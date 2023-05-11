@@ -16,9 +16,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiPaddingCSS,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
 const ExampleEntry = ({ question, onClick }: { question: string; onClick: () => void }) => {
   return (
@@ -28,12 +31,43 @@ const ExampleEntry = ({ question, onClick }: { question: string; onClick: () => 
   );
 };
 
-const Message = ({ response, content }: { response: boolean; content: string }) => {
+const Message = ({
+  loading,
+  response,
+  content,
+}: {
+  loading?: boolean;
+  response: boolean;
+  content?: string;
+}) => {
+  const [loadingIndicator, setLoadingIndicator] = useState('');
+
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setLoadingIndicator((indicator) => {
+        if (indicator.length >= 3) {
+          return '';
+        }
+        return `${indicator}.`;
+      });
+    }, 400);
+
+    return () => clearInterval(interval);
+  });
+
   return (
     <>
       <EuiSpacer size="s" />
       <EuiPanel color={response ? 'subdued' : 'primary'} hasShadow={false}>
-        <EuiMarkdownFormat textSize="relative">{content}</EuiMarkdownFormat>
+        {loading ? (
+          loadingIndicator || <>&nbsp;</>
+        ) : content ? (
+          <EuiMarkdownFormat textSize="relative">{content}</EuiMarkdownFormat>
+        ) : undefined}
       </EuiPanel>
     </>
   );
@@ -41,12 +75,84 @@ const Message = ({ response, content }: { response: boolean; content: string }) 
 
 const examples = [
   'How do I create a new temporary data view?',
-  'What happens if I delete a saved object with references?',
-  'Can I create small multiples in Lens?',
+  'What happens when an alert I created gets triggered?',
+  'Can I create a histogram breakdown in Lens?',
 ];
 
+export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('coreStart');
+
 export const DocsGpt = () => {
-  const [messages, setMessages] = useState<Array<{ response: boolean; content: string }>>([]);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [messages, setMessages] = useState<
+    Array<{ loading?: boolean; response: boolean; content?: string }>
+  >([]);
+
+  const scrollToBottom = () =>
+    setTimeout(() => chatRef.current?.scrollTo(0, chatRef.current.scrollHeight));
+
+  const askQuestion = async (currentQuestion: string) => {
+    const trimmedQuestion = currentQuestion.trim();
+
+    if (!trimmedQuestion) {
+      return;
+    }
+
+    const newMessages = [
+      ...messages,
+      {
+        response: false,
+        content: trimmedQuestion,
+      },
+    ];
+
+    setQuestion('');
+    setLoading(true);
+    setMessages([
+      ...newMessages,
+      {
+        loading: true,
+        response: true,
+      },
+    ]);
+    scrollToBottom();
+
+    let message: string;
+
+    try {
+      const response = await getCoreStart().http.get<{
+        answer: string;
+        references: Array<{ title: string; url: string }>;
+      }>('/internal/open_ai/kibana_docs', {
+        query: { query: trimmedQuestion },
+      });
+
+      const messageParts = [response.answer];
+
+      if (response.references.length) {
+        const references = response.references
+          .map(({ title, url }) => `* [${title}](${url})`)
+          .join('\n');
+
+        messageParts.push(`##### References:\n${references}`);
+      }
+
+      message = messageParts.join('\n\n');
+    } catch (e) {
+      message = `Sorry, I encountered an error while trying to answer your question:\n\`\`\`\n${e.toString()}\n\`\`\``;
+    }
+
+    setLoading(false);
+    setMessages([
+      ...newMessages,
+      {
+        response: true,
+        content: message,
+      },
+    ]);
+    scrollToBottom();
+  };
 
   return (
     <EuiFlexGroup
@@ -61,44 +167,60 @@ export const DocsGpt = () => {
         <EuiTitle size="s">
           <h2>Hi Maria, how can I help?</h2>
         </EuiTitle>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
       </EuiFlexItem>
       <EuiFlexItem
         css={css`
-          overflow: auto;
+          overflow: hidden;
         `}
       >
-        <div>
-          <EuiPanel hasShadow={false} hasBorder={true}>
-            <EuiTitle className="eui-textCenter" size="xxs">
-              <h2>Examples</h2>
-            </EuiTitle>
-            {examples.map((example, i) => (
-              <>
-                <EuiSpacer size="s" />{' '}
-                <ExampleEntry
-                  key={i}
-                  question={example}
-                  onClick={() => setMessages([...messages, { response: false, content: example }])}
-                />
-              </>
-            ))}
-          </EuiPanel>
+        <div
+          ref={chatRef}
+          className="eui-yScrollWithShadows"
+          css={css`
+            ${useEuiPaddingCSS('top').s};
+            ${useEuiPaddingCSS('bottom').s};
+          `}
+        >
+          {!messages.length && (
+            <EuiPanel hasShadow={false} hasBorder={true}>
+              <EuiTitle className="eui-textCenter" size="xxs">
+                <h2>Examples</h2>
+              </EuiTitle>
+              {examples.map((example, i) => (
+                <>
+                  <EuiSpacer key={`spacer-${i}`} size="s" />{' '}
+                  <ExampleEntry
+                    key={`example-${i}`}
+                    question={example}
+                    onClick={() => askQuestion(example)}
+                  />
+                </>
+              ))}
+            </EuiPanel>
+          )}
           {messages.map((message, i) => (
             <Message key={i} {...message} />
           ))}
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem>
-                <EuiFieldText placeholder="Ask me anything" fullWidth={true} />
+                <EuiFieldText
+                  placeholder="Ask me anything"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  fullWidth={true}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton>Send</EuiButton>
+                <EuiButton isLoading={loading} onClick={() => askQuestion(question)}>
+                  Send
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

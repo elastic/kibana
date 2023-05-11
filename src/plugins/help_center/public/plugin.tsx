@@ -21,6 +21,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { HelpCenterPluginStartDependencies } from './types';
 import { HelpCenterNavButton } from './components/help_center_header_nav_button';
 import { getApi, HelpCenterApi } from './lib/api';
+import { setCoreStart } from './components/docs_gpt';
 
 export type HelpCenterPublicPluginSetup = ReturnType<HelpCenterPublicPlugin['setup']>;
 export type HelpCenterPublicPluginStart = ReturnType<HelpCenterPublicPlugin['start']>;
@@ -46,6 +47,8 @@ export class HelpCenterPublicPlugin
       order: 1000,
       mount: (target) => this.mount(api, target, core.theme.theme$),
     });
+
+    setCoreStart(core);
   }
 
   public stop() {

@@ -7,6 +7,6 @@
     "server": true,
     "browser": true,
     "requiredPlugins": ["screenshotMode"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "kibanaUtils"]
   }
 }
