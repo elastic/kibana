@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { TiDataSources } from './use_ti_data_sources';
 import { useKibana } from '../../../common/lib/kibana';
 import { getDashboardsByTagIds } from '../../../common/containers/dashboards/api';
@@ -17,25 +17,28 @@ const CTI_TAG_NAME = 'threat intel';
 
 const useCtiInstalledDashboards = () => {
   const { http } = useKibana().services;
-  const abortController = useRef(new AbortController());
 
   const {
-    fetch,
-    data: dashboards,
-    isLoading,
-  } = useFetch(REQUEST_NAMES.CTI_TAGS, async (tagName: string) => {
-    const ctiTags = await getTagsByName(http, tagName, abortController.current.signal);
-    return getDashboardsByTagIds(
-      http,
-      ctiTags.map((tag) => tag.id)
-    );
+    data: ctiTags,
+    isLoading: isLoadingTags,
+    error: errorTags,
+  } = useFetch(REQUEST_NAMES.CTI_TAGS, getTagsByName, {
+    initialParameters: { http, tagName: CTI_TAG_NAME },
   });
 
-  useEffect(() => {
-    fetch(CTI_TAG_NAME);
-  }, [fetch]);
+  const {
+    fetch: fetchDashboards,
+    data: dashboards,
+    isLoading: isLoadingDashboards,
+  } = useFetch(REQUEST_NAMES.CTI_TAGS, getDashboardsByTagIds);
 
-  return { dashboards, isLoading };
+  useEffect(() => {
+    if (!isLoadingTags && !errorTags && ctiTags && ctiTags.length === 0) {
+      fetchDashboards({ http, tagIds: ctiTags.map((tag) => tag.id) });
+    }
+  }, [errorTags, fetchDashboards, http, isLoadingTags, ctiTags]);
+
+  return { dashboards, isLoading: isLoadingDashboards || isLoadingTags };
 };
 
 export const useCtiDashboardLinks = ({

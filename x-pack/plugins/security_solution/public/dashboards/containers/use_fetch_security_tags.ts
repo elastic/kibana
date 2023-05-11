@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { getTagsByName, createTag } from '../../common/containers/tags/api';
 import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
@@ -13,39 +13,36 @@ import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/con
 
 export const useFetchSecurityTags = () => {
   const { http } = useKibana().services;
-  const abortController = useRef(new AbortController());
 
   const {
-    fetch,
     data: tags,
-    isLoading,
-    error,
-  } = useFetch(REQUEST_NAMES.SECURITY_TAGS, async () => {
-    const securityTags = await getTagsByName(
-      http,
-      SECURITY_TAG_NAME,
-      abortController.current.signal
-    );
-    if (securityTags.length === 0) {
-      const tag = await createTag(http, {
-        name: SECURITY_TAG_NAME,
-        description: SECURITY_TAG_DESCRIPTION,
+    isLoading: isLoadingTags,
+    error: errorFetchTags,
+  } = useFetch(REQUEST_NAMES.SECURITY_TAGS, getTagsByName, {
+    initialParameters: { http, tagName: SECURITY_TAG_NAME },
+  });
+
+  const {
+    fetch: fetchCreateTag,
+    data: tag,
+    isLoading: isLoadingCreateTags,
+    error: errorCreateTag,
+  } = useFetch(REQUEST_NAMES.SECURITY_CREATE_TAG, createTag);
+
+  useEffect(() => {
+    if (!isLoadingTags && !errorFetchTags && tags && tags.length === 0) {
+      fetchCreateTag({
+        http,
+        tag: { name: SECURITY_TAG_NAME, description: SECURITY_TAG_DESCRIPTION },
       });
-      securityTags.push(tag);
     }
-    return securityTags;
-  });
+  }, [errorFetchTags, fetchCreateTag, http, isLoadingTags, tags]);
 
-  useEffect(() => {
-    fetch({});
-  }, [fetch]);
+  const tagsResult = useMemo(() => tags ?? (tag ? [tag] : undefined), [tags, tag]);
 
-  useEffect(() => {
-    const currentAbortController = abortController.current;
-    return () => {
-      currentAbortController.abort();
-    };
-  });
-
-  return { tags, isLoading, error };
+  return {
+    tags: tagsResult,
+    isLoading: isLoadingTags || isLoadingCreateTags,
+    error: errorFetchTags || errorCreateTag,
+  };
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useFetch, REQUEST_NAMES } from '../../common/hooks/use_fetch';
 import { useKibana } from '../../common/lib/kibana';
 import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
@@ -15,28 +15,19 @@ export const useFetchSecurityDashboards = () => {
   const { http } = useKibana().services;
   const securityTags = useSecurityTags();
   const tagIds = useMemo(() => securityTags?.map(({ id }) => id) ?? null, [securityTags]);
-  const abortController = useRef(new AbortController());
+
   const {
     fetch,
     data: dashboards,
     isLoading,
     error,
-  } = useFetch(REQUEST_NAMES.SECURITY_DASHBOARDS, (loadedTagIds: string[]) =>
-    getDashboardsByTagIds(http, loadedTagIds, abortController.current.signal)
-  );
+  } = useFetch(REQUEST_NAMES.SECURITY_DASHBOARDS, getDashboardsByTagIds);
 
   useEffect(() => {
     if (tagIds) {
-      fetch(tagIds);
+      fetch({ http, tagIds });
     }
-  }, [fetch, tagIds]);
-
-  useEffect(() => {
-    const currentAbortController = abortController.current;
-    return () => {
-      currentAbortController.abort();
-    };
-  });
+  }, [fetch, http, tagIds]);
 
   return { dashboards, isLoading, error };
 };
