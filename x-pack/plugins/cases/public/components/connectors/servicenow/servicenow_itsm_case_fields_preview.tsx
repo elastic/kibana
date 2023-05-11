@@ -42,7 +42,7 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
   const { http } = useKibana().services;
   const showConnectorWarning = connector.isDeprecated;
 
-  const { data: choicesData } = useGetChoices({
+  const { isLoading, data: choicesData } = useGetChoices({
     http,
     connector,
     fields: choicesToGet,
@@ -89,7 +89,8 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.URGENCY,
-              description: urgencyOptions.find((option) => `${option.value}` === urgency)?.text,
+              description:
+                urgencyOptions.find((option) => `${option.value}` === urgency)?.text ?? '',
             },
           ]
         : []),
@@ -97,7 +98,8 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.SEVERITY,
-              description: severityOptions.find((option) => `${option.value}` === severity)?.text,
+              description:
+                severityOptions.find((option) => `${option.value}` === severity)?.text ?? '',
             },
           ]
         : []),
@@ -105,7 +107,7 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.IMPACT,
-              description: impactOptions.find((option) => `${option.value}` === impact)?.text,
+              description: impactOptions.find((option) => `${option.value}` === impact)?.text ?? '',
             },
           ]
         : []),
@@ -113,7 +115,8 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.CATEGORY,
-              description: categoryOptions.find((option) => `${option.value}` === category)?.text,
+              description:
+                categoryOptions.find((option) => `${option.value}` === category)?.text ?? '',
             },
           ]
         : []),
@@ -121,8 +124,8 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.SUBCATEGORY,
-              description: subcategoryOptions.find((option) => `${option.value}` === subcategory)
-                ?.text,
+              description:
+                subcategoryOptions.find((option) => `${option.value}` === subcategory)?.text ?? '',
             },
           ]
         : []),
@@ -156,7 +159,7 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
             connectorType={ConnectorTypes.serviceNowITSM}
             title={connector.name}
             listItems={listItems}
-            isLoading={false}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

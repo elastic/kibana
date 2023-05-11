@@ -267,4 +267,53 @@ describe('Jira Fields', () => {
       expect(screen.getByText('Issue type is required')).toBeInTheDocument();
     });
   });
+
+  it('should not show the loading skeleton when loading issue types', async () => {
+    useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    expect(screen.queryByTestId('fields-by-issue-type-loading')).not.toBeInTheDocument();
+  });
+
+  it('should not show the loading skeleton when issueType is null', async () => {
+    useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={{ ...fields, issueType: null }}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    expect(screen.queryByTestId('fields-by-issue-type-loading')).not.toBeInTheDocument();
+  });
+
+  it('should not show the loading skeleton when does not load fields', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    expect(screen.queryByTestId('fields-by-issue-type-loading')).not.toBeInTheDocument();
+  });
+
+  it('should show the loading skeleton when loading fields', async () => {
+    useGetFieldsByIssueTypeMock.mockReturnValue({
+      ...useGetFieldsByIssueTypeResponse,
+      isLoading: true,
+    });
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    expect(screen.getByTestId('fields-by-issue-type-loading')).toBeInTheDocument();
+  });
 });

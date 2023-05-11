@@ -7,11 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { map } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
+import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 import type { JiraFieldsType } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
@@ -19,6 +20,7 @@ import type { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
+
 const { emptyField } = fieldValidators;
 
 const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
@@ -86,7 +88,12 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
         }}
       />
       <EuiSpacer size="m" />
-      <>
+      <EuiSkeletonText
+        lines={5}
+        size="m"
+        isLoading={isLoadingFields && !isLoadingIssueTypes && !isEmpty(issueType)}
+        data-test-subj="fields-by-issue-type-loading"
+      >
         {hasParent && (
           <>
             <EuiFlexGroup>
@@ -121,7 +128,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
             </EuiFlexGroup>
           </>
         )}
-      </>
+      </EuiSkeletonText>
     </div>
   );
 };

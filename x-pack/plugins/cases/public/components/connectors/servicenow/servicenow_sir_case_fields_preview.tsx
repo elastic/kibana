@@ -43,7 +43,7 @@ const ServiceNowSIRFieldsPreviewComponent: React.FunctionComponent<
   const { http } = useKibana().services;
   const showConnectorWarning = connector.isDeprecated;
 
-  const { data: choicesData } = useGetChoices({
+  const { isLoading, data: choicesData } = useGetChoices({
     http,
     connector,
     fields: choicesToGet,
@@ -165,7 +165,7 @@ const ServiceNowSIRFieldsPreviewComponent: React.FunctionComponent<
             connectorType={ConnectorTypes.serviceNowSIR}
             title={connector.name}
             listItems={listItems}
-            isLoading={false}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

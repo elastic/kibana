@@ -9,7 +9,8 @@ export const connectorsQueriesKeys = {
   jira: ['jira'] as const,
   resilient: ['resilient'] as const,
   servicenow: ['servicenow'] as const,
-  jiraGetFieldsByIssueType: () => [...connectorsQueriesKeys.jira, 'getFields'] as const,
+  jiraGetFieldsByIssueType: (issueType: string) =>
+    [...connectorsQueriesKeys.jira, 'getFields', issueType] as const,
   jiraGetIssueTypes: () => [...connectorsQueriesKeys.jira, 'getIssueType'] as const,
   jiraGetIssues: (query: string) => [...connectorsQueriesKeys.jira, 'getIssues', query] as const,
   resilientGetIncidentTypes: () =>

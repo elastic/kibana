@@ -8,6 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { isEmpty } from 'lodash';
 import type { ServerError } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { ActionConnector } from '../../../../common/api';
@@ -25,7 +26,7 @@ interface Props {
 export const useGetFieldsByIssueType = ({ http, connector, issueType }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<Fields>, ServerError>(
-    connectorsQueriesKeys.jiraGetFieldsByIssueType(),
+    connectorsQueriesKeys.jiraGetFieldsByIssueType(issueType ?? ''),
     () => {
       const abortCtrlRef = new AbortController();
       return getFieldsByIssueType({
@@ -36,7 +37,7 @@ export const useGetFieldsByIssueType = ({ http, connector, issueType }: Props) =
       });
     },
     {
-      enabled: Boolean(connector && issueType),
+      enabled: Boolean(connector) && !isEmpty(issueType),
       staleTime: 60 * 1000, // one minute
       onSuccess: (res) => {
         if (res.status && res.status === 'error') {
