@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { HelpCenterContext } from './help_center_header_nav_button';
@@ -32,7 +33,6 @@ export const DocumentationCards = () => {
       return await Promise.all(
         (helpFetchResults?.documentation ?? []).map(async (doc, i) => {
           const response = await fetch(doc.href);
-          console.log(doc.href);
           const data = await response.text();
 
           const content = parser.parseFromString(data, 'text/html').querySelector('div#content');
@@ -56,51 +56,55 @@ export const DocumentationCards = () => {
               }
             });
           }
-          return content?.outerHTML;
+          return `${content?.outerHTML}<br>`;
         })
       );
     }, [helpFetchResults?.documentation]);
 
   return (
     <>
-      {(helpFetchResults?.documentation ?? []).map((doc, i) => {
-        return (
-          <EuiAccordion
-            id={`documentation-${i}`}
-            className="euiAccordionForm"
-            buttonClassName="euiAccordionForm__button"
-            buttonContent={
-              <div>
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={doc.iconType ?? 'document'} size="m" />
-                  </EuiFlexItem>
+      {documentationLoading ? (
+        <EuiLoadingSpinner size="xl" />
+      ) : (
+        (helpFetchResults?.documentation ?? []).map((doc, i) => {
+          return (
+            <EuiAccordion
+              id={`documentation-${i}`}
+              className="euiAccordionForm"
+              buttonClassName="euiAccordionForm__button"
+              buttonContent={
+                <div>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={doc.iconType ?? 'document'} size="m" />
+                    </EuiFlexItem>
 
-                  <EuiFlexItem>
-                    <EuiTitle size="s">
-                      <h3>{doc.title}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-              // <EuiCard
-              //   css={css`
-              //     margin-block-end: 0;
-              //   `}
-              //   layout={'horizontal'}
-              //   icon={<EuiIcon size="xl" type={doc.iconType ?? 'document'} />}
-              //   title={`Visit the ${doc.title} documentation`}
-              //   target="_blank"
-              //   titleSize="xs"
-              // />
-            }
-          >
-            <EuiText>
-              <div dangerouslySetInnerHTML={{ __html: innerHtml[i] }} />
-            </EuiText>
-          </EuiAccordion>
-        );
-      })}
+                    <EuiFlexItem>
+                      <EuiTitle size="s">
+                        <h3>{doc.title}</h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+                // <EuiCard
+                //   css={css`
+                //     margin-block-end: 0;
+                //   `}
+                //   layout={'horizontal'}
+                //   icon={<EuiIcon size="xl" type={doc.iconType ?? 'document'} />}
+                //   title={`Visit the ${doc.title} documentation`}
+                //   target="_blank"
+                //   titleSize="xs"
+                // />
+              }
+            >
+              <EuiText>
+                <div dangerouslySetInnerHTML={{ __html: innerHtml[i] }} />
+              </EuiText>
+            </EuiAccordion>
+          );
+        })
+      )}
     </>
   );
 };
