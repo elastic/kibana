@@ -125,7 +125,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`wget -O pf-host-agent.tgz &quot;https://ela.st/pf-host-agent-amd64-${hostAgentVersion}&quot; && tar xzf pf-host-agent.tgz`}
+              {`wget -O pf-host-agent.tgz "https://ela.st/pf-host-agent-amd64-${hostAgentVersion}" && tar xzf pf-host-agent.tgz`}
             </EuiCodeBlock>
           ),
         },
