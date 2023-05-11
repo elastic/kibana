@@ -8,12 +8,13 @@
 import React, { memo, Suspense } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
+import type { ConnectorTypeFields } from '../../../common/api';
 import type { CaseActionConnector } from '../types';
 import { getCaseConnectors } from '.';
 
 interface Props {
   connector: CaseActionConnector | null;
-  fields: unknown;
+  fields: ConnectorTypeFields['fields'];
 }
 
 const ConnectorFieldsFormPreviewComponent: React.FC<Props> = ({ connector, fields }) => {
@@ -37,7 +38,6 @@ const ConnectorFieldsFormPreviewComponent: React.FC<Props> = ({ connector, field
             </EuiFlexGroup>
           }
         >
-          {' '}
           <div data-test-subj={'connector-fields-preview'}>
             <PreviewComponent connector={connector} fields={fields} key={connector.id} />
           </div>

@@ -195,7 +195,7 @@ describe('ConnectorsForm ', () => {
         name: 'My Resilient connector',
         type: '.resilient',
         // severity changed from 5 to 4
-        fields: { incidentTypes: [], severityCode: '4' },
+        fields: { incidentTypes: null, severityCode: '4' },
       });
     });
   });
@@ -277,5 +277,44 @@ describe('ConnectorsForm ', () => {
     appMockRender.render(<ConnectorsForm {...props} supportedActionConnectors={[]} />);
 
     expect(screen.getByTestId('edit-connectors-submit')).not.toBeDisabled();
+  });
+
+  it('changes optional (undefined) values to null', async () => {
+    const caseConnectorsOptional = {
+      ...caseConnectors,
+      'resilient-2': {
+        ...caseConnectors['servicenow-1'],
+        fields: null,
+      },
+    } as CaseConnectors;
+
+    appMockRender.render(<ConnectorsForm {...props} caseConnectors={caseConnectorsOptional} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('My SN connector')).toBeInTheDocument();
+    });
+
+    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
+    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
+      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
+    });
+
+    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith({
+        fields: {
+          incidentTypes: null,
+          severityCode: null,
+        },
+        id: 'resilient-2',
+        name: 'My Resilient connector',
+        type: '.resilient',
+      })
+    );
   });
 });
