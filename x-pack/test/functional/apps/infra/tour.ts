@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { observTourStepStorageKey } from '@kbn/observability-plugin/public/components/shared/tour';
+import { observTourStepStorageKey } from '@kbn/observability-shared-plugin/public';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
