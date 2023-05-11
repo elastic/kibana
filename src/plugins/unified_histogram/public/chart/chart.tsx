@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
-  // EuiFlyout,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';

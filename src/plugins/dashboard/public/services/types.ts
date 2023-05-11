@@ -9,7 +9,8 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DashboardStartDependencies } from '../plugin';
 import { DashboardAnalyticsService } from './analytics/types';
 import { DashboardApplicationService } from './application/types';
@@ -26,6 +27,8 @@ import { DashboardEmbeddableService } from './embeddable/types';
 import { DashboardHTTPService } from './http/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
 import { DashboardNavigationService } from './navigation/types';
+import { DashboardUnifiedSearchService } from './unified_search/types';
+
 import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
 import { DashboardSavedObjectsTaggingService } from './saved_objects_tagging/types';
@@ -56,6 +59,9 @@ export interface DashboardServices {
   http: DashboardHTTPService;
   initializerContext: DashboardInitializerContextService;
   navigation: DashboardNavigationService;
+  unifiedSearch: DashboardUnifiedSearchService;
+  lens: LensPublicStart;
+  expressions: ExpressionsStart;
   notifications: DashboardNotificationsService;
   overlays: DashboardOverlaysService;
   savedObjectsTagging: DashboardSavedObjectsTaggingService; // TODO: make this optional in follow up

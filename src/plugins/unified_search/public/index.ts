@@ -28,6 +28,7 @@ export type { DataViewPickerProps } from './dataview_picker';
 export type { ApplyGlobalFilterActionContext } from './actions';
 export { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
 export { UPDATE_FILTER_REFERENCES_TRIGGER } from './triggers';
+export { TextBasedLanguagesEditor } from './query_string_input/text_based_languages_editor';
 
 /*
  * Autocomplete query suggestions:

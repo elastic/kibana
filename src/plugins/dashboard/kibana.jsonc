@@ -19,12 +19,12 @@
       "savedObjectsFinder",
       "savedObjectsManagement",
       "share",
-      "screenshotMode",
       "uiActions",
       "urlForwarding",
       "presentationUtil",
       "visualizations",
-      "unifiedSearch"
+      "unifiedSearch",
+      "expressions"
     ],
     "optionalPlugins": [
       "home",
@@ -32,7 +32,8 @@
       "savedObjectsTaggingOss",
       "screenshotMode",
       "usageCollection",
-      "taskManager"
+      "taskManager",
+      "lens"
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -19,6 +19,7 @@ export type ToolbarButtonType = typeof ToolbarButton | typeof ToolbarPopover;
 /** Specific type for the toolbar children in its props */
 interface NamedSlots {
   primaryButton: ReactElement<ToolbarButtonType>;
+  secondButton: ReactElement<ToolbarButtonType>;
   iconButtonGroup?: ReactElement<typeof IconButtonGroup>;
   extraButtons?: Array<ReactElement<ToolbarButtonType>> | undefined;
 }
@@ -41,7 +42,7 @@ const errorText = i18n.translate('sharedUXPackages.buttonToolbar.toolbar.errorTo
  * @returns Toolbar component
  */
 export const Toolbar = ({ children }: Props) => {
-  const { primaryButton, iconButtonGroup, extraButtons = [] } = children;
+  const { primaryButton, iconButtonGroup, extraButtons = [], secondButton } = children;
 
   if (extraButtons.length > 120) {
     throw new Error(errorText);
@@ -58,6 +59,7 @@ export const Toolbar = ({ children }: Props) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>{primaryButton}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{secondButton}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup wrap={true} responsive={false} alignItems="center" gutterSize="s">
           {iconButtonGroup ? <EuiFlexItem grow={false}>{iconButtonGroup}</EuiFlexItem> : null}

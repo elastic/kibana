@@ -15,6 +15,7 @@ import { setIndexPatterns, setTheme, setOverlays } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
+import { TextBasedLanguagesEditor } from './query_string_input/text_based_languages_editor';
 import type {
   UnifiedSearchStartDependencies,
   UnifiedSearchSetupDependencies,
@@ -94,6 +95,7 @@ export class UnifiedSearchPublicPlugin
         SearchBar,
         AggregateQuerySearchBar: SearchBar,
         FiltersBuilderLazy,
+        TextBasedLanguagesEditor,
       },
       autocomplete: autocompleteStart,
     };

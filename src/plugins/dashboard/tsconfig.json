@@ -23,6 +23,7 @@
     "@kbn/saved-objects-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/lens-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/spaces-plugin",
     "@kbn/config-schema",
