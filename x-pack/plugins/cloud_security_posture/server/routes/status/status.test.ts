@@ -292,6 +292,7 @@ describe('calculateIntegrationStatus for vul_mgmt', () => {
         stream: 'empty',
         score: 'empty',
       },
+      mockInstallation,
       1,
       61,
       [VULN_MGMT_POLICY_TEMPLATE]
