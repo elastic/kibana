@@ -94,14 +94,14 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
               values={{
                 enginesDocsLink: (
                   <EuiLink
-                    href={docLinks.enterpriseSearchEngines}
+                    href={docLinks.searchApplications}
                     target="_blank"
                     data-telemetry-id="entSearchApplications-createEngine-docsLink"
                     external
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.engines.createEngine.header.docsLink',
-                      { defaultMessage: 'Search Application documentation' }
+                      { defaultMessage: 'Search Applications documentation' }
                     )}
                   </EuiLink>
                 ),
