@@ -7,9 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButton,
-  EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +15,6 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPanel,
-  EuiPopover,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -59,6 +55,7 @@ import {
   getTabs,
   logStacktraceTab,
 } from './error_tabs';
+import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { ExceptionStacktrace } from './exception_stacktrace';
 import { SampleSummary } from './sample_summary';
 
@@ -131,8 +128,6 @@ export function ErrorSampleDetails({
   };
 
   const { error, transaction } = errorData;
-
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
   const externalContextMenuItems = useAsync(() => {
     return getContextMenuItemsFromActions({
@@ -231,37 +226,7 @@ export function ErrorSampleDetails({
           </EuiFlexItem>
         )}
         {externalContextMenuItems.value?.length ? (
-          <EuiPopover
-            id="errorContextMenu"
-            button={
-              <EuiButton
-                data-test-subj="ErrorSampleDetailsButton"
-                onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
-                iconType="arrowDown"
-                iconSide="right"
-              >
-                {i18n.translate(
-                  'xpack.pam.errorSampleDetails.investigateMenu',
-                  { defaultMessage: 'Investigate' }
-                )}
-              </EuiButton>
-            }
-            isOpen={isContextMenuOpen}
-            closePopover={() => setIsContextMenuOpen(() => false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenu
-              initialPanelId="mainMenu"
-              panels={[
-                {
-                  id: 'mainMenu',
-                  items:
-                    externalContextMenuItems.value as EuiContextMenuPanelItemDescriptor[],
-                },
-              ]}
-            />
-          </EuiPopover>
+          <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}
         <EuiFlexItem grow={false}>
           <DiscoverErrorLink error={error} kuery={kuery}>

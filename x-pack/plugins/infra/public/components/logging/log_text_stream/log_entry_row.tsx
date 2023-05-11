@@ -107,7 +107,7 @@ export const LogEntryRow = memo(
         triggerId: ObservabilityTriggerId.LogEntryContextMenu,
         context: logEntry,
       });
-    }, []);
+    }, [uiActions, logEntry]);
 
     const menuItems = useMemo(() => {
       const items = [];

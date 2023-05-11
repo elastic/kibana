@@ -74,22 +74,22 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   );
 
   const wrappedItems = useMemo(() => {
-    return items.map((item, i) => (
-      <EuiContextMenuItem key={i} onClick={closeMenuAndCall(item.onClick)} href={item.href}>
-        {item.label}
-      </EuiContextMenuItem>
-    ));
-  }, [items, closeMenuAndCall]);
-
-  const allItems = wrappedItems.concat(
-    (externalItems ?? []).map((item, i) => (
-      <EuiContextMenuItem
-        key={i + wrappedItems.length}
-        {...item}
-        onClick={closeMenuAndCall(item.onClick)}
-      />
-    ))
-  );
+    return items
+      .map((item, i) => (
+        <EuiContextMenuItem key={i} onClick={closeMenuAndCall(item.onClick)} href={item.href}>
+          {item.label}
+        </EuiContextMenuItem>
+      ))
+      .concat(
+        (externalItems ?? []).map((item, i) => (
+          <EuiContextMenuItem
+            key={i + wrappedItems.length}
+            {...item}
+            onClick={closeMenuAndCall(item.onClick)}
+          />
+        ))
+      );
+  }, [items, closeMenuAndCall, externalItems]);
 
   return (
     <LogEntryContextMenuContent>
@@ -101,7 +101,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
           button={button}
           ownFocus={true}
         >
-          <EuiContextMenuPanel items={allItems} />
+          <EuiContextMenuPanel items={wrappedItems} />
         </EuiPopover>
       </AbsoluteWrapper>
     </LogEntryContextMenuContent>

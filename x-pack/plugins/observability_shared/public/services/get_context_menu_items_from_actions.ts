@@ -9,7 +9,7 @@ import { EuiContextMenuItemProps } from '@elastic/eui';
 import { buildContextMenuForActions, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '../../common';
 
-type ObservabilityActionContextMenuItemProps = EuiContextMenuItemProps & {
+export type ObservabilityActionContextMenuItemProps = EuiContextMenuItemProps & {
   children: React.ReactElement;
 };
 
