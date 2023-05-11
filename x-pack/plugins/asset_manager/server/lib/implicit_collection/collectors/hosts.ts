@@ -30,7 +30,7 @@ export async function collectHosts({ client, from }: CollectorOptions): Promise<
           {
             range: {
               '@timestamp': {
-                gte: 'now-1h',
+                gte: from,
               },
             },
           },

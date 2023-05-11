@@ -31,7 +31,7 @@ export async function collectPods({ client, from }: CollectorOptions) {
           {
             range: {
               '@timestamp': {
-                gte: 'now-1h',
+                gte: from,
               },
             },
           },

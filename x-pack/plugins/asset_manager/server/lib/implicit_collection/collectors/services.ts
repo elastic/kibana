@@ -27,7 +27,7 @@ export async function collectServices({ client, from }: CollectorOptions): Promi
           {
             range: {
               '@timestamp': {
-                gte: 'now-1h',
+                gte: from,
               },
             },
           },
