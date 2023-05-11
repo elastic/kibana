@@ -35,6 +35,7 @@ class DocLinks {
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
   public behavioralAnalytics: string;
+  public behavioralAnalyticsCORS: string;
   public behavioralAnalyticsEvents: string;
   public buildConnector: string;
   public bulkApi: string;
@@ -62,7 +63,9 @@ class DocLinks {
   public cloudIndexManagement: string;
   public connectors: string;
   public connectorsAzureBlobStorage: string;
+  public connectorsConfluence: string;
   public connectorsGoogleCloudStorage: string;
+  public connectorsJira: string;
   public connectorsMicrosoftSQL: string;
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
@@ -70,6 +73,7 @@ class DocLinks {
   public connectorsOracle: string;
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
+  public connectorsSharepoint: string;
   public connectorsWorkplaceSearch: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
@@ -98,6 +102,8 @@ class DocLinks {
   public queryDsl: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
+  public searchApplications: string;
+  public searchTemplates: string;
   public start: string;
   public syncRules: string;
   public workplaceSearchApiKeys: string;
@@ -164,6 +170,7 @@ class DocLinks {
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
     this.behavioralAnalytics = '';
+    this.behavioralAnalyticsCORS = '';
     this.behavioralAnalyticsEvents = '';
     this.buildConnector = '';
     this.bulkApi = '';
@@ -191,7 +198,9 @@ class DocLinks {
     this.cloudIndexManagement = '';
     this.connectors = '';
     this.connectorsAzureBlobStorage = '';
+    this.connectorsConfluence = '';
     this.connectorsGoogleCloudStorage = '';
+    this.connectorsJira = '';
     this.connectorsMicrosoftSQL = '';
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
@@ -199,6 +208,7 @@ class DocLinks {
     this.connectorsOracle = '';
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
+    this.connectorsSharepoint = '';
     this.connectorsWorkplaceSearch = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
@@ -227,6 +237,8 @@ class DocLinks {
     this.queryDsl = '';
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
+    this.searchApplications = '';
+    this.searchTemplates = '';
     this.start = '';
     this.syncRules = '';
     this.workplaceSearchApiKeys = '';
@@ -295,6 +307,7 @@ class DocLinks {
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
     this.behavioralAnalytics = docLinks.links.enterpriseSearch.behavioralAnalytics;
+    this.behavioralAnalyticsCORS = docLinks.links.enterpriseSearch.behavioralAnalyticsCORS;
     this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
     this.buildConnector = docLinks.links.enterpriseSearch.buildConnector;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
@@ -321,8 +334,10 @@ class DocLinks {
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
+    this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
+    this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
@@ -330,6 +345,7 @@ class DocLinks {
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
+    this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
@@ -358,6 +374,8 @@ class DocLinks {
     this.queryDsl = docLinks.links.query.queryDsl;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
+    this.searchApplications = docLinks.links.enterpriseSearch.searchApplications;
+    this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
     this.start = docLinks.links.enterpriseSearch.start;
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
