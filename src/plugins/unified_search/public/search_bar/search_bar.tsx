@@ -82,6 +82,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
+  // Disables the default auto-refresh option inside the date picker
+  isAutoRefreshDisabled?: boolean;
 
   placeholder?: string;
   isClearable?: boolean;

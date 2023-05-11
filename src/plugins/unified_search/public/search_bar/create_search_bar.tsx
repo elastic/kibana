@@ -39,7 +39,6 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
     savedQueryId?: string;
     onSavedQueryIdChange?: (savedQueryId?: string) => void;
     onFiltersUpdated?: (filters: Filter[]) => void;
-    isAutoRefreshDisabled?: boolean;
   };
 
 // Respond to user changing the filters
