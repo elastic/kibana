@@ -188,5 +188,7 @@ type AvailableTopNavActions =
   | 'cancel'
   | 'share'
   | 'getUnderlyingDataUrl'
-  | 'openSettings';
+  | 'openSettings'
+  | 'undo'
+  | 'redo';
 export type LensTopNavActions = Record<AvailableTopNavActions, TopNavAction>;

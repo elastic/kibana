@@ -28,12 +28,17 @@ import {
   DispatchSetState,
   switchAndCleanDatasource,
   selectDataViews,
+  undo,
+  redo,
+  selectCanUndo,
+  selectCanRedo,
 } from '../state_management';
 import {
   getIndexPatternsObjects,
   getIndexPatternsIds,
   getResolvedDateRange,
   refreshIndexPatternsList,
+  DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
@@ -111,6 +116,8 @@ function getLensTopNavConfig(options: {
   showReplaceInDashboard: boolean;
   showReplaceInCanvas: boolean;
   contextFromEmbeddable?: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -122,6 +129,8 @@ function getLensTopNavConfig(options: {
     showReplaceInCanvas,
     contextFromEmbeddable,
     isByValueMode,
+    canUndo,
+    canRedo,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -230,6 +239,31 @@ function getLensTopNavConfig(options: {
     });
   }
 
+  topNavMenu.push(
+    {
+      label: '',
+      iconType: 'editorUndo',
+      run: actions.undo.execute,
+      className: DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,
+      testId: 'lnsApp_undo',
+      description: i18n.translate('xpack.lens.app.undoButtonAriaLabel', {
+        defaultMessage: 'Undo last change',
+      }),
+      disableButton: !canUndo,
+    },
+    {
+      label: '',
+      iconType: 'editorRedo',
+      run: actions.redo.execute,
+      className: DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,
+      testId: 'lnsApp_redo',
+      description: i18n.translate('xpack.lens.app.redoButtonAriaLabel', {
+        defaultMessage: 'Redo last change',
+      }),
+      disableButton: !canRedo,
+    }
+  );
+
   topNavMenu.push({
     label: saveButtonLabel,
     iconType: (showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn)
@@ -314,6 +348,8 @@ export const LensTopNavMenu = ({
   } = useLensSelector((state) => state.lens);
 
   const dataViews = useLensSelector(selectDataViews);
+  const canUndo = useLensSelector(selectCanUndo);
+  const canRedo = useLensSelector(selectCanRedo);
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = React.useCallback(
@@ -563,6 +599,8 @@ export const LensTopNavMenu = ({
       showReplaceInDashboard,
       showReplaceInCanvas,
       contextFromEmbeddable,
+      canUndo,
+      canRedo,
       actions: {
         inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
         share: {
@@ -750,6 +788,18 @@ export const LensTopNavMenu = ({
               theme$,
             }),
         },
+        undo: {
+          visible: true,
+          execute: () => {
+            dispatch(undo());
+          },
+        },
+        redo: {
+          visible: true,
+          execute: () => {
+            dispatch(redo());
+          },
+        },
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -766,11 +816,15 @@ export const LensTopNavMenu = ({
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
+    canUndo,
+    canRedo,
     layerMetaInfo,
     additionalMenuEntries,
     lensInspector,
     title,
     share,
+    visualization,
+    visualizationMap,
     shortUrlService,
     data,
     filters,
@@ -778,12 +832,10 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     datasourceStates,
     datasourceMap,
-    visualizationMap,
-    visualization,
     currentDoc,
     adHocDataViews,
-    defaultLensTitle,
     isCurrentStateDirty,
+    defaultLensTitle,
     onAppLeave,
     runSave,
     attributeService,
@@ -797,6 +849,7 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
+    dispatch,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

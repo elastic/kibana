@@ -30,10 +30,6 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
-  undo,
-  redo,
-  selectCanUndo,
-  selectCanRedo,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -67,8 +63,6 @@ export function WorkspacePanelWrapper({
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
-  const canUndo = useLensSelector(selectCanUndo);
-  const canRedo = useLensSelector(selectCanRedo);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
@@ -146,44 +140,6 @@ export function WorkspacePanelWrapper({
                     <MessageList messages={userMessages} />
                   </EuiFlexItem>
                 ) : null}
-
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    disabled={!canUndo}
-                    fill
-                    className={
-                      'lnsWorkspacePanelWrapper__applyButton ' +
-                      DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS
-                    }
-                    onClick={() => dispatchLens(undo())}
-                    size="m"
-                    minWidth="auto"
-                  >
-                    <FormattedMessage
-                      id="xpack.lens.editorFrame.applyChangesLabel"
-                      defaultMessage="Undo"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    disabled={!canRedo}
-                    fill
-                    className={
-                      'lnsWorkspacePanelWrapper__applyButton ' +
-                      DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS
-                    }
-                    onClick={() => dispatchLens(redo())}
-                    size="m"
-                    minWidth="auto"
-                  >
-                    <FormattedMessage
-                      id="xpack.lens.editorFrame.applyChangesLabel"
-                      defaultMessage="Redo"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
 
                 {!autoApplyEnabled && (
                   <EuiFlexItem grow={false}>

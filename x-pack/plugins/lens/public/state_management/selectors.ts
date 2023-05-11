@@ -32,8 +32,8 @@ export const selectStagedActiveData = (state: LensState) =>
 export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoApplyDisabled;
 export const selectChangesApplied = (state: LensState) =>
   !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
-export const selectCanUndo = (state: LensState) => state.lens.changes.length;
-export const selectCanRedo = (state: LensState) => state.lens.reversedChanges.length;
+export const selectCanUndo = (state: LensState) => Boolean(state.lens.changes.length);
+export const selectCanRedo = (state: LensState) => Boolean(state.lens.reversedChanges.length);
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
 export const selectVisualizationState = (state: LensState) => state.lens.visualization;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
