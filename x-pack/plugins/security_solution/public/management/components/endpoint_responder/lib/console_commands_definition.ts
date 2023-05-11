@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  commandToCapabilitiesPrivilegesMap,
+  getRbacControl,
+} from '../../../../../common/endpoint/utils/commands';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -65,71 +69,6 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
         'Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds). Example: 37m.',
     });
   }
-};
-
-const commandToCapabilitiesPrivilegesMap = new Map<
-  ConsoleResponseActionCommands,
-  { capability: EndpointCapabilities; privilege: (privileges: EndpointPrivileges) => boolean }
->([
-  [
-    'isolate',
-    {
-      capability: 'isolation',
-      privilege: (privileges: EndpointPrivileges) => privileges.canIsolateHost,
-    },
-  ],
-  [
-    'release',
-    {
-      capability: 'isolation',
-      privilege: (privileges: EndpointPrivileges) => privileges.canUnIsolateHost,
-    },
-  ],
-  [
-    'kill-process',
-    {
-      capability: 'kill_process',
-      privilege: (privileges: EndpointPrivileges) => privileges.canKillProcess,
-    },
-  ],
-  [
-    'suspend-process',
-    {
-      capability: 'suspend_process',
-      privilege: (privileges: EndpointPrivileges) => privileges.canSuspendProcess,
-    },
-  ],
-  [
-    'processes',
-    {
-      capability: 'running_processes',
-      privilege: (privileges: EndpointPrivileges) => privileges.canGetRunningProcesses,
-    },
-  ],
-  [
-    'get-file',
-    {
-      capability: 'get_file',
-      privilege: (privileges: EndpointPrivileges) => privileges.canWriteFileOperations,
-    },
-  ],
-  [
-    'execute',
-    {
-      capability: 'execute',
-      privilege: (privileges: EndpointPrivileges) => privileges.canWriteExecuteOperations,
-    },
-  ],
-]);
-
-export const getRbacControl = ({
-  commandName,
-  privileges,
-}: {
-  commandName: ConsoleResponseActionCommands;
-  privileges: EndpointPrivileges;
-}): boolean => {
-  return Boolean(commandToCapabilitiesPrivilegesMap.get(commandName)?.privilege(privileges));
 };
 
 const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {

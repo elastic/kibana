@@ -23,6 +23,7 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { getUiCommand } from '../../../../../common/endpoint/utils/commands';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
@@ -30,7 +31,7 @@ import type { ActionListApiResponse } from '../../../../../common/endpoint/types
 import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { TABLE_COLUMN_NAMES, UX_MESSAGES, ARIA_LABELS } from '../translations';
-import { getActionStatus, getUiCommand } from './hooks';
+import { getActionStatus } from './hooks';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { StatusBadge } from './status_badge';
 import { ActionsLogExpandedTray } from './action_log_expanded_tray';

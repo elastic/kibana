@@ -17,3 +17,5 @@ export const EndpointParams = t.type({
   command: t.keyof(keyObject(RESPONSE_ACTION_API_COMMANDS_NAMES)),
   comment: t.union([t.string, t.undefined]),
 });
+
+export type EndpointParams = t.TypeOf<typeof EndpointParams>;

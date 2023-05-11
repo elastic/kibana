@@ -10,6 +10,7 @@ import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getCommandKey } from '../../../../common/endpoint/utils/commands';
 import type {
   ResponseActionsApiCommandNames,
   ResponseActionStatus,
@@ -22,7 +23,7 @@ import { useGetEndpointActionList } from '../../hooks';
 import { UX_MESSAGES } from './translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionsLogFilters } from './components/actions_log_filters';
-import { getCommandKey, useDateRangePicker } from './components/hooks';
+import { useDateRangePicker } from './components/hooks';
 import { useActionHistoryUrlParams } from './components/use_action_history_url_params';
 import { useUrlPagination } from '../../hooks/use_url_pagination';
 import { ManagementPageLoader } from '../management_page_loader';

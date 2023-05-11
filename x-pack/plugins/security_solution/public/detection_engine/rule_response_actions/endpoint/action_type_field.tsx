@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
-import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
+import { getRbacControl, getUiCommand } from '../../../../common/endpoint/utils/commands';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 

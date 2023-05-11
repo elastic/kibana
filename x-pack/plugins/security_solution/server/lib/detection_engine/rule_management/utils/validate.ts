@@ -9,12 +9,9 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
+import { getUiCommand, getRbacControl } from '../../../../../common/endpoint/utils/commands';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import type {
-  ResponseAction,
-  RuleResponseAction,
-} from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import type {
   QueryRule,
   RuleCreateProps,
@@ -25,8 +22,12 @@ import type { RuleParams, RuleAlertType, UnifiedQueryRuleParams } from '../../ru
 import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
-import { transform } from './utils';
+import { findDifferenceInArrays, transform } from './utils';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
+import type {
+  ResponseAction,
+  RuleResponseAction,
+} from '../../../../../common/detection_engine/rule_response_actions/schemas';
 
 export const transformValidate = (
   rule: PartialRule<RuleParams>
@@ -69,34 +70,33 @@ export const transformValidateBulkError = (
 export const validateResponseActionsPermissions = async (
   securitySolution: SecuritySolutionApiRequestHandlerContext,
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
-  existingRule?: RuleAlertType | null | undefined
+  existingRule?: RuleAlertType | null
 ) => {
   const payload = ruleUpdate as QueryRule;
   const existingPayload = existingRule as Rule<UnifiedQueryRuleParams>;
-  // This functionality has to check just for Isolate command so far. When we decide to enable more commands, we will need to use more complex validation here.
+
   if (payload.response_actions?.length || existingPayload?.params?.responseActions?.length) {
     const endpointAuthz = await securitySolution.getEndpointAuthz();
 
-    if (endpointAuthz.canIsolateHost) {
-      return;
-    }
-
-    const ruleBodyContainsIsolate = payload.response_actions?.find((action: ResponseAction) => {
-      return action.action_type_id === '.endpoint' && action.params.command === 'isolate';
-    });
-
-    const existingRuleContainIsolate = existingPayload?.params?.responseActions?.find(
-      (action: RuleResponseAction) => {
-        return action.actionTypeId === '.endpoint' && action.params.command === 'isolate';
-      }
+    const difference = findDifferenceInArrays<ResponseAction, RuleResponseAction>(
+      payload.response_actions,
+      existingPayload?.params?.responseActions
     );
 
-    // check if existing vs body have changed
-    if (typeof existingRuleContainIsolate !== typeof ruleBodyContainsIsolate) {
-      throw new CustomHttpRequestError(
-        'User is not authorized to change isolate host response actions',
-        400
-      );
-    }
+    difference.forEach((action) => {
+      if ('command' in action?.params) {
+        const isInvalid = !getRbacControl({
+          commandName: getUiCommand(action.params.command),
+          privileges: { ...endpointAuthz, loading: false },
+        });
+
+        if (isInvalid) {
+          throw new CustomHttpRequestError(
+            `User is not authorized to change ${action.params.command} response actions`,
+            400
+          );
+        }
+      }
+    });
   }
 };
