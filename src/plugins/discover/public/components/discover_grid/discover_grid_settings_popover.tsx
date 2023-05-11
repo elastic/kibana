@@ -23,13 +23,14 @@ export function DiscoverGridSettingsPopover({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [activeSampleSize, setActiveSampleSize] = useState<number>(sampleSize);
 
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen((isOpen) => !isOpen);
+  const openPopover = useCallback(() => {
+    setIsPopoverOpen(true);
   }, []);
 
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
-  }, []);
+    setActiveSampleSize(sampleSize);
+  }, [sampleSize]);
 
   const debouncedOnChangeSampleSize = useMemo(
     () => debounce(onChangeSampleSize, 300, { leading: false, trailing: true }),
@@ -76,7 +77,7 @@ export function DiscoverGridSettingsPopover({
             iconType="gear"
             color="text"
             data-test-subj="dscGridSettingsPopoverButton"
-            onClick={togglePopover}
+            onClick={isPopoverOpen ? closePopover : openPopover}
             aria-label={buttonLabel}
           />
         </EuiToolTip>
