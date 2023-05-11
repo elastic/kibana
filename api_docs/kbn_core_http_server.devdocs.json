@@ -120,7 +120,7 @@
             "section": "def-common.AddVersionOpts",
             "text": "AddVersionOpts"
           },
-          "<P, Q, B, R>"
+          "<P, Q, B>"
         ],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
         "deprecated": false,
@@ -7117,7 +7117,7 @@
               "\nAdd a new version of this route"
             ],
             "signature": [
-              "<P = unknown, Q = unknown, B = unknown, R = any>(options: ",
+              "<P = unknown, Q = unknown, B = unknown>(options: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -7125,7 +7125,7 @@
                 "section": "def-common.AddVersionOpts",
                 "text": "AddVersionOpts"
               },
-              "<P, Q, B, R>, handler: (context: Ctx, request: ",
+              "<P, Q, B>, handler: (context: Ctx, request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -7157,7 +7157,7 @@
                 "section": "def-common.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<R>>) => ",
+              "<any>>) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -7186,7 +7186,7 @@
                     "section": "def-common.AddVersionOpts",
                     "text": "AddVersionOpts"
                   },
-                  "<P, Q, B, R>"
+                  "<P, Q, B>"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -7235,7 +7235,7 @@
                     "section": "def-common.IKibanaResponse",
                     "text": "IKibanaResponse"
                   },
-                  "<R>>"
+                  "<any>>"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
