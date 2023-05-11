@@ -20,6 +20,10 @@ export interface Dashboard {
 
 export const getDashboardsByTagIds = (
   http: HttpSetup,
-  tagIds: string[]
+  tagIds: string[],
+  abortSignal?: AbortSignal
 ): Promise<Dashboard[] | null> =>
-  http.post(INTERNAL_DASHBOARDS_URL, { body: JSON.stringify({ tagIds }) });
+  http.post(INTERNAL_DASHBOARDS_URL, {
+    body: JSON.stringify({ tagIds }),
+    signal: abortSignal,
+  });

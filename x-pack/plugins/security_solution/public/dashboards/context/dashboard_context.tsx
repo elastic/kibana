@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
 import { useFetchSecurityTags } from '../containers/use_fetch_security_tags';
 
@@ -18,12 +18,7 @@ const DashboardContext = React.createContext<DashboardContextType | null>({ secu
 export const DashboardContextProvider: React.FC = ({ children }) => {
   const { tags, isLoading } = useFetchSecurityTags();
 
-  const securityTags = useMemo(() => {
-    if (isLoading || !tags) {
-      return null;
-    }
-    return tags;
-  }, [tags, isLoading]);
+  const securityTags = isLoading || !tags ? null : tags;
 
   return <DashboardContext.Provider value={{ securityTags }}>{children}</DashboardContext.Provider>;
 };

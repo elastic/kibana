@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { TiDataSources } from './use_ti_data_sources';
 import { useKibana } from '../../../common/lib/kibana';
 import { getDashboardsByTagIds } from '../../../common/containers/dashboards/api';
@@ -17,13 +17,14 @@ const CTI_TAG_NAME = 'threat intel';
 
 const useCtiInstalledDashboards = () => {
   const { http } = useKibana().services;
+  const abortController = useRef(new AbortController());
 
   const {
     fetch,
     data: dashboards,
     isLoading,
   } = useFetch(REQUEST_NAMES.CTI_TAGS, async (tagName: string) => {
-    const ctiTags = await getTagsByName(http, tagName);
+    const ctiTags = await getTagsByName(http, tagName, abortController.current.signal);
     return getDashboardsByTagIds(
       http,
       ctiTags.map((tag) => tag.id)
@@ -32,8 +33,7 @@ const useCtiInstalledDashboards = () => {
 
   useEffect(() => {
     fetch(CTI_TAG_NAME);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetch]);
 
   return { dashboards, isLoading };
 };
