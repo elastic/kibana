@@ -14,8 +14,10 @@
     ],
     "requiredPlugins": [
       "serverless",
+      "cloud",
       "enterpriseSearch",
-      "management"
+      "management",
+      "security",
     ],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"]
