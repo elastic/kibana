@@ -119,10 +119,32 @@ I think that points to having some new startup flow that would
 enumerate "background_tasks" only plugins.  Could be part of the
 build?
 
+## plugins not granular enough
+
+You might wonder how we managed to pull in the `discover` plugin as
+a background tasks only plugin.  If you look at the dependencies of the
+`infra` plugin, it includes `ruleRegistry` and `discover`.  Basically,
+our plugins aren't granular enough.
+
+I guess the approach for plugins like these would be to split out the
+task- / rule-related code into a separate smaller plugin.  For instance
+create a `infra-rules-tasks` plugin with the rules/tasks from the
+`infra` plugin - **without referring to the `infra` plugin** - and
+then `infra` will require `infra-rules-tasks`.  Likely an extra
+type- / code-sharing package would be needed as well.
+
+### splitting routes
+
+There's another obvious split.  No plugin needs routes for background tasks,
+so plugins with routes should split them into separate plugins, so they
+don't need to be loaded.  
+
+### marking plugins declaratively
+
 ## load modules faster with snapshot blobs
 
 Perhaps there's some hope in 
-[node snapshot blobss](https://blog.logrocket.com/snapshot-flags-node-js-v18-8/).
+[node snapshot blobs](https://blog.logrocket.com/snapshot-flags-node-js-v18-8/).
 The idea would be to bundle all of Kibana into a single module ...gulp... and
 hope to restructure Kibana to a form where a snapshot can be saved - after
 reading modules, but before opening network connections.  
@@ -142,6 +164,9 @@ functions in terms of poor performance:
 
 - `loadJSONSpecInDir()` - 250ms - uses `fs.readFileSync()`
   https://github.com/elastic/kibana/blob/51f6eeccefca5b927f96727be39181e0c4119275/src/plugins/console/server/services/spec_definitions_service.ts#L118-L143
+  Haha!  I thought this was the sync file read, but it's actually the 
+  `reduce()`!  I didn't have the energy this morning to "fix" this one,
+  assume it could go to near 0.
 
 - `kbn-alerts-as-data-utils/src/field_maps/ecs_field_map.ts` - 200ms - don't reduce? memo-ize?
   https://github.com/elastic/kibana/blob/main/packages/kbn-alerts-as-data-utils/src/field_maps/ecs_field_map.ts
@@ -150,7 +175,9 @@ functions in terms of poor performance:
 
 - `calculateDepthRecursive()` - 187ms cumulative - memo-ize?
   https://github.com/elastic/kibana/blob/51f6eeccefca5b927f96727be39181e0c4119275/packages/core/status/core-status-server-internal/src/plugins_status.ts#L243-L250
-  This is called 312 times, 273 times with a previous invoked plugin.
+  This is called 312 times, 273 times with a previous invoked plugin.  After
+  memo-ization, it disappears from the profile, but it's caller 
+  `getOrderedPluginNames()` is in the profile as under 1ms.
 
 - `DFS()` from npm prismjs - 400ms cumulative - looks like it's some kind
   of initialization of language parsers or such (prism is a code formatting
@@ -159,8 +186,9 @@ functions in terms of poor performance:
   Wonder if we can move this out of the start flow.  Wondering who might
   need this in background tasks anyway?
 
-These can probably be fixed - the first may be a one-time startup thing, but the other two look
-memo-izable, and/or stop using `reduce()`.
+It's not clear to me how much savings we really get here, or at least how
+to measure it.  If you look at the profiling data, it's basically time
+readings, but since async calls "overlap"
 
 ## green field
 
