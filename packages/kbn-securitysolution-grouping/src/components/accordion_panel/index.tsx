@@ -10,7 +10,7 @@ import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@
 import type { Filter } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { GroupingBucket } from '../types';
-import { createGroupFilter, getNullGroupFilter } from './helpers';
+import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 
 interface GroupPanelProps<T> {
   customAccordionButtonClassName?: string;

@@ -8,7 +8,7 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import { GroupPanel } from '.';
-import { createGroupFilter, getNullGroupFilter } from './helpers';
+import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 import React from 'react';
 import { groupingBucket } from '../../mocks';
 

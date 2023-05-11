@@ -10,7 +10,7 @@ import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Grouping } from './grouping';
-import { createGroupFilter, getNullGroupFilter } from './accordion_panel/helpers';
+import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getTelemetryEvent } from '../telemetry/const';
 

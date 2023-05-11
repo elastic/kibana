@@ -55,7 +55,16 @@ export const getGroupingQuery = ({
       type: 'keyword',
       script: {
         source:
-          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) } else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
+          // when size()==0, emits a uniqueValue as the value to represent this group  else join by uniqueValue.
+          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
+          // Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
+          // the runtime field will only return the first value in an array.
+          // The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
+          // However, this gives us a group for each value instead of combining the values like we're aiming for.
+          // Instead of .value, we can retrieve all values with .join().
+          // Instead of joining with a "," we should join with a unique value to avoid splitting a value that happens to contain a ",".
+          // We will format into a proper array in parseGroupingQuery .
+          " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
         params: {
           selectedGroup: groupByField,
           uniqueValue,
@@ -112,7 +121,8 @@ export const getGroupingQuery = ({
  * Parses the grouping query response to add the isNullGroup
  * flag to the buckets and to format the bucket keys
  * @param selectedGroup from the grouping query
- * @param aggs aggs returned from the grouping query
+ * @param uniqueValue from the grouping query
+ * @param aggs aggregation response from the grouping query
  */
 export const parseGroupingQuery = <T>(
   selectedGroup: string,
@@ -133,7 +143,7 @@ export const parseGroupingQuery = <T>(
         isNullGroup: true,
       };
     }
-    // doing isArray check for typescrupt
+    // doing isArray check for TS
     // the key won't be an array, runtime fields cannot be multivalued
     const groupKey = Array.isArray(group.key) ? group.key[0] : group.key;
     const valueAsArray = groupKey.split(uniqueValue);
