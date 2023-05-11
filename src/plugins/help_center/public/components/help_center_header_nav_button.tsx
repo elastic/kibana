@@ -73,7 +73,9 @@ export const HelpCenterNavButton = ({ helpCenterApi }: Props) => {
         >
           <EuiIcon type="help" size="m" />
         </EuiHeaderSectionItemButton>
-        {flyoutVisible && topNav ? <HelpCenterFlyout headerRef={topNav} /> : null}
+        {flyoutVisible && topNav ? (
+          <HelpCenterFlyout headerRef={topNav} username={helpCenterApi.username} />
+        ) : null}
       </>
     </HelpCenterContext.Provider>
   );

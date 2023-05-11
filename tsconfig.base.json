@@ -972,6 +972,8 @@
       "@kbn/observability-shared-plugin/*": ["x-pack/plugins/observability_shared/*"],
       "@kbn/oidc-provider-plugin": ["x-pack/test/security_api_integration/plugins/oidc_provider"],
       "@kbn/oidc-provider-plugin/*": ["x-pack/test/security_api_integration/plugins/oidc_provider/*"],
+      "@kbn/open-ai-plugin": ["src/plugins/open_ai"],
+      "@kbn/open-ai-plugin/*": ["src/plugins/open_ai/*"],
       "@kbn/open-telemetry-instrumented-plugin": ["test/common/plugins/otel_metrics"],
       "@kbn/open-telemetry-instrumented-plugin/*": ["test/common/plugins/otel_metrics/*"],
       "@kbn/optimizer": ["packages/kbn-optimizer"],

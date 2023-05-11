@@ -10,6 +10,7 @@
     "@kbn/screenshot-mode-plugin",
     "@kbn/i18n-react",
     "@kbn/config-schema",
+    "@kbn/security-plugin",
     "@kbn/core-chrome-browser-internal",
     "@kbn/core-chrome-browser"
   ],
