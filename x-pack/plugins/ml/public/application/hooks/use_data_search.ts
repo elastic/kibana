@@ -254,10 +254,14 @@ export const useFetchDataDriftResult = (
           // add histogram aggregation with min and max from baseline
           if (type === 'numeric') {
             const numBins = 10;
-            const min = Math.min(baselineResponse.aggregations[`${field}_stats`].min, 
-            driftedResp.aggregations[`${field}_stats`].min);
-            const max = Math.max(baselineResponse.aggregations[`${field}_stats`].max,
-            driftedResp.aggregations[`${field}_stats`].max);
+            const min = Math.min(
+              baselineResponse.aggregations[`${field}_stats`].min,
+              driftedResp.aggregations[`${field}_stats`].min
+            );
+            const max = Math.max(
+              baselineResponse.aggregations[`${field}_stats`].max,
+              driftedResp.aggregations[`${field}_stats`].max
+            );
             const interval = (max - min) / numBins;
             referenceHistogramRequest.body.aggs[`${field}_histogram`] = {
               histogram: {
