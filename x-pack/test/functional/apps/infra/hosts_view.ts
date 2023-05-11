@@ -544,6 +544,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
           });
         });
+
+        it('should show an error message when an invalid KQL is submitted', async () => {
+          await pageObjects.infraHostsView.submitQuery('cloud.provider="gcp" A');
+          await testSubjects.existOrFail('hostsViewErrorCallout');
+        });
       });
 
       describe('Pagination and Sorting', () => {
