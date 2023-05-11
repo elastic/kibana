@@ -18,8 +18,13 @@ import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle'
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
+import { AnalysisTab } from '../analysis_tab';
 import { DiscoverDocuments } from './discover_documents';
-import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
+import {
+  ANALYSIS_VIEW_CLICK,
+  DOCUMENTS_VIEW_CLICK,
+  FIELD_STATISTICS_VIEW_CLICK,
+} from '../field_stats_table/constants';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { useDataState } from '../../hooks/use_data_state';
 
@@ -66,8 +71,10 @@ export const DiscoverMainContent = ({
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
           trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
-        } else {
+        } else if (mode === VIEW_MODE.DOCUMENT_LEVEL) {
           trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
+        } else {
+          trackUiMetric(METRIC_TYPE.CLICK, ANALYSIS_VIEW_CLICK);
         }
       }
     },
@@ -99,6 +106,7 @@ export const DiscoverMainContent = ({
               <DocumentViewModeToggle
                 viewMode={viewMode}
                 setDiscoverViewMode={setDiscoverViewMode}
+                isTimeBasedDataView={dataView.isTimeBased()}
               />
             )}
           </EuiFlexItem>
@@ -120,7 +128,8 @@ export const DiscoverMainContent = ({
               stateContainer={stateContainer}
               onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
             />
-          ) : (
+          ) : null}
+          {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <FieldStatisticsTab
               dataView={dataView}
               columns={columns}
@@ -128,7 +137,16 @@ export const DiscoverMainContent = ({
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               trackUiMetric={trackUiMetric}
             />
-          )}
+          ) : null}
+          {viewMode === VIEW_MODE.ANALYSIS_LEVEL && dataView.isTimeBased() ? (
+            <AnalysisTab
+              dataView={dataView}
+              columns={columns}
+              stateContainer={stateContainer}
+              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              trackUiMetric={trackUiMetric}
+            />
+          ) : null}
         </EuiFlexGroup>
       </DropOverlayWrapper>
     </DragDrop>

@@ -30,8 +30,9 @@ export interface DocumentCountContentProps {
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
-  totalCount: number;
   sampleProbability: number;
+  showTotalCount?: boolean;
+  totalCount: number;
   windowParameters?: WindowParameters;
 }
 
@@ -41,8 +42,9 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   documentCountStats,
   documentCountStatsSplit,
   documentCountStatsSplitLabel = '',
-  totalCount,
   sampleProbability,
+  showTotalCount = true,
+  totalCount,
   windowParameters,
 }) => {
   const [isBrushCleared, setIsBrushCleared] = useState(true);
@@ -101,9 +103,11 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem>
-          <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
-        </EuiFlexItem>
+        {showTotalCount ? (
+          <EuiFlexItem>
+            <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+          </EuiFlexItem>
+        ) : null}
         {!isBrushCleared && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

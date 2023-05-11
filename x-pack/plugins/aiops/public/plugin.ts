@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
+import { registerEmbeddables } from './components/explain_log_rate_spikes/embeddables';
 
 import {
   AiopsPluginSetup,
@@ -18,8 +19,11 @@ import {
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
-  public setup() {
-    return {};
+  public setup(
+    core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
+    plugins: AiopsPluginSetupDeps
+  ) {
+    registerEmbeddables(plugins.embeddable, core);
   }
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps) {

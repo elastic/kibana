@@ -108,6 +108,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
+
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
   const overallSeriesName = i18n.translate(

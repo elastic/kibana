@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const DEFAULT_ROWS_PER_PAGE = 100;
-export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-  ANALYSIS_LEVEL = 'analysis',
-}
+export { AnalysisTab } from './analysis_tab';

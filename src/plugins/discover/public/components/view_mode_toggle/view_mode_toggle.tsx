@@ -18,9 +18,11 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 export const DocumentViewModeToggle = ({
   viewMode,
   setDiscoverViewMode,
+  isTimeBasedDataView,
 }: {
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  isTimeBasedDataView: boolean;
 }) => {
   const { uiSettings } = useDiscoverServices();
 
@@ -56,6 +58,16 @@ export const DocumentViewModeToggle = ({
           defaultMessage="Field statistics"
         />
       </EuiTab>
+      {isTimeBasedDataView ? (
+        <EuiTab
+          isSelected={viewMode === VIEW_MODE.ANALYSIS_LEVEL}
+          onClick={() => setDiscoverViewMode(VIEW_MODE.ANALYSIS_LEVEL)}
+          className="dscViewModeToggle__tab"
+          data-test-subj="dscViewModeAnalysisButton"
+        >
+          <FormattedMessage id="discover.viewModes.analysis.label" defaultMessage="Analysis" />
+        </EuiTab>
+      ) : null}
     </EuiTabs>
   );
 };

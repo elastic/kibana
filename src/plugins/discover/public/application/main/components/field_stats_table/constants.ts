@@ -10,3 +10,4 @@
 export const FIELD_STATISTICS_LOADED = 'field_statistics_loaded';
 export const FIELD_STATISTICS_VIEW_CLICK = 'field_statistics_view_click';
 export const DOCUMENTS_VIEW_CLICK = 'documents_view_click';
+export const ANALYSIS_VIEW_CLICK = 'analysis_view_click';

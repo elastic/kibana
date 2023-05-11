@@ -10,6 +10,9 @@
     "requiredPlugins": [
       "charts",
       "data",
+      "discover",
+      "embeddable",
+      "fieldFormats",
       "lens",
       "licensing",
       "uiActions",

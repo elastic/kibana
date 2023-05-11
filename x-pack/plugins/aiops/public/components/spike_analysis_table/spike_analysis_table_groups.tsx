@@ -59,6 +59,7 @@ interface SpikeAnalysisTableProps {
   searchQuery: estypes.QueryDslQueryContainer;
   timeRangeMs: TimeRangeMs;
   dataView: DataView;
+  showActionsColumn?: boolean;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -68,6 +69,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   dataView,
   timeRangeMs,
   searchQuery,
+  showActionsColumn,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -350,10 +352,14 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
-      name: i18n.translate('xpack.aiops.spikeAnalysisTable.actionsColumnName', {
+      name: i18n.translate('xpack.aiops.aiopsSpikeAnalysisGroupsTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      actions: [viewInDiscoverAction, viewInLogPatternAnalysisAction, copyToClipBoardAction],
+      actions: [
+        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+        copyToClipBoardAction,
+      ],
       width: ACTIONS_COLUMN_WIDTH,
       valign: 'top',
     },
