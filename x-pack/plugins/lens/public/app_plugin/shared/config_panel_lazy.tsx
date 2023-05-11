@@ -48,6 +48,7 @@ function fromExcludedClickTarget(event: Event) {
     if (
       node.classList!.contains(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS) ||
       node.classList!.contains('euiBody-hasPortalContent') ||
+      node.classList!.contains('lnsDimensionContainer') ||
       node.getAttribute('data-euiportal') === 'true'
     ) {
       return true;
@@ -70,11 +71,13 @@ export function getConfigPanel(
     dataView: DataView;
     updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
     setIsFlyoutVisible?: (flag: boolean) => void;
+    datasourceId?: 'formBased' | 'textBased';
   }) => {
     const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
       initialActiveDimensionState
     );
     const [attributes, setAttributes] = useState(props.attributes);
+    const datasourceId = props?.datasourceId ?? 'textBased';
 
     const updateVisualizationState = useCallback(
       (newState) => {
@@ -85,11 +88,11 @@ export function getConfigPanel(
             visualization: newState,
           },
         };
-        const dsState = attributes.state.datasourceStates.textBased;
+        const dsState = attributes.state.datasourceStates[datasourceId];
         setAttributes(attrs);
         props.updateAll(dsState, newState);
       },
-      [attributes, props]
+      [attributes, datasourceId, props]
     );
 
     const updateDatasourceState = useCallback(
@@ -101,13 +104,13 @@ export function getConfigPanel(
             ...attributes.state,
             datasourceStates: {
               ...attributes.state.datasourceStates,
-              textBased: newState,
+              [datasourceId]: newState,
             },
           },
         };
         setAttributes(attrs);
       },
-      [attributes, props]
+      [attributes, datasourceId, props]
     );
 
     const updateAll = useCallback(
@@ -119,14 +122,14 @@ export function getConfigPanel(
             visualization: newVisualizationState,
             datasourceStates: {
               ...attributes.state.datasourceStates,
-              textBased: newState,
+              [datasourceId]: newState,
             },
           },
         };
         setAttributes(attrs);
         props.updateAll(newState, newVisualizationState);
       },
-      [attributes, props]
+      [attributes, datasourceId, props]
     );
 
     const closeFlyout = () => {
@@ -155,12 +158,12 @@ export function getConfigPanel(
     const datasourceLayers: DatasourceLayers = useMemo(() => {
       return {};
     }, []);
-    const activeDatasource = datasourceMap.textBased;
-    const layers = activeDatasource.getLayers(datasourceStates.textBased);
+    const activeDatasource = datasourceMap[datasourceId];
+    const layers = activeDatasource.getLayers(datasourceStates[datasourceId]);
 
-    const datasourceState = datasourceStates.textBased;
+    const datasourceState = datasourceStates[datasourceId];
     layers.forEach((layer) => {
-      datasourceLayers[layer] = datasourceMap.textBased.getPublicAPI({
+      datasourceLayers[layer] = datasourceMap[datasourceId].getPublicAPI({
         state: datasourceState,
         layerId: layer,
         indexPatterns: dataViews.indexPatterns,
@@ -182,7 +185,7 @@ export function getConfigPanel(
     });
     const layerId = layerIds[0];
     const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
-    const layerDatasource = datasourceMap.textBased;
+    const layerDatasource = datasourceMap[datasourceId];
     const layerDatasourceState = datasourceState;
     const visualizationState = attributes.state.visualization;
     const columnLabelMap = activeVisualization?.getUniqueLabels?.(visualizationState);

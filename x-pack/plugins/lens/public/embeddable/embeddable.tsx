@@ -1292,6 +1292,7 @@ export class Embeddable
 
   async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
     const viz = this.savedVis;
+    const datasourceId = this.isTextBasedLanguage() ? 'textBased' : 'formBased';
     if (viz?.state) {
       const attrs = {
         ...viz,
@@ -1300,7 +1301,7 @@ export class Embeddable
           visualization: visualizationState,
           datasourceStates: {
             ...viz.state.datasourceStates,
-            textBased: datasourceState,
+            [datasourceId]: datasourceState,
           },
         },
       };
@@ -1324,6 +1325,7 @@ export class Embeddable
           attributes={attributes}
           dataView={dataView}
           updateAll={this.updateVisualization.bind(this)}
+          datasourceId={this.isTextBasedLanguage() ? 'textBased' : 'formBased'}
         />
       );
     }
