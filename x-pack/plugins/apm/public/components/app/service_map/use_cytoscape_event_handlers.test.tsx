@@ -13,7 +13,7 @@ import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import lodash from 'lodash';
 
-jest.mock('@kbn/observability-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public');
 
 cytoscape.use(dagre);
 
