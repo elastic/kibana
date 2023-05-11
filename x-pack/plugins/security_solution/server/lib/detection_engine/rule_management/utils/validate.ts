@@ -8,15 +8,20 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
+import type { Rule } from '@kbn/alerting-plugin/common';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import type {
+  ResponseAction,
+  RuleResponseAction,
+} from '../../../../../common/detection_engine/rule_response_actions/schemas';
+import type {
+  QueryRule,
   RuleCreateProps,
   RuleUpdateProps,
 } from '../../../../../common/detection_engine/rule_schema';
 import { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
-import type { RuleParams, RuleAlertType } from '../../rule_schema';
+import type { RuleParams, RuleAlertType, UnifiedQueryRuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
@@ -63,34 +68,31 @@ export const transformValidateBulkError = (
 // for now we want to make sure that user cannot configure Isolate action if has no RBAC permissions to do so
 export const validateResponseActionsPermissions = async (
   securitySolution: SecuritySolutionApiRequestHandlerContext,
-  body: RuleCreateProps | RuleUpdateProps,
+  ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null | undefined
 ) => {
+  const payload = ruleUpdate as QueryRule;
+  const existingPayload = existingRule as Rule<UnifiedQueryRuleParams>;
   // This functionality has to check just for Isolate command so far. When we decide to enable more commands, we will need to use more complex validation here.
-  if (body.response_actions?.length || existingRule?.params?.responseActions?.length) {
+  if (payload.response_actions?.length || existingPayload?.params?.responseActions?.length) {
     const endpointAuthz = await securitySolution.getEndpointAuthz();
 
     if (endpointAuthz.canIsolateHost) {
       return;
     }
 
-    const ruleBodyContainsIsolate = body.response_actions?.find((action: ResponseAction) => {
+    const ruleBodyContainsIsolate = payload.response_actions?.find((action: ResponseAction) => {
       return action.action_type_id === '.endpoint' && action.params.command === 'isolate';
     });
 
-    console.log({ test: existingRule?.params?.responseActions });
-    const existingRuleContainIsolate = existingRule?.params?.responseActions?.find(
-      (action: ResponseAction) => {
+    const existingRuleContainIsolate = existingPayload?.params?.responseActions?.find(
+      (action: RuleResponseAction) => {
         return action.actionTypeId === '.endpoint' && action.params.command === 'isolate';
       }
     );
 
-    console.log({ existingRuleContainIsolate, ruleBodyContainsIsolate });
-
-    if (
-      (existingRuleContainIsolate && !ruleBodyContainsIsolate) ||
-      (!existingRuleContainIsolate && ruleBodyContainsIsolate)
-    ) {
+    // check if existing vs body have changed
+    if (typeof existingRuleContainIsolate !== typeof ruleBodyContainsIsolate) {
       throw new CustomHttpRequestError(
         'User is not authorized to change isolate host response actions',
         400
