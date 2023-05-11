@@ -25,8 +25,12 @@ export function startImplicitCollection(options: ImplicitCollectionOptions): () 
 
   const timer = setInterval(async () => {
     options.logger.info('Starting execution');
-    await runner.run();
-    options.logger.info('Execution ended');
+    try {
+      await runner.run();
+      options.logger.info('Execution ended successfully');
+    } catch (err) {
+      options.logger.info(`Execution ended with error: ${err}`);
+    }
   }, options.intervalMs);
 
   return () => {
