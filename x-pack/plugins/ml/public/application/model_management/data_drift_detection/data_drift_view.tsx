@@ -1075,10 +1075,6 @@ export const significanceLevels = [
   0.95, 0.96, 0.97, 0.98, 0.99,
 ];
 
-interface chi2Parameters {
-  chi2Statistic: number;
-  df: number;
-}
 
 const formatSignificanceLevel = (significanceLevel: number) => {
   if (significanceLevel < 0.01) {
@@ -1107,36 +1103,31 @@ const criticalTableLookup = (chi2Statistic: number, df: number) => {
   return significanceLevel;
 };
 
-export const computeChi2PValue = (
-  normalizedBaselineTerms: Histogram[],
-  normalizedDriftedTerms: Histogram[]
-) => {
+export const computeChi2PValue = (normalizedBaselineTerms: Histogram[], normalizedDriftedTerms: Histogram[]) => {
   // Get all unique keys from both arrays
   const allKeys: string[] = Array.from(
-    new Set([
-      ...normalizedBaselineTerms.map((term) => term.key.toString()),
-      ...normalizedDriftedTerms.map((term) => term.key.toString()),
-    ])
+    new Set([...normalizedBaselineTerms.map((term) => term.key.toString()),
+       ...normalizedDriftedTerms.map((term) => term.key.toString())])
   ).sort();
 
-  // Calculate the expected and observed frequencies for each key
-  const frequencies: { [key: string]: { observed: number; expected: number } } = {};
-  // let totalBaseline: number = 0;
-  // let totalDrifted: number = 0;
-  allKeys.forEach((key) => {
-    const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
-    const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
+  // // Calculate the expected and observed frequencies for each key
+  // const frequencies: { [key: string]: { observed: number; expected: number } } = {};
+  // // let totalBaseline: number = 0;
+  // // let totalDrifted: number = 0;
+  // allKeys.forEach((key) => {
+  //   const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
+  //   const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
 
-    const observedBaseline: number = baselineTerm ? baselineTerm.doc_count : 0;
-    const observedDrifted: number = driftedTerm ? driftedTerm.doc_count : 0;
-    frequencies[key] = {
-      observed: observedDrifted,
-      expected: observedBaseline,
-    };
+  //   const observedBaseline: number = baselineTerm ? baselineTerm.doc_count : 0;
+  //   const observedDrifted: number = driftedTerm ? driftedTerm.doc_count : 0;
+  //   frequencies[key] = {
+  //     observed: observedDrifted,
+  //     expected: observedBaseline,
+  //   };
 
-    // totalBaseline += observedBaseline;
-    // totalDrifted += observedDrifted;
-  });
+  //   // totalBaseline += observedBaseline;
+  //   // totalDrifted += observedDrifted;
+  // });
 
   // Calculate the chi-squared statistic and degrees of freedom
   let chiSquared: number = 0;
@@ -1286,12 +1277,19 @@ const DataDriftChart = ({
     </Chart>
   );
 };
+const normalizeHistogram = (histogram: Histogram[]): Histogram[] => {
+  // Compute a total doc_count for all terms
+  const totalDocCount: number = histogram.reduce((acc, term) => acc + term.doc_count, 0);
 
-const normalizeTerms = (
-  terms: Histogram[],
-  keys: string[],
-  sumOtherDocCount: number
-): Histogram[] => {
+  // Iterate over the original array and update the doc_count of each term in the new array
+  histogram.forEach((term) => {
+    term.doc_count = term.doc_count / totalDocCount;
+  });
+
+  return histogram;
+};
+
+const normalizeTerms = (terms: Histogram[], keys: string[], sumOtherDocCount: number): Histogram[] => {
   // Compute a total doc_count for all terms
   const totalDocCount: number = terms.reduce((acc, term) => acc + term.doc_count, sumOtherDocCount);
 
@@ -1328,13 +1326,18 @@ export const DataDriftView = () => {
     }
     return Object.entries(result.data).map(([featureName, data], idx) => {
       if (isNumericDriftData(data)) {
+
+        // normalize data.referenceHistogram and data.productionHistogram to use frequencies instead of counts
+        const referenceHistogram: Histogram[] = normalizeHistogram(data.referenceHistogram);
+        const productionHistogram: Histogram[] = normalizeHistogram(data.productionHistogram);
+
         return {
           featureName,
           featureType: NUMERIC_TYPE_LABEL,
           driftDetected: data.pValue < DRIFT_P_VALUE_THRESHOLD,
           similarityTestPValue: data.pValue,
-          referenceHistogram: data.referenceHistogram ?? [],
-          productionHistogram: data.productionHistogram ?? [],
+          referenceHistogram: referenceHistogram ?? [],
+          productionHistogram: productionHistogram ?? [],
           comparisonDistribution: [
             ...data.referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
             ...data.productionHistogram.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
@@ -1352,16 +1355,8 @@ export const DataDriftView = () => {
       ).sort();
 
       // Normalize the baseline and drifted terms arrays
-      const normalizedBaselineTerms: Histogram[] = normalizeTerms(
-        data.baselineTerms,
-        allKeys,
-        data.baselineSumOtherDocCount
-      );
-      const normalizedDriftedTerms: Histogram[] = normalizeTerms(
-        data.driftedTerms,
-        allKeys,
-        data.driftedSumOtherDocCount
-      );
+      const normalizedBaselineTerms: Histogram[] = normalizeTerms(data.baselineTerms, allKeys, data.baselineSumOtherDocCount);
+      const normalizedDriftedTerms: Histogram[] = normalizeTerms(data.driftedTerms, allKeys, data.driftedSumOtherDocCount);
       const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
       return {
         featureName,

@@ -31,9 +31,16 @@ export interface Result<T extends unknown> {
   error?: string;
 }
 
+interface Range {
+  min: number;
+  max: number;
+  interval: number;
+}
+
 interface NumericDriftData {
   type: 'numeric';
   pValue: number;
+  range: Range;
   referenceHistogram: Histogram[];
   productionHistogram: Histogram[];
 }
@@ -250,6 +257,8 @@ export const useFetchDataDriftResult = (
           },
         };
 
+        const fieldRange: { [field: string]: Range } = {};
+
         for (const { field, type } of fields) {
           // add histogram aggregation with min and max from baseline
           if (type === 'numeric') {
@@ -263,11 +272,14 @@ export const useFetchDataDriftResult = (
               driftedResp.aggregations[`${field}_stats`].max
             );
             const interval = (max - min) / numBins;
+            const offset = min;
+            fieldRange[field] = { min, max, interval };
             referenceHistogramRequest.body.aggs[`${field}_histogram`] = {
               histogram: {
                 field,
                 interval,
-                hard_bounds: {
+                offset,
+                extended_bounds: {
                   min,
                   max,
                 },
@@ -277,7 +289,8 @@ export const useFetchDataDriftResult = (
               histogram: {
                 field,
                 interval,
-                hard_bounds: {
+                offset,
+                extended_bounds: {
                   min,
                   max,
                 },
@@ -323,6 +336,7 @@ export const useFetchDataDriftResult = (
             data[field] = {
               type: 'numeric',
               pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
+              range: fieldRange[field],
               referenceHistogram:
                 referenceHistogramResponse.aggregations[`${field}_histogram`].buckets,
               productionHistogram:
