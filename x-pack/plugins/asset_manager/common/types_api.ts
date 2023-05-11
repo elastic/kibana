@@ -14,7 +14,7 @@ export const assetTypeRT = schema.oneOf([
 ]);
 export type AssetType = typeof assetTypeRT.type;
 
-export type AssetKind = 'unknown' | 'node';
+export type AssetKind = 'cluster' | 'host' | 'pod' | 'container' | 'service';
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
@@ -46,17 +46,20 @@ export interface ECSDocument extends WithTimestamp {
   'orchestrator.cluster.version'?: string;
 
   'cloud.provider'?: CloudProviderName;
+  'cloud.instance.id'?: string;
   'cloud.region'?: string;
   'cloud.service.name'?: string;
+
+  'service.environment'?: string;
 }
 
 export interface Asset extends ECSDocument {
   'asset.collection_version'?: string;
   'asset.ean': string;
   'asset.id': string;
-  'asset.kind'?: AssetKind;
+  'asset.kind': AssetKind;
   'asset.name'?: string;
-  'asset.type': AssetType;
+  'asset.type'?: AssetType;
   'asset.status'?: AssetStatus;
   'asset.parents'?: string | string[];
   'asset.children'?: string | string[];
