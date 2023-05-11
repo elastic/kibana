@@ -16,6 +16,7 @@ import { EuiHealth } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { RiskScore } from '.';
+import { SEVERITY_COLOR } from '../../../../../overview/components/detection_response/utils';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -37,7 +38,7 @@ describe('RiskScore', () => {
     expect(container).toHaveTextContent(RiskSeverity.critical);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorDanger }),
+      expect.objectContaining({ color: SEVERITY_COLOR.critical }),
       context
     );
   });
@@ -52,7 +53,7 @@ describe('RiskScore', () => {
     expect(container).toHaveTextContent(RiskSeverity.high);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorVis9_behindText }),
+      expect.objectContaining({ color: SEVERITY_COLOR.high }),
       context
     );
   });
@@ -67,7 +68,7 @@ describe('RiskScore', () => {
     expect(container).toHaveTextContent(RiskSeverity.moderate);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorWarning }),
+      expect.objectContaining({ color: SEVERITY_COLOR.medium }),
       context
     );
   });
@@ -82,7 +83,7 @@ describe('RiskScore', () => {
     expect(container).toHaveTextContent(RiskSeverity.low);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorVis0 }),
+      expect.objectContaining({ color: SEVERITY_COLOR.low }),
       context
     );
   });

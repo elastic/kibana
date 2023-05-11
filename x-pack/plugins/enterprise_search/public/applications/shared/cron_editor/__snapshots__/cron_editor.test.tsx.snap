@@ -170,9 +170,10 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -1135,9 +1136,10 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -1934,9 +1936,10 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -2149,9 +2152,10 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -3137,9 +3141,10 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -3346,9 +3351,10 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -3554,9 +3560,10 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -4482,9 +4489,10 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -5114,9 +5122,10 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -5921,9 +5930,10 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -6136,9 +6146,10 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -6728,9 +6739,10 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -7352,9 +7364,10 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -8155,9 +8168,10 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -8370,9 +8384,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -9161,9 +9176,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -9611,9 +9627,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -10251,9 +10268,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -11062,9 +11080,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"

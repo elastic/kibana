@@ -23,7 +23,6 @@ import {
 } from '../bulk_actions/get_leading_control_column';
 import { CasesService } from '../types';
 import {
-  ADD_TO_CASE_DISABLED,
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
@@ -109,7 +108,7 @@ export const useBulkAddToCaseActions = ({
             key: 'attach-new-case',
             'data-test-subj': 'attach-new-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE_DISABLED,
+            disabledLabel: ADD_TO_NEW_CASE,
             onClick: (alerts?: TimelineItem[]) => {
               const caseAttachments = alerts
                 ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
@@ -124,7 +123,7 @@ export const useBulkAddToCaseActions = ({
             label: ADD_TO_EXISTING_CASE,
             key: 'attach-existing-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE_DISABLED,
+            disabledLabel: ADD_TO_EXISTING_CASE,
             'data-test-subj': 'attach-existing-case',
             onClick: (alerts?: TimelineItem[]) => {
               selectCaseModal.open({

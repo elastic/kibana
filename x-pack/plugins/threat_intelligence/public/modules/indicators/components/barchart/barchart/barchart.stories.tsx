@@ -11,7 +11,7 @@ import { Story } from '@storybook/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../../common/mocks/mock_kibana_timelines_service';
-import { IndicatorsBarChart } from '.';
+import { IndicatorsBarChart } from './barchart';
 import { ChartSeries } from '../../../services';
 
 const mockIndicators: ChartSeries[] = [
@@ -55,7 +55,7 @@ const mockDateRange: TimeRangeBounds = {
   max: moment(validDate).add(numberOfDays, 'days'),
 };
 
-const mockField: string = 'threat.indicator.ip';
+const mockField = { label: 'threat.indicator.ip', value: 'ip' };
 
 export default {
   component: IndicatorsBarChart,
@@ -70,7 +70,7 @@ export const Default: Story<void> = () => (
 
 export const NoData: Story<void> = () => (
   <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
-    <IndicatorsBarChart indicators={[]} field={''} dateRange={mockDateRange} />
+    <IndicatorsBarChart indicators={[]} field={mockField} dateRange={mockDateRange} />
   </StoryProvidersComponent>
 );
 
