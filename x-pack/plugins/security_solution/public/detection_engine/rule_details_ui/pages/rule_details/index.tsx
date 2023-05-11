@@ -137,6 +137,7 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../common/components/navigation/types';
 import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
+import { ShowAdHocRunnerFlyoutButton } from '../../../../detections/pages/detection_engine/rules/details/components/show_ad_hoc_runner_flyout_button';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
@@ -738,6 +739,22 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EditRuleSettingButtonLink
+                          ruleId={ruleId}
+                          disabled={
+                            !isExistingRule ||
+                            !hasUserCRUDPermission(canUserCRUD) ||
+                            (isMlRule(rule?.type) && !hasMlPermissions)
+                          }
+                          disabledReason={explainLackOfPermission(
+                            rule,
+                            hasMlPermissions,
+                            hasActionsPrivileges,
+                            canUserCRUD
+                          )}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ShowAdHocRunnerFlyoutButton
                           ruleId={ruleId}
                           disabled={
                             !isExistingRule ||

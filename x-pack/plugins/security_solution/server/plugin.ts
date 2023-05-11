@@ -205,7 +205,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
     let previewRuleDataClient: IRuleDataClient | null = null;
-    let adHocRunnerPolicy: IRuleDataClient | null = null;
+    let adHocRunnerDataClient: IRuleDataClient | null = null;
 
     // rule options are used both to create and preview rules.
     const ruleOptions: CreateRuleOptions = {
@@ -242,9 +242,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       secondaryAlias: undefined,
     });
 
-    adHocRunnerPolicy = ruleDataService.initializeIndex({
+    // Ad Hoc runner writes to default .alerts-security.alerts-* index as well
+    adHocRunnerDataClient = ruleDataService.initializeIndex({
       ...ruleDataServiceOptions,
-      additionalPrefix: '.gap_runner',
       ilmPolicy: adHocRunnerIlmPolicy,
       secondaryAlias: undefined,
     });
@@ -311,7 +311,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
-      adHocRunnerPolicy,
+      adHocRunnerDataClient,
       this.telemetryReceiver
     );
 

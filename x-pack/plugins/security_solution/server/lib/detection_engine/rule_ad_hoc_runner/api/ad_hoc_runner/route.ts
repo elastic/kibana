@@ -20,18 +20,14 @@ import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
 import * as t from 'io-ts';
-import {
-  DEFAULT_PREVIEW_INDEX,
-  DETECTION_ENGINE_RULES_AD_HOC_RUNNER,
-} from '../../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_AD_HOC_RUNNER } from '../../../../../../common/constants';
 
 import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
 import type { RulePreviewLogs } from '../../../../../../common/detection_engine/rule_schema';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
-import { convertCreateAPIToInternalSchema } from '../../../rule_management';
-import type { RuleParams } from '../../../rule_schema';
+import type { RuleParams } from '../../../rule_schema/model/rule_schemas';
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -63,6 +59,7 @@ import { createPreviewRuleExecutionLogger } from '../../../rule_preview/api/prev
 import { wrapScopedClusterClient } from '../../../rule_preview/api/preview_rules/wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from '../../../rule_preview/api/preview_rules/wrap_search_source_client';
 import { alertInstanceFactoryStub } from '../../../rule_preview/api/preview_rules/alert_instance_factory_stub';
+import { getInvocationCountFromTimeRange } from '../logic/get_invocation_count_from_time_range';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
@@ -85,8 +82,9 @@ export const adHocRunnerRoute = async (
         body: buildRouteValidation(
           t.type({
             ruleId: t.string,
-            invocationCount: t.number,
+            timeframeStart: t.string,
             timeframeEnd: t.string,
+            interval: t.string,
           })
         ),
       },
@@ -96,27 +94,30 @@ export const adHocRunnerRoute = async (
     },
     async (context, request, response) => {
       const rulesClient = (await context.alerting).getRulesClient();
-
       const siemResponse = buildSiemResponse(response);
       const coreContext = await context.core;
       try {
-        const [, { data, security: securityService, share, dataViews }] = await getStartServices();
+        const [, { data, share, dataViews }] = await getStartServices();
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
 
-        const timeframeEnd = request.body.timeframeEnd;
-        let invocationCount = request.body.invocationCount;
+        const { timeframeStart, timeframeEnd, interval } = request.body;
+        let invocationCount = getInvocationCountFromTimeRange({
+          timeframeStart,
+          timeframeEnd,
+          interval,
+        });
+
+        const initialInvocationCount = invocationCount;
+
         if (invocationCount < 1) {
           return response.ok({
             body: { logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }] },
           });
         }
 
-        const rule = await rulesClient.resolve({ id: request.body.ruleId });
-        const internalRule = convertCreateAPIToInternalSchema(rule.params);
-
-        const ruleParams = internalRule.params;
+        const rule = await rulesClient.resolve<RuleParams>({ id: request.body.ruleId });
 
         const mlAuthz = buildMlAuthz({
           license: (await context.licensing).license,
@@ -124,53 +125,26 @@ export const adHocRunnerRoute = async (
           request,
           savedObjectsClient,
         });
-        throwAuthzError(await mlAuthz.validateRuleType(ruleParams.type));
+        throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
 
         const listsContext = await context.lists;
         await listsContext?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
-        const previewId = uuidv4();
+        const adHocRunId = uuidv4();
         const username = security?.authc.getCurrentUser(request)?.username;
         const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
         const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
         let isAborted = false;
+        const uniqueExecutionId = uuidv4();
 
-        const { hasAllRequested } = await securityService.authz
-          .checkPrivilegesWithRequest(request)
-          .atSpace(spaceId, {
-            elasticsearch: {
-              index: {
-                [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]: ['read'],
-                [`.internal${DEFAULT_PREVIEW_INDEX}-${spaceId}-*`]: ['read'],
-              },
-              cluster: [],
-            },
-          });
-
-        if (!hasAllRequested) {
-          return response.ok({
-            body: {
-              logs: [
-                {
-                  errors: [
-                    'Missing "read" privileges for the ".preview.alerts-security.alerts" or ".internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
-                  ],
-                  warnings: [],
-                  duration: 0,
-                },
-              ],
-            },
-          });
-        }
-
-        const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
+        const adHocRunnerRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
           ruleDataClient: adHocRunnerDataClient,
           ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
-          isPreview: true,
+          isPreview: false,
         });
 
         const runExecutors = async <
@@ -220,22 +194,22 @@ export const adHocRunnerRoute = async (
           }, PREVIEW_TIMEOUT_SECONDS * 1000);
 
           const startedAt = moment(timeframeEnd);
-          const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
+          const parsedDuration = parseDuration(rule.schedule.interval) ?? 0;
           startedAt.subtract(moment.duration(parsedDuration * (invocationCount - 1)));
 
           let previousStartedAt = null;
 
           const ruleToExecute = {
-            ...internalRule,
-            id: previewId,
+            ...rule,
+            id: rule.params.ruleId ?? uuidv4(),
             createdAt: new Date(),
-            createdBy: username ?? 'preview-created-by',
-            producer: 'preview-producer',
+            createdBy: username ?? 'ad-hoc-runner-created-by',
+            producer: 'ad-hoc-runner-producer',
             revision: 0,
             ruleTypeId,
             ruleTypeName,
             updatedAt: new Date(),
-            updatedBy: username ?? 'preview-updated-by',
+            updatedBy: username ?? 'ad-hoc-runner-updated-by',
             muteAll: false,
             snoozeSchedule: [],
           };
@@ -251,7 +225,7 @@ export const adHocRunnerRoute = async (
             invocationStartTime = moment();
 
             ({ state: statePreview } = (await executor({
-              executionId: uuidv4(),
+              executionId: uniqueExecutionId,
               params,
               previousStartedAt,
               rule: ruleToExecute,
@@ -301,14 +275,14 @@ export const adHocRunnerRoute = async (
             }
 
             previousStartedAt = startedAt.toDate();
-            startedAt.add(parseInterval(internalRule.schedule.interval));
+            startedAt.add(parseInterval(rule.schedule.interval));
             invocationCount--;
           }
         };
 
-        switch (ruleParams.type) {
+        switch (rule.params.type) {
           case 'query':
-            const queryAlertType = previewRuleTypeWrapper(
+            const queryAlertType = adHocRunnerRuleTypeWrapper(
               createQueryAlertType({
                 ...ruleOptions,
                 id: QUERY_RULE_TYPE_ID,
@@ -319,7 +293,7 @@ export const adHocRunnerRoute = async (
               queryAlertType.executor,
               queryAlertType.id,
               queryAlertType.name,
-              ruleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -332,7 +306,7 @@ export const adHocRunnerRoute = async (
             );
             break;
           case 'saved_query':
-            const savedQueryAlertType = previewRuleTypeWrapper(
+            const savedQueryAlertType = adHocRunnerRuleTypeWrapper(
               createQueryAlertType({
                 ...ruleOptions,
                 id: SAVED_QUERY_RULE_TYPE_ID,
@@ -343,7 +317,7 @@ export const adHocRunnerRoute = async (
               savedQueryAlertType.executor,
               savedQueryAlertType.id,
               savedQueryAlertType.name,
-              ruleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -356,14 +330,14 @@ export const adHocRunnerRoute = async (
             );
             break;
           case 'threshold':
-            const thresholdAlertType = previewRuleTypeWrapper(
+            const thresholdAlertType = adHocRunnerRuleTypeWrapper(
               createThresholdAlertType(ruleOptions)
             );
             await runExecutors(
               thresholdAlertType.executor,
               thresholdAlertType.id,
               thresholdAlertType.name,
-              ruleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -376,14 +350,14 @@ export const adHocRunnerRoute = async (
             );
             break;
           case 'threat_match':
-            const threatMatchAlertType = previewRuleTypeWrapper(
+            const threatMatchAlertType = adHocRunnerRuleTypeWrapper(
               createIndicatorMatchAlertType(ruleOptions)
             );
             await runExecutors(
               threatMatchAlertType.executor,
               threatMatchAlertType.id,
               threatMatchAlertType.name,
-              ruleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -396,12 +370,12 @@ export const adHocRunnerRoute = async (
             );
             break;
           case 'eql':
-            const eqlAlertType = previewRuleTypeWrapper(createEqlAlertType(ruleOptions));
+            const eqlAlertType = adHocRunnerRuleTypeWrapper(createEqlAlertType(ruleOptions));
             await runExecutors(
               eqlAlertType.executor,
               eqlAlertType.id,
               eqlAlertType.name,
-              ruleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -414,12 +388,12 @@ export const adHocRunnerRoute = async (
             );
             break;
           case 'machine_learning':
-            const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
+            const mlAlertType = adHocRunnerRuleTypeWrapper(createMlAlertType(ruleOptions));
             await runExecutors(
               mlAlertType.executor,
               mlAlertType.id,
               mlAlertType.name,
-              ruleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -432,12 +406,14 @@ export const adHocRunnerRoute = async (
             );
             break;
           case 'new_terms':
-            const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
+            const newTermsAlertType = adHocRunnerRuleTypeWrapper(
+              createNewTermsAlertType(ruleOptions)
+            );
             await runExecutors(
               newTermsAlertType.executor,
               newTermsAlertType.id,
               newTermsAlertType.name,
-              ruleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -450,7 +426,7 @@ export const adHocRunnerRoute = async (
             );
             break;
           default:
-            assertUnreachable(ruleParams);
+            assertUnreachable(rule.params);
         }
 
         // Refreshes alias to ensure index is able to be read before returning
@@ -463,7 +439,9 @@ export const adHocRunnerRoute = async (
 
         return response.ok({
           body: {
-            previewId,
+            adHocRunId,
+            initialInvocationCount,
+            executionId: uniqueExecutionId,
             logs,
             isAborted,
           },

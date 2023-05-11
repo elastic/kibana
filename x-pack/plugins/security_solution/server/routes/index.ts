@@ -89,7 +89,7 @@ export const initRoutes = (
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  gapRunnerDataClient: IRuleDataClient,
+  adHocRunnerDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
@@ -110,17 +110,20 @@ export const initRoutes = (
     getStartServices,
     logger
   );
-  registerAdHocRunnerRoutes(
-    router,
-    config,
-    ml,
-    security,
-    ruleOptions,
-    securityRuleTypeOptions,
-    gapRunnerDataClient,
-    getStartServices,
-    logger
-  );
+
+  if (ruleDataClient) {
+    registerAdHocRunnerRoutes(
+      router,
+      config,
+      ml,
+      security,
+      ruleOptions,
+      securityRuleTypeOptions,
+      ruleDataClient,
+      getStartServices,
+      logger
+    );
+  }
 
   registerResolverRoutes(router, getStartServices, config);
 
