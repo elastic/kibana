@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '@kbn/cases-components';
+import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { Case } from '../hooks/api';
 
 export const theCase: Case = {

@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiIcon, EuiText } from '@elastic/eui';
-import { Status } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components/src/status/status';
 import type { RelatedCaseInfo } from '@kbn/cases-plugin/common/api';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';

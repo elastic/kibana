@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import { EuiLink, EuiSkeletonText } from '@elastic/eui';
-import { Tooltip as CaseTooltip } from '@kbn/cases-components';
-import type { CaseTooltipContentProps } from '@kbn/cases-components';
+import { Tooltip as CaseTooltip } from '@kbn/cases-components/src/tooltip/tooltip';
+import type { CaseTooltipContentProps } from '@kbn/cases-components/src/tooltip/types';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { CellComponentProps } from '../types';
 import { useCaseViewNavigation } from './use_case_view_navigation';
