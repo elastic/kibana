@@ -14,7 +14,7 @@ import { RollupTransformGenerator } from './rollup_transform_generators';
 type TransformId = string;
 
 export interface TransformManager {
-  install(slo: SLO): Promise<TransformId>;
+  install(slo: SLO): Promise<void>;
   start(transformId: TransformId): Promise<void>;
   stop(transformId: TransformId): Promise<void>;
   uninstall(transformId: TransformId): Promise<void>;
@@ -27,7 +27,7 @@ export class DefaultTransformManager implements TransformManager {
     private logger: Logger
   ) {}
 
-  async install(slo: SLO): Promise<TransformId> {
+  async install(slo: SLO): Promise<void> {
     const rollupTransformGenerator = this.getRollupTransformGenerator(slo);
     if (!rollupTransformGenerator) {
       this.logger.error(`No rollup transform generator found for SLI type: ${slo.indicator.type}`);
@@ -43,8 +43,6 @@ export class DefaultTransformManager implements TransformManager {
       this.logger.error(`Cannot create transform: ${err}`);
       throw err;
     }
-
-    return transformParams.transform_id;
   }
 
   async start(transformId: TransformId): Promise<void> {

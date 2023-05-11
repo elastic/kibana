@@ -70,10 +70,9 @@ describe('TransformManager', () => {
       );
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      const transformId = await transformManager.install(slo);
+      await transformManager.install(slo);
 
       expect(esClientMock.transform.putTransform).toHaveBeenCalledTimes(1);
-      expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
     });
   });
 

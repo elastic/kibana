@@ -14,6 +14,7 @@ import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { validateSLO } from '../../domain/services';
+import { getSLOTransformId } from '../../assets/constants';
 
 export class CreateSLO {
   constructor(
@@ -29,19 +30,19 @@ export class CreateSLO {
     await this.resourceInstaller.ensureCommonResourcesInstalled();
     await this.repository.save(slo, { throwOnConflict: true });
 
-    let sloTransformId;
     try {
-      sloTransformId = await this.transformManager.install(slo);
+      await this.transformManager.install(slo);
     } catch (err) {
       await this.repository.deleteById(slo.id);
       throw err;
     }
 
+    const transformId = getSLOTransformId(slo.id, slo.revision);
     try {
-      await this.transformManager.start(sloTransformId);
+      await this.transformManager.start(transformId);
     } catch (err) {
       await Promise.all([
-        this.transformManager.uninstall(sloTransformId),
+        this.transformManager.uninstall(transformId),
         this.repository.deleteById(slo.id),
       ]);
 
