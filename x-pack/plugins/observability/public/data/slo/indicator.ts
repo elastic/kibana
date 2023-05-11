@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import {
+  APMTransactionDurationIndicatorSchema,
+  APMTransactionErrorRateIndicatorSchema,
+  KQLCustomIndicatorSchema,
+  SLOWithSummaryResponse,
+} from '@kbn/slo-schema';
 
 export const buildApmAvailabilityIndicator = (
   params: Partial<SLOWithSummaryResponse['indicator']['params']> = {}
@@ -21,7 +26,7 @@ export const buildApmAvailabilityIndicator = (
       index: 'metrics-apm*',
       ...params,
     },
-  };
+  } as APMTransactionErrorRateIndicatorSchema;
 };
 
 export const buildApmLatencyIndicator = (
@@ -38,7 +43,7 @@ export const buildApmLatencyIndicator = (
       index: 'metrics-apm*',
       ...params,
     },
-  };
+  } as APMTransactionDurationIndicatorSchema;
 };
 
 export const buildCustomKqlIndicator = (
@@ -54,5 +59,5 @@ export const buildCustomKqlIndicator = (
       timestampField: '@timestamp',
       ...params,
     },
-  };
+  } as KQLCustomIndicatorSchema;
 };
