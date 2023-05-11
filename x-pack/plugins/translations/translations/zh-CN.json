@@ -35689,7 +35689,6 @@
     "xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeDisabledByLicenseMessage": "此连接器需要{minimumLicenseRequired}许可证。",
     "xpack.triggersActionsUI.checkRuleTypeEnabled.ruleTypeDisabledByLicenseMessage": "此规则类型需要{minimumLicenseRequired}许可证。",
     "xpack.triggersActionsUI.components.builtinActionTypes.missingSecretsValuesLabel": "未导入敏感信息。请为以下字段{encryptedFieldsLength, plural, other {}} {secretFieldsLabel}输入值{encryptedFieldsLength, plural, other {}}。",
-    "xpack.triggersActionsUI.components.buttonGroupField.error.requiredField": "{label} 必填。",
     "xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText": "无法删除 {numErrors, number} 个{numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}",
     "xpack.triggersActionsUI.components.deleteSelectedIdsPartialSuccessNotification.descriptionText": "已删除 {numberOfSuccess, number} 个{numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}，{numberOfErrors, number} 个{numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}}遇到错误",
     "xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText": "已删除 {numSuccesses, number} 个{numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}",
