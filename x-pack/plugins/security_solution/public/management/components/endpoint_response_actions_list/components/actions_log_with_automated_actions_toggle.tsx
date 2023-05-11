@@ -13,10 +13,15 @@ import { FILTER_NAMES } from '../translations';
 interface ActionsLogWithRuleToggleProps {
   isFlyout: boolean;
   dataTestSubj?: string;
+  onChangeWithAutomatedActionsFilter: () => void;
 }
 
-export const ActionsLogWithRuleToggle = React.memo(
-  ({ isFlyout, dataTestSubj }: ActionsLogWithRuleToggleProps) => {
+export const ActionsLogWithAutomatedActionsToggle = React.memo(
+  ({
+    dataTestSubj,
+    onChangeWithAutomatedActionsFilter,
+    isFlyout,
+  }: ActionsLogWithRuleToggleProps) => {
     const { withAutomatedActions: withAutomatedActionsUrlParam, setUrlWithAutomatedActions } =
       useActionHistoryUrlParams();
 
@@ -25,7 +30,13 @@ export const ActionsLogWithRuleToggle = React.memo(
         // set and show `withAutomatedActions` URL param on history page
         setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
       }
-    }, [isFlyout, setUrlWithAutomatedActions, withAutomatedActionsUrlParam]);
+      onChangeWithAutomatedActionsFilter();
+    }, [
+      isFlyout,
+      onChangeWithAutomatedActionsFilter,
+      setUrlWithAutomatedActions,
+      withAutomatedActionsUrlParam,
+    ]);
 
     return (
       <EuiFilterButton
@@ -39,4 +50,4 @@ export const ActionsLogWithRuleToggle = React.memo(
   }
 );
 
-ActionsLogWithRuleToggle.displayName = 'ActionsLogWithRuleToggle';
+ActionsLogWithAutomatedActionsToggle.displayName = 'ActionsLogWithAutomatedActionsToggle';

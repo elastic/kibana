@@ -175,6 +175,13 @@ export const ResponseActionsLog = memo<
       [setQueryParams]
     );
 
+    const onChangeWithAutomatedActionsFilter = useCallback(() => {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        withAutomatedActions: !prevState.withAutomatedActions,
+      }));
+    }, [setQueryParams]);
+
     // handle on change hosts filter
     const onChangeHostsFilter = useCallback(
       (selectedAgentIds: string[]) => {
@@ -245,6 +252,7 @@ export const ResponseActionsLog = memo<
           onChangeCommandsFilter={onChangeCommandsFilter}
           onChangeStatusesFilter={onChangeStatusesFilter}
           onChangeUsersFilter={onChangeUsersFilter}
+          onChangeWithAutomatedActionsFilter={onChangeWithAutomatedActionsFilter}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
