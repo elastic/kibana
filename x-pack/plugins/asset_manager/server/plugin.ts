@@ -14,6 +14,7 @@ import {
   PluginInitializerContext,
   PluginConfigDescriptor,
   Logger,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 
 import { upsertTemplate } from './lib/manage_index_templates';
@@ -27,18 +28,22 @@ const configSchema = schema.object({
   alphaEnabled: schema.maybe(schema.boolean()),
   implicitCollection: schema.maybe(
     schema.object({
-      enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+      enabled: schema.boolean({ defaultValue: true }),
       interval: schema.duration({ defaultValue: '5m' }),
-      input: schema.object({
-        hosts: schema.string(),
-        username: schema.string(),
-        password: schema.string(),
-      }),
-      output: schema.object({
-        hosts: schema.string(),
-        username: schema.string(),
-        password: schema.string(),
-      }),
+      input: schema.maybe(
+        schema.object({
+          hosts: schema.string(),
+          username: schema.string(),
+          password: schema.string(),
+        })
+      ),
+      output: schema.maybe(
+        schema.object({
+          hosts: schema.string(),
+          username: schema.string(),
+          password: schema.string(),
+        })
+      ),
     })
   ),
 });
@@ -94,23 +99,7 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
         `Implicit collection set to run every ${this.config.implicitCollection.interval}`
       );
 
-      const inputClient = core.elasticsearch.createClient(
-        'asset_manager.implicit_collection.reader',
-        {
-          hosts: [this.config.implicitCollection.input.hosts],
-          username: this.config.implicitCollection.input.username,
-          password: this.config.implicitCollection.input.password,
-        }
-      ).asInternalUser;
-
-      const outputClient = core.elasticsearch.createClient(
-        'asset_manager.implicit_collection.writer',
-        {
-          hosts: [this.config.implicitCollection.output.hosts],
-          username: this.config.implicitCollection.output.username,
-          password: this.config.implicitCollection.output.password,
-        }
-      ).asInternalUser;
+      const [inputClient, outputClient] = this.getClients(core);
 
       this.stopImplicitCollection = startImplicitCollection({
         inputClient,
@@ -123,5 +112,28 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
 
   public stop() {
     this.stopImplicitCollection?.();
+  }
+
+  private getClients({ elasticsearch }: CoreStart): [ElasticsearchClient, ElasticsearchClient] {
+    let inputClient = elasticsearch.client.asInternalUser;
+    let outputClient = elasticsearch.client.asInternalUser;
+
+    if (this.config.implicitCollection?.input) {
+      inputClient = elasticsearch.createClient('asset_manager.implicit_collection.reader', {
+        hosts: [this.config.implicitCollection.input.hosts],
+        username: this.config.implicitCollection.input.username,
+        password: this.config.implicitCollection.input.password,
+      }).asInternalUser;
+    }
+
+    if (this.config.implicitCollection?.output) {
+      outputClient = elasticsearch.createClient('asset_manager.implicit_collection.writer', {
+        hosts: [this.config.implicitCollection.output.hosts],
+        username: this.config.implicitCollection.output.username,
+        password: this.config.implicitCollection.output.password,
+      }).asInternalUser;
+    }
+
+    return [inputClient, outputClient];
   }
 }
