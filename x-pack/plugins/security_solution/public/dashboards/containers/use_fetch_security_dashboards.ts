@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useFetch, REQUEST_NAMES } from '../../common/hooks/use_fetch';
 import { useKibana } from '../../common/lib/kibana';
 import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
@@ -14,7 +14,6 @@ import { useSecurityTags } from '../context/dashboard_context';
 export const useFetchSecurityDashboards = () => {
   const { http } = useKibana().services;
   const securityTags = useSecurityTags();
-  const tagIds = useMemo(() => securityTags?.map(({ id }) => id) ?? null, [securityTags]);
 
   const {
     fetch,
@@ -24,10 +23,10 @@ export const useFetchSecurityDashboards = () => {
   } = useFetch(REQUEST_NAMES.SECURITY_DASHBOARDS, getDashboardsByTagIds);
 
   useEffect(() => {
-    if (tagIds) {
-      fetch({ http, tagIds });
+    if (securityTags) {
+      fetch({ http, tagIds: securityTags.map(({ id }) => id) });
     }
-  }, [fetch, http, tagIds]);
+  }, [fetch, http, securityTags]);
 
   return { dashboards, isLoading, error };
 };

@@ -51,7 +51,13 @@ describe('useFetchSecurityDashboards', () => {
     await asyncRenderUseFetchSecurityDashboards();
 
     expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-    expect(getDashboardsByTagIds).toHaveBeenCalledWith(mockHttp, [MOCK_TAG_ID]);
+    expect(getDashboardsByTagIds).toHaveBeenCalledWith(
+      {
+        http: mockHttp,
+        tagIds: [MOCK_TAG_ID],
+      },
+      expect.any(Object)
+    );
   });
 
   it('should return Security Solution dashboards', async () => {
