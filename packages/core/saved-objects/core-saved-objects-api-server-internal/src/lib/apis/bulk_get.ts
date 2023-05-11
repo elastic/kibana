@@ -21,6 +21,7 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
+import { includedFields } from '../utils';
 import {
   Either,
   errorContent,
@@ -32,7 +33,6 @@ import {
   rawDocExistsInNamespaces,
 } from './utils';
 import { ApiExecutionContext } from './types';
-import { includedFields } from '../included_fields';
 
 export interface PerformBulkGetParams<T = unknown> {
   objects: SavedObjectsBulkGetObject[];
