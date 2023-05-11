@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KQL Custom Transform Generator aggregates using the denominator kql 1`] = `
+exports[`KQL Custom Rollup Transform Generator aggregates using the denominator kql 1`] = `
 Object {
   "filter": Object {
     "bool": Object {
@@ -17,7 +17,7 @@ Object {
 }
 `;
 
-exports[`KQL Custom Transform Generator aggregates using the numerator kql 1`] = `
+exports[`KQL Custom Rollup Transform Generator aggregates using the numerator kql 1`] = `
 Object {
   "filter": Object {
     "bool": Object {
@@ -85,7 +85,7 @@ Object {
 }
 `;
 
-exports[`KQL Custom Transform Generator filters the source using the kql query 1`] = `
+exports[`KQL Custom Rollup Transform Generator filters the source using the kql query 1`] = `
 Object {
   "bool": Object {
     "minimum_should_match": 1,
@@ -100,7 +100,7 @@ Object {
 }
 `;
 
-exports[`KQL Custom Transform Generator returns the expected transform params for timeslices slo 1`] = `
+exports[`KQL Custom Rollup Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
     "managed": true,
@@ -207,7 +207,7 @@ Object {
 }
 `;
 
-exports[`KQL Custom Transform Generator returns the expected transform params with every specified indicator params 1`] = `
+exports[`KQL Custom Rollup Transform Generator returns the expected transform params with every specified indicator params 1`] = `
 Object {
   "_meta": Object {
     "managed": true,

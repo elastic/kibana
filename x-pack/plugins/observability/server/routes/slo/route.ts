@@ -32,8 +32,8 @@ import {
   ApmTransactionErrorRateTransformGenerator,
   KQLCustomTransformGenerator,
   MetricCustomTransformGenerator,
-  TransformGenerator,
-} from '../../services/slo/transform_generators';
+  RollupTransformGenerator,
+} from '../../services/slo/rollup_transform_generators';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
@@ -42,7 +42,7 @@ import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 
-const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
+const transformGenerators: Record<IndicatorTypes, RollupTransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
   'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
   'sli.kql.custom': new KQLCustomTransformGenerator(),

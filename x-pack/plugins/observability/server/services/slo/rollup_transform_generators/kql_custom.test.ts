@@ -14,7 +14,7 @@ import { KQLCustomTransformGenerator } from './kql_custom';
 
 const generator = new KQLCustomTransformGenerator();
 
-describe('KQL Custom Transform Generator', () => {
+describe('KQL Custom Rollup Transform Generator', () => {
   describe('validation', () => {
     it('throws when the KQL numerator is invalid', () => {
       const anSLO = createSLO({

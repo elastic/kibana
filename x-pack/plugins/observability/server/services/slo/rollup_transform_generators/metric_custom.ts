@@ -10,7 +10,7 @@ import { metricCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@k
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, RollupTransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -24,7 +24,7 @@ type MetricCustomMetricDef =
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
-export class MetricCustomTransformGenerator extends TransformGenerator {
+export class MetricCustomTransformGenerator extends RollupTransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!metricCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);

@@ -6,17 +6,17 @@
  */
 
 import {
-  createAPMTransactionDurationIndicator,
+  createAPMTransactionErrorRateIndicator,
   createSLO,
   createSLOWithTimeslicesBudgetingMethod,
 } from '../fixtures/slo';
-import { ApmTransactionDurationTransformGenerator } from './apm_transaction_duration';
+import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
 
-const generator = new ApmTransactionDurationTransformGenerator();
+const generator = new ApmTransactionErrorRateTransformGenerator();
 
-describe('APM Transaction Duration Transform Generator', () => {
+describe('APM Transaction Error Rate Rollup Transform Generator', () => {
   it('returns the expected transform params with every specified indicator params', async () => {
-    const anSLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
+    const anSLO = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot({
@@ -34,7 +34,7 @@ describe('APM Transaction Duration Transform Generator', () => {
 
   it('returns the expected transform params for timeslices slo', async () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
-      indicator: createAPMTransactionDurationIndicator(),
+      indicator: createAPMTransactionErrorRateIndicator(),
     });
     const transform = generator.getTransformParams(anSLO);
 
@@ -46,7 +46,7 @@ describe('APM Transaction Duration Transform Generator', () => {
 
   it("does not include the query filter when params are '*'", async () => {
     const anSLO = createSLO({
-      indicator: createAPMTransactionDurationIndicator({
+      indicator: createAPMTransactionErrorRateIndicator({
         environment: '*',
         service: '*',
         transactionName: '*',
@@ -61,7 +61,7 @@ describe('APM Transaction Duration Transform Generator', () => {
   it('uses the provided index params as source index', async () => {
     const index = 'my-custom-apm-index*';
     const anSLO = createSLO({
-      indicator: createAPMTransactionDurationIndicator({
+      indicator: createAPMTransactionErrorRateIndicator({
         index,
       }),
     });
@@ -73,7 +73,7 @@ describe('APM Transaction Duration Transform Generator', () => {
   it('adds the custom kql filter to the query', async () => {
     const filter = `"my.field" : "value" and ("foo" >= 12 or "bar" <= 100)`;
     const anSLO = createSLO({
-      indicator: createAPMTransactionDurationIndicator({
+      indicator: createAPMTransactionErrorRateIndicator({
         filter,
       }),
     });

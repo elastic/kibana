@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM Transaction Error Rate Transform Generator adds the custom kql filter to the query 1`] = `
+exports[`APM Transaction Error Rate Rollup Transform Generator adds the custom kql filter to the query 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -111,7 +111,7 @@ Object {
 }
 `;
 
-exports[`APM Transaction Error Rate Transform Generator does not include the query filter when params are '*' 1`] = `
+exports[`APM Transaction Error Rate Rollup Transform Generator does not include the query filter when params are '*' 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -149,7 +149,7 @@ Object {
 }
 `;
 
-exports[`APM Transaction Error Rate Transform Generator returns the expected transform params for timeslices slo 1`] = `
+exports[`APM Transaction Error Rate Rollup Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
     "managed": true,
@@ -294,7 +294,7 @@ Object {
 }
 `;
 
-exports[`APM Transaction Error Rate Transform Generator returns the expected transform params with every specified indicator params 1`] = `
+exports[`APM Transaction Error Rate Rollup Transform Generator returns the expected transform params with every specified indicator params 1`] = `
 Object {
   "_meta": Object {
     "managed": true,

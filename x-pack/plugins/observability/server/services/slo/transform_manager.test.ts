@@ -18,8 +18,8 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { DefaultTransformManager } from './transform_manager';
 import {
   ApmTransactionErrorRateTransformGenerator,
-  TransformGenerator,
-} from './transform_generators';
+  RollupTransformGenerator,
+} from './rollup_transform_generators';
 import { SLO, IndicatorTypes } from '../../domain/models';
 import {
   createAPMTransactionDurationIndicator,
@@ -40,7 +40,7 @@ describe('TransformManager', () => {
     describe('Unhappy path', () => {
       it('throws when no generator exists for the slo indicator type', async () => {
         // @ts-ignore defining only a subset of the possible SLI
-        const generators: Record<IndicatorTypes, TransformGenerator> = {
+        const generators: Record<IndicatorTypes, RollupTransformGenerator> = {
           'sli.apm.transactionDuration': new DummyTransformGenerator(),
         };
         const service = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -52,7 +52,7 @@ describe('TransformManager', () => {
 
       it('throws when transform generator fails', async () => {
         // @ts-ignore defining only a subset of the possible SLI
-        const generators: Record<IndicatorTypes, TransformGenerator> = {
+        const generators: Record<IndicatorTypes, RollupTransformGenerator> = {
           'sli.apm.transactionDuration': new FailTransformGenerator(),
         };
         const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -67,7 +67,7 @@ describe('TransformManager', () => {
 
     it('installs the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<IndicatorTypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, RollupTransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -83,7 +83,7 @@ describe('TransformManager', () => {
   describe('Start', () => {
     it('starts the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<IndicatorTypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, RollupTransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -97,7 +97,7 @@ describe('TransformManager', () => {
   describe('Stop', () => {
     it('stops the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<IndicatorTypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, RollupTransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -111,7 +111,7 @@ describe('TransformManager', () => {
   describe('Uninstall', () => {
     it('uninstalls the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<IndicatorTypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, RollupTransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -126,7 +126,7 @@ describe('TransformManager', () => {
         new EsErrors.ConnectionError('irrelevant')
       );
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<IndicatorTypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, RollupTransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -138,13 +138,13 @@ describe('TransformManager', () => {
   });
 });
 
-class DummyTransformGenerator extends TransformGenerator {
+class DummyTransformGenerator extends RollupTransformGenerator {
   getTransformParams(slo: SLO): TransformPutTransformRequest {
     return {} as TransformPutTransformRequest;
   }
 }
 
-class FailTransformGenerator extends TransformGenerator {
+class FailTransformGenerator extends RollupTransformGenerator {
   getTransformParams(slo: SLO): TransformPutTransformRequest {
     throw new Error('Some error');
   }

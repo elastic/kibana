@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './transform_generator';
+export * from './rollup_transform_generator';
 export * from './apm_transaction_error_rate';
 export * from './apm_transaction_duration';
 export * from './kql_custom';

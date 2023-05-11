@@ -12,7 +12,7 @@ import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
 
-export abstract class TransformGenerator {
+export abstract class RollupTransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
 
   public buildCommonRuntimeMappings(slo: SLO) {
