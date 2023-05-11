@@ -351,13 +351,12 @@ export class Plugin
           initialWidth: 250,
         },
         {
-          id: 'kibana.alert.context.reason',
-          displayAsText: 'Reason',
+          id: 'kibana.alert.instance.id',
+          displayAsText: 'Alert ID',
         },
         {
-          id: 'kibana.alert.status',
-          displayAsText: 'Status',
-          initialWidth: 100,
+          id: 'kibana.alert.context.message',
+          displayAsText: 'Reason',
         },
       ],
       sort: [

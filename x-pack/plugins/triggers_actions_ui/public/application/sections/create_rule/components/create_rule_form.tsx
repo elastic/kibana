@@ -18,12 +18,17 @@ import {
   EuiPageHeader,
   EuiSuperUpdateButton,
   EuiFlexGroup,
+  EuiPanel,
+  EuiImage,
+  EuiLoadingSpinner,
+  EuiIcon,
 } from '@elastic/eui';
 import { RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_EXECUTION_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import icon from '../../alerts_table/assets/illustration_product_no_results_magnifying_glass.svg';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import {
   TriggersActionsUiConfig,
@@ -51,7 +56,6 @@ import { createRule } from '../../../lib/rule_api/create';
 import { getInitialInterval } from '../../rule_form/get_initial_interval';
 import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 import { getRuleWithInvalidatedFields } from '../../../lib/value_validators';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { previewRule } from '../../../lib/rule_api/preview';
 import AlertsTableState from '../../alerts_table/alerts_table_state';
 import { TypeRegistry } from '../../../type_registry';
@@ -115,6 +119,7 @@ export const CreateRuleForm = ({
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
+  const [loadedFirstPreview, setLoadedFirstPreview] = useState<boolean>(false);
   const [hasPreviewAlertData, setHasPreviewAlertData] = useState<boolean>(false);
   const [previewActionData, setPreviewActionData] = useState<RuleAction[]>([]);
   const [alertsTableQuery, setAlertsTableQuery] = useState<any>(null);
@@ -366,49 +371,53 @@ export const CreateRuleForm = ({
                     <p>Preview your rule before saving it.</p>
                   </EuiText>
                   <EuiSpacer size="s" />
-                  <EuiSuperUpdateButton
-                    isDisabled={!isValidRule(rule, ruleErrors, ruleActionsErrors)}
-                    iconType="refresh"
-                    onClick={async () => {
-                      setIsLoadingPreview(true);
-                      const result = await previewRule({ http, rule: rule as RuleUpdates });
+                  <EuiFlexGroup>
+                    <EuiSuperUpdateButton
+                      isDisabled={!isValidRule(rule, ruleErrors, ruleActionsErrors)}
+                      iconType="refresh"
+                      onClick={async () => {
+                        setIsLoadingPreview(true);
+                        const result = await previewRule({ http, rule: rule as RuleUpdates });
 
-                      if (result.alerts.length > 0) {
-                        setHasPreviewAlertData(true);
-                        setAlertsTableQuery({
-                          bool: {
-                            filter: [
-                              {
-                                term: {
-                                  [ALERT_RULE_EXECUTION_UUID]: result.uuid,
+                        if (result.alerts.length > 0) {
+                          setHasPreviewAlertData(true);
+                          setAlertsTableQuery({
+                            bool: {
+                              filter: [
+                                {
+                                  term: {
+                                    [ALERT_RULE_EXECUTION_UUID]: result.uuid,
+                                  },
                                 },
-                              },
-                              {
-                                bool: {
-                                  must_not: [
-                                    {
-                                      term: {
-                                        [ALERT_STATUS]: 'preview-complete',
+                                {
+                                  bool: {
+                                    must_not: [
+                                      {
+                                        term: {
+                                          [ALERT_STATUS]: 'preview-complete',
+                                        },
                                       },
-                                    },
-                                  ],
+                                    ],
+                                  },
                                 },
-                              },
-                            ],
-                          },
-                        });
-                      } else {
-                        setHasPreviewAlertData(false);
-                      }
+                              ],
+                            },
+                          });
+                        } else {
+                          setHasPreviewAlertData(false);
+                        }
 
-                      setPreviewActionData(result.actions ?? []);
-                      setIsLoadingPreview(false);
-                    }}
-                    color="primary"
-                    fill={true}
-                    data-test-subj="previewSubmitButton"
-                  />
-                  {isLoadingPreview ? <CenterJustifiedSpinner /> : null}
+                        setPreviewActionData(result.actions ?? []);
+                        setLoadedFirstPreview(true);
+                        setIsLoadingPreview(false);
+                      }}
+                      color="primary"
+                      fill={true}
+                      data-test-subj="previewSubmitButton"
+                    />
+                    {isLoadingPreview ? <EuiLoadingSpinner size="xl" /> : null}
+                  </EuiFlexGroup>
+                  <EuiSpacer size="m" />
                   {hasPreviewAlertData && alertsTableQuery ? (
                     <>
                       <EuiTitle size="s">
@@ -426,11 +435,52 @@ export const CreateRuleForm = ({
                           alertsTableConfigurationRegistry as TypeRegistry<AlertsTableConfigurationRegistry>
                         }
                         featureIds={['alerts']}
-                        showExpandToDetails={true}
+                        showExpandToDetails={false}
                         query={alertsTableQuery}
                       />
                       <EuiSpacer size="m" />
                     </>
+                  ) : null}
+                  {loadedFirstPreview && !hasPreviewAlertData ? (
+                    <EuiPanel
+                      hasBorder={true}
+                      style={{
+                        maxWidth: 500,
+                      }}
+                    >
+                      <EuiFlexGroup
+                        style={{ height: 150 }}
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <EuiFlexItem>
+                          <EuiText size="s">
+                            <EuiTitle>
+                              <h3>
+                                <FormattedMessage
+                                  id="xpack.triggersActionsUI.empty.title"
+                                  defaultMessage="No alerts detected"
+                                />
+                              </h3>
+                            </EuiTitle>
+                            <p>
+                              <FormattedMessage
+                                id="xpack.triggersActionsUI.empty.description"
+                                defaultMessage="Try modifying your rule configuration"
+                              />
+                            </p>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiImage
+                            style={{ width: 200, height: 148 }}
+                            size="200"
+                            alt=""
+                            url={icon}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPanel>
                   ) : null}
                   {actionTypesIndex && previewActionData.length > 0 ? (
                     <>
@@ -466,6 +516,14 @@ export const CreateRuleForm = ({
                         );
                       })}
                     </>
+                  ) : null}
+                  {loadedFirstPreview && hasPreviewAlertData && !previewActionData.length ? (
+                    <EuiTitle size="xxs">
+                      <h5>
+                        <EuiIcon type="iInCircle" />
+                        Add actions to your rule configuration to preview their contents
+                      </h5>
+                    </EuiTitle>
                   ) : null}
                 </EuiResizablePanel>
               </>
