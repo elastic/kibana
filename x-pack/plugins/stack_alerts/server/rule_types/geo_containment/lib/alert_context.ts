@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import type { GeoContainmentAlertInstanceContext, GeoContainmentAlertInstanceState } from './types';
+import type { GeoContainmentAlertInstanceContext, GeoContainmentAlertInstanceState } from '../types';
 
 export function getAlertId(entityName: string, boundaryName: unknown) {
   return `${entityName}-${boundaryName}`;

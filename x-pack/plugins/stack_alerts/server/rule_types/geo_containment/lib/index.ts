@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { getRecoveredAlertContext } from './alert_context';
 export { executeEsQueryFactory } from './es_query_builder';
 export { getEntitiesAndGenerateAlerts } from './get_entities_and_generate_alerts';
 export { canSkipBoundariesFetch, getShapeFilters } from './get_shape_filters';

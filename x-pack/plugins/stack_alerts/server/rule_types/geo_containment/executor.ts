@@ -11,6 +11,7 @@ import {
   canSkipBoundariesFetch,
   executeEsQueryFactory,
   getEntitiesAndGenerateAlerts,
+  getRecoveredAlertContext,
   getShapeFilters,
   transformResults,
 } from './lib';
@@ -22,7 +23,6 @@ import type {
 } from './types';
 
 import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
-import { getRecoveredAlertContext } from './get_context';
 
 export async function executor({
   previousStartedAt: windowStart,

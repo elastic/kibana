@@ -12,7 +12,7 @@ import type {
 } from '../types';
 
 import { ActionGroupId, OTHER_CATEGORY } from '../constants';
-import { getAlertId, getContainedAlertContext } from '../get_context';
+import { getAlertId, getContainedAlertContext } from './alert_context';
 
 export function getEntitiesAndGenerateAlerts(
   prevLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
