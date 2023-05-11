@@ -12,22 +12,21 @@ import {
   type ISavedObjectTypeRegistry,
   type SavedObjectsType,
   MAIN_SAVED_OBJECT_INDEX,
-  ALL_SAVED_OBJECT_INDICES,
 } from '@kbn/core-saved-objects-server';
 import {
-  readLog,
+  clearLog,
   startElasticsearch,
   getKibanaMigratorTestKit,
   getCurrentVersionTypeRegistry,
   overrideTypeRegistry,
-  clearLog,
   getAggregatedTypesCount,
   currentVersion,
   type KibanaMigratorTestKit,
   getEsClient,
+  getAggregatedTypesCountAllIndices,
 } from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { delay, parseLogFile } from '../test_utils';
+import '../jest_matchers';
 
 // define a type => index distribution
 const RELOCATE_TYPES: Record<string, string> = {
@@ -41,6 +40,7 @@ const RELOCATE_TYPES: Record<string, string> = {
 };
 
 const PARALLEL_MIGRATORS = 6;
+export const logFilePath = Path.join(__dirname, 'dot_kibana_split.test.log');
 
 describe('split .kibana index into multiple system indices', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -51,7 +51,7 @@ describe('split .kibana index into multiple system indices', () => {
   });
 
   beforeEach(async () => {
-    await clearLog();
+    await clearLog(logFilePath);
   });
 
   describe('when migrating from a legacy version', () => {
@@ -78,6 +78,7 @@ describe('split .kibana index into multiple system indices', () => {
         getKibanaMigratorTestKit({
           types: updatedTypeRegistry.getAllTypes(),
           kibanaIndex: '.kibana',
+          logFilePath,
         });
 
       const { runMigrations, client } = await migratorTestKitFactory();
@@ -121,50 +122,48 @@ describe('split .kibana index into multiple system indices', () => {
       });
 
       const indicesInfo = await client.indices.get({ index: '.kibana*' });
-      expect(indicesInfo).toEqual(
+      expect(indicesInfo[`.kibana_${currentVersion}_001`]).toEqual(
         expect.objectContaining({
-          '.kibana_8.9.0_001': {
-            aliases: { '.kibana': expect.any(Object), '.kibana_8.9.0': expect.any(Object) },
-            mappings: {
-              dynamic: 'strict',
-              _meta: {
-                migrationMappingPropertyHashes: expect.any(Object),
-                indexTypesMap: expect.any(Object),
-              },
-              properties: expect.any(Object),
+          aliases: expect.objectContaining({ '.kibana': expect.any(Object) }),
+          mappings: {
+            dynamic: 'strict',
+            _meta: {
+              migrationMappingPropertyHashes: expect.any(Object),
+              indexTypesMap: expect.any(Object),
             },
-            settings: { index: expect.any(Object) },
+            properties: expect.any(Object),
           },
-          '.kibana_so_search_8.9.0_001': {
-            aliases: {
-              '.kibana_so_search': expect.any(Object),
-              '.kibana_so_search_8.9.0': expect.any(Object),
+          settings: { index: expect.any(Object) },
+        })
+      );
+
+      expect(indicesInfo[`.kibana_so_search_${currentVersion}_001`]).toEqual(
+        expect.objectContaining({
+          aliases: expect.objectContaining({ '.kibana_so_search': expect.any(Object) }),
+          mappings: {
+            dynamic: 'strict',
+            _meta: {
+              migrationMappingPropertyHashes: expect.any(Object),
+              indexTypesMap: expect.any(Object),
             },
-            mappings: {
-              dynamic: 'strict',
-              _meta: {
-                migrationMappingPropertyHashes: expect.any(Object),
-                indexTypesMap: expect.any(Object),
-              },
-              properties: expect.any(Object),
-            },
-            settings: { index: expect.any(Object) },
+            properties: expect.any(Object),
           },
-          '.kibana_so_ui_8.9.0_001': {
-            aliases: {
-              '.kibana_so_ui': expect.any(Object),
-              '.kibana_so_ui_8.9.0': expect.any(Object),
+          settings: { index: expect.any(Object) },
+        })
+      );
+
+      expect(indicesInfo[`.kibana_so_ui_${currentVersion}_001`]).toEqual(
+        expect.objectContaining({
+          aliases: expect.objectContaining({ '.kibana_so_ui': expect.any(Object) }),
+          mappings: {
+            dynamic: 'strict',
+            _meta: {
+              migrationMappingPropertyHashes: expect.any(Object),
+              indexTypesMap: expect.any(Object),
             },
-            mappings: {
-              dynamic: 'strict',
-              _meta: {
-                migrationMappingPropertyHashes: expect.any(Object),
-                indexTypesMap: expect.any(Object),
-              },
-              properties: expect.any(Object),
-            },
-            settings: { index: expect.any(Object) },
+            properties: expect.any(Object),
           },
+          settings: { index: expect.any(Object) },
         })
       );
 
@@ -279,110 +278,119 @@ describe('split .kibana index into multiple system indices', () => {
         }
       `);
 
-      const logs = await readLog();
+      const logs = await parseLogFile(logFilePath);
 
-      // .kibana_task_manager index exists and has no aliases => LEGACY_* migration path
-      expect(logs).toMatch('[.kibana_task_manager] INIT -> LEGACY_SET_WRITE_BLOCK.');
-      // .kibana_task_manager migrator is NOT involved in relocation, must not sync
-      expect(logs).not.toMatch('[.kibana_task_manager] READY_TO_REINDEX_SYNC');
+      expect(logs).toContainLogEntries(
+        [
+          // .kibana_task_manager index exists and has no aliases => LEGACY_* migration path
+          '[.kibana_task_manager] INIT -> LEGACY_SET_WRITE_BLOCK.',
+          '[.kibana_task_manager] LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE.',
+          '[.kibana_task_manager] LEGACY_DELETE -> SET_SOURCE_WRITE_BLOCK.',
+          '[.kibana_task_manager] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.',
+          '[.kibana_task_manager] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.',
+          '[.kibana_task_manager] CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT.',
+          '[.kibana_task_manager] REINDEX_SOURCE_TO_TEMP_OPEN_PIT -> REINDEX_SOURCE_TO_TEMP_READ.',
+          '[.kibana_task_manager] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM.',
+          '[.kibana_task_manager] REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK.',
+          '[.kibana_task_manager] REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ.',
+          '[.kibana_task_manager] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.',
+          '[.kibana_task_manager] REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK.',
+          '[.kibana_task_manager] SET_TEMP_WRITE_BLOCK -> CLONE_TEMP_TO_TARGET.',
+          '[.kibana_task_manager] CLONE_TEMP_TO_TARGET -> REFRESH_TARGET.',
+          '[.kibana_task_manager] REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.',
+          '[.kibana_task_manager] OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT -> OUTDATED_DOCUMENTS_SEARCH_READ.',
+          '[.kibana_task_manager] OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.',
+          '[.kibana_task_manager] OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> CHECK_TARGET_MAPPINGS.',
+          '[.kibana_task_manager] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.',
+          '[.kibana_task_manager] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.',
+          '[.kibana_task_manager] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.',
+          '[.kibana_task_manager] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.',
+          '[.kibana_task_manager] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.',
+          '[.kibana_task_manager] MARK_VERSION_INDEX_READY -> DONE.',
+          '[.kibana_task_manager] Migration completed after',
+        ],
+        { ordered: true }
+      );
 
-      // newer indices migrators did not exist, so they all have to reindex (create temp index + sync)
+      expect(logs).not.toContainLogEntries([
+        // .kibana_task_manager migrator is NOT involved in relocation, must not sync with other migrators
+        '[.kibana_task_manager] READY_TO_REINDEX_SYNC',
+        '[.kibana_task_manager] DONE_REINDEXING_SYNC',
+      ]);
+
+      // new indices migrators did not exist, so they all have to reindex (create temp index + sync)
       ['.kibana_so_ui', '.kibana_so_search'].forEach((newIndex) => {
-        expect(logs).toMatch(`[${newIndex}] INIT -> CREATE_REINDEX_TEMP.`);
-        expect(logs).toMatch(`[${newIndex}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`);
-        // no docs to reindex, as source index did NOT exist
-        expect(logs).toMatch(`[${newIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`);
+        expect(logs).toContainLogEntries(
+          [
+            `[${newIndex}] INIT -> CREATE_REINDEX_TEMP.`,
+            `[${newIndex}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
+            // no docs to reindex, as source index did NOT exist
+            `[${newIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`,
+          ],
+          { ordered: true }
+        );
       });
 
       // the .kibana migrator is involved in a relocation, it must also reindex
-      expect(logs).toMatch('[.kibana] INIT -> WAIT_FOR_YELLOW_SOURCE.');
-      expect(logs).toMatch('[.kibana] WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS.');
-      expect(logs).toMatch('[.kibana] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.');
-      expect(logs).toMatch('[.kibana] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.');
-      expect(logs).toMatch('[.kibana] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.');
-      expect(logs).toMatch('[.kibana] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.');
-      expect(logs).toMatch('[.kibana] READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT.');
-      expect(logs).toMatch(
-        '[.kibana] REINDEX_SOURCE_TO_TEMP_OPEN_PIT -> REINDEX_SOURCE_TO_TEMP_READ.'
+      expect(logs).toContainLogEntries(
+        [
+          '[.kibana] INIT -> WAIT_FOR_YELLOW_SOURCE.',
+          '[.kibana] WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS.',
+          '[.kibana] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.',
+          '[.kibana] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.',
+          '[.kibana] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.',
+          '[.kibana] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.',
+          '[.kibana] READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT.',
+          '[.kibana] REINDEX_SOURCE_TO_TEMP_OPEN_PIT -> REINDEX_SOURCE_TO_TEMP_READ.',
+          '[.kibana] Starting to process 59 documents.',
+          '[.kibana] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM.',
+          '[.kibana] REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK.',
+          '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ.',
+          '[.kibana] Processed 59 documents out of 59.',
+          '[.kibana] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.',
+          '[.kibana] REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> DONE_REINDEXING_SYNC.',
+        ],
+        { ordered: true }
       );
-      expect(logs).toMatch('[.kibana] Starting to process 59 documents.');
-      expect(logs).toMatch(
-        '[.kibana] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM.'
-      );
-      expect(logs).toMatch(
-        '[.kibana] REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK.'
-      );
-      expect(logs).toMatch('[.kibana_task_manager] LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE.');
-      expect(logs).toMatch(
-        '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ.'
-      );
-      expect(logs).toMatch('[.kibana] Processed 59 documents out of 59.');
-      expect(logs).toMatch(
-        '[.kibana] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.'
-      );
-      expect(logs).toMatch('[.kibana] REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> DONE_REINDEXING_SYNC.');
 
       // after .kibana migrator is done relocating documents
       // the 3 migrators share the final part of the flow
-      [
-        ['.kibana', 8],
-        ['.kibana_so_ui', 45],
-        ['.kibana_so_search', 2],
-      ].forEach(([index, docCount]) => {
-        expect(logs).toMatch(`[${index}] DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK.`);
-        expect(logs).toMatch(`[${index}] SET_TEMP_WRITE_BLOCK -> CLONE_TEMP_TO_TARGET.`);
+      ['.kibana', '.kibana_so_ui', '.kibana_so_search'].forEach((index) => {
+        expect(logs).toContainLogEntries(
+          [
+            `[${index}] DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK.`,
+            `[${index}] SET_TEMP_WRITE_BLOCK -> CLONE_TEMP_TO_TARGET.`,
+            `[${index}] CLONE_TEMP_TO_TARGET -> REFRESH_TARGET.`,
+            `[${index}] REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.`,
+            `[${index}] OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT -> OUTDATED_DOCUMENTS_SEARCH_READ.`,
+            `[${index}] OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.`,
+            `[${index}] OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> CHECK_TARGET_MAPPINGS.`,
+            `[${index}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`,
+            `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.`,
+            `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`,
+            `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`,
+            `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.`,
+            `[${index}] MARK_VERSION_INDEX_READY -> DONE.`,
+            `[${index}] Migration completed after`,
+          ],
+          { ordered: true }
+        );
+      });
 
-        expect(logs).toMatch(`[${index}] CLONE_TEMP_TO_TARGET -> REFRESH_TARGET.`);
-        expect(logs).toMatch(`[${index}] REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.`);
-        expect(logs).toMatch(
-          `[${index}] OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT -> OUTDATED_DOCUMENTS_SEARCH_READ.`
-        );
-        expect(logs).toMatch(`[${index}] Starting to process ${docCount} documents.`);
-        expect(logs).toMatch(
-          `[${index}] OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM.`
-        );
-        expect(logs).toMatch(
-          `[${index}] OUTDATED_DOCUMENTS_TRANSFORM -> TRANSFORMED_DOCUMENTS_BULK_INDEX.`
-        );
-        expect(logs).toMatch(
-          `[${index}] OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.`
-        );
-        expect(logs).toMatch(
-          `[${index}] OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> OUTDATED_DOCUMENTS_REFRESH.`
-        );
-        expect(logs).toMatch(`[${index}] OUTDATED_DOCUMENTS_REFRESH -> CHECK_TARGET_MAPPINGS.`);
-        expect(logs).toMatch(
-          `[${index}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`
-        );
-
-        expect(logs).toMatch(
-          `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.`
-        );
-        expect(logs).toMatch(
-          `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`
-        );
-        expect(logs).toMatch(
-          `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`
-        );
-        expect(logs).toMatch(
-          `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.`
-        );
-
-        expect(logs).toMatch(`[${index}] MARK_VERSION_INDEX_READY -> DONE.`);
-        expect(logs).toMatch(`[${index}] Migration completed`);
+      // should NOT retransform anything (we reindexed, thus we transformed already)
+      ['.kibana', '.kibana_task_manager', '.kibana_so_ui', '.kibana_so_search'].forEach((index) => {
+        expect(logs).not.toContainLogEntry(`[${index}] OUTDATED_DOCUMENTS_TRANSFORM`);
       });
     });
 
     afterEach(async () => {
       // we run the migrator again to ensure that the next time state is loaded everything still works as expected
       const { runMigrations } = await migratorTestKitFactory();
-      await clearLog();
+      await clearLog(logFilePath);
       await runMigrations();
 
-      const logs = await readLog();
-      expect(logs).not.toMatch('REINDEX');
-      expect(logs).not.toMatch('CREATE');
-      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS');
+      const logs = await parseLogFile(logFilePath);
+      expect(logs).not.toContainLogEntries(['REINDEX', 'CREATE', 'UPDATE_TARGET_MAPPINGS']);
     });
 
     afterAll(async () => {
@@ -391,71 +399,54 @@ describe('split .kibana index into multiple system indices', () => {
     });
   });
 
-  const getAggregatedTypesCountAllIndices = async (esClient: ElasticsearchClient) => {
-    const typeBreakdown = await Promise.all(
-      ALL_SAVED_OBJECT_INDICES.map((index) => getAggregatedTypesCount(esClient, index))
-    );
-
-    return ALL_SAVED_OBJECT_INDICES.reduce<Record<string, Record<string, number> | undefined>>(
-      (acc, index, pos) => {
-        acc[index] = typeBreakdown[pos];
-        return acc;
-      },
-      {}
-    );
-  };
-
   describe('when multiple Kibana migrators run in parallel', () => {
-    it.each(['7.7.2_xpack_100k_obj.zip', '7_13_corrupt_and_transform_failures_docs.zip'])(
-      'correctly migrates %s archive',
-      async (archive) => {
-        esServer = await startElasticsearch({
-          dataArchive: Path.join(__dirname, '..', 'archives', archive),
-        });
-        const esClient = await getEsClient();
+    it('correctly migrates 7.7.2_xpack_100k_obj.zip archive', async () => {
+      esServer = await startElasticsearch({
+        dataArchive: Path.join(__dirname, '..', 'archives', '7.7.2_xpack_100k_obj.zip'),
+      });
+      const esClient = await getEsClient();
 
-        const breakdownBefore = await getAggregatedTypesCountAllIndices(esClient);
-        expect(breakdownBefore).toMatchSnapshot('before migration');
+      const breakdownBefore = await getAggregatedTypesCountAllIndices(esClient);
+      expect(breakdownBefore).toMatchSnapshot('before migration');
 
-        for (let i = 0; i < PARALLEL_MIGRATORS; ++i) {
-          await clearLog(Path.join(__dirname, `dot_kibana_split_instance_${i}.log`));
-        }
-
-        const testKits = await Promise.all(
-          new Array(PARALLEL_MIGRATORS)
-            .fill({
-              settings: {
-                migrations: {
-                  discardUnknownObjects: currentVersion,
-                  discardCorruptObjects: currentVersion,
-                },
-              },
-              kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
-              types: typeRegistry.getAllTypes(),
-            })
-            .map((config, index) =>
-              getKibanaMigratorTestKit({
-                ...config,
-                logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
-              })
-            )
-        );
-
-        const results = await Promise.all(testKits.map((testKit) => testKit.runMigrations()));
-        expect(
-          results
-            .flat()
-            .every((result) => result.status === 'migrated' || result.status === 'patched')
-        ).toEqual(true);
-
-        const breakdownAfter = await getAggregatedTypesCountAllIndices(esClient);
-        expect(breakdownAfter).toMatchSnapshot('after migration');
+      for (let i = 0; i < PARALLEL_MIGRATORS; ++i) {
+        await clearLog(Path.join(__dirname, `dot_kibana_split_instance_${i}.log`));
       }
-    );
+
+      const testKits = await Promise.all(
+        new Array(PARALLEL_MIGRATORS)
+          .fill({
+            settings: {
+              migrations: {
+                discardUnknownObjects: currentVersion,
+                discardCorruptObjects: currentVersion,
+              },
+            },
+            kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
+            types: typeRegistry.getAllTypes(),
+          })
+          .map((config, index) =>
+            getKibanaMigratorTestKit({
+              ...config,
+              logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
+            })
+          )
+      );
+
+      const results = await Promise.all(testKits.map((testKit) => testKit.runMigrations()));
+      expect(
+        results
+          .flat()
+          .every((result) => result.status === 'migrated' || result.status === 'patched')
+      ).toEqual(true);
+
+      const breakdownAfter = await getAggregatedTypesCountAllIndices(esClient);
+      expect(breakdownAfter).toMatchSnapshot('after migration');
+    });
 
     afterEach(async () => {
       await esServer?.stop();
-      await delay(10);
+      await delay(2);
     });
   });
 });

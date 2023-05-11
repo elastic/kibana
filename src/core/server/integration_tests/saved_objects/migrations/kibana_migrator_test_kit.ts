@@ -33,7 +33,11 @@ import {
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import {
+  ALL_SAVED_OBJECT_INDICES,
+  ISavedObjectTypeRegistry,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
@@ -333,6 +337,20 @@ export const getAggregatedTypesCount = async (
     }
     throw error;
   }
+};
+
+export const getAggregatedTypesCountAllIndices = async (esClient: ElasticsearchClient) => {
+  const typeBreakdown = await Promise.all(
+    ALL_SAVED_OBJECT_INDICES.map((index) => getAggregatedTypesCount(esClient, index))
+  );
+
+  return ALL_SAVED_OBJECT_INDICES.reduce<Record<string, Record<string, number> | undefined>>(
+    (acc, index, pos) => {
+      acc[index] = typeBreakdown[pos];
+      return acc;
+    },
+    {}
+  );
 };
 
 const registerTypes = (
