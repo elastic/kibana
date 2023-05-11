@@ -54,7 +54,7 @@ testAndReport() {
 #  set +x
 }
 upload() {
-  buildkite-agent artifact upload "target/junit/*.xml"
+  buildkite-agent artifact upload "target/junit/**/*.xml"
 }
 
 while getopts b:i:r:u: flag; do
