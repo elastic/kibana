@@ -10,13 +10,13 @@ export default async function* customReporter(source) {
   for await (const event of source) {
     switch (event.type) {
       case 'test:start':
-        yield `A test named: ${event.data.name} started\n`;
+        yield `A test named: [${event.data.name}] started\n`;
         break;
       case 'test:pass':
-        yield `A test named: ${event.data.name} passed\n`;
+        yield `A test named: [${event.data.name}] passed\n`;
         break;
       case 'test:fail':
-        yield `A test named: ${event.data.name} failed\n`;
+        yield `A test named: [${event.data.name}] failed\n`;
         break;
       case 'test:plan':
         console.log(`\n### event: \n${JSON.stringify(event, null, 2)}`);
