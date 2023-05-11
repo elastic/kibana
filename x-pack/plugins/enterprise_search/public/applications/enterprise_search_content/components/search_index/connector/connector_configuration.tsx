@@ -100,27 +100,9 @@ export const ConnectorConfiguration: React.FC = () => {
                   children: (
                     <>
                       <EuiText size="s">
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.firstParagraph',
-                          {
-                            defaultMessage:
-                              'The connectors repository contains several connector client examples to help you utilize our framework for accelerated development against custom data sources.',
-                          }
-                        )}
-                      </EuiText>
-                      <EuiLink href="https://github.com/elastic/connectors" target="_blank">
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.button.label',
-                          {
-                            defaultMessage: 'Explore the connectors repository',
-                          }
-                        )}
-                      </EuiLink>
-                      <EuiSpacer />
-                      <EuiText size="s">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.secondParagraph"
-                          defaultMessage="The connectors repository contains several {link} to help you utilize our framework for accelerated development against custom data sources."
+                          defaultMessage="The connectors repository contains several {link}. Use our framework for accelerated development against custom data sources."
                           values={{
                             link: (
                               <EuiLink
@@ -266,7 +248,7 @@ export const ConnectorConfiguration: React.FC = () => {
                             'xpack.enterpriseSearch.content.indices.configurationConnector.scheduleSync.description',
                             {
                               defaultMessage:
-                                'Once your connectors are configured to your liking, don’t forget to set a recurring sync schedule to make sure your documents are indexed and relevant. You can also trigger a one-time sync without enabling a sync schedule.',
+                                'Once configured, set a recurring sync schedule to keep your documents in sync over time. You can also simply trigger a one-time sync.',
                             }
                           )}
                         </EuiText>
@@ -364,65 +346,6 @@ export const ConnectorConfiguration: React.FC = () => {
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.readme.label',
                         {
                           defaultMessage: 'Connector readme',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://discuss.elastic.co/c/enterprise-search/84"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.getHelp.label',
-                        {
-                          defaultMessage: 'Get help',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://github.com/elastic/connectors-python/issues"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.issue.label',
-                        {
-                          defaultMessage: 'File an issue',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLinkTo to={'/app/integrations/browse'} shouldNotCreateHref>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.dontSeeIntegration.label',
-                        {
-                          defaultMessage: 'Don’t see the integration you’re looking for?',
-                        }
-                      )}
-                    </EuiLinkTo>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://docs.elastic.co/search-ui/tutorials/workplace-search"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.searchUI.label',
-                        {
-                          defaultMessage: 'Use Search UI for Workplace Search',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink href="https://www.elastic.co/kibana/feedback" target="_blank">
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
-                        {
-                          defaultMessage: 'Connector feedback',
                         }
                       )}
                     </EuiLink>

@@ -7,8 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Status } from '../../../../../../../common/types/api';
+import { i18n } from '@kbn/i18n';
+
+import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import {
   CreateTextExpansionModelApiLogic,
   CreateTextExpansionModelApiLogicActions,
@@ -46,18 +49,66 @@ interface TextExpansionCalloutActions {
 }
 
 export interface TextExpansionCalloutValues {
+  createTextExpansionModelError: HttpError | undefined;
   createTextExpansionModelStatus: Status;
   createdTextExpansionModel: CreateTextExpansionModelResponse | undefined;
+  fetchTextExpansionModelError: HttpError | undefined;
   isCreateButtonDisabled: boolean;
   isModelDownloadInProgress: boolean;
   isModelDownloaded: boolean;
   isModelStarted: boolean;
   isPollingTextExpansionModelActive: boolean;
   isStartButtonDisabled: boolean;
+  startTextExpansionModelError: HttpError | undefined;
   startTextExpansionModelStatus: Status;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
 }
+
+/**
+ * Extracts the topmost error in precedence order (create > start > fetch).
+ * @param createError
+ * @param fetchError
+ * @param startError
+ * @returns the extracted error or null if there is no error
+ */
+export const getTextExpansionError = (
+  createError: HttpError | undefined,
+  fetchError: HttpError | undefined,
+  startError: HttpError | undefined
+) => {
+  return createError !== undefined
+    ? {
+        title: i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.title',
+          {
+            defaultMessage: 'Error with ELSER deployment',
+          }
+        ),
+        message: getErrorsFromHttpResponse(createError)[0],
+      }
+    : startError !== undefined
+    ? {
+        title: i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.textExpansionStartError.title',
+          {
+            defaultMessage: 'Error starting ELSER deployment',
+          }
+        ),
+        message: getErrorsFromHttpResponse(startError)[0],
+      }
+    : fetchError !== undefined
+    ? {
+        title: i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.textExpansionFetchError.title',
+          {
+            defaultMessage: 'Error fetching ELSER model',
+          }
+        ),
+        message: getErrorsFromHttpResponse(fetchError)[0],
+      }
+    : null;
+};
 
 export const TextExpansionCalloutLogic = kea<
   MakeLogicType<TextExpansionCalloutValues, TextExpansionCalloutActions>
@@ -74,7 +125,11 @@ export const TextExpansionCalloutLogic = kea<
   connect: {
     actions: [
       CreateTextExpansionModelApiLogic,
-      ['makeRequest as createTextExpansionModel', 'apiSuccess as createTextExpansionModelSuccess'],
+      [
+        'makeRequest as createTextExpansionModel',
+        'apiSuccess as createTextExpansionModelSuccess',
+        'apiError as createTextExpansionModelError',
+      ],
       FetchTextExpansionModelApiLogic,
       [
         'makeRequest as fetchTextExpansionModel',
@@ -82,15 +137,23 @@ export const TextExpansionCalloutLogic = kea<
         'apiError as fetchTextExpansionModelError',
       ],
       StartTextExpansionModelApiLogic,
-      ['makeRequest as startTextExpansionModel', 'apiSuccess as startTextExpansionModelSuccess'],
+      [
+        'makeRequest as startTextExpansionModel',
+        'apiSuccess as startTextExpansionModelSuccess',
+        'apiError as startTextExpansionModelError',
+      ],
     ],
     values: [
       CreateTextExpansionModelApiLogic,
-      ['data as createdTextExpansionModel', 'status as createTextExpansionModelStatus'],
+      [
+        'data as createdTextExpansionModel',
+        'status as createTextExpansionModelStatus',
+        'error as createTextExpansionModelError',
+      ],
       FetchTextExpansionModelApiLogic,
-      ['data as textExpansionModel'],
+      ['data as textExpansionModel', 'error as fetchTextExpansionModelError'],
       StartTextExpansionModelApiLogic,
-      ['status as startTextExpansionModelStatus'],
+      ['status as startTextExpansionModelStatus', 'error as startTextExpansionModelError'],
     ],
   },
   events: ({ actions, values }) => ({
@@ -169,7 +232,7 @@ export const TextExpansionCalloutLogic = kea<
   selectors: ({ selectors }) => ({
     isCreateButtonDisabled: [
       () => [selectors.createTextExpansionModelStatus],
-      (status: Status) => status !== Status.IDLE,
+      (status: Status) => status !== Status.IDLE && status !== Status.ERROR,
     ],
     isModelDownloadInProgress: [
       () => [selectors.textExpansionModel],
@@ -195,7 +258,7 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isStartButtonDisabled: [
       () => [selectors.startTextExpansionModelStatus],
-      (status: Status) => status !== Status.IDLE,
+      (status: Status) => status !== Status.IDLE && status !== Status.ERROR,
     ],
   }),
 });

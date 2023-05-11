@@ -40,6 +40,7 @@ import { DOC_TYPE } from '../../common/constants';
 import { LensAppServices } from '../app_plugin/types';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
+import { SavedObjectIndexStore } from '../persistence';
 
 const startMock = coreMock.createStart();
 
@@ -149,8 +150,12 @@ export function makeDefaultServices(
     },
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
-    savedObjectsClient: core.savedObjects.client,
     dashboardFeatureFlag: { allowByValueEmbeddables: false },
+    savedObjectStore: {
+      load: jest.fn(),
+      search: jest.fn(),
+      save: jest.fn(),
+    } as unknown as SavedObjectIndexStore,
     stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
     getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),
     application: {

@@ -50,8 +50,19 @@ export const renderApp = (
   },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { access, features, publicUrl, errorConnectingMessage, readOnlyMode, ...initialData } =
-    data;
+  const {
+    access,
+    appSearch,
+    configuredLimits,
+    enterpriseSearchVersion,
+    errorConnectingMessage,
+    features,
+    kibanaVersion,
+    publicUrl,
+    readOnlyMode,
+    searchOAuth,
+    workplaceSearch,
+  } = data;
   const { history } = params;
   const { application, chrome, http, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
@@ -114,7 +125,17 @@ export const renderApp = (
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>
-                <App {...initialData} />
+                <App
+                  access={productAccess}
+                  appSearch={appSearch}
+                  configuredLimits={configuredLimits}
+                  enterpriseSearchVersion={enterpriseSearchVersion}
+                  features={features}
+                  kibanaVersion={kibanaVersion}
+                  readOnlyMode={readOnlyMode}
+                  searchOAuth={searchOAuth}
+                  workplaceSearch={workplaceSearch}
+                />
                 <Toasts />
               </Router>
             </Provider>

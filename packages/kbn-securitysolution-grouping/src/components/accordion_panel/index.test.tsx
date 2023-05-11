@@ -8,19 +8,21 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import { GroupPanel } from '.';
-import { createGroupFilter } from './helpers';
+import { createGroupFilter, getNullGroupFilter } from './helpers';
 import React from 'react';
 
 const onToggleGroup = jest.fn();
 const renderChildComponent = jest.fn();
 const ruleName = 'Rule name';
-const ruleDesc = 'Rule description';
+const selectedGroup = 'kibana.alert.rule.name';
 
 const testProps = {
   isLoading: false,
+  isNullGroup: false,
   groupBucket: {
-    key: [ruleName, ruleDesc],
-    key_as_string: `${ruleName}|${ruleDesc}`,
+    selectedGroup,
+    key: [ruleName, ruleName],
+    key_as_string: `${ruleName}|${ruleName}`,
     doc_count: 98,
     hostsCountAggregation: {
       value: 5,
@@ -54,7 +56,7 @@ const testProps = {
     },
   },
   renderChildComponent,
-  selectedGroup: 'kibana.alert.rule.name',
+  selectedGroup,
   onGroupClose: () => {},
 };
 
@@ -69,7 +71,12 @@ describe('grouping accordion panel', () => {
       createGroupFilter(testProps.selectedGroup, ruleName)
     );
   });
-  it('does not create query without a valid groupFieldValue', () => {
+  it('creates the query for the selectedGroup attribute when the group is null', () => {
+    const { getByTestId } = render(<GroupPanel {...testProps} isNullGroup />);
+    expect(getByTestId('grouping-accordion')).toBeInTheDocument();
+    expect(renderChildComponent).toHaveBeenCalledWith(getNullGroupFilter(testProps.selectedGroup));
+  });
+  it('does not render accordion or create query without a valid groupFieldValue', () => {
     const { queryByTestId } = render(
       <GroupPanel
         {...testProps}
@@ -82,6 +89,11 @@ describe('grouping accordion panel', () => {
     );
     expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
     expect(renderChildComponent).not.toHaveBeenCalled();
+  });
+  it('Does not render accordion or create query when groupBucket.selectedGroup !== selectedGroup', () => {
+    const { queryByTestId } = render(<GroupPanel {...testProps} selectedGroup="source.ip" />);
+    expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
+    expect(testProps.renderChildComponent).not.toHaveBeenCalled();
   });
   it('When onToggleGroup not defined, does nothing on toggle', () => {
     const { container } = render(<GroupPanel {...testProps} />);

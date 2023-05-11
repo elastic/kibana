@@ -41,14 +41,6 @@ export const getAlertsGroupingQuery = ({
       ? getAggregationsByGroupField(selectedGroup)
       : [],
     pageNumber: pageIndex * pageSize,
-    rootAggregations: [
-      {
-        unitsCount: { value_count: { field: selectedGroup } },
-      },
-      ...(!isNoneGroup([selectedGroup])
-        ? [{ groupsCount: { cardinality: { field: selectedGroup } } }]
-        : []),
-    ],
     runtimeMappings,
     selectedGroupEsTypes,
     size: pageSize,
@@ -175,16 +167,9 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
-              },
-            },
-          },
-          {
-            usersCountAggregation: {
-              cardinality: {
-                field: 'user.name',
               },
             },
           },
@@ -216,7 +201,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
               },

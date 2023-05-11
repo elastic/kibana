@@ -47,6 +47,12 @@ describe('getAlertsGroupingQuery', () => {
         unitsCount: {
           value_count: {
             field: 'kibana.alert.rule.name',
+            missing: '-',
+          },
+        },
+        unitsCountWithoutNull: {
+          value_count: {
+            field: 'kibana.alert.rule.name',
           },
         },
         groupsCount: {
@@ -197,6 +203,12 @@ describe('getAlertsGroupingQuery', () => {
       _source: false,
       aggs: {
         unitsCount: {
+          value_count: {
+            field: 'process.name',
+            missing: '-',
+          },
+        },
+        unitsCountWithoutNull: {
           value_count: {
             field: 'process.name',
           },

@@ -6,7 +6,6 @@
  */
 
 import type {
-  SavedObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
@@ -14,7 +13,6 @@ import type {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { CommentAttributes as AttachmentAttributes } from '../../../common/api';
 import { CommentType } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter, combineFilters } from '../../client/utils';
@@ -38,7 +36,11 @@ import type {
   UpdateAttachmentArgs,
 } from './types';
 import { AttachmentGetter } from './operations/get';
-import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
+import type {
+  AttachmentPersistedAttributes,
+  AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
+} from '../../common/types/attachments';
 
 export class AttachmentService {
   private readonly _getter: AttachmentGetter;
@@ -155,7 +157,7 @@ export class AttachmentService {
     references,
     id,
     refresh,
-  }: CreateAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
+  }: CreateAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to POST a new comment`);
 
@@ -190,7 +192,7 @@ export class AttachmentService {
   public async bulkCreate({
     attachments,
     refresh,
-  }: BulkCreateAttachments): Promise<SavedObjectsBulkResponse<AttachmentAttributes>> {
+  }: BulkCreateAttachments): Promise<SavedObjectsBulkResponse<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to bulk create attachments`);
       const res =
@@ -231,7 +233,7 @@ export class AttachmentService {
     attachmentId,
     updatedAttributes,
     options,
-  }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributes>> {
+  }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
 
@@ -278,7 +280,9 @@ export class AttachmentService {
   public async bulkUpdate({
     comments,
     refresh,
-  }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributes>> {
+  }: BulkUpdateAttachmentArgs): Promise<
+    SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributes>
+  > {
     try {
       this.context.log.debug(
         `Attempting to UPDATE comments ${comments.map((c) => c.attachmentId).join(', ')}`
@@ -336,7 +340,7 @@ export class AttachmentService {
     options,
   }: {
     options?: SavedObjectFindOptionsKueryNode;
-  }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
+  }): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find comments`);
       const res =

@@ -6,64 +6,67 @@
  * Side Public License, v 1.
  */
 
-import { NavigationServices, SolutionProperties } from '../../types';
+import { BehaviorSubject } from 'rxjs';
+import { NavigationServices, ChromeNavigationNodeViewModel } from '../../types';
 
 export const getServicesMock = (): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
-  const loadingCount = 0;
+  const loadingCount$ = new BehaviorSubject(0);
+  const recentlyAccessed$ = new BehaviorSubject([]);
 
   return {
     basePath,
-    loadingCount,
+    loadingCount$,
+    recentlyAccessed$,
     navIsOpen: true,
     navigateToUrl,
   };
 };
 
-export const getSolutionPropertiesMock = (): SolutionProperties => ({
+export const getSolutionPropertiesMock = (): ChromeNavigationNodeViewModel => ({
   id: 'example_project',
   icon: 'logoObservability',
-  name: 'Example project',
+  title: 'Example project',
   items: [
     {
       id: 'root',
-      name: '',
+      title: '',
       items: [
         {
           id: 'get_started',
-          name: 'Get started',
+          title: 'Get started',
           href: '/app/example_project/get_started',
         },
         {
           id: 'alerts',
-          name: 'Alerts',
+          title: 'Alerts',
           href: '/app/example_project/alerts',
         },
         {
           id: 'cases',
-          name: 'Cases',
+          title: 'Cases',
           href: '/app/example_project/cases',
         },
       ],
     },
     {
       id: 'example_settings',
-      name: 'Settings',
+      title: 'Settings',
       items: [
         {
           id: 'logs',
-          name: 'Logs',
+          title: 'Logs',
           href: '/app/management/logs',
         },
         {
           id: 'signals',
-          name: 'Signals',
+          title: 'Signals',
           href: '/app/management/signals',
         },
         {
           id: 'tracing',
-          name: 'Tracing',
+          title: 'Tracing',
           href: '/app/management/tracing',
         },
       ],

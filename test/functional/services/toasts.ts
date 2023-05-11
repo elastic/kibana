@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class ToastsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly retry = this.ctx.getService('retry');
 
   /**
    * Returns the title and message of a specific error toast.
@@ -62,6 +64,23 @@ export class ToastsService extends FtrService {
     }
   }
 
+  public async dismissAllToastsWithChecks() {
+    await this.retry.tryForTime(30 * 1000, async () => {
+      await this.dismissAllToasts();
+      await this.assertToastCount(0);
+    });
+  }
+
+  public async assertToastCount(expectedCount: number) {
+    await this.retry.tryForTime(5 * 1000, async () => {
+      const toastCount = await this.getToastCount({ timeout: 1000 });
+      expect(toastCount).to.eql(
+        expectedCount,
+        `Toast count should be ${expectedCount} (got ${toastCount})`
+      );
+    });
+  }
+
   public async getToastElement(index: number) {
     const list = await this.getGlobalToastList();
     return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
@@ -77,13 +96,13 @@ export class ToastsService extends FtrService {
     return await list.findAllByCssSelector(`.euiToast`);
   }
 
-  private async getGlobalToastList() {
-    return await this.testSubjects.find('globalToastList');
+  private async getGlobalToastList(options?: { timeout?: number }) {
+    return await this.testSubjects.find('globalToastList', options?.timeout);
   }
 
-  public async getToastCount() {
-    const list = await this.getGlobalToastList();
-    const toasts = await list.findAllByCssSelector(`.euiToast`);
+  public async getToastCount(options?: { timeout?: number }) {
+    const list = await this.getGlobalToastList(options);
+    const toasts = await list.findAllByCssSelector(`.euiToast`, options?.timeout);
     return toasts.length;
   }
 }

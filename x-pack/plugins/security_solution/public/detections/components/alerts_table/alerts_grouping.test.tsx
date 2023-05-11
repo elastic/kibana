@@ -245,7 +245,17 @@ describe('GroupedAlertsTable', () => {
             },
           },
           groupsCount: { cardinality: { field: 'kibana.alert.rule.name' } },
-          unitsCount: { value_count: { field: 'kibana.alert.rule.name' } },
+          unitsCount: {
+            value_count: {
+              field: 'kibana.alert.rule.name',
+              missing: '-',
+            },
+          },
+          unitsCountWithoutNull: {
+            value_count: {
+              field: 'kibana.alert.rule.name',
+            },
+          },
         },
         query: {
           bool: {

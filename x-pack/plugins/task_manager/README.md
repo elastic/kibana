@@ -44,7 +44,6 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 - `max_attempts` - The maximum number of times a task will be attempted before being abandoned as failed
 - `poll_interval` - How often the background worker should check the task_manager index for more work
-- `max_poll_inactivity_cycles` - How many poll intervals is work allowed to block polling for before it's timed out. This does not include task execution, as task execution does not block the polling, but rather includes work needed to manage Task Manager's state.
 - `index` - **deprecated** The name of the index that the task_manager will use. This is deprecated, and will be removed starting in 8.0
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
 - `version_conflict_threshold` - The threshold percentage for workers experiencing version conflicts for shifting the polling interval

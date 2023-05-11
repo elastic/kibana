@@ -8,13 +8,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiCallOut,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPage,
-} from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
@@ -78,7 +72,7 @@ export function Doc(props: DocProps) {
           values: { id: props.id },
         })}
       </h1>
-      <EuiPageContent>
+      <EuiPageBody panelled paddingSize="l" panelProps={{ role: 'main' }}>
         {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
             color="danger"
@@ -150,7 +144,7 @@ export function Doc(props: DocProps) {
             <DocViewer hit={hit} dataView={dataView} />
           </div>
         )}
-      </EuiPageContent>
+      </EuiPageBody>
     </EuiPage>
   );
 }

@@ -8,7 +8,7 @@
 import React, { VFC } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSecurityContext } from '../../../../hooks';
+import { useSecurityContext } from '../../../../hooks/use_security_context';
 import { useBlockListContext } from '../../../indicators/hooks/use_block_list_context';
 import { useSetUrlParams } from '../../hooks/use_set_url_params';
 

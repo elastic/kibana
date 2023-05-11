@@ -96,7 +96,6 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
 
     return (
       <>
-        {/* <GlobalPanelStyle /> */}
         <EuiWindowEvent event="keydown" handler={onKeyDown} />
         <EuiPortal>
           <EuiFocusTrap autoFocus>
