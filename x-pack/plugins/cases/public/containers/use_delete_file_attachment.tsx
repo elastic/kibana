@@ -39,5 +39,3 @@ export const useDeleteFileAttachment = () => {
     }
   );
 };
-
-export type UseDeleteFileAttachment = ReturnType<typeof useDeleteFileAttachment>;
