@@ -90,7 +90,7 @@ export function runBuildApiDocsCli() {
 
       const plugins = findPlugins(stats && pluginFilter ? pluginFilter : undefined);
 
-      if (Array.isArray(pluginFilter) && pluginFilter.length !== plugins.length) {
+      if (stats && Array.isArray(pluginFilter) && pluginFilter.length !== plugins.length) {
         await endTransactionWithFailure(transaction);
         throw createFlagError('expected --plugin was not found');
       }
