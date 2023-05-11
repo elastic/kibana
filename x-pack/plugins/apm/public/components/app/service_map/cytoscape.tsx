@@ -6,11 +6,9 @@
  */
 
 import cytoscape from 'cytoscape';
-import dagre from 'cytoscape-dagre';
 import fcose from 'cytoscape-fcose';
 import { isEqual } from 'lodash';
 import React, {
-  createContext,
   CSSProperties,
   memo,
   ReactNode,
@@ -21,11 +19,9 @@ import React, {
 } from 'react';
 import { useTheme } from '../../../hooks/use_theme';
 import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
-import { getCytoscapeOptions } from './cytoscape_options';
-import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import { CytoscapeContext } from '../../../context/cytoscape_context';
 
-//cytoscape.use(dagre);
+// cytoscape.use(dagre);
 cytoscape.use(fcose);
 
 export interface CytoscapeProps {
@@ -67,10 +63,10 @@ function CytoscapeComponent({
 }: CytoscapeProps) {
   const theme = useTheme();
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
-  //const [ref, cy] = useCytoscape({
+  // const [ref, cy] = useCytoscape({
   // ...getCytoscapeOptions(theme, isTraceExplorerEnabled),
   // elements,
-  //});
+  // });
   const ref = useRef(null);
   const cy = useContext(CytoscapeContext);
 

@@ -5,32 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiTitle,
-  EuiToolTip,
-  EuiIcon,
-} from '@elastic/eui';
 import cytoscape from 'cytoscape';
-import React, {
-  CSSProperties,
-  MouseEvent,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { i18n } from '@kbn/i18n';
+import { MouseEvent } from 'react';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import { Environment } from '../../../../../common/environment_rt';
-import { useTheme } from '../../../../hooks/use_theme';
-import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
-import { CytoscapeContext } from '../cytoscape';
-import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
 import { DependencyContents } from './dependency_contents';
 import { EdgeContents } from './edge_contents';
 import { ExternalsListContents } from './externals_list_contents';

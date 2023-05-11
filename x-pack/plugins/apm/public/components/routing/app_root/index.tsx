@@ -18,9 +18,11 @@ import {
 } from '@kbn/observability-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import cytoscape from 'cytoscape';
+import dagre from 'cytoscape-dagre';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -43,12 +45,9 @@ import { RedirectDependenciesToDependenciesInventory } from './redirect_dependen
 import { TrackPageview } from '../track_pageview';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
 import { CytoscapeContext } from '../../../context/cytoscape_context';
-import cytoscape from 'cytoscape';
 import { getCytoscapeOptions } from '../../app/service_map/cytoscape_options';
 import { useCytoscapeEventHandlers } from '../../app/service_map/use_cytoscape_event_handlers';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import fcose from 'cytoscape-fcose';
-import dagre from 'cytoscape-dagre';
 const storage = new Storage(localStorage);
 
 cytoscape.use(dagre);

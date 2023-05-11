@@ -16,7 +16,6 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { APMQueryParams } from '../../shared/links/url_helpers';
 import { CytoscapeContext } from '../../../context/cytoscape_context';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 
 const ControlsContainer = euiStyled('div')`
   left: ${({ theme }) => theme.eui.euiSize};

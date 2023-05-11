@@ -161,7 +161,6 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
       }),
       href: router.link('/services', { query }),
     },
-
   ];
 
   return tabs

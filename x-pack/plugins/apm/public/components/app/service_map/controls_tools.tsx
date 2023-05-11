@@ -19,17 +19,12 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import cytoscape from 'cytoscape';
 import React, { useContext, useState } from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { CytoscapeContext } from '../../../context/cytoscape_context';
 import { EuiButton } from '@elastic/eui';
-import {
-  CodeEditor,
-  createKibanaReactContext,
-} from '../../../../../../../src/plugins/kibana_react/public';
 import { EuiCodeBlock } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiTextArea } from '@elastic/eui';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { CytoscapeContext } from '../../../context/cytoscape_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 const ControlsContainer = euiStyled('div')`
@@ -375,21 +370,36 @@ export function ControlsTools() {
             <EuiFlyoutBody>
               <EuiText>
                 Query your infrastructure using{' '}
-                <EuiLink href="https://mondoo.com/cnquery">cnquery</EuiLink> and{' '}
-                <EuiLink href="https://mondoo.com/docs/mql/resources/">
+                <EuiLink
+                  data-test-subj="apmControlsToolsCnqueryLink"
+                  href="https://mondoo.com/cnquery"
+                >
+                  cnquery
+                </EuiLink>{' '}
+                and{' '}
+                <EuiLink
+                  data-test-subj="apmControlsToolsMqlLink"
+                  href="https://mondoo.com/docs/mql/resources/"
+                >
                   MQL
                 </EuiLink>
                 .
               </EuiText>
               <EuiSpacer />
               <EuiTextArea
+                data-test-subj="apmControlsToolsTextArea"
                 placeholder=""
                 fullWidth={true}
                 onChange={handleCodeEditorChange}
                 value={editorContents}
               />
               <EuiSpacer />
-              <EuiButton onClick={handleCodeEditorSubmit}>Submit</EuiButton>
+              <EuiButton
+                data-test-subj="apmControlsToolsSubmitButton"
+                onClick={handleCodeEditorSubmit}
+              >
+                Submit
+              </EuiButton>
               <EuiSpacer />
               <EuiCodeBlock>
                 {JSON.stringify(queryResponse, null, 2)}

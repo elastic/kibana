@@ -9,7 +9,7 @@ import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 

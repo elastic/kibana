@@ -14,10 +14,7 @@ import {
 import React, { ReactNode, useContext, useEffect } from 'react';
 import { Environment } from '../../../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import {
-  SERVICE_MAP_TIMEOUT_ERROR,
-  invalidLicenseMessage,
-} from '../../../../common/service_map';
+import { invalidLicenseMessage } from '../../../../common/service_map';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useAnyOfApmParams, useApmParams } from '../../../hooks/use_apm_params';
@@ -29,13 +26,8 @@ import { LicensePrompt } from '../../shared/license_prompt';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { Controls } from './controls';
 import { ControlsBottom } from './controls_bottom';
-import { Cytoscape } from './cytoscape';
 import { getCytoscapeDivStyle } from './cytoscape_options';
 import { DisabledPrompt } from './disabled_prompt';
-import { EmptyBanner } from './empty_banner';
-import { EmptyPrompt } from './empty_prompt';
-import { Popover } from './popover';
-import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { CytoscapeContext } from '../../../context/cytoscape_context';
@@ -147,8 +139,8 @@ export function ServiceMap({
     };
   });
   // Temporary hack to work around bottom padding introduced by EuiPage
-  //const PADDING_BOTTOM = 24;
-  //const heightWithPadding = height - PADDING_BOTTOM;
+  // const PADDING_BOTTOM = 24;
+  // const heightWithPadding = height - PADDING_BOTTOM;
   const heightWithPadding = dimensions.height;
   if (!license) {
     return null;
