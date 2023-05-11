@@ -39,6 +39,11 @@ export interface PerformBulkGetParams<T = unknown> {
   options: SavedObjectsGetOptions;
 }
 
+type ExpectedBulkGetResult = Either<
+  { type: string; id: string; error: Payload },
+  { type: string; id: string; fields?: string[]; namespaces?: string[]; esRequestIndex: number }
+>;
+
 export const performBulkGet = async <T>(
   { objects, options }: PerformBulkGetParams<T>,
   { helpers, allowedTypes, client, serializer, registry, extensions = {} }: ApiExecutionContext
@@ -75,10 +80,6 @@ export const performBulkGet = async <T>(
   };
 
   let bulkGetRequestIndexCounter = 0;
-  type ExpectedBulkGetResult = Either<
-    { type: string; id: string; error: Payload },
-    { type: string; id: string; fields?: string[]; namespaces?: string[]; esRequestIndex: number }
-  >;
   const expectedBulkGetResults = await Promise.all(
     objects.map<Promise<ExpectedBulkGetResult>>(async (object) => {
       const { type, id, fields } = object;

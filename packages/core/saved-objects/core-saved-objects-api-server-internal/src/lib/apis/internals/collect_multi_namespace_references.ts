@@ -123,7 +123,9 @@ export async function collectMultiNamespaceReferences(
     return { ...obj, spacesWithMatchingAliases, spacesWithMatchingOrigins };
   });
 
-  if (!securityExtension) return { objects: results };
+  if (!securityExtension) {
+    return { objects: results };
+  }
 
   // Now that we have *all* information for the object graph, if the Security extension is enabled, we can: check/enforce authorization,
   // write audit events, filter the object graph, and redact spaces from the objects.
