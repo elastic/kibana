@@ -154,9 +154,11 @@ export const getGeoContainmentExecutor = (): GeoContainmentRuleType['executor'] 
       boundaryNameField: params.boundaryNameField,
       boundaryIndexQuery: params.boundaryIndexQuery,
     };
-    const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters && canSkipBoundariesFetch(boundariesRequestMeta, state.boundariesRequestMeta)
-      ? state
-      : await getShapeFilters(boundariesRequestMeta, services.scopedClusterClient.asCurrentUser);
+    const { shapesFilters, shapesIdsNamesMap } =
+      state.shapesFilters &&
+      canSkipBoundariesFetch(boundariesRequestMeta, state.boundariesRequestMeta)
+        ? state
+        : await getShapeFilters(boundariesRequestMeta, services.scopedClusterClient.asCurrentUser);
 
     const executeEsQuery = await executeEsQueryFactory(
       params,
