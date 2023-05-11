@@ -194,6 +194,13 @@ export const SW_REQUIRED_API_TOKEN = i18n.translate(
   }
 );
 
+export const SW_REQUIRED_CONNECTOR_TYPE = i18n.translate(
+  'xpack.stackConnectors.components.swimlane.error.requiredConnectorType',
+  {
+    defaultMessage: 'Connector Type is required.',
+  }
+);
+
 export const SW_BACK = i18n.translate('xpack.stackConnectors.components.swimlane.prevStep', {
   defaultMessage: 'Back',
 });

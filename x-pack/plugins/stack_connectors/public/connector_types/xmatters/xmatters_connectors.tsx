@@ -19,9 +19,9 @@ import {
   TextField,
   PasswordField,
   HiddenField,
+  ButtonGroupField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ButtonGroupField } from '@kbn/triggers-actions-ui-plugin/public';
 import { XmattersAuthenticationType } from '../types';
 import * as i18n from './translations';
 
@@ -107,12 +107,26 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         </h4>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <ButtonGroupField
-        defaultValue={selectedAuthDefaultValue}
-        path={'__internal__.auth'}
-        label={i18n.BASIC_AUTH_LABEL}
-        legend={i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND}
-        options={authenticationButtons}
+      <UseField
+        path="__internal__.auth"
+        component={ButtonGroupField}
+        config={{
+          label: i18n.BASIC_AUTH_LABEL,
+          defaultValue: selectedAuthDefaultValue,
+          validations: [
+            {
+              validator: emptyField(i18n.BASIC_AUTH_REQUIRED),
+            },
+          ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            legend: i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND,
+            options: authenticationButtons,
+            buttonSize: 'm',
+            color: 'primary',
+          },
+        }}
       />
       <UseField path="config.usesBasic" component={HiddenField} config={{ defaultValue: true }} />
       <EuiSpacer size="m" />
