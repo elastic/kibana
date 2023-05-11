@@ -9,11 +9,11 @@ import React, { useState, VFC } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { canAddToBlockList } from '../../../../block_list/utils/can_add_to_block_list';
-import { AddToBlockListContextMenu } from '../../../../block_list/components/add_to_block_list';
+import { AddToBlockListContextMenu } from '../../../../block_list/components/add_to_block_list/add_to_block_list';
 import { AddToNewCase } from '../../../../cases/components/add_to_new_case/add_to_new_case';
 import { AddToExistingCase } from '../../../../cases/components/add_to_existing_case/add_to_existing_case';
 import { Indicator } from '../../../../../../common/types/indicator';
-import { InvestigateInTimelineContextMenu } from '../../../../timeline';
+import { InvestigateInTimelineContextMenu } from '../../../../timeline/components/investigate_in_timeline/investigate_in_timeline';
 import {
   ADD_TO_BLOCK_LIST_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
