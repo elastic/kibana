@@ -12,7 +12,7 @@ import { executeEsQueryFactory, OTHER_CATEGORY } from './es_query_builder';
 import { canSkipBoundariesFetch, getShapeFilters } from './get_shape_filters';
 import type {
   GeoContainmentAlertInstanceState,
-  GeoContainmentAlertType,
+  GeoContainmentRuleType,
   GeoContainmentAlertInstanceContext,
   GeoContainmentRuleState,
 } from './types';
@@ -137,7 +137,7 @@ export function getEntitiesAndGenerateAlerts(
   return { activeEntities, inactiveEntities };
 }
 
-export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor'] =>
+export const getGeoContainmentExecutor = (): GeoContainmentRuleType['executor'] =>
   async function ({
     previousStartedAt: windowStart,
     startedAt: windowEnd,

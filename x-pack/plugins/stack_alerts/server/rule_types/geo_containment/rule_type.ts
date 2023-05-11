@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectReference } from '@kbn/core/server';
 import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import type { GeoContainmentAlertType, GeoContainmentExtractedRuleParams, GeoContainmentRuleParams } from './types';
+import type { GeoContainmentRuleType, GeoContainmentExtractedRuleParams, GeoContainmentRuleParams } from './types';
 import { getGeoContainmentExecutor } from './geo_containment';
 import { ActionGroupId, RecoveryActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 
@@ -150,7 +150,7 @@ export function injectEntityAndBoundaryIds(
   } as GeoContainmentRuleParams;
 }
 
-export function getRuleType(): GeoContainmentAlertType {
+export function getRuleType(): GeoContainmentRuleType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
     defaultMessage: 'Tracking containment',
   });

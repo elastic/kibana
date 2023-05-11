@@ -71,7 +71,7 @@ export interface GeoContainmentAlertInstanceContext extends AlertInstanceContext
   containingBoundaryName?: unknown;
 }
 
-export type GeoContainmentAlertType = RuleType<
+export type GeoContainmentRuleType = RuleType<
   GeoContainmentRuleParams,
   GeoContainmentExtractedRuleParams,
   GeoContainmentRuleState,
