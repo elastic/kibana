@@ -7,14 +7,14 @@
  */
 
 import {
-  compareModelVersionsMock,
-  getModelVersionsFromMappingsMock,
-  getModelVersionMapForTypesMock,
+  compareVirtualVersionsMock,
+  getVirtualVersionMapMock,
+  getVirtualVersionsFromMappingsMock,
 } from './check_version_compatibility.test.mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
-  ModelVersionMap,
+  VirtualVersionMap,
   CompareModelVersionResult,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { checkVersionCompatibility } from './check_version_compatibility';
@@ -27,9 +27,9 @@ describe('checkVersionCompatibility', () => {
   let mappings: IndexMapping;
 
   beforeEach(() => {
-    compareModelVersionsMock.mockReset().mockReturnValue({});
-    getModelVersionsFromMappingsMock.mockReset().mockReturnValue({});
-    getModelVersionMapForTypesMock.mockReset().mockReturnValue({ status: 'equal' });
+    compareVirtualVersionsMock.mockReset().mockReturnValue({});
+    getVirtualVersionMapMock.mockReset().mockReturnValue({});
+    getVirtualVersionsFromMappingsMock.mockReset().mockReturnValue({ status: 'equal' });
 
     types = [createType({ name: 'foo' }), createType({ name: 'bar' })];
 
@@ -46,8 +46,8 @@ describe('checkVersionCompatibility', () => {
       deletedTypes,
     });
 
-    expect(getModelVersionMapForTypesMock).toHaveBeenCalledTimes(1);
-    expect(getModelVersionMapForTypesMock).toHaveBeenCalledWith(types);
+    expect(getVirtualVersionMapMock).toHaveBeenCalledTimes(1);
+    expect(getVirtualVersionMapMock).toHaveBeenCalledWith(types);
   });
 
   it('calls getModelVersionsFromMappings with the correct parameters', () => {
@@ -58,8 +58,8 @@ describe('checkVersionCompatibility', () => {
       deletedTypes,
     });
 
-    expect(getModelVersionsFromMappingsMock).toHaveBeenCalledTimes(1);
-    expect(getModelVersionsFromMappingsMock).toHaveBeenCalledWith({
+    expect(getVirtualVersionsFromMappingsMock).toHaveBeenCalledTimes(1);
+    expect(getVirtualVersionsFromMappingsMock).toHaveBeenCalledWith({
       mappings,
       source: 'mappingVersions',
       knownTypes: ['foo', 'bar'],
@@ -67,11 +67,11 @@ describe('checkVersionCompatibility', () => {
   });
 
   it('calls compareModelVersions with the correct parameters', () => {
-    const appVersions: ModelVersionMap = { foo: 2, bar: 2 };
-    const indexVersions: ModelVersionMap = { foo: 1, bar: 1 };
+    const appVersions: VirtualVersionMap = { foo: '10.2.0', bar: '10.2.0' };
+    const indexVersions: VirtualVersionMap = { foo: '10.1.0', bar: '10.1.0' };
 
-    getModelVersionMapForTypesMock.mockReturnValue(appVersions);
-    getModelVersionsFromMappingsMock.mockReturnValue(indexVersions);
+    getVirtualVersionMapMock.mockReturnValue(appVersions);
+    getVirtualVersionsFromMappingsMock.mockReturnValue(indexVersions);
 
     checkVersionCompatibility({
       types,
@@ -80,8 +80,8 @@ describe('checkVersionCompatibility', () => {
       deletedTypes,
     });
 
-    expect(compareModelVersionsMock).toHaveBeenCalledTimes(1);
-    expect(compareModelVersionsMock).toHaveBeenCalledWith({
+    expect(compareVirtualVersionsMock).toHaveBeenCalledTimes(1);
+    expect(compareVirtualVersionsMock).toHaveBeenCalledWith({
       appVersions,
       indexVersions,
       deletedTypes,
@@ -97,7 +97,7 @@ describe('checkVersionCompatibility', () => {
         equal: [],
       },
     };
-    compareModelVersionsMock.mockReturnValue(expected);
+    compareVirtualVersionsMock.mockReturnValue(expected);
 
     const result = checkVersionCompatibility({
       types,

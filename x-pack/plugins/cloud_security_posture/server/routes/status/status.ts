@@ -45,6 +45,7 @@ import {
 import { checkIndexStatus } from '../../lib/check_index_status';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
+export const INDEX_TIMEOUT_IN_MINUTES_CNVM = 60;
 
 interface CspStatusDependencies {
   logger: Logger;
@@ -101,6 +102,7 @@ export const calculateIntegrationStatus = (
 ): CspStatusCode => {
   // We check privileges only for the relevant indices for our pages to appear
   const postureTypeCheck: PostureTypes = POSTURE_TYPES[integration];
+
   if (indicesStatus.latest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
   if (!installation) return 'not-installed';
@@ -112,7 +114,10 @@ export const calculateIntegrationStatus = (
   if (
     indicesStatus.latest === 'empty' &&
     indicesStatus.stream === 'empty' &&
-    timeSinceInstallationInMinutes < INDEX_TIMEOUT_IN_MINUTES
+    timeSinceInstallationInMinutes <
+      (postureTypeCheck !== VULN_MGMT_POLICY_TEMPLATE
+        ? INDEX_TIMEOUT_IN_MINUTES
+        : INDEX_TIMEOUT_IN_MINUTES_CNVM)
   )
     return 'waiting_for_results';
 

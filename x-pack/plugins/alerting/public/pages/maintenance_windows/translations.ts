@@ -20,6 +20,20 @@ export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const READ_ONLY_BADGE_TEXT = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.readOnly.text',
+  {
+    defaultMessage: 'Read only',
+  }
+);
+
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to create or edit maintenance Windows',
+  }
+);
+
 export const CREATE_NEW_BUTTON = i18n.translate(
   'xpack.alerting.maintenanceWindows.createNewButton',
   {
@@ -572,7 +586,7 @@ export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcomi
 export const UPGRADE_TO_PLATINUM = i18n.translate(
   'xpack.alerting.maintenanceWindows.licenseCallout.updgradeToPlatinumTitle',
   {
-    defaultMessage: 'Maintenance Windows are a subscription feature.',
+    defaultMessage: 'Maintenance windows are a subscription feature',
   }
 );
 

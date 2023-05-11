@@ -5,55 +5,24 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { EuiEmptyPrompt, EuiTitle, EuiLink } from '@elastic/eui';
 import { useEnablement } from '../../../../hooks/use_enablement';
-import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const EnablementEmptyState = () => {
-  const { error, enablement, loading } = useEnablement();
-  const [shouldFocusEnablementButton, setShouldFocusEnablementButton] = useState(false);
-  const [isEnabling, setIsEnabling] = useState(false);
+  const { enablement, loading } = useEnablement();
   const { isEnabled } = enablement;
-  const isEnabledRef = useRef(isEnabled);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!isEnabled && isEnabledRef.current === true) {
-      /* shift focus to enable button when enable toggle disappears. Prevent
-       * focus loss on the page */
-      setShouldFocusEnablementButton(true);
-    }
-    isEnabledRef.current = Boolean(isEnabled);
-  }, [isEnabled]);
-
-  useEffect(() => {
-    if (isEnabling && isEnabled) {
-      setIsEnabling(false);
-      kibanaService.toasts.addSuccess({
-        title: labels.SYNTHETICS_ENABLE_SUCCESS,
-        toastLifeTimeMs: 3000,
-      });
-    } else if (isEnabling && error) {
-      setIsEnabling(false);
-      kibanaService.toasts.addSuccess({
-        title: labels.SYNTHETICS_DISABLE_SUCCESS,
-        toastLifeTimeMs: 3000,
-      });
-    }
-  }, [isEnabled, isEnabling, error]);
-
-  useEffect(() => {
-    if (shouldFocusEnablementButton) {
-      buttonRef.current?.focus();
-    }
-  }, [shouldFocusEnablementButton]);
 
   return !isEnabled && !loading ? (
     <EuiEmptyPrompt
-      title={<h2>{labels.SYNTHETICS_APP_DISABLED_LABEL}</h2>}
-      body={<p>{labels.MONITOR_MANAGEMENT_DISABLED_MESSAGE}</p>}
+      title={<h2>{labels.SYNTHETICS_APP_ENABLEMENT_TITLE}</h2>}
+      body={
+        <>
+          <p>{labels.MONITOR_MANAGEMENT_DISABLED_MESSAGE}</p>
+          <p>{labels.MONITOR_MANAGEMENT_CONTACT_ADMINISTRATOR}</p>
+        </>
+      }
       footer={
         <>
           <EuiTitle size="xxs">

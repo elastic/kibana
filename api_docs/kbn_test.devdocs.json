@@ -2490,7 +2490,7 @@
             "section": "def-common.EsVersion",
             "text": "EsVersion"
           },
-          "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[] | undefined; exclude: string[] | undefined; }; suiteFilters: { include: string[] | undefined; exclude: string[] | undefined; }; }) => Promise<void>"
+          "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }) => Promise<void>"
         ],
         "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
         "deprecated": false,
@@ -2533,7 +2533,7 @@
                 "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
-              "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[] | undefined; exclude: string[] | undefined; }; suiteFilters: { include: string[] | undefined; exclude: string[] | undefined; }; }"
+              "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }"
             ],
             "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
             "deprecated": false,
@@ -2844,7 +2844,7 @@
             "tags": [],
             "label": "dataArchive",
             "description": [
-              "\nPath to data archive snapshot to run Elasticsearch with.\nTo prepare the the snapshot:\n- run Elasticsearch server\n- index necessary data\n- stop Elasticsearch server\n- go to Elasticsearch folder: cd .es/${ELASTICSEARCH_VERSION}\n- archive data folder: zip -r my_archive.zip data"
+              "\nPath to data archive snapshot to run Elasticsearch with.\nTo prepare the snapshot:\n- run Elasticsearch server\n- index necessary data\n- stop Elasticsearch server\n- go to Elasticsearch folder: cd .es/${ELASTICSEARCH_VERSION}\n- archive data folder: zip -r my_archive.zip data"
             ],
             "signature": [
               "string | undefined"

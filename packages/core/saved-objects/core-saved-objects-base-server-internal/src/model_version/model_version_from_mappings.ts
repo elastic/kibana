@@ -7,8 +7,8 @@
  */
 
 import type { IndexMapping, IndexMappingMeta } from '../mappings';
-import type { ModelVersionMap } from './version_map';
-import { assertValidModelVersion } from './conversion';
+import type { VirtualVersionMap } from './version_map';
+import { assertValidVirtualVersion } from './conversion';
 
 export interface GetModelVersionsFromMappingsOpts {
   mappings: IndexMapping;
@@ -20,16 +20,16 @@ export interface GetModelVersionsFromMappingsOpts {
 /**
  * Build the version map from the specified source of the provided mappings.
  */
-export const getModelVersionsFromMappings = ({
+export const getVirtualVersionsFromMappings = ({
   mappings,
   source,
   knownTypes,
-}: GetModelVersionsFromMappingsOpts): ModelVersionMap | undefined => {
+}: GetModelVersionsFromMappingsOpts): VirtualVersionMap | undefined => {
   if (!mappings._meta) {
     return undefined;
   }
 
-  return getModelVersionsFromMappingMeta({
+  return getVirtualVersionsFromMappingMeta({
     meta: mappings._meta,
     source,
     knownTypes,
@@ -46,20 +46,20 @@ export interface GetModelVersionsFromMappingMetaOpts {
 /**
  * Build the version map from the specified source of the provided mappings meta.
  */
-export const getModelVersionsFromMappingMeta = ({
+export const getVirtualVersionsFromMappingMeta = ({
   meta,
   source,
   knownTypes,
-}: GetModelVersionsFromMappingMetaOpts): ModelVersionMap | undefined => {
+}: GetModelVersionsFromMappingMetaOpts): VirtualVersionMap | undefined => {
   const indexVersions = source === 'mappingVersions' ? meta.mappingVersions : meta.docVersions;
   if (!indexVersions) {
     return undefined;
   }
   const typeSet = knownTypes ? new Set(knownTypes) : undefined;
 
-  return Object.entries(indexVersions).reduce<ModelVersionMap>((map, [type, rawVersion]) => {
+  return Object.entries(indexVersions).reduce<VirtualVersionMap>((map, [type, rawVersion]) => {
     if (!typeSet || typeSet.has(type)) {
-      map[type] = assertValidModelVersion(rawVersion);
+      map[type] = assertValidVirtualVersion(rawVersion);
     }
     return map;
   }, {});

@@ -1375,27 +1375,27 @@
         "references": [
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4237,31 +4237,31 @@
         "references": [
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/index.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/index.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/components/data_table/index.tsx"
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4329,6 +4329,10 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
           },
           {
@@ -4689,11 +4693,11 @@
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/mock/mock_source.ts"
+            "path": "x-pack/packages/security-solution/data_table/mock/mock_source.ts"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/kbn-securitysolution-data-table/mock/mock_source.ts"
+            "path": "x-pack/packages/security-solution/data_table/mock/mock_source.ts"
           }
         ],
         "initialIsOpen": false

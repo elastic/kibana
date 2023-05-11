@@ -7,7 +7,7 @@
 
 import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_STAT } from '../../../helpers';
@@ -66,7 +66,7 @@ const defaultProps: Props = {
 
 describe('DataQualityDetails', () => {
   describe('when ILM phases are provided', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.clearAllMocks();
 
       render(
@@ -74,6 +74,8 @@ describe('DataQualityDetails', () => {
           <DataQualityDetails {...defaultProps} />
         </TestProviders>
       );
+
+      await waitFor(() => {}); // wait for PatternComponent state updates
     });
 
     test('it renders the storage details', () => {

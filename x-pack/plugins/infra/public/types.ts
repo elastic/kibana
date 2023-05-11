@@ -38,6 +38,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -45,6 +46,7 @@ import type {
 } from './components/infrastructure_node_metrics_tables/shared';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { LogViewsServiceStart } from './services/log_views';
+import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
 
 // Our own setup and start contract values
@@ -53,6 +55,7 @@ export type InfraClientSetupExports = void;
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
   logViews: LogViewsServiceStart;
+  metricsExplorerViews: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
   ContainerMetricsTable: (
     props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
@@ -70,6 +73,7 @@ export interface InfraClientSetupDeps {
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlPluginSetup;
   embeddable: EmbeddableSetup;
@@ -93,6 +97,7 @@ export interface InfraClientStartDeps {
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
   telemetry: ITelemetryClient;

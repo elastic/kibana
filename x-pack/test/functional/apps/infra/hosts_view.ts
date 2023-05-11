@@ -149,9 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const enableHostView = () => pageObjects.infraHostsView.clickEnableHostViewButton();
 
   // Tests
-
-  // Failing: See https://github.com/elastic/kibana/issues/155429
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -328,6 +326,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           START_DATE.format(timepickerFormat),
           END_DATE.format(timepickerFormat)
         );
+
+        await retry.waitFor(
+          'wait for table and KPI charts to load',
+          async () =>
+            (await pageObjects.infraHostsView.isHostTableLoading()) &&
+            (await pageObjects.infraHostsView.isKPIChartsLoaded())
+        );
       });
 
       after(async () => {
@@ -359,29 +364,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      it('should render "N/A" when processes summary is not available in flyout', async () => {
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        const processesTotalValue =
+          await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+        const processValue = await processesTotalValue.getVisibleText();
+        expect(processValue).to.eql('N/A');
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
+      });
+
       describe('KPI tiles', () => {
         it('should render 5 metrics trend tiles', async () => {
-          const hosts = await pageObjects.infraHostsView.getAllMetricsTrendTiles();
+          const hosts = await pageObjects.infraHostsView.getAllKPITiles();
           expect(hosts.length).to.equal(5);
         });
 
         [
-          { metric: 'hosts', value: '6' },
+          { metric: 'hostsCount', value: '6' },
           { metric: 'cpu', value: '0.8%' },
           { metric: 'memory', value: '16.81%' },
           { metric: 'tx', value: 'N/A' },
           { metric: 'rx', value: 'N/A' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
-            const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
-            expect(tileValue).to.eql(value);
+            await retry.try(async () => {
+              const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+              expect(tileValue).to.eql(value);
+            });
           });
         });
       });
 
       describe('Metrics Tab', () => {
         before(async () => {
-          browser.scrollTop();
+          await browser.scrollTop();
           await pageObjects.infraHostsView.visitMetricsTab();
         });
 
@@ -391,18 +408,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should have an option to open the chart in lens', async () => {
-          await pageObjects.infraHostsView.getOpenInLensOption();
+          await pageObjects.infraHostsView.clickAndValidateMetriChartActionOptions();
         });
       });
 
       describe('Logs Tab', () => {
         before(async () => {
-          browser.scrollTop();
+          await browser.scrollTop();
           await pageObjects.infraHostsView.visitLogsTab();
         });
 
         it('should load the Logs tab section when clicking on it', async () => {
-          testSubjects.existOrFail('hostsView-logs');
+          await testSubjects.existOrFail('hostsView-logs');
         });
       });
 
@@ -413,7 +430,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const COLUMNS = 5;
 
         before(async () => {
-          browser.scrollTop();
+          await browser.scrollTop();
           await pageObjects.infraHostsView.visitAlertTab();
         });
 
@@ -474,7 +491,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const query = filtererEntries.map((entry) => `host.name :"${entry.title}"`).join(' or ');
 
         before(async () => {
+          await browser.scrollTop();
           await pageObjects.infraHostsView.submitQuery(query);
+          await retry.waitFor(
+            'wait for table and KPI charts to load',
+            async () =>
+              (await pageObjects.infraHostsView.isHostTableLoading()) &&
+              (await pageObjects.infraHostsView.isKPIChartsLoaded())
+          );
         });
 
         after(async () => {
@@ -496,14 +520,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should update the KPIs content on a search submit', async () => {
           await Promise.all(
             [
-              { metric: 'hosts', value: '3' },
+              { metric: 'hostsCount', value: '3' },
               { metric: 'cpu', value: '0.8%' },
               { metric: 'memory', value: '16.25%' },
               { metric: 'tx', value: 'N/A' },
               { metric: 'rx', value: 'N/A' },
             ].map(async ({ metric, value }) => {
-              const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
-              expect(tileValue).to.eql(value);
+              await retry.try(async () => {
+                const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+                expect(tileValue).to.eql(value);
+              });
             })
           );
         });
@@ -528,9 +554,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
           });
         });
+
+        it('should show an error message when an invalid KQL is submitted', async () => {
+          await pageObjects.infraHostsView.submitQuery('cloud.provider="gcp" A');
+          await testSubjects.existOrFail('hostsViewErrorCallout');
+        });
       });
 
       describe('Pagination and Sorting', () => {
+        before(async () => {
+          await browser.scrollTop();
+        });
+
         beforeEach(async () => {
           await pageObjects.infraHostsView.changePageSize(5);
         });

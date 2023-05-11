@@ -12,7 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/api';
 import { CommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
@@ -29,10 +29,7 @@ import { validateRegisteredAttachments } from './validators';
  *
  * @ignore
  */
-export const addComment = async (
-  addArgs: AddArgs,
-  clientArgs: CasesClientArgs
-): Promise<CaseResponse> => {
+export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
   const { comment, caseId } = addArgs;
   const query = pipe(
     CommentRequestRt.decode(comment),

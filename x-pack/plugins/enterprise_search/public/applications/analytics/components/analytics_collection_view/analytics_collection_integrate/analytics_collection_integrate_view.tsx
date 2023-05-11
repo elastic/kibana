@@ -75,7 +75,7 @@ const CORSStep = (): EuiContainedStepProps => ({
 
           <EuiCodeBlock language="yaml" isCopyable>
             {`http.cors.allow-origin: "*"
-http.cors.enabled: true 
+http.cors.enabled: true
 http.cors.allow-credentials: true
 http.cors.allow-methods: OPTIONS, POST
 http.cors.allow-headers: X-Requested-With, X-Auth-Token, Content-Type, Content-Length, Authorization, Access-Control-Allow-Headers, Accept`}
@@ -90,7 +90,7 @@ http.cors.allow-headers: X-Requested-With, X-Auth-Token, Content-Type, Content-L
             )}
           </p>
           <EuiLink
-            href={``}
+            href={docLinks.behavioralAnalyticsCORS}
             data-telemetry-id="entSearchContent-analytics-cors-learnMoreLink"
             external
             target="_blank"
@@ -272,7 +272,7 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
           'xpack.enterpriseSearch.analytics.collectionsView.integration.description',
           {
             defaultMessage:
-              'Easily install our tracker on your search application to receive in depth analytics data. No search applications required.',
+              'Easily install our tracker on your application or website to receive in-depth analytics data.',
           }
         ),
         rightSideItems: [],

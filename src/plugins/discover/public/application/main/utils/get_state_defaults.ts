@@ -19,6 +19,8 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
+import { isTextBasedQuery } from './is_text_based_query';
+import { getValidViewMode } from './get_valid_view_mode';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -81,7 +83,10 @@ export function getStateDefaults({
     defaultState.rowHeight = savedSearch.rowHeight;
   }
   if (savedSearch.viewMode) {
-    defaultState.viewMode = savedSearch.viewMode;
+    defaultState.viewMode = getValidViewMode({
+      viewMode: savedSearch.viewMode,
+      isTextBasedQueryMode: isTextBasedQuery(query),
+    });
   }
   if (savedSearch.hideAggregatedPreview) {
     defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;

@@ -90,6 +90,7 @@ export const SelectConnector: React.FC = () => {
                 <ConnectorCheckable
                   icon={connector.icon}
                   isBeta={connector.isBeta}
+                  isTechPreview={Boolean(connector.isTechPreview)}
                   name={connector.name}
                   serviceType={connector.serviceType}
                   onChange={() => {
@@ -117,8 +118,9 @@ export const SelectConnector: React.FC = () => {
             <EuiFlexItem grow={false}>
               <span>
                 <EuiButton
+                  data-test-subj="entSearchContent-connector-selectConnector-selectAndConfigure"
                   data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
-                  disabled={!selectedConnector}
+                  disabled={selectedConnector === null}
                   fill
                   color="primary"
                   type="submit"

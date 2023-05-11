@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
@@ -31,6 +32,7 @@ import { createMetricsFetchData, createMetricsHasData } from './metrics_overview
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
 import { LogViewsService } from './services/log_views';
+import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { TelemetryService } from './services/telemetry';
 import {
   InfraClientCoreSetup,
@@ -47,6 +49,7 @@ export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
   private logViews: LogViewsService;
+  private metricsExplorerViews: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
@@ -57,6 +60,7 @@ export class Plugin implements InfraClientPluginClass {
       messageFields:
         this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
     });
+    this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
   }
 
@@ -64,6 +68,10 @@ export class Plugin implements InfraClientPluginClass {
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
+
+    pluginsSetup.uiActions.registerTrigger({
+      id: ObservabilityTriggerId.LogEntryContextMenu,
+    });
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createInventoryMetricRuleType()
@@ -298,11 +306,16 @@ export class Plugin implements InfraClientPluginClass {
       search: plugins.data.search,
     });
 
+    const metricsExplorerViews = this.metricsExplorerViews.start({
+      http: core.http,
+    });
+
     const telemetry = this.telemetry.start();
 
     const startContract: InfraClientStartExports = {
       inventoryViews,
       logViews,
+      metricsExplorerViews,
       telemetry,
       ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
       HostMetricsTable: createLazyHostMetricsTable(getStartServices),

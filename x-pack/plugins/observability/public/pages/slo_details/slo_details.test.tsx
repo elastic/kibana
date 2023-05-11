@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useParams } from 'react-router-dom';
 import { useLicense } from '../../hooks/use_license';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
+import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
+import { useCloneSlo } from '../../hooks/slo/use_clone_slo';
+import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { buildSlo } from '../../data/slo/slo';
 import { paths } from '../../config/paths';
-import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
 import {
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
@@ -34,22 +36,27 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_breadcrumbs');
 jest.mock('../../hooks/use_license');
+jest.mock('../../hooks/slo/use_capabilities');
 jest.mock('../../hooks/slo/use_fetch_active_alerts');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_fetch_historical_summary');
-jest.mock('../../hooks/slo/use_capabilities');
+jest.mock('../../hooks/slo/use_clone_slo');
+jest.mock('../../hooks/slo/use_delete_slo');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
+const useCapabilitiesMock = useCapabilities as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
+const useCloneSloMock = useCloneSlo as jest.Mock;
+const useDeleteSloMock = useDeleteSlo as jest.Mock;
 
 const mockNavigate = jest.fn();
-const mockBasePathPrepend = jest.fn();
 const mockLocator = jest.fn();
+const mockClone = jest.fn();
+const mockDelete = jest.fn();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -58,12 +65,13 @@ const mockKibana = () => {
       charts: chartPluginMock.createStartContract(),
       http: {
         basePath: {
-          prepend: mockBasePathPrepend,
+          prepend: (url: string) => url,
         },
       },
       notifications: {
         toasts: {
           addSuccess: jest.fn(),
+          addDanger: jest.fn(),
           addError: jest.fn(),
         },
       },
@@ -100,6 +108,8 @@ describe('SLO Details Page', () => {
       sloHistoricalSummaryResponse: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: {} });
+    useCloneSloMock.mockReturnValue({ mutate: mockClone });
+    useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
   });
 
   describe('when the incorrect license is found', () => {
@@ -111,7 +121,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
     });
   });
 
@@ -217,7 +227,26 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />);
 
     fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
-    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverClone')).toBeTruthy();
+
+    const button = screen.queryByTestId('sloDetailsHeaderControlPopoverClone');
+
+    expect(button).toBeTruthy();
+
+    fireEvent.click(button!);
+
+    const { id, createdAt, enabled, revision, summary, updatedAt, ...newSlo } = slo;
+
+    expect(mockClone).toBeCalledWith({
+      idToCopyFrom: slo.id,
+      slo: {
+        ...newSlo,
+        name: `[Copy] ${newSlo.name}`,
+      },
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+    });
   });
 
   it("renders a 'Delete' button under actions menu", async () => {
@@ -229,14 +258,25 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />);
 
     fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
-    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverDelete')).toBeTruthy();
 
-    const manageRulesButton = screen.queryByTestId('sloDetailsHeaderControlPopoverManageRules');
-    expect(manageRulesButton).toBeTruthy();
+    const button = screen.queryByTestId('sloDetailsHeaderControlPopoverDelete');
 
-    fireEvent.click(manageRulesButton!);
+    expect(button).toBeTruthy();
 
-    expect(mockLocator).toBeCalled();
+    fireEvent.click(button!);
+
+    const deleteModalConfirmButton = screen.queryByTestId('confirmModalConfirmButton');
+
+    fireEvent.click(deleteModalConfirmButton!);
+
+    expect(mockDelete).toBeCalledWith({
+      id: slo.id,
+      name: slo.name,
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+    });
   });
 
   it('renders the Overview tab by default', async () => {

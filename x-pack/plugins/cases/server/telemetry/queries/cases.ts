@@ -14,8 +14,6 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   OWNERS,
 } from '../../../common/constants';
-import { ESCaseStatus } from '../../services/cases/types';
-import type { ESCaseAttributes } from '../../services/cases/types';
 import type {
   CollectTelemetryDataParams,
   CasesTelemetry,
@@ -37,12 +35,14 @@ import {
   getReferencesAggregationQuery,
   getSolutionValues,
 } from './utils';
+import type { CasePersistedAttributes } from '../../common/types/case';
+import { CasePersistedStatus } from '../../common/types/case';
 
 export const getLatestCasesDates = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<LatestDates> => {
   const find = async (sortField: string) =>
-    savedObjectsClient.find<ESCaseAttributes>({
+    savedObjectsClient.find<CasePersistedAttributes>({
       page: 1,
       perPage: 1,
       sortField,
@@ -94,9 +94,12 @@ export const getCasesTelemetryData = async ({
         total: casesRes.total,
         ...getCountsFromBuckets(aggregationsBuckets.counts),
         status: {
-          open: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.OPEN),
-          inProgress: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.IN_PROGRESS),
-          closed: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.CLOSED),
+          open: findValueInBuckets(aggregationsBuckets.status, CasePersistedStatus.OPEN),
+          inProgress: findValueInBuckets(
+            aggregationsBuckets.status,
+            CasePersistedStatus.IN_PROGRESS
+          ),
+          closed: findValueInBuckets(aggregationsBuckets.status, CasePersistedStatus.CLOSED),
         },
         syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
         syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),

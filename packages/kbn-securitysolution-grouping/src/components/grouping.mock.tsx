@@ -8,29 +8,28 @@
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-export const rule1Name = 'Rule 1 name';
-const rule1Desc = 'Rule 1 description';
-export const rule2Name = 'Rule 2 name';
-const rule2Desc = 'Rule 2 description';
+export const host1Name = 'nice-host';
+export const host2Name = 'cool-host';
 
 export const mockGroupingProps = {
   activePage: 0,
   data: {
     groupsCount: {
-      value: 2,
+      value: 3,
     },
     groupByFields: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [
         {
-          key: [rule1Name, rule1Desc],
-          key_as_string: `${rule1Name}|${rule1Desc}`,
+          key: [host1Name],
+          key_as_string: `${host1Name}`,
+          selectedGroup: 'host.name',
           doc_count: 1,
           hostsCountAggregation: {
             value: 1,
           },
-          ruleTags: {
+          hostTags: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [],
@@ -56,13 +55,14 @@ export const mockGroupingProps = {
           },
         },
         {
-          key: [rule2Name, rule2Desc],
-          key_as_string: `${rule2Name}|${rule2Desc}`,
+          key: [host2Name],
+          key_as_string: `${host2Name}`,
+          selectedGroup: 'host.name',
           doc_count: 1,
           hostsCountAggregation: {
             value: 1,
           },
-          ruleTags: {
+          hostTags: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [],
@@ -87,10 +87,47 @@ export const mockGroupingProps = {
             value: 1,
           },
         },
+        {
+          key: ['-'],
+          key_as_string: `-`,
+          selectedGroup: 'host.name',
+          isNullGroup: true,
+          doc_count: 11,
+          hostsCountAggregation: {
+            value: 11,
+          },
+          hostTags: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          alertsCount: {
+            value: 11,
+          },
+          severitiesSubAggregation: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'low',
+                doc_count: 11,
+              },
+            ],
+          },
+          countSeveritySubAggregation: {
+            value: 11,
+          },
+          usersCountAggregation: {
+            value: 11,
+          },
+        },
       ],
     },
     unitsCount: {
-      value: 2,
+      value: 14,
+    },
+    unitsCountWithoutNull: {
+      value: 14,
     },
   },
   groupingId: 'test-grouping-id',
@@ -98,7 +135,7 @@ export const mockGroupingProps = {
   itemsPerPage: 25,
   renderChildComponent: () => <p>{'child component'}</p>,
   onGroupClose: () => {},
-  selectedGroup: 'kibana.alert.rule.name',
+  selectedGroup: 'host.name',
   takeActionItems: () => [
     <EuiContextMenuItem key="acknowledged" onClick={() => {}}>
       {'Mark as acknowledged'}

@@ -8,7 +8,7 @@
 
 import type {
   IndexMappingMeta,
-  ModelVersionMap,
+  VirtualVersionMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 
 export const setMetaMappingMigrationComplete = ({
@@ -16,7 +16,7 @@ export const setMetaMappingMigrationComplete = ({
   versions,
 }: {
   meta: IndexMappingMeta;
-  versions: ModelVersionMap;
+  versions: VirtualVersionMap;
 }): IndexMappingMeta => {
   return {
     ...meta,
@@ -44,7 +44,7 @@ export const setMetaDocMigrationComplete = ({
   versions,
 }: {
   meta: IndexMappingMeta;
-  versions: ModelVersionMap;
+  versions: VirtualVersionMap;
 }): IndexMappingMeta => {
   return {
     ...meta,

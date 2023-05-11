@@ -581,9 +581,27 @@
                   "packages": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "description": "package name"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "package name"
+                            },
+                            "version": {
+                              "type": "string",
+                              "description": "package version"
+                            }
+                          }
+                        }
+                      ]
                     },
-                    "description": "list of package names to install"
+                    "description": "list of packages to install"
                   },
                   "force": {
                     "type": "boolean",
@@ -3401,46 +3419,6 @@
         ]
       },
       "parameters": []
-    },
-    "/message_signing_service/rotate_key_pair": {
-      "post": {
-        "summary": "Rotate key pair",
-        "tags": [
-          "Message Signing Service"
-        ],
-        "operationId": "rotate-key-pair",
-        "parameters": [
-          {
-            "schema": {
-              "type": "boolean"
-            },
-            "in": "query",
-            "name": "acknowledge",
-            "required": true,
-            "description": "When set to true, rotate key pair is done. If set to false or missing, it returns an error."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/error"
-          }
-        }
-      }
     },
     "/data_streams": {
       "get": {
@@ -6621,6 +6599,10 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "description": "Indicates whether the agent policy has tamper protection enabled. Default false.",
+            "type": "boolean"
           }
         },
         "required": [
@@ -6695,6 +6677,9 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -6764,6 +6749,9 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "type": "boolean"
           }
         },
         "required": [
