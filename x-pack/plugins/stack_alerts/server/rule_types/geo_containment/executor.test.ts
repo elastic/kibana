@@ -128,7 +128,6 @@ describe('getGeoContainmentExecutor', () => {
   });
 
   test('should query for shapes if state does not contain shapes', async () => {
-    // @ts-ignore
     const executionResult = await executor({
       previousStartedAt,
       startedAt,
@@ -149,8 +148,34 @@ describe('getGeoContainmentExecutor', () => {
     expect(testAlertActionArr).toMatchObject(expectedAlertResults);
   });
 
+  test('should query for shapes if boundaries request meta changes', async () => {
+    const executionResult = await executor({
+      previousStartedAt,
+      startedAt,
+      // @ts-ignore
+      services: alertServicesWithSearchMock,
+      params: geoContainmentParams,
+      // @ts-ignore
+      rule: {
+        id: ruleId,
+      },
+      // @ts-ignore
+      state: {
+        ...geoContainmentState,
+        boundariesRequestMeta: {
+          ...geoContainmentState.boundariesRequestMeta,
+          geoField: 'otherLocation',
+        }
+      },
+    });
+    if (executionResult && executionResult.state.shapesFilters) {
+      expect(boundaryCall.mock.calls.length).toBe(1);
+      expect(esAggCall.mock.calls.length).toBe(1);
+    }
+    expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+  });
+
   test('should not query for shapes if state contains shapes', async () => {
-    // @ts-ignore
     const executionResult = await executor({
       previousStartedAt,
       startedAt,
@@ -171,7 +196,6 @@ describe('getGeoContainmentExecutor', () => {
   });
 
   test('should carry through shapes filters in state to next call unmodified', async () => {
-    // @ts-ignore
     const executionResult = await executor({
       previousStartedAt,
       startedAt,
@@ -209,7 +233,6 @@ describe('getGeoContainmentExecutor', () => {
         },
       ],
     };
-    // @ts-ignore
     const executionResult = await executor({
       previousStartedAt,
       startedAt,

@@ -24,7 +24,11 @@ export function canSkipBoundariesFetch(
   requestMeta: BoundariesRequestMeta,
   prevRequestMeta?: BoundariesRequestMeta
 ) {
-  return fastIsEqual(requestMeta, prevRequestMeta);
+  return prevRequestMeta
+    ? fastIsEqual(
+      [requestMeta.geoField, requestMeta.boundaryIndexTitle, requestMeta.boundaryGeoField, requestMeta.boundaryNameField, requestMeta.boundaryIndexQuery],
+      [prevRequestMeta.geoField, prevRequestMeta.boundaryIndexTitle, prevRequestMeta.boundaryGeoField, prevRequestMeta.boundaryNameField, prevRequestMeta.boundaryIndexQuery])
+    : false;
 }
 
 export async function getShapeFilters(
