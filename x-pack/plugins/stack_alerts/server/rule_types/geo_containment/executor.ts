@@ -65,7 +65,7 @@ export async function executor({
     services.scopedClusterClient.asCurrentUser,
     shapesFilters,
     windowStart,
-    windowEnd,
+    windowEnd
   );
 
   const currLocationMap: Map<string, GeoContainmentAlertInstanceState[]> = transformResults(

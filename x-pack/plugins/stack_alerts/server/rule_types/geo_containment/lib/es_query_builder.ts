@@ -19,15 +19,9 @@ export async function executeEsQuery(
   esClient: ElasticsearchClient,
   shapesFilters: Record<string, unknown>,
   gteDateTime: Date | null,
-  ltDateTime: Date | null,
+  ltDateTime: Date | null
 ): Promise<estypes.SearchResponse<unknown>> {
-  const {
-    entity,
-    index,
-    dateField,
-    geoField,
-    indexQuery,
-  } = params;
+  const { entity, index, dateField, geoField, indexQuery } = params;
   let esFormattedQuery;
   if (indexQuery) {
     const gteEpochDateTime = gteDateTime ? new Date(gteDateTime).getTime() : null;
