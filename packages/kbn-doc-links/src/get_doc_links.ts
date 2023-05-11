@@ -155,6 +155,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       machineLearningStart: `${ENTERPRISE_SEARCH_DOCS}machine-learning-start.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html`,
+      searchApplications: `${ENTERPRISE_SEARCH_DOCS}search-applications.html`,
+      searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
@@ -378,6 +380,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
       ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
+      configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     securitySolution: {
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
@@ -507,7 +510,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
       serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
-      slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
+      slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-webhook`,
+      slackApiAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-web-api`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
       connectors: `${KIBANA_DOCS}action-types.html`,
     },
@@ -739,6 +743,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     searchUI: {
       appSearch: `${SEARCH_UI_DOCS}tutorials/app-search`,
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
+    },
+    synthetics: {
+      featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
     },
   });
 };
