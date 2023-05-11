@@ -180,7 +180,7 @@ _meta:
     const sourceData = getYamlTestData(undefined, '0.2.0');
     const expectedData = getExpectedData('0.2.0');
 
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
@@ -191,9 +191,9 @@ _meta:
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
@@ -208,7 +208,7 @@ _meta:
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>)
       .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
       .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
@@ -218,14 +218,14 @@ _meta:
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: {
           installed_es: previousInstallation.installed_es,
         },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
     // Mock transform from old version
@@ -242,10 +242,10 @@ _meta:
     });
 
     await installTransforms({
-      installablePackage: ({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
@@ -460,7 +460,7 @@ _meta:
     const sourceData = getYamlTestData(undefined, '0.2.0');
     const expectedData = getExpectedData('0.2.0');
 
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.1.0-dev.0',
@@ -471,9 +471,9 @@ _meta:
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
@@ -488,7 +488,7 @@ _meta:
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>)
       .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
       .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
@@ -498,14 +498,14 @@ _meta:
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: {
           installed_es: previousInstallation.installed_es,
         },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
     // Mock transform from old version
@@ -522,10 +522,10 @@ _meta:
     });
 
     await installTransforms({
-      installablePackage: ({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
@@ -748,7 +748,7 @@ _meta:
     const sourceData = getYamlTestData(false, '0.2.0');
     const expectedData = getExpectedData('0.2.0');
 
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
@@ -759,9 +759,9 @@ _meta:
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
@@ -776,7 +776,7 @@ _meta:
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>)
       .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
       .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
@@ -785,14 +785,14 @@ _meta:
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: {
           installed_es: previousInstallation.installed_es,
         },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
     // Mock transform from old version
@@ -809,10 +809,10 @@ _meta:
     });
 
     await installTransforms({
-      installablePackage: ({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
@@ -1004,18 +1004,18 @@ _meta:
     const sourceData = getYamlTestData(false, '0.2.0');
     const expectedData = getExpectedData('0.2.0');
 
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: `logs-endpoint.metadata_current-default-0.2.0`,
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>)
       .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
       .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
@@ -1024,19 +1024,19 @@ _meta:
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: { installed_es: [] },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
     await installTransforms({
-      installablePackage: ({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
@@ -1057,7 +1057,7 @@ _meta:
     const sourceData = getYamlTestData(false, '0.1.0');
     const expectedData = getExpectedData('0.1.0');
 
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [
         {
           id: `logs-endpoint.metadata_current-default-0.2.0`,
@@ -1076,9 +1076,9 @@ _meta:
           type: ElasticsearchAssetType.componentTemplate,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: `logs-endpoint.metadata_current-default-0.1.0`,
@@ -1097,7 +1097,7 @@ _meta:
           type: ElasticsearchAssetType.componentTemplate,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>)
       .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
       .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
@@ -1106,12 +1106,12 @@ _meta:
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: { installed_es: [] },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
     // Mock resp for when index from older version already exists
@@ -1126,10 +1126,10 @@ _meta:
     );
 
     await installTransforms({
-      installablePackage: ({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
@@ -1159,7 +1159,7 @@ _meta:
     // Old fleet_transform_version is 0.1.0, fleet_transform_version to be installed is 0.1.0
     const sourceData = getYamlTestData(false, '0.1.0');
 
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [
         {
           id: 'logs-endpoint.metadata_current-default-0.1.0',
@@ -1178,16 +1178,16 @@ _meta:
           type: ElasticsearchAssetType.componentTemplate,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: 'endpoint.metadata-current-default-0.1.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
     (getAsset as jest.MockedFunction<typeof getAsset>)
       .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
@@ -1198,19 +1198,19 @@ _meta:
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: { installed_es: currentInstallation.installed_es },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
     await installTransforms({
-      installablePackage: ({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
