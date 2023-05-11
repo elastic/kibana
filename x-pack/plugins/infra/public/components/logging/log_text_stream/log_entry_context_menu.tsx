@@ -83,7 +83,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
       .concat(
         (externalItems ?? []).map((item, i) => (
           <EuiContextMenuItem
-            key={i + wrappedItems.length}
+            key={`external_${i}`}
             {...item}
             onClick={closeMenuAndCall(item.onClick)}
           />

@@ -108,7 +108,7 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
       : Promise.resolve([]);
   }, [transaction, uiActions]);
 
-  if (externalMenuItems.value) {
+  if (externalMenuItems.value?.length) {
     sections.push([
       {
         key: 'external',
