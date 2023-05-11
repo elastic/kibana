@@ -177,7 +177,7 @@ describe('createActionRoute', () => {
       config: { foo: ' ' },
       secrets: {},
     };
-    expect(() => bodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
+    expect(() => bodySchema.parse(body)).toThrowErrorMatchingInlineSnapshot(
       `"[config.foo]: value '' is not valid"`
     );
   });
