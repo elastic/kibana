@@ -18,7 +18,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { BARCHART_AGGREGATION_NAME } from '../../../../../common/constants';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { IndicatorsBarChartWrapper } from '.';
+import { IndicatorsBarChartWrapper } from './wrapper';
 import { Aggregation, ChartSeries } from '../../services';
 
 export default {
