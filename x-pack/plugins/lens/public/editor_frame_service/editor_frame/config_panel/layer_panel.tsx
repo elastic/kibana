@@ -34,6 +34,7 @@ import {
   LayerAction,
   VisualizationDimensionGroupConfig,
   UserMessagesGetter,
+  ExtendedUndoableOperationService,
 } from '../../../types';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
@@ -89,6 +90,7 @@ export function LayerPanel(
     }) => void;
     indexPatternService: IndexPatternServiceAPI;
     getUserMessages: UserMessagesGetter;
+    extendedUndoService: ExtendedUndoableOperationService;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -116,6 +118,7 @@ export function LayerPanel(
     visualizationState,
     onChangeIndexPattern,
     core,
+    extendedUndoService,
   } = props;
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
@@ -189,6 +192,8 @@ export function LayerPanel(
         setNextFocusedButtonId(target.columnId);
       }
 
+      extendedUndoService.begin();
+
       let hasDropSucceeded = true;
       if (layerDatasource) {
         hasDropSucceeded = Boolean(
@@ -235,8 +240,11 @@ export function LayerPanel(
           });
         }
       }
+
+      extendedUndoService.complete();
     };
   }, [
+    extendedUndoService,
     layerDatasource,
     setNextFocusedButtonId,
     layerDatasourceState,

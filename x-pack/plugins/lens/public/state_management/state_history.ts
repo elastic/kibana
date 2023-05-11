@@ -72,6 +72,7 @@ export const stateHistoryMiddleware = () => (store: MiddlewareAPI) => (next: Dis
 
     if (beginReversibleOperation.match(action)) {
       prevStateForExtendedOperation = store.getState().lens;
+      // console.log('BEGIN reversible operation');
     }
 
     if (prevStateForExtendedOperation) {
@@ -80,6 +81,7 @@ export const stateHistoryMiddleware = () => (store: MiddlewareAPI) => (next: Dis
       if (completeReversibleOperation.match(action)) {
         completeChange(prevStateForExtendedOperation);
         prevStateForExtendedOperation = undefined;
+        // console.log('COMPLETE reversible operation');
       }
     }
 

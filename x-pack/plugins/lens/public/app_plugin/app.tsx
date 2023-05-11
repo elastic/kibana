@@ -585,8 +585,8 @@ export function App({
 
   const extendedUndoService: ExtendedUndoableOperationService = useMemo(
     () => ({
-      begin: () => dispatch(beginReversibleOperation),
-      complete: () => dispatch(completeReversibleOperation),
+      begin: () => dispatch(beginReversibleOperation()),
+      complete: () => dispatch(completeReversibleOperation()),
     }),
     [dispatch]
   );

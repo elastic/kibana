@@ -124,6 +124,7 @@ export class EditorFrameService {
           indexPatternService,
           getUserMessages,
           addUserMessages,
+          extendedUndoService,
         }) => {
           return (
             <div className="lnsApp__frame">
@@ -139,6 +140,7 @@ export class EditorFrameService {
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
+                extendedUndoService={extendedUndoService}
               />
             </div>
           );
