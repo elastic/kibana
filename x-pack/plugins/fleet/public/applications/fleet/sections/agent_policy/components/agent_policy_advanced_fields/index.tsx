@@ -320,7 +320,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             })}
             checked={agentPolicy.is_protected ?? false}
             onChange={(e) => {
-              console.log('i am in the onchange', e.target.checked);
               updateAgentPolicy({ is_protected: e.target.checked });
             }}
           />
