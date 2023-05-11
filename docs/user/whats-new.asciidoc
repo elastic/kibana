@@ -67,7 +67,81 @@ with prefix format support up to yottabyte and yottabit
 [role="screenshot"]
 image::images/highlights-lens-metric-chart.png[Improvements to Lens metric chart]
 
+[discrete]
+=== Machine learning
 
+[discrete]
+==== {transform-cap} ‘schedule now’ action added to UI
+
+The {transform} UI has been updated to make use of the _schedule_now 
+functionality. This schedules a {transform} to instantly process new data 
+without waiting for the configured interval between checks for changes in the 
+source indices. It is a useful operation for {transforms} with a longer 
+frequency setting where the {transform} can be activated to update directly 
+after data has been uploaded. The feature can be used on individual {transforms} 
+as well as a bulk action on multiple.
+
+[role="screenshot"]
+image::images/highlights-ml-transform-schedule-now.png[Shedule now action for Transforms]
+
+[discrete]
+==== ELSER configuration on the Trained Models UI
+
+Elastic Learned Sparse EncodeR – or ELSER – is a {ml} model newly added to the
+library. ELSER improves your search relevance by enabling you to perform 
+semantic search; a search type that operates on the meaning of words and does 
+not search only on literal terms. The Trained Models UI enables you to easily 
+download and deploy the model in your cluster and use ELSER in an {infer} 
+pipeline or a text expansion query.
+
+[role="screenshot"]
+image::images/highlights-ml-ELSER-config.png[ELSER configuration in the Trained Models UI]
+
+[discrete]
+==== Change point detection - multiple metrics and split fields
+
+Change point detection was introduced in 8.7 as part of AIOps Labs. In 8.8, it 
+supports multiple change point configurations which enables you to view data 
+from different metrics and partitions in a table layout with change point 
+previews. It accommodates more results on a single page, provides more sorting 
+possibilities, and makes it possible to zoom in on particular entries.
+It has updated controls for the metric and split fields which provides easy 
+access to the top values and distribution of the configuring field.
+The quick filter action simplifies the investigation of certain partitions or 
+excluding them from the analysis.
+
+[role="screenshot"]
+image::images/highlights-ml-change-point-detection-enhancements.png[Change point detection multiple metrics and split fields]
+
+[discrete]
+==== Log pattern analysis in Discover
+
+The AIOps feature for log pattern analysis has been added to Discover and it is 
+available for any text field. It can be accessed from the field selection left 
+panel for a natural troubleshooting workflow. This provides a great experience 
+for navigating log data by being able to filter out the noisy messages or filter 
+in on the more important, actionable data.
+
+[role="screenshot"]
+image::images/highlights-ml-log-pattern-analysis-discover.png[Log pattern analysis in Discover]
+
+[discrete]
+==== {dfanalytics-cap} drilldown actions
+
+From 8.8, the results data grid provides a link under the Actions column to 
+Discover filtering for the row's field/values.
+Creating custom URLs for jobs is also supported from the jobs list. You can 
+create a link to {kib} Discover, {kib} Dashboards, or an external URL. You can 
+also test the configured custom URL.
+
+[role="screenshot"]
+image::images/highlights-ml-dfa-drilldown-1.png[Data frame analytics custom URLs]
+
+The custom URLs you created appear in the {dfanalytics} results table row and 
+you can click through to any URL with the values from that row.
+
+[role="screenshot"]
+image::images/highlights-ml-dfa-drilldown-2.png[Data frame analytics results table]
 
 [discrete]
 === Dashboard has new settings
