@@ -6,18 +6,17 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getSLOTransformId } from '../../assets/constants';
 
 import { SLO } from '../../domain/models';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { RollupTransformGenerator } from './rollup_transform_generators';
 
-type TransformId = string;
-
 export interface TransformManager {
   install(slo: SLO): Promise<void>;
-  start(transformId: TransformId): Promise<void>;
-  stop(transformId: TransformId): Promise<void>;
-  uninstall(transformId: TransformId): Promise<void>;
+  start(slo: SLO): Promise<void>;
+  stop(slo: SLO): Promise<void>;
+  uninstall(slo: SLO): Promise<void>;
 }
 
 export class DefaultTransformManager implements TransformManager {
@@ -45,7 +44,8 @@ export class DefaultTransformManager implements TransformManager {
     }
   }
 
-  async start(transformId: TransformId): Promise<void> {
+  async start(slo: SLO): Promise<void> {
+    const transformId = getSLOTransformId(slo.id, slo.revision);
     try {
       await retryTransientEsErrors(
         () =>
@@ -58,7 +58,8 @@ export class DefaultTransformManager implements TransformManager {
     }
   }
 
-  async stop(transformId: TransformId): Promise<void> {
+  async stop(slo: SLO): Promise<void> {
+    const transformId = getSLOTransformId(slo.id, slo.revision);
     try {
       await retryTransientEsErrors(
         () =>
@@ -74,7 +75,8 @@ export class DefaultTransformManager implements TransformManager {
     }
   }
 
-  async uninstall(transformId: TransformId): Promise<void> {
+  async uninstall(slo: SLO): Promise<void> {
+    const transformId = getSLOTransformId(slo.id, slo.revision);
     try {
       await retryTransientEsErrors(
         () =>

@@ -8,7 +8,6 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import { getSLOTransformId } from '../../assets/constants';
 import { SLO } from '../../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
@@ -166,9 +165,8 @@ describe('UpdateSLO', () => {
   }
 
   function expectDeletionOfObsoleteSLOData(originalSlo: SLO) {
-    const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    expect(mockTransformManager.stop).toBeCalledWith(transformId);
-    expect(mockTransformManager.uninstall).toBeCalledWith(transformId);
+    expect(mockTransformManager.stop).toBeCalledWith(originalSlo);
+    expect(mockTransformManager.uninstall).toBeCalledWith(originalSlo);
     expect(mockEsClient.deleteByQuery).toBeCalledWith(
       expect.objectContaining({
         query: {

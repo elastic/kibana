@@ -9,7 +9,7 @@ import deepEqual from 'fast-deep-equal';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 
-import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
+import { SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { SLO } from '../../domain/models';
@@ -31,7 +31,7 @@ export class UpdateSLO {
 
       await this.repository.save(updatedSlo);
       await this.transformManager.install(updatedSlo);
-      await this.transformManager.start(getSLOTransformId(updatedSlo.id, updatedSlo.revision));
+      await this.transformManager.start(updatedSlo);
     } else {
       await this.repository.save(updatedSlo);
     }
@@ -73,9 +73,8 @@ export class UpdateSLO {
   }
 
   private async deleteObsoleteSLORevisionData(originalSlo: SLO) {
-    const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    await this.transformManager.stop(originalSloTransformId);
-    await this.transformManager.uninstall(originalSloTransformId);
+    await this.transformManager.stop(originalSlo);
+    await this.transformManager.uninstall(originalSlo);
     await this.deleteRollupData(originalSlo.id, originalSlo.revision);
   }
 

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable max-classes-per-file */
 
 import {
   ElasticsearchClientMock,
@@ -83,8 +82,9 @@ describe('TransformManager', () => {
         esClientMock,
         loggerMock
       );
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await transformManager.start('slo-transform-id');
+      await transformManager.start(slo);
 
       expect(esClientMock.transform.startTransform).toHaveBeenCalledTimes(1);
     });
@@ -97,8 +97,9 @@ describe('TransformManager', () => {
         esClientMock,
         loggerMock
       );
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await transformManager.stop('slo-transform-id');
+      await transformManager.stop(slo);
 
       expect(esClientMock.transform.stopTransform).toHaveBeenCalledTimes(1);
     });
@@ -111,8 +112,9 @@ describe('TransformManager', () => {
         esClientMock,
         loggerMock
       );
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await transformManager.uninstall('slo-transform-id');
+      await transformManager.uninstall(slo);
 
       expect(esClientMock.transform.deleteTransform).toHaveBeenCalledTimes(1);
     });
@@ -126,19 +128,14 @@ describe('TransformManager', () => {
         esClientMock,
         loggerMock
       );
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await transformManager.uninstall('slo-transform-id');
+      await transformManager.uninstall(slo);
 
       expect(esClientMock.transform.deleteTransform).toHaveBeenCalledTimes(2);
     });
   });
 });
-
-class DummyTransformGenerator extends RollupTransformGenerator {
-  generate(slo: SLO): TransformPutTransformRequest {
-    return {} as TransformPutTransformRequest;
-  }
-}
 
 class FailTransformGenerator extends RollupTransformGenerator {
   generate(slo: SLO): TransformPutTransformRequest {

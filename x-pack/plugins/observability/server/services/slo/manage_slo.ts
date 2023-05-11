@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getSLOTransformId } from '../../assets/constants';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
@@ -18,7 +17,7 @@ export class ManageSLO {
       return;
     }
 
-    await this.transformManager.start(getSLOTransformId(slo.id, slo.revision));
+    await this.transformManager.start(slo);
     slo.enabled = true;
     slo.updatedAt = new Date();
     await this.repository.save(slo);
@@ -30,7 +29,7 @@ export class ManageSLO {
       return;
     }
 
-    await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision));
+    await this.transformManager.stop(slo);
     slo.enabled = false;
     slo.updatedAt = new Date();
     await this.repository.save(slo);
