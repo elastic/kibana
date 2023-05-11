@@ -53,5 +53,5 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/core-ui-settings-common",
   ],
-  "exclude": ["target/**/*", "jest.common.ts"]
+  "exclude": ["target/**/*"]
 }

@@ -14,5 +14,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/triggers_actions_ui/{common,public,server}/**/*.{ts,tsx}',
   ],
-  setupFilesAfterEnv: ['<rootDir>/x-pack/plugins/triggers_actions_ui/jest.common.ts'],
+  // setupFilesAfterEnv: ['<rootDir>/x-pack/plugins/triggers_actions_ui/jest.common.js'],
 };
