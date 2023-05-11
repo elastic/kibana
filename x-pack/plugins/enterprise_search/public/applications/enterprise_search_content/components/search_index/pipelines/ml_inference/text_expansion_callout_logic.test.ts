@@ -339,6 +339,49 @@ describe('TextExpansionCalloutLogic', () => {
       });
     });
 
+    describe('isModelRunningSingleThreaded', () => {
+      it('is set to true if the model has 1 deployment with 1 allocation and 1 thread', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: MlModelDeploymentState.FullyAllocated,
+          modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
+        });
+        expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(true);
+      });
+      it('is set to false if the model has multiple deployments', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: MlModelDeploymentState.FullyAllocated,
+          modelId: 'mock-model-id',
+          allocationCount: 3,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
+        });
+        expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(false);
+      });
+      it('is set to false if the model has multiple allocations on a node', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: MlModelDeploymentState.FullyAllocated,
+          modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 2,
+          threadsPerAllocation: 1,
+        });
+        expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(false);
+      });
+      it('is set to false if the model runs on multiple threads', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: MlModelDeploymentState.FullyAllocated,
+          modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 4,
+        });
+        expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(false);
+      });      
+    });
+
     describe('isModelStarted', () => {
       it('is set to true if the model is started', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
