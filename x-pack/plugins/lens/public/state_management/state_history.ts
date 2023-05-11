@@ -66,6 +66,7 @@ export const stateHistoryMiddleware = () => (store: MiddlewareAPI) => (next: Dis
         testAction.match(action)
       )
     ) {
+      // do nothing
       return next(action);
     }
 

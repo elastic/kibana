@@ -1239,11 +1239,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const history = currentState.changes;
       const change = history[history.length - 1];
 
+      const changes = history.slice(0, history.length - 1);
+      const reversedChanges = [...currentState.reversedChanges, change];
+
+      // console.log('changes', changes);
+      // console.log('reversedChanges', reversedChanges);
       return change
         ? {
             ...applyPatch(currentState, change.backward, false, false).newDocument,
-            changes: history.slice(0, history.length - 1),
-            reversedChanges: [...currentState.reversedChanges, change],
+            changes,
+            reversedChanges,
           }
         : currentState;
     },
@@ -1252,11 +1257,15 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const history = currentState.reversedChanges;
       const change = history[history.length - 1];
 
+      const reversedChanges = history.slice(0, history.length - 1);
+      const changes = [...currentState.changes, change];
+      // console.log('changes', changes);
+      // console.log('reversedChanges', reversedChanges);
       return change
         ? {
             ...applyPatch(currentState, change.forward, false, false).newDocument,
-            reversedChanges: history.slice(0, history.length - 1),
-            changes: [...currentState.reversedChanges, change],
+            changes,
+            reversedChanges,
           }
         : currentState;
     },
