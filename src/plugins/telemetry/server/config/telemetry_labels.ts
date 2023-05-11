@@ -27,6 +27,7 @@ export const labelsSchema = schema.object(
     testBuildId: schema.maybe(schema.string()),
     testJobId: schema.maybe(schema.string()),
     ciBuildName: schema.maybe(schema.string()),
+    performancePhase: schema.maybe(schema.string()),
   },
   { defaultValue: {} }
 );
