@@ -214,6 +214,7 @@ const mockAgentPolicyGet = () => {
         updated_at: new Date().toISOString(),
         updated_by: 'test',
         revision: 1,
+        is_protected: false,
       });
     }
   );
