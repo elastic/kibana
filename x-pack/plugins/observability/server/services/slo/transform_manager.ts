@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { SLO, IndicatorTypes } from '../../domain/models';
+import { SLO } from '../../domain/models';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { RollupTransformGenerator } from './rollup_transform_generators';
 
@@ -22,19 +22,19 @@ export interface TransformManager {
 
 export class DefaultTransformManager implements TransformManager {
   constructor(
-    private rollupGenerators: Record<IndicatorTypes, RollupTransformGenerator>,
+    private getRollupTransformGenerator: (slo: SLO) => RollupTransformGenerator,
     private esClient: ElasticsearchClient,
     private logger: Logger
   ) {}
 
   async install(slo: SLO): Promise<TransformId> {
-    const rollupGenerator = this.rollupGenerators[slo.indicator.type];
-    if (!rollupGenerator) {
-      this.logger.error(`No transform generator found for ${slo.indicator.type} SLO type`);
+    const rollupTransformGenerator = this.getRollupTransformGenerator(slo);
+    if (!rollupTransformGenerator) {
+      this.logger.error(`No rollup transform generator found for SLI type: ${slo.indicator.type}`);
       throw new Error(`Unsupported SLI type: ${slo.indicator.type}`);
     }
 
-    const transformParams = rollupGenerator.getTransformParams(slo);
+    const transformParams = rollupTransformGenerator.getTransformParams(slo);
     try {
       await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
         logger: this.logger,

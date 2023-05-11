@@ -16,6 +16,7 @@ import {
   manageSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
+import { assertNever } from '@kbn/std';
 import {
   CreateSLO,
   DefaultResourceInstaller,
@@ -37,16 +38,25 @@ import {
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
-import type { IndicatorTypes } from '../../domain/models';
+import type { SLO } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 
-const transformGenerators: Record<IndicatorTypes, RollupTransformGenerator> = {
-  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
-  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
-  'sli.kql.custom': new KQLCustomTransformGenerator(),
-  'sli.metric.custom': new MetricCustomTransformGenerator(),
+const getRollupTransformGenerator = (slo: SLO): RollupTransformGenerator => {
+  const indicatorType = slo.indicator.type;
+  switch (indicatorType) {
+    case 'sli.apm.transactionDuration':
+      return new ApmTransactionDurationTransformGenerator();
+    case 'sli.apm.transactionErrorRate':
+      return new ApmTransactionErrorRateTransformGenerator();
+    case 'sli.kql.custom':
+      return new KQLCustomTransformGenerator();
+    case 'sli.metric.custom':
+      return new MetricCustomTransformGenerator();
+    default:
+      assertNever(indicatorType);
+  }
 };
 
 const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerContext) => {
@@ -72,7 +82,11 @@ const createSLORoute = createObservabilityServerRoute({
 
     const resourceInstaller = new DefaultResourceInstaller(esClient, logger);
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const transformManager = new DefaultTransformManager(
+      getRollupTransformGenerator,
+      esClient,
+      logger
+    );
     const createSLO = new CreateSLO(resourceInstaller, repository, transformManager);
 
     const response = await createSLO.execute(params.body);
@@ -98,7 +112,11 @@ const updateSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const transformManager = new DefaultTransformManager(
+      getRollupTransformGenerator,
+      esClient,
+      logger
+    );
     const updateSLO = new UpdateSLO(repository, transformManager, esClient);
 
     const response = await updateSLO.execute(params.path.id, params.body);
@@ -131,7 +149,11 @@ const deleteSLORoute = createObservabilityServerRoute({
     const rulesClient = getRulesClientWithRequest(request);
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const transformManager = new DefaultTransformManager(
+      getRollupTransformGenerator,
+      esClient,
+      logger
+    );
 
     const deleteSLO = new DeleteSLO(repository, transformManager, esClient, rulesClient);
 
@@ -181,7 +203,11 @@ const enableSLORoute = createObservabilityServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const transformManager = new DefaultTransformManager(
+      getRollupTransformGenerator,
+      esClient,
+      logger
+    );
     const manageSLO = new ManageSLO(repository, transformManager);
 
     const response = await manageSLO.enable(params.path.id);
@@ -207,7 +233,11 @@ const disableSLORoute = createObservabilityServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const transformManager = new DefaultTransformManager(
+      getRollupTransformGenerator,
+      esClient,
+      logger
+    );
     const manageSLO = new ManageSLO(repository, transformManager);
 
     const response = await manageSLO.disable(params.path.id);
