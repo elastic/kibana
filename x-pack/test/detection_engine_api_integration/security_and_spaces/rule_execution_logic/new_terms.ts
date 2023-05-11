@@ -577,6 +577,147 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts.length).eql(100);
       });
+
+      it('should not miss alerts if execution combinations overlap historical with more than 100 values', async () => {
+        // historical window documents
+        const historicalDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              ip: ['127.0.0.1'],
+            },
+          },
+        ];
+
+        // rule execution documents
+        // 10 new combinations
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: [
+                ...Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+                ...Array.from(Array(10)).map((_, i) => `a-${i}`),
+              ],
+              ip: ['127.0.0.1'],
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        // ensure there are no alerts for single new terms fields, it means values are not new
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.ip'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        // 10 alerts (with host.names a-[0-9]) should be generated
+        expect(previewAlerts.length).eql(10);
+      });
+
+      it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have more than 100', async () => {
+        // historical window documents
+        const historicalDocuments = [
+          {
+            host: {
+              name: ['a', 'b'],
+              domain: Array.from(Array(200)).map((_, i) => 100 + i),
+            },
+          },
+        ];
+
+        // rule execution documents
+        // no new combination of values emitted
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: 'a',
+              domain: Array.from(Array(100)).map((_, i) => 100 + i),
+            },
+          },
+          {
+            host: {
+              name: 'b',
+              domain: 201,
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        // ensure there are no alerts for single new terms fields, it means values are not new
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.domain'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        //  0
+        expect(previewAlerts.length).eql(0);
+      });
+
+      it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have precisely 100', async () => {
+        // historical window documents
+        const historicalDocuments = [
+          {
+            host: {
+              name: ['a', 'b'],
+              domain: Array.from(Array(200)).map((_, i) => 100 + i),
+            },
+          },
+        ];
+
+        // rule execution documents
+        // no new combination of values emitted
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: 'a',
+              domain: Array.from(Array(100)).map((_, i) => 100 + i),
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        // ensure there are no alerts for single new terms fields, it means values are not new
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.domain'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        //  0
+        expect(previewAlerts.length).eql(0);
+      });
     });
 
     describe('timestamp override and fallback', () => {
