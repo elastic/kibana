@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { fetchOpenAlerts, fetchVirusTotalAnalysis, sendFileToVirusTotal } from './api';
-import { ConversationRole, SecurityAssistantConversation } from './security_assistant';
 import crypto from 'crypto';
+import { fetchOpenAlerts, fetchVirusTotalAnalysis, sendFileToVirusTotal } from './api';
+import type { SecurityAssistantConversation } from './security_assistant';
+import { ConversationRole } from './security_assistant';
+import type { Message } from './security_assistant_context/types';
 
 /**
  * Do it like this in your `kibana.dev.yml`, use 'overrides' as keys aren't actually defined
@@ -30,6 +32,9 @@ export interface SecurityAssistantUiSettings {
   openAI: {
     apiKey: string;
     baseUrl: string;
+    model?: string;
+    prompt?: string;
+    temperature?: number;
   };
 }
 
@@ -298,4 +303,21 @@ export const formatFileVirusTotalResponse = (response: any, sha256Hash: any) => 
     `**View On [VirusTotal](https://www.virustotal.com/gui/file/${sha256Hash})**`;
 
   return result;
+};
+
+export const getMessageFromRawResponse = (rawResponse: string): Message => {
+  const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
+  if (rawResponse) {
+    return {
+      role: 'assistant',
+      content: rawResponse,
+      timestamp: dateTimeString,
+    };
+  } else {
+    return {
+      role: 'assistant',
+      content: 'Error: Response from LLM API is empty or undefined.',
+      timestamp: dateTimeString,
+    };
+  }
 };

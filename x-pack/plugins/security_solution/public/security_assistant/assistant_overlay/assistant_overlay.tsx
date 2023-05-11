@@ -8,9 +8,9 @@
 import React, { useCallback, useState } from 'react';
 import { EuiModal, EuiSpacer } from '@elastic/eui';
 
-import { SecurityAssistant } from '../security_assistant';
 import useEvent from 'react-use/lib/useEvent';
 import styled from 'styled-components';
+import { SecurityAssistant } from '../security_assistant';
 import { QuickPrompts } from './quick_prompts';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -56,7 +56,7 @@ export const AssistantOverlay: React.FC<AssistantOverlayProps> = React.memo(({})
     <>
       {isModalVisible && (
         <StyledEuiModal onClose={handleCloseModal}>
-          <SecurityAssistant input={input} autoSendInput={false} />
+          <SecurityAssistant autoSendInput={false} />
 
           <EuiSpacer size="xs" />
 

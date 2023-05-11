@@ -42,7 +42,7 @@ const NewChatComponent: React.FC<{
       panelPaddingSize="none"
     >
       <SecurityAssistantContainer>
-        <SecurityAssistant promptContextId={promptContextId} localStorageKey={'alertSummary'} />
+        <SecurityAssistant promptContextId={promptContextId} conversationId={'alertSummary'} />
       </SecurityAssistantContainer>
     </EuiPopover>
   );

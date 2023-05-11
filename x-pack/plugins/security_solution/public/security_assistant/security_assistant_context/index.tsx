@@ -15,27 +15,60 @@ import type {
   RegisterPromptContext,
   UnRegisterPromptContext,
 } from '../prompt_context/types';
+import type { SecurityAssistantUiSettings } from '../helpers';
+import type { Conversation } from './types';
 
 interface SecurityAssistantProviderProps {
+  apiConfig: SecurityAssistantUiSettings;
   children: React.ReactNode;
   httpFetch: HttpHandler;
 }
 
 interface UseSecurityAssistantContext {
+  apiConfig: SecurityAssistantUiSettings;
   httpFetch: HttpHandler;
   promptContexts: Record<string, PromptContext>;
   registerPromptContext: RegisterPromptContext;
   unRegisterPromptContext: UnRegisterPromptContext;
+  conversationIds: string[];
+  conversations: Record<string, Conversation>;
+  setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
 }
+
+export const SECURITY_ASSISTANT_UI_SETTING_KEY = 'securityAssistant';
+
+const LOCAL_STORAGE_KEY = `securityAssistant`;
+
+export const DEFAULT_CONVERSATION_STATE: Conversation = {
+  id: 'default',
+  messages: [],
+  apiConfig: {
+    openAI: {
+      apiKey: '',
+      baseUrl: '',
+      model: '',
+      prompt: '',
+      temperature: 0.2,
+    },
+    virusTotal: {
+      apiKey: '',
+      baseUrl: '',
+    },
+  },
+};
 
 const SecurityAssistantContext = React.createContext<UseSecurityAssistantContext | undefined>(
   undefined
 );
 
 export const SecurityAssistantProvider: React.FC<SecurityAssistantProviderProps> = ({
+  apiConfig,
   children,
   httpFetch,
 }) => {
+  /**
+   * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
+   */
   const [promptContexts, setQueryContexts] = useState<Record<string, PromptContext>>({});
 
   const registerPromptContext: RegisterPromptContext = useCallback(
@@ -56,14 +89,39 @@ export const SecurityAssistantProvider: React.FC<SecurityAssistantProviderProps>
     []
   );
 
+  /**
+   * Conversation state/actions
+   */
+  const [conversations, setConversations] = useState<Record<string, Conversation>>({
+    default: DEFAULT_CONVERSATION_STATE,
+  });
+  // const [conversationsMap, setConversationsMap] = useLocalStorage<Record<string, Conversation>>({
+  //   defaultValue: { default: DEFAULT_CONVERSATION_STATE },
+  //   key: LOCAL_STORAGE_KEY,
+  //   isInvalidDefault: (valueFromStorage) => {
+  //     return !valueFromStorage;
+  //   },
+  // });
+
   const value = useMemo(
     () => ({
+      apiConfig,
       httpFetch,
       promptContexts,
       registerPromptContext,
       unRegisterPromptContext,
+      setConversations,
+      conversationIds: Object.keys(conversations).sort(),
+      conversations,
     }),
-    [httpFetch, promptContexts, registerPromptContext, unRegisterPromptContext]
+    [
+      apiConfig,
+      httpFetch,
+      promptContexts,
+      registerPromptContext,
+      unRegisterPromptContext,
+      conversations,
+    ]
   );
 
   return (

@@ -24,11 +24,15 @@ import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_c
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
 import type { State } from '../common/store';
-import { SecurityAssistantProvider } from '../security_assistant/security_assistant_context';
+import {
+  SECURITY_ASSISTANT_UI_SETTING_KEY,
+  SecurityAssistantProvider,
+} from '../security_assistant/security_assistant_context';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
+import type { SecurityAssistantUiSettings } from '../security_assistant/helpers';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -52,7 +56,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
     application: { capabilities },
     http,
     uiActions,
+    uiSettings,
   } = useKibana().services;
+  const apiConfig = uiSettings.get<SecurityAssistantUiSettings>(SECURITY_ASSISTANT_UI_SETTING_KEY);
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   return (
     <EuiErrorBoundary>
@@ -61,7 +67,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
           <ReduxStoreProvider store={store}>
             <KibanaThemeProvider theme$={theme$}>
               <EuiThemeProvider darkMode={darkMode}>
-                <SecurityAssistantProvider httpFetch={http.fetch}>
+                <SecurityAssistantProvider apiConfig={apiConfig} httpFetch={http.fetch}>
                   <MlCapabilitiesProvider>
                     <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                       <ManageUserInfo>

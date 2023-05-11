@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import { SecurityAssistantConversation } from './security_assistant';
+import type { Message } from './security_assistant_context/types';
 
 export const fetchOpenAlerts = async () => {
   try {
@@ -71,24 +71,24 @@ export const sendFileToVirusTotal = async ({
 };
 
 export interface FetchChatCompletionProps {
-  conversation: SecurityAssistantConversation;
+  messages: Message[];
   baseUrl: string;
   apiKey: string;
   signal?: AbortSignal | undefined;
 }
 export const fetchChatCompletion = async ({
-  conversation,
+  messages,
   baseUrl,
   apiKey,
   signal,
 }: FetchChatCompletionProps): Promise<string> => {
-  const messages = conversation.map((msg) => ({
+  const outboundMessages = messages.map((msg) => ({
     role: msg.role,
     content: msg.content,
   }));
 
   const requestBody = {
-    messages: messages,
+    messages: outboundMessages,
     n: 1,
     stop: null,
     temperature: 0.2,

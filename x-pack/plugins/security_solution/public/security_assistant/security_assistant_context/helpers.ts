@@ -8,6 +8,9 @@
 import { v4 } from 'uuid';
 
 import type { PromptContext } from '../prompt_context/types';
+import { SecurityAssistantUiSettings } from '../helpers';
+import { DEFAULT_CONVERSATION_STATE } from './index';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 export const getUniquePromptContextId = (): string => v4();
 
@@ -23,3 +26,39 @@ export const updatePromptContexts = ({
     ...promptContext,
   },
 });
+
+/**
+ * Returns ConversationState from local storage or default state, fills in secrets
+ * @param key - full key to use for local storage, e.g. 'securitySolution.securityAssistant.default'
+ * @param storage - local storage object
+ * @param secrets - secrets to use for apiConfig
+ */
+export const getConversationFromLocalStorage = ({
+  key,
+  storage,
+  secrets,
+}: {
+  key: string;
+  storage: IStorageWrapper;
+  secrets: SecurityAssistantUiSettings;
+}) => {
+  const state = storage.get(key);
+  if (state != null) {
+    return {
+      ...state,
+      apiConfig: {
+        openAI: { ...secrets.openAI },
+        virusTotal: { ...secrets.virusTotal },
+      },
+    };
+  } else {
+    storage.set(key, DEFAULT_CONVERSATION_STATE);
+    return {
+      ...DEFAULT_CONVERSATION_STATE,
+      apiConfig: {
+        openAI: { ...secrets.openAI },
+        virusTotal: { ...secrets.virusTotal },
+      },
+    };
+  }
+};
