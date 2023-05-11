@@ -21,6 +21,7 @@ import { ConnectorFieldsForm } from '../connectors/fields_form';
 import type { CaseActionConnector } from '../types';
 import {
   getConnectorById,
+  getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
   getConnectorsFormValidators,
 } from '../utils';
@@ -57,6 +58,7 @@ const ConnectorsFormComponent: React.FC<Props> = ({
     defaultValue: { connectorId: initialConnectorId, fields: initialConnectorFields },
     options: { stripEmptyFields: false },
     serializer: getConnectorsFormSerializer,
+    deserializer: getConnectorsFormDeserializer,
   });
 
   const [{ connectorId, fields }] = useFormData<FormState>({ form });

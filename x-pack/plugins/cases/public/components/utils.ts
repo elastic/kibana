@@ -67,6 +67,12 @@ export const getConnectorsFormValidators = ({
   ],
 });
 
+/**
+ * Fields without a value need to be transformed to null.
+ * Passing undefined for a field to the backed will throw an error.
+ * Fo that reason, we need to convert empty fields to null.
+ */
+
 export const getConnectorsFormSerializer = <T extends { fields: ConnectorTypeFields['fields'] }>(
   data: T
 ): T => {
@@ -82,6 +88,33 @@ export const getConnectorsFormSerializer = <T extends { fields: ConnectorTypeFie
     return {
       ...data,
       fields: serializedFields as ConnectorTypeFields['fields'],
+    };
+  }
+
+  return data;
+};
+
+/**
+ * Form html elements do not support null values.
+ * For that reason, we need to convert null values to
+ * undefined which is supported.
+ */
+
+export const getConnectorsFormDeserializer = <T extends { fields: ConnectorTypeFields['fields'] }>(
+  data: T
+): T => {
+  if (data.fields) {
+    const deserializedFields = Object.entries(data.fields).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: value === null ? undefined : value,
+      }),
+      {}
+    );
+
+    return {
+      ...data,
+      fields: deserializedFields as ConnectorTypeFields['fields'],
     };
   }
 

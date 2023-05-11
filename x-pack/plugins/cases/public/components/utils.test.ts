@@ -10,6 +10,8 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import {
   connectorDeprecationValidator,
   getConnectorIcon,
+  getConnectorsFormDeserializer,
+  getConnectorsFormSerializer,
   isDeprecatedConnector,
   removeItemFromSessionStorage,
 } from './utils';
@@ -113,6 +115,30 @@ describe('Utils', () => {
       removeItemFromSessionStorage(sessionKey);
 
       expect(sessionStorage.getItem(sessionKey)).toBe(null);
+    });
+  });
+
+  describe('getConnectorsFormSerializer', () => {
+    it('converts empty values to null', () => {
+      const res = getConnectorsFormSerializer({
+        // @ts-expect-error: expects real connector fields.
+        fields: { foo: null, bar: undefined, baz: [], qux: '', quux: {} },
+      });
+
+      expect(res).toEqual({ fields: { foo: null, bar: null, baz: null, qux: null, quux: null } });
+    });
+  });
+
+  describe('getConnectorsFormDeserializer', () => {
+    it('converts null values to undefined', () => {
+      const res = getConnectorsFormDeserializer({
+        // @ts-expect-error: expects real connector fields.
+        fields: { foo: null, bar: undefined, baz: [], qux: '', quux: {} },
+      });
+
+      expect(res).toEqual({
+        fields: { foo: undefined, bar: undefined, baz: [], qux: '', quux: {} },
+      });
     });
   });
 });

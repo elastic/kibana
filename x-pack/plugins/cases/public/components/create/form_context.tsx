@@ -20,7 +20,11 @@ import type { UseCreateAttachments } from '../../containers/use_create_attachmen
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { getConnectorById, getConnectorsFormSerializer } from '../utils';
+import {
+  getConnectorById,
+  getConnectorsFormDeserializer,
+  getConnectorsFormSerializer,
+} from '../utils';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
@@ -139,6 +143,7 @@ export const FormContext: React.FC<Props> = ({
     schema,
     onSubmit: submitCase,
     serializer: getConnectorsFormSerializer,
+    deserializer: getConnectorsFormDeserializer,
   });
 
   const childrenWithExtraProp = useMemo(
