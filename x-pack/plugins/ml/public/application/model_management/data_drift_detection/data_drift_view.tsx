@@ -54,6 +54,7 @@ const DRIFT_P_VALUE_THRESHOLD = 0.05;
 interface Histogram {
   doc_count: 0;
   key: string | number;
+  percentage?: number;
 }
 
 interface ComparisionHistogram extends Histogram {
@@ -1226,7 +1227,7 @@ export const ReferenceDistribution = ({ data }: { data: Histogram[] }) => {
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
-        yAccessors={['doc_count']}
+        yAccessors={['percentage']}
         data={data}
       />
     </Chart>
@@ -1244,7 +1245,7 @@ export const ProductionDistribution = ({ data }: { data: Histogram[] }) => {
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
-        yAccessors={['doc_count']}
+        yAccessors={['percentage']}
         data={data}
       />
     </Chart>
@@ -1273,10 +1274,10 @@ const DataDriftChart = ({
       <BarSeries
         id="data-drift-viz"
         name={featureName}
-        xScaleType={featureType == NUMERIC_TYPE_LABEL ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={featureType === NUMERIC_TYPE_LABEL ? ScaleType.Linear : ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
-        yAccessors={['doc_count']}
+        yAccessors={['percentage']}
         splitSeriesAccessors={['g']}
         data={data}
       />
@@ -1286,38 +1287,37 @@ const DataDriftChart = ({
 const normalizeHistogram = (histogram: Histogram[]): Histogram[] => {
   // Compute a total doc_count for all terms
   const totalDocCount: number = histogram.reduce((acc, term) => acc + term.doc_count, 0);
-
   // Iterate over the original array and update the doc_count of each term in the new array
-  histogram.forEach((term) => {
-    term.doc_count = term.doc_count / totalDocCount;
-  });
-
-  return histogram;
+  return histogram.map((term) => ({ ...term, percentage: term.doc_count / totalDocCount }));
 };
 
 const normalizeTerms = (
   terms: Histogram[],
-  keys: string[],
+  keys: Array<{ key: string; relative_drift: number }>,
   sumOtherDocCount: number
-): Histogram[] => {
+): { normalizedTerms: Histogram[]; totalDocCount: number } => {
   // Compute a total doc_count for all terms
   const totalDocCount: number = terms.reduce((acc, term) => acc + term.doc_count, sumOtherDocCount);
 
   // Create a new array of terms with the same keys as the given array
-  const normalizedTerms: Histogram[] = keys.map((key) => ({
-    key,
+  const normalizedTerms: Array<Histogram & { relative_drift?: number }> = keys.map((term) => ({
+    ...term,
     doc_count: 0,
   }));
 
   // Iterate over the original array and update the doc_count of each term in the new array
   terms.forEach((term) => {
-    const index: number = keys.indexOf(term.key.toString());
+    const index: number = keys.findIndex((k) => k.key === term.key.toString());
     if (index !== -1) {
-      normalizedTerms[index].doc_count = term.doc_count / totalDocCount;
+      normalizedTerms[index].doc_count = term.doc_count;
+      normalizedTerms[index].percentage = term.doc_count / totalDocCount;
     }
   });
 
-  return normalizedTerms;
+  return {
+    normalizedTerms,
+    totalDocCount,
+  };
 };
 
 // Data drift view
@@ -1329,12 +1329,11 @@ export const DataDriftView = () => {
     { field: 'categoric_changeable', type: 'categoric' },
   ]);
 
-  // @TODO: Format data for dataFromResult and use it in table and charts
   const dataFromResult: Feature[] = useMemo(() => {
     if (!result.data) {
       return [];
     }
-    return Object.entries(result.data).map(([featureName, data], idx) => {
+    const d = Object.entries(result.data).map(([featureName, data], idx) => {
       if (isNumericDriftData(data)) {
         // normalize data.referenceHistogram and data.productionHistogram to use frequencies instead of counts
         const referenceHistogram: Histogram[] = normalizeHistogram(data.referenceHistogram);
@@ -1348,8 +1347,8 @@ export const DataDriftView = () => {
           referenceHistogram: referenceHistogram ?? [],
           productionHistogram: productionHistogram ?? [],
           comparisonDistribution: [
-            ...data.referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
-            ...data.productionHistogram.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
+            ...referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+            ...productionHistogram.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
           ],
         };
       }
@@ -1361,34 +1360,57 @@ export const DataDriftView = () => {
           ...data.baselineTerms.map((term) => term.key.toString()),
           ...data.driftedTerms.map((term) => term.key.toString()),
         ])
-      ).sort();
+      );
+
+      // Sort the categories (allKeys) by the following metric: Math.abs(productionDocCount-referenceDocCount)/referenceDocCount
+      const sortedKeys = allKeys
+        .map((k) => {
+          const key = k.toString();
+          const baselineTerm = data.baselineTerms.find((t) => t.key === key);
+          const driftedTerm = data.driftedTerms.find((t) => t.key === key);
+          if (baselineTerm && driftedTerm) {
+            const referenceDocCount = baselineTerm.doc_count;
+            const productionDocCount = driftedTerm.doc_count;
+            return {
+              key,
+              relative_drift: Math.abs(productionDocCount - referenceDocCount) / referenceDocCount,
+            };
+          }
+          return {
+            key,
+            relative_drift: Infinity,
+          };
+        })
+        .sort((s1, s2) => s2.relative_drift - s1.relative_drift);
 
       // Normalize the baseline and drifted terms arrays
-      const normalizedBaselineTerms: Histogram[] = normalizeTerms(
+      const { normalizedTerms: normalizedBaselineTerms } = normalizeTerms(
         data.baselineTerms,
-        allKeys,
+        sortedKeys,
         data.baselineSumOtherDocCount
       );
-      const normalizedDriftedTerms: Histogram[] = normalizeTerms(
+      const { normalizedTerms: normalizedDriftedTerms } = normalizeTerms(
         data.driftedTerms,
-        allKeys,
+        sortedKeys,
         data.driftedSumOtherDocCount
       );
+
       const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
       return {
         featureName,
         featureType: CATEGORICAL_TYPE_LABEL,
         driftDetected: pValue < DRIFT_P_VALUE_THRESHOLD,
         similarityTestPValue: pValue,
-        // @TODO: Need to sort order for baseline terms and drifted terms for consistency?
         referenceHistogram: normalizedBaselineTerms ?? [],
         productionHistogram: normalizedDriftedTerms ?? [],
         comparisonDistribution: [
-          ...data.baselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
-          ...data.driftedTerms.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
+          ...normalizedBaselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+          ...normalizedDriftedTerms.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
         ],
       };
     });
+
+    return d;
   }, [result]);
 
   return (
@@ -1412,7 +1434,7 @@ export const OverlapDistributionComparison = ({ data }: { data: ComparisionHisto
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
-        yAccessors={['doc_count']}
+        yAccessors={['percentage']}
         splitSeriesAccessors={['g']}
         data={data}
         curve={CurveType.CURVE_STEP_AFTER}
@@ -1422,7 +1444,10 @@ export const OverlapDistributionComparison = ({ data }: { data: ComparisionHisto
 };
 
 export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
-  console.log('DataDriftOverviewTable data ', data);
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
+
   // if data is an empty array return
   if (data.length === 0) {
     return null;
@@ -1551,9 +1576,6 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
       textOnly: true,
     };
   };
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
-    {}
-  );
 
   const toggleDetails = (item: Feature) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
