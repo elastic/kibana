@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { getCoreVitalsComponent } from '@kbn/exploratory-view-plugin/public';
+import { getCoreVitalsComponent } from '@kbn/observability-plugin/public';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './key_ux_metrics';
 import { useUxQuery } from '../hooks/use_ux_query';

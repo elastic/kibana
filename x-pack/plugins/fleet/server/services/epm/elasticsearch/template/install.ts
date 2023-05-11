@@ -322,9 +322,9 @@ export function buildComponentTemplates(params: {
           ...templateSettings.index,
           ...(pipelineName ? { default_pipeline: pipelineName } : {}),
           mapping: {
-            ...templateSettings?.mapping,
+            ...templateSettings.index?.mapping,
             total_fields: {
-              ...templateSettings?.mapping?.total_fields,
+              ...templateSettings.index?.mapping?.total_fields,
               limit: '10000',
             },
           },
@@ -519,7 +519,7 @@ export function prepareTemplate({
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     experimentalDataStreamFeature?.features.tsdb;
 
-  const mappings = generateMappings(validFields, { isIndexModeTimeSeries });
+  const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
