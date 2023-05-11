@@ -52,7 +52,7 @@ export function showCli(program: any, keystore: Keystore) {
   program
     .command('show <key>')
     .description(
-      'Displays the value of a single setting in the keystore. Pass the -o (or --output) parameter to write the setting to a file. d as a UTF-8 string.'
+      'Displays the value of a single setting in the keystore. Pass the -o (or --output) parameter to write the setting to a file.'
     )
     .option('-s, --silent', 'prevent all logging')
     .option('-o, --output <file>', 'output value to a file')
