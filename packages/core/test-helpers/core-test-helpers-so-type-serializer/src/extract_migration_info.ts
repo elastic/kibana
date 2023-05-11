@@ -10,6 +10,8 @@ import { compare as semverCompare } from 'semver';
 import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;
@@ -26,8 +28,8 @@ export interface SavedObjectTypeMigrationInfo {
 
 export interface ModelVersionSummary {
   version: string;
-  changeType: string;
-  hasMigration: boolean;
+  changeTypes: string[];
+  hasTransformation: boolean;
   newMappings: string[];
 }
 
@@ -55,9 +57,9 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     const entry = modelVersionMap[version];
     return {
       version,
-      changeType: entry.modelChange.type,
-      hasMigration: !!entry.modelChange.transformation,
-      newMappings: Object.keys(getFlattenedObject(entry.modelChange.addedMappings ?? {})),
+      changeTypes: entry.changes.map((change) => change.type),
+      hasTransformation: hasTransformation(entry.changes),
+      newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(entry.changes))),
     };
   });
 
@@ -73,4 +75,8 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     modelVersions,
     switchToModelVersionAt: soType.switchToModelVersionAt,
   };
+};
+
+const hasTransformation = (changes: SavedObjectsModelChange[]): boolean => {
+  return changes.some((change) => change.type === 'data_backfill');
 };
