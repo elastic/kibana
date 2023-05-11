@@ -78,6 +78,9 @@ export const ProcessListAPIQueryAggregationRT = rt.type({
   }),
 });
 
+// string in case of 'N?A'
+const summaryPropertyRT = rt.union([rt.number, rt.string]);
+
 export const ProcessListAPIResponseRT = rt.type({
   processList: rt.array(
     rt.type({
@@ -92,15 +95,14 @@ export const ProcessListAPIResponseRT = rt.type({
   ),
   summary: rt.exact(
     rt.partial({
-      // string in case of 'N?A'
-      total: rt.union([rt.number, rt.string]),
-      running: rt.union([rt.number, rt.string]),
-      sleeping: rt.union([rt.number, rt.string]),
-      dead: rt.union([rt.number, rt.string]),
-      stopped: rt.union([rt.number, rt.string]),
-      idle: rt.union([rt.number, rt.string]),
-      zombie: rt.union([rt.number, rt.string]),
-      unknown: rt.union([rt.number, rt.string]),
+      total: summaryPropertyRT,
+      running: summaryPropertyRT,
+      sleeping: summaryPropertyRT,
+      dead: summaryPropertyRT,
+      stopped: summaryPropertyRT,
+      idle: summaryPropertyRT,
+      zombie: summaryPropertyRT,
+      unknown: summaryPropertyRT,
     })
   ),
 });

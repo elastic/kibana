@@ -46,10 +46,7 @@ const processSummaryNotAvailable = {
 };
 
 export const SummaryTable = ({ processSummary, isLoading }: Props) => {
-  const summary =
-    !processSummary?.total || processSummary?.total === 0
-      ? processSummaryNotAvailable
-      : processSummary;
+  const summary = !processSummary?.total ? processSummaryNotAvailable : processSummary;
 
   const processCount = useMemo(
     () =>
