@@ -51,6 +51,7 @@ export type CasesFeatures = Partial<CasesContextFeatures>;
 export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;
+    mentions: boolean;
   };
   files: {
     maxSize?: number;

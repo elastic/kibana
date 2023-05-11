@@ -15,7 +15,9 @@ import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import type { TemporaryProcessingPluginsType } from './types';
 import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
+import * as mentionsPlugin from './plugins/mentions';
 import { ID as LensPluginId } from './plugins/lens/constants';
+import { ID as MentionsPluginId } from './plugins/mentions/constants';
 
 export const usePlugins = (disabledPlugins?: string[]) => {
   const kibanaConfig = KibanaServices.getConfig();
@@ -49,6 +51,14 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     // This line of code is TS-compatible and it will break if [1][1] change in the future.
     processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
 
+    if(kibanaConfig?.markdownPlugins?.mentions && !disabledPlugins?.includes(MentionsPluginId)) {
+      uiPlugins.push(mentionsPlugin.plugin);
+    }
+
+    parsingPlugins.push(mentionsPlugin.parser);
+
+    processingPlugins[1][1].components.mentions = mentionsPlugin.renderer;
+
     return {
       uiPlugins,
       parsingPlugins,
@@ -59,5 +69,6 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     disabledPlugins,
     kibanaConfig?.markdownPlugins?.lens,
     timelinePlugins,
+    kibanaConfig?.markdownPlugins?.mentions,
   ]);
 };

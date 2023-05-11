@@ -12,6 +12,7 @@ import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 export const ConfigSchema = schema.object({
   markdownPlugins: schema.object({
     lens: schema.boolean({ defaultValue: true }),
+    mentions: schema.boolean({ defaultValue: true }),
   }),
   files: schema.object({
     allowedMimeTypes: schema.arrayOf(schema.string({ minLength: 1 }), {
