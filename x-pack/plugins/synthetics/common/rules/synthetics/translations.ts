@@ -52,14 +52,13 @@ export const SyntheticsMonitorStatusTranslations = {
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
       defaultMessage:
-        'The alert for "{monitorName}" from {locationName} is no longer active: {recoveryReason}.\n\nDetails:\n\nMonitor name: {monitorName}  \n{monitorUrlLabel}: {monitorUrl}  \nMonitor type: {monitorType}  \nFrom: {locationName}  \nLatest error received: {lastErrorMessage}  \n{linkMessage}',
+        'The alert for "{monitorName}" from {locationName} is no longer active: {recoveryReason}.\n\nDetails:\n\nMonitor name: {monitorName}  \n{monitorUrlLabel}: {monitorUrl}  \nMonitor type: {monitorType}  \nFrom: {locationName}  \n{linkMessage}',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrlLabel: '{{context.monitorUrlLabel}}',
         monitorUrl: '{{{context.monitorUrl}}}',
         monitorType: '{{context.monitorType}}',
         locationName: '{{context.locationName}}',
-        lastErrorMessage: '{{{context.lastErrorMessage}}}',
         recoveryReason: '{{context.recoveryReason}}',
         linkMessage: '{{{context.linkMessage}}}',
       },
