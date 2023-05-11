@@ -7,7 +7,7 @@
  */
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { fieldDefined, hasFilterKeyError } from '../filter_utils';
+import { fieldDefined, hasFilterKeyError } from '../utils/filter_utils';
 
 /**
  * Returns true if the given attribute path is a valid root level SO attribute path

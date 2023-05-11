@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsRepository } from './repository';
-export { SavedObjectsClientProvider } from './scoped_client_provider';
-export { PointInTimeFinder } from './point_in_time_finder';
-export type { ISavedObjectsClientProvider } from './scoped_client_provider';
+export { decorateEsError } from './decorate_es_error';
+export { getRootFields, includedFields } from './included_fields';

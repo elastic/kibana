@@ -22,8 +22,8 @@ import {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';
-import { findLegacyUrlAliases } from '../../legacy_url_aliases';
-import { getRootFields } from '../../included_fields';
+import { findLegacyUrlAliases } from './find_legacy_url_aliases';
+import { getRootFields } from '../../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import {

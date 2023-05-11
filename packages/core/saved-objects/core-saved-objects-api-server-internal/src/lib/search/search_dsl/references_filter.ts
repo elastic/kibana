@@ -7,7 +7,6 @@
  */
 
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
-
 import type { SearchOperator } from './query_params';
 
 export function getReferencesFilter({

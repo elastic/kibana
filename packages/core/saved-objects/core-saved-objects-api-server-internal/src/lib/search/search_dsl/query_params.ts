@@ -8,15 +8,14 @@
 
 import * as esKuery from '@kbn/es-query';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
-
-type KueryNode = any;
-
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
 import { getReferencesFilter } from './references_filter';
+
+type KueryNode = any;
 
 /**
  * Gets the types based on the type. Uses mappings to support
