@@ -68,7 +68,7 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <ConnectorFieldsForm connector={connector} isEdit={true} />
+        <ConnectorFieldsForm connector={connector} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
