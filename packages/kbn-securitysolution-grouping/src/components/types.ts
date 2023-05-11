@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// copied from common/search_strategy/common
 export interface GenericBuckets {
   key: string | string[];
   key_as_string?: string; // contains, for example, formatted dates
@@ -24,10 +23,9 @@ export type GroupingBucket<T> = RawBucket<T> & {
 };
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
-// TODO: write developer docs for these fields
 export interface RootAggregation<T> {
   groupByFields?: {
-    buckets?: Array<GroupingBucket<T>>;
+    buckets?: Array<RawBucket<T>>;
   };
   groupsCount?: {
     value?: number | null;
@@ -40,6 +38,12 @@ export interface RootAggregation<T> {
   };
 }
 
+export type ParsedRootAggregation<T> = RootAggregation<T> & {
+  groupByFields?: {
+    buckets?: Array<GroupingBucket<T>>;
+  };
+};
+
 export type GroupingFieldTotalAggregation<T> = Record<
   string,
   {
@@ -49,6 +53,8 @@ export type GroupingFieldTotalAggregation<T> = Record<
 >;
 
 export type GroupingAggregation<T> = RootAggregation<T> & GroupingFieldTotalAggregation<T>;
+export type ParsedGroupingAggregation<T> = ParsedRootAggregation<T> &
+  GroupingFieldTotalAggregation<T>;
 
 export interface BadgeMetric {
   value: number;

@@ -23,13 +23,13 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
-import type { GroupingAggregation, GroupPanelRenderer } from './types';
-import { GroupStatsRenderer, OnGroupToggle } from './types';
+import type { ParsedGroupingAggregation, GroupPanelRenderer } from './types';
+import { GroupingBucket, GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
   activePage: number;
-  data?: GroupingAggregation<T>;
+  data?: ParsedGroupingAggregation<T>;
   groupPanelRenderer?: GroupPanelRenderer<T>;
   groupSelector?: JSX.Element;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
@@ -92,7 +92,7 @@ const GroupingComponent = <T,>({
 
   const groupPanels = useMemo(
     () =>
-      data?.groupByFields?.buckets?.map((groupBucket, groupNumber) => {
+      data?.groupByFields?.buckets?.map((groupBucket: GroupingBucket<T>, groupNumber) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group-${groupNumber}-${group}`;
         const isNullGroup = groupBucket.isNullGroup ?? false;

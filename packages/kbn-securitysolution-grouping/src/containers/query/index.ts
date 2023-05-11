@@ -7,7 +7,7 @@
  */
 
 import { getEmptyValue } from './helpers';
-import { GroupingAggregation } from '../..';
+import { GroupingAggregation, ParsedGroupingAggregation } from '../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
@@ -118,7 +118,7 @@ export const parseGroupingQuery = <T>(
   selectedGroup: string,
   uniqueValue: string,
   aggs?: GroupingAggregation<T>
-): GroupingAggregation<T> | {} => {
+): ParsedGroupingAggregation<T> | {} => {
   if (!aggs) {
     return {};
   }
