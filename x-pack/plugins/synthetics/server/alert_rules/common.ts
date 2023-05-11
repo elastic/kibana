@@ -192,7 +192,7 @@ export const setRecoveredAlertsContext = ({
         recoveryReason = i18n.translate(
           'xpack.synthetics.alerts.monitorStatus.deleteMonitor.reason',
           {
-            defaultMessage: `The monitor has been deleted`,
+            defaultMessage: `the monitor has been deleted`,
           }
         );
       } else if (downConfig.isLocationRemoved) {
@@ -205,7 +205,7 @@ export const setRecoveredAlertsContext = ({
         recoveryReason = i18n.translate(
           'xpack.synthetics.alerts.monitorStatus.removedLocation.reason',
           {
-            defaultMessage: `This location has been removed from the monitor`,
+            defaultMessage: `this location has been removed from the monitor`,
           }
         );
       }
@@ -221,18 +221,18 @@ export const setRecoveredAlertsContext = ({
       const checkedAt = moment(upTimestamp).tz(tz).format(dateFormat);
       const duration = getErrorDuration(moment(errorStartedAt), moment(upTimestamp));
       recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
-        defaultMessage: `is now Up`,
+        defaultMessage: `is now up`,
       });
       recoveryReason = errorStartedAt
         ? i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithDuration', {
-            defaultMessage: `the monitor is now Up again. It ran successfully at {checkedAt} after a {duration} downtime`,
+            defaultMessage: `the monitor is now up again. It ran successfully at {checkedAt} after a {duration} downtime`,
             values: {
               checkedAt,
               duration,
             },
           })
         : i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithoutDuration', {
-            defaultMessage: `the monitor is now Up again. It ran successfully at {checkedAt}`,
+            defaultMessage: `the monitor is now up again. It ran successfully at {checkedAt}`,
             values: {
               checkedAt,
             },

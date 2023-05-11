@@ -259,7 +259,7 @@ describe('setRecoveredAlertsContext', () => {
       linkMessage: '',
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
-      recoveryReason: 'The monitor has been deleted',
+      recoveryReason: 'the monitor has been deleted',
       recoveryStatus: 'has been deleted',
     });
   });
@@ -307,7 +307,7 @@ describe('setRecoveredAlertsContext', () => {
       linkMessage: '',
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
-      recoveryReason: 'This location has been removed from the monitor',
+      recoveryReason: 'this location has been removed from the monitor',
       recoveryStatus: 'has recovered',
     });
   });
@@ -359,8 +359,8 @@ describe('setRecoveredAlertsContext', () => {
       monitorName: 'test-monitor',
       status: 'up',
       recoveryReason:
-        'the monitor is now Up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
-      recoveryStatus: 'is now Up',
+        'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
+      recoveryStatus: 'is now up',
       locationId: 'us_west',
       linkMessage:
         'Link: https://localhost:5601/app/synthetics/monitor/12345-67891/errors/123456?locationId=us_west',
