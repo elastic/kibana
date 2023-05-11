@@ -1249,25 +1249,27 @@ export const ProductionDistribution = ({ data }: { data: Histogram[] }) => {
 
 const DataDriftChart = ({
   featureName,
+  featureType,
   data,
 }: {
   featureName: string;
+  featureType: string;
   data: ComparisionHistogram[];
 }) => {
   return (
     <Chart>
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" />
+      <Axis id="bottom" position={Position.Bottom} title="Feature values" />
       <Axis
         id="left2"
-        title="Left axis"
+        title="Frequency"
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
       <BarSeries
         id="data-drift-viz"
         name={featureName}
-        xScaleType={ScaleType.Linear}
+        xScaleType={(featureType==NUMERIC_TYPE_LABEL)?ScaleType.Linear:ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['doc_count']}
@@ -1547,7 +1549,7 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
       const { featureName, comparisonDistribution } = item;
       itemIdToExpandedRowMapValues[item.featureName] = (
         <div css={{ width: '100%', height: 200 }}>
-          <DataDriftChart featureName={featureName} data={comparisonDistribution} />
+          <DataDriftChart featureName={featureName} featureType={item.featureType} data={comparisonDistribution} />
         </div>
       );
     }
