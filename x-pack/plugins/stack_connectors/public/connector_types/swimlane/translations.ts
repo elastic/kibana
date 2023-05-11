@@ -187,6 +187,13 @@ export const SW_REQUIRED_ALERT_ID = i18n.translate(
   }
 );
 
+export const SW_REQUIRED_API_TOKEN = i18n.translate(
+  'xpack.stackConnectors.components.swimlane.error.requiredApiToken',
+  {
+    defaultMessage: 'API Token is required.',
+  }
+);
+
 export const SW_BACK = i18n.translate('xpack.stackConnectors.components.swimlane.prevStep', {
   defaultMessage: 'Back',
 });

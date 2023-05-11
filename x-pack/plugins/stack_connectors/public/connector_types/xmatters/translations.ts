@@ -39,6 +39,13 @@ export const PASSWORD_LABEL = i18n.translate(
   }
 );
 
+export const PASSWORD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.xmatters.error.requiredPasswordText',
+  {
+    defaultMessage: 'Password is required.',
+  }
+);
+
 export const BASIC_AUTH_BUTTON_LABEL = i18n.translate(
   'xpack.stackConnectors.components.xmatters.basicAuthLabel',
   {

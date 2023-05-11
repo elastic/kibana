@@ -27,10 +27,10 @@ import {
   SelectField,
   TextField,
   ToggleField,
+  PasswordField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put'];
@@ -138,11 +138,23 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <PasswordField
+            <UseField
               path="secrets.password"
-              label={i18n.PASSWORD_LABEL}
-              readOnly={readOnly}
-              data-test-subj="webhookPasswordInput"
+              config={{
+                label: i18n.PASSWORD_LABEL,
+                validations: [
+                  {
+                    validator: emptyField(i18n.PASSWORD_REQUIRED),
+                  },
+                ],
+              }}
+              component={PasswordField}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'webhookPasswordInput',
+                  readOnly,
+                },
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

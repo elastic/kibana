@@ -23,6 +23,7 @@ export const FIELD_TYPES = {
   BUTTON_GROUP: 'buttonGroup',
   MULTI_BUTTON_GROUP: 'multiButtonGroup',
   DATE_PICKER: 'datePicker',
+  PASSWORD: 'password',
 };
 
 // Validation types

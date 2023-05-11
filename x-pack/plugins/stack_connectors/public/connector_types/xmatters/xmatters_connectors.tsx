@@ -15,13 +15,9 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  ButtonGroupField,
-  HiddenField,
-  PasswordField,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ButtonGroupField, HiddenField } from '@kbn/triggers-actions-ui-plugin/public';
 import { XmattersAuthenticationType } from '../types';
 import * as i18n from './translations';
 
@@ -167,11 +163,23 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <PasswordField
+              <UseField
                 path="secrets.password"
-                label={i18n.PASSWORD_LABEL}
-                readOnly={readOnly}
-                data-test-subj="xmattersPasswordInput"
+                config={{
+                  label: i18n.PASSWORD_LABEL,
+                  validations: [
+                    {
+                      validator: emptyField(i18n.PASSWORD_REQUIRED),
+                    },
+                  ],
+                }}
+                component={PasswordField}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'xmattersPasswordInput',
+                    readOnly,
+                  },
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
