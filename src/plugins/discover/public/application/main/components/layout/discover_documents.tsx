@@ -261,7 +261,7 @@ function DiscoverDocumentsComponent({
               rowsPerPageState={rowsPerPage}
               onUpdateRowsPerPage={onUpdateRowsPerPage}
               sampleSizeState={sampleSizeState || sampleSize}
-              onUpdateSampleSize={onUpdateSampleSize}
+              onUpdateSampleSize={!isPlainRecord ? onUpdateSampleSize : undefined}
               onFieldEdited={onFieldEdited}
               savedSearchId={savedSearch.id}
               DocumentView={DiscoverGridFlyout}
