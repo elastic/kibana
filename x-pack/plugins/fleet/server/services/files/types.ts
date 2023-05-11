@@ -10,20 +10,22 @@ import type { Readable } from 'stream';
 import type { FileStatus } from '@kbn/shared-ux-file-types';
 
 export interface FleetFileClientInterface {
-  /** Creates a new file */
+  /** Creates a new file. Only applicable when type of file is `to-host`. */
   create(fileStream: HapiReadableStream, agentIds: string[]): Promise<FleetFile>;
 
-  /** Deletes a file */
+  /** Deletes a file. Only applicable when type of file is `to-host`. */
   delete(fileId: string): Promise<void>;
 
-  /** Updates metadata for the file */
+  /** Updates metadata for the file. Only applicable when type of file is `to-host`. */
   update(fileId: string, updates: {}): Promise<FleetFile>;
 
   /** Checks if a file has chunks */
   doesFileHaveChunks(fileId: string): Promise<boolean>;
 
   /** Returns a Stream for downloading the file */
-  getFileDownloadStream(fileId: string): Promise<void>;
+  getDownloadStream(
+    fileId: string
+  ): Promise<{ stream: Readable; fileName: string; mimeType?: string }>;
 
   /** Returns meta info about the file */
   get(fileId: string): Promise<FleetFile>;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -53,7 +55,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
     });
   }
 
-  get(fileId: string): Promise<FleetFile> {
+  async get(fileId: string): Promise<FleetFile> {
     if (this.type === 'to-host') {
       // FIXME:PT implement
     }
@@ -61,17 +63,68 @@ export class FleetFilesClient implements FleetFileClientInterface {
     return this.getFileCreatedByHost(fileId);
   }
 
-  create(): Promise<FleetFile> {}
+  async create(): Promise<FleetFile> {
+    // FIXME:PT implement
+  }
 
-  update(): Promise<FleetFile> {}
+  async update(): Promise<FleetFile> {
+    // FIXME:PT implement
+  }
 
-  delete(): Promise<void> {}
+  async delete(): Promise<void> {}
 
-  doesFileHaveChunks(fileId: string): Promise<boolean> {}
+  async doesFileHaveChunks(fileId: string): Promise<boolean> {
+    try {
+      const chunks = await this.esClient.search({
+        index: this.fileDataIndex,
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    bid: fileId,
+                  },
+                },
+              ],
+            },
+          },
+          // Setting `_source` to false - we don't need the actual document to be returned
+          _source: false,
+        },
+      });
 
-  getFileDownloadStream(): Promise<void> {}
+      return Boolean((chunks.hits?.total as estypes.SearchTotalHits)?.value);
+    } catch (err) {
+      throw new FleetFilesClientError(
+        `Checking if file id [${fileId}] has data in index [${this.fileDataIndex}] failed with: ${err.message}`,
+        err
+      );
+    }
+  }
 
-  private async getFileCreatedByHost(fileId: string): Promise<FLeetFile> {
+  async getDownloadStream(
+    fileId: string
+  ): Promise<{ stream: Readable; fileName: string; mimeType?: string }> {
+    try {
+      const file = await this.esFileClient.get({ id: fileId });
+      const { name: fileName, mimeType } = file.data;
+
+      return {
+        stream: await file.downloadContent(),
+        fileName,
+        mimeType,
+      };
+    } catch (error) {
+      throw new FleetFilesClientError(
+        `Attempt to get download stream failed with: ${error.message}`,
+        error
+      );
+    }
+  }
+
+  private async getFileCreatedByHost(fileId: string): Promise<FleetFile> {
     try {
       const fileDocSearchResult = await this.esClient.search<HostUploadedFileMetadata>({
         index: this.fileMetaIndex,
@@ -91,7 +144,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
         throw new FleetFileNotFound(`File with id [${fileId}] not found`);
       }
 
-      const fleetFile = mapFileDocToFleetFile(docSearchHit);
+      const fleetFile = this.mapIndexedDocToFleetFile(docSearchHit);
       let fileHasChunks: boolean = true;
 
       // if status is `READY`, then ensure that file has chunks - for the cases where the file
@@ -117,32 +170,34 @@ export class FleetFilesClient implements FleetFileClientInterface {
       throw new FleetFilesClientError(error.message, error);
     }
   }
-}
 
-const mapFileDocToFleetFile = (fileDoc: estypes.SearchHit<HostUploadedFileMetadata>): FleetFile => {
-  if (!fileDoc._source) {
-    throw new FleetFilesClientError('Missing file document `_source`');
+  private mapIndexedDocToFleetFile(
+    fileDoc: estypes.SearchHit<HostUploadedFileMetadata>
+  ): FleetFile {
+    if (!fileDoc._source) {
+      throw new FleetFilesClientError('Missing file document `_source`');
+    }
+
+    const {
+      action_id: actionId,
+      agent_id: agentId,
+      file: { name, Status: status, mime_type: mimeType = '', size = 0, hash = {} },
+    } = fileDoc._source;
+
+    const file: FleetFile = {
+      id: fileDoc._id,
+      agents: [agentId],
+      sha256: hash?.sha256 ?? '',
+      actionId,
+      name,
+      status,
+      mimeType,
+      size,
+    };
+
+    return file;
   }
-
-  const {
-    action_id: actionId,
-    agent_id: agentId,
-    file: { name, Status: status, mime_type: mimeType = '', size = 0, hash = {} },
-  } = fileDoc._source;
-
-  const file: FleetFile = {
-    id: fileDoc._id,
-    agents: [agentId],
-    sha256: hash?.sha256 ?? '',
-    actionId,
-    name,
-    status,
-    mimeType,
-    size,
-  };
-
-  return file;
-};
+}
 
 /**
  * File upload metadata information. Stored by endpoint/fleet-server when a file is uploaded to ES in connection with
