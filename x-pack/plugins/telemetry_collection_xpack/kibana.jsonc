@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/telemetry-collection-xpack-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "telemetryCollectionXpack",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "telemetryCollectionManager"
+    ]
+  }
+}

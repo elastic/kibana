@@ -7,18 +7,12 @@
  */
 
 import { resolve } from 'path';
-import { services } from '../plugin_functional/services';
-import fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { findTestPluginPaths } from '@kbn/test';
+import { services } from '../plugin_functional/services';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
-
-  // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
-  const examplesFiles = fs.readdirSync(resolve(REPO_ROOT, 'examples'));
-  const examples = examplesFiles.filter((file) =>
-    fs.statSync(resolve(REPO_ROOT, 'examples', file)).isDirectory()
-  );
 
   return {
     rootTags: ['runOutsideOfCiGroups'],
@@ -63,9 +57,7 @@ export default async function ({ readConfigFile }) {
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
         '--telemetry.optIn=false',
-        ...examples.map(
-          (exampleDir) => `--plugin-path=${resolve(REPO_ROOT, 'examples', exampleDir)}`
-        ),
+        ...findTestPluginPaths(resolve(REPO_ROOT, 'examples')),
       ],
     },
   };

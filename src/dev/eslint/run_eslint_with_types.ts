@@ -18,7 +18,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { TS_PROJECTS, TsProject } from '@kbn/ts-projects';
+import { TS_PROJECTS, type TsProject } from '@kbn/ts-projects';
 
 export function runEslintWithTypes() {
   run(

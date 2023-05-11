@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/iframe-embedded-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "iframeEmbedded",
+    "server": true,
+    "browser": false
+  }
+}

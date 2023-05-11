@@ -1,0 +1,30 @@
+{
+  "type": "plugin",
+  "id": "@kbn/actions-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "actions",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "actions"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "taskManager",
+      "encryptedSavedObjects",
+      "eventLog",
+      "features"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "spaces",
+      "security",
+      "monitoringCollection"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

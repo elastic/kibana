@@ -1,9 +1,0 @@
-{
-  "id": "alertingFixture",
-  "owner": { "name": "Response Ops", "githubTeam": "response-ops" },
-  "version": "1.0.0",
-  "kibanaVersion": "kibana",
-  "requiredPlugins": ["alerting", "triggersActionsUi", "features"],
-  "server": true,
-  "ui": true
-}

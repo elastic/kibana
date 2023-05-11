@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/oidc-provider-plugin",
+  "owner": "@elastic/kibana-security",
+  "plugin": {
+    "id": "oidcProviderPlugin",
+    "server": true,
+    "browser": false
+  }
+}

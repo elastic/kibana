@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/monitoring-collection-plugin",
+  "owner": "@elastic/infra-monitoring-ui",
+  "plugin": {
+    "id": "monitoringCollection",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "monitoring_collection"
+    ]
+  }
+}

@@ -52,6 +52,9 @@ const setup = async () => {
     dockerPush: false,
     dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 
   const run = createRunner({

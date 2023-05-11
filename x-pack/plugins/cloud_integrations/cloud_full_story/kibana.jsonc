@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-full-story-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "When Kibana runs on Elastic Cloud, this plugin registers FullStory as a shipper for telemetry.",
+  "plugin": {
+    "id": "cloudFullStory",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "cloud_integrations",
+      "full_story"
+    ],
+    "requiredPlugins": [
+      "cloud"
+    ],
+    "optionalPlugins": [
+      "security"
+    ]
+  }
+}

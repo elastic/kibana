@@ -27,7 +27,6 @@
     "@kbn/repo-info",
     "@kbn/dev-cli-runner",
     "@kbn/jest-serializers",
-    "@kbn/plugin-discovery",
     "@kbn/repo-packages",
   ]
 }

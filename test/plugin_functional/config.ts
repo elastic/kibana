@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import path from 'path';
-import fs from 'fs';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
-
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
-  );
 
   return {
     rootTags: ['runOutsideOfCiGroups'],
@@ -70,9 +63,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud_integrations.full_story.org_id=a_string',
         '--xpack.cloud_integrations.gain_sight.enabled=true',
         '--xpack.cloud_integrations.gain_sight.org_id=a_string',
-        ...plugins.map(
-          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
-        ),
+        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },
   };

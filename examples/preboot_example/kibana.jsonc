@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/preboot-example-plugin",
+  "owner": [
+    "@elastic/kibana-security",
+    "@elastic/kibana-core"
+  ],
+  "description": "The example of the `preboot` plugin.",
+  "plugin": {
+    "id": "prebootExample",
+    "type": "preboot",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "prebootExample"
+    ]
+  }
+}

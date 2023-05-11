@@ -6,16 +6,20 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
-import { promisify } from 'util';
+import Fs from 'fs';
+import { fork } from 'child_process';
 
+import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { OptimizerConfig, runOptimizer, logOptimizerState } from '@kbn/optimizer';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { OptimizerConfig } from '@kbn/optimizer';
+import { Bundle, BundleRemotes } from '@kbn/optimizer/src/common';
+import { observeLines } from '@kbn/stdio-dev-helpers';
 
 import { BuildContext } from '../build_context';
 
-const asyncRename = promisify(Fs.rename);
+type WorkerMsg = { success: true; warnings: string } | { success: false; error: string };
 
 export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContext) {
   if (!plugin.manifest.ui) {
@@ -24,24 +28,86 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
 
   log.info('running @kbn/optimizer');
   await log.indent(2, async () => {
-    // build bundles into target
-    const config = OptimizerConfig.create({
+    const optimizerConfig = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
-      pluginPaths: [sourceDir],
-      cache: false,
+      examples: false,
+      testPlugins: false,
+      includeCoreBundle: true,
       dist: true,
-      filter: [plugin.manifest.id],
     });
 
-    const target = Path.resolve(sourceDir, 'target');
+    const bundle = new Bundle({
+      id: plugin.manifest.id,
+      contextDir: sourceDir,
+      ignoreMetrics: true,
+      outputDir: Path.resolve(buildDir, 'target/public'),
+      sourceRoot: sourceDir,
+      type: 'plugin',
+      remoteInfo: {
+        pkgId: 'not-importable',
+        targets: ['public', 'common'],
+      },
+    });
 
-    await runOptimizer(config).pipe(logOptimizerState(log, config)).toPromise();
+    const remotes = BundleRemotes.fromBundles([...optimizerConfig.bundles, bundle]);
+    const worker = optimizerConfig.getWorkerConfig('cache disabled');
 
-    // clean up unnecessary files
-    Fs.unlinkSync(Path.resolve(target, 'public/metrics.json'));
-    Fs.unlinkSync(Path.resolve(target, 'public/.kbn-optimizer-cache'));
+    const proc = fork(require.resolve('./optimize_worker'), {
+      cwd: REPO_ROOT,
+      execArgv: ['--require=@kbn/babel-register/install'],
+      stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+    });
 
-    // move target into buildDir
-    await asyncRename(target, Path.resolve(buildDir, 'target'));
+    const result = await Rx.lastValueFrom(
+      Rx.race(
+        observeLines(proc.stdout!).pipe(
+          Rx.tap((line) => log.debug(line)),
+          Rx.ignoreElements()
+        ),
+        observeLines(proc.stderr!).pipe(
+          Rx.tap((line) => log.error(line)),
+          Rx.ignoreElements()
+        ),
+        Rx.defer(() => {
+          proc.send({
+            workerConfig: worker,
+            bundles: JSON.stringify([bundle.toSpec()]),
+            bundleRemotes: remotes.toSpecJson(),
+          });
+
+          return Rx.merge(
+            Rx.fromEvent<[WorkerMsg]>(proc, 'message').pipe(
+              Rx.map((msg) => {
+                return msg[0];
+              })
+            ),
+            Rx.fromEvent<Error>(proc, 'error').pipe(
+              Rx.map((error) => {
+                throw error;
+              })
+            )
+          ).pipe(
+            Rx.take(1),
+            Rx.tap({
+              complete() {
+                proc.kill('SIGKILL');
+              },
+            })
+          );
+        })
+      )
+    );
+
+    // cleanup unnecessary files
+    Fs.unlinkSync(Path.resolve(bundle.outputDir, '.kbn-optimizer-cache'));
+
+    const rel = Path.relative(REPO_ROOT, bundle.outputDir);
+    if (!result.success) {
+      throw createFailError(`Optimizer failure: ${result.error}`);
+    } else if (result.warnings) {
+      log.warning(`browser bundle created at ${rel}, but with warnings:\n${result.warnings}`);
+    } else {
+      log.success(`browser bundle created at ${rel}`);
+    }
   });
 }

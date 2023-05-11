@@ -140,86 +140,56 @@ test('correctly creates environment with constructor.', () => {
   expect(env).toMatchSnapshot('env properties');
 });
 
-test('pluginSearchPaths contains x-pack plugins path if --oss flag is false', () => {
+test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters', () => {
   const env = new Env(
     '/some/home/dir',
     packageInfos,
     getEnvOptions({
-      cliArgs: { oss: false },
+      cliArgs: {
+        oss: false,
+        runExamples: false,
+      },
     })
   );
 
-  expect(env.pluginSearchPaths).toContain('/some/home/dir/x-pack/plugins');
-});
+  expect(env.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 
-test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is true', () => {
-  const env = new Env(
+  const env2 = new Env(
     '/some/home/dir',
     packageInfos,
     getEnvOptions({
-      cliArgs: { oss: true },
+      cliArgs: {
+        oss: true,
+        runExamples: true,
+      },
     })
   );
 
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/plugins');
-});
+  expect(env2.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 
-test('pluginSearchPaths contains examples plugins path if --run-examples flag is true', () => {
-  const env = new Env(
+  const env3 = new Env(
     '/some/home/dir',
     packageInfos,
     getEnvOptions({
-      cliArgs: { runExamples: true },
+      cliArgs: {
+        oss: true,
+        runExamples: false,
+      },
     })
   );
 
-  expect(env.pluginSearchPaths).toContain('/some/home/dir/examples');
-});
+  expect(env3.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 
-test('pluginSearchPaths contains x-pack/examples plugins path if --run-examples flag is true', () => {
-  const env = new Env(
+  const env4 = new Env(
     '/some/home/dir',
     packageInfos,
     getEnvOptions({
-      cliArgs: { runExamples: true },
+      cliArgs: {
+        oss: false,
+        runExamples: true,
+      },
     })
   );
 
-  expect(env.pluginSearchPaths).toContain('/some/home/dir/x-pack/examples');
-});
-
-test('pluginSearchPaths does not contain x-pack/examples plugins path if --oss flag is true', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: true, oss: true },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/examples');
-});
-
-test('pluginSearchPaths does not contains examples plugins path if --run-examples flag is false', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: false },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/examples');
-});
-
-test('pluginSearchPaths does not contains x-pack/examples plugins path if --run-examples flag is false', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: false },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/examples');
+  expect(env4.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 });

@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kibana-overview-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "kibanaOverview",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "navigation",
+      "dataViews",
+      "home",
+      "share",
+      "dataViewEditor"
+    ],
+    "optionalPlugins": [
+      "newsfeed",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "newsfeed"
+    ]
+  }
+}

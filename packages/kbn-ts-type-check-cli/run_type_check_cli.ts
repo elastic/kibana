@@ -14,7 +14,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import { SomeDevLog } from '@kbn/some-dev-log';
-import { TsProject, TS_PROJECTS } from '@kbn/ts-projects';
+import { type TsProject, TS_PROJECTS } from '@kbn/ts-projects';
 
 import {
   updateRootRefsConfig,

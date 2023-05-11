@@ -24,6 +24,8 @@ it('returns a bundle for core and each plugin', () => {
           isUiPlugin: true,
           extraPublicDirs: [],
           manifestPath: '/repo/plugins/foo/kibana.json',
+          pkgId: '@kbn/foo-plugin',
+          ignoreMetrics: false,
         },
         {
           directory: '/repo/plugins/bar',
@@ -31,6 +33,8 @@ it('returns a bundle for core and each plugin', () => {
           isUiPlugin: false,
           extraPublicDirs: [],
           manifestPath: '/repo/plugins/bar/kibana.json',
+          pkgId: '@kbn/bar-plugin',
+          ignoreMetrics: false,
         },
         {
           directory: '/outside/of/repo/plugins/baz',
@@ -38,6 +42,8 @@ it('returns a bundle for core and each plugin', () => {
           isUiPlugin: true,
           extraPublicDirs: [],
           manifestPath: '/outside/of/repo/plugins/baz/kibana.json',
+          pkgId: '@kbn/external-baz-plugin',
+          ignoreMetrics: false,
         },
         {
           directory: '/repo/x-pack/plugins/box',
@@ -45,8 +51,11 @@ it('returns a bundle for core and each plugin', () => {
           isUiPlugin: true,
           extraPublicDirs: [],
           manifestPath: '/repo/x-pack/plugins/box/kibana.json',
+          pkgId: '@kbn/box-plugin',
+          ignoreMetrics: false,
         },
       ],
+
       '/repo',
       '/output',
       {
@@ -61,12 +70,16 @@ it('returns a bundle for core and each plugin', () => {
         "banner": undefined,
         "contextDir": <repoRoot>/plugins/foo,
         "id": "foo",
+        "ignoreMetrics": false,
         "manifestPath": <repoRoot>/plugins/foo/kibana.json,
         "outputDir": <outputRoot>/plugins/foo/target/public,
         "pageLoadAssetSizeLimit": undefined,
-        "publicDirNames": Array [
-          "public",
-        ],
+        "remoteInfo": Object {
+          "pkgId": "@kbn/foo-plugin",
+          "targets": Array [
+            "public",
+          ],
+        },
         "sourceRoot": <repoRoot>,
         "type": "plugin",
       },
@@ -74,27 +87,35 @@ it('returns a bundle for core and each plugin', () => {
         "banner": undefined,
         "contextDir": <outsideOfRepo>/plugins/baz,
         "id": "baz",
+        "ignoreMetrics": false,
         "manifestPath": <outsideOfRepo>/plugins/baz/kibana.json,
         "outputDir": <outsideOfRepo>/plugins/baz/target/public,
         "pageLoadAssetSizeLimit": undefined,
-        "publicDirNames": Array [
-          "public",
-        ],
+        "remoteInfo": Object {
+          "pkgId": "@kbn/external-baz-plugin",
+          "targets": Array [
+            "public",
+          ],
+        },
         "sourceRoot": <repoRoot>,
         "type": "plugin",
       },
       Object {
-        "banner": "/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements. 
+        "banner": "/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
      * Licensed under the Elastic License 2.0; you may not use this file except in compliance with the Elastic License 2.0. */
     ",
         "contextDir": <repoRoot>/x-pack/plugins/box,
         "id": "box",
+        "ignoreMetrics": false,
         "manifestPath": <repoRoot>/x-pack/plugins/box/kibana.json,
         "outputDir": <outputRoot>/x-pack/plugins/box/target/public,
         "pageLoadAssetSizeLimit": 123,
-        "publicDirNames": Array [
-          "public",
-        ],
+        "remoteInfo": Object {
+          "pkgId": "@kbn/box-plugin",
+          "targets": Array [
+            "public",
+          ],
+        },
         "sourceRoot": <repoRoot>,
         "type": "plugin",
       },

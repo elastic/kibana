@@ -2733,11 +2733,31 @@
   resolved "https://registry.yarnpkg.com/@jsdevtools/ono/-/ono-7.1.3.tgz#9df03bbd7c696a5c58885c34aa06da41c8543796"
   integrity sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==
 
+"@kbn/aad-fixtures-plugin@link:x-pack/test/alerting_api_integration/common/plugins/aad":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ace@link:packages/kbn-ace":
   version "0.0.0"
   uid ""
 
+"@kbn/actions-plugin@link:x-pack/plugins/actions":
+  version "0.0.0"
+  uid ""
+
+"@kbn/actions-simulators-plugin@link:x-pack/test/alerting_api_integration/common/plugins/actions_simulators":
+  version "0.0.0"
+  uid ""
+
+"@kbn/advanced-settings-plugin@link:src/plugins/advanced_settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/aiops-plugin@link:x-pack/plugins/aiops":
   version "0.0.0"
   uid ""
 
@@ -2746,6 +2766,26 @@
   uid ""
 
 "@kbn/alerting-api-integration-helpers@link:x-pack/test/alerting_api_integration/packages/helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alerting-api-integration-test-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alerting-example-plugin@link:x-pack/examples/alerting_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alerting-fixture-plugin@link:x-pack/test/functional_with_es_ssl/plugins/alerts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alerting-plugin@link:x-pack/plugins/alerting":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alerts-restricted-fixtures-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerts_restricted":
   version "0.0.0"
   uid ""
 
@@ -2777,6 +2817,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-ftr-helpers-plugin@link:test/analytics/plugins/analytics_ftr_helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/analytics-plugin-a-plugin@link:test/analytics/plugins/analytics_plugin_a":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-shippers-elastic-v3-browser@link:packages/analytics/shippers/elastic_v3/browser":
   version "0.0.0"
   uid ""
@@ -2805,6 +2853,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-plugin@link:x-pack/plugins/apm":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-synthtrace-client@link:packages/kbn-apm-synthtrace-client":
   version "0.0.0"
   uid ""
@@ -2817,11 +2869,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/axe-config@link:packages/kbn-axe-config":
+"@kbn/app-link-test-plugin@link:test/plugin_functional/plugins/app_link_test":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-plugin-package-imports@link:packages/kbn-babel-plugin-package-imports":
+"@kbn/application-usage-test-plugin@link:x-pack/test/usage_collection/plugins/application_usage_test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/axe-config@link:packages/kbn-axe-config":
   version "0.0.0"
   uid ""
 
@@ -2837,11 +2897,35 @@
   version "0.0.0"
   uid ""
 
+"@kbn/banners-plugin@link:x-pack/plugins/banners":
+  version "0.0.0"
+  uid ""
+
 "@kbn/bazel-runner@link:packages/kbn-bazel-runner":
   version "0.0.0"
   uid ""
 
+"@kbn/bfetch-explorer-plugin@link:examples/bfetch_explorer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/bfetch-plugin@link:src/plugins/bfetch":
+  version "0.0.0"
+  uid ""
+
+"@kbn/canvas-plugin@link:x-pack/plugins/canvas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cases-api-integration-test-plugin@link:x-pack/test/cases_api_integration/common/plugins/cases":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cases-components@link:packages/kbn-cases-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cases-plugin@link:x-pack/plugins/cases":
   version "0.0.0"
   uid ""
 
@@ -2854,6 +2938,10 @@
   uid ""
 
 "@kbn/chart-icons@link:packages/kbn-chart-icons":
+  version "0.0.0"
+  uid ""
+
+"@kbn/charts-plugin@link:src/plugins/charts":
   version "0.0.0"
   uid ""
 
@@ -2874,6 +2962,46 @@
   uid ""
 
 "@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-chat-plugin@link:x-pack/plugins/cloud_integrations/cloud_chat":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-data-migration-plugin@link:x-pack/plugins/cloud_integrations/cloud_data_migration":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-defend-plugin@link:x-pack/plugins/cloud_defend":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-experiments-plugin@link:x-pack/plugins/cloud_integrations/cloud_experiments":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-full-story-plugin@link:x-pack/plugins/cloud_integrations/cloud_full_story":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-gainsight-plugin@link:x-pack/plugins/cloud_integrations/cloud_gain_sight":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-integration-saml-provider-plugin@link:x-pack/test/cloud_integration/plugins/saml_provider":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-links-plugin@link:x-pack/plugins/cloud_integrations/cloud_links":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-plugin@link:x-pack/plugins/cloud":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-security-posture-plugin@link:x-pack/plugins/cloud_security_posture":
   version "0.0.0"
   uid ""
 
@@ -2905,11 +3033,27 @@
   version "0.0.0"
   uid ""
 
+"@kbn/console-plugin@link:src/plugins/console":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:packages/content-management/content_editor":
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-plugin@link:src/plugins/content_management":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-table-list@link:packages/content-management/table_list":
+  version "0.0.0"
+  uid ""
+
+"@kbn/controls-example-plugin@link:examples/controls_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/controls-plugin@link:src/plugins/controls":
   version "0.0.0"
   uid ""
 
@@ -2934,6 +3078,10 @@
   uid ""
 
 "@kbn/core-analytics-server@link:packages/core/analytics/core-analytics-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-app-status-plugin@link:test/plugin_functional/plugins/core_app_status":
   version "0.0.0"
   uid ""
 
@@ -3177,6 +3325,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-history-block-plugin@link:test/plugin_functional/plugins/core_history_block":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-browser-internal@link:packages/core/http/core-http-browser-internal":
   version "0.0.0"
   uid ""
@@ -3198,6 +3350,10 @@
   uid ""
 
 "@kbn/core-http-context-server-mocks@link:packages/core/http/core-http-context-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-plugin@link:test/plugin_functional/plugins/core_http":
   version "0.0.0"
   uid ""
 
@@ -3397,6 +3553,50 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-plugin-a-plugin@link:test/plugin_functional/plugins/core_plugin_a":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-appleave-plugin@link:test/plugin_functional/plugins/core_plugin_appleave":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-b-plugin@link:test/plugin_functional/plugins/core_plugin_b":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-chromeless-plugin@link:test/plugin_functional/plugins/core_plugin_chromeless":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-deep-links-plugin@link:test/plugin_functional/plugins/core_plugin_deep_links":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-deprecations-plugin@link:test/plugin_functional/plugins/core_plugin_deprecations":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-execution-context-plugin@link:test/plugin_functional/plugins/core_plugin_execution_context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-helpmenu-plugin@link:test/plugin_functional/plugins/core_plugin_helpmenu":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-initializer-context-plugin@link:test/node_roles_functional/plugins/core_plugin_initializer_context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-route-timeouts-plugin@link:test/plugin_functional/plugins/core_plugin_route_timeouts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-static-assets-plugin@link:test/plugin_functional/plugins/core_plugin_static_assets":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-plugins-base-server-internal@link:packages/core/plugins/core-plugins-base-server-internal":
   version "0.0.0"
   uid ""
@@ -3434,6 +3634,10 @@
   uid ""
 
 "@kbn/core-preboot-server@link:packages/core/preboot/core-preboot-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-provider-plugin@link:test/plugin_functional/plugins/core_provider_plugin":
   version "0.0.0"
   uid ""
 
@@ -3629,6 +3833,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core@link:src/core":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cross-cluster-replication-plugin@link:x-pack/plugins/cross_cluster_replication":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto-browser@link:packages/kbn-crypto-browser":
   version "0.0.0"
   uid ""
@@ -3637,7 +3849,59 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-branding-plugin@link:x-pack/plugins/custom_branding":
+  version "0.0.0"
+  uid ""
+
+"@kbn/custom-integrations-plugin@link:src/plugins/custom_integrations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cypress-config@link:packages/kbn-cypress-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dashboard-embeddable-examples-plugin@link:examples/dashboard_embeddable_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dashboard-enhanced-plugin@link:x-pack/plugins/dashboard_enhanced":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dashboard-plugin@link:src/plugins/dashboard":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-plugin@link:src/plugins/data":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-search-plugin@link:test/plugin_functional/plugins/data_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-view-editor-plugin@link:src/plugins/data_view_editor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-view-field-editor-example-plugin@link:examples/data_view_field_editor_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-view-field-editor-plugin@link:src/plugins/data_view_field_editor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-view-management-plugin@link:src/plugins/data_view_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-views-plugin@link:src/plugins/data_views":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-visualizer-plugin@link:x-pack/plugins/data_visualizer":
   version "0.0.0"
   uid ""
 
@@ -3657,7 +3921,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dev-tools-plugin@link:src/plugins/dev_tools":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dev-utils@link:packages/kbn-dev-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/developer-examples-plugin@link:examples/developer_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discover-enhanced-plugin@link:x-pack/plugins/discover_enhanced":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discover-plugin@link:src/plugins/discover":
   version "0.0.0"
   uid ""
 
@@ -3673,11 +3953,51 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ecs-data-quality-dashboard-plugin@link:x-pack/plugins/ecs_data_quality_dashboard":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ecs-data-quality-dashboard@link:x-pack/packages/kbn-ecs-data-quality-dashboard":
   version "0.0.0"
   uid ""
 
 "@kbn/ecs@link:packages/kbn-ecs":
+  version "0.0.0"
+  uid ""
+
+"@kbn/elasticsearch-client-plugin@link:test/plugin_functional/plugins/elasticsearch_client_plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/elasticsearch-client-xpack-plugin@link:x-pack/test/plugin_api_integration/plugins/elasticsearch_client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/embeddable-enhanced-plugin@link:x-pack/plugins/embeddable_enhanced":
+  version "0.0.0"
+  uid ""
+
+"@kbn/embeddable-examples-plugin@link:examples/embeddable_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/embeddable-explorer-plugin@link:examples/embeddable_explorer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/embeddable-plugin@link:src/plugins/embeddable":
+  version "0.0.0"
+  uid ""
+
+"@kbn/embedded-lens-example-plugin@link:x-pack/examples/embedded_lens_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/encrypted-saved-objects-plugin@link:x-pack/plugins/encrypted_saved_objects":
+  version "0.0.0"
+  uid ""
+
+"@kbn/enterprise-search-plugin@link:x-pack/plugins/enterprise_search":
   version "0.0.0"
   uid ""
 
@@ -3694,6 +4014,10 @@
   uid ""
 
 "@kbn/es-types@link:packages/kbn-es-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/es-ui-shared-plugin@link:src/plugins/es_ui_shared":
   version "0.0.0"
   uid ""
 
@@ -3717,7 +4041,87 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eso-plugin@link:x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/event-annotation-plugin@link:src/plugins/event_annotation":
+  version "0.0.0"
+  uid ""
+
+"@kbn/event-log-fixture-plugin@link:x-pack/test/plugin_api_integration/plugins/event_log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/event-log-plugin@link:x-pack/plugins/event_log":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expect@link:packages/kbn-expect":
+  version "0.0.0"
+  uid ""
+
+"@kbn/exploratory-view-example-plugin@link:x-pack/examples/exploratory_view_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-error-plugin@link:src/plugins/expression_error":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-gauge-plugin@link:src/plugins/chart_expressions/expression_gauge":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-heatmap-plugin@link:src/plugins/chart_expressions/expression_heatmap":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-image-plugin@link:src/plugins/expression_image":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-legacy-metric-vis-plugin@link:src/plugins/chart_expressions/expression_legacy_metric":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-metric-plugin@link:src/plugins/expression_metric":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-metric-vis-plugin@link:src/plugins/chart_expressions/expression_metric":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-partition-vis-plugin@link:src/plugins/chart_expressions/expression_partition_vis":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-repeat-image-plugin@link:src/plugins/expression_repeat_image":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-reveal-image-plugin@link:src/plugins/expression_reveal_image":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-shape-plugin@link:src/plugins/expression_shape":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-tagcloud-plugin@link:src/plugins/chart_expressions/expression_tagcloud":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expression-xy-plugin@link:src/plugins/chart_expressions/expression_xy":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expressions-explorer-plugin@link:examples/expressions_explorer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expressions-plugin@link:src/plugins/expressions":
   version "0.0.0"
   uid ""
 
@@ -3725,7 +4129,43 @@
   version "0.0.0"
   uid ""
 
+"@kbn/feature-usage-test-plugin@link:x-pack/test/plugin_api_integration/plugins/feature_usage_test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/features-plugin@link:x-pack/plugins/features":
+  version "0.0.0"
+  uid ""
+
+"@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/field-formats-example-plugin@link:examples/field_formats_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/field-formats-plugin@link:src/plugins/field_formats":
+  version "0.0.0"
+  uid ""
+
 "@kbn/field-types@link:packages/kbn-field-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/file-upload-plugin@link:x-pack/plugins/file_upload":
+  version "0.0.0"
+  uid ""
+
+"@kbn/files-example-plugin@link:examples/files_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/files-management-plugin@link:src/plugins/files_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/files-plugin@link:src/plugins/files":
   version "0.0.0"
   uid ""
 
@@ -3733,7 +4173,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/fleet-plugin@link:x-pack/plugins/fleet":
+  version "0.0.0"
+  uid ""
+
 "@kbn/flot-charts@link:packages/kbn-flot-charts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/foo-plugin@link:x-pack/test/ui_capabilities/common/plugins/foo_plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ftr-apis-plugin@link:src/plugins/ftr_apis":
   version "0.0.0"
   uid ""
 
@@ -3745,11 +4197,47 @@
   version "0.0.0"
   uid ""
 
+"@kbn/functional-with-es-ssl-cases-test-plugin@link:x-pack/test/functional_with_es_ssl/plugins/cases":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""
 
 "@kbn/get-repo-files@link:packages/kbn-get-repo-files":
+  version "0.0.0"
+  uid ""
+
+"@kbn/global-search-bar-plugin@link:x-pack/plugins/global_search_bar":
+  version "0.0.0"
+  uid ""
+
+"@kbn/global-search-plugin@link:x-pack/plugins/global_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/global-search-providers-plugin@link:x-pack/plugins/global_search_providers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/global-search-test-plugin@link:x-pack/test/plugin_functional/plugins/global_search_test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/graph-plugin@link:x-pack/plugins/graph":
+  version "0.0.0"
+  uid ""
+
+"@kbn/grokdebugger-plugin@link:x-pack/plugins/grokdebugger":
+  version "0.0.0"
+  uid ""
+
+"@kbn/guided-onboarding-example-plugin@link:examples/guided_onboarding_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/guided-onboarding-plugin@link:src/plugins/guided_onboarding":
   version "0.0.0"
   uid ""
 
@@ -3766,6 +4254,14 @@
   uid ""
 
 "@kbn/health-gateway-server@link:packages/kbn-health-gateway-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/hello-world-plugin@link:examples/hello_world":
+  version "0.0.0"
+  uid ""
+
+"@kbn/home-plugin@link:src/plugins/home":
   version "0.0.0"
   uid ""
 
@@ -3789,11 +4285,55 @@
   version "0.0.0"
   uid ""
 
+"@kbn/iframe-embedded-plugin@link:x-pack/test/functional_embedded/plugins/iframe_embedded":
+  version "0.0.0"
+  uid ""
+
+"@kbn/image-embeddable-plugin@link:src/plugins/image_embeddable":
+  version "0.0.0"
+  uid ""
+
 "@kbn/import-locator@link:packages/kbn-import-locator":
   version "0.0.0"
   uid ""
 
 "@kbn/import-resolver@link:packages/kbn-import-resolver":
+  version "0.0.0"
+  uid ""
+
+"@kbn/index-lifecycle-management-plugin@link:x-pack/plugins/index_lifecycle_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/index-management-plugin@link:x-pack/plugins/index_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/index-patterns-test-plugin@link:test/plugin_functional/plugins/index_patterns":
+  version "0.0.0"
+  uid ""
+
+"@kbn/infra-plugin@link:x-pack/plugins/infra":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ingest-pipelines-plugin@link:x-pack/plugins/ingest_pipelines":
+  version "0.0.0"
+  uid ""
+
+"@kbn/input-control-vis-plugin@link:src/plugins/input_control_vis":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inspector-plugin@link:src/plugins/inspector":
+  version "0.0.0"
+  uid ""
+
+"@kbn/interactive-setup-plugin@link:src/plugins/interactive_setup":
+  version "0.0.0"
+  uid ""
+
+"@kbn/interactive-setup-test-endpoints-plugin@link:test/interactive_setup_api_integration/plugins/test_endpoints":
   version "0.0.0"
   uid ""
 
@@ -3817,11 +4357,71 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kbn-health-gateway-status-plugin@link:test/health_gateway/plugins/status":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kbn-sample-panel-action-plugin@link:test/plugin_functional/plugins/kbn_sample_panel_action":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kbn-top-nav-plugin@link:test/plugin_functional/plugins/kbn_top_nav":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kbn-tp-custom-visualizations-plugin@link:test/plugin_functional/plugins/kbn_tp_custom_visualizations":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kbn-tp-run-pipeline-plugin@link:test/interpreter_functional/plugins/kbn_tp_run_pipeline":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kibana-cors-test-plugin@link:x-pack/test/functional_cors/plugins/kibana_cors_test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kibana-manifest-schema@link:packages/kbn-kibana-manifest-schema":
   version "0.0.0"
   uid ""
 
+"@kbn/kibana-overview-plugin@link:src/plugins/kibana_overview":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kibana-react-plugin@link:src/plugins/kibana_react":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kibana-usage-collection-plugin@link:src/plugins/kibana_usage_collection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kibana-utils-plugin@link:src/plugins/kibana_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
+  version "0.0.0"
+  uid ""
+
 "@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
+  version "0.0.0"
+  uid ""
+
+"@kbn/lens-plugin@link:x-pack/plugins/lens":
+  version "0.0.0"
+  uid ""
+
+"@kbn/license-api-guard-plugin@link:x-pack/plugins/license_api_guard":
+  version "0.0.0"
+  uid ""
+
+"@kbn/license-management-plugin@link:x-pack/plugins/license_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/licensing-plugin@link:x-pack/plugins/licensing":
   version "0.0.0"
   uid ""
 
@@ -3833,11 +4433,27 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lists-plugin@link:x-pack/plugins/lists":
+  version "0.0.0"
+  uid ""
+
+"@kbn/locator-examples-plugin@link:examples/locator_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/locator-explorer-plugin@link:examples/locator_explorer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging-mocks@link:packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
 
 "@kbn/logging@link:packages/kbn-logging":
+  version "0.0.0"
+  uid ""
+
+"@kbn/logstash-plugin@link:x-pack/plugins/logstash":
   version "0.0.0"
   uid ""
 
@@ -3849,7 +4465,27 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-plugin@link:src/plugins/management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-test-plugin@link:test/plugin_functional/plugins/management_test_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/mapbox-gl@link:packages/kbn-mapbox-gl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/maps-custom-raster-source-plugin@link:x-pack/examples/third_party_maps_source_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/maps-ems-plugin@link:src/plugins/maps_ems":
+  version "0.0.0"
+  uid ""
+
+"@kbn/maps-plugin@link:x-pack/plugins/maps":
   version "0.0.0"
   uid ""
 
@@ -3877,6 +4513,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-plugin@link:x-pack/plugins/ml":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-query-utils@link:x-pack/packages/ml/query_utils":
   version "0.0.0"
   uid ""
@@ -3893,6 +4533,46 @@
   version "0.0.0"
   uid ""
 
+"@kbn/monitoring-collection-plugin@link:x-pack/plugins/monitoring_collection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/monitoring-plugin@link:x-pack/plugins/monitoring":
+  version "0.0.0"
+  uid ""
+
+"@kbn/navigation-plugin@link:src/plugins/navigation":
+  version "0.0.0"
+  uid ""
+
+"@kbn/newsfeed-plugin@link:src/plugins/newsfeed":
+  version "0.0.0"
+  uid ""
+
+"@kbn/newsfeed-test-plugin@link:test/common/plugins/newsfeed":
+  version "0.0.0"
+  uid ""
+
+"@kbn/notifications-plugin@link:x-pack/plugins/notifications":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/observability":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-plugin@link:x-pack/plugins/observability":
+  version "0.0.0"
+  uid ""
+
+"@kbn/oidc-provider-plugin@link:x-pack/test/security_api_integration/plugins/oidc_provider":
+  version "0.0.0"
+  uid ""
+
+"@kbn/open-telemetry-instrumented-plugin@link:test/common/plugins/otel_metrics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/optimizer-webpack-helpers@link:packages/kbn-optimizer-webpack-helpers":
   version "0.0.0"
   uid ""
@@ -3902,6 +4582,18 @@
   uid ""
 
 "@kbn/osquery-io-ts-types@link:packages/kbn-osquery-io-ts-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/osquery-plugin@link:x-pack/plugins/osquery":
+  version "0.0.0"
+  uid ""
+
+"@kbn/paertial-results-example-plugin@link:examples/partial_results_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/painless-lab-plugin@link:x-pack/plugins/painless_lab":
   version "0.0.0"
   uid ""
 
@@ -3921,10 +4613,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-discovery@link:packages/kbn-plugin-discovery":
-  version "0.0.0"
-  uid ""
-
 "@kbn/plugin-generator@link:packages/kbn-plugin-generator":
   version "0.0.0"
   uid ""
@@ -3933,7 +4621,27 @@
   version "0.0.0"
   uid ""
 
+"@kbn/preboot-example-plugin@link:examples/preboot_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/presentation-util-plugin@link:src/plugins/presentation_util":
+  version "0.0.0"
+  uid ""
+
+"@kbn/profiling-plugin@link:x-pack/plugins/profiling":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-field@link:packages/kbn-react-field":
+  version "0.0.0"
+  uid ""
+
+"@kbn/remote-clusters-plugin@link:x-pack/plugins/remote_clusters":
+  version "0.0.0"
+  uid ""
+
+"@kbn/rendering-plugin@link:test/plugin_functional/plugins/rendering_plugin":
   version "0.0.0"
   uid ""
 
@@ -3965,7 +4673,31 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+  version "0.0.0"
+  uid ""
+
+"@kbn/resolver-test-plugin@link:x-pack/test/plugin_functional/plugins/resolver_test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-stream-plugin@link:examples/response_stream":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rison@link:packages/kbn-rison":
+  version "0.0.0"
+  uid ""
+
+"@kbn/rollup-plugin@link:x-pack/plugins/rollup":
+  version "0.0.0"
+  uid ""
+
+"@kbn/routing-example-plugin@link:examples/routing_example":
   version "0.0.0"
   uid ""
 
@@ -3973,7 +4705,111 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rule-registry-plugin@link:x-pack/plugins/rule_registry":
+  version "0.0.0"
+  uid ""
+
+"@kbn/runtime-fields-plugin@link:x-pack/plugins/runtime_fields":
+  version "0.0.0"
+  uid ""
+
 "@kbn/safer-lodash-set@link:packages/kbn-safer-lodash-set":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saml-provider-plugin@link:x-pack/test/security_api_integration/plugins/saml_provider":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sample-task-plugin@link:x-pack/test/plugin_api_integration/plugins/sample_task_plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-object-export-transforms-plugin@link:test/plugin_functional/plugins/saved_object_export_transforms":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-object-import-warnings-plugin@link:test/plugin_functional/plugins/saved_object_import_warnings":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-object-test-plugin@link:x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-objects-finder-plugin@link:src/plugins/saved_objects_finder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-objects-hidden-from-http-apis-type-plugin@link:test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-objects-hidden-type-plugin@link:test/plugin_functional/plugins/saved_objects_hidden_type":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-objects-management-plugin@link:src/plugins/saved_objects_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-objects-plugin@link:src/plugins/saved_objects":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-objects-tagging-plugin@link:x-pack/plugins/saved_objects_tagging":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-search-plugin@link:src/plugins/saved_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/screenshot-mode-example-plugin@link:examples/screenshot_mode_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/screenshot-mode-plugin@link:src/plugins/screenshot_mode":
+  version "0.0.0"
+  uid ""
+
+"@kbn/screenshotting-example-plugin@link:x-pack/examples/screenshotting_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/screenshotting-plugin@link:x-pack/plugins/screenshotting":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-examples-plugin@link:examples/search_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/searchprofiler-plugin@link:x-pack/plugins/searchprofiler":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-api-integration-helpers@link:x-pack/test/security_api_integration/packages/helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-plugin@link:x-pack/plugins/security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/security_solution":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-test-endpoints-plugin@link:x-pack/test/security_functional/plugins/test_endpoints":
   version "0.0.0"
   uid ""
 
@@ -4049,7 +4885,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/session-notifications-plugin@link:test/plugin_functional/plugins/session_notifications":
+  version "0.0.0"
+  uid ""
+
+"@kbn/session-view-plugin@link:x-pack/plugins/session_view":
+  version "0.0.0"
+  uid ""
+
 "@kbn/set-map@link:packages/kbn-set-map":
+  version "0.0.0"
+  uid ""
+
+"@kbn/share-examples-plugin@link:examples/share_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/share-plugin@link:src/plugins/share":
   version "0.0.0"
   uid ""
 
@@ -4257,6 +5109,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
+  version "0.0.0"
+  uid ""
+
 "@kbn/some-dev-log@link:packages/kbn-some-dev-log":
   version "0.0.0"
   uid ""
@@ -4265,7 +5121,39 @@
   version "0.0.0"
   uid ""
 
+"@kbn/spaces-plugin@link:x-pack/plugins/spaces":
+  version "0.0.0"
+  uid ""
+
+"@kbn/spaces-test-plugin@link:x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/spec-to-console@link:packages/kbn-spec-to-console":
+  version "0.0.0"
+  uid ""
+
+"@kbn/stack-alerts-plugin@link:x-pack/plugins/stack_alerts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/stack-connectors-plugin@link:x-pack/plugins/stack_connectors":
+  version "0.0.0"
+  uid ""
+
+"@kbn/stack-management-usage-test-plugin@link:x-pack/test/usage_collection/plugins/stack_management_usage_test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/state-containers-examples-plugin@link:examples/state_containers_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/status-plugin-a-plugin@link:test/server_integration/plugins/status_plugin_a":
+  version "0.0.0"
+  uid ""
+
+"@kbn/status-plugin-b-plugin@link:test/server_integration/plugins/status_plugin_b":
   version "0.0.0"
   uid ""
 
@@ -4281,7 +5169,47 @@
   version "0.0.0"
   uid ""
 
+"@kbn/synthetics-plugin@link:x-pack/plugins/synthetics":
+  version "0.0.0"
+  uid ""
+
+"@kbn/task-manager-fixture-plugin@link:x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture":
+  version "0.0.0"
+  uid ""
+
+"@kbn/task-manager-performance-plugin@link:x-pack/test/plugin_api_perf/plugins/task_manager_performance":
+  version "0.0.0"
+  uid ""
+
+"@kbn/task-manager-plugin@link:x-pack/plugins/task_manager":
+  version "0.0.0"
+  uid ""
+
+"@kbn/telemetry-collection-manager-plugin@link:src/plugins/telemetry_collection_manager":
+  version "0.0.0"
+  uid ""
+
+"@kbn/telemetry-collection-xpack-plugin@link:x-pack/plugins/telemetry_collection_xpack":
+  version "0.0.0"
+  uid ""
+
+"@kbn/telemetry-management-section-plugin@link:src/plugins/telemetry_management_section":
+  version "0.0.0"
+  uid ""
+
+"@kbn/telemetry-plugin@link:src/plugins/telemetry":
+  version "0.0.0"
+  uid ""
+
+"@kbn/telemetry-test-plugin@link:test/plugin_functional/plugins/telemetry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-feature-usage-plugin@link:x-pack/test/licensing_plugin/plugins/test_feature_usage":
   version "0.0.0"
   uid ""
 
@@ -4297,6 +5225,26 @@
   version "0.0.0"
   uid ""
 
+"@kbn/testing-embedded-lens-plugin@link:x-pack/examples/testing_embedded_lens":
+  version "0.0.0"
+  uid ""
+
+"@kbn/third-party-lens-navigation-prompt-plugin@link:x-pack/examples/third_party_lens_navigation_prompt":
+  version "0.0.0"
+  uid ""
+
+"@kbn/third-party-vis-lens-example-plugin@link:x-pack/examples/third_party_vis_lens_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/threat-intelligence-plugin@link:x-pack/plugins/threat_intelligence":
+  version "0.0.0"
+  uid ""
+
+"@kbn/timelines-plugin@link:x-pack/plugins/timelines":
+  version "0.0.0"
+  uid ""
+
 "@kbn/timelion-grammar@link:packages/kbn-timelion-grammar":
   version "0.0.0"
   uid ""
@@ -4306,6 +5254,22 @@
   uid ""
 
 "@kbn/tooling-log@link:packages/kbn-tooling-log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/transform-plugin@link:x-pack/plugins/transform":
+  version "0.0.0"
+  uid ""
+
+"@kbn/translations-plugin@link:x-pack/plugins/translations":
+  version "0.0.0"
+  uid ""
+
+"@kbn/triggers-actions-ui-example-plugin@link:x-pack/examples/triggers_actions_ui_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/triggers-actions-ui-plugin@link:x-pack/plugins/triggers_actions_ui":
   version "0.0.0"
   uid ""
 
@@ -4325,7 +5289,31 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-actions-enhanced-examples-plugin@link:x-pack/examples/ui_actions_enhanced_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-actions-enhanced-plugin@link:src/plugins/ui_actions_enhanced":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-actions-examples-plugin@link:examples/ui_action_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-actions-explorer-plugin@link:examples/ui_actions_explorer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-actions-plugin@link:src/plugins/ui_actions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-framework@link:packages/kbn-ui-framework":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-settings-plugin@link:test/plugin_functional/plugins/ui_settings_plugin":
   version "0.0.0"
   uid ""
 
@@ -4341,7 +5329,47 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-field-list-plugin@link:src/plugins/unified_field_list":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-histogram-plugin@link:src/plugins/unified_histogram":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-search-plugin@link:src/plugins/unified_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/upgrade-assistant-plugin@link:x-pack/plugins/upgrade_assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/url-drilldown-plugin@link:x-pack/plugins/drilldowns/url_drilldown":
+  version "0.0.0"
+  uid ""
+
+"@kbn/url-forwarding-plugin@link:src/plugins/url_forwarding":
+  version "0.0.0"
+  uid ""
+
+"@kbn/usage-collection-plugin@link:src/plugins/usage_collection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/usage-collection-test-plugin@link:test/plugin_functional/plugins/usage_collection":
+  version "0.0.0"
+  uid ""
+
 "@kbn/user-profile-components@link:packages/kbn-user-profile-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/user-profile-examples-plugin@link:examples/user_profile_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/user-profiles-consumer-plugin@link:x-pack/test/security_api_integration/plugins/user_profiles_consumer":
   version "0.0.0"
   uid ""
 
@@ -4354,6 +5382,70 @@
   uid ""
 
 "@kbn/utils@link:packages/kbn-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ux-plugin@link:x-pack/plugins/ux":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-default-editor-plugin@link:src/plugins/vis_default_editor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-gauge-plugin@link:src/plugins/vis_types/gauge":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-heatmap-plugin@link:src/plugins/vis_types/heatmap":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-markdown-plugin@link:src/plugins/vis_type_markdown":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-metric-plugin@link:src/plugins/vis_types/metric":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-pie-plugin@link:src/plugins/vis_types/pie":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-table-plugin@link:src/plugins/vis_types/table":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-tagcloud-plugin@link:src/plugins/vis_types/tagcloud":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-timelion-plugin@link:src/plugins/vis_types/timelion":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-timeseries-plugin@link:src/plugins/vis_types/timeseries":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-vega-plugin@link:src/plugins/vis_types/vega":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-vislib-plugin@link:src/plugins/vis_types/vislib":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vis-type-xy-plugin@link:src/plugins/vis_types/xy":
+  version "0.0.0"
+  uid ""
+
+"@kbn/visualizations-plugin@link:src/plugins/visualizations":
+  version "0.0.0"
+  uid ""
+
+"@kbn/watcher-plugin@link:x-pack/plugins/watcher":
   version "0.0.0"
   uid ""
 
@@ -24103,10 +25195,17 @@ rgbcolor@^1.0.1:
   resolved "https://registry.yarnpkg.com/rgbcolor/-/rgbcolor-1.0.1.tgz#d6505ecdb304a6595da26fa4b43307306775945d"
   integrity sha1-1lBezbMEplldom+ktDMHMGd1lF0=
 
-rimraf@^2.2.8, rimraf@^2.5.4, rimraf@^2.6.2, rimraf@^2.6.3:
+rimraf@^2.2.8, rimraf@^2.5.4, rimraf@^2.6.3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.6.3.tgz#b2d104fe0d8fb27cf9e0a1cda8262dd3833c6cab"
   integrity sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==
+  dependencies:
+    glob "^7.1.3"
+
+rimraf@^2.6.2:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.7.1.tgz#35797f13a7fdadc566142c29d4f07ccad483e3ec"
+  integrity sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==
   dependencies:
     glob "^7.1.3"
 
@@ -28337,12 +29436,7 @@ write-file-atomic@^4.0.1:
     imurmurhash "^0.1.4"
     signal-exit "^3.0.7"
 
-ws@8.13.0:
-  version "8.13.0"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-8.13.0.tgz#9a9fb92f93cf41512a0735c8f4dd09b8a1211cd0"
-  integrity sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==
-
-ws@>=8.13.0:
+ws@8.13.0, ws@>=8.13.0:
   version "8.13.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.13.0.tgz#9a9fb92f93cf41512a0735c8f4dd09b8a1211cd0"
   integrity sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==
