@@ -4508,6 +4508,20 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeAlias.hidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisTypeAlias.isDeprecated",
             "type": "CompoundType",
             "tags": [],
