@@ -38,7 +38,12 @@ export const useFetchSecurityTags = () => {
     }
   }, [errorFetchTags, fetchCreateTag, http, isLoadingTags, tags]);
 
-  const tagsResult = useMemo(() => tags ?? (tag ? [tag] : undefined), [tags, tag]);
+  const tagsResult = useMemo(() => {
+    if (tags?.length) {
+      return tags;
+    }
+    return tag ? [tag] : undefined;
+  }, [tags, tag]);
 
   return {
     tags: tagsResult,

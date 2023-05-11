@@ -13,16 +13,13 @@ import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 export const getTagsByName = (
   { http, tagName }: { http: HttpSetup; tagName: string },
   abortSignal?: AbortSignal
-): Promise<Tag[]> => {
-  return http.get(INTERNAL_TAGS_URL, { query: { name: tagName }, signal: abortSignal });
-};
+): Promise<Tag[]> => http.get(INTERNAL_TAGS_URL, { query: { name: tagName }, signal: abortSignal });
 
 export const createTag = (
   { http, tag }: { http: HttpSetup; tag: Omit<TagAttributes, 'color'> & { color?: string } },
   abortSignal?: AbortSignal
-): Promise<Tag> => {
-  return http.put(INTERNAL_TAGS_URL, {
+): Promise<Tag> =>
+  http.put(INTERNAL_TAGS_URL, {
     body: JSON.stringify(tag),
     signal: abortSignal,
   });
-};
