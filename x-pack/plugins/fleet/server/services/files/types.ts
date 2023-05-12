@@ -20,12 +20,10 @@ export interface FleetFileClientInterface {
   update(fileId: string, updates: {}): Promise<FleetFile>;
 
   /** Checks if a file has chunks */
-  doesFileHaveChunks(fileId: string): Promise<boolean>;
+  doesFileHaveData(fileId: string): Promise<boolean>;
 
   /** Returns a Stream for downloading the file */
-  getDownloadStream(
-    fileId: string
-  ): Promise<{ stream: Readable; fileName: string; mimeType?: string }>;
+  download(fileId: string): Promise<{ stream: Readable; fileName: string; mimeType?: string }>;
 
   /** Returns meta info about the file */
   get(fileId: string): Promise<FleetFile>;

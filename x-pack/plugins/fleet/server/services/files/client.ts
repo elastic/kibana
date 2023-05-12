@@ -131,7 +131,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
     await this.esFileClient.delete({ id: fileId, hasContent: true });
   }
 
-  async doesFileHaveChunks(fileId: string): Promise<boolean> {
+  async doesFileHaveData(fileId: string): Promise<boolean> {
     try {
       const chunks = await this.esClient.search({
         index: this.fileDataIndex,
@@ -162,7 +162,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
     }
   }
 
-  async getDownloadStream(
+  async download(
     fileId: string
   ): Promise<{ stream: Readable; fileName: string; mimeType?: string }> {
     try {
@@ -213,7 +213,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
       // if status is `READY`, then ensure that file has chunks - for the cases where the file
       // data might have been cleaned up due to ILM
       if (fleetFile.status === 'READY') {
-        fileHasChunks = await this.doesFileHaveChunks(fleetFile.id);
+        fileHasChunks = await this.doesFileHaveData(fleetFile.id);
 
         if (!fileHasChunks) {
           this.logger.warn(
