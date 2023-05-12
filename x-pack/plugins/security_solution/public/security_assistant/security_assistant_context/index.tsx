@@ -20,6 +20,17 @@ import type { Conversation } from './types';
 import { DEFAULT_CONVERSATION_STATE } from '../use_conversation';
 import { useLocalStorage } from '../../common/components/local_storage';
 
+export interface ShowAssistantOverlayProps {
+  showOverlay: boolean;
+  promptContextId?: string;
+  conversationId?: string;
+}
+
+type ShowAssistantOverlay = ({
+  showOverlay,
+  promptContextId,
+  conversationId,
+}: ShowAssistantOverlayProps) => void;
 interface SecurityAssistantProviderProps {
   apiConfig: SecurityAssistantUiSettings;
   children: React.ReactNode;
@@ -35,6 +46,8 @@ interface UseSecurityAssistantContext {
   conversationIds: string[];
   conversations: Record<string, Conversation>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  showAssistantOverlay: ShowAssistantOverlay;
+  setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
 }
 
 export const SECURITY_ASSISTANT_UI_SETTING_KEY = 'securityAssistant';
@@ -84,6 +97,13 @@ export const SecurityAssistantProvider: React.FC<SecurityAssistantProviderProps>
     },
   });
 
+  /**
+   * Global Assistant Overlay actions
+   */
+  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(
+    (showAssistant) => {}
+  );
+
   const value = useMemo(
     () => ({
       apiConfig,
@@ -94,6 +114,8 @@ export const SecurityAssistantProvider: React.FC<SecurityAssistantProviderProps>
       setConversations,
       conversationIds: Object.keys(conversations).sort(),
       conversations,
+      showAssistantOverlay,
+      setShowAssistantOverlay,
     }),
     [
       apiConfig,
@@ -103,6 +125,8 @@ export const SecurityAssistantProvider: React.FC<SecurityAssistantProviderProps>
       unRegisterPromptContext,
       setConversations,
       conversations,
+      showAssistantOverlay,
+      setShowAssistantOverlay,
     ]
   );
 

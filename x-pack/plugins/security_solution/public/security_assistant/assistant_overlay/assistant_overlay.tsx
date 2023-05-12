@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiModal, EuiSpacer } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
 import styled from 'styled-components';
 import { SecurityAssistant } from '../security_assistant';
 import { QuickPrompts } from './quick_prompts';
+import type { ShowAssistantOverlayProps } from '../security_assistant_context';
+import { useSecurityAssistantContext } from '../security_assistant_context';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -30,6 +32,27 @@ interface AssistantOverlayProps {}
 export const AssistantOverlay: React.FC<AssistantOverlayProps> = React.memo(({}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [input, setInput] = useState<string | undefined>();
+  const [conversationId, setConversationId] = useState<string | undefined>('default');
+  const [promptContextId, setPromptContextId] = useState<string | undefined>();
+  const { setShowAssistantOverlay } = useSecurityAssistantContext();
+
+  // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
+  const showOverlay = useCallback(
+    () =>
+      ({
+        showOverlay: so,
+        promptContextId: pid,
+        conversationId: cid,
+      }: ShowAssistantOverlayProps) => {
+        setIsModalVisible(so);
+        setPromptContextId(pid);
+        setConversationId(cid);
+      },
+    [setIsModalVisible]
+  );
+  useEffect(() => {
+    setShowAssistantOverlay(showOverlay);
+  }, [setShowAssistantOverlay, showOverlay]);
 
   // Register keyboard listener to show the modal when cmd + / is pressed
   const onKeyDown = useCallback(
@@ -46,6 +69,8 @@ export const AssistantOverlay: React.FC<AssistantOverlayProps> = React.memo(({})
   // Modal control functions
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
+    setPromptContextId(undefined);
+    setConversationId('default');
   }, [setIsModalVisible]);
 
   const handleCloseModal = useCallback(() => {
@@ -56,7 +81,7 @@ export const AssistantOverlay: React.FC<AssistantOverlayProps> = React.memo(({})
     <>
       {isModalVisible && (
         <StyledEuiModal onClose={handleCloseModal}>
-          <SecurityAssistant />
+          <SecurityAssistant conversationId={conversationId} promptContextId={promptContextId} />
 
           <EuiSpacer size="xs" />
 

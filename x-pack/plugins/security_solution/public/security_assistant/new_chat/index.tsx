@@ -5,46 +5,31 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { EuiButtonEmpty } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
-import { SecurityAssistant } from '../security_assistant';
 import * as i18n from './translations';
-
-const SecurityAssistantContainer = styled.div`
-  max-height: 1020px;
-  max-width: 600px;
-`;
+import { useSecurityAssistantOverlay } from '../assistant_overlay/use_security_assistant_overlay';
 
 const NewChatComponent: React.FC<{
   promptContextId: string;
 }> = ({ promptContextId }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const closePopover = () => setIsPopoverOpen(false);
+  const { showSecurityAssistantOverlay } = useSecurityAssistantOverlay({
+    promptContextId,
+    conversationId: 'alertSummary',
+  });
 
-  const onStartConversation = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
+  const showOverlay = useCallback(() => {
+    showSecurityAssistantOverlay(true);
+  }, [showSecurityAssistantOverlay]);
 
-  const NewChatButton = useMemo(
+  return useMemo(
     () => (
-      <EuiButtonEmpty onClick={onStartConversation} iconType="discuss">
+      <EuiButtonEmpty onClick={showOverlay} iconType="discuss">
         {i18n.NEW_CHAT}
       </EuiButtonEmpty>
     ),
-    [onStartConversation]
-  );
-
-  return (
-    <EuiPopover
-      button={NewChatButton}
-      closePopover={closePopover}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <SecurityAssistantContainer>
-        <SecurityAssistant promptContextId={promptContextId} conversationId={'alertSummary'} />
-      </SecurityAssistantContainer>
-    </EuiPopover>
+    [showOverlay]
   );
 };
 

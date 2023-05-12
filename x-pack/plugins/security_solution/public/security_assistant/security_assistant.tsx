@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
@@ -85,8 +85,10 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       const { isLoading, sendMessages } = useSendMessages();
 
       const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
-      const currentConversation =
-        conversations[selectedConversationId] ?? createConversation({ conversationId });
+      const currentConversation = useMemo(
+        () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
+        [conversationId, conversations, createConversation, selectedConversationId]
+      );
 
       const { cases } = useKibana().services;
       const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -217,7 +219,8 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       ////
 
       useEffect(() => {
-        if (currentConversation.messages.length > 0) {
+        // Adding `conversationId !== selectedConversationId` to prevent auto-run still executing after changing selected conversation
+        if (currentConversation.messages.length || conversationId !== selectedConversationId) {
           return;
         }
 
@@ -232,7 +235,14 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
         };
 
         autoRunOnOpen();
-      }, [currentConversation.messages, promptContexts, promptContextId, handleSendMessage]);
+      }, [
+        currentConversation.messages,
+        promptContexts,
+        promptContextId,
+        handleSendMessage,
+        conversationId,
+        selectedConversationId,
+      ]);
 
       return (
         <EuiPanel>
