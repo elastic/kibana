@@ -472,6 +472,7 @@ export interface DocLinks {
     secureLogstash: string;
     agentPolicy: string;
     api: string;
+    uninstallAgent: string;
   }>;
   readonly ecs: {
     readonly guide: string;
