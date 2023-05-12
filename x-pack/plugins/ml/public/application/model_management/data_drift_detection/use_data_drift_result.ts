@@ -103,9 +103,9 @@ export const computeChi2PValue = (
     const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
     const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
 
-    const observed: number = driftedTerm ? driftedTerm.doc_count : 0;
-    const expected: number = baselineTerm ? baselineTerm.doc_count : 1e-6; // Prevent divide by zero
-    chiSquared += Math.pow(observed - expected, 2) / expected;
+    const observed: number = driftedTerm ? driftedTerm.percentage : 0;
+    const expected: number = baselineTerm ? baselineTerm.percentage : 0; 
+    chiSquared += Math.pow(observed - expected, 2) / (expected > 0 ? expected : 1e-6); // Prevent divide by zero
   });
 
   return criticalTableLookup(chiSquared, degreesOfFreedom);
@@ -153,10 +153,9 @@ const normalizeHistogram = (histogram: Histogram[]): Histogram[] => {
 const normalizeTerms = (
   terms: Histogram[],
   keys: Array<{ key: string; relative_drift: number }>,
-  sumOtherDocCount: number
+  totalDocCount: number
 ): { normalizedTerms: Histogram[]; totalDocCount: number } => {
-  // Compute a total doc_count for all terms
-  const totalDocCount: number = terms.reduce((acc, term) => acc + term.doc_count, sumOtherDocCount);
+ 
 
   // Create a new array of terms with the same keys as the given array
   const normalizedTerms: Array<Histogram & { relative_drift?: number }> = keys.map((term) => ({
@@ -211,6 +210,10 @@ const processDataDriftResult = (
       ])
     );
 
+    // Compute a total doc_count for all terms
+    const referenceTotalDocCount: number = data.baselineTerms.reduce((acc, term) => acc + term.doc_count, data.baselineSumOtherDocCount);
+    const productionTotalDocCount: number = data.driftedTerms.reduce((acc, term) => acc + term.doc_count, data.driftedSumOtherDocCount);
+
     // Sort the categories (allKeys) by the following metric: Math.abs(productionDocCount-referenceDocCount)/referenceDocCount
     const sortedKeys = allKeys
       .map((k) => {
@@ -218,11 +221,11 @@ const processDataDriftResult = (
         const baselineTerm = data.baselineTerms.find((t) => t.key === key);
         const driftedTerm = data.driftedTerms.find((t) => t.key === key);
         if (baselineTerm && driftedTerm) {
-          const referenceDocCount = baselineTerm.doc_count;
-          const productionDocCount = driftedTerm.doc_count;
+          const referencePercentage = baselineTerm.doc_count/referenceTotalDocCount;
+          const productionPercentage = driftedTerm.doc_count/productionTotalDocCount;
           return {
             key,
-            relative_drift: Math.abs(productionDocCount - referenceDocCount) / referenceDocCount,
+            relative_drift: Math.abs(productionPercentage - referencePercentage) / referencePercentage,
           };
         }
         return {
@@ -236,12 +239,12 @@ const processDataDriftResult = (
     const { normalizedTerms: normalizedBaselineTerms } = normalizeTerms(
       data.baselineTerms,
       sortedKeys,
-      data.baselineSumOtherDocCount
+      referenceTotalDocCount
     );
     const { normalizedTerms: normalizedDriftedTerms } = normalizeTerms(
       data.driftedTerms,
       sortedKeys,
-      data.driftedSumOtherDocCount
+      productionTotalDocCount
     );
 
     const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
