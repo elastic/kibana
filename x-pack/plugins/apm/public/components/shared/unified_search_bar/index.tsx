@@ -20,6 +20,9 @@ import { EuiSkeletonRectangle } from '@elastic/eui';
 import qs from 'query-string';
 import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isEqual } from 'lodash';
+import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import { useEffectOnce } from 'react-use/lib';
 import { UIProcessorEvent } from '../../../../common/processor_event';
 import { TimePickerTimeDefaults } from '../date_picker/typings';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -30,6 +33,14 @@ import { fromQuery, toQuery } from '../links/url_helpers';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { getBoolFilter } from '../get_bool_filter';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+import { clearCache } from '../../../services/rest/call_api';
+import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
+import {
+  toBoolean,
+  toNumber,
+} from '../../../context/url_params_context/helpers';
+
+export const DEFAULT_REFRESH_INTERVAL = 60000;
 
 function useSearchBarParams(defaultKuery?: string) {
   const { path, query } = useApmParams('/*');
@@ -37,6 +48,12 @@ function useSearchBarParams(defaultKuery?: string) {
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
   const groupId = 'groupId' in path ? path.groupId : undefined;
   const environment = 'environment' in query ? query.environment : undefined;
+  const refreshIntervalFromUrl =
+    'refreshInterval' in query
+      ? toNumber(query.refreshInterval)
+      : DEFAULT_REFRESH_INTERVAL;
+  const refreshPausedFromUrl =
+    'refreshPaused' in query ? query.refreshPaused : 'true';
 
   return {
     kuery: urlKuery
@@ -48,6 +65,8 @@ function useSearchBarParams(defaultKuery?: string) {
     serviceName,
     groupId,
     environment,
+    refreshPausedFromUrl,
+    refreshIntervalFromUrl,
   };
 }
 
@@ -129,8 +148,14 @@ export function UnifiedSearchBar({
     },
   } = services;
 
-  const { kuery, serviceName, environment, groupId } =
-    useSearchBarParams(value);
+  const {
+    kuery,
+    serviceName,
+    environment,
+    groupId,
+    refreshPausedFromUrl,
+    refreshIntervalFromUrl,
+  } = useSearchBarParams(value);
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
@@ -148,8 +173,23 @@ export function UnifiedSearchBar({
     }
     // Sync Time Range with Search Bar
     timeFilterService.timefilter.setTime(urlTimeRange as TimeRange);
-  }, [kuery, queryStringService, timeFilterService, urlTimeRange]);
+  }, [kuery, queryStringService, timeFilterService.timefilter, urlTimeRange]);
 
+  useEffectOnce(() => {
+    // Sync Refresh Interval with Search Bar
+    const refreshInterval = {
+      pause: toBoolean(refreshPausedFromUrl),
+      value: refreshIntervalFromUrl,
+    };
+    if (
+      !deepEqual(
+        timeFilterService.timefilter.getRefreshInterval(),
+        refreshInterval
+      )
+    ) {
+      timeFilterService.timefilter.setRefreshInterval(refreshInterval);
+    }
+  });
   useEffect(() => {
     syncSearchBarWithUrl();
   }, [syncSearchBarWithUrl]);
@@ -159,6 +199,7 @@ export function UnifiedSearchBar({
   const { dataView } = useApmDataView();
   const { urlParams } = useLegacyUrlParams();
   const processorEvent = useProcessorEvent();
+  const { incrementTimeRangeId } = useTimeRangeId();
   const searchbarPlaceholder = getSearchBarPlaceholder(
     placeholder,
     processorEvent
@@ -183,6 +224,28 @@ export function UnifiedSearchBar({
       query: filter,
     } as Filter;
   });
+
+  const onRefresh = () => {
+    clearCache();
+    incrementTimeRangeId();
+  };
+
+  const onRefreshChange = ({
+    isPaused,
+    refreshInterval,
+  }: OnRefreshChangeProps) => {
+    const existingQueryParams = toQuery(location.search);
+    const updatedQueryParams = {
+      ...existingQueryParams,
+      refreshPaused: isPaused,
+      refreshInterval,
+    };
+
+    history.push({
+      ...location,
+      search: fromQuery(updatedQueryParams),
+    });
+  };
   const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
     if (dataView == null) {
       return;
@@ -206,13 +269,21 @@ export function UnifiedSearchBar({
         rangeFrom,
         rangeTo,
       };
-      history.push({
-        ...location,
-        search: fromQuery({
-          ...updatedQueryWithTime,
-          kuery: query?.query,
-        }),
-      });
+      const newSearchParams = {
+        ...updatedQueryWithTime,
+        kuery: query?.query,
+      };
+
+      const isRefresh = isEqual(existingQueryParams, newSearchParams);
+
+      if (isRefresh) {
+        onRefresh();
+      } else {
+        history.push({
+          ...location,
+          search: fromQuery(newSearchParams),
+        });
+      }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
@@ -239,6 +310,8 @@ export function UnifiedSearchBar({
         showSubmitButton={showSubmitButton}
         displayStyle="inPage"
         onQuerySubmit={handleSubmit}
+        onRefresh={onRefresh}
+        onRefreshChange={onRefreshChange}
         isClearable={isClearable}
         dataTestSubj="apmUnifiedSearchBar"
         filtersForSuggestions={filtersForSearchBarSuggestions}
