@@ -10,6 +10,7 @@ import { type CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fle
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
+import { VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { benchmarksNavigation, cloudPosturePages } from '../../common/navigation/constants';
 
@@ -18,7 +19,7 @@ const SECURITY_APP_NAME = 'securitySolutionUI';
 export const CspCustomAssetsExtension = () => {
   const { application } = useKibana().services;
   const { search } = useLocation();
-  const isCNVM = search.includes('vuln_mgmt');
+  const isCNVM = search.includes(VULN_MGMT_POLICY_TEMPLATE);
 
   const viewsCNVM: CustomAssetsAccordionProps['views'] = [
     {
@@ -65,12 +66,12 @@ export const CspCustomAssetsExtension = () => {
     <>
       {search.length === 0 ? (
         <>
-          <CustomAssetsAccordion views={views} initialIsOpen CSPDropdown="Cloud Posture" />
+          <CustomAssetsAccordion views={views} initialIsOpen title="Cloud Posture" />
           <EuiSpacer size="m" />
           <CustomAssetsAccordion
             views={viewsCNVM}
             initialIsOpen
-            CSPDropdown="Cloud Native Vulnerability Management"
+            title="Cloud Native Vulnerability Management"
           />
         </>
       ) : (

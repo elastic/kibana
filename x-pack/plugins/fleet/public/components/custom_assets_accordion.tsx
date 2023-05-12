@@ -31,13 +31,13 @@ export interface CustomAssetsAccordionProps {
     description: string;
   }>;
   initialIsOpen?: boolean;
-  CSPDropdown?: string;
+  title?: string;
 }
 
 export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps> = ({
   views,
   initialIsOpen = false,
-  CSPDropdown = undefined,
+  title = undefined,
 }) => {
   const { application } = useStartServices();
 
@@ -48,7 +48,7 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="m">
-              <h3>{CSPDropdown === undefined ? AssetTitleMap.view : CSPDropdown}</h3>
+              <h3>{title === undefined ? AssetTitleMap.view : title}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
