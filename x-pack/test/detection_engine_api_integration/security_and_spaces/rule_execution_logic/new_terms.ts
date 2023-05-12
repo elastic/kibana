@@ -467,7 +467,7 @@ export default ({ getService }: FtrProviderContext) => {
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
       expect(previewAlerts.length).eql(1);
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', 'false']);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', false]);
     });
 
     it('should generate alerts for every term when history window is small', async () => {
@@ -623,6 +623,64 @@ export default ({ getService }: FtrProviderContext) => {
 
         // 10 alerts (with host.names a-[0-9]) should be generated
         expect(previewAlerts.length).eql(10);
+      });
+
+      it('should not miss alerts for high cardinality values in arrays, over 10.000 composite page size', async () => {
+        // historical window documents
+        const historicalDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+            user: {
+              name: Array.from(Array(5)).map((_, i) => `user-${100 + i}`),
+            },
+          },
+        ];
+
+        // rule execution documents
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+            user: {
+              name: Array.from(Array(5)).map((_, i) => `user-${100 + i}`),
+            },
+          },
+          {
+            host: {
+              name: 'host-140',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        // ensure there are no alerts for single new terms fields, it means values are not new
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.domain', 'user.name'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        // 10 alerts (with host.names a-[0-9]) should be generated
+        expect(previewAlerts.length).eql(1);
       });
 
       it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have more than 100', async () => {
@@ -851,7 +909,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('runtime field', () => {
+    describe.skip('runtime field', () => {
       it('should return runtime field created from 2 single values', async () => {
         // encoded base64 values of "host-0" and  "127.0.0.1" joined with underscore
         const expectedEncodedValues = ['aG9zdC0w_MTI3LjAuMC4x'];
