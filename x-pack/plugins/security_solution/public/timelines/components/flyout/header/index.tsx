@@ -244,11 +244,6 @@ const KpisContainer = styled.div`
   ${({ theme }) => `margin-right: ${theme.eui.euiSizeM};`}
 `;
 
-const RowFlexItem = styled(EuiFlexItem)`
-  flex-direction: row;
-  align-items: center;
-`;
-
 const TimelineTitleContainer = styled.h3`
   display: -webkit-box;
   overflow: hidden;
@@ -423,17 +418,21 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     <StyledTimelineHeader alignItems="center" gutterSize="s">
       <EuiFlexItem>
         <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
-          <RowFlexItem>
-            <TimelineName timelineId={timelineId} />
-            <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
-            <TimelineStatusInfoContainer>
-              <TimelineStatusInfo timelineId={timelineId} />
-            </TimelineStatusInfoContainer>
-          </RowFlexItem>
-          <RowFlexItem>
-            <TimelineDescription timelineId={timelineId} />
-            <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
-          </RowFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
+              <TimelineName timelineId={timelineId} />
+              <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
+              <TimelineStatusInfoContainer>
+                <TimelineStatusInfo timelineId={timelineId} />
+              </TimelineStatusInfoContainer>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
+              <TimelineDescription timelineId={timelineId} />
+              <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
