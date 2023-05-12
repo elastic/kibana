@@ -129,6 +129,7 @@ const MainDocumentationTab = ({
         );
       })}
       <GlobalContent />
+      <EuiSpacer size="l" />
     </div>
   );
 };
@@ -179,11 +180,6 @@ export const DocumentationTab = ({
           );
         })
       );
-
-      if (helpFetchResults?.custom) {
-        mainPanels.push(<></>);
-      }
-
       return mainPanels;
     }, [helpFetchResults?.documentation]);
 

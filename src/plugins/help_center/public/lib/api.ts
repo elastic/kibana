@@ -124,7 +124,7 @@ export async function getApi(
         });
       }
       contactLinks.push(githubLink);
-      console.log(documentationLinks);
+
       return {
         global: globalHelpExtensionMenuLinks.sort((a, b) => b.priority - a.priority),
         documentation: documentationLinks.sort((a, b) => b.priority - a.priority),
