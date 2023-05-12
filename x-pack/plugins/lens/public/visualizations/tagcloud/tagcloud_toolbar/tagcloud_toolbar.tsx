@@ -41,7 +41,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
             >
               <EuiDualRange
                 id="tagCloudFontSizeSlider"
-                min={1}
+                min={5}
                 max={120}
                 step={1}
                 value={[props.state.minFontSize, props.state.maxFontSize]}
