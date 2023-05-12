@@ -1048,13 +1048,18 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/common/utils/field_formatters* @elastic/security-threat-hunting-investigations
 
 *sourcerer* @elastic/security-threat-hunting-investigations
+**/security-solution/public/**/common/**/filter_group/.* @elastic/security-threat-hunting-investigations
+**/security-solution/public/**/common/**/filter_group.* @elastic/security-threat-hunting-investigations
 
 ## Security Solution sub teams - Threat Hunting Explore
+
+### Search strategy
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
 /x-pack/test/security_solution_ftr/page_objects/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/common/containers/use_search_strategy/ @elastic/security-threat-hunting-explore
 
 /x-pack/test/functional/fixtures/kbn_archiver/cases/ @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
@@ -1103,6 +1108,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
 /x-pack/test/api_integration/apis/security_solution/host_details.ts @elastic/security-threat-hunting-explore
 /x-pack/test/api_integration_basic/apis/security_solution/cases_privileges.ts  @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/common/components/visualization_actions/ @elastic/security-threat-hunting-explore
 
 ## Risk Scoring
 /x-pack/plugins/security_solution/**/*risk_score* @elastic/security-threat-hunting-explore
