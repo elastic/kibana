@@ -71,7 +71,6 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           id: request.body.id,
         });
 
-        console.log({ ctx });
         await validateResponseActionsPermissions(ctx.securitySolution, request.body, existingRule);
 
         const rule = await updateRules({
