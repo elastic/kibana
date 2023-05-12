@@ -24,13 +24,15 @@ export class CollectorRunner {
   }
 
   async run() {
+    const now = Date.now();
+
     for (let i = 0; i < this.collectors.length; i++) {
       const { name, collector } = this.collectors[i];
       this.options.logger.info(`Collector '${name}' started`);
 
       const transaction = apm.startTransaction(transactionName(name), TRANSACTION_TYPE);
       const collectorOptions = {
-        from: Date.now() - this.options.intervalMs,
+        from: now - this.options.intervalMs,
         client: this.options.inputClient,
         transaction,
       };
