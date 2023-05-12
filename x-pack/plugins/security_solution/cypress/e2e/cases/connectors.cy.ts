@@ -10,7 +10,7 @@ import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../o
 import { SERVICE_NOW_MAPPING } from '../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../tasks/all_cases';
-import { cleanKibana, deleteCases } from '../../tasks/common';
+import { cleanKibana, deleteCases, deleteConnectors } from '../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
@@ -89,12 +89,7 @@ describe('Cases connectors', () => {
   });
 
   after(() => {
-    cy.request({
-      method: 'DELETE',
-      url: `/api/actions/connector/${connectorId}`,
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-      timeout: 300000,
-    });
+    deleteConnectors();
   });
 
   it('Configures a new connector', () => {
