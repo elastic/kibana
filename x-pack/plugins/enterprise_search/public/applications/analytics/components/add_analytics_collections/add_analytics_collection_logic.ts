@@ -92,7 +92,7 @@ export const AddAnalyticsCollectionLogic = kea<
             i18n.translate(
               'xpack.enterpriseSearch.analytics.collectionsCreate.action.somethingWentWrong',
               {
-                defaultMessage: 'Something went wrong',
+                defaultMessage: 'Something went wrong.',
               }
             )
         );

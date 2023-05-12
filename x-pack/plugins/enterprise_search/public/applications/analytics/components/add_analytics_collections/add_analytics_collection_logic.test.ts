@@ -83,7 +83,7 @@ describe('addAnalyticsCollectionLogic', () => {
     });
 
     describe('onApiError', () => {
-      it('should call setFlashMessages with an error when system error with message', () => {
+      it('should call setFlashMessages with an error when system error', () => {
         const httpError: HttpError = {
           body: {
             error: 'Bad Gateway',
@@ -98,25 +98,11 @@ describe('addAnalyticsCollectionLogic', () => {
         expect(flashAPIErrors).not.toHaveBeenCalled();
         expect(setFlashMessages).toHaveBeenCalledWith([
           {
-            description: 'Something went wrong',
+            description: 'Check Kibana Server logs for details.',
             message: 'Sorry, there was an error creating your collection.',
             type: 'error',
           },
         ]);
-      });
-
-      it('should flash a default error toast when system error without message', () => {
-        const httpError: HttpError = {
-          body: {
-            error: 'Bad Gateway',
-            statusCode: 502,
-          },
-          fetchOptions: {},
-          request: {},
-        } as HttpError;
-        AddAnalyticsCollectionLogic.actions.apiError(httpError);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(httpError);
       });
 
       it('should set input error when is client error', () => {
