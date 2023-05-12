@@ -17,27 +17,17 @@ import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import type { EventsAndTerms } from './wrap_new_terms_alerts';
 import type {
-  DocFetchAggResult,
   RecentTermsAggResult,
   CompositeDocFetchAggResult,
   CompositeNewTermsAggResult,
 } from './build_new_terms_aggregation';
 import {
-  buildDocFetchAgg,
   buildRecentTermsAgg,
-  buildNewTermsAgg,
   buildCompositeNewTermsAgg,
   buildCompositeDocFetchAgg,
 } from './build_new_terms_aggregation';
 import { validateIndexPatterns } from '../utils';
-import {
-  parseDateString,
-  validateHistoryWindowStart,
-  transformBucketsToValues,
-  getNewTermsRuntimeMappings,
-  getAggregationField,
-  decodeMatchedValues,
-} from './utils';
+import { parseDateString, validateHistoryWindowStart } from './utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
