@@ -172,6 +172,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
         telemetry: this.telemetry.start(),
+        cloudCollaboration: startPluginsDeps.cloudCollaboration,
       };
       return services;
     };

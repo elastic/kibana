@@ -45,6 +45,7 @@
       "savedObjectsManagement",
     ],
     "optionalPlugins": [
+      "cloudCollaboration",
       "cloudExperiments",
       "encryptedSavedObjects",
       "fleet",

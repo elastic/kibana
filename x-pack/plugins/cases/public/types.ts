@@ -24,6 +24,7 @@ import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { CloudCollaborationPluginStart } from '@kbn/cloud-collaboration-plugin/public';
 import type {
   CasesBulkGetRequest,
   CasesBulkGetResponse,
@@ -74,6 +75,7 @@ export interface CasesPluginStart {
   spaces?: SpacesPluginStart;
   apm?: ApmBase;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  cloudCollaboration?: CloudCollaborationPluginStart;
 }
 
 /**

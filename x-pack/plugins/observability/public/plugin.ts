@@ -49,6 +49,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import { CloudCollaborationPluginStart } from '@kbn/cloud-collaboration-plugin/public';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
@@ -109,6 +110,7 @@ export interface ObservabilityPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
+  cloudCollaboration?: CloudCollaborationPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;

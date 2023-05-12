@@ -28,7 +28,7 @@
       "unifiedSearch",
       "visualizations"
     ],
-    "optionalPlugins": ["discover", "home", "licensing", "spaces", "usageCollection"],
+    "optionalPlugins": ["discover", "home", "licensing", "spaces", "usageCollection", "cloudCollaboration"],
     "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch"],
     "extraPublicDirs": ["common"]
   }

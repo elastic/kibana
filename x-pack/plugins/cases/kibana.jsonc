@@ -34,7 +34,8 @@
       "home",
       "taskManager",
       "usageCollection",
-      "spaces"
+      "spaces",
+      "cloudCollaboration"
     ],
     "requiredBundles": [],
     "extraPublicDirs": [

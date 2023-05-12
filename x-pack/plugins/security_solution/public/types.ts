@@ -49,6 +49,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
+import type { CloudCollaborationPluginStart } from '@kbn/cloud-collaboration-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -104,6 +105,7 @@ export interface StartPlugins {
   osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
   cloud?: CloudStart;
+  cloudCollaboration?: CloudCollaborationPluginStart;
   cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;

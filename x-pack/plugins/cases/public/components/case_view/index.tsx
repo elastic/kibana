@@ -41,7 +41,7 @@ export const CaseView = React.memo(
     useFetchAlertData,
     refreshRef,
   }: CaseViewProps) => {
-    const { spaces: spacesApi } = useKibana().services;
+    const { spaces: spacesApi, cloudCollaboration } = useKibana().services;
     const { detailName: caseId } = useCaseViewParams();
     const { basePath } = useCasesContext();
 
@@ -76,6 +76,13 @@ export const CaseView = React.memo(
       }
       return null;
     }, [basePath, data, spacesApi]);
+
+    useEffect(() => {
+      cloudCollaboration?.setBreadcrumbPresence('caseView', caseId);
+      return () => {
+        cloudCollaboration?.clearBreadcrumbPresence();
+      };
+    });
 
     return isError ? (
       <DoesNotExist caseId={caseId} />
