@@ -1014,7 +1014,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/common/types/timeline @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/cypress/e2e/timeline_templates @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/cypress/e2e/timeline @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/cypress/e2e/timelines @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/cypress/e2e/detection_alerts @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/cypress/e2e/urls @elastic/security-threat-hunting-investigations
 
