@@ -13,13 +13,13 @@ import type {
   UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import { APP_POLICIES_PATH } from '../../../../common/constants';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
-import { POLICIES_URL } from '../../../../cypress/urls/navigation';
 import { request } from '../tasks/common';
 import { expectAndCloseSuccessToast } from '../tasks/toasts';
 
 export const visitPolicyDetailsPage = () => {
-  cy.visit(POLICIES_URL);
+  cy.visit(APP_POLICIES_PATH);
 
   cy.getByTestSubj('policyNameCellLink').eq(0).click({ force: true });
   cy.getByTestSubj('policyDetailsPage').should('exist');
