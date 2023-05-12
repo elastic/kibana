@@ -50,7 +50,7 @@ export async function getApi(
         ChromeHelpExtensionMenuDocumentationLink & { title: string; priority: number }
       > = [
         {
-          title: 'Kibana documentation',
+          title: 'About Kibana',
           priority: -1, // should always go last since it's the most general
           linkType: 'documentation',
           iconType: 'logoKibana',
@@ -88,7 +88,7 @@ export async function getApi(
           switch (link.linkType) {
             case 'documentation': {
               documentationLinks.push({
-                title: helpExtension.appName + ' documentation',
+                title: 'About ' + helpExtension.appName,
                 ...link,
                 priority: link.priority ?? 0,
               });

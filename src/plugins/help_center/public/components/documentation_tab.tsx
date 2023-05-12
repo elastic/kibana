@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import useAsync from 'react-use/lib/useAsync';
 import {
@@ -114,7 +114,7 @@ const MainDocumentationTab = ({
       if (response.links.length) {
         const links = response.links.map(({ title, url }) => {
           return {
-            title,
+            title: title.split('|')[0],
             href: url,
             linkType: 'documentation',
           } as ChromeHelpExtensionMenuDocumentationLink;
@@ -158,9 +158,11 @@ const MainDocumentationTab = ({
                   // justifyContent="spaceBetween"
                   alignItems="center"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon size="xl" type={doc.iconType ?? 'discuss'} />
-                  </EuiFlexItem>
+                  {doc.iconType && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon size="xl" type={doc.iconType} />
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem
                     grow={true}
                     css={css`
@@ -237,6 +239,10 @@ export const DocumentationTab = ({
   const [documentation, setDocumentation] = useState<ChromeHelpExtensionMenuDocumentationLink[]>(
     helpFetchResults?.documentation ?? []
   );
+
+  useEffect(() => {
+    if (searchString === '') setDocumentation(helpFetchResults?.documentation ?? []);
+  }, [helpFetchResults, searchString]);
 
   const { loading: documentationLoading, value: panels = [] as ReactElement[] } =
     useAsync(async () => {

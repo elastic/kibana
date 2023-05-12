@@ -58,9 +58,9 @@ export function Main() {
         href: `https://www.elastic.co/guide/en/kibana/current/console-kibana.html`,
       },
       {
-        iconType: 'consoleApp',
+        iconType: 'questionInCircle',
         linkType: 'documentation',
-        title: 'How to send requests',
+        title: 'How do I send requests?',
         priority: 100,
         content: <ConsoleDocumentation />,
       },
