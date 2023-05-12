@@ -56,7 +56,7 @@ const response = z.array(
     is_deprecated: z.boolean(),
     is_preconfigured: z.boolean(),
     name: nonEmptyString,
-    referenced_by_count: z.number,
+    referenced_by_count: z.number(),
   })
 );
 // End of shareable schemas
