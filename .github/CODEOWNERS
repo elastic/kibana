@@ -1126,6 +1126,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/common/search_strategy/eql @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/cypress/e2e/data_sources/create_runtime_field* @elastic/security-solution-platform
 
 ## Security Solution sub teams - Detections and Response Rules
 /x-pack/plugins/security_solution/common/detection_engine/fleet_integrations @elastic/security-detections-response-rules
@@ -1159,6 +1160,10 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema @elastic/security-detections-response-rules @elastic/security-detections-response-alerts
 
 /x-pack/plugins/security_solution/server/utils @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/cypress/e2e/dashboards/detection_response* @elastic/security-detections-response-alerts
+
+/x-pack/plugins/security_solution/common/utils/expand_dotted* @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/common/utils/enum_from_string* @elastic/security-detections-response-alerts
 
 ## Security Solution sub teams - Security Platform
 
@@ -1173,7 +1178,6 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-solution-platform
-/x-pack/plugins/security_solution/public/common/components/sourcerer @elastic/security-solution-platform
 
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-solution-platform
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-solution-platform
@@ -1213,6 +1217,8 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/test/defend_workflows_cypress @elastic/security-defend-workflows
 /test/scripts/jenkins_defend_workflows_cypress.sh @elastic/security-defend-workflows
 /test/scripts/jenkins_osquery_cypress.sh @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/search_strategy/endpoint_fields @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/common/utils/path_placeholder* @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
@@ -1227,7 +1233,7 @@ x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 /test/scripts/jenkins_security_solution_cypress_firefox.sh @security-engineering-productivity
 /.ci/Jenkinsfile_security_cypress @security-engineering-productivity
 /.github/ISSUE_TEMPLATE/Bug_report_security_solution.md @security-engineering-productivity
-/x-pack/plugins/security_solution/cypress/ @security-engineering-productivity
+#/x-pack/plugins/security_solution/cypress/ @security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/sec-cloudnative-integrations
@@ -1282,13 +1288,6 @@ x-pack/test/cloud_security_posture_api @elastic/kibana-cloud-security-posture
 
 ### This is code shared between the Detections and Response team and the Endpoint team
 /x-pack/test/common/services/security_solution @elastic/security-defend-workflows @elastic/security-detections-response
-
-### These tests directories contain files owned by multiple teams. The directory will be owned by the tech leads, and the files will be owned by sub teams.
-/x-pack/plugins/security_solution/cypress/e2e/dashboards/ @elastic/security-tech-leads
-/x-pack/plugins/security_solution/cypress/e2e/dashboards/detection_response* @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/cypress/e2e/dashboards/enable_risk_score* @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/dashboards/entity_analytics* @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/data_sources/create_runtime_field* @elastic/security-solution-platform
 
 # Observability design
 /x-pack/plugins/apm/**/*.scss @elastic/observability-design
