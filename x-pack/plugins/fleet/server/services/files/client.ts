@@ -33,11 +33,6 @@ import type {
   FleetFileUpdatableFields,
 } from './types';
 
-interface FileCustomMeta {
-  target_agents: string[];
-  action_id: string;
-}
-
 /**
  * Public interface for interacting with Files stored in Fleet indexes. Service is consumed via
  * the Fleet `Plugin#start()` interface - {@link FleetStartContract}
@@ -305,6 +300,11 @@ const isSearchHit = (data: unknown): data is estypes.SearchHit<HostUploadedFileM
     '_index' in data
   );
 };
+
+interface FileCustomMeta {
+  target_agents: string[];
+  action_id: string;
+}
 
 /**
  * File upload metadata information. Stored by endpoint/fleet-server when a file is uploaded to ES in connection with
