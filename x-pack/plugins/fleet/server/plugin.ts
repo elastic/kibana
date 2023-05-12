@@ -65,6 +65,10 @@ import {
 } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
+import { FleetFilesClient } from './services/files/client';
+
+import type { FleetFileClientInterface } from './services/files/types';
+
 import type { MessageSigningServiceInterface } from './services/security';
 import {
   getRouteRequiredAuthz,
@@ -216,6 +220,27 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+
+  /**
+   * Create a Fleet Files client instance
+   * @param packageName
+   * @param type
+   * @param maxSizeBytes
+   */
+  createFilesClient: (
+    /** The integration package name */
+    packageName: string,
+    /**
+     * Type of file.
+     * Use `from-host` when interacting with files that were sent to ES from the
+     * host (via Fleet-Server)
+     * Use `to-host` when interacting with files that are being sent to the host
+     * (via fleet-server)
+     */
+    type: 'from-host' | 'to-host',
+    /** Max size for files created when `type` is `to-host` */
+    maxSizeBytes?: number
+  ) => FleetFileClientInterface;
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
@@ -566,6 +591,15 @@ export class FleetPlugin
       },
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
+      },
+      createFilesClient: (packageName, type, maxFileBytes) => {
+        return new FleetFilesClient(
+          core.elasticsearch.client.asInternalUser,
+          this.initializerContext.logger.get('fleetFiles', packageName),
+          packageName,
+          type,
+          maxFileBytes
+        );
       },
       messageSigningService,
       uninstallTokenService,
