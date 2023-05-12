@@ -40,6 +40,7 @@ export interface TextExpansionCallOutState {
   isCompact: boolean;
   isCreateButtonDisabled: boolean;
   isDismissable: boolean;
+  isSingleThreaded: boolean;
   isStartButtonDisabled: boolean;
   show: boolean;
 }
@@ -48,6 +49,8 @@ export interface TextExpansionCallOutProps {
   isCompact?: boolean;
   isDismissable?: boolean;
 }
+
+const TRAINED_MODELS_PATH = '/app/ml/trained_models';
 
 export const TextExpansionDismissButton = ({
   dismiss,
@@ -63,6 +66,25 @@ export const TextExpansionDismissButton = ({
     />
   );
 };
+
+export const FineTuneModelsButton: React.FC = () => (
+  <EuiButtonEmpty
+    iconSide="left"
+    iconType="wrench"
+    onClick={() =>
+      KibanaLogic.values.navigateToUrl(TRAINED_MODELS_PATH, {
+        shouldNotCreateHref: true,
+      })
+    }
+  >
+    {i18n.translate(
+      'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.fineTuneModelButton',
+      {
+        defaultMessage: 'Fine-tune performance',
+      }
+    )}
+  </EuiButtonEmpty>
+);
 
 export const DeployModel = ({
   dismiss,
@@ -277,19 +299,7 @@ export const ModelDeployed = ({
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconSide="left"
-                iconType="wrench"
-                onClick={() =>
-                  KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
-                    shouldNotCreateHref: true,
-                  })
-                }
-              >
-                {i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.viewKeysButton', {
-                  defaultMessage: 'Fine-tune performance',
-                })}
-              </EuiButtonEmpty>
+              <FineTuneModelsButton />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -302,7 +312,11 @@ export const ModelStarted = ({
   dismiss,
   isCompact,
   isDismissable,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'isCompact' | 'isDismissable'>) => (
+  isSingleThreaded,
+}: Pick<
+  TextExpansionCallOutState,
+  'dismiss' | 'isCompact' | 'isDismissable' | 'isSingleThreaded'
+>) => (
   <EuiCallOut color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow>
@@ -313,7 +327,17 @@ export const ModelStarted = ({
           <EuiFlexItem grow>
             <EuiText color="success" size="xs">
               <h3>
-                {isCompact
+                {isSingleThreaded
+                  ? isCompact
+                    ? i18n.translate(
+                        'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedSingleThreadedTitleCompact',
+                        { defaultMessage: 'Your ELSER model is running single-threaded.' }
+                      )
+                    : i18n.translate(
+                        'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedSingleThreadedTitle',
+                        { defaultMessage: 'Your ELSER model has started single-threaded.' }
+                      )
+                  : isCompact
                   ? i18n.translate(
                       'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitleCompact',
                       { defaultMessage: 'Your ELSER model is running.' }
@@ -333,16 +357,60 @@ export const ModelStarted = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       {!isCompact && (
-        <EuiFlexItem grow>
-          <EuiText size="s">
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody',
-                { defaultMessage: 'Enjoy the power of ELSER in your custom Inference pipeline.' }
-              )}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
+        <>
+          <EuiFlexItem grow>
+            <EuiText size="s">
+              <p>
+                {isSingleThreaded
+                  ? i18n.translate(
+                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedSingleThreadedBody',
+                      {
+                        defaultMessage:
+                          'This single-threaded configuration is great for testing your custom inference pipelines, however performance should be fine-tuned for production.',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody',
+                      {
+                        defaultMessage:
+                          'Enjoy the power of ELSER in your custom Inference pipeline.',
+                      }
+                    )}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="m"
+              alignItems="center"
+              justifyContent="flexStart"
+            >
+              <EuiFlexItem grow={false}>
+                {isSingleThreaded ? (
+                  <FineTuneModelsButton />
+                ) : (
+                  <EuiButtonEmpty
+                    iconSide="left"
+                    iconType="wrench"
+                    onClick={() =>
+                      KibanaLogic.values.navigateToUrl(TRAINED_MODELS_PATH, {
+                        shouldNotCreateHref: true,
+                      })
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.viewModelsButton',
+                      {
+                        defaultMessage: 'View details',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </>
       )}
     </EuiFlexGroup>
   </EuiCallOut>
@@ -357,6 +425,7 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
     isCreateButtonDisabled,
     isModelDownloadInProgress,
     isModelDownloaded,
+    isModelRunningSingleThreaded,
     isModelStarted,
     isStartButtonDisabled,
     startTextExpansionModelError,
@@ -384,7 +453,14 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
       />
     );
   } else if (isModelStarted) {
-    return <ModelStarted dismiss={dismiss} isCompact={isCompact} isDismissable={isDismissable} />;
+    return (
+      <ModelStarted
+        dismiss={dismiss}
+        isCompact={isCompact}
+        isDismissable={isDismissable}
+        isSingleThreaded={isModelRunningSingleThreaded}
+      />
+    );
   }
 
   return (
