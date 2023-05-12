@@ -8,6 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PropsWithChildren } from 'react';
 import React, { memo, useMemo } from 'react';
+import type { EuiTextProps } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
@@ -53,11 +54,12 @@ interface EndpointUploadActionResultProps {
   >;
   /** The agent id to display the result for. If undefined, the output for ALL agents will be displayed */
   agentId?: string;
+  textSize?: EuiTextProps['size'];
   'data-test-subj'?: string;
 }
 
 export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
-  ({ action: _action, agentId, 'data-test-subj': dataTestSubj }) => {
+  ({ action: _action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     const action = _action as ActionDetails<
       ResponseActionUploadOutputContent,
       ResponseActionUploadParameters
@@ -99,7 +101,7 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
     }
 
     return (
-      <div data-test-subj={getTestId()}>
+      <EuiText data-test-subj={getTestId()} size={textSize}>
         {outputs.map(({ name, state, result }) => {
           // Use case: action log
           if (!state.isCompleted) {
@@ -157,7 +159,7 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
             </HostUploadResult>
           );
         })}
-      </div>
+      </EuiText>
     );
   }
 );
@@ -169,9 +171,8 @@ export interface KeyValueDisplayProps {
 }
 const KeyValueDisplay = memo<KeyValueDisplayProps>(({ name, value }) => {
   return (
-    <EuiText
+    <div
       className="eui-textBreakWord"
-      size="s"
       css={css`
         white-space: pre-wrap;
       `}
@@ -181,7 +182,7 @@ const KeyValueDisplay = memo<KeyValueDisplayProps>(({ name, value }) => {
         {': '}
       </strong>
       {value}
-    </EuiText>
+    </div>
   );
 });
 KeyValueDisplay.displayName = 'KeyValueDisplay';
