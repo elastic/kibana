@@ -147,6 +147,7 @@ const MainDocumentationTab = ({
             <EuiCard
               className="help-center-card"
               hasBorder={true}
+              paddingSize="s"
               id={`contact_card_${i}`}
               // layout={'horizontal'}
               // icon={<EuiIcon size="xl" type={doc.iconType ?? 'discuss'} />}
@@ -160,7 +161,7 @@ const MainDocumentationTab = ({
                 >
                   {doc.iconType && (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon size="xl" type={doc.iconType} />
+                      <EuiIcon size="l" type={doc.iconType} />
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem
@@ -172,7 +173,7 @@ const MainDocumentationTab = ({
                     {doc.title ?? 'Documentation'}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon size="l" type="arrowRight" />
+                    <EuiIcon size="m" type="arrowRight" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
