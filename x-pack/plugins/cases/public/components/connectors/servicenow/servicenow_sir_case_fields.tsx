@@ -8,7 +8,11 @@
 import React, { useMemo } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CheckBoxField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ServiceNowSIRFieldsType } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
@@ -30,6 +34,7 @@ const defaultFields: Fields = {
 const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
   connector,
 }) => {
+  const form = useFormContext();
   const [{ fields }] = useFormData<{ fields: ServiceNowSIRFieldsType }>();
   const { category = null } = fields ?? {};
 
@@ -68,6 +73,10 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
       ),
     [choicesFormatted.subcategory, category]
   );
+
+  const onCategoryChange = () => {
+    form.setFieldValue('fields.subcategory', null);
+  };
 
   return (
     <>
@@ -176,6 +185,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
               config={{
                 label: i18n.CATEGORY,
               }}
+              onChange={onCategoryChange}
               componentProps={{
                 euiFieldProps: {
                   'data-test-subj': 'categorySelect',
@@ -189,25 +199,23 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {subcategoryOptions?.length > 0 ? (
-              <UseField
-                path="fields.subcategory"
-                component={SelectField}
-                config={{
-                  label: i18n.SUBCATEGORY,
-                }}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'subcategorySelect',
-                    options: subcategoryOptions,
-                    hasNoInitialSelection: true,
-                    fullWidth: true,
-                    disabled: isLoadingChoices,
-                    isLoading: isLoadingChoices,
-                  },
-                }}
-              />
-            ) : null}
+            <UseField
+              path="fields.subcategory"
+              component={SelectField}
+              config={{
+                label: i18n.SUBCATEGORY,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'subcategorySelect',
+                  options: subcategoryOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

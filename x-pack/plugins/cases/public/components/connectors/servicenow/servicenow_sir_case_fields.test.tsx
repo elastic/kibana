@@ -136,7 +136,7 @@ describe('ServiceNowSIR Fields', () => {
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  it('should hide subcategory if selecting a category without subcategories', async () => {
+  it('shows the subcategory if the selected category does not have subcategories', async () => {
     // Failed Login doesn't have defined subcategories
     const customFields = {
       ...fields,
@@ -150,7 +150,8 @@ describe('ServiceNowSIR Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.queryByTestId('subcategorySelect')).not.toBeInTheDocument();
+    expect(screen.getByTestId('subcategorySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('subcategorySelect')).not.toHaveValue();
   });
 
   describe('changing checkbox', () => {
@@ -213,5 +214,29 @@ describe('ServiceNowSIR Fields', () => {
     expect(screen.getByTestId('prioritySelect')).toHaveValue('1');
     expect(screen.getByTestId('categorySelect')).toHaveValue('Denial of Service');
     expect(screen.getByTestId('subcategorySelect')).toHaveValue('26');
+  });
+
+  it('resets subcategory when changing category', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    const categorySelect = screen.getByTestId('categorySelect');
+    const subcategorySelect = screen.getByTestId('subcategorySelect');
+
+    userEvent.selectOptions(categorySelect, ['Denial of Service']);
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
+    });
+
+    userEvent.selectOptions(subcategorySelect, ['26']);
+    userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
+
+    await waitFor(() => {
+      expect(subcategorySelect).not.toHaveValue();
+    });
   });
 });
