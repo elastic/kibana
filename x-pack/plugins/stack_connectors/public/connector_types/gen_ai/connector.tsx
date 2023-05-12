@@ -16,7 +16,7 @@ import { ButtonGroupField as SelectField } from '@kbn/triggers-actions-ui-plugin
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
+import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import * as i18n from './translations';
 import { DEFAULT_URL, DEFAULT_URL_AZURE } from './constants';
 

@@ -143,7 +143,6 @@ export async function executor(
 
   const axiosInstance = axios.create();
   const responseSettings = configurationUtilities.getResponseSettings();
-  console.log('config, API Provider', config.apiProvider);
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,

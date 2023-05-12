@@ -7,6 +7,7 @@
 
 export { COMPARATORS, builtInComparators } from './comparators';
 export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';
+export { OpenAiProviderType } from '../../../common';
 export { builtInGroupByTypes } from './group_by_types';
 export * from './action_frequency_types';
 

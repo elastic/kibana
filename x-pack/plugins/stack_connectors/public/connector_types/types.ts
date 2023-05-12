@@ -6,7 +6,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
-import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
+import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export interface EmailActionParams {
