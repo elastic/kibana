@@ -109,7 +109,7 @@ export const getActionFileUploadHandler = (
       // already been created and potentially dispatched to Endpoint. Action ID is not
       // needed by the Endpoint or fleet-server's API, so no need to fail here
       try {
-        await fleetFiles.update(uploadParameters.file_id, { actionId });
+        await fleetFiles.update(uploadParameters.file_id, { actionId: data.id });
       } catch (e) {
         logger.warn(`Attempt to update File meta with Action ID failed: ${e.message}`, e);
       }

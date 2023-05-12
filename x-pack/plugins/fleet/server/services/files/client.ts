@@ -132,7 +132,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
 
     await file.update({ meta });
 
-    return this.get(fileId);
+    return this.mapIndexedDocToFleetFile(file);
   }
 
   async delete(fileId: string): Promise<void> {
