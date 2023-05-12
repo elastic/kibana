@@ -11,6 +11,8 @@ export interface TagcloudState {
   layerId: string;
   tagAccessor?: string;
   valueAccessor?: string;
+  maxFontSize: number;
+  minFontSize: number;
 }
 
 export interface TagcloudConfig extends TagcloudState {

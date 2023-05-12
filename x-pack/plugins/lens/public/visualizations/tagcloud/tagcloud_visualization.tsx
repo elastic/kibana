@@ -50,6 +50,8 @@ export const getTagcloudVisualization = ({
     const newState = { ...state };
     delete newState.tagAccessor;
     delete newState.valueAccessor;
+    delete newState.maxFontSize;
+    delete newState.minFontSize;
     return newState;
   },
 
@@ -71,6 +73,8 @@ export const getTagcloudVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
+        maxFontSize: 72,
+        minFontSize: 18,
       }
     );
   },
@@ -148,8 +152,33 @@ export const getTagcloudVisualization = ({
     };
   },
 
-  toPreviewExpression: (state, datasourceLayers) => {
-    return null;
+  toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers = {}) => {
+    if (!state.tagAccessor || !state.valueAccessor) {
+      return null;
+    }
+
+    // shrink font size to fit in preview window
+    const PREVIEW_WINDOW_MAX_FONT_SIZE = 12;
+    const fontSizeRatio = state.maxFontSize / PREVIEW_WINDOW_MAX_FONT_SIZE;
+
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
+    return {
+      type: 'expression',
+      chain: [
+        ...(datasourceExpression ? datasourceExpression.chain : []),
+        {
+          type: 'function',
+          function: 'tagcloud',
+          arguments: {
+            bucket: [state.tagAccessor],
+            metric: [state.valueAccessor],
+            maxFontSize: [Math.ceil(state.maxFontSize / fontSizeRatio)],
+            minFontSize: [Math.ceil(state.minFontSize / fontSizeRatio)],
+            showLabel: [false],
+          },
+        },
+      ],
+    };
   },
 
   setDimension({ columnId, groupId, prevState }) {

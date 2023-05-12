@@ -52,6 +52,8 @@ export function suggestions({
         layerId: table.layerId,
         tagAccessor: group.columnId,
         valueAccessor: metrics[0].columnId,
+        maxFontSize: 72,
+        minFontSize: 18,
       },
     }
   });
