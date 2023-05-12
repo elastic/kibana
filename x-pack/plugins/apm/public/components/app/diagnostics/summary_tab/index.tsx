@@ -19,10 +19,10 @@ export function DiagnosticsSummary() {
         <ApmIntegrationPackageStatus />
       </EuiFlexItem>
       <EuiFlexItem>
-        <DataStreamsStatus />
+        <IndexTemplatesStatus />
       </EuiFlexItem>
       <EuiFlexItem>
-        <IndexTemplatesStatus />
+        <DataStreamsStatus />
       </EuiFlexItem>
       <EuiFlexItem>
         <FieldMappingStatus />

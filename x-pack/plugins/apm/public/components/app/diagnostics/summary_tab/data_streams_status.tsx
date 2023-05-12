@@ -22,7 +22,8 @@ export function DataStreamsStatus() {
     getIsValidIndexTemplateName(ds.template)
   );
 
-  const isOk = !data?.nonDataStreamIndices.length && isEveryTemplateNameValid;
+  const hasNonDataStreamIndices = data?.nonDataStreamIndices.length;
+  const isOk = !hasNonDataStreamIndices && isEveryTemplateNameValid;
 
   return (
     <EuiFlexGroup>
@@ -41,21 +42,19 @@ export function DataStreamsStatus() {
       </EuiFlexItem>
 
       <EuiFlexItem grow={10}>
-        {isLoading ? (
-          '...'
-        ) : isOk ? (
-          'No problems with data streams'
-        ) : (
-          <>
-            Problems with data streams
-            <EuiLink
-              data-test-subj="apmDataStreamsStatusSeeDetailsLink"
-              href={router.link('/diagnostics/data_streams')}
-            >
-              See details
-            </EuiLink>
-          </>
-        )}
+        {isLoading
+          ? '...'
+          : isOk
+          ? 'Data streams: No problems found'
+          : hasNonDataStreamIndices
+          ? 'Data streams: Non-data stream indices were found'
+          : 'Data streams: Some data streams are backed by non-standard index templates'}
+        <EuiLink
+          data-test-subj="apmDataStreamsStatusSeeDetailsLink"
+          href={router.link('/diagnostics/data_streams')}
+        >
+          See details
+        </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -19,14 +19,6 @@ export function FieldMappingStatus() {
 
   const invalidCount = data?.invalidFieldMappings.length;
   const isOk = invalidCount === 0;
-  const link = (
-    <EuiLink
-      data-test-subj="apmExpectedIndexTemplatesInstalledStatusAsLink"
-      href={router.link('/diagnostics/invalid-field-mappings')}
-    >
-      See details
-    </EuiLink>
-  );
 
   return (
     <EuiFlexGroup>
@@ -51,7 +43,13 @@ export function FieldMappingStatus() {
                 invalidCount,
               },
             })}
-        {link}
+
+        <EuiLink
+          data-test-subj="apmExpectedIndexTemplatesInstalledStatusAsLink"
+          href={router.link('/diagnostics/invalid-field-mappings')}
+        >
+          See details
+        </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

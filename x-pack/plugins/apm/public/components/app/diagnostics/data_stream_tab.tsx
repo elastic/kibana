@@ -11,6 +11,7 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -28,6 +29,7 @@ export function DiagnosticsDataStreams() {
   return (
     <>
       <NonDataStreamIndicesCallout data={data} />
+      <EuiSpacer />
       <DataStreamsTable data={data} />
     </>
   );

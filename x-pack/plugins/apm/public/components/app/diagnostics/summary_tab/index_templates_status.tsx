@@ -27,15 +27,6 @@ export function IndexTemplatesStatus() {
   const isOk =
     isEveryExpectedIndexTemplateInstalled && !hasNonStandardIndexTemplates;
 
-  const indexTemplatesLink = (
-    <EuiLink
-      data-test-subj="apmExpectedIndexTemplatesInstalledStatusAsLink"
-      href={router.link('/diagnostics/index-templates')}
-    >
-      See details
-    </EuiLink>
-  );
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
@@ -50,13 +41,18 @@ export function IndexTemplatesStatus() {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
-        {isOk ? (
-          'Default index templates exists'
-        ) : isEveryExpectedIndexTemplateInstalled === false ? (
-          <>Some index templates could not be found {indexTemplatesLink}</>
-        ) : (
-          <>Non standard index templates were found {indexTemplatesLink}</>
-        )}
+        {isOk
+          ? 'Index templates: No problems found'
+          : isEveryExpectedIndexTemplateInstalled === false
+          ? 'Index templates: Not all expected index templates exist'
+          : 'Index templates: Non standard index templates found'}
+
+        <EuiLink
+          data-test-subj="apmExpectedIndexTemplatesInstalledStatusAsLink"
+          href={router.link('/diagnostics/index-templates')}
+        >
+          See details
+        </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
