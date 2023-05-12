@@ -24,6 +24,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { JsonEditor, OnJsonEditorUpdateHandler } from '@kbn/es-ui-shared-plugin/public';
+import { monaco as monacoEditor } from '@kbn/monaco';
 import { useSendCurrentRequest } from '../../../hooks/use_send_current_request';
 import { SenseEditor } from '../../../models';
 
@@ -33,7 +34,7 @@ interface Request {
   body: any;
 }
 export const Editor = () => {
-  const editor = {
+  const editorInstance = {
     getRequestsInRange: () => {
       return [{ url: request.url, method: request.method, data: [JSON.stringify(request.body)] }];
     },
@@ -73,7 +74,7 @@ export const Editor = () => {
     prefix: 'console-editor-request-actions',
   });
 
-  const sendCurrentRequst = useSendCurrentRequest(editor as unknown as SenseEditor);
+  const sendCurrentRequst = useSendCurrentRequest(editorInstance as unknown as SenseEditor);
 
   const requestActions = [
     <EuiContextMenuItem key="copy-as-curl" onClick={closePopover}>
@@ -155,7 +156,45 @@ export const Editor = () => {
           onUpdate={updateBody}
           defaultValue={request.body}
           codeEditorProps={{
-            height: '300px',
+            editorDidMount: (editor) => {
+              monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+                validate: true,
+                schemas: [
+                  {
+                    uri: editor.getModel()?.uri.toString() ?? '',
+                    fileMatch: ['*'],
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        query: {
+                          type: 'object',
+                          properties: {
+                            match_all: {
+                              type: 'object',
+                            },
+                            term: {
+                              type: 'object',
+                              description:
+                                'Returns documents that contain an exact term in a provided field',
+                              patternProperties: {
+                                '.*': {
+                                  type: 'object',
+                                  properties: {
+                                    value: {
+                                      type: 'string',
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              });
+            },
           }}
         />
       </EuiForm>
