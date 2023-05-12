@@ -22,6 +22,7 @@ export const useAdHocRunnerRoute = ({ rule, timeframeOptions }: AdHocRunnerRoute
   const { isLoading, response } = useAdHocRunner({
     rule,
     timeframeOptions,
+    isRequestTriggered,
   });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);

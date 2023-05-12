@@ -94,6 +94,7 @@ export const buildBulkBody = (
           riskScore: completeRule.ruleParams.riskScore,
           riskScoreMapping: completeRule.ruleParams.riskScoreMapping,
         }).riskScore,
+        adHocTimestampOverride: validatedEventFields['event.start'] as string,
       }
     : undefined;
 

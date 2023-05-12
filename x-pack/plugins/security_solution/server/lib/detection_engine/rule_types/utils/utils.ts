@@ -591,6 +591,7 @@ export const getValidDateFromDoc = ({
     typeof timestampValue === 'string' || typeof timestampValue === 'number'
       ? timestampValue
       : undefined;
+
   if (lastTimestamp != null) {
     const tempMoment = moment(lastTimestamp);
     if (tempMoment.isValid()) {

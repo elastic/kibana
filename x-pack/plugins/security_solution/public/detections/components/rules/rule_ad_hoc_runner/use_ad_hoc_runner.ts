@@ -24,9 +24,11 @@ const emptyPreviewRule: AdHocRunResponse = {
 export const useAdHocRunner = ({
   rule,
   timeframeOptions,
+  isRequestTriggered,
 }: {
   rule: Rule;
   timeframeOptions: TimeframePreviewOptions;
+  isRequestTriggered: boolean;
 }) => {
   const [response, setResponse] = useState<AdHocRunResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +56,7 @@ export const useAdHocRunner = ({
     const abortCtrl = new AbortController();
     setResponse(emptyPreviewRule);
     const createAdHocRunId = async () => {
-      if (rule != null) {
+      if (rule && isRequestTriggered) {
         try {
           setIsLoading(true);
           const adHocRunResponse = await adHocRunRule({
@@ -85,7 +87,16 @@ export const useAdHocRunner = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount, from, interval, timeframeEnd, timeframeStart]);
+  }, [
+    rule,
+    addError,
+    invocationCount,
+    from,
+    interval,
+    timeframeEnd,
+    timeframeStart,
+    isRequestTriggered,
+  ]);
 
   return { isLoading, response };
 };

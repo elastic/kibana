@@ -32,6 +32,7 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from '../rule_preview/use_preview_invocation_count';
 import { useAdHocRunnerRoute } from './use_ad_hoc_runner_route';
+import { PreviewHistogram } from '../rule_preview/preview_histogram';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
@@ -216,16 +217,16 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
       </EuiFormRow>
       <EuiSpacer size="l" />
       {isAdHocRunRequestInProgress && <LoadingHistogram />}
-      {/* {!isAdHocRunRequestInProgress && adHocRunId && spaceId && (
+      {!isAdHocRunRequestInProgress && adHocRunId && spaceId && (
         <PreviewHistogram
           ruleType={rule.type}
           previewId={adHocRunId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
-          indexPattern={rule.index}
+          indexPattern={undefined}
           timeframeOptions={adHocRunOptions}
         />
-      )} */}
+      )}
       <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
     </>
   );

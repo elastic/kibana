@@ -202,7 +202,7 @@ export const adHocRunnerRoute = async (
           const ruleToExecute = {
             ...rule,
             id: rule.params.ruleId ?? uuidv4(),
-            createdAt: new Date(),
+            // createdAt: new Date(),
             createdBy: username ?? 'ad-hoc-runner-created-by',
             producer: 'ad-hoc-runner-producer',
             revision: 0,
@@ -293,7 +293,14 @@ export const adHocRunnerRoute = async (
               queryAlertType.executor,
               queryAlertType.id,
               queryAlertType.name,
-              rule.params,
+              {
+                ...rule.params,
+                // Need to override the timestamp otherwise the alerts get created when the execution gets run
+                // instead of when the event happened
+                timestampOverride: 'event.start',
+                timestampOverrideFallbackDisabled: true,
+                pepito: 3,
+              },
               () => true,
               {
                 create: alertInstanceFactoryStub,

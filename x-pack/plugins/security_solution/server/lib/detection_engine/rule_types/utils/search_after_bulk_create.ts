@@ -24,6 +24,7 @@ import {
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { createEnrichEventsFunction } from './enrichments';
+import { de } from 'date-fns/locale';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
