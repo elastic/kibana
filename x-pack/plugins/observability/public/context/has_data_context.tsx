@@ -15,7 +15,7 @@ import {
   APM_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
-  SYNTHETICS_APP,
+  UPTIME_APP,
   UX_APP,
 } from './constants';
 import { getDataHandler } from '../data_handler';
@@ -50,7 +50,7 @@ export const HasDataContext = createContext({} as HasDataContextValue);
 
 const apps: DataContextApps[] = [
   APM_APP,
-  SYNTHETICS_APP,
+  UPTIME_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
   UX_APP,
@@ -100,7 +100,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
                   serviceName: resultUx?.serviceName as string,
                 });
                 break;
-              case SYNTHETICS_APP:
+              case UPTIME_APP:
                 const resultSy = await getDataHandler(app)?.hasData();
                 updateState({ hasData: resultSy?.hasData, indices: resultSy?.indices });
 

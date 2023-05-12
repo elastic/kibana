@@ -12,7 +12,7 @@ import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { NewIndex } from '../new_index';
+import { NewIndexRouter } from '../new_index/new_index_router';
 import { SearchIndexRouter } from '../search_index/search_index_router';
 
 import { SearchIndices } from './search_indices';
@@ -25,7 +25,7 @@ describe('SearchIndicesRouter', () => {
 
     const routeSwitch = wrapper.find(Switch);
 
-    expect(routeSwitch.find(NewIndex)).toHaveLength(1);
+    expect(routeSwitch.find(NewIndexRouter)).toHaveLength(1);
     expect(routeSwitch.find(SearchIndices)).toHaveLength(1);
     expect(routeSwitch.find(SearchIndexRouter)).toHaveLength(1);
   });

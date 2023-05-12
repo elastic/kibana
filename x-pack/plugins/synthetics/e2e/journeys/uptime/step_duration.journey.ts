@@ -6,8 +6,8 @@
  */
 
 import { journey, step, expect } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { recordVideo } from '../../helpers/record_video';
 import { loginPageProvider } from '../../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
@@ -32,7 +32,7 @@ journey('StepsDuration', async ({ page, params }) => {
   });
 
   step('Go to monitor details', async () => {
-    await page.click('button:has-text("test-monitor - inline")');
+    await page.click('text="test-monitor - inline"');
     expect(page.url()).toBe(`${baseUrl}/monitor/dGVzdC1tb25pdG9yLWlubGluZQ==/?${queryParams}`);
   });
 

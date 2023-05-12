@@ -7,14 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.errorTitle',
+export const DOCUMENT_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentErrorTitle',
   {
-    defaultMessage: 'Unable to display document information',
+    defaultMessage: 'document information',
   }
 );
 
-export const ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.errorMessage',
-  { defaultMessage: 'There was an error displaying the document fields and values' }
+export const DOCUMENT_ERROR_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentErrorMessage',
+  {
+    defaultMessage: 'the document fields and values',
+  }
 );

@@ -21,7 +21,9 @@ import {
 import { PAGE_TITLE } from '../../screens/common/page';
 import { OPEN_ALERT_DETAILS_PAGE } from '../../screens/alerts_details';
 
-describe('Alert Details Page Navigation', () => {
+// This is skipped as the details page POC will be removed in favor of the expanded alert flyout
+// https://github.com/elastic/kibana/issues/154477
+describe.skip('Alert Details Page Navigation', () => {
   describe('navigating to alert details page', () => {
     const rule = getNewRule();
     before(() => {

@@ -38,13 +38,17 @@ export const createRuleTypeMocks = () => {
   } as AlertingPluginSetupContract;
 
   const scheduleActions = jest.fn();
+  const getUuid = jest.fn();
 
   const services = {
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     savedObjectsClient: {
       get: () => ({ attributes: { consumer: APM_SERVER_FEATURE_ID } }),
     },
-    alertFactory: { create: jest.fn(() => ({ scheduleActions })), done: {} },
+    alertFactory: {
+      create: jest.fn(() => ({ scheduleActions, getUuid })),
+      done: {},
+    },
     alertWithLifecycle: jest.fn(),
     logger: loggerMock,
     shouldWriteAlerts: () => true,

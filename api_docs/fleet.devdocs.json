@@ -60,7 +60,7 @@
         "label": "PackagePolicyEditorDatastreamMappings",
         "description": [],
         "signature": [
-          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo, customDataset }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -79,7 +79,7 @@
             "id": "def-public.PackagePolicyEditorDatastreamMappings.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ packageInputStream, packageInfo }",
+            "label": "{ packageInputStream, packageInfo, customDataset }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -109,7 +109,7 @@
         "label": "PackagePolicyEditorDatastreamPipelines",
         "description": [],
         "signature": [
-          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo, customDataset }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -128,7 +128,7 @@
             "id": "def-public.PackagePolicyEditorDatastreamPipelines.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ packageInputStream, packageInfo }",
+            "label": "{ packageInputStream, packageInfo, customDataset }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1888,6 +1888,20 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamMappingsProps.customDataset",
+            "type": "string",
+            "tags": [],
+            "label": "customDataset",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1973,6 +1987,20 @@
             "description": [],
             "signature": [
               "{ id?: string | undefined; data_stream: { dataset: string; type: string; }; }"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamPipelinesProps.customDataset",
+            "type": "string",
+            "tags": [],
+            "label": "customDataset",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
             "deprecated": false,
@@ -5732,6 +5760,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.rotateKeyPair",
+            "type": "Function",
+            "tags": [],
+            "label": "rotateKeyPair",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.MessageSigningServiceInterface.sign",
             "type": "Function",
             "tags": [],
@@ -5971,6 +6015,60 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.readBundledPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "readBundledPackage",
+            "description": [],
+            "signature": [
+              "(bundledPackage: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.BundledPackage",
+                "text": "BundledPackage"
+              },
+              ") => Promise<{ packageInfo: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              "; paths: string[]; }>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.readBundledPackage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "bundledPackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.BundledPackage",
+                    "text": "BundledPackage"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -6233,7 +6331,9 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; bumpRevision?: boolean | undefined; force?: boolean | undefined; skipEnsureInstalled?: boolean | undefined; skipUniqueNameVerification?: boolean | undefined; overwrite?: boolean | undefined; packageInfo?: ",
+              " | undefined; authorizationHeader?: ",
+              "HTTPAuthorizationHeader",
+              " | null | undefined; bumpRevision?: boolean | undefined; force?: boolean | undefined; skipEnsureInstalled?: boolean | undefined; skipUniqueNameVerification?: boolean | undefined; overwrite?: boolean | undefined; packageInfo?: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6389,6 +6489,21 @@
                         "text": "AuthenticatedUser"
                       },
                       " | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.create.$4.authorizationHeader",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "authorizationHeader",
+                    "description": [],
+                    "signature": [
+                      "HTTPAuthorizationHeader",
+                      " | null | undefined"
                     ],
                     "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
@@ -6568,7 +6683,9 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; bumpRevision?: boolean | undefined; force?: true | undefined; } | undefined) => Promise<",
+              " | undefined; bumpRevision?: boolean | undefined; force?: true | undefined; authorizationHeader?: ",
+              "HTTPAuthorizationHeader",
+              " | null | undefined; } | undefined) => Promise<{ created: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6576,7 +6693,23 @@
                 "section": "def-common.PackagePolicy",
                 "text": "PackagePolicy"
               },
-              "[]>"
+              "[]; failed: { packagePolicy: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.NewPackagePolicy",
+                "text": "NewPackagePolicy"
+              },
+              "; error?: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined; }[]; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -6699,6 +6832,21 @@
                     "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.bulkCreate.$4.authorizationHeader",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "authorizationHeader",
+                    "description": [],
+                    "signature": [
+                      "HTTPAuthorizationHeader",
+                      " | null | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -6729,15 +6877,15 @@
                 "section": "def-common.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               },
-              ", packagePolicyUpdates: (",
+              ", packagePolicyUpdates: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
+                "section": "def-common.UpdatePackagePolicy",
+                "text": "UpdatePackagePolicy"
               },
-              " & { version?: string | undefined; id: string; })[], options?: { user?: ",
+              "[], options?: { user?: ",
               {
                 "pluginId": "security",
                 "scope": "common",
@@ -6745,7 +6893,7 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; force?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
+              " | undefined; force?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<{ updatedPolicies: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6753,7 +6901,17 @@
                 "section": "def-common.PackagePolicy",
                 "text": "PackagePolicy"
               },
-              "[] | null>"
+              "[] | null; failedPolicies: { packagePolicy: ",
+              "NewPackagePolicyWithId",
+              "; error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              "; }[]; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -6809,15 +6967,14 @@
                 "label": "packagePolicyUpdates",
                 "description": [],
                 "signature": [
-                  "(",
                   {
                     "pluginId": "fleet",
                     "scope": "common",
                     "docId": "kibFleetPluginApi",
-                    "section": "def-common.NewPackagePolicy",
-                    "text": "NewPackagePolicy"
+                    "section": "def-common.UpdatePackagePolicy",
+                    "text": "UpdatePackagePolicy"
                   },
-                  " & { version?: string | undefined; id: string; })[]"
+                  "[]"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -9249,9 +9406,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -9283,7 +9438,11 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -9311,27 +9470,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "CountResponse",
-              ">; }; exists: { (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -9509,7 +9648,27 @@
               "default",
               "; eql: ",
               "default",
-              "; existsSource: { (this: That, params: ",
+              "; exists: { (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
               " | ",
               "ExistsSourceRequest",
@@ -10204,8 +10363,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -10584,9 +10741,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -10618,7 +10773,11 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -10646,27 +10805,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "CountResponse",
-              ">; }; exists: { (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -10844,7 +10983,27 @@
               "default",
               "; eql: ",
               "default",
-              "; existsSource: { (this: That, params: ",
+              "; exists: { (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
               " | ",
               "ExistsSourceRequest",
@@ -11539,8 +11698,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -11932,9 +12089,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -11966,7 +12121,11 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -11994,27 +12153,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "CountResponse",
-              ">; }; exists: { (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -12192,7 +12331,27 @@
               "default",
               "; eql: ",
               "default",
-              "; existsSource: { (this: That, params: ",
+              "; exists: { (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
               " | ",
               "ExistsSourceRequest",
@@ -12887,8 +13046,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -13277,9 +13434,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -13311,7 +13466,11 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -13339,27 +13498,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "CountResponse",
-              ">; }; exists: { (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -13537,7 +13676,27 @@
               "default",
               "; eql: ",
               "default",
-              "; existsSource: { (this: That, params: ",
+              "; exists: { (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
               " | ",
               "ExistsSourceRequest",
@@ -14232,8 +14391,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -14625,9 +14782,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -14659,7 +14814,11 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -14687,27 +14846,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "CountResponse",
-              ">; }; exists: { (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -14885,7 +15024,27 @@
               "default",
               "; eql: ",
               "default",
-              "; existsSource: { (this: That, params: ",
+              "; exists: { (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
               " | ",
               "ExistsSourceRequest",
@@ -15580,8 +15739,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -16041,6 +16198,20 @@
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.uninstallTokenService",
+          "type": "Object",
+          "tags": [],
+          "label": "uninstallTokenService",
+          "description": [],
+          "signature": [
+            "UninstallTokenServiceInterface"
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -16486,6 +16657,17 @@
             "signature": [
               "number | undefined"
             ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AgentPolicy.is_protected",
+            "type": "boolean",
+            "tags": [],
+            "label": "is_protected",
+            "description": [],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -17798,7 +17980,8 @@
               "\nComponents array"
             ],
             "signature": [
-              "FleetServerAgentComponent[] | undefined"
+              "FleetServerAgentComponent",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -19076,9 +19259,9 @@
             "label": "experimental_data_stream_features",
             "description": [],
             "signature": [
-              "{ data_stream: string; features: Record<",
+              "{ data_stream: string; features: Partial<Record<",
               "ExperimentalIndexingFeature",
-              ", boolean>; }[] | undefined"
+              ", boolean>>; }[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -19602,6 +19785,20 @@
             "description": [],
             "signature": [
               "{ name: string; enabled: boolean; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.is_protected",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_protected",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -20160,7 +20357,7 @@
             "label": "data_stream",
             "description": [],
             "signature": [
-              "{ dataset: string; type: string; elasticsearch?: { privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; source_mode?: string | undefined; } | undefined; }"
+              "{ dataset: string; type: string; elasticsearch?: { dynamic_dataset?: boolean | undefined; dynamic_namespace?: boolean | undefined; privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; source_mode?: string | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
@@ -21483,6 +21680,34 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.dynamic_dataset",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dynamic_dataset",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.dynamic_namespace",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dynamic_namespace",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -22616,7 +22841,7 @@
             "section": "def-common.ElasticsearchAssetType",
             "text": "ElasticsearchAssetType"
           },
-          "; }"
+          "; deferred?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -23547,7 +23772,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"monitoring\" | \"security\" | \"infrastructure\" | \"cloud\" | \"custom\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\""
+          "\"connector\" | \"security\" | \"monitoring\" | \"observability\" | \"infrastructure\" | \"cloud\" | \"custom\" | \"enterprise_search\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"app_search\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"connector_package\" | \"containers\" | \"content_source\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"kubernetes\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
         "deprecated": false,
@@ -23669,7 +23894,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; name: string; description: string; version: string; title: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; name: string; description: string; title: string; version: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -23739,6 +23964,21 @@
           "10000"
         ],
         "path": "x-pack/plugins/fleet/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.UNINSTALL_TOKENS_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "UNINSTALL_TOKENS_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-uninstall-tokens\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/uninstall_tokens.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -25166,6 +25406,21 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.DASHBOARD_LOCATORS_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DASHBOARD_LOCATORS_IDS",
+        "description": [],
+        "signature": [
+          "{ readonly ELASTIC_AGENT_OVERVIEW: \"elastic_agent-a148dc70-6b3c-11ed-98de-67bdecd21824\"; readonly ELASTIC_AGENT_AGENT_INFO: \"elastic_agent-0600ffa0-6b5e-11ed-98de-67bdecd21824\"; readonly ELASTIC_AGENT_AGENT_METRICS: \"elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395\"; readonly ELASTIC_AGENT_INTEGRATIONS: \"elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824\"; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/locators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.ENDPOINT_PRIVILEGES",
         "type": "Object",
         "tags": [],
@@ -25341,6 +25596,17 @@
             "type": "string",
             "tags": [],
             "label": "DELETE_PATTERN_DEPRECATED",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS",
+            "type": "string",
+            "tags": [],
+            "label": "REAUTHORIZE_TRANSFORMS",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,
@@ -25677,6 +25943,53 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-common.epmRouteService.getUpdatePath.$2",
+                "type": "string",
+                "tags": [],
+                "label": "pkgVersion",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getReauthorizeTransformsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getReauthorizeTransformsPath",
+            "description": [],
+            "signature": [
+              "(pkgName: string, pkgVersion: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getReauthorizeTransformsPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pkgName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getReauthorizeTransformsPath.$2",
                 "type": "string",
                 "tags": [],
                 "label": "pkgVersion",

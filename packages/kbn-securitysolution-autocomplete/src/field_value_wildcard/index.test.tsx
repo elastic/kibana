@@ -143,11 +143,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="comboBoxInput"]')
-        .hasClass('euiComboBox__inputWrap-isClearable')
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="comboBoxClearButton"]`)).toBeTruthy();
   });
 
   test('it correctly displays selected value', () => {

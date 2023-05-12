@@ -15,9 +15,9 @@ import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
 export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const theme = useTheme();
 

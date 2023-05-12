@@ -217,18 +217,7 @@ export function DiscoverGridFlyout({
             hit={actualHit}
             columns={columns}
             dataView={dataView}
-            filter={
-              onFilter
-                ? (mapping, value, mode) => {
-                    onFilter(mapping, value, mode);
-                    services.toastNotifications.addSuccess(
-                      i18n.translate('discover.grid.flyout.toastFilterAdded', {
-                        defaultMessage: `Filter was added`,
-                      })
-                    );
-                  }
-                : undefined
-            }
+            filter={onFilter}
             onRemoveColumn={(columnName: string) => {
               onRemoveColumn(columnName);
               services.toastNotifications.addSuccess(

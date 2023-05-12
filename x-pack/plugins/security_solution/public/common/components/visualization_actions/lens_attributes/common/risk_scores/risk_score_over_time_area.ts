@@ -56,7 +56,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
                 axisMode: 'left',
                 lineWidth: 2,
                 color: '#aa6556',
-                icon: 'warning',
+                icon: 'alert',
                 textVisibility: true,
                 fill: 'none',
                 iconPosition: 'left',

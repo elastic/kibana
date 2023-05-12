@@ -64,7 +64,7 @@ export default async function ({ readConfigFile }) {
     }
 
     // more settings, like timeouts, mochaOpts, etc are
-    // defined in the config schema. See {blob}src/functional_test_runner/lib/config/schema.js[src/functional_test_runner/lib/config/schema.js]
+    // defined in the config schema. See {kibana-blob}src/functional_test_runner/lib/config/schema.js[src/functional_test_runner/lib/config/schema.js]
   };
 }
 

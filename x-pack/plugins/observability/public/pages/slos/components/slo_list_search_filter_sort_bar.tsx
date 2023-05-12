@@ -32,7 +32,7 @@ export interface SloListSearchFilterSortBarProps {
   onChangeIndicatorTypeFilter: (filter: FilterType[]) => void;
 }
 
-export type SortType = 'name' | 'indicatorType';
+export type SortType = 'creationTime' | 'indicatorType';
 export type FilterType =
   | 'sli.apm.transactionDuration'
   | 'sli.apm.transactionErrorRate'
@@ -46,10 +46,10 @@ export type Item<T> = EuiSelectableOption & {
 
 const SORT_OPTIONS: Array<Item<SortType>> = [
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.name', {
-      defaultMessage: 'Name',
+    label: i18n.translate('xpack.observability.slo.list.sortBy.creationTime', {
+      defaultMessage: 'Creation time',
     }),
-    type: 'name',
+    type: 'creationTime',
     checked: 'on',
   },
   {
@@ -108,7 +108,7 @@ export function SloListSearchFilterSortBar({
   };
 
   useEffect(() => {
-    if (selectedSort?.type === 'name' || selectedSort?.type === 'indicatorType') {
+    if (selectedSort?.type === 'creationTime' || selectedSort?.type === 'indicatorType') {
       onChangeSort(selectedSort.type);
     }
   }, [onChangeSort, selectedSort]);

@@ -20,7 +20,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/stream?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404))&logFilter=(query:(language:kuery,query:''),refreshInterval:(pause:!t,value:5000),timeRange:(from:'2019-02-20T12:58:09.404Z',to:'2019-02-20T14:58:09.404Z'))"
+        to="/stream?logView=(logViewId:default,type:log-view-reference)&logPosition=(position:(tiebreaker:0,time:1550671089404))&logFilter=(query:(language:kuery,query:''),refreshInterval:(pause:!t,value:5000),timeRange:(from:'2019-02-20T12:58:09.404Z',to:'2019-02-20T14:58:09.404Z'))"
       />
     `);
   });
@@ -34,7 +34,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/stream?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404))&logFilter=(query:(language:kuery,query:'FILTER_FIELD:FILTER_VALUE'),refreshInterval:(pause:!t,value:5000),timeRange:(from:'2019-02-20T12:58:09.404Z',to:'2019-02-20T14:58:09.404Z'))"
+        to="/stream?logView=(logViewId:default,type:log-view-reference)&logPosition=(position:(tiebreaker:0,time:1550671089404))&logFilter=(query:(language:kuery,query:'FILTER_FIELD:FILTER_VALUE'),refreshInterval:(pause:!t,value:5000),timeRange:(from:'2019-02-20T12:58:09.404Z',to:'2019-02-20T14:58:09.404Z'))"
       />
     `);
   });
@@ -46,7 +46,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/stream?sourceId=SOME-OTHER-SOURCE&logFilter=(query:(language:kuery,query:''),refreshInterval:(pause:!t,value:5000))"
+        to="/stream?logView=(logViewId:default,type:log-view-reference)&logFilter=(query:(language:kuery,query:''),refreshInterval:(pause:!t,value:5000))"
       />
     `);
   });

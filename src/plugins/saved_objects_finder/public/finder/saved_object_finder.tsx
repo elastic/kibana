@@ -30,8 +30,13 @@ import { i18n } from '@kbn/i18n';
 
 import type { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectCommon, FindQueryHTTP, FindResponseHTTP, FinderAttributes } from '../../common';
+import {
+  SavedObjectCommon,
+  FindQueryHTTP,
+  FindResponseHTTP,
+  FinderAttributes,
+  LISTING_LIMIT_SETTING,
+} from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;

@@ -38,9 +38,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
-import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -51,7 +49,6 @@ import {
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
-import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -103,6 +100,11 @@ interface MgetAndAuditAlert {
 export interface BulkUpdateCasesOptions {
   alerts: MgetAndAuditAlert[];
   caseIds: string[];
+}
+
+export interface RemoveCaseIdFromAlertsOptions {
+  alerts: MgetAndAuditAlert[];
+  caseId: string;
 }
 
 interface GetAlertParams {
@@ -846,6 +848,101 @@ export class AlertsClient {
     });
   }
 
+  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveCaseIdFromAlertsOptions) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
+    try {
+      if (alerts.length === 0) {
+        return;
+      }
+
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null) {
+        if (ctx._source['${ALERT_CASE_IDS}'].contains('${caseId}')) {
+          int index = ctx._source['${ALERT_CASE_IDS}'].indexOf('${caseId}');
+          ctx._source['${ALERT_CASE_IDS}'].remove(index);
+        }
+      }`;
+
+      const bulkUpdateRequest = [];
+
+      for (const alert of alerts) {
+        bulkUpdateRequest.push(
+          {
+            update: {
+              _index: alert.index,
+              _id: alert.id,
+            },
+          },
+          {
+            script: { source: painlessScript, lang: 'painless' },
+          }
+        );
+      }
+
+      await this.esClient.bulk({
+        refresh: 'wait_for',
+        body: bulkUpdateRequest,
+      });
+    } catch (error) {
+      this.logger.error(`Error removing case ${caseId} from alerts: ${error}`);
+      throw error;
+    }
+  }
+
+  public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
+    try {
+      if (caseIds.length === 0) {
+        return;
+      }
+
+      const index = `${this.ruleDataService.getResourcePrefix()}-*`;
+      const query = `${ALERT_CASE_IDS}: (${caseIds.join(' or ')})`;
+      const esQuery = buildEsQuery(undefined, { query, language: 'kuery' }, []);
+
+      const SCRIPT_PARAMS_ID = 'caseIds';
+
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null && ctx._source['${ALERT_CASE_IDS}'].length > 0 && params['${SCRIPT_PARAMS_ID}'] != null && params['${SCRIPT_PARAMS_ID}'].length > 0) {
+        List storedCaseIds = ctx._source['${ALERT_CASE_IDS}'];
+        List caseIdsToRemove = params['${SCRIPT_PARAMS_ID}'];
+
+        for (int i=0; i < caseIdsToRemove.length; i++) {
+          if (storedCaseIds.contains(caseIdsToRemove[i])) {
+            int index = storedCaseIds.indexOf(caseIdsToRemove[i]);
+            storedCaseIds.remove(index);
+          }
+        }
+      }`;
+
+      await this.esClient.updateByQuery({
+        index,
+        conflicts: 'proceed',
+        refresh: true,
+        body: {
+          script: {
+            source: painlessScript,
+            lang: 'painless',
+            params: { caseIds },
+          } as InlineScript,
+          query: esQuery,
+        },
+        ignore_unavailable: true,
+      });
+    } catch (err) {
+      this.logger.error(`Failed removing ${caseIds} from all alerts: ${err}`);
+      throw err;
+    }
+  }
+
   public async find<Params extends RuleTypeParams = never>({
     aggs,
     featureIds,
@@ -973,24 +1070,5 @@ export class AlertsClient {
       this.logger.error(errMessage);
       throw Boom.failedDependency(errMessage);
     }
-  }
-
-  public async getBrowserFields({
-    indices,
-    metaFields,
-    allowNoIndex,
-  }: {
-    indices: string[];
-    metaFields: string[];
-    allowNoIndex: boolean;
-  }): Promise<BrowserFields> {
-    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-      pattern: indices,
-      metaFields,
-      fieldCapsOptions: { allow_no_indices: allowNoIndex },
-    });
-
-    return fieldDescriptorToBrowserFieldMapper(fields);
   }
 }

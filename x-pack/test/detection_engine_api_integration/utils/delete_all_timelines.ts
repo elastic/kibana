@@ -6,14 +6,15 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 /**
- * Remove all timelines from the .kibana index
+ * Remove all timelines from the security solution savedObjects index
  * @param es The ElasticSearch handle
  */
 export const deleteAllTimelines = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
     q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,

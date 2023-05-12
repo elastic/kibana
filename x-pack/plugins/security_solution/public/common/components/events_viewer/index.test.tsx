@@ -23,7 +23,7 @@ import { getDefaultControlColumn } from '../../../timelines/components/timeline/
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { mount } from 'enzyme';
 
 jest.mock('../../lib/kibana');

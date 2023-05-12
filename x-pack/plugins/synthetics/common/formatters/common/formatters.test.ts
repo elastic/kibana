@@ -5,49 +5,62 @@
  * 2.0.
  */
 
+import { ConfigKey } from '../../runtime_types';
 import {
+  secondsToCronFormatter,
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
-  secondsToCronFormatter,
-} from './formatters';
+} from '../formatting_utils';
 
 describe('formatters', () => {
   describe('cronToSecondsNormalizer', () => {
     it('takes a number of seconds and converts it to cron format', () => {
-      expect(secondsToCronFormatter('3')).toEqual('3s');
+      expect(secondsToCronFormatter({ [ConfigKey.WAIT]: '3' }, ConfigKey.WAIT)).toEqual('3s');
     });
   });
 
   describe('arrayToJsonFormatter', () => {
     it('takes an array and converts it to json', () => {
-      expect(arrayToJsonFormatter(['tag1', 'tag2'])).toEqual('["tag1","tag2"]');
+      expect(arrayToJsonFormatter({ [ConfigKey.TAGS]: ['tag1', 'tag2'] }, ConfigKey.TAGS)).toEqual(
+        '["tag1","tag2"]'
+      );
     });
 
     it('returns null if the array has length of 0', () => {
-      expect(arrayToJsonFormatter([])).toEqual(null);
+      expect(arrayToJsonFormatter({ [ConfigKey.TAGS]: [] }, ConfigKey.TAGS)).toEqual(null);
     });
   });
 
   describe('objectToJsonFormatter', () => {
     it('takes a json object string and returns an object', () => {
-      expect(objectToJsonFormatter({ key: 'value' })).toEqual('{"key":"value"}');
+      expect(
+        objectToJsonFormatter(
+          { [ConfigKey.RESPONSE_HEADERS_CHECK]: { key: 'value' } },
+          ConfigKey.RESPONSE_HEADERS_CHECK
+        )
+      ).toEqual('{"key":"value"}');
     });
 
     it('returns null if the object has no keys', () => {
-      expect(objectToJsonFormatter({})).toEqual(null);
+      expect(objectToJsonFormatter({ [ConfigKey.METADATA]: {} }, ConfigKey.METADATA)).toEqual(null);
     });
   });
 
   describe('stringToJsonFormatter', () => {
     it('takes a string and returns an json string', () => {
-      expect(stringToJsonFormatter('step("test step", () => {})')).toEqual(
-        '"step(\\"test step\\", () => {})"'
-      );
+      expect(
+        stringToJsonFormatter(
+          { [ConfigKey.SOURCE_INLINE]: 'step("test step", () => {})' },
+          ConfigKey.SOURCE_INLINE
+        )
+      ).toEqual('"step(\\"test step\\", () => {})"');
     });
 
     it('returns null if the string is falsy', () => {
-      expect(stringToJsonFormatter('')).toEqual(null);
+      expect(
+        stringToJsonFormatter({ [ConfigKey.SOURCE_INLINE]: '' }, ConfigKey.SOURCE_INLINE)
+      ).toEqual(null);
     });
   });
 });

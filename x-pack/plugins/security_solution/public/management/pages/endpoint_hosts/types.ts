@@ -36,6 +36,9 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
+    // Adding `hostInfo` to store full API response in order to support the
+    // refactoring effort with AgentStatus component
+    hostInfo?: HostInfo;
     hostDetails: {
       /** details data for a specific host */
       details?: Immutable<HostMetadata>;

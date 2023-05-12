@@ -8,6 +8,7 @@
 import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
@@ -34,7 +35,7 @@ import {
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
-import { getEditPath } from '../../common';
+import { getEditPath } from '../../common/constants';
 import { isLensEqual } from './lens_document_equality';
 import {
   type IndexPatternServiceAPI,
@@ -52,6 +53,7 @@ export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'>
   onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
   newDescription?: string;
   newTags?: string[];
+  panelTimeRange?: TimeRange;
 };
 
 export function App({
@@ -70,6 +72,7 @@ export function App({
   initialContext,
   theme$,
   coreStart,
+  savedObjectStore,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -457,17 +460,14 @@ export function App({
       }
       if (locator && shortUrls) {
         // This is a stripped down version of what the share URL plugin is doing
-        const relativeUrl = await shortUrls.create({ locator, params });
-        const absoluteShortUrl = application.getUrlForApp('', {
-          path: `/r/s/${relativeUrl.data.slug}`,
-          absolute: true,
-        });
+        const shortUrl = await shortUrls.createWithLocator({ locator, params });
+        const absoluteShortUrl = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
         shareURLCache.current = { params: cacheKey, url: absoluteShortUrl };
         return absoluteShortUrl;
       }
       return '';
     },
-    [locator, application, shortUrls]
+    [locator, shortUrls]
   );
 
   const returnToOriginSwitchLabelForContext =

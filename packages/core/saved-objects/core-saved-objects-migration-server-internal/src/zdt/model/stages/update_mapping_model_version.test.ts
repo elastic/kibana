@@ -12,20 +12,19 @@ import {
   createPostInitState,
   type MockedMigratorContext,
 } from '../../test_helpers';
-import type { ResponseType } from '../../next';
-import type { UpdateIndexMappingsState } from '../../state';
+import type { UpdateMappingModelVersionState } from '../../state';
 import type { StateActionResponse } from '../types';
-import { updateIndexMappings } from './update_index_mappings';
+import { updateMappingModelVersion } from './update_mapping_model_version';
+import { setMetaMappingMigrationComplete } from '../../utils';
 
-describe('Stage: updateIndexMappings', () => {
+describe('Stage: updateMappingModelVersion', () => {
   let context: MockedMigratorContext;
 
   const createState = (
-    parts: Partial<UpdateIndexMappingsState> = {}
-  ): UpdateIndexMappingsState => ({
+    parts: Partial<UpdateMappingModelVersionState> = {}
+  ): UpdateMappingModelVersionState => ({
     ...createPostInitState(),
-    controlState: 'UPDATE_INDEX_MAPPINGS',
-    additiveMappingChanges: {},
+    controlState: 'UPDATE_MAPPING_MODEL_VERSIONS',
     ...parts,
   });
 
@@ -33,21 +32,50 @@ describe('Stage: updateIndexMappings', () => {
     context = createContextMock();
   });
 
-  it('UPDATE_INDEX_MAPPINGS -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK when successful', () => {
-    const state = createState();
-    const res: ResponseType<'UPDATE_INDEX_MAPPINGS'> = Either.right({
-      taskId: '42',
-    });
-
-    const newState = updateIndexMappings(
-      state,
-      res as StateActionResponse<'UPDATE_INDEX_MAPPINGS'>,
-      context
+  it('updates state.currentIndexMeta', () => {
+    const state = createState({});
+    const res: StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'> = Either.right(
+      'update_mappings_succeeded'
     );
+
+    const newState = updateMappingModelVersion(state, res, context);
+    expect(newState.currentIndexMeta).toEqual(
+      setMetaMappingMigrationComplete({
+        meta: state.currentIndexMeta,
+        versions: context.typeVirtualVersions,
+      })
+    );
+  });
+
+  it('UPDATE_MAPPING_MODEL_VERSIONS -> UPDATE_ALIASES when at least one aliasActions', () => {
+    const state = createState({
+      aliasActions: [{ add: { alias: '.kibana', index: '.kibana_1' } }],
+    });
+    const res: StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'> = Either.right(
+      'update_mappings_succeeded'
+    );
+
+    const newState = updateMappingModelVersion(state, res, context);
     expect(newState).toEqual({
       ...state,
-      controlState: 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK',
-      updateTargetMappingsTaskId: '42',
+      currentIndexMeta: expect.any(Object),
+      controlState: 'UPDATE_ALIASES',
+    });
+  });
+
+  it('UPDATE_MAPPING_MODEL_VERSIONS -> INDEX_STATE_UPDATE_DONE when no aliasActions', () => {
+    const state = createState({
+      aliasActions: [],
+    });
+    const res: StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'> = Either.right(
+      'update_mappings_succeeded'
+    );
+
+    const newState = updateMappingModelVersion(state, res, context);
+    expect(newState).toEqual({
+      ...state,
+      currentIndexMeta: expect.any(Object),
+      controlState: 'INDEX_STATE_UPDATE_DONE',
     });
   });
 });

@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
@@ -30,12 +31,17 @@ import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { VisualizationActions } from '../visualization_actions/actions';
-import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
+import type {
+  GetLensAttributes,
+  LensAttributes,
+  VisualizationResponse,
+} from '../visualization_actions/types';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { MatrixHistogramChartContent } from './chart_content';
+import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -70,7 +76,12 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
   ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
 
-const CHART_HEIGHT = '150px';
+const CHART_HEIGHT = 150;
+
+const visualizationResponseHasData = (response: VisualizationResponse): boolean =>
+  Object.values<AggregationsTermsAggregateBase<unknown[]>>(response.aggregations ?? {}).some(
+    ({ buckets }) => buckets.length > 0
+  );
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
@@ -107,6 +118,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   skip,
   hideQueryToggle = false,
 }) => {
+  const visualizationId = `${id}-embeddable`;
   const dispatch = useDispatch();
 
   const handleBrushEnd = useCallback(
@@ -191,17 +203,27 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
+  const visualizationResponse = useVisualizationResponse({ visualizationId });
   const subtitleWithCounts = useMemo(() => {
     if (isInitialLoading) {
       return null;
     }
 
     if (typeof subtitle === 'function') {
-      return totalCount >= 0 ? subtitle(totalCount) : null;
+      if (isChartEmbeddablesEnabled) {
+        if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse[0])) {
+          return subtitle(0);
+        }
+        const visualizationCount = visualizationResponse[0].hits.total;
+        return visualizationCount >= 0 ? subtitle(visualizationCount) : null;
+      } else {
+        return totalCount >= 0 ? subtitle(totalCount) : null;
+      }
     }
 
     return subtitle;
-  }, [isInitialLoading, subtitle, totalCount]);
+  }, [isChartEmbeddablesEnabled, isInitialLoading, subtitle, totalCount, visualizationResponse]);
+
   const hideHistogram = useMemo(
     () => (totalCount <= 0 && hideHistogramIfEmpty ? true : false),
     [totalCount, hideHistogramIfEmpty]
@@ -235,6 +257,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   ]);
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
+  const extraVisualizationOptions = useMemo(
+    () => ({ dnsIsPtrIncluded: isPtrIncluded ?? false }),
+    [isPtrIncluded]
+  );
   if (hideHistogram) {
     return null;
   }
@@ -276,6 +302,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 <EuiFlexItem grow={false}>
                   <VisualizationActions
                     className="histogram-viz-actions"
+                    extraOptions={extraVisualizationOptions}
                     getLensAttributes={getLensAttributes}
                     isInspectButtonDisabled={filterQuery === undefined}
                     lensAttributes={lensAttributes}
@@ -303,9 +330,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
+                extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
-                height={CHART_HEIGHT}
-                id={`${id}-embeddable`}
+                height={chartHeight ?? CHART_HEIGHT}
+                id={visualizationId}
                 inspectTitle={title as string}
                 lensAttributes={lensAttributes}
                 stackByField={selectedStackByOption.value}

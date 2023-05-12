@@ -78,12 +78,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('full screen button should exist', async () => {
-      await testSubjects.click('mapsFullScreenMode');
+      await PageObjects.maps.existFullScreen();
       await a11y.testAppSnapshot();
     });
 
     it('displays exit full screen logo button', async () => {
-      await testSubjects.click('exitFullScreenModeButton');
+      await PageObjects.maps.enterFullScreen();
       await a11y.testAppSnapshot();
     });
 

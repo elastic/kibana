@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
 import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { useRiskDonutChartData } from './use_risk_donut_chart_data';
@@ -22,8 +21,10 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 const DONUT_HEIGHT = 120;
 
-const fillColor: FillColor = (d: ShapeTreeNode) => {
-  return RISK_SEVERITY_COLOUR[d.dataName as RiskSeverity] ?? emptyDonutColor;
+const fillColor: FillColor = (dataName) => {
+  return Object.hasOwn(RISK_SEVERITY_COLOUR, dataName)
+    ? RISK_SEVERITY_COLOUR[dataName as RiskSeverity]
+    : emptyDonutColor;
 };
 
 const DonutContainer = styled(EuiFlexItem)`

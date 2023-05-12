@@ -789,7 +789,7 @@
         "signature": [
           "\"savedObjects:listingLimit\""
         ],
-        "path": "src/plugins/saved_objects_finder/common/index.ts",
+        "path": "packages/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -804,7 +804,7 @@
         "signature": [
           "\"savedObjects:perPage\""
         ],
-        "path": "src/plugins/saved_objects_finder/common/index.ts",
+        "path": "packages/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -7,13 +7,13 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import type { PropsWithChildren, ReactElement, RefObject } from 'react';
+import { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { LensEmbeddableInput, LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
@@ -26,6 +26,7 @@ import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramInput$,
 } from '../types';
+import { useLensSuggestions } from './hooks/use_lens_suggestions';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   /**
@@ -49,9 +50,25 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   filters?: Filter[];
   /**
+   * The current Lens suggestion
+   */
+  currentSuggestion?: Suggestion;
+  /**
+   * Flag that indicates that a text based language is used
+   */
+  isPlainRecord?: boolean;
+  /**
    * The current time range
    */
   timeRange?: TimeRange;
+  /**
+   * The relative time range, used when timeRange is an absolute range (e.g. for edit visualization button)
+   */
+  relativeTimeRange?: TimeRange;
+  /**
+   * The current columns
+   */
+  columns?: string[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
    */
@@ -97,9 +114,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   input$?: UnifiedHistogramInput$;
   /**
-   * Callback to get the relative time range, useful when passing an absolute time range (e.g. for edit visualization button)
+   * The Lens suggestions API
    */
-  getRelativeTimeRange?: () => TimeRange;
+  lensSuggestionsApi: LensSuggestionsApi;
   /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
@@ -116,6 +133,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Callback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField
    */
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  /**
+   * Callback to update the suggested chart
+   */
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   /**
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
    * and {@link UnifiedHistogramHitsContext.total} to result
@@ -141,10 +162,14 @@ export const UnifiedHistogramLayout = ({
   dataView,
   query,
   filters,
+  currentSuggestion: originalSuggestion,
+  isPlainRecord,
   timeRange,
+  relativeTimeRange,
+  columns,
   request,
   hits,
-  chart,
+  chart: originalChart,
   breakdown,
   resizeRef,
   topPanelHeight,
@@ -152,18 +177,31 @@ export const UnifiedHistogramLayout = ({
   disableAutoFetching,
   disableTriggers,
   disabledActions,
+  lensSuggestionsApi,
   input$,
-  getRelativeTimeRange,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
+  onSuggestionChange,
   onTotalHitsChange,
   onChartLoad,
   onFilter,
   onBrushEnd,
   children,
 }: UnifiedHistogramLayoutProps) => {
+  const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
+    dataView,
+    query,
+    originalSuggestion,
+    isPlainRecord,
+    columns,
+    lensSuggestionsApi,
+    onSuggestionChange,
+  });
+
+  const chart = suggestionUnsupported ? undefined : originalChart;
+
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
@@ -212,8 +250,12 @@ export const UnifiedHistogramLayout = ({
           query={query}
           filters={filters}
           timeRange={timeRange}
+          relativeTimeRange={relativeTimeRange}
           request={request}
           hits={hits}
+          currentSuggestion={currentSuggestion}
+          allSuggestions={allSuggestions}
+          isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
@@ -222,11 +264,11 @@ export const UnifiedHistogramLayout = ({
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
-          getRelativeTimeRange={getRelativeTimeRange}
           onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
+          onSuggestionChange={onSuggestionChange}
           onTotalHitsChange={onTotalHitsChange}
           onChartLoad={onChartLoad}
           onFilter={onFilter}

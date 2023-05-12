@@ -466,7 +466,7 @@ describe('DocumentMigrator', () => {
       });
     });
 
-    it('allows changing type', () => {
+    it('does not allow changing type', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry(
@@ -485,20 +485,17 @@ describe('DocumentMigrator', () => {
         ),
       });
       migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'smelly',
-        type: 'dog',
-        attributes: { name: 'Callie' },
-        typeMigrationVersion: '',
-        coreMigrationVersion: '8.8.0',
-      });
-      expect(actual).toEqual({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Kitty Callie' },
-        coreMigrationVersion: '8.8.0',
-        typeMigrationVersion: '1.0.0',
-      });
+      expect(() =>
+        migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: { name: 'Callie' },
+          typeMigrationVersion: '',
+          coreMigrationVersion: '8.8.0',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Changing a document's type during a migration is not supported."`
+      );
     });
 
     it('disallows updating a typeMigrationVersion prop to a lower version', () => {
@@ -804,6 +801,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
             },
           ]);
         });
@@ -819,6 +817,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
               namespace: 'foo-namespace',
             },
           ]);
@@ -852,6 +851,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
+              managed: false,
             },
           ]);
         });
@@ -868,6 +868,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
               coreMigrationVersion: '8.8.0',
               namespace: 'foo-namespace',
+              managed: false,
             },
           ]);
         });
@@ -965,6 +966,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
               namespaces: ['default'],
             },
           ]);
@@ -995,6 +997,7 @@ describe('DocumentMigrator', () => {
               typeMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'cute',
+              managed: false,
             },
             {
               id: 'foo-namespace:dog:cute',
@@ -1050,6 +1053,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
+              managed: false,
             },
           ]);
         });
@@ -1067,6 +1071,7 @@ describe('DocumentMigrator', () => {
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
               namespace: 'foo-namespace',
+              managed: false,
             },
           ]);
         });
@@ -1177,6 +1182,7 @@ describe('DocumentMigrator', () => {
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
               namespaces: ['default'],
+              managed: false,
             },
           ]);
         });
@@ -1206,6 +1212,7 @@ describe('DocumentMigrator', () => {
               typeMigrationVersion: '2.0.0',
               namespaces: ['foo-namespace'],
               originId: 'pretty',
+              managed: false,
             },
             {
               id: 'foo-namespace:dog:pretty',

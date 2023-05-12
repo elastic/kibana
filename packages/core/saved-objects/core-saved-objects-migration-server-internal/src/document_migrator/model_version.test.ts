@@ -13,6 +13,7 @@ import type {
   SavedObjectModelTransformationFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { Transform, TransformType } from './types';
 import { getModelVersionTransforms, convertModelVersionTransformFn } from './model_version';
 
@@ -37,27 +38,18 @@ describe('getModelVersionTransforms', () => {
     log = loggerMock.create();
   });
 
-  it('generate transforms for model version having a transformation', () => {
+  it('generate transforms for all model versions', () => {
     const typeDefinition = createType({
       name: 'foo',
       modelVersions: {
         '1': {
-          modelChange: {
-            type: 'expansion',
-            transformation: { up: jest.fn(), down: jest.fn() },
-          },
+          changes: [{ type: 'data_backfill', transform: jest.fn() }],
         },
         '2': {
-          modelChange: {
-            type: 'expansion',
-            addedMappings: { foo: { type: 'keyword' } },
-          },
+          changes: [{ type: 'mappings_deprecation', deprecatedMappings: [] }],
         },
         '3': {
-          modelChange: {
-            type: 'expansion',
-            transformation: { up: jest.fn(), down: jest.fn() },
-          },
+          changes: [{ type: 'mappings_addition', addedMappings: {} }],
         },
       },
     });
@@ -65,8 +57,9 @@ describe('getModelVersionTransforms', () => {
     const transforms = getModelVersionTransforms({ log, typeDefinition });
 
     expect(transforms).toEqual([
-      expectTransform(TransformType.Migrate, '10.1.0'),
-      expectTransform(TransformType.Migrate, '10.3.0'),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(1)),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(2)),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(3)),
     ]);
   });
 
@@ -75,22 +68,13 @@ describe('getModelVersionTransforms', () => {
       name: 'foo',
       modelVersions: () => ({
         '1': {
-          modelChange: {
-            type: 'expansion',
-            transformation: { up: jest.fn(), down: jest.fn() },
-          },
+          changes: [{ type: 'data_backfill', transform: jest.fn() }],
         },
         '2': {
-          modelChange: {
-            type: 'expansion',
-            addedMappings: { foo: { type: 'keyword' } },
-          },
+          changes: [{ type: 'data_backfill', transform: jest.fn() }],
         },
         '3': {
-          modelChange: {
-            type: 'expansion',
-            transformation: { up: jest.fn(), down: jest.fn() },
-          },
+          changes: [{ type: 'data_backfill', transform: jest.fn() }],
         },
       }),
     });
@@ -98,8 +82,9 @@ describe('getModelVersionTransforms', () => {
     const transforms = getModelVersionTransforms({ log, typeDefinition });
 
     expect(transforms).toEqual([
-      expectTransform(TransformType.Migrate, '10.1.0'),
-      expectTransform(TransformType.Migrate, '10.3.0'),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(1)),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(2)),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(3)),
     ]);
   });
 });
@@ -123,65 +108,103 @@ describe('convertModelVersionTransformFn', () => {
     }));
   };
 
-  it('generates a transform function calling the model transform', () => {
-    const upTransform = createModelTransformFn();
-    const downTransform = createModelTransformFn();
+  describe('up transformation', () => {
+    it('generates a transform function calling the model transform', () => {
+      const upTransform = createModelTransformFn();
 
-    const definition: SavedObjectsModelVersion = {
-      modelChange: {
-        type: 'expansion',
-        transformation: { up: upTransform, down: downTransform },
-      },
-    };
+      const definition: SavedObjectsModelVersion = {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: upTransform,
+          },
+        ],
+      };
 
-    const transform = convertModelVersionTransformFn({
-      log,
-      modelVersion: 1,
-      virtualVersion: '10.1.0',
-      definition,
+      const transform = convertModelVersionTransformFn({
+        log,
+        modelVersion: 1,
+        virtualVersion: '10.1.0',
+        definition,
+      });
+
+      expect(upTransform).not.toHaveBeenCalled();
+
+      const doc = createDoc();
+      const context = { log, modelVersion: 1 };
+
+      transform(doc);
+
+      expect(upTransform).toHaveBeenCalledTimes(1);
+      expect(upTransform).toHaveBeenCalledWith(doc, context);
     });
 
-    expect(upTransform).not.toHaveBeenCalled();
-    expect(downTransform).not.toHaveBeenCalled();
+    it('generates a transform function calling all model transforms of the version', () => {
+      const upTransform1 = createModelTransformFn();
+      const upTransform2 = createModelTransformFn();
 
-    const doc = createDoc();
-    const context = { log, modelVersion: 1 };
+      const definition: SavedObjectsModelVersion = {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: upTransform1,
+          },
+          {
+            type: 'data_backfill',
+            transform: upTransform2,
+          },
+        ],
+      };
 
-    transform(doc);
+      const transform = convertModelVersionTransformFn({
+        log,
+        modelVersion: 1,
+        virtualVersion: '10.1.0',
+        definition,
+      });
 
-    expect(upTransform).toHaveBeenCalledTimes(1);
-    expect(downTransform).not.toHaveBeenCalled();
-    expect(upTransform).toHaveBeenCalledWith(doc, context);
-  });
+      const doc = createDoc();
+      const context = { log, modelVersion: 1 };
 
-  it('returns the document from the model transform', () => {
-    const upTransform = createModelTransformFn();
+      transform(doc);
 
-    const resultDoc = createDoc();
-    upTransform.mockImplementation((doc) => {
-      return { document: resultDoc };
+      expect(upTransform1).toHaveBeenCalledTimes(1);
+      expect(upTransform1).toHaveBeenCalledWith(doc, context);
+      expect(upTransform2).toHaveBeenCalledTimes(1);
+      expect(upTransform2).toHaveBeenCalledWith(doc, context);
     });
 
-    const definition: SavedObjectsModelVersion = {
-      modelChange: {
-        type: 'expansion',
-        transformation: { up: upTransform, down: jest.fn() },
-      },
-    };
+    it('returns the document from the model transform', () => {
+      const upTransform = createModelTransformFn();
 
-    const transform = convertModelVersionTransformFn({
-      log,
-      modelVersion: 1,
-      virtualVersion: '10.1.0',
-      definition,
-    });
+      const resultDoc = createDoc();
+      upTransform.mockImplementation((doc) => {
+        return { document: resultDoc };
+      });
 
-    const doc = createDoc();
+      const definition: SavedObjectsModelVersion = {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: upTransform,
+          },
+        ],
+      };
 
-    const result = transform(doc);
-    expect(result).toEqual({
-      transformedDoc: resultDoc,
-      additionalDocs: [],
+      const transform = convertModelVersionTransformFn({
+        log,
+        modelVersion: 1,
+        virtualVersion: '10.1.0',
+        definition,
+      });
+
+      const doc = createDoc();
+
+      const result = transform(doc);
+      expect(result).toEqual({
+        transformedDoc: resultDoc,
+        additionalDocs: [],
+      });
     });
   });
 });

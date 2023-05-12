@@ -15,7 +15,7 @@ import {
   CaseConnector,
   ConnectorTypes,
   CasePostRequest,
-  CaseResponse,
+  Case,
   GetCaseConnectorsResponse,
   getCaseConnectorsUrl,
 } from '@kbn/cases-plugin/common/api';
@@ -219,7 +219,7 @@ export const createCaseWithConnector = async ({
   createCaseReq?: CasePostRequest;
   headers?: Record<string, unknown>;
 }): Promise<{
-  postedCase: CaseResponse;
+  postedCase: Case;
   connector: CreateConnectorResponse;
   configuration: CasesConfigureResponse;
 }> => {

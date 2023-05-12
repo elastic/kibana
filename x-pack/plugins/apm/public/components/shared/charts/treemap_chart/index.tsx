@@ -47,7 +47,7 @@ export function TreemapChart({
             {
               groupByRollup: (d: Datum) => d.label,
               shape: {
-                fillColor: ({ sortIndex }: { sortIndex: number }) =>
+                fillColor: (dataName, sortIndex) =>
                   colorPalette[Math.floor(sortIndex % 10)],
               },
               fillLabel: {

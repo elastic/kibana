@@ -26,6 +26,7 @@ interface FilterEditorWrapperProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   closePopoverOnAdd?: () => void;
   closePopoverOnCancel?: () => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
@@ -37,6 +38,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   indexPatterns,
   filters,
   timeRangeForSuggestionsOverride,
+  filtersForSuggestions,
   closePopoverOnAdd,
   closePopoverOnCancel,
   onFiltersUpdated,
@@ -111,6 +113,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
           onLocalFilterUpdate={onLocalFilterUpdate}
           onLocalFilterCreate={onLocalFilterCreate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={filtersForSuggestions}
         />
       )}
     </div>

@@ -50,8 +50,7 @@
               "prop",
               "prop",
               "prop",
-              "prop",
-              "memberof"
+              "prop"
             ],
             "label": "Constructor",
             "description": [
@@ -69,7 +68,7 @@
                 "id": "def-common.DocumentMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "documentMigratorOptions",
+                "label": "options",
                 "description": [],
                 "signature": [
                   "DocumentMigratorOptions"
@@ -86,14 +85,10 @@
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-common.DocumentMigrator.migrationVersion",
             "type": "Object",
-            "tags": [
-              "readonly",
-              "type",
-              "memberof"
-            ],
+            "tags": [],
             "label": "migrationVersion",
             "description": [
-              "\nGets the latest version of each migrate-able property.\n"
+              "\nGets the latest version of each migrate-able property."
             ],
             "signature": [
               {
@@ -112,12 +107,10 @@
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-common.DocumentMigrator.prepareMigrations",
             "type": "Function",
-            "tags": [
-              "memberof"
-            ],
+            "tags": [],
             "label": "prepareMigrations",
             "description": [
-              "\nPrepares active migrations and document transformer function.\n"
+              "\nPrepares active migrations and document transformer function."
             ],
             "signature": [
               "() => void"
@@ -132,12 +125,10 @@
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-common.DocumentMigrator.migrate",
             "type": "Function",
-            "tags": [
-              "memberof"
-            ],
+            "tags": [],
             "label": "migrate",
             "description": [
-              "\nMigrates a document to the latest version.\n"
+              "\nMigrates a document to the latest version."
             ],
             "signature": [
               "(doc: ",
@@ -191,12 +182,10 @@
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-common.DocumentMigrator.migrateAndConvert",
             "type": "Function",
-            "tags": [
-              "memberof"
-            ],
+            "tags": [],
             "label": "migrateAndConvert",
             "description": [
-              "\nMigrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may\nhave been created during the transformation process.\n"
+              "\nMigrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may\nhave been created during the transformation process."
             ],
             "signature": [
               "(doc: ",
@@ -242,6 +231,85 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.DocumentMigrator.transformDown",
+            "type": "Function",
+            "tags": [],
+            "label": "transformDown",
+            "description": [],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>, options: { targetTypeVersion: string; }) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-common.DocumentMigrator.transformDown.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-common.DocumentMigrator.transformDown.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                    "id": "def-common.DocumentMigrator.transformDown.$2.targetTypeVersion",
+                    "type": "string",
+                    "tags": [],
+                    "label": "targetTypeVersion",
+                    "description": [],
+                    "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -305,7 +373,7 @@
                 "id": "def-common.KibanaMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n  }",
+                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    defaultIndexTypesMap = DEFAULT_INDEX_TYPES_MAP,\n    waitForMigrationCompletion,\n    nodeRoles,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -921,7 +989,7 @@
             "section": "def-common.SavedObjectsRawDoc",
             "text": "SavedObjectsRawDoc"
           },
-          ") => ",
+          ", typeIndexMap?: Record<string, string>) => ",
           "BulkIndexOperationTuple"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
@@ -943,6 +1011,21 @@
                 "section": "def-common.SavedObjectsRawDoc",
                 "text": "SavedObjectsRawDoc"
               }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.createBulkIndexOperationTuple.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "typeIndexMap",
+            "description": [],
+            "signature": [
+              "Record<string, string>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
@@ -2307,9 +2390,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -2341,7 +2422,11 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -2369,27 +2454,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "CountResponse",
-              ">; }; exists: { (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -2567,7 +2632,27 @@
               "default",
               "; eql: ",
               "default",
-              "; existsSource: { (this: That, params: ",
+              "; exists: { (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
               " | ",
               "ExistsSourceRequest",
@@ -3263,8 +3348,6 @@
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
               "default",
-              "; security: ",
-              "default",
               "; shutdown: ",
               "default",
               "; slm: ",
@@ -3423,7 +3506,7 @@
             "label": "soMigrationsConfig",
             "description": [],
             "signature": [
-              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -3506,6 +3589,41 @@
             "tags": [],
             "label": "waitForMigrationCompletion",
             "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.KibanaMigratorOptions.defaultIndexTypesMap",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultIndexTypesMap",
+            "description": [],
+            "signature": [
+              "IndexTypesMap",
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.KibanaMigratorOptions.nodeRoles",
+            "type": "Object",
+            "tags": [],
+            "label": "nodeRoles",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-node-server",
+                "scope": "common",
+                "docId": "kibKbnCoreNodeServerPluginApi",
+                "section": "def-common.NodeRoles",
+                "text": "NodeRoles"
+              }
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false

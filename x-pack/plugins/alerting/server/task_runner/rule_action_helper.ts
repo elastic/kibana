@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import {
+  IntervalSchedule,
   parseDuration,
   RuleAction,
   RuleNotifyWhenTypeValues,
@@ -27,33 +28,27 @@ export const isActionOnInterval = (action?: RuleAction) => {
   );
 };
 
-export const isSummaryActionPerRuleRun = (action: RuleAction) => {
-  if (!action.frequency) {
-    return false;
-  }
-  return (
-    action.frequency.notifyWhen === RuleNotifyWhenTypeValues[1] &&
-    typeof action.frequency.throttle !== 'string'
-  );
+export const isSummaryActionOnInterval = (action: RuleAction) => {
+  return isActionOnInterval(action) && action.frequency?.summary;
 };
 
 export const isSummaryActionThrottled = ({
   action,
-  summaryActions,
+  throttledSummaryActions,
   logger,
 }: {
   action?: RuleAction;
-  summaryActions?: ThrottledActions;
+  throttledSummaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
   if (!isActionOnInterval(action)) {
     return false;
   }
-  if (!summaryActions) {
+  if (!throttledSummaryActions) {
     return false;
   }
-  const triggeredSummaryAction = summaryActions[action?.uuid!];
-  if (!triggeredSummaryAction) {
+  const throttledAction = throttledSummaryActions[action?.uuid!];
+  if (!throttledAction) {
     return false;
   }
   let throttleMills = 0;
@@ -63,7 +58,7 @@ export const isSummaryActionThrottled = ({
     logger.debug(`Action'${action?.actionTypeId}:${action?.id}', has an invalid throttle interval`);
   }
 
-  const throttled = triggeredSummaryAction.date.getTime() + throttleMills > Date.now();
+  const throttled = throttledAction.date.getTime() + throttleMills > Date.now();
 
   if (throttled) {
     logger.debug(
@@ -97,4 +92,33 @@ export const getSummaryActionsFromTaskState = ({
       return newObj;
     }
   }, {});
+};
+
+export const getSummaryActionTimeBounds = (
+  action: RuleAction,
+  ruleSchedule: IntervalSchedule,
+  previousStartedAt: Date | null
+): { start?: number; end?: number } => {
+  if (!isSummaryAction(action)) {
+    return { start: undefined, end: undefined };
+  }
+  let startDate: Date;
+  const now = Date.now();
+
+  if (isActionOnInterval(action)) {
+    // If action is throttled, set time bounds using throttle interval
+    const throttleMills = parseDuration(action.frequency!.throttle!);
+    startDate = new Date(now - throttleMills);
+  } else {
+    // If action is not throttled, set time bounds to previousStartedAt - now
+    // If previousStartedAt is null, use the rule schedule interval
+    if (previousStartedAt) {
+      startDate = previousStartedAt;
+    } else {
+      const scheduleMillis = parseDuration(ruleSchedule.interval);
+      startDate = new Date(now - scheduleMillis);
+    }
+  }
+
+  return { start: startDate.valueOf(), end: now.valueOf() };
 };

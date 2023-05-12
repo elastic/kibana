@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { CustomUrls } from '../../../../../../../../jobs_list/components/edit_job_flyout/tabs/custom_urls';
-import { UrlConfig } from '../../../../../../../../../../../common/types/custom_urls';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import { CustomUrls } from '../../../../../../../../../components/custom_urls/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
@@ -15,7 +15,7 @@ import { CombinedJob } from '../../../../../../../../../../../common/types/anoma
 export const CustomUrlsSelection: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
 
-  const setCustomUrls = (customUrls: UrlConfig[]) => {
+  const setCustomUrls = (customUrls: MlUrlConfig[]) => {
     jobCreator.customUrls = customUrls;
     jobCreatorUpdate();
   };

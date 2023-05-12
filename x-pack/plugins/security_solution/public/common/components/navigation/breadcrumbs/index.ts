@@ -19,6 +19,7 @@ import { getTrailingBreadcrumbs as getCSPBreadcrumbs } from '../../../../cloud_s
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../explore/users/pages/details/utils';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getAlertDetailBreadcrumbs } from '../../../../detections/pages/alert_details/utils/breadcrumbs';
+import { getTrailingBreadcrumbs as getDashboardBreadcrumbs } from '../../../../dashboards/pages/utils';
 import { SecurityPageName } from '../../../../app/types';
 import type { RouteSpyState } from '../../../utils/route/types';
 import { timelineActions } from '../../../../timelines/store/timeline';
@@ -134,6 +135,8 @@ const getTrailingBreadcrumbsForRoutes = (
       return getAlertDetailBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.cloudSecurityPostureBenchmarks:
       return getCSPBreadcrumbs(spyState, getSecuritySolutionUrl);
+    case SecurityPageName.dashboards:
+      return getDashboardBreadcrumbs(spyState);
   }
 
   return [];

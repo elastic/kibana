@@ -49,7 +49,7 @@ const MONITOR_DETAILS_STEP = (readOnly: boolean = false): Step => ({
 });
 
 const SCRIPT_RECORDER_BTNS = (
-  <EuiFlexGroup justifyContent="flexStart">
+  <EuiFlexGroup justifyContent="flexStart" wrap={true}>
     <EuiFlexItem grow={false}>
       <EuiButton
         data-test-subj="syntheticsLaunchSyntheticsRecorderButton"

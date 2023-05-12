@@ -12,7 +12,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console']);
   const a11y = getService('a11y');
 
-  describe('Dev tools console', () => {
+  // https://github.com/elastic/kibana/issues/148538
+  describe.skip('Dev tools console', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
     });

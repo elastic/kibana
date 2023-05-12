@@ -15,7 +15,7 @@ import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { CSV_REPORTING_ACTION } from '../../common/constants';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-common';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';

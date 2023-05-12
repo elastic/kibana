@@ -9,18 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { ES_SPATIAL_RELATIONS } from './constants';
 
-export function getAppTitle() {
-  return i18n.translate('xpack.maps.appTitle', {
-    defaultMessage: 'Maps',
-  });
-}
-
-export function getMapEmbeddableDisplayName() {
-  return i18n.translate('xpack.maps.embeddableDisplayName', {
-    defaultMessage: 'map',
-  });
-}
-
 export function getDataSourceLabel() {
   return i18n.translate('xpack.maps.source.dataSourceLabel', {
     defaultMessage: 'Data source',

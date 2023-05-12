@@ -87,7 +87,6 @@ export interface ILayer {
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
-  isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE;
@@ -377,11 +376,19 @@ export class AbstractLayer implements ILayer {
   }
 
   isLayerLoading(): boolean {
-    const areTilesLoading =
-      typeof this._descriptor.__areTilesLoaded !== 'undefined'
-        ? !this._descriptor.__areTilesLoaded
-        : false;
-    return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+    const hasOpenDataRequests = this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+
+    if (this._isTiled()) {
+      return (
+        hasOpenDataRequests ||
+        this._descriptor.__areTilesLoaded === undefined ||
+        !this._descriptor.__areTilesLoaded
+      );
+    }
+
+    return !this.getSourceDataRequest()
+      ? true // layer is loading until source data request has been created
+      : hasOpenDataRequests;
   }
 
   hasErrors(): boolean {
@@ -416,11 +423,6 @@ export class AbstractLayer implements ILayer {
 
   getLayerTypeIconName(): string {
     throw new Error('should implement Layer#getLayerTypeIconName');
-  }
-
-  isInitialDataLoadComplete(): boolean {
-    const sourceDataRequest = this.getSourceDataRequest();
-    return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
   async getBounds(
@@ -492,5 +494,9 @@ export class AbstractLayer implements ILayer {
 
   _getMetaFromTiles(): TileMetaFeature[] {
     return this._descriptor.__metaFromTiles || [];
+  }
+
+  _isTiled(): boolean {
+    throw new Error('Must implement AbstractLayer#_isTiled');
   }
 }

@@ -73,7 +73,7 @@ function toCriteria(params: FindSLOParams): Criteria {
 
 function toSort(params: FindSLOParams): Sort {
   return {
-    field: params.sortBy === 'indicatorType' ? SortField.IndicatorType : SortField.Name,
+    field: params.sortBy === 'indicatorType' ? SortField.IndicatorType : SortField.CreationTime,
     direction: params.sortDirection === 'desc' ? SortDirection.Desc : SortDirection.Asc,
   };
 }

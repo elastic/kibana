@@ -6,9 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
+import { getJourneyFailedSteps } from '../../legacy_uptime/lib/requests/get_journey_failed_steps';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import {
+  SyntheticsRestApiRouteFactory,
+  UMRestApiRouteFactory,
+} from '../../legacy_uptime/routes/types';
 import { getJourneyDetails } from '../../queries/get_journey_details';
 
 export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
@@ -54,9 +58,11 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
   },
 });
 
-export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createJourneyFailedStepsRoute: SyntheticsRestApiRouteFactory = (
+  libs: UMServerLibs
+) => ({
   method: 'GET',
-  path: API_URLS.JOURNEY_FAILED_STEPS,
+  path: SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
   validate: {
     query: schema.object({
       checkGroups: schema.arrayOf(schema.string()),
@@ -65,7 +71,7 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { checkGroups } = request.query;
     try {
-      const result = await libs.requests.getJourneyFailedSteps({
+      const result = await getJourneyFailedSteps({
         uptimeEsClient,
         checkGroups,
       });

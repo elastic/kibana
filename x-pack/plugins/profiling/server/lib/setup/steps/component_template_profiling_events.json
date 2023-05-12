@@ -59,9 +59,6 @@
       "host.ip": {
         "type": "ip"
       },
-      "host.ipstring": {
-        "type": "keyword"
-      },
       "host.name": {
         "type": "keyword"
       },

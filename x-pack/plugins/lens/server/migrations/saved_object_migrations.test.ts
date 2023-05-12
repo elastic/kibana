@@ -27,7 +27,7 @@ import {
   VisState850,
 } from './types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
-import { LegacyMetricState } from '../../common';
+import { LegacyMetricState } from '../../common/types';
 import { Filter } from '@kbn/es-query';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 

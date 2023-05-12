@@ -11,13 +11,11 @@ import {
   MlTrainedModelConfig,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-plugin/common/constants/trained_models';
+import { SUPPORTED_PYTORCH_TASKS, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 
 import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
 import {
-  BUILT_IN_MODEL_TAG as LOCAL_BUILT_IN_MODEL_TAG,
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
   getRemoveProcessorForInferenceType,
@@ -25,7 +23,6 @@ import {
   parseMlInferenceParametersFromPipeline,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
-  SUPPORTED_PYTORCH_TASKS as LOCAL_SUPPORTED_PYTORCH_TASKS,
 } from '.';
 
 const mockModel: MlTrainedModelConfig = {
@@ -65,10 +62,6 @@ describe('getMlModelTypesForModelConfig lib function', () => {
     const response = getMlModelTypesForModelConfig(builtInMockModel);
     expect(response.sort()).toEqual(expected.sort());
   });
-
-  it('local BUILT_IN_MODEL_TAG matches ml plugin', () => {
-    expect(LOCAL_BUILT_IN_MODEL_TAG).toEqual(BUILT_IN_MODEL_TAG);
-  });
 });
 
 describe('getRemoveProcessorForInferenceType lib function', () => {
@@ -104,12 +97,7 @@ describe('getRemoveProcessorForInferenceType lib function', () => {
 });
 
 describe('getSetProcessorForInferenceType lib function', () => {
-  const destinationField = 'dest';
-
-  it('local LOCAL_SUPPORTED_PYTORCH_TASKS matches ml plugin', () => {
-    expect(SUPPORTED_PYTORCH_TASKS).toEqual(LOCAL_SUPPORTED_PYTORCH_TASKS);
-  });
-
+  const targetField = 'dest';
   it('should return expected value for TEXT_CLASSIFICATION', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
 
@@ -117,12 +105,12 @@ describe('getSetProcessorForInferenceType lib function', () => {
       copy_from: 'ml.inference.dest.predicted_value',
       description:
         "Copy the predicted_value to 'dest' if the prediction_probability is greater than 0.5",
-      field: destinationField,
+      field: targetField,
       if: "ctx?.ml?.inference != null && ctx.ml.inference['dest'] != null && ctx.ml.inference['dest'].prediction_probability > 0.5",
       value: undefined,
     };
 
-    expect(getSetProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
+    expect(getSetProcessorForInferenceType(targetField, inferenceType)).toEqual(expected);
   });
 
   it('should return expected value for TEXT_EMBEDDING', () => {
@@ -131,18 +119,18 @@ describe('getSetProcessorForInferenceType lib function', () => {
     const expected: IngestSetProcessor = {
       copy_from: 'ml.inference.dest.predicted_value',
       description: "Copy the predicted_value to 'dest'",
-      field: destinationField,
+      field: targetField,
       if: "ctx?.ml?.inference != null && ctx.ml.inference['dest'] != null",
       value: undefined,
     };
 
-    expect(getSetProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
+    expect(getSetProcessorForInferenceType(targetField, inferenceType)).toEqual(expected);
   });
 
   it('should return undefined for unknown inferenceType', () => {
     const inferenceType = 'wrongInferenceType';
 
-    expect(getSetProcessorForInferenceType(destinationField, inferenceType)).toBeUndefined();
+    expect(getSetProcessorForInferenceType(targetField, inferenceType)).toBeUndefined();
   });
 });
 
@@ -152,7 +140,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
     processors: [
       {
         remove: {
-          field: 'ml.inference.my-destination-field',
+          field: 'ml.inference.my-target-field',
           ignore_missing: true,
         },
       },
@@ -177,7 +165,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
               },
             },
           ],
-          target_field: 'ml.inference.my-destination-field',
+          target_field: 'ml.inference.my-target-field',
         },
       },
       {
@@ -200,26 +188,24 @@ describe('generateMlInferencePipelineBody lib function', () => {
   it('should return something expected', () => {
     const actual: MlInferencePipeline = generateMlInferencePipelineBody({
       description: 'my-description',
-      destinationField: 'my-destination-field',
       model: mockModel,
       pipelineName: 'my-pipeline',
-      sourceField: 'my-source-field',
+      fieldMappings: [{ sourceField: 'my-source-field', targetField: 'my-target-field' }],
     });
 
     expect(actual).toEqual(expected);
   });
 
-  it('should return something expected 2', () => {
+  it('should return something expected with specific processors', () => {
     const mockTextClassificationModel: MlTrainedModelConfig = {
       ...mockModel,
       ...{ inference_config: { text_classification: {} } },
     };
     const actual: MlInferencePipeline = generateMlInferencePipelineBody({
       description: 'my-description',
-      destinationField: 'my-destination-field',
       model: mockTextClassificationModel,
       pipelineName: 'my-pipeline',
-      sourceField: 'my-source-field',
+      fieldMappings: [{ sourceField: 'my-source-field', targetField: 'my-target-field' }],
     });
 
     expect(actual).toEqual(
@@ -228,19 +214,145 @@ describe('generateMlInferencePipelineBody lib function', () => {
         processors: expect.arrayContaining([
           expect.objectContaining({
             remove: {
-              field: 'my-destination-field',
+              field: 'my-target-field',
               ignore_missing: true,
             },
           }),
           expect.objectContaining({
             set: {
-              copy_from: 'ml.inference.my-destination-field.predicted_value',
+              copy_from: 'ml.inference.my-target-field.predicted_value',
               description:
-                "Copy the predicted_value to 'my-destination-field' if the prediction_probability is greater than 0.5",
-              field: 'my-destination-field',
-              if: "ctx?.ml?.inference != null && ctx.ml.inference['my-destination-field'] != null && ctx.ml.inference['my-destination-field'].prediction_probability > 0.5",
+                "Copy the predicted_value to 'my-target-field' if the prediction_probability is greater than 0.5",
+              field: 'my-target-field',
+              if: "ctx?.ml?.inference != null && ctx.ml.inference['my-target-field'] != null && ctx.ml.inference['my-target-field'].prediction_probability > 0.5",
             },
           }),
+        ]),
+      })
+    );
+  });
+
+  it('should return something that safely removes redundant prefixes', () => {
+    const mockTextClassificationModel: MlTrainedModelConfig = {
+      ...mockModel,
+      ...{ inference_config: { text_classification: {} } },
+    };
+    const actual: MlInferencePipeline = generateMlInferencePipelineBody({
+      description: 'my-description',
+      model: mockTextClassificationModel,
+      pipelineName: 'my-pipeline',
+      fieldMappings: [
+        { sourceField: 'my-source-field_1', targetField: 'ml.inference.my-source-field_expanded' },
+        { sourceField: 'my-source-field_2', targetField: 'my-source-ml.inference-field_expanded' },
+        {
+          sourceField: 'my-source-field_3',
+          targetField: 'ml.inference.my-source-2-ml.inference-field_expanded',
+        },
+      ],
+    });
+
+    expect(actual).toEqual(
+      expect.objectContaining({
+        description: expect.any(String),
+        processors: expect.arrayContaining([
+          expect.objectContaining({
+            remove: {
+              field: 'ml.inference.my-source-field_expanded',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
+            remove: {
+              field: 'ml.inference.my-source-ml.inference-field_expanded',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
+            remove: {
+              field: 'ml.inference.my-source-2-ml.inference-field_expanded',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field_1': 'MODEL_INPUT_FIELD',
+              },
+              target_field: 'ml.inference.my-source-field_expanded',
+            }),
+          }),
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field_2': 'MODEL_INPUT_FIELD',
+              },
+              target_field: 'ml.inference.my-source-ml.inference-field_expanded',
+            }),
+          }),
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field_3': 'MODEL_INPUT_FIELD',
+              },
+              target_field: 'ml.inference.my-source-2-ml.inference-field_expanded',
+            }),
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('should return something expected with multiple fields', () => {
+    const actual: MlInferencePipeline = generateMlInferencePipelineBody({
+      description: 'my-description',
+      model: mockModel,
+      pipelineName: 'my-pipeline',
+      fieldMappings: [
+        { sourceField: 'my-source-field1', targetField: 'my-destination-field1' },
+        { sourceField: 'my-source-field2', targetField: 'my-destination-field2' },
+        { sourceField: 'my-source-field3', targetField: 'my-destination-field3' },
+      ],
+    });
+
+    expect(actual).toEqual(
+      expect.objectContaining({
+        processors: expect.arrayContaining([
+          {
+            remove: expect.objectContaining({
+              field: 'ml.inference.my-destination-field1',
+            }),
+          },
+          {
+            remove: expect.objectContaining({
+              field: 'ml.inference.my-destination-field2',
+            }),
+          },
+          {
+            remove: expect.objectContaining({
+              field: 'ml.inference.my-destination-field3',
+            }),
+          },
+          {
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field1': 'MODEL_INPUT_FIELD',
+              },
+            }),
+          },
+          {
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field2': 'MODEL_INPUT_FIELD',
+              },
+            }),
+          },
+          {
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field3': 'MODEL_INPUT_FIELD',
+              },
+            }),
+          },
         ]),
       })
     );

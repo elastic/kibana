@@ -127,10 +127,10 @@ export interface ActionType<
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
-  validate?: {
-    params?: ValidatorType<Params>;
-    config?: ValidatorType<Config>;
-    secrets?: ValidatorType<Secrets>;
+  validate: {
+    params: ValidatorType<Params>;
+    config: ValidatorType<Config>;
+    secrets: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
 

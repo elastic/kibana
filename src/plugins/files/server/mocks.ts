@@ -9,15 +9,18 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import * as stream from 'stream';
+import { clone } from 'lodash';
 import { File } from '../common';
-import { FileClient, FileServiceFactory, FileServiceStart } from '.';
+import { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
 
 export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => ({
   create: jest.fn(),
   delete: jest.fn(),
+  bulkDelete: jest.fn(),
   deleteShareObject: jest.fn(),
   find: jest.fn(),
   getById: jest.fn(),
+  bulkGetById: jest.fn(),
   getByToken: jest.fn(),
   getShareObject: jest.fn(),
   getUsageMetrics: jest.fn(),
@@ -54,7 +57,9 @@ export const createFileMock = (): DeeplyMockedKeys<File> => {
     share: jest.fn(),
     listShares: jest.fn(),
     unshare: jest.fn(),
-    toJSON: jest.fn(),
+    toJSON: jest.fn(() => {
+      return clone(fileMock.data);
+    }),
   };
 
   fileMock.update.mockResolvedValue(fileMock);
@@ -76,5 +81,11 @@ export const createFileClientMock = (): DeeplyMockedKeys<FileClient> => {
     share: jest.fn(),
     unshare: jest.fn(),
     listShares: jest.fn().mockResolvedValue({ shares: [] }),
+  };
+};
+
+export const createFilesSetupMock = (): DeeplyMockedKeys<FilesSetup> => {
+  return {
+    registerFileKind: jest.fn(),
   };
 };

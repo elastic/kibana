@@ -1,20 +1,16 @@
 {
   "description": "Security: Authentication - Looks for an unusually large spike in authentication failure events. This can be due to password spraying, user enumeration, or brute force activity and may be a precursor to account takeover or credentialed access.",
-  "groups": [
-    "security",
-    "authentication"
-  ],
+  "groups": ["security", "authentication"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high count of logon fails",
+        "detector_description": "Detects high count of logon fails.",
         "function": "high_non_zero_count",
         "detector_index": 0
       }
     ],
-    "influencers": [],
-    "model_prune_window": "30d"
+    "influencers": ["source.ip", "user.name", "host.name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -25,6 +21,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-auth",
-    "security_app_display_name": "Spike in Failed Logon Events"
+    "security_app_display_name": "Spike in Failed Logon Events",
+    "managed": true,
+    "job_revision": 4
   }
 }

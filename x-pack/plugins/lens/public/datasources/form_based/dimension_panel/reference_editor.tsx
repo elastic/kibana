@@ -15,7 +15,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DateRange } from '../../../../common';
+import type { DateRange } from '../../../../common/types';
 import type { OperationSupportMatrix } from './operation_support';
 import type { GenericIndexPatternColumn, OperationType } from '../form_based';
 import {
@@ -92,6 +92,7 @@ export interface ReferenceEditorProps {
   ) => void;
   onChooseField: (choice: FieldChoiceWithOperationType) => void;
   onDeleteColumn: () => void;
+  onResetIncomplete: () => void;
   onChooseFunction: (operationType: string, field?: IndexPatternField) => void;
 
   // Services
@@ -116,6 +117,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     functionLabel,
     onChooseField,
     onDeleteColumn,
+    onResetIncomplete,
     onChooseFunction,
     fieldLabel,
     operationDefinitionMap,
@@ -261,6 +263,10 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 }
 
                 const operationType = choices[0].value!;
+                // When it has an incomplete state, make sure to clear it up before updating
+                if (incompleteColumn) {
+                  onResetIncomplete();
+                }
                 if (column?.operationType === operationType) {
                   return;
                 }

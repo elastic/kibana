@@ -26,6 +26,11 @@ import { i18n } from '@kbn/i18n';
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 
+import {
+  getNumTransformAssets,
+  TransformInstallWithCurrentUserPermissionCallout,
+} from '../../../../../../../components/transform_install_as_current_user_callout';
+
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
@@ -227,9 +232,10 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
 
   const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
 
-  const numOfAssets = useMemo(
-    () =>
-      Object.entries(packageInfo.assets).reduce(
+  const { numOfAssets, numTransformAssets } = useMemo(
+    () => ({
+      numTransformAssets: getNumTransformAssets(packageInfo.assets),
+      numOfAssets: Object.entries(packageInfo.assets).reduce(
         (acc, [serviceName, serviceNameValue]) =>
           acc +
           Object.entries(serviceNameValue).reduce(
@@ -238,6 +244,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
           ),
         0
       ),
+    }),
     [packageInfo.assets]
   );
 
@@ -351,6 +358,15 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       </h4>
                     </EuiTitle>
                     <EuiSpacer size="s" />
+
+                    {numTransformAssets > 0 ? (
+                      <>
+                        <TransformInstallWithCurrentUserPermissionCallout
+                          count={numTransformAssets}
+                        />
+                        <EuiSpacer size="s" />
+                      </>
+                    ) : null}
                     <p>
                       <FormattedMessage
                         id="xpack.fleet.integrations.settings.packageInstallDescription"

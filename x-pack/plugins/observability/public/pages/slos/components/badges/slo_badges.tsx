@@ -6,66 +6,61 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiSkeletonRectangle } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { i18n } from '@kbn/i18n';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { useKibana } from '../../../../utils/kibana_react';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
+import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
-import { toAlertsPageQueryFilter } from '../../helpers/alerts_page_query_filter';
-import { paths } from '../../../../config/paths';
+import { SloRulesBadge } from './slo_rules_badge';
 import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
+import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 
 export interface Props {
-  slo: SLOWithSummaryResponse;
   activeAlerts?: ActiveAlerts;
+  isLoading: boolean;
+  rules: Array<Rule<SloRule>> | undefined;
+  slo: SLOWithSummaryResponse;
+  onClickRuleBadge: () => void;
 }
 
-export function SloBadges({ slo, activeAlerts }: Props) {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
-
-  const handleClick = () => {
-    if (activeAlerts) {
-      navigateToUrl(
-        `${basePath.prepend(paths.observability.alerts)}?_a=${toAlertsPageQueryFilter(
-          activeAlerts
-        )}`
-      );
-    }
-  };
-
+export function SloBadges({ activeAlerts, isLoading, rules, slo, onClickRuleBadge }: Props) {
   return (
     <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
-      <SloStatusBadge slo={slo} />
-      <EuiFlexItem grow={false}>
-        <SloIndicatorTypeBadge slo={slo} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SloTimeWindowBadge slo={slo} />
-      </EuiFlexItem>
-      {!!activeAlerts && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge
-            iconType="warning"
-            color="danger"
-            onClick={handleClick}
-            onClickAriaLabel={i18n.translate(
-              'xpack.observability.slo.slo.activeAlertsBadge.ariaLabel',
-              { defaultMessage: 'active alerts badge' }
-            )}
-            data-test-subj="o11ySlosPageSloActiveAlertsBadge"
-          >
-            {i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
-              defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
-              values: { count: activeAlerts.count },
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
+      {isLoading ? (
+        <>
+          <EuiSkeletonRectangle
+            isLoading
+            contentAriaLabel="Loading"
+            width="54.16px"
+            height="20px"
+            borderRadius="s"
+          />
+          <EuiSkeletonRectangle
+            isLoading
+            contentAriaLabel="Loading"
+            width="54.16px"
+            height="20px"
+            borderRadius="s"
+          />
+          <EuiSkeletonRectangle
+            isLoading
+            contentAriaLabel="Loading"
+            width="54.16px"
+            height="20px"
+            borderRadius="s"
+          />
+        </>
+      ) : (
+        <>
+          <SloStatusBadge slo={slo} />
+          <SloIndicatorTypeBadge slo={slo} />
+          <SloTimeWindowBadge slo={slo} />
+          <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
+          <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />
+        </>
       )}
     </EuiFlexGroup>
   );

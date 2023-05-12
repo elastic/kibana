@@ -5,20 +5,29 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
-import { EndpointAgentAndIsolationStatus } from '../../endpoint_agent_and_isolation_status';
+import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
+import type { Platform } from './platforms';
+import { PlatformIcon } from './platforms';
+
+const IconContainer = euiStyled.div`
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 interface HeaderEndpointInfoProps {
   endpointId: string;
@@ -32,23 +41,8 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
     refetchInterval: 10000,
   });
 
-  const pendingActionRequests = useMemo<
-    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingActions'>
-  >(() => {
-    const pendingActions = endpointPendingActions?.data?.[0].pending_actions;
-    return {
-      pendingActions: {
-        pendingIsolate: pendingActions?.isolate ?? 0,
-        pendingUnIsolate: pendingActions?.unisolate ?? 0,
-        pendingKillProcess: pendingActions?.['kill-process'] ?? 0,
-        pendingSuspendProcess: pendingActions?.['suspend-process'] ?? 0,
-        pendingRunningProcesses: pendingActions?.['running-processes'] ?? 0,
-      },
-    };
-  }, [endpointPendingActions?.data]);
-
   if (isFetching && endpointPendingActions === undefined) {
-    return <EuiLoadingContent lines={2} />;
+    return <EuiSkeletonText lines={2} />;
   }
 
   if (!endpointDetails) {
@@ -56,40 +50,50 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false} className="eui-textTruncate">
-            <EuiToolTip
-              content={endpointDetails.metadata.host.name}
-              anchorClassName="eui-textTruncate"
-            >
-              <EuiText size="s" data-test-subj="responderHeaderEndpointName">
-                <h6 className="eui-textTruncate">{endpointDetails.metadata.host.name}</h6>
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EndpointAgentAndIsolationStatus
-              status={endpointDetails.host_status}
-              isIsolated={endpointDetails.metadata.Endpoint.state?.isolation}
-              {...pendingActionRequests}
-              data-test-subj="responderHeaderEndpointAgentIsolationStatus"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <IconContainer>
+          <PlatformIcon
+            data-test-subj="responderHeaderEndpointPlatformIcon"
+            platform={endpointDetails.metadata.host.os.name.toLowerCase() as Platform}
+          />
+        </IconContainer>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <EuiText color="subdued" size="s" data-test-subj="responderHeaderLastSeen">
-          <FormattedMessage
-            id="xpack.securitySolution.responder.header.lastSeen"
-            defaultMessage="Last seen {date}"
-            values={{
-              date: <FormattedRelative value={endpointDetails.metadata['@timestamp']} />,
-            }}
-          />
-        </EuiText>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem grow={false} className="eui-textTruncate">
+                <EuiToolTip
+                  content={endpointDetails.metadata.host.name}
+                  anchorClassName="eui-textTruncate"
+                >
+                  <EuiText size="s" data-test-subj="responderHeaderEndpointName">
+                    <h6 className="eui-textTruncate">{endpointDetails.metadata.host.name}</h6>
+                  </EuiText>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EndpointAgentStatus
+                  endpointHostInfo={endpointDetails}
+                  data-test-subj="responderHeaderEndpointAgentIsolationStatus"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="xs" />
+            <EuiText color="subdued" size="s" data-test-subj="responderHeaderLastSeen">
+              <FormattedMessage
+                id="xpack.securitySolution.responder.header.lastSeen"
+                defaultMessage="Last seen {date}"
+                values={{
+                  date: <FormattedRelative value={endpointDetails.metadata['@timestamp']} />,
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

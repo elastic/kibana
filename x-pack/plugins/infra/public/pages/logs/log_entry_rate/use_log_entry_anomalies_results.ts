@@ -7,6 +7,7 @@
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
 import useMount from 'react-use/lib/useMount';
+import { PersistedLogViewReference } from '../../../../common/log_views';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
@@ -137,7 +138,7 @@ const STATE_DEFAULTS: ReducerStateDefaults = {
 export const useLogEntryAnomaliesResults = ({
   endTime,
   startTime,
-  sourceId,
+  logViewReference,
   defaultSortOptions,
   defaultPaginationOptions,
   onGetLogEntryAnomaliesDatasetsError,
@@ -145,7 +146,7 @@ export const useLogEntryAnomaliesResults = ({
 }: {
   endTime: number;
   startTime: number;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   defaultSortOptions: AnomaliesSort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetLogEntryAnomaliesDatasetsError?: (error: Error) => void;
@@ -183,7 +184,7 @@ export const useLogEntryAnomaliesResults = ({
         } = reducerState;
         return await callGetLogEntryAnomaliesAPI(
           {
-            sourceId,
+            logViewReference,
             startTime: queryStartTime,
             endTime: queryEndTime,
             sort: sortOptions,
@@ -216,7 +217,7 @@ export const useLogEntryAnomaliesResults = ({
       },
     },
     [
-      sourceId,
+      logViewReference,
       dispatch,
       reducerState.timeRange,
       reducerState.sortOptions,
@@ -294,7 +295,7 @@ export const useLogEntryAnomaliesResults = ({
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         return await callGetLogEntryAnomaliesDatasetsAPI(
-          { sourceId, startTime, endTime },
+          { logViewReference, startTime, endTime },
           services.http.fetch
         );
       },
@@ -311,7 +312,7 @@ export const useLogEntryAnomaliesResults = ({
         }
       },
     },
-    [endTime, sourceId, startTime]
+    [endTime, logViewReference, startTime]
   );
 
   const isLoadingDatasets = useMemo(

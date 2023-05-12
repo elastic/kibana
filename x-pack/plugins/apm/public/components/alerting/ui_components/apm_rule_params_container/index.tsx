@@ -24,6 +24,7 @@ interface Props {
   setRuleProperty: (key: string, value: any) => void;
   defaultParams: Record<string, any>;
   fields: React.ReactNode[];
+  groupAlertsBy?: React.ReactNode;
   chartPreview?: React.ReactNode;
   minimumWindowSize?: MinimumWindowSize;
 }
@@ -31,6 +32,7 @@ interface Props {
 export function ApmRuleParamsContainer(props: Props) {
   const {
     fields,
+    groupAlertsBy,
     setRuleParams,
     defaultParams,
     chartPreview,
@@ -72,6 +74,7 @@ export function ApmRuleParamsContainer(props: Props) {
 
       {chartPreview}
       <EuiSpacer size="m" />
+      {groupAlertsBy}
     </>
   );
 }

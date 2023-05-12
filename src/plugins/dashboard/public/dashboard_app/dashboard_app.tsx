@@ -8,13 +8,13 @@
 
 import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
-import { css } from '@emotion/react';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -29,14 +29,14 @@ import {
   removeSearchSessionIdFromURL,
   createSessionRestorationDataProvider,
 } from './url/search_sessions_integration';
+import { DashboardAPI, DashboardRenderer } from '..';
 import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
-import type { DashboardContainer } from '../dashboard_container';
+import { AwaitingDashboardAPI } from '../dashboard_container';
 import { type DashboardEmbedSettings, DashboardRedirect } from './types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
-import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 
@@ -47,6 +47,16 @@ export interface DashboardAppProps {
   embedSettings?: DashboardEmbedSettings;
 }
 
+export const DashboardAPIContext = createContext<AwaitingDashboardAPI>(null);
+
+export const useDashboardAPI = (): DashboardAPI => {
+  const api = useContext<AwaitingDashboardAPI>(DashboardAPIContext);
+  if (api == null) {
+    throw new Error('useDashboardAPI must be used inside DashboardAPIContext');
+  }
+  return api!;
+};
+
 export function DashboardApp({
   savedDashboardId,
   embedSettings,
@@ -54,19 +64,11 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
-  /**
-   * This state keeps track of the height of the top navigation bar so that padding at the
-   * top of the viewport can be adjusted dynamically.
-   */
-  const [topNavHeight, setTopNavHeight] = useState(0);
 
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
-
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer | undefined>(
-    undefined
-  );
+  const [dashboardAPI, setDashboardAPI] = useState<AwaitingDashboardAPI>(null);
 
   /**
    * Unpack & set up dashboard services
@@ -78,7 +80,9 @@ export function DashboardApp({
     notifications: { toasts },
     settings: { uiSettings },
     data: { search },
+    customBranding,
   } = pluginServices.getServices();
+  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
 
   const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
     DASHBOARD_APP_ID,
@@ -146,7 +150,7 @@ export function DashboardApp({
       },
 
       // Override all state with URL + Locator input
-      overrideInput: {
+      initialInput: {
         // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
         ...initialUrlState,
         ...stateFromLocator,
@@ -170,56 +174,38 @@ export function DashboardApp({
   ]);
 
   /**
-   * Get the redux wrapper from the dashboard container. This is used to wrap the top nav so it can interact with the
-   * dashboard's redux state.
-   */
-  const DashboardReduxWrapper = useMemo(
-    () => dashboardContainer?.getReduxEmbeddableTools().Wrapper,
-    [dashboardContainer]
-  );
-
-  /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
-    if (!dashboardContainer) return;
+    if (!dashboardAPI) return;
     const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
       kbnUrlStateStorage,
-      dashboardContainer,
+      dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardContainer, kbnUrlStateStorage]);
+  }, [dashboardAPI, kbnUrlStateStorage]);
 
   return (
-    <div className={'dshAppWrapper'}>
+    <div className="dshAppWrapper">
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
         <>
-          {DashboardReduxWrapper && (
-            <DashboardReduxWrapper>
-              <DashboardTopNav
-                onHeightChange={setTopNavHeight}
-                redirectTo={redirectTo}
-                embedSettings={embedSettings}
-              />
-            </DashboardReduxWrapper>
+          {dashboardAPI && (
+            <DashboardAPIContext.Provider value={dashboardAPI}>
+              <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
+            </DashboardAPIContext.Provider>
           )}
 
           {getLegacyConflictWarning?.()}
-          <div
-            className="dashboardViewportWrapper"
-            css={css`
-              padding-top: ${topNavHeight}px;
-            `}
-          >
-            <DashboardContainerRenderer
-              savedObjectId={savedDashboardId}
-              getCreationOptions={getCreationOptions}
-              onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
-            />
-          </div>
+
+          <DashboardRenderer
+            ref={setDashboardAPI}
+            savedObjectId={savedDashboardId}
+            showPlainSpinner={showPlainSpinner}
+            getCreationOptions={getCreationOptions}
+          />
         </>
       )}
     </div>

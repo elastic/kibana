@@ -68,6 +68,7 @@ export const RULE_EXECUTION_LOG_COLUMN_IDS = [
   'es_search_duration',
   'schedule_delay',
   'timed_out',
+  'maintenance_window_ids',
 ] as const;
 
 export const RULE_EXECUTION_LOG_DURATION_COLUMNS = [

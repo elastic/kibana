@@ -18,3 +18,4 @@ export {
 
 export { ColorMode, LabelRotation, defaultCountLabel } from './components';
 export * from './styles';
+export type { AllowedSettingsOverrides } from './overrides';

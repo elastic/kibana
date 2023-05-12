@@ -23,6 +23,8 @@ export interface FilterGroupContextType {
   switchToEditMode: () => void;
   setHasPendingChanges: (value: boolean) => void;
   setShowFiltersChangedBanner: (value: boolean) => void;
+  saveChangesHandler: () => void;
+  discardChangesHandler: () => void;
 }
 
 export const FilterGroupContext = createContext<FilterGroupContextType | undefined>(undefined);

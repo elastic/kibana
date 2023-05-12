@@ -16,8 +16,6 @@ const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', 
   defaultMessage: 'Error fetching cases data',
 });
 
-const caseFields = ['title', 'description', 'status', 'totalComment', 'created_at', 'created_by'];
-
 const transformCases = (data: CasesBulkGetResponse): Map<string, Case> => {
   const casesMap = new Map();
 
@@ -28,20 +26,20 @@ const transformCases = (data: CasesBulkGetResponse): Map<string, Case> => {
   return casesMap;
 };
 
-export const useBulkGetCases = (caseIds: string[]) => {
+export const useBulkGetCases = (caseIds: string[], fetchCases: boolean) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
   return useQuery(
-    triggersActionsUiQueriesKeys.casesBulkGet(),
+    triggersActionsUiQueriesKeys.casesBulkGet(caseIds),
     () => {
       const abortCtrlRef = new AbortController();
-      return bulkGetCases(http, { ids: caseIds, fields: caseFields }, abortCtrlRef.signal);
+      return bulkGetCases(http, { ids: caseIds }, abortCtrlRef.signal);
     },
     {
-      enabled: caseIds.length > 0,
+      enabled: caseIds.length > 0 && fetchCases,
       select: transformCases,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {

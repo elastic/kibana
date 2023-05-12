@@ -28,6 +28,9 @@
       "force": true
     },
     "@kbn/rison",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/securitysolution-data-table"
   ]
 }

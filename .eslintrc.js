@@ -867,6 +867,7 @@ module.exports = {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -886,7 +887,11 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/apm/**/*.stories.*', 'x-pack/plugins/observability/**/*.stories.*'],
+      files: [
+        'x-pack/plugins/apm/**/*.stories.*',
+        'x-pack/plugins/observability/**/*.stories.*',
+        'x-pack/plugins/exploratory_view/**/*.stories.*',
+      ],
       rules: {
         'react/function-component-definition': [
           'off',
@@ -901,6 +906,7 @@ module.exports = {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/infra/**/*.{js,mjs,ts,tsx}',
@@ -974,7 +980,7 @@ module.exports = {
       // front end and common typescript and javascript files only
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
@@ -1001,14 +1007,14 @@ module.exports = {
       // This should be a very small set as most linter rules are useful for tests as well.
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       excludedFiles: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1021,7 +1027,7 @@ module.exports = {
       // typescript only for front and back end
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
@@ -1053,7 +1059,7 @@ module.exports = {
       // typescript and javascript for front and back end
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',

@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
-
 import type { Connectors } from './connector';
 
 export type CreateRulePropsRewrites<CreateRuleProps> = Partial<Exclude<CreateRuleProps, 'type'>>;
 
 export interface Actions {
-  throttle: RuleActionThrottle;
   connectors: Connectors[];
 }

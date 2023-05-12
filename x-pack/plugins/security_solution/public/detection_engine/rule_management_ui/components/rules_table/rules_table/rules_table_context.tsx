@@ -15,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -24,6 +25,7 @@ import type {
   FilterOptions,
   PaginationOptions,
   Rule,
+  RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -36,6 +38,22 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
+
+interface RulesSnoozeSettingsState {
+  /**
+   * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
+   */
+  data: RulesSnoozeSettingsMap;
+  /**
+   * Sets to true during the first data loading
+   */
+  isLoading: boolean;
+  /**
+   * Sets to true during data loading
+   */
+  isFetching: boolean;
+  isError: boolean;
+}
 
 export interface RulesTableState {
   /**
@@ -106,6 +124,10 @@ export interface RulesTableState {
    * Whether the state has its default value
    */
   isDefault: boolean;
+  /**
+   * Rules snooze settings for the current rules
+   */
+  rulesSnoozeSettings: RulesSnoozeSettingsState;
 }
 
 export type LoadingRuleAction =
@@ -274,9 +296,28 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   );
 
+  // Fetch rules snooze settings
+  const {
+    data: rulesSnoozeSettingsMap,
+    isLoading: isSnoozeSettingsLoading,
+    isFetching: isSnoozeSettingsFetching,
+    isError: isSnoozeSettingsFetchError,
+    refetch: refetchSnoozeSettings,
+  } = useFetchRulesSnoozeSettings(
+    rules.map((x) => x.id),
+    { enabled: rules.length > 0 }
+  );
+
+  const refetchRulesAndSnoozeSettings = useCallback(async () => {
+    const response = await refetch();
+    await refetchSnoozeSettings();
+
+    return response;
+  }, [refetch, refetchSnoozeSettings]);
+
   const actions = useMemo(
     () => ({
-      reFetchRules: refetch,
+      reFetchRules: refetchRulesAndSnoozeSettings,
       setFilterOptions: handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -290,7 +331,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       clearFilters,
     }),
     [
-      refetch,
+      refetchRulesAndSnoozeSettings,
       handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -309,6 +350,12 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     () => ({
       state: {
         rules,
+        rulesSnoozeSettings: {
+          data: rulesSnoozeSettingsMap ?? {},
+          isLoading: isSnoozeSettingsLoading,
+          isFetching: isSnoozeSettingsFetching,
+          isError: isSnoozeSettingsFetchError,
+        },
         pagination: {
           page,
           perPage,
@@ -338,6 +385,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }),
     [
       rules,
+      rulesSnoozeSettingsMap,
+      isSnoozeSettingsLoading,
+      isSnoozeSettingsFetching,
+      isSnoozeSettingsFetchError,
       page,
       perPage,
       total,

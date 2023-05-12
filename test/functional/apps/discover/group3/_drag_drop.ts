@@ -1,0 +1,71 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
+
+  describe('discover drag and drop', function describeIndexTests() {
+    before(async function () {
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+    });
+
+    beforeEach(async () => {
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+      });
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+    });
+
+    afterEach(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.replace({});
+      await PageObjects.discover.cleanSidebarLocalStorage();
+    });
+
+    describe('should add fields as columns via drag and drop', function () {
+      it('should support dragging and dropping a field onto the grid', async function () {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+          '@timestamp, Document'
+        );
+
+        await PageObjects.discover.dragFieldToTable('extension');
+
+        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+          '@timestamp, extension'
+        );
+
+        await PageObjects.discover.dragFieldWithKeyboardToTable('@message');
+
+        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+          '@timestamp, extension, @message'
+        );
+
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        expect(
+          (await PageObjects.discover.getSidebarSectionFieldNames('selected')).join(', ')
+        ).to.be('extension, @message');
+      });
+    });
+  });
+}

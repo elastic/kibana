@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { HealthStatus, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 export interface EnterpriseSearchEnginesResponse {
   count: number;
-  params: { q?: string; from: number; size: number };
+  params: { from: number; q?: string; size: number };
   results: EnterpriseSearchEngine[];
 }
 
@@ -21,25 +21,20 @@ export interface EnterpriseSearchEngine {
 
 export interface EnterpriseSearchEngineDetails {
   indices: EnterpriseSearchEngineIndex[];
-  updated_at_millis: number;
   name: string;
+  updated_at_millis: number;
 }
 
 export interface EnterpriseSearchEngineIndex {
-  count: number;
+  count: number | null;
   health: HealthStatus | 'unknown';
   name: string;
 }
 
 export interface EnterpriseSearchEngineFieldCapabilities {
-  field_capabilities: FieldCapsResponse;
-  fields?: SchemaField[];
+  fields: SchemaField[];
   name: string;
   updated_at_millis: number;
-}
-export interface EnterpriseSearchSchemaField {
-  field_name: string;
-  field_type: string[];
 }
 
 export interface EnterpriseSearchEngineUpsertResponse {
@@ -51,8 +46,10 @@ export interface SchemaFieldIndex {
 }
 
 export interface SchemaField {
-  fields: SchemaField[];
+  aggregatable: boolean;
   indices: SchemaFieldIndex[];
+  metadata_field?: boolean;
   name: string;
+  searchable: boolean;
   type: string;
 }

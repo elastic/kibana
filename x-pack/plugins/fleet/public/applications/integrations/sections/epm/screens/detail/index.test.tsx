@@ -18,6 +18,7 @@ import type {
   GetPackagePoliciesResponse,
   GetStatsResponse,
   GetSettingsResponse,
+  GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type {
   DetailViewPanelName,
@@ -39,13 +40,13 @@ import { ExperimentalFeaturesService } from '../../../../services';
 ExperimentalFeaturesService.init({});
 import { Detail } from '.';
 
-// FLAKY: https://github.com/elastic/kibana/issues/150607
-describe.skip('when on integration detail', () => {
+describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
+
   const render = async () => {
     await act(async () => {
       renderResult = testRenderer.render(
@@ -67,16 +68,15 @@ describe.skip('when on integration detail', () => {
   });
 
   describe('and the package is installed', () => {
-    beforeEach(async () => render());
+    beforeEach(async () => await render());
 
     it('should display agent policy usage count', async () => {
       await act(() => mockedApi.waitForApi());
-
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      await mockedApi.waitForApi();
+      await act(() => mockedApi.waitForApi());
       expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
     });
   });
@@ -85,6 +85,7 @@ describe.skip('when on integration detail', () => {
     const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
     unInstalledPackage.item.status = 'not_installed';
     unInstalledPackage.item.version = pkgVersion;
+
     mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
       if (query?.prerelease === false) {
         const gaPackage = { item: { ...unInstalledPackage.item } };
@@ -136,6 +137,16 @@ describe.skip('when on integration detail', () => {
         item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
       });
       await render();
+    });
+
+    it('should NOT display agent policy usage count', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    });
+
+    it('should NOT display the Policies tab', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
     it('should display version text and no callout if prerelease setting disabled', async () => {
@@ -324,6 +335,7 @@ interface EpmPackageDetailsResponseProvidersMock {
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
   appCheckPermissions: jest.MockedFunction<() => CheckPermissionsResponse>;
   getSettings: jest.MockedFunction<() => GetSettingsResponse>;
+  getVerificationKeyId: jest.MockedFunction<() => GetVerificationKeyIdResponse>;
 }
 
 const mockApiCalls = (
@@ -772,6 +784,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 0,
+        is_protected: false,
       },
       {
         id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
@@ -786,6 +799,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 100,
+        is_protected: false,
       },
     ],
     total: 2,
@@ -804,6 +818,8 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
   };
 
   const getSettingsResponse = { item: { prerelease_integrations_enabled: true } };
+
+  const getVerificationKeyIdResponse = { id: 'test-verification-key' };
 
   const mockedApiInterface: MockedApi<EpmPackageDetailsResponseProvidersMock> = {
     waitForApi() {
@@ -824,6 +840,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
       appCheckPermissions: jest.fn().mockReturnValue(appCheckPermissionsResponse),
       getSettings: jest.fn().mockReturnValue(getSettingsResponse),
+      getVerificationKeyId: jest.fn().mockReturnValue(getVerificationKeyIdResponse),
     },
   };
 
@@ -879,6 +896,9 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       }
       if (path === '/api/fleet/settings') {
         return mockedApiInterface.responseProvider.getSettings();
+      }
+      if (path === '/api/fleet/epm/verification_key_id') {
+        return mockedApiInterface.responseProvider.getVerificationKeyId();
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);

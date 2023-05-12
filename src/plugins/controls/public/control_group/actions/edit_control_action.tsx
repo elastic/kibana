@@ -19,7 +19,7 @@ import { DeleteControlAction } from './delete_control_action';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ACTION_EDIT_CONTROL, ControlGroupContainer } from '..';
 import { ControlEmbeddable, DataControlInput } from '../../types';
-import { setFlyoutRef } from '../embeddable/control_group_container';
+import { ControlGroupContainerContext, setFlyoutRef } from '../embeddable/control_group_container';
 import { isControlGroup } from '../embeddable/control_group_helpers';
 
 export interface EditControlActionContext {
@@ -91,11 +91,10 @@ export class EditControlAction implements Action<EditControlActionContext> {
       throw new IncompatibleActionError();
     }
     const controlGroup = embeddable.parent as ControlGroupContainer;
-    const ReduxWrapper = controlGroup.getReduxEmbeddableTools().Wrapper;
 
     const flyoutInstance = this.openFlyout(
       toMountPoint(
-        <ReduxWrapper>
+        <ControlGroupContainerContext.Provider value={controlGroup}>
           <EditControlFlyout
             embeddable={embeddable}
             removeControl={() => this.deleteControlAction.execute({ embeddable })}
@@ -104,7 +103,7 @@ export class EditControlAction implements Action<EditControlActionContext> {
               flyoutInstance.close();
             }}
           />
-        </ReduxWrapper>,
+        </ControlGroupContainerContext.Provider>,
 
         { theme$: this.theme$ }
       ),

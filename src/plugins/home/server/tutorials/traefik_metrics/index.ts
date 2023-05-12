@@ -46,6 +46,6 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['observability'],
   };
 }

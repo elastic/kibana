@@ -367,6 +367,10 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/feature.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
               },
@@ -1799,6 +1803,10 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/feature.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
               },
@@ -2547,29 +2555,6 @@
                 "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
               }
             ],
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.getFeaturesUICapabilities",
-            "type": "Function",
-            "tags": [],
-            "label": "getFeaturesUICapabilities",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3695,6 +3680,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/feature.ts"
               },
               {
                 "plugin": "fleet",

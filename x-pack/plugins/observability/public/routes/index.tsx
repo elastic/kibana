@@ -7,9 +7,9 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { DatePickerContextProvider } from '../context/date_picker_context';
-import { jsonRt } from './json_rt';
+import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
 import { AlertDetails } from '../pages/alert_details/alert_details';
 import { CasesPage } from '../pages/cases/cases';
@@ -17,9 +17,9 @@ import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
 import { SlosPage } from '../pages/slos/slos';
+import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
-import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { casesPath } from '../../common';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
@@ -35,9 +35,18 @@ export interface Params {
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
-function SimpleRedirect({ to }: { to: string }) {
+function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: string }) {
+  const {
+    application: { navigateToApp },
+  } = useKibana().services;
   const history = useHistory();
-  history.replace(to);
+  const { search, hash } = useLocation();
+
+  if (redirectToApp) {
+    navigateToApp(redirectToApp, { path: `/${search}${hash}`, replace: true });
+  } else if (to) {
+    history.replace(to);
+  }
   return null;
 }
 
@@ -83,18 +92,11 @@ export const routes = {
     },
     exact: true,
   },
-  '/exploratory-view/': {
+  '/exploratory-view': {
     handler: () => {
-      return <ObservabilityExploratoryView />;
+      return <SimpleRedirect to="/" redirectToApp="exploratory-view" />;
     },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
+    params: {},
     exact: true,
   },
   '/alerts/rules': {
@@ -128,6 +130,13 @@ export const routes = {
   '/slos/create': {
     handler: () => {
       return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/welcome': {
+    handler: () => {
+      return <SlosWelcomePage />;
     },
     params: {},
     exact: true,

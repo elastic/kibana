@@ -6,6 +6,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import { PersistedLogViewReference } from '../../../../common/log_views';
 
 import { LogEntryExample } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -16,14 +17,14 @@ export const useLogEntryExamples = ({
   dataset,
   endTime,
   exampleCount,
-  sourceId,
+  logViewReference,
   startTime,
   categoryId,
 }: {
   dataset: string;
   endTime: number;
   exampleCount: number;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   startTime: number;
   categoryId?: string;
 }) => {
@@ -36,7 +37,7 @@ export const useLogEntryExamples = ({
       createPromise: async () => {
         return await callGetLogEntryExamplesAPI(
           {
-            sourceId,
+            logViewReference,
             startTime,
             endTime,
             dataset,
@@ -50,7 +51,7 @@ export const useLogEntryExamples = ({
         setLogEntryExamples(examples);
       },
     },
-    [dataset, endTime, exampleCount, sourceId, startTime]
+    [dataset, endTime, exampleCount, logViewReference, startTime]
   );
 
   const isLoadingLogEntryExamples = useMemo(

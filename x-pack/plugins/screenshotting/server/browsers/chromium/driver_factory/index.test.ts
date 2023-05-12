@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import puppeteer from 'puppeteer';
+import * as puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
 import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';

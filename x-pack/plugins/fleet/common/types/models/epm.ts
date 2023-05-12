@@ -363,6 +363,8 @@ export interface RegistryElasticsearch {
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
   index_mode?: 'time_series';
+  dynamic_dataset?: boolean;
+  dynamic_namespace?: boolean;
 }
 
 export interface RegistryDataStreamProperties {
@@ -451,6 +453,7 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
   showLabels?: boolean;
@@ -471,7 +474,7 @@ export type ExperimentalIndexingFeature =
 
 export interface ExperimentalDataStreamFeature {
   data_stream: string;
-  features: Record<ExperimentalIndexingFeature, boolean>;
+  features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
 export interface Installation extends SavedObjectAttributes {
@@ -493,7 +496,7 @@ export interface Installation extends SavedObjectAttributes {
   // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
   experimental_data_stream_features?: Array<{
     data_stream: string;
-    features: Record<ExperimentalIndexingFeature, boolean>;
+    features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>;
 }
 
@@ -537,6 +540,7 @@ export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
 };
 export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
+  deferred?: boolean;
 };
 
 export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
@@ -577,7 +581,7 @@ export interface TemplateMapEntry {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
       }
     | {
-        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
       };
 }
 

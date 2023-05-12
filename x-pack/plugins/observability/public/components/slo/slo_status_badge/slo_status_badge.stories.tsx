@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import { EuiFlexGroup } from '@elastic/eui';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloStatusBadge as Component, SloStatusProps } from './slo_status_badge';
@@ -19,7 +20,9 @@ export default {
 };
 
 const Template: ComponentStory<typeof Component> = (props: SloStatusProps) => (
-  <Component {...props} />
+  <EuiFlexGroup>
+    <Component {...props} />
+  </EuiFlexGroup>
 );
 
 const defaultProps = {

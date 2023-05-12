@@ -6,12 +6,7 @@
  */
 
 import { takeLatest } from 'redux-saga/effects';
-import {
-  getMonitorList,
-  getMonitorListSuccess,
-  getMonitorListFailure,
-  getUpdatedMonitor,
-} from '../actions';
+import { getMonitorList, getMonitorListSuccess, getMonitorListFailure } from '../actions';
 import { fetchMonitorList } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
@@ -19,12 +14,5 @@ export function* fetchMonitorListEffect() {
   yield takeLatest(
     getMonitorList,
     fetchEffectFactory(fetchMonitorList, getMonitorListSuccess, getMonitorListFailure)
-  );
-}
-
-export function* fetchUpdatedMonitorEffect() {
-  yield takeLatest(
-    getUpdatedMonitor.get,
-    fetchEffectFactory(fetchMonitorList, getUpdatedMonitor.success, getUpdatedMonitor.fail)
   );
 }

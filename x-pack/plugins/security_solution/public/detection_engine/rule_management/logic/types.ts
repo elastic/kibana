@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 
+import type { RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   RiskScore,
@@ -27,6 +28,7 @@ import {
   type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
@@ -217,6 +219,24 @@ export interface FetchRulesProps {
   signal?: AbortSignal;
 }
 
+// Rule snooze settings map keyed by rule SO's id (not ruleId) and valued by rule snooze settings
+export type RulesSnoozeSettingsMap = Record<string, RuleSnoozeSettings>;
+
+interface RuleSnoozeSettingsResponse {
+  /**
+   * Rule's SO id
+   */
+  id: string;
+  mute_all: boolean;
+  snooze_schedule?: RuleSnooze;
+  active_snoozes?: string[];
+  is_snoozed_until?: string;
+}
+
+export interface RulesSnoozeSettingsBatchResponse {
+  data: RuleSnoozeSettingsResponse[];
+}
+
 export type SortingOptions = t.TypeOf<typeof SortingOptions>;
 export const SortingOptions = t.type({
   field: FindRulesSortField,
@@ -241,6 +261,11 @@ export interface FetchRulesResponse {
 
 export interface FetchRuleProps {
   id: string;
+  signal?: AbortSignal;
+}
+
+export interface FetchRuleSnoozingProps {
+  ids: string[];
   signal?: AbortSignal;
 }
 

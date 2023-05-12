@@ -31,6 +31,7 @@ import {
   caseViewProps,
   defaultGetCase,
   defaultGetCaseMetrics,
+  defaultInfiniteUseFindCaseUserActions,
   defaultUpdateCaseState,
   defaultUseFindCaseUserActions,
 } from './mocks';
@@ -39,6 +40,8 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
+import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
 
 const mockSetTitle = jest.fn();
 
@@ -46,6 +49,8 @@ jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_metrics');
 jest.mock('../../containers/use_find_case_user_actions');
+jest.mock('../../containers/use_infinite_find_case_user_actions');
+jest.mock('../../containers/use_get_case_user_actions_stats');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
@@ -80,6 +85,8 @@ const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
+const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
+const useGetCaseUserActionsStatsMock = useGetCaseUserActionsStats as jest.Mock;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
@@ -111,6 +118,12 @@ export const caseClosedProps: CaseViewPageProps = {
   caseData: basicCaseClosed,
 };
 
+const userActionsStats = {
+  total: 21,
+  totalComments: 9,
+  totalOtherActions: 11,
+};
+
 describe('CaseViewPage', () => {
   const updateCaseProperty = defaultUpdateCaseState.updateCaseProperty;
   const pushCaseToExternalService = jest.fn();
@@ -118,14 +131,15 @@ describe('CaseViewPage', () => {
   let appMockRenderer: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
   const caseUsers = getCaseUsersMockResponse();
-  const refetchFindCaseUserActions = jest.fn();
 
   beforeEach(() => {
-    mockGetCase();
     jest.clearAllMocks();
+    mockGetCase();
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useGetCaseConnectorsMock.mockReturnValue({
       isLoading: false,
@@ -175,7 +189,7 @@ describe('CaseViewPage', () => {
     expect(result.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
 
     expect(
-      within(result.getByTestId('description-action')).getByTestId('user-action-markdown')
+      within(result.getByTestId('description')).getByTestId('scrollable-markdown')
     ).toHaveTextContent(data.description);
 
     expect(result.getByTestId('case-view-status-action-button')).toHaveTextContent(
@@ -349,22 +363,16 @@ describe('CaseViewPage', () => {
     });
   });
 
-  it('should show loading content when loading user actions', async () => {
+  it('should show loading content when loading user actions stats', async () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
-    useFindCaseUserActionsMock.mockReturnValue({
-      data: undefined,
-      isError: false,
-      isLoading: true,
-      isFetching: true,
-      refetch: refetchFindCaseUserActions,
-    });
+    useGetCaseUserActionsStatsMock.mockReturnValue({ isLoading: true });
 
     const result = appMockRenderer.render(
       <CaseViewPage {...caseProps} useFetchAlertData={useFetchAlertData} />
     );
     await waitFor(() => {
       expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
-      expect(result.queryByTestId('user-actions')).not.toBeInTheDocument();
+      expect(result.queryByTestId('user-actions-list')).not.toBeInTheDocument();
     });
   });
 
@@ -374,7 +382,7 @@ describe('CaseViewPage', () => {
       <CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />
     );
 
-    userEvent.click(result.getByTestId('comment-action-show-alert-alert-action-id'));
+    userEvent.click(result.getAllByTestId('comment-action-show-alert-alert-action-id')[1]);
 
     await waitFor(() => {
       expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -387,7 +395,7 @@ describe('CaseViewPage', () => {
     await waitFor(() => {
       expect(
         result
-          .getByTestId('user-action-alert-comment-create-action-alert-action-id')
+          .getAllByTestId('user-action-alert-comment-create-action-alert-action-id')[1]
           .querySelector('.euiCommentEvent__headerEvent')
       ).toHaveTextContent('added an alert from Awesome rule');
     });
@@ -485,8 +493,9 @@ describe('CaseViewPage', () => {
     it('renders tabs correctly', async () => {
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
-        expect(result.getByTestId('case-view-tab-title-alerts')).toBeTruthy();
         expect(result.getByTestId('case-view-tab-title-activity')).toBeTruthy();
+        expect(result.getByTestId('case-view-tab-title-alerts')).toBeTruthy();
+        expect(result.getByTestId('case-view-tab-title-files')).toBeTruthy();
       });
     });
 
@@ -595,15 +604,15 @@ describe('CaseViewPage', () => {
     });
 
     describe('description', () => {
-      it('renders the descriptions user correctly', async () => {
+      it('renders the description correctly', async () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        const description = within(screen.getByTestId('description-action'));
+        const description = within(screen.getByTestId('description'));
 
-        expect(await description.findByText('Leslie Knope')).toBeInTheDocument();
+        expect(await description.findByText(caseData.description)).toBeInTheDocument();
       });
 
-      it('should display description isLoading', async () => {
+      it('should display description when case is loading', async () => {
         useUpdateCaseMock.mockImplementation(() => ({
           ...defaultUpdateCaseState,
           isLoading: true,
@@ -613,8 +622,7 @@ describe('CaseViewPage', () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
         await waitFor(() => {
-          expect(screen.getByTestId('description-loading')).toBeInTheDocument();
-          expect(screen.queryByTestId('description-action')).not.toBeInTheDocument();
+          expect(screen.getByTestId('description')).toBeInTheDocument();
         });
       });
 
@@ -627,11 +635,11 @@ describe('CaseViewPage', () => {
 
         userEvent.type(await screen.findByTestId('euiMarkdownEditorTextArea'), newComment);
 
-        userEvent.click(await screen.findByTestId('editable-description-edit-icon'));
+        userEvent.click(await screen.findByTestId('description-edit-icon'));
 
         userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], 'Edited!');
 
-        userEvent.click(screen.getByTestId('user-action-save-markdown'));
+        userEvent.click(screen.getByTestId('editable-save-markdown'));
 
         expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
           newComment

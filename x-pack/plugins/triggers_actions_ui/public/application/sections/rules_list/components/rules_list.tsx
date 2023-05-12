@@ -8,7 +8,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import { capitalize, isEmpty, sortBy } from 'lodash';
+import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, {
@@ -75,6 +75,7 @@ import './rules_list.scss';
 import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListDocLink } from './rules_list_doc_link';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
@@ -105,26 +106,28 @@ import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list
 const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
-interface RulesPageContainerState {
-  lastResponse: string[];
-  status: RuleStatus[];
-}
-
 export interface RulesListProps {
   filteredRuleTypes?: string[];
-  showActionFilter?: boolean;
-  ruleDetailsRoute?: string;
-  showCreateRuleButtonInPrompt?: boolean;
-  setHeaderActions?: (components?: React.ReactNode[]) => void;
-  statusFilter?: RuleStatus[];
-  onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
-  onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
   lastRunOutcomeFilter?: string[];
-  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
   refresh?: Date;
+  ruleDetailsRoute?: string;
+  ruleParamFilter?: Record<string, string | number | object>;
   rulesListKey?: string;
+  searchFilter?: string;
+  showActionFilter?: boolean;
+  showCreateRuleButtonInPrompt?: boolean;
+  showSearchBar?: boolean;
+  statusFilter?: RuleStatus[];
+  typeFilter?: string[];
   visibleColumns?: string[];
+  onLastResponseFilterChange?: (lastResponse: string[]) => void;
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => void;
+  onRuleParamFilterChange?: (ruleParams: Record<string, string | number | object>) => void;
+  onSearchFilterChange?: (search: string) => void;
+  onStatusFilterChange?: (status: RuleStatus[]) => void;
+  onTypeFilterChange?: (type: string[]) => void;
+  setHeaderActions?: (components?: React.ReactNode[]) => void;
 }
 
 export const percentileFields = {
@@ -143,43 +146,51 @@ const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
   filteredRuleTypes = EMPTY_ARRAY,
-  showActionFilter = true,
-  ruleDetailsRoute,
-  showCreateRuleButtonInPrompt = false,
-  statusFilter,
-  onStatusFilterChange,
   lastResponseFilter,
-  onLastResponseFilterChange,
   lastRunOutcomeFilter,
-  onLastRunOutcomeFilterChange,
-  setHeaderActions,
   refresh,
+  ruleDetailsRoute,
+  ruleParamFilter,
   rulesListKey,
+  searchFilter = '',
+  showActionFilter = true,
+  showCreateRuleButtonInPrompt = false,
+  showSearchBar = true,
+  statusFilter,
+  typeFilter,
   visibleColumns,
+  onLastResponseFilterChange,
+  onLastRunOutcomeFilterChange,
+  onRuleParamFilterChange,
+  onSearchFilterChange,
+  onStatusFilterChange,
+  onTypeFilterChange,
+  setHeaderActions,
 }: RulesListProps) => {
   const history = useHistory();
   const {
-    http,
-    notifications: { toasts },
-    application: { capabilities },
-    ruleTypeRegistry,
     actionTypeRegistry,
+    application: { capabilities },
+    http,
     kibanaFeatures,
+    notifications: { toasts },
+    ruleTypeRegistry,
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>('');
+  const [inputText, setInputText] = useState<string>(searchFilter);
 
-  const [filters, setFilters] = useState<RulesListFilters>(() => ({
-    searchText: '',
-    types: [],
+  const [filters, setFilters] = useState<RulesListFilters>({
     actionTypes: [],
     ruleExecutionStatuses: lastResponseFilter || [],
     ruleLastRunOutcomes: lastRunOutcomeFilter || [],
+    ruleParams: ruleParamFilter || {},
     ruleStatuses: statusFilter || [],
+    searchText: searchFilter || '',
     tags: [],
-  }));
+    types: typeFilter || [],
+  });
 
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -354,6 +365,15 @@ export const RulesList = ({
         case 'ruleLastRunOutcomes':
           onLastRunOutcomeFilterChange?.(value as string[]);
           break;
+        case 'ruleParams':
+          onRuleParamFilterChange?.(value as Record<string, string | number | object>);
+          break;
+        case 'searchText':
+          onSearchFilterChange?.(value as string);
+          break;
+        case 'types':
+          onTypeFilterChange?.(value as string[]);
+          break;
         default:
           break;
       }
@@ -362,6 +382,8 @@ export const RulesList = ({
       onStatusFilterChange,
       onLastResponseFilterChange,
       onLastRunOutcomeFilterChange,
+      onSearchFilterChange,
+      onTypeFilterChange,
       onClearSelection,
     ]
   );
@@ -377,6 +399,8 @@ export const RulesList = ({
     },
     [setFilters, handleUpdateFiltersEffect]
   );
+
+  const handleClearRuleParamFilter = () => updateFilters({ filter: 'ruleParams', value: {} });
 
   useEffect(() => {
     if (statusFilter) {
@@ -395,6 +419,24 @@ export const RulesList = ({
       updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
   }, [lastRunOutcomeFilter]);
+
+  useEffect(() => {
+    if (ruleParamFilter && !isEqual(ruleParamFilter, filters.ruleParams)) {
+      updateFilters({ filter: 'ruleParams', value: ruleParamFilter });
+    }
+  }, [ruleParamFilter]);
+
+  useEffect(() => {
+    if (typeof searchFilter === 'string') {
+      updateFilters({ filter: 'searchText', value: searchFilter });
+    }
+  }, [searchFilter]);
+
+  useEffect(() => {
+    if (typeFilter) {
+      updateFilters({ filter: 'types', value: typeFilter });
+    }
+  }, [typeFilter]);
 
   useEffect(() => {
     if (cloneRuleId.current) {
@@ -675,8 +717,13 @@ export const RulesList = ({
   };
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
+
   return (
     <>
+      {showSearchBar && !isEmpty(filters.ruleParams) ? (
+        <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
+      ) : null}
+
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
@@ -759,26 +806,32 @@ export const RulesList = ({
           />
         )}
         <EuiSpacer size="xs" />
+
         {showRulesList && (
           <>
-            <RulesListFiltersBar
-              inputText={inputText}
-              filters={filters}
-              showActionFilter={showActionFilter}
-              rulesStatusesTotal={rulesStatusesTotal}
-              rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
-              tags={tags}
-              filterOptions={filterOptions}
-              actionTypes={actionTypes}
-              lastUpdate={lastUpdate}
-              showErrors={showErrors}
-              updateFilters={updateFilters}
-              setInputText={setInputText}
-              onClearSelection={onClearSelection}
-              onRefreshRules={refreshRules}
-              onToggleRuleErrors={toggleRuleErrors}
-            />
-            <EuiSpacer size="s" />
+            {showSearchBar ? (
+              <>
+                <RulesListFiltersBar
+                  actionTypes={actionTypes}
+                  filterOptions={filterOptions}
+                  filters={filters}
+                  inputText={inputText}
+                  lastUpdate={lastUpdate}
+                  rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
+                  rulesStatusesTotal={rulesStatusesTotal}
+                  setInputText={setInputText}
+                  showActionFilter={showActionFilter}
+                  showErrors={showErrors}
+                  tags={tags}
+                  updateFilters={updateFilters}
+                  onClearSelection={onClearSelection}
+                  onRefreshRules={refreshRules}
+                  onToggleRuleErrors={toggleRuleErrors}
+                />
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
+
             <RulesListTable
               items={tableItems}
               isLoading={isRulesTableLoading}
@@ -794,7 +847,7 @@ export const RulesList = ({
               itemIdToExpandedRowMap={itemIdToExpandedRowMap}
               onSort={setSort}
               onPage={setPage}
-              onRuleChanged={() => refreshRules()}
+              onRuleChanged={refreshRules}
               onRuleClick={(rule) => {
                 const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
                 history.push(detailsRoute.replace(`:ruleId`, rule.id));
@@ -830,7 +883,7 @@ export const RulesList = ({
                   key={rule.id}
                   item={rule}
                   onLoading={onLoading}
-                  onRuleChanged={() => refreshRules()}
+                  onRuleChanged={refreshRules}
                   onDeleteRule={() =>
                     updateRulesToBulkEdit({
                       action: 'delete',

@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { TestNowResponse } from '../../../common/types';
 import {
   ConfigKey,
@@ -15,7 +16,6 @@ import {
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
-import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -44,20 +44,18 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const testRunId = uuidv4();
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
 
-    const errors = await syntheticsService.runOnceConfigs([
-      formatHeartbeatRequest({
-        // making it enabled, even if it's disabled in the UI
-        monitor: { ...normalizedMonitor.attributes, enabled: true },
-        monitorId,
-        heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
-        testRunId,
-        params: paramsBySpace[spaceId],
-      }),
-    ]);
+    const errors = await syntheticsService.runOnceConfigs({
+      // making it enabled, even if it's disabled in the UI
+      monitor: { ...normalizedMonitor.attributes, enabled: true },
+      configId: monitorId,
+      heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+      testRunId,
+      params: paramsBySpace[spaceId],
+    });
 
     if (errors && errors?.length > 0) {
       return {

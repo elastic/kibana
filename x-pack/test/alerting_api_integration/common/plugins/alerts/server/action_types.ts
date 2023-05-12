@@ -24,6 +24,11 @@ export function defineActionTypes(
     name: 'Test: Noop',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      params: { schema: schema.object({}, { defaultValue: {} }) },
+    },
     async executor() {
       return { status: 'ok', actionId: '' };
     },
@@ -34,6 +39,11 @@ export function defineActionTypes(
     name: 'Test: Throw',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      params: { schema: schema.object({}, { defaultValue: {} }) },
+    },
     async executor() {
       throw new Error('this action is intended to fail');
     },
@@ -44,6 +54,11 @@ export function defineActionTypes(
     name: 'Test: Capped',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      params: { schema: schema.object({}, { defaultValue: {} }) },
+    },
     async executor() {
       return { status: 'ok', actionId: '' };
     },
@@ -168,6 +183,8 @@ function getFailingActionType() {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
       params: {
         schema: paramsSchema,
       },
@@ -204,6 +221,8 @@ function getRateLimitedActionType() {
     supportedFeatureIds: ['alerting'],
     maxAttempts: 2,
     validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
       params: {
         schema: paramsSchema,
       },
@@ -243,6 +262,8 @@ function getNoAttemptsRateLimitedActionType() {
     supportedFeatureIds: ['alerting'],
     maxAttempts: 0,
     validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
       params: {
         schema: paramsSchema,
       },
@@ -284,6 +305,8 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
       params: {
         schema: paramsSchema,
       },
@@ -365,6 +388,11 @@ function getExcludedActionType() {
     name: 'Test: Excluded',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      params: { schema: schema.object({}, { defaultValue: {} }) },
+    },
     async executor({ actionId }) {
       return { status: 'ok', actionId };
     },

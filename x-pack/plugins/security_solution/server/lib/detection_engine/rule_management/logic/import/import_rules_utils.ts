@@ -16,8 +16,6 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
 import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../rule_actions/legacy_action_migration';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { createRules } from '../crud/create_rules';
@@ -128,14 +126,9 @@ export const importRules = async ({
                     status_code: 200,
                   });
                 } else if (rule != null && overwriteRules) {
-                  const migratedRule = await legacyMigrate({
-                    rulesClient,
-                    savedObjectsClient,
-                    rule,
-                  });
                   await patchRules({
                     rulesClient,
-                    existingRule: migratedRule,
+                    existingRule: rule,
                     nextParams: {
                       ...parsedRule,
                       exceptions_list: [...exceptions],

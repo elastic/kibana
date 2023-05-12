@@ -40,12 +40,9 @@ export function logHealthMetrics(
       capacity_estimation: undefined,
     },
   };
-  const statusWithoutCapacity = calculateHealthStatus(
-    healthWithoutCapacity,
-    config,
-    shouldRunTasks,
-    logger
-  );
+  const healthStatus = calculateHealthStatus(healthWithoutCapacity, config, shouldRunTasks, logger);
+
+  const statusWithoutCapacity = healthStatus?.status;
   if (statusWithoutCapacity === HealthStatus.Warning) {
     logLevel = LogLevel.Warn;
   } else if (statusWithoutCapacity === HealthStatus.Error && !isEmpty(monitoredHealth.stats)) {

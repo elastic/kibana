@@ -53,7 +53,7 @@ export function UptimeSection({ bucketSize }: Props) {
   const { data, status } = useFetcher(
     () => {
       if (bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('synthetics')?.fetchData({
+        return getDataHandler('uptime')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           timeZone,
@@ -75,7 +75,7 @@ export function UptimeSection({ bucketSize }: Props) {
     ]
   );
 
-  if (!hasDataMap.synthetics?.hasData) {
+  if (!hasDataMap.uptime?.hasData) {
     return null;
   }
 

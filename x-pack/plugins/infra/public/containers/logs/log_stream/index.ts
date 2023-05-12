@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
-import { LogViewColumnConfiguration } from '../../../../common/log_views';
+import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { useSubscription } from '../../../utils/use_observable';
 import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
@@ -21,7 +21,7 @@ import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 export type BuiltEsQuery = ReturnType<typeof buildEsQuery>;
 
 interface LogStreamProps {
-  sourceId: string;
+  logViewReference: LogViewReference;
   startTimestamp: number;
   endTimestamp: number;
   query?: BuiltEsQuery;
@@ -52,7 +52,7 @@ const INITIAL_STATE: LogStreamState = {
 const LOG_ENTRIES_CHUNK_SIZE = 200;
 
 export function useLogStream({
-  sourceId,
+  logViewReference,
   startTimestamp,
   endTimestamp,
   query,
@@ -85,13 +85,13 @@ export function useLogStream({
 
   const commonFetchArguments = useMemo(
     () => ({
-      sourceId,
+      logViewReference,
       startTimestamp,
       endTimestamp,
       query: cachedQuery,
       columnOverrides: columns,
     }),
-    [columns, endTimestamp, cachedQuery, sourceId, startTimestamp]
+    [columns, endTimestamp, cachedQuery, logViewReference, startTimestamp]
   );
 
   const {
@@ -109,7 +109,7 @@ export function useLogStream({
             ...(resetOnSuccess ? INITIAL_STATE : prevState),
             entries: combined.entries,
             hasMoreAfter: combined.hasMoreAfter ?? prevState.hasMoreAfter,
-            hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+            hasMoreBefore: combined.hasMoreBefore ?? prevState.hasMoreBefore,
             bottomCursor: combined.bottomCursor,
             topCursor: combined.topCursor,
             lastLoadedTime: new Date(),
@@ -151,9 +151,9 @@ export function useLogStream({
 
   const fetchPreviousEntries = useCallback<FetchPageCallback>(
     (params) => {
-      if (state.topCursor === null) {
+      if (state.topCursor === null && state.hasMoreBefore) {
         throw new Error(
-          'useLogStream: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+          'useLogStream: Cannot fetch previous entries.\nIt seems there are more entries available, but no cursor is set.\nEnsure you have called `fetchEntries` at least once.'
         );
       }
 
@@ -161,10 +161,12 @@ export function useLogStream({
         return;
       }
 
-      fetchLogEntriesBefore(state.topCursor, {
-        size: LOG_ENTRIES_CHUNK_SIZE,
-        extendTo: params?.extendTo,
-      });
+      if (state.topCursor !== null) {
+        fetchLogEntriesBefore(state.topCursor, {
+          size: LOG_ENTRIES_CHUNK_SIZE,
+          extendTo: params?.extendTo,
+        });
+      }
     },
     [fetchLogEntriesBefore, state.topCursor, state.hasMoreBefore]
   );
@@ -198,7 +200,7 @@ export function useLogStream({
 
   const fetchNextEntries = useCallback<FetchPageCallback>(
     (params) => {
-      if (state.bottomCursor === null) {
+      if (state.bottomCursor === null && state.hasMoreAfter) {
         throw new Error(
           'useLogStream: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
         );
@@ -208,10 +210,12 @@ export function useLogStream({
         return;
       }
 
-      fetchLogEntriesAfter(state.bottomCursor, {
-        size: LOG_ENTRIES_CHUNK_SIZE,
-        extendTo: params?.extendTo,
-      });
+      if (state.bottomCursor !== null) {
+        fetchLogEntriesAfter(state.bottomCursor, {
+          size: LOG_ENTRIES_CHUNK_SIZE,
+          extendTo: params?.extendTo,
+        });
+      }
     },
     [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]
   );

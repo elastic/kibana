@@ -62,6 +62,9 @@ import {
   DISABLED_RULES_BTN,
   REFRESH_RULES_TABLE_BUTTON,
   RULE_LAST_RUN,
+  DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
+  DUPLICATE_WITH_EXCEPTIONS_OPTION,
+  DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -145,10 +148,27 @@ export const deleteRuleFromDetailsPage = () => {
     .should(($el) => expect($el).to.be.not.visible);
 };
 
-export const duplicateSelectedRules = () => {
+export const duplicateSelectedRulesWithoutExceptions = () => {
   cy.log('Duplicate selected rules');
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITHOUT_EXCEPTIONS_OPTION).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
+};
+
+export const duplicateSelectedRulesWithExceptions = () => {
+  cy.log('Duplicate selected rules');
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITH_EXCEPTIONS_OPTION).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
+};
+
+export const duplicateSelectedRulesWithNonExpiredExceptions = () => {
+  cy.log('Duplicate selected rules');
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 

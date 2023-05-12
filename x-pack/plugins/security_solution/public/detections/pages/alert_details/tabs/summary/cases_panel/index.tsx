@@ -86,12 +86,12 @@ export const CasesPanel = React.memo<CasesPanelProps>(
         : [];
     }, [casesUi.helpers, dataAsNestedObject, detailsData, eventId]);
 
-    const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+    const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout({
       onSuccess: refetchRelatedCases,
     });
 
-    const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
-      onRowClick: refetchRelatedCases,
+    const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal({
+      onSuccess: refetchRelatedCases,
     });
 
     const addToNewCase = useCallback(() => {
@@ -102,7 +102,7 @@ export const CasesPanel = React.memo<CasesPanelProps>(
 
     const addToExistingCase = useCallback(() => {
       if (userCasesPermissions.update) {
-        selectCaseModal.open({ attachments: caseAttachments });
+        selectCaseModal.open({ getAttachments: () => caseAttachments });
       }
     }, [caseAttachments, selectCaseModal, userCasesPermissions.update]);
 

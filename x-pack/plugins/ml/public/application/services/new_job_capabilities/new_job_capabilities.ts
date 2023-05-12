@@ -62,4 +62,8 @@ export class NewJobCapabilitiesServiceBase {
     const agg = this._aggs.find((f) => f.id === id);
     return agg === undefined ? null : agg;
   }
+
+  protected removeCounterFields() {
+    this._fields = this._fields.filter((f) => f.counter === false);
+  }
 }

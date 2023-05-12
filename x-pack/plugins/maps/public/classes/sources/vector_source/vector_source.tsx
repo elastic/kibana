@@ -14,6 +14,7 @@ import {
   Polygon,
   Position,
 } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/data-plugin/common';
 import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
@@ -27,6 +28,7 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
+  DataFilters,
   ESSearchSourceResponseMeta,
   MapExtent,
   Timeslice,
@@ -62,6 +64,7 @@ export interface BoundsRequestMeta {
   timeslice?: Timeslice;
   isFeatureEditorOpenForLayer: boolean;
   joinKeyFilter?: Filter;
+  executionContext: KibanaExecutionContext;
 }
 
 export interface GetFeatureActionsArgs {
@@ -84,14 +87,17 @@ export interface GetFeatureActionsArgs {
 
 export interface IVectorSource extends ISource {
   isMvt(): boolean;
-  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     layerDataFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null>;
   getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
@@ -107,7 +113,7 @@ export interface IVectorSource extends ISource {
    * Vector layer avoids unnecessarily re-fetching source data.
    * Use getSyncMeta to expose fields that require source data re-fetch when changed.
    */
-  getSyncMeta(): object | null;
+  getSyncMeta(dataFilters: DataFilters): object | null;
 
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
@@ -189,7 +195,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
@@ -202,7 +208,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   // Allow source to filter and format feature properties before displaying to user
-  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]> {
     const tooltipProperties: ITooltipProperty[] = [];
     for (const key in properties) {
       if (key.startsWith('__kbn')) {
@@ -230,7 +239,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
-  getSyncMeta(): object | null {
+  getSyncMeta(dataFilters: DataFilters): object | null {
     return null;
   }
 

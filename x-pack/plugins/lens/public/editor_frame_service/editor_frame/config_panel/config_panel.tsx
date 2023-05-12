@@ -13,7 +13,7 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { LayerType } from '../../../../common';
+import { LayerType } from '../../../../common/types';
 import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';

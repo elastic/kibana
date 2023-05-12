@@ -8,105 +8,40 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import {
-  HIGHLIGHTED_FIELDS_DETAILS_TEST_ID,
-  HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK,
-  HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID,
-  HIGHLIGHTED_FIELDS_HEADER_TITLE_TEST_ID,
-} from './test_ids';
+import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { HighlightedFields } from './highlighted_fields';
-import { RightPanelKey, RightPanelTableTabPath } from '..';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { ThemeProvider } from 'styled-components';
 
-const mockTheme = getMockTheme({
-  eui: {
-    euiSizeL: '10px',
-  },
-});
-
 describe('<HighlightedFields />', () => {
-  it('should render the component collapsed', () => {
-    const flyoutContextValue = {
-      openRightPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContext;
-    const panelContextValue = {
-      eventId: 'eventId',
-      indexName: 'indexName',
-      dataFormattedForFieldBrowser: [],
-      browserFields: {},
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = render(
-      <ThemeProvider theme={mockTheme}>
-        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <HighlightedFields />
-          </RightPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
-      </ThemeProvider>
-    );
-
-    expect(getByTestId(HIGHLIGHTED_FIELDS_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render the component expanded', () => {
-    const flyoutContextValue = {
-      openRightPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContext;
-    const panelContextValue = {
-      eventId: 'eventId',
-      indexName: 'indexName',
-      dataFormattedForFieldBrowser: [],
-      browserFields: {},
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = render(
-      <ThemeProvider theme={mockTheme}>
-        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <HighlightedFields expanded={true} />
-          </RightPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
-      </ThemeProvider>
-    );
-
-    expect(getByTestId(HIGHLIGHTED_FIELDS_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should expand details when clicking on header', () => {
-    const flyoutContextValue = {
-      openRightPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContext;
-    const panelContextValue = {
-      eventId: 'eventId',
-      indexName: 'indexName',
-      dataFormattedForFieldBrowser: [],
-      browserFields: {},
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = render(
-      <ThemeProvider theme={mockTheme}>
-        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <HighlightedFields />
-          </RightPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
-      </ThemeProvider>
-    );
-
-    getByTestId(HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID).click();
-    getByTestId(HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK).click();
-    expect(flyoutContextValue.openRightPanel).toHaveBeenCalledWith({
-      id: RightPanelKey,
-      path: RightPanelTableTabPath,
-      params: {
-        id: panelContextValue.eventId,
-        indexName: panelContextValue.indexName,
+  it('should render the component', () => {
+    const mockTheme = getMockTheme({
+      eui: {
+        euiSizeL: '10px',
       },
     });
+    const flyoutContextValue = {
+      openRightPanel: jest.fn(),
+    } as unknown as ExpandableFlyoutContext;
+    const panelContextValue = {
+      eventId: 'eventId',
+      indexName: 'indexName',
+      dataFormattedForFieldBrowser: [],
+      browserFields: {},
+    } as unknown as RightPanelContext;
+
+    const { getByTestId } = render(
+      <ThemeProvider theme={mockTheme}>
+        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+          <RightPanelContext.Provider value={panelContextValue}>
+            <HighlightedFields />
+          </RightPanelContext.Provider>
+        </ExpandableFlyoutContext.Provider>
+      </ThemeProvider>
+    );
+
+    expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 
@@ -119,7 +54,7 @@ describe('<HighlightedFields />', () => {
       browserFields: {},
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <RightPanelContext.Provider value={panelContextValue}>
           <HighlightedFields />
@@ -127,11 +62,7 @@ describe('<HighlightedFields />', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if browserFields is null', () => {
@@ -143,7 +74,7 @@ describe('<HighlightedFields />', () => {
       browserFields: null,
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <RightPanelContext.Provider value={panelContextValue}>
           <HighlightedFields />
@@ -151,11 +82,7 @@ describe('<HighlightedFields />', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if eventId is null', () => {
@@ -167,7 +94,7 @@ describe('<HighlightedFields />', () => {
       browserFields: {},
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <RightPanelContext.Provider value={panelContextValue}>
           <HighlightedFields />
@@ -175,10 +102,6 @@ describe('<HighlightedFields />', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 });

@@ -32,7 +32,7 @@ interface PreviewSectionProps {
   /**
    * Width used when rendering the panel
    */
-  width: number | undefined;
+  width: number;
   /**
    * Display the back button in the header
    */
@@ -50,8 +50,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
 }: PreviewSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutContext();
-
-  const previewWith: string = width ? `${width}px` : '0px';
+  const left = `${(1 - width) * 100}%`;
 
   const closeButton = (
     <EuiFlexItem grow={false}>
@@ -91,7 +90,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           top: 0;
           bottom: 0;
           right: 0;
-          left: ${previewWith};
+          left: ${left};
           background-color: ${euiTheme.colors.shadow};
           opacity: 0.5;
         `}
@@ -102,7 +101,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           top: 0;
           bottom: 0;
           right: 0;
-          left: ${previewWith};
+          left: ${left};
           z-index: 1000;
         `}
       >

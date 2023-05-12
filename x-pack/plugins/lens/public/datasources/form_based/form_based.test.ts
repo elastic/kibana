@@ -48,7 +48,7 @@ import {
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createMockFramePublicAPI } from '../../mocks';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 
@@ -194,11 +194,17 @@ describe('IndexPattern Data Source', () => {
   let FormBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState>;
 
   beforeEach(() => {
+    const data = dataPluginMock.createStartContract();
+    data.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
+      from: '',
+      to: '',
+    }));
+
     FormBasedDatasource = getFormBasedDatasource({
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
-      data: dataPluginMock.createStartContract(),
+      data,
       dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
@@ -3013,6 +3019,22 @@ describe('IndexPattern Data Source', () => {
   });
 
   describe('#getUserMessages', () => {
+    function createMockFrameDatasourceAPI({
+      activeData,
+      dataViews,
+    }: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
+      dataViews?: Partial<FramePublicAPI['dataViews']>;
+    }): FrameDatasourceAPI {
+      return {
+        ...createMockFramePublicAPI({
+          activeData,
+          dataViews,
+        }),
+        query: { query: '', language: 'kuery' },
+        filters: [],
+      };
+    }
+
     describe('error messages', () => {
       it('should generate error messages for a single layer', () => {
         (getErrorMessages as jest.Mock).mockClear();
@@ -3029,7 +3051,7 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3081,7 +3103,7 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3170,7 +3192,7 @@ describe('IndexPattern Data Source', () => {
           (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
             setState: () => {},
           });
 
@@ -3208,7 +3230,7 @@ describe('IndexPattern Data Source', () => {
           ] as ReturnType<typeof getErrorMessages>);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
             setState: () => {},
           });
 
@@ -3238,7 +3260,7 @@ describe('IndexPattern Data Source', () => {
 
     describe('warning messages', () => {
       let state: FormBasedPrivateState;
-      let framePublicAPI: FramePublicAPI;
+      let framePublicAPI: FrameDatasourceAPI;
 
       beforeEach(() => {
         (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
@@ -3320,7 +3342,7 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
         };
 
-        framePublicAPI = {
+        framePublicAPI = createMockFrameDatasourceAPI({
           activeData: {
             first: {
               type: 'datatable',
@@ -3355,14 +3377,9 @@ describe('IndexPattern Data Source', () => {
             },
           },
           dataViews: {
-            ...createMockFramePublicAPI().dataViews,
             indexPatterns: expectedIndexPatterns,
-            indexPatternRefs: Object.values(expectedIndexPatterns).map(({ id, title }) => ({
-              id,
-              title,
-            })),
           },
-        } as unknown as FramePublicAPI;
+        });
       });
 
       const extractTranslationIdsFromWarnings = (warnings: UserMessage[]) => {
@@ -3378,7 +3395,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should return mismatched time shifts', () => {
         const warnings = FormBasedDatasource.getUserMessages!(state, {
-          frame: framePublicAPI as FrameDatasourceAPI,
+          frame: framePublicAPI,
           setState: () => {},
         });
 
@@ -3394,7 +3411,7 @@ describe('IndexPattern Data Source', () => {
         framePublicAPI.activeData!.first.columns[1].meta.sourceParams!.hasPrecisionError = true;
 
         const warnings = FormBasedDatasource.getUserMessages!(state, {
-          frame: framePublicAPI as FrameDatasourceAPI,
+          frame: framePublicAPI,
           setState: () => {},
         });
 
@@ -3405,6 +3422,133 @@ describe('IndexPattern Data Source', () => {
                     "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
                   ]
               `);
+      });
+    });
+
+    describe('info messages', () => {
+      function createLayer(
+        index: number = 0,
+        sampling?: number
+      ): FormBasedPrivateState['layers'][number] {
+        return {
+          sampling,
+          indexPatternId: '1',
+          columnOrder: [`col-${index}-1`, `col-${index}-2`],
+          columns: {
+            [`col-${index}-1`]: {
+              operationType: 'date_histogram',
+              params: {
+                interval: '12h',
+              },
+              label: '',
+              dataType: 'date',
+              isBucketed: true,
+              sourceField: 'timestamp',
+            } as DateHistogramIndexPatternColumn,
+            [`col-${index}-2`]: {
+              operationType: 'count',
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'records',
+            },
+          },
+        };
+      }
+
+      function createDatatableForLayer(index: number): Datatable {
+        return {
+          type: 'datatable' as const,
+          rows: [],
+          columns: [
+            {
+              id: `col-${index}-1`,
+              name: `col-${index}-1`,
+              meta: {
+                type: 'date',
+                source: 'esaggs',
+                sourceParams: {
+                  type: 'date_histogram',
+                  params: {
+                    used_interval: '12h',
+                  },
+                },
+              },
+            },
+            {
+              id: `col-${index}-2`,
+              name: `col-${index}-2`,
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+        };
+      }
+
+      beforeEach(() => {
+        (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+      });
+
+      it.each`
+        sampling     | infoMessages
+        ${undefined} | ${0}
+        ${1}         | ${0}
+        ${0.1}       | ${1}
+      `(
+        'should return $infoMessages info messages when sampling is set to $sampling',
+        ({ sampling, infoMessages }) => {
+          const messages = FormBasedDatasource.getUserMessages!(
+            {
+              layers: {
+                first: createLayer(0, sampling),
+              },
+              currentIndexPatternId: '1',
+            },
+            {
+              frame: createMockFrameDatasourceAPI({
+                activeData: {
+                  first: createDatatableForLayer(0),
+                },
+                dataViews: {
+                  indexPatterns: expectedIndexPatterns,
+                },
+              }),
+              setState: () => {},
+              visualizationInfo: { layers: [] },
+            }
+          );
+          expect(messages.filter(({ severity }) => severity === 'info')).toHaveLength(infoMessages);
+        }
+      );
+
+      it('should return a single info message for multiple layers with sampling < 100%', () => {
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: createLayer(0, 0.1),
+            second: createLayer(1, 0.001),
+          },
+          currentIndexPatternId: '1',
+        };
+        const messages = FormBasedDatasource.getUserMessages!(state, {
+          frame: createMockFrameDatasourceAPI({
+            activeData: {
+              first: createDatatableForLayer(0),
+              second: createDatatableForLayer(1),
+            },
+            dataViews: {
+              indexPatterns: expectedIndexPatterns,
+            },
+          }),
+          setState: () => {},
+          visualizationInfo: { layers: [] },
+        });
+        const infoMessages = messages.filter(({ severity }) => severity === 'info');
+        expect(infoMessages).toHaveLength(1);
+        const [info] = infoMessages;
+        if (isFragment(info.longMessage)) {
+          expect(info.longMessage.props.layers).toHaveLength(2);
+        }
       });
     });
   });

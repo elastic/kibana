@@ -359,29 +359,10 @@ describe('when on the endpoint list page', () => {
         const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
 
         expect(hostStatuses[0].textContent).toEqual('Unhealthy');
-        expect(hostStatuses[0].getAttribute('style')).toMatch(
-          /background-color\: rgb\(241\, 216\, 111\)\;/
-        );
-
         expect(hostStatuses[1].textContent).toEqual('Healthy');
-        expect(hostStatuses[1].getAttribute('style')).toMatch(
-          /background-color\: rgb\(109\, 204\, 177\)\;/
-        );
-
         expect(hostStatuses[2].textContent).toEqual('Offline');
-        expect(hostStatuses[2].getAttribute('style')).toMatch(
-          /background-color\: rgb\(211\, 218\, 230\)\;/
-        );
-
         expect(hostStatuses[3].textContent).toEqual('Updating');
-        expect(hostStatuses[3].getAttribute('style')).toMatch(
-          /background-color\: rgb\(121\, 170\, 217\)\;/
-        );
-
         expect(hostStatuses[4].textContent).toEqual('Inactive');
-        expect(hostStatuses[4].getAttribute('style')).toMatch(
-          /background-color\: rgb\(211\, 218\, 230\)\;/
-        );
       });
 
       it('should display correct policy status', async () => {

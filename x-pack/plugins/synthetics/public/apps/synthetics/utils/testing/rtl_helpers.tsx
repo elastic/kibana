@@ -129,18 +129,38 @@ export const mockCore: () => Partial<CoreStart> = () => {
       get: getSetting,
       get$: setSetting$,
     },
+    settings: {
+      client: {
+        ...defaultCore.settings.client,
+        get: getSetting,
+        get$: setSetting$,
+      },
+      globalClient: defaultCore.settings.globalClient,
+    },
     usageCollection: {
       reportUiCounter: () => {},
     },
     triggersActionsUi: triggersActionsUiMock.createStart(),
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
+    // @ts-ignore
     observability: {
       useRulesLink: () => ({ href: 'newRuleLink' }),
+      observabilityRuleTypeRegistry: {
+        register: jest.fn(),
+        getFormatter: jest.fn(),
+        list: jest.fn(),
+      },
+    },
+    observabilityShared: {
       navigation: {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
       },
+    },
+    exploratoryView: {
+      createExploratoryViewUrl: jest.fn(),
+      getAppDataView: jest.fn(),
       ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
   };
@@ -164,6 +184,8 @@ export function MockKibanaProvider<ExtraCore>({
         <SyntheticsStartupPluginsContextProvider
           data={(coreOptions as any).data}
           observability={(coreOptions as any).observability}
+          observabilityShared={(coreOptions as any).observabilityShared}
+          exploratoryView={(coreOptions as any).exploratoryView}
         >
           <EuiThemeProvider darkMode={false}>
             <I18nProvider>{children}</I18nProvider>

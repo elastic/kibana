@@ -68,7 +68,12 @@ export const OverviewGrid = memo(() => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="baseline"
+        responsive={false}
+        wrap={true}
+      >
         <EuiFlexItem grow={true}>
           <OverviewPaginationInfo
             page={page}

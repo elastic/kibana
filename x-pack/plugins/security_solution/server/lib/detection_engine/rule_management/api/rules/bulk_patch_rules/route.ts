@@ -24,8 +24,6 @@ import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { patchRules } from '../../../logic/crud/patch_rules';
 import { readRules } from '../../../logic/crud/read_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
@@ -98,14 +96,8 @@ export const bulkPatchRulesRoute = (
               ruleId: payloadRule.id,
             });
 
-            const migratedRule = await legacyMigrate({
-              rulesClient,
-              savedObjectsClient,
-              rule: existingRule,
-            });
-
             const rule = await patchRules({
-              existingRule: migratedRule,
+              existingRule,
               rulesClient,
               nextParams: payloadRule,
             });

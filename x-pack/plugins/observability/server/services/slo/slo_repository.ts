@@ -37,7 +37,7 @@ export const SortDirection = {
 type SortDirection = ObjectValues<typeof SortDirection>;
 
 export const SortField = {
-  Name: 'Name',
+  CreationTime: 'CreationTime',
   IndicatorType: 'IndicatorType',
 };
 
@@ -99,12 +99,15 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 
   async find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>> {
+    const { search, searchFields } = buildSearch(criteria);
     const filterKuery = buildFilterKuery(criteria);
     const { sortField, sortOrder } = buildSortQuery(sort);
     const response = await this.soClient.find<StoredSLO>({
       type: SO_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
+      search,
+      searchFields,
       filter: filterKuery,
       sortField,
       sortOrder,
@@ -138,12 +141,19 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 }
 
-function buildFilterKuery(criteria: Criteria): string | undefined {
-  const filters: string[] = [];
-  if (!!criteria.name) {
-    filters.push(`(slo.attributes.name: ${addWildcardsIfAbsent(criteria.name)})`);
+function buildSearch(criteria: Criteria): {
+  search: string | undefined;
+  searchFields: string[] | undefined;
+} {
+  if (!criteria.name) {
+    return { search: undefined, searchFields: undefined };
   }
 
+  return { search: addWildcardsIfAbsent(criteria.name), searchFields: ['name'] };
+}
+
+function buildFilterKuery(criteria: Criteria): string | undefined {
+  const filters: string[] = [];
   if (!!criteria.indicatorTypes) {
     const indicatorTypesFilter: string[] = criteria.indicatorTypes.map(
       (indicatorType) => `slo.attributes.indicator.type: ${indicatorType}`
@@ -160,9 +170,9 @@ function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'de
     case SortField.IndicatorType:
       sortField = 'indicator.type';
       break;
-    case SortField.Name:
+    case SortField.CreationTime:
     default:
-      sortField = 'name';
+      sortField = 'created_at';
       break;
   }
 

@@ -242,15 +242,6 @@
         "searchable": true,
         "aggregatable": true
       }
-    },
-    "hits": {
-      "int": {
-        "type": "integer",
-        "metadata_field": false,
-        "searchable": true,
-        "aggregatable": true,
-        "time_series_metric": "counter"
-      }
     }
   }
 }

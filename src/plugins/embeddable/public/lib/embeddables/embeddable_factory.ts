@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMetaData } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';

@@ -14,17 +14,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 export const MonitorFailedTests = ({
   time,
   allowBrushing = true,
+  location,
 }: {
   time: { to: string; from: string };
   allowBrushing?: boolean;
+  location: ReturnType<typeof useSelectedLocation>;
 }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const monitorId = useMonitorQueryId();
 
@@ -39,6 +42,7 @@ export const MonitorFailedTests = ({
   return (
     <>
       <ExploratoryViewEmbeddable
+        id={'failedTestsLineSeries'}
         customHeight={'120px'}
         reportType="heatmap"
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
@@ -49,6 +53,7 @@ export const MonitorFailedTests = ({
             reportDefinitions: {
               ...(monitorId ? { 'monitor.id': [monitorId] } : {}),
               ...(errorStateId ? { 'state.id': [errorStateId] } : {}),
+              'observer.geo.name': [location?.label || ''],
             },
             dataType: 'synthetics',
             selectedMetricField: 'failed_tests',

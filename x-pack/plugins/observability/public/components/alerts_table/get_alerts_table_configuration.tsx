@@ -14,7 +14,6 @@ import {
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
-import { useBulkAddToCaseTriggerActions } from '../../hooks/use_alert_bulk_case_actions';
 import { getRenderCellValue } from './render_cell_value';
 import { columns } from './default_columns';
 import {
@@ -31,7 +30,7 @@ export const getAlertsTableConfiguration = (
   config: ConfigSchema
 ): AlertsTableConfigurationRegistry => ({
   id: observabilityFeatureId,
-  casesFeatureId,
+  cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
   columns,
   getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {
     return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });
@@ -44,7 +43,12 @@ export const getAlertsTableConfiguration = (
     },
   ],
   useActionsColumn: () => ({
-    renderCustomActionsRow: ({ alert, id, setFlyoutAlert }: RenderCustomActionsRowArgs) => {
+    renderCustomActionsRow: ({
+      alert,
+      id,
+      setFlyoutAlert,
+      refresh,
+    }: RenderCustomActionsRowArgs) => {
       return (
         <AlertActions
           config={config}
@@ -56,11 +60,11 @@ export const getAlertsTableConfiguration = (
           id={id}
           observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
           setFlyoutAlert={setFlyoutAlert}
+          refresh={refresh}
         />
       );
     },
   }),
-  useBulkActions: useBulkAddToCaseTriggerActions,
   useInternalFlyout: () => {
     const { header, body, footer } = useGetAlertFlyoutComponents(observabilityRuleTypeRegistry);
     return { header, body, footer };

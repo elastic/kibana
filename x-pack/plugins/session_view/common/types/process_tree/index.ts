@@ -191,8 +191,9 @@ export interface ProcessEvent {
   '@timestamp'?: string;
   event?: {
     kind?: EventKind;
-    category?: string[];
+    category?: string | string[];
     action?: EventAction | EventAction[];
+    type?: string | string[];
     id?: string;
   };
   file?: {
@@ -289,6 +290,7 @@ export interface ProcessEventCloud {
   };
   project?: {
     id?: string;
+    name?: string;
   };
   provider?: string;
   region?: string;

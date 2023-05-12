@@ -22,6 +22,8 @@ import { EndpointRuleAlertGenerator } from '../data_generators/endpoint_rule_ale
 export interface IndexEndpointRuleAlertsOptions {
   esClient: Client;
   endpointAgentId: string;
+  endpointHostname?: string;
+  endpointIsolated?: boolean;
   count?: number;
   log?: ToolingLog;
 }
@@ -40,12 +42,16 @@ export interface DeletedIndexedEndpointRuleAlerts {
  * written them to for a given endpoint
  * @param esClient
  * @param endpointAgentId
+ * @param endpointHostname
+ * @param endpointIsolated
  * @param count
  * @param log
  */
 export const indexEndpointRuleAlerts = async ({
   esClient,
   endpointAgentId,
+  endpointHostname,
+  endpointIsolated,
   count = 1,
   log = new ToolingLog(),
 }: IndexEndpointRuleAlertsOptions): Promise<IndexedEndpointRuleAlerts> => {
@@ -57,7 +63,11 @@ export const indexEndpointRuleAlerts = async ({
   const indexedAlerts: estypes.IndexResponse[] = [];
 
   for (let n = 0; n < count; n++) {
-    const alert = alertsGenerator.generate({ agent: { id: endpointAgentId } });
+    const alert = alertsGenerator.generate({
+      agent: { id: endpointAgentId },
+      host: { hostname: endpointHostname },
+      ...(endpointIsolated ? { Endpoint: { state: { isolation: endpointIsolated } } } : {}),
+    });
     const indexedAlert = await esClient.index({
       index: `${DEFAULT_ALERTS_INDEX}-default`,
       refresh: 'wait_for',

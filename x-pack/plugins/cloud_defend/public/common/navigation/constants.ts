@@ -10,7 +10,7 @@ import type { CloudDefendPage, CloudDefendPageNavigationItem } from './types';
 
 const NAV_ITEMS_NAMES = {
   POLICIES: i18n.translate('xpack.cloudDefend.navigation.policiesNavItemLabel', {
-    defaultMessage: 'Defend for containers (D4C)',
+    defaultMessage: 'Container Workload Protection',
   }),
 };
 

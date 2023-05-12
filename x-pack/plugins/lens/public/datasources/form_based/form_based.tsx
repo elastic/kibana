@@ -22,7 +22,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
@@ -37,7 +37,6 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
-  DatasourceLayerSettingsProps,
   DataSourceInfo,
   UserMessage,
   FrameDatasourceAPI,
@@ -69,6 +68,7 @@ import {
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
+  getNotifiableFeatures,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -168,7 +168,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const uiSettings = core.uiSettings;
+  const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
 
@@ -428,10 +428,7 @@ export function getFormBasedDatasource({
     toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
       toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
 
-    renderLayerSettings(
-      domElement: Element,
-      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
-    ) {
+    renderLayerSettings(domElement, props) {
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
@@ -538,6 +535,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -567,6 +565,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -585,6 +584,7 @@ export function getFormBasedDatasource({
                 unifiedSearch={unifiedSearch}
                 dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
+                notifications={core.notifications}
                 {...props}
               />
             </KibanaContextProvider>
@@ -601,18 +601,32 @@ export function getFormBasedDatasource({
       const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <LayerPanel
-            onChangeIndexPattern={(indexPatternId) => {
-              triggerActionOnIndexPatternChange({
-                indexPatternId,
-                state: props.state,
-                layerId: props.layerId,
-                uiActions,
-              });
-              onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
-            }}
-            {...otherProps}
-          />
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                share,
+              }}
+            >
+              <LayerPanel
+                onChangeIndexPattern={(indexPatternId) => {
+                  triggerActionOnIndexPatternChange({
+                    indexPatternId,
+                    state: props.state,
+                    layerId: props.layerId,
+                    uiActions,
+                  });
+                  onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
+                }}
+                {...otherProps}
+              />
+            </KibanaContextProvider>
+          </I18nProvider>
         </KibanaThemeProvider>,
         domElement
       );
@@ -818,7 +832,7 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getUserMessages(state, { frame: frameDatasourceAPI, setState }) {
+    getUserMessages(state, { frame: frameDatasourceAPI, setState, visualizationInfo }) {
       if (!state) {
         return [];
       }
@@ -872,7 +886,9 @@ export function getFormBasedDatasource({
         ),
       ];
 
-      return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
+      const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
+
+      return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {

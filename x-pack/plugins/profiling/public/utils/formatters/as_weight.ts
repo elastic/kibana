@@ -10,7 +10,7 @@ import { asNumber } from './as_number';
 
 const ONE_POUND_TO_A_KILO = 0.45359237;
 
-export function asWeight(valueInPounds: number) {
+export function asWeight(valueInPounds: number): string {
   const lbs = asNumber(valueInPounds);
   const kgs = asNumber(Number(valueInPounds * ONE_POUND_TO_A_KILO));
 

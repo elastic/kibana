@@ -84,7 +84,7 @@ const sampleId = 'case-id';
 const defaultPostCase = {
   isLoading: false,
   isError: false,
-  postCase,
+  mutateAsync: postCase,
 };
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
@@ -226,7 +226,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
+      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, tags: sampleTags } });
     });
 
     it('should post a case on submit click with the selected severity', async () => {
@@ -258,8 +258,10 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        severity: CaseSeverity.HIGH,
+        request: {
+          ...sampleDataWithoutTags,
+          severity: CaseSeverity.HIGH,
+        },
       });
     });
 
@@ -313,8 +315,10 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        settings: { syncAlerts: false },
+        request: {
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        },
       });
     });
 
@@ -343,8 +347,10 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        settings: { syncAlerts: false },
+        request: {
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        },
       });
     });
 
@@ -398,18 +404,20 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        connector: {
-          fields: {
-            impact: null,
-            severity: null,
-            urgency: null,
-            category: null,
-            subcategory: null,
+        request: {
+          ...sampleDataWithoutTags,
+          connector: {
+            fields: {
+              impact: null,
+              severity: null,
+              urgency: null,
+              category: null,
+              subcategory: null,
+            },
+            id: 'servicenow-1',
+            name: 'My SN connector',
+            type: '.servicenow',
           },
-          id: 'servicenow-1',
-          name: 'My SN connector',
-          type: '.servicenow',
         },
       });
     });
@@ -449,7 +457,7 @@ describe('Create case', () => {
       });
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
-      expect(postCase).toBeCalledWith(sampleDataWithoutTags);
+      expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
     });
   });
 
@@ -501,12 +509,14 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        connector: {
-          id: 'resilient-2',
-          name: 'My Connector 2',
-          type: '.resilient',
-          fields: { incidentTypes: ['21'], severityCode: '4' },
+        request: {
+          ...sampleDataWithoutTags,
+          connector: {
+            id: 'resilient-2',
+            name: 'My Resilient connector',
+            type: '.resilient',
+            fields: { incidentTypes: ['21'], severityCode: '4' },
+          },
         },
       });
 
@@ -514,7 +524,7 @@ describe('Create case', () => {
         caseId: sampleId,
         connector: {
           id: 'resilient-2',
-          name: 'My Connector 2',
+          name: 'My Resilient connector',
           type: '.resilient',
           fields: { incidentTypes: ['21'], severityCode: '4' },
         },
@@ -572,6 +582,7 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments = [
       {
         alertId: '1234',
@@ -623,6 +634,7 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments: CaseAttachments = [];
 
     mockedContext.render(
@@ -766,8 +778,10 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        assignees: [{ uid: userProfiles[0].uid }],
+        request: {
+          ...sampleDataWithoutTags,
+          assignees: [{ uid: userProfiles[0].uid }],
+        },
       });
     });
 

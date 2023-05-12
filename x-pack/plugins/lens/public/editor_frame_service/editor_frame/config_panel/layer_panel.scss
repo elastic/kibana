@@ -54,7 +54,7 @@
   &,
   .euiFormRow__fieldWrapper {
     & > * + * {
-      margin-top: $euiSize;
+      margin-top: $euiSizeS;
     }
   }
 }
@@ -64,22 +64,42 @@
   padding: $euiSizeS $euiSize;
 }
 
+.lnsLayerPanel__dimensionRemove {
+  margin-right: $euiSizeS;
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
+  }
+}
+
 .lnsLayerPanel__dimension {
   @include euiFontSizeS;
   border-radius: $euiBorderRadius;
   display: flex;
   align-items: center;
   overflow: hidden;
-  min-height: $euiSizeXXL;
+  min-height: $euiSizeXL;
   position: relative;
 
   // NativeRenderer is messing this up
   > div {
     flex-grow: 1;
   }
+
+  &:hover,
+  &:focus {
+    .lnsLayerPanel__dimensionRemove {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity $euiAnimSpeedFast ease-in-out;
+    }
+  }
 }
 
 .lnsLayerPanel__dimension--empty {
+  border: $euiBorderWidthThin dashed $euiBorderColor !important;
+
   &:focus,
   &:focus-within {
     @include euiFocusRing;
@@ -94,26 +114,31 @@
   }
 }
 
-.lnsLayerPanel__dimensionRemove {
-  margin-right: $euiSizeS;
-}
-
 .lnsLayerPanel__triggerText {
   width: 100%;
-  padding: $euiSizeS;
-  min-height: $euiSizeXXL - 2;
+  padding: $euiSizeXS $euiSizeS;
   word-break: break-word;
   font-weight: $euiFontWeightRegular;
+}
+
+.lnsLayerPanel__dimensionLink {
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.lnsLayerPanel__triggerTextLabel {
+  transition: background-color $euiAnimSpeedFast ease-in-out;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .domDragDrop-isReplacing {
   .lnsLayerPanel__triggerText {
     text-decoration: line-through;
   }
-}
-
-.lnsLayerPanel__triggerTextLabel {
-  transition: background-color $euiAnimSpeedFast ease-in-out;
 }
 
 .lnsLayerPanel__triggerTextContent {
@@ -139,6 +164,7 @@
 }
 
 .lnsLayerPanel__palette {
+  height: $euiSizeXS / 2;
   border-radius: 0 0 ($euiBorderRadius - 1px) ($euiBorderRadius - 1px);
 
   &::after {
@@ -153,5 +179,6 @@
   &:focus {
     @include passDownFocusRing('.lnsLayerPanel__triggerTextLabel');
     background-color: transparent;
+    text-decoration-thickness: $euiBorderWidthThin !important;
   }
 }

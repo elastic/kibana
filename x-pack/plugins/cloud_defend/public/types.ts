@@ -15,6 +15,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CloudDefendRouterProps } from './application/router';
 import type { CloudDefendPageId } from './common/navigation/types';
+import * as i18n from './components/control_general_view/translations';
 
 /**
  * cloud_defend plugin types
@@ -63,29 +64,28 @@ export type SelectorType = 'file' | 'process';
 export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
 
 export type SelectorCondition =
+  | 'containerImageFullName'
   | 'containerImageName'
   | 'containerImageTag'
-  | 'fullContainerImageName'
-  | 'orchestratorClusterId'
-  | 'orchestratorClusterName'
-  | 'orchestratorNamespace'
-  | 'orchestratorResourceLabel'
-  | 'orchestratorResourceName'
-  | 'orchestratorResourceType'
-  | 'orchestratorType'
+  | 'kubernetesClusterId'
+  | 'kubernetesClusterName'
+  | 'kubernetesNamespace'
+  | 'kubernetesPodLabel'
+  | 'kubernetesPodName'
   | 'targetFilePath'
   | 'ignoreVolumeFiles'
   | 'ignoreVolumeMounts'
   | 'operation'
   | 'processExecutable'
   | 'processName'
-  | 'processUserId'
-  | 'sessionLeaderInteractive'
-  | 'sessionLeaderName';
+  | 'sessionLeaderInteractive';
 
 export interface SelectorConditionOptions {
   type: SelectorConditionType;
+  pattern?: string;
+  patternError?: string;
   selectorType?: SelectorType;
+  maxValueBytes?: number; // defaults to const MAX_FILE_PATH_VALUE_LENGTH_BYTES
   not?: SelectorCondition[];
   values?:
     | {
@@ -101,19 +101,28 @@ export type SelectorConditionsMapProps = {
 
 // used to determine UX control and allowed values for each condition
 export const SelectorConditionsMap: SelectorConditionsMapProps = {
-  containerImageName: { type: 'stringArray', not: ['fullContainerImageName'] },
-  containerImageTag: { type: 'stringArray' },
-  fullContainerImageName: {
+  containerImageFullName: {
     type: 'stringArray',
+    pattern:
+      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$',
+    patternError: i18n.errorInvalidFullContainerImageName,
     not: ['containerImageName'],
   },
-  orchestratorClusterId: { type: 'stringArray' },
-  orchestratorClusterName: { type: 'stringArray' },
-  orchestratorNamespace: { type: 'stringArray' },
-  orchestratorResourceLabel: { type: 'stringArray' },
-  orchestratorResourceName: { type: 'stringArray' },
-  orchestratorResourceType: { type: 'stringArray', values: ['node', 'pod'] },
-  orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
+  containerImageName: {
+    type: 'stringArray',
+    pattern: '^[a-z0-9]+$',
+    not: ['containerImageFullName'],
+  },
+  containerImageTag: { type: 'stringArray' },
+  kubernetesClusterId: { type: 'stringArray' },
+  kubernetesClusterName: { type: 'stringArray' },
+  kubernetesNamespace: { type: 'stringArray' },
+  kubernetesPodName: { type: 'stringArray' },
+  kubernetesPodLabel: {
+    type: 'stringArray',
+    pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
+    patternError: i18n.errorInvalidPodLabel,
+  },
   operation: {
     type: 'stringArray',
     values: {
@@ -121,14 +130,29 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
       process: ['fork', 'exec'],
     },
   },
-  targetFilePath: { selectorType: 'file', type: 'stringArray' },
+  targetFilePath: {
+    selectorType: 'file',
+    type: 'stringArray',
+    maxValueBytes: 255,
+    pattern: '^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidTargetFilePath,
+  },
   ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
   ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
-  processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
-  processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
-  processUserId: { selectorType: 'process', type: 'stringArray' },
+  processExecutable: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processName'],
+    pattern: '^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidProcessExecutable,
+  },
+  processName: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processExecutable'],
+    maxValueBytes: 15,
+  },
   sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
-  sessionLeaderName: { selectorType: 'process', type: 'stringArray' },
 };
 
 export type ResponseAction = 'log' | 'alert' | 'block';
@@ -136,15 +160,14 @@ export type ResponseAction = 'log' | 'alert' | 'block';
 export interface Selector {
   name: string;
   operation?: string[];
+  containerImageFullName?: string[];
   containerImageName?: string[];
   containerImageTag?: string[];
-  orchestratorClusterId?: string[];
-  orchestratorClusterName?: string[];
-  orchestratorNamespace?: string[];
-  orchestratorResourceLabel?: string[];
-  orchestratorResourceName?: string[];
-  orchestratorResourceType?: string[];
-  orchestratorType?: string[];
+  kubernetesClusterId?: string[];
+  kubernetesClusterName?: string[];
+  kubernetesNamespace?: string[];
+  kubernetesPodLabel?: string[];
+  kubernetesPodName?: string[];
 
   // selector properties
   targetFilePath?: string[];
@@ -154,9 +177,7 @@ export interface Selector {
   // process selector properties
   processExecutable?: string[];
   processName?: string[];
-  processUserId?: string[];
   sessionLeaderInteractive?: string[];
-  sessionLeaderName?: string[];
 
   // non yaml fields
   type: SelectorType;
@@ -216,6 +237,7 @@ export interface ViewDeps extends SettingsDeps {
 export interface ControlGeneralViewSelectorDeps {
   selector: Selector;
   selectors: Selector[];
+  usedByResponse: boolean;
   index: number;
   onChange(selector: Selector, index: number): void;
   onRemove(index: number): void;

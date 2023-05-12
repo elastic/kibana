@@ -9,11 +9,11 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
-  SavedObjectsTypeMappingDefinition,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
-import mappings from './mappings.json';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { actionMappings, actionTaskParamsMappings, connectorTokenMappings } from './mappings';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
 import { PreConfiguredAction, RawAction } from '../types';
@@ -35,10 +35,11 @@ export function setupSavedObjects(
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
-    mappings: mappings.action as SavedObjectsTypeMappingDefinition,
+    mappings: actionMappings,
     migrations: getActionsMigrations(encryptedSavedObjects),
     management: {
       displayName: 'connector',
@@ -73,10 +74,11 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
-    mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
+    mappings: actionTaskParamsMappings,
     migrations: getActionTaskParamsMigrations(encryptedSavedObjects, preconfiguredActions),
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
       const oldestIdleActionTask = await getOldestIdleActionTask(
@@ -100,9 +102,10 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
-    mappings: mappings.connector_token as SavedObjectsTypeMappingDefinition,
+    mappings: connectorTokenMappings,
     management: {
       importableAndExportable: false,
     },

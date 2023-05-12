@@ -37,6 +37,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
+    "overrides": undefined,
     "params": Object {
       "listenOnChange": true,
     },

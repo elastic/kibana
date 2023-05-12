@@ -77,6 +77,7 @@ export interface IndexViewValues {
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
   isCanceling: boolean;
+  isHiddenIndex: boolean;
   isInitialLoading: typeof CachedFetchIndexApiLogic.values.isInitialLoading;
   isSyncing: boolean;
   isWaitingForSync: boolean;
@@ -233,6 +234,11 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     isConnectorIndex: [
       () => [selectors.indexData],
       (data: FetchIndexApiResponse | undefined) => isConnectorIndex(data),
+    ],
+    isHiddenIndex: [
+      () => [selectors.indexData],
+      (data: FetchIndexApiResponse | undefined) =>
+        data?.hidden || (data?.name ?? '').startsWith('.'),
     ],
     isSyncing: [
       () => [selectors.indexData, selectors.syncStatus],

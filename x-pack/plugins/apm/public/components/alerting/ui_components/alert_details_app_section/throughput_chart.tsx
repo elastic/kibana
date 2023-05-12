@@ -17,14 +17,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { getResponseTimeTickFormatter } from '../../../shared/charts/transaction_charts/helper';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../../common/document_type';
+import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -38,7 +39,6 @@ function ThroughputChart({
   end,
   comparisonChartTheme,
   comparisonEnabled,
-  latencyMaxY,
   offset,
   timeZone,
 }: {
@@ -49,15 +49,23 @@ function ThroughputChart({
   end: string;
   comparisonChartTheme: RecursivePartial<Theme>;
   comparisonEnabled: boolean;
-  latencyMaxY: number;
   offset: string;
   timeZone: string;
 }) {
   /* Throughput Chart */
+
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    numBuckets: 100,
+    kuery: '',
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
+
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } =
     useFetcher(
       (callApmApi) => {
-        if (serviceName && transactionType && start && end) {
+        if (serviceName && transactionType && start && end && preferred) {
           return callApmApi(
             'GET /internal/apm/services/{serviceName}/throughput',
             {
@@ -72,13 +80,16 @@ function ThroughputChart({
                   end,
                   transactionType,
                   transactionName: undefined,
+                  documentType: preferred.source.documentType,
+                  rollupInterval: preferred.source.rollupInterval,
+                  bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 },
               },
             }
           );
         }
       },
-      [environment, serviceName, start, end, transactionType]
+      [environment, serviceName, start, end, transactionType, preferred]
     );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
     ChartType.THROUGHPUT
@@ -103,8 +114,6 @@ function ThroughputChart({
         ]
       : []),
   ];
-
-  const latencyFormatter = getDurationFormatter(latencyMaxY);
 
   return (
     <EuiFlexItem>
@@ -140,7 +149,7 @@ function ThroughputChart({
           fetchStatus={statusThroughput}
           customTheme={comparisonChartTheme}
           timeseries={timeseriesThroughput}
-          yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+          yLabelFormat={asExactTransactionRate}
           timeZone={timeZone}
         />
       </EuiPanel>

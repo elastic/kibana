@@ -6,14 +6,13 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import { listTypeSchema } from './schemas/management_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { checksFactory } from '../saved_objects';
-import { BUILT_IN_MODEL_TAG } from '../../common/constants/data_frame_analytics';
-import { BUILT_IN_MODEL_TYPE } from '../../common/constants/trained_models';
 import type {
   AnomalyDetectionManagementItems,
   AnalyticsManagementItems,

@@ -490,7 +490,7 @@
           },
           " extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"singleSelection\" | \"height\" | \"errorMessage\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "packages/shared-ux/avatar/user_profile/impl/user_profiles_selectable.tsx",
         "deprecated": false,

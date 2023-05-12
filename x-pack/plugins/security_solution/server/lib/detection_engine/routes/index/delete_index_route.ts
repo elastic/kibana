@@ -57,7 +57,7 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
             body: `index: "${index}" does not exist`,
           });
         } else {
-          await deleteAllIndex(esClient, index);
+          await deleteAllIndex(esClient, index, true);
           const policyExists = await getPolicyExists(esClient, index);
           if (policyExists) {
             await deletePolicy(esClient, index);

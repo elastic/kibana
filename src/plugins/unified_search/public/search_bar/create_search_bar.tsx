@@ -56,13 +56,22 @@ const defaultFiltersUpdated = (
 };
 
 // Respond to user changing the refresh settings
-const defaultOnRefreshChange = (queryService: QueryStart) => {
+const defaultOnRefreshChange = (
+  queryService: QueryStart,
+  onRefreshChange?: (payload: { isPaused: boolean; refreshInterval: number }) => void
+) => {
   const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
       value: options.refreshInterval,
       pause: options.isPaused,
     });
+    if (onRefreshChange) {
+      onRefreshChange({
+        refreshInterval: options.refreshInterval,
+        isPaused: options.isPaused,
+      });
+    }
   };
 };
 
@@ -145,6 +154,9 @@ export function createSearchBar({
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
+    useEffect(() => {
+      onQuerySubmitRef.current = props.onQuerySubmit;
+    }, [props.onQuerySubmit]);
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
     const { filters } = useFilterManager({
@@ -215,9 +227,10 @@ export function createSearchBar({
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-            onRefreshChange={defaultOnRefreshChange(data.query)}
+            onRefreshChange={defaultOnRefreshChange(data.query, props.onRefreshChange)}
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
             onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
@@ -232,6 +245,8 @@ export function createSearchBar({
             onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
+            dataTestSubj={props.dataTestSubj}
+            filtersForSuggestions={props.filtersForSuggestions}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

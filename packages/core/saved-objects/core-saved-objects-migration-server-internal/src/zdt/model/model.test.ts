@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { StageMocks } from './model.test.mocks';
+import './model.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { createContextMock, MockedMigratorContext } from '../test_helpers';
 import type { RetryableEsClientError } from '../../actions';
 import type { State, BaseState, FatalState, AllActionStates } from '../state';
 import type { StateActionResponse } from './types';
-import { model } from './model';
+import { model, modelStageMap } from './model';
 
 describe('model', () => {
   let context: MockedMigratorContext;
@@ -30,6 +30,7 @@ describe('model', () => {
     retryCount: 0,
     retryDelay: 0,
     logs: [],
+    skipDocumentMigration: false,
   };
 
   const retryableError: RetryableEsClientError = {
@@ -128,16 +129,7 @@ describe('model', () => {
         },
       });
 
-    const stageMapping: Record<AllActionStates, Function> = {
-      INIT: StageMocks.init,
-      CREATE_TARGET_INDEX: StageMocks.createTargetIndex,
-      UPDATE_INDEX_MAPPINGS: StageMocks.updateIndexMappings,
-      UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: StageMocks.updateIndexMappingsWaitForTask,
-      UPDATE_MAPPING_MODEL_VERSIONS: StageMocks.updateMappingModelVersion,
-      UPDATE_ALIASES: StageMocks.updateAliases,
-    };
-
-    Object.entries(stageMapping).forEach(([stage, handler]) => {
+    Object.entries(modelStageMap).forEach(([stage, handler]) => {
       test(`dispatch ${stage} state`, () => {
         const state = createStubState(stage as AllActionStates);
         const res = createStubResponse();

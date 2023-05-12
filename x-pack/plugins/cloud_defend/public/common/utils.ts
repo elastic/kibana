@@ -5,7 +5,10 @@
  * 2.0.
  */
 import yaml from 'js-yaml';
+import { uniq } from 'lodash';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { errorBlockActionRequiresTargetFilePath } from '../components/control_general_view/translations';
 import {
   Selector,
   Response,
@@ -17,6 +20,11 @@ import {
   SelectorConditionsMap,
   SelectorCondition,
 } from '../types';
+import {
+  MAX_CONDITION_VALUE_LENGTH_BYTES,
+  MAX_SELECTORS_AND_RESPONSES_PER_TYPE,
+  FIM_OPERATIONS,
+} from './constants';
 
 export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
   return policy.inputs.find((input) => input.type === inputId);
@@ -47,6 +55,162 @@ export function conditionCombinationInvalid(
   });
 
   return !!invalid;
+}
+
+type TotalByType = {
+  [key in SelectorType]: number;
+};
+
+export function getTotalsByType(selectors: Selector[], responses: Response[]) {
+  const totalsByType: TotalByType = { process: 0, file: 0 };
+
+  selectors.forEach((selector) => {
+    totalsByType[selector.type]++;
+  });
+
+  responses.forEach((response) => {
+    totalsByType[response.type]++;
+  });
+
+  return totalsByType;
+}
+
+function selectorUsesFIM(selector?: Selector) {
+  return (
+    selector &&
+    (!selector.operation ||
+      selector.operation.length === 0 ||
+      selector.operation.some((r) => FIM_OPERATIONS.indexOf(r) >= 0))
+  );
+}
+
+function selectorsIncludeConditionsForFIMOperations(
+  selectors: Selector[],
+  conditions: SelectorCondition[],
+  selectorNames?: string[],
+  requireForAll?: boolean
+) {
+  const result =
+    selectorNames &&
+    selectorNames.reduce((prev, cur) => {
+      const selector = selectors.find((s) => s.name === cur);
+      const usesFIM = selectorUsesFIM(selector);
+      const hasAllConditions =
+        !usesFIM ||
+        !!(
+          selector &&
+          conditions.reduce((p, c) => {
+            return p && selector.hasOwnProperty(c);
+          }, true)
+        );
+
+      if (requireForAll) {
+        return prev && hasAllConditions;
+      } else {
+        return prev || hasAllConditions;
+      }
+    }, requireForAll);
+
+  return !!result;
+}
+
+export function selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar(
+  selectors: Selector[],
+  selectorNames?: string[]
+) {
+  const result =
+    selectorNames &&
+    selectorNames.reduce((prev, cur) => {
+      const selector = selectors.find((s) => s.name === cur);
+      const usesFIM = selectorUsesFIM(selector);
+      return prev || !!(usesFIM && selector?.targetFilePath?.includes('/**'));
+    }, false);
+
+  return !!result;
+}
+
+export function validateBlockRestrictions(selectors: Selector[], responses: Response[]) {
+  const errors: string[] = [];
+
+  responses.forEach((response) => {
+    if (response.actions.includes('block')) {
+      // check if any selectors are using FIM operations
+      // and verify that targetFilePath is specfied in all 'match' selectors
+      // or at least one 'exclude' selector
+      const excludeUsesTargetFilePath = selectorsIncludeConditionsForFIMOperations(
+        selectors,
+        ['targetFilePath'],
+        response.exclude
+      );
+      const matchSelectorsAllUsingTargetFilePath = selectorsIncludeConditionsForFIMOperations(
+        selectors,
+        ['targetFilePath'],
+        response.match,
+        true
+      );
+
+      if (!(matchSelectorsAllUsingTargetFilePath || excludeUsesTargetFilePath)) {
+        errors.push(errorBlockActionRequiresTargetFilePath);
+      }
+    }
+  });
+
+  return errors;
+}
+
+export function validateMaxSelectorsAndResponses(selectors: Selector[], responses: Response[]) {
+  const errors: string[] = [];
+  const totalsByType = getTotalsByType(selectors, responses);
+
+  // check selectors + responses doesn't exceed MAX_SELECTORS_AND_RESPONSES_PER_TYPE
+  Object.values(totalsByType).forEach((count) => {
+    if (count > MAX_SELECTORS_AND_RESPONSES_PER_TYPE) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorMaxSelectorsResponsesExceeded', {
+          defaultMessage:
+            'You cannot exceed {max} selectors + responses for a given type e.g file, process',
+          values: { max: MAX_SELECTORS_AND_RESPONSES_PER_TYPE },
+        })
+      );
+    }
+  });
+
+  return errors;
+}
+
+export function validateStringValuesForCondition(condition: SelectorCondition, values: string[]) {
+  const errors: string[] = [];
+  const maxValueBytes =
+    SelectorConditionsMap[condition].maxValueBytes || MAX_CONDITION_VALUE_LENGTH_BYTES;
+
+  const { pattern, patternError } = SelectorConditionsMap[condition];
+
+  values.forEach((value) => {
+    if (pattern && !new RegExp(pattern).test(value)) {
+      if (patternError) {
+        errors.push(patternError);
+      } else {
+        errors.push(
+          i18n.translate('xpack.cloudDefend.errorGenericRegexFailure', {
+            defaultMessage: '"{condition}" values must match the pattern: /{pattern}/',
+            values: { condition, pattern },
+          })
+        );
+      }
+    }
+
+    const bytes = new Blob([value]).size;
+    if (bytes > maxValueBytes) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorMaxValueBytesExceeded', {
+          defaultMessage: '"{condition}" values cannot exceed {maxValueBytes} bytes',
+          values: { condition, maxValueBytes },
+        })
+      );
+    }
+  });
+
+  return uniq(errors);
 }
 
 export function getRestrictedValuesForCondition(
@@ -145,12 +309,15 @@ export function getYamlFromSelectorsAndResponses(selectors: Selector[], response
   }, schema);
 
   responses.reduce((current, response: any) => {
-    if (current && response && response.type) {
+    if (current && response) {
       if (current[response.type]) {
-        current[response.type]?.responses.push(response);
+        current[response.type].responses.push(response);
+      } else {
+        current[response.type] = { selectors: [], responses: [response] };
       }
     }
 
+    // the 'any' cast is used so we can keep 'response.type' type safe
     delete response.type;
 
     return current;

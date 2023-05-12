@@ -76,7 +76,7 @@ export type HasData<T extends ObservabilityFetchDataPlugins> = (
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'stack_monitoring' | 'uptime' | 'fleet'
+  'observability-overview' | 'stack_monitoring' | 'fleet' | 'synthetics'
 >;
 
 export interface DataHandler<
@@ -154,7 +154,7 @@ export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
-  synthetics: UptimeFetchDataResponse;
+  uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
 }
 
@@ -162,6 +162,6 @@ export interface ObservabilityHasDataResponse {
   apm: APMHasDataResponse;
   infra_metrics: InfraMetricsHasDataResponse;
   infra_logs: InfraLogsHasDataResponse;
-  synthetics: SyntheticsHasDataResponse;
+  uptime: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
 }

@@ -58,6 +58,7 @@ class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
       // keyword fields over text fields.
       // e.g. if foo.keyword and foo exist, don't add foo to the list.
       this._fields = fieldsPreferringKeyword;
+      this.removeCounterFields();
     } catch (error) {
       console.error('Unable to load analytics index fields', error); // eslint-disable-line no-console
     }

@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFieldText } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import {
   PhraseValueInput,
   PhrasesValuesInput,
@@ -35,6 +36,7 @@ interface ParamsEditorInputProps {
   onParamsChange: (params: unknown) => void;
   onParamsUpdate: (value: unknown) => void;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   field?: DataViewField;
   operator?: Operator;
   invalid: boolean;
@@ -63,6 +65,7 @@ export function ParamsEditorInput({
   onParamsChange,
   onParamsUpdate,
   timeRangeForSuggestionsOverride,
+  filtersForSuggestions,
 }: ParamsEditorInputProps) {
   switch (operator?.type) {
     case 'exists':
@@ -76,6 +79,7 @@ export function ParamsEditorInput({
           value={params !== undefined ? `${params}` : undefined}
           onChange={onParamsChange}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={filtersForSuggestions}
           fullWidth
           invalid={invalid}
           disabled={disabled}
@@ -91,6 +95,7 @@ export function ParamsEditorInput({
           onChange={onParamsChange}
           onParamsUpdate={onParamsUpdate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={filtersForSuggestions}
           fullWidth
           disabled={disabled}
         />

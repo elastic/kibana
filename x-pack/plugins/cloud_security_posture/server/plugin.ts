@@ -85,7 +85,7 @@ export class CspPlugin
 
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
-    registerCspmUsageCollector(this.logger, plugins.usageCollection);
+    registerCspmUsageCollector(this.logger, coreStartServices, plugins.usageCollection);
 
     this.isCloudEnabled = plugins.cloud.isCloudEnabled;
 

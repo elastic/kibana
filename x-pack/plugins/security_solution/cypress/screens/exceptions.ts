@@ -49,10 +49,20 @@ export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingException
 export const EXCEPTIONS_TABLE_DELETE_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemDelete"]';
 
+export const EXCEPTIONS_TABLE_LINK_RULES_BTN =
+  '[data-test-subj="sharedListOverflowCardActionItemLinkRules"]';
+
 export const EXCEPTIONS_TABLE_EXPORT_MODAL_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemExport"]';
 
-export const EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+export const EXCEPTIONS_TABLE_DUPLICATE_BTN =
+  '[data-test-subj="sharedListOverflowCardActionItemDuplicate"]';
+
+export const EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN =
+  '[data-test-subj="confirmModalConfirmButton"]';
+
+export const INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH =
+  '[data-test-subj="includeExpiredExceptionsConfirmationModalSwitch"]';
 
 export const EXCEPTIONS_TABLE_SEARCH_CLEAR =
   '[data-test-subj="allExceptionListsPanel"] button.euiFormControlLayoutClearButton';
@@ -149,6 +159,13 @@ export const CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT =
 export const CREATE_SHARED_EXCEPTION_LIST_BTN =
   'button[data-test-subj="exception-lists-form-create-shared"]';
 
+export const exceptionsTableListManagementListContainerByListId = (listId: string) =>
+  `[data-test-subj="exceptionsManagementListCard-${listId}"]`;
+
+export const LINKED_RULES_BADGE = '[data-test-subj="exceptionListCardLinkedRulesBadge"]';
+
+export const MANAGE_RULES_SAVE = '[data-test-subj="manageListRulesSaveButton"]';
+
 // Exception list management
 export const EXCEPTIONS_LIST_MANAGEMENT_NAME =
   '[data-test-subj="exceptionListManagementTitleText"]';
@@ -169,3 +186,5 @@ export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModal
 
 export const EXCEPTIONS_LIST_DETAILS_HEADER =
   '[data-test-subj="exceptionListManagementPageHeader"]';
+
+export const EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeader"]';

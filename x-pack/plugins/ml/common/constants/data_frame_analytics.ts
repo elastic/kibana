@@ -34,6 +34,4 @@ export const INDEX_CREATED_BY = {
   DATA_FRAME_ANALYTICS: 'data-frame-analytics',
 } as const;
 
-export const BUILT_IN_MODEL_TAG = 'prepackaged';
-
 export type JobMapNodeTypes = typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES];

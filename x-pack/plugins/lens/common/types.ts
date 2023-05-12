@@ -17,6 +17,10 @@ import { layerTypes } from './layer_types';
 import { CollapseFunction } from './expressions';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
+export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
+export type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+export type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
+export type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -25,7 +29,7 @@ export interface DateRange {
   toDate: string;
 }
 
-export interface PersistableFilterMeta extends FilterMeta {
+interface PersistableFilterMeta extends FilterMeta {
   indexRefName?: string;
 }
 
@@ -40,10 +44,10 @@ export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 export type ValueLabelConfig = 'hide' | 'show';
 
 export type PieChartType = $Values<typeof PieChartTypes>;
-export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
-export type NumberDisplayType = $Values<typeof NumberDisplay>;
+type CategoryDisplayType = $Values<typeof CategoryDisplay>;
+type NumberDisplayType = $Values<typeof NumberDisplay>;
 
-export type LegendDisplayType = $Values<typeof LegendDisplay>;
+type LegendDisplayType = $Values<typeof LegendDisplay>;
 
 export enum EmptySizeRatios {
   SMALL = 0.3,

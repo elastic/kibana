@@ -20,6 +20,8 @@ import {
   FetchLogViewStatusError,
   LogView,
   LogViewAttributes,
+  logViewAttributesRT,
+  LogViewReference,
   LogViewsStaticConfig,
   LogViewStatus,
   PutLogViewError,
@@ -37,7 +39,15 @@ export class LogViewsClient implements ILogViewsClient {
     private readonly config: LogViewsStaticConfig
   ) {}
 
-  public async getLogView(logViewId: string): Promise<LogView> {
+  public async getLogView(logViewReference: LogViewReference): Promise<LogView> {
+    if (logViewReference.type === 'log-view-inline') {
+      return {
+        ...logViewReference,
+        origin: 'inline',
+      };
+    }
+
+    const { logViewId } = logViewReference;
     const response = await this.http.get(getLogViewUrl(logViewId)).catch((error) => {
       throw new FetchLogViewError(`Failed to fetch log view "${logViewId}": ${error}`);
     });
@@ -51,8 +61,8 @@ export class LogViewsClient implements ILogViewsClient {
     return data;
   }
 
-  public async getResolvedLogView(logViewId: string): Promise<ResolvedLogView> {
-    const logView = await this.getLogView(logViewId);
+  public async getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView> {
+    const logView = await this.getLogView(logViewReference);
     const resolvedLogView = await this.resolveLogView(logView.id, logView.attributes);
     return resolvedLogView;
   }
@@ -98,24 +108,44 @@ export class LogViewsClient implements ILogViewsClient {
   }
 
   public async putLogView(
-    logViewId: string,
+    logViewReference: LogViewReference,
     logViewAttributes: Partial<LogViewAttributes>
   ): Promise<LogView> {
-    const response = await this.http
-      .put(getLogViewUrl(logViewId), {
-        body: JSON.stringify(putLogViewRequestPayloadRT.encode({ attributes: logViewAttributes })),
-      })
-      .catch((error) => {
-        throw new PutLogViewError(`Failed to write log view "${logViewId}": ${error}`);
-      });
+    if (logViewReference.type === 'log-view-inline') {
+      const { id } = logViewReference;
+      const attributes = decodeOrThrow(
+        rt.partial(logViewAttributesRT.type.props),
+        (message: string) =>
+          new PutLogViewError(`Failed to decode inline log view "${id}": ${message}"`)
+      )(logViewAttributes);
+      return {
+        id,
+        attributes: {
+          ...logViewReference.attributes,
+          ...attributes,
+        },
+        origin: 'inline',
+      };
+    } else {
+      const { logViewId } = logViewReference;
+      const response = await this.http
+        .put(getLogViewUrl(logViewId), {
+          body: JSON.stringify(
+            putLogViewRequestPayloadRT.encode({ attributes: logViewAttributes })
+          ),
+        })
+        .catch((error) => {
+          throw new PutLogViewError(`Failed to write log view "${logViewId}": ${error}`);
+        });
 
-    const { data } = decodeOrThrow(
-      getLogViewResponsePayloadRT,
-      (message: string) =>
-        new PutLogViewError(`Failed to decode written log view "${logViewId}": ${message}"`)
-    )(response);
+      const { data } = decodeOrThrow(
+        getLogViewResponsePayloadRT,
+        (message: string) =>
+          new PutLogViewError(`Failed to decode written log view "${logViewId}": ${message}"`)
+      )(response);
 
-    return data;
+      return data;
+    }
   }
 
   public async resolveLogView(

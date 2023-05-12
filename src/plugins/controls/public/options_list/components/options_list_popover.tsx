@@ -9,16 +9,13 @@
 import React, { useState } from 'react';
 import { isEmpty } from 'lodash';
 
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListPopoverTitle } from './options_list_popover_title';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 export interface OptionsListPopoverProps {
   width: number;
@@ -33,21 +30,16 @@ export const OptionsListPopover = ({
   updateSearchString,
   loadMoreSuggestions,
 }: OptionsListPopoverProps) => {
-  // Redux embeddable container Context
-  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
-    OptionsListReduxState,
-    typeof optionsListReducers
-  >();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const availableOptions = select((state) => state.componentState.availableOptions);
-  const field = select((state) => state.componentState.field);
+  const field = optionsList.select((state) => state.componentState.field);
+  const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
-  const hideActionBar = select((state) => state.explicitInput.hideActionBar);
-  const hideExclude = select((state) => state.explicitInput.hideExclude);
-  const fieldName = select((state) => state.explicitInput.fieldName);
-  const id = select((state) => state.explicitInput.id);
+  const id = optionsList.select((state) => state.explicitInput.id);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const hideExclude = optionsList.select((state) => state.explicitInput.hideExclude);
+  const hideActionBar = optionsList.select((state) => state.explicitInput.hideActionBar);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 

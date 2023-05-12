@@ -39,14 +39,10 @@ import {
   getSelectorTypeIcon,
   conditionCombinationInvalid,
   getRestrictedValuesForCondition,
+  validateStringValuesForCondition,
 } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
-import {
-  VALID_SELECTOR_NAME_REGEX,
-  MAX_SELECTOR_NAME_LENGTH,
-  MAX_CONDITION_VALUE_LENGTH_BYTES,
-  MAX_FILE_PATH_VALUE_LENGTH_BYTES,
-} from '../../common/constants';
+import { VALID_SELECTOR_NAME_REGEX, MAX_SELECTOR_NAME_LENGTH } from '../../common/constants';
 
 interface ConditionProps {
   label: string;
@@ -188,6 +184,7 @@ const StringArrayCondition = ({
 export const ControlGeneralViewSelector = ({
   selector,
   selectors,
+  usedByResponse,
   index,
   onRemove,
   onDuplicate,
@@ -287,17 +284,11 @@ export const ControlGeneralViewSelector = ({
         errors.push(i18n.errorValueRequired);
       }
 
-      values.forEach((value) => {
-        const bytes = new Blob([value]).size;
+      const stringValueErrors = validateStringValuesForCondition(prop, values);
 
-        if (prop === 'targetFilePath') {
-          if (bytes > MAX_FILE_PATH_VALUE_LENGTH_BYTES) {
-            errors.push(i18n.errorValueLengthExceeded);
-          }
-        } else if (bytes > MAX_CONDITION_VALUE_LENGTH_BYTES) {
-          errors.push(i18n.errorValueLengthExceeded);
-        }
-      });
+      if (stringValueErrors.length > 0) {
+        errors.push(...stringValueErrors);
+      }
 
       if (errors.length) {
         errorMap[prop] = errors;
@@ -403,17 +394,24 @@ export const ControlGeneralViewSelector = ({
       css={styles.accordion}
       extraAction={
         <EuiFlexGroup alignItems="center" gutterSize="none">
-          {accordionState === 'closed' && (
-            <div>
-              <EuiText css={styles.conditionsBadge} size="xs">
-                <b>{i18n.conditions}</b>
-              </EuiText>
-              <EuiBadge title={conditionsAdded.join(',')} color="hollow">
-                {conditionsAdded.length}
+          <div>
+            {accordionState === 'closed' && (
+              <div data-test-subj="cloud-defend-conditions-count">
+                <EuiText css={styles.conditionsBadge} size="xs">
+                  <b>{i18n.conditions}</b>
+                </EuiText>
+                <EuiBadge title={conditionsAdded.join(',')} color="hollow">
+                  {conditionsAdded.length}
+                </EuiBadge>
+              </div>
+            )}
+            {!usedByResponse && (
+              <EuiBadge title={i18n.unusedSelectorHelp} color="warning">
+                {i18n.unusedSelector}
               </EuiBadge>
-              <div css={styles.verticalDivider} />
-            </div>
-          )}
+            )}
+            <div css={styles.verticalDivider} />
+          </div>
           <EuiFlexItem>
             <EuiPopover
               id={selector.name}

@@ -128,7 +128,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
             <JsonEditor
               label={i18nTexts.editor.label}
               onUpdate={onJsonUpdate}
-              euiCodeEditorProps={{
+              codeEditorProps={{
                 height: '300px',
               }}
             />

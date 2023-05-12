@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../../../plugin';
 
@@ -25,9 +25,9 @@ export const OverviewErrorsCount = ({
   to,
   locations,
 }: MonitorErrorsCountProps) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 

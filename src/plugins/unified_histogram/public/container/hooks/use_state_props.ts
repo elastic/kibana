@@ -6,31 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
-import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
+import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
+import {
+  AggregateQuery,
+  getAggregateQueryMode,
+  isOfAggregateQueryType,
+  Query,
+} from '@kbn/es-query';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
 import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
   breakdownFieldSelector,
   chartHiddenSelector,
-  dataViewSelector,
-  querySelector,
-  requestAdapterSelector,
-  searchSessionIdSelector,
   timeIntervalSelector,
   totalHitsResultSelector,
   totalHitsStatusSelector,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 
-export const useStateProps = (stateService: UnifiedHistogramStateService | undefined) => {
+export const useStateProps = ({
+  stateService,
+  dataView,
+  query,
+  searchSessionId,
+  requestAdapter,
+}: {
+  stateService: UnifiedHistogramStateService | undefined;
+  dataView: DataView;
+  query: Query | AggregateQuery | undefined;
+  searchSessionId: string | undefined;
+  requestAdapter: RequestAdapter | undefined;
+}) => {
   const breakdownField = useStateSelector(stateService?.state$, breakdownFieldSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
-  const dataView = useStateSelector(stateService?.state$, dataViewSelector);
-  const query = useStateSelector(stateService?.state$, querySelector);
-  const requestAdapter = useStateSelector(stateService?.state$, requestAdapterSelector);
-  const searchSessionId = useStateSelector(stateService?.state$, searchSessionIdSelector);
   const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
@@ -40,7 +50,11 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
    */
 
   const isPlainRecord = useMemo(() => {
-    return query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql';
+    return (
+      query &&
+      isOfAggregateQueryType(query) &&
+      ['sql', 'esql'].some((mode) => mode === getAggregateQueryMode(query))
+    );
   }, [query]);
 
   const isTimeBased = useMemo(() => {
@@ -48,7 +62,7 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
   }, [dataView]);
 
   const hits = useMemo(() => {
-    if (isPlainRecord || totalHitsResult instanceof Error) {
+    if (totalHitsResult instanceof Error) {
       return undefined;
     }
 
@@ -56,10 +70,10 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
       status: totalHitsStatus,
       total: totalHitsResult,
     };
-  }, [isPlainRecord, totalHitsResult, totalHitsStatus]);
+  }, [totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (isPlainRecord || !isTimeBased) {
+    if (!isTimeBased && !isPlainRecord) {
       return undefined;
     }
 
@@ -136,6 +150,13 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
     [stateService]
   );
 
+  const onSuggestionChange = useCallback(
+    (suggestion) => {
+      stateService?.setCurrentSuggestion(suggestion);
+    },
+    [stateService]
+  );
+
   /**
    * Effects
    */
@@ -152,11 +173,13 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
     chart,
     breakdown,
     request,
+    isPlainRecord,
     onTopPanelHeightChange,
     onTimeIntervalChange,
     onTotalHitsChange,
     onChartHiddenChange,
     onChartLoad,
     onBreakdownFieldChange,
+    onSuggestionChange,
   };
 };

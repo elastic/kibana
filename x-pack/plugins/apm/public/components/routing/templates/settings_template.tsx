@@ -10,13 +10,15 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableAgentExplorerView } from '@kbn/observability-plugin/public';
 import React from 'react';
-import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
 import { Environment } from '../../../../common/environment_rt';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
+import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
+import { BetaBadge } from '../../shared/beta_badge';
 import { ApmRouter } from '../apm_route_config';
 import { ApmMainTemplate } from './apm_main_template';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -41,7 +43,17 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const router = useApmRouter();
   const defaultEnvironment = useDefaultEnvironment();
 
-  const tabs = getTabs({ core, selectedTab, router, defaultEnvironment });
+  const agentConfigurationAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.AgentConfigurationAvailable
+  );
+
+  const tabs = getTabs({
+    core,
+    selectedTab,
+    router,
+    defaultEnvironment,
+    agentConfigurationAvailable,
+  });
 
   return (
     <ApmMainTemplate
@@ -63,17 +75,19 @@ function getTabs({
   selectedTab,
   router,
   defaultEnvironment,
+  agentConfigurationAvailable,
 }: {
   core: CoreStart;
   selectedTab: Tab['key'];
   router: ApmRouter;
   defaultEnvironment: Environment;
+  agentConfigurationAvailable: boolean;
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
 
   const agentExplorerEnabled = core.uiSettings.get<boolean>(
     enableAgentExplorerView,
-    false
+    true
   );
 
   const tabs: Tab[] = [
@@ -84,13 +98,17 @@ function getTabs({
       }),
       href: router.link('/settings/general-settings'),
     },
-    {
-      key: 'agent-configuration',
-      label: i18n.translate('xpack.apm.settings.agentConfig', {
-        defaultMessage: 'Agent Configuration',
-      }),
-      href: router.link('/settings/agent-configuration'),
-    },
+    ...(agentConfigurationAvailable
+      ? [
+          {
+            key: 'agent-configuration' as const,
+            label: i18n.translate('xpack.apm.settings.agentConfig', {
+              defaultMessage: 'Agent Configuration',
+            }),
+            href: router.link('/settings/agent-configuration'),
+          },
+        ]
+      : []),
     {
       key: 'agent-explorer',
       label: i18n.translate('xpack.apm.settings.agentExplorer', {
@@ -104,7 +122,7 @@ function getTabs({
           serviceName: '',
         },
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <BetaBadge icon="beta" />,
       hidden: !agentExplorerEnabled,
     },
     {

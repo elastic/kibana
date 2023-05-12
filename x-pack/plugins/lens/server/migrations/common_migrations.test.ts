@@ -12,7 +12,7 @@ import {
   getLensFilterMigrations,
   commonMigratePartitionChartGroups,
 } from './common_migrations';
-import { LensDocShape840 } from '..';
+import { LensDocShape840 } from './types';
 
 describe('Lens migrations', () => {
   describe('applying filter migrations', () => {

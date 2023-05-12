@@ -10,7 +10,7 @@ import type { AstFunction } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { IndexPattern } from '../../../../../types';
-import { LayerType } from '../../../../../../common';
+import { LayerType } from '../../../../../../common/types';
 import type { TimeScaleUnit } from '../../../../../../common/expressions';
 import type { FormBasedLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';

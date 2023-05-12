@@ -9,13 +9,12 @@
 import { EuiDelayRender, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { lazy } from 'react';
+import type { UnifiedHistogramApi, UnifiedHistogramContainerProps } from './container';
 
 export type {
-  UnifiedHistogramUninitializedApi,
-  UnifiedHistogramInitializedApi,
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps,
-  UnifiedHistogramInitializeOptions,
+  UnifiedHistogramCreationOptions,
 } from './container';
 export type { UnifiedHistogramState, UnifiedHistogramStateOptions } from './services/state_service';
 export {
@@ -32,10 +31,11 @@ const LazyUnifiedHistogramContainer = lazy(() => import('./container'));
 /**
  * A resizable layout component with two panels that renders a histogram with a hits
  * counter in the top panel, and a main display (data table, etc.) in the bottom panel.
- * If all context props are left undefined, the layout will render in a single panel
- * mode including only the main display.
  */
-export const UnifiedHistogramContainer = withSuspense(
+export const UnifiedHistogramContainer = withSuspense<
+  UnifiedHistogramContainerProps,
+  UnifiedHistogramApi
+>(
   LazyUnifiedHistogramContainer,
   <EuiDelayRender delay={300}>
     <EuiFlexGroup

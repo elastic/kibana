@@ -21,8 +21,8 @@ const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
 const DEFAULT_IMPLICIT_BUNDLE_DEPS = ['core'];
 
-const toStringArray = (input: any): string[] =>
-  Array.isArray(input) && input.every((x) => typeof x === 'string') ? input : [];
+const toStringArray = (input: any): string[] | null =>
+  Array.isArray(input) && input.every((x) => typeof x === 'string') ? input : null;
 
 export interface BundleSpec {
   readonly type: typeof VALID_BUNDLE_TYPES[0];
@@ -164,19 +164,39 @@ export class Bundle {
       );
     }
 
-    if (isObj(parsed) && isObj(parsed.plugin)) {
-      return {
-        explicit: [...toStringArray(parsed.plugin.requiredBundles)],
-        implicit: [
-          ...DEFAULT_IMPLICIT_BUNDLE_DEPS,
-          ...toStringArray(parsed.plugin.requiredPlugins),
-        ],
-      };
+    // TODO: remove once we improve the third party plugin build workflow
+    // This is only used to build legacy third party plugins in the @kbn/plugin-helpers
+
+    if (!isObj(parsed)) {
+      throw new Error(`Expected [${this.manifestPath}] to be a jsonc parseable file`);
     }
 
-    throw new Error(
-      `Expected "requiredBundles" and "requiredPlugins" in manifest file [${this.manifestPath}] to be arrays of strings`
-    );
+    const requiredBundles = isObj(parsed.plugin)
+      ? parsed.plugin.requiredBundles
+      : parsed.requiredBundles;
+    const requiredPlugins = isObj(parsed.plugin)
+      ? parsed.plugin.requiredPlugins
+      : parsed.requiredPlugins;
+    const requiredBundlesStringArray = toStringArray(requiredBundles);
+    const requiredPluginsStringArray = toStringArray(requiredPlugins);
+    // END-OF-TD: we just need to check for parse.plugin and not for legacy plugins manifest types
+
+    if (!requiredBundlesStringArray && requiredBundles) {
+      throw new Error(
+        `Expected "requiredBundles" in manifest file [${this.manifestPath}] to be an array of strings`
+      );
+    }
+
+    if (!requiredPluginsStringArray && requiredPlugins) {
+      throw new Error(
+        `Expected "requiredPlugins" in manifest file [${this.manifestPath}] to be an array of strings`
+      );
+    }
+
+    return {
+      explicit: [...(requiredBundlesStringArray || [])],
+      implicit: [...DEFAULT_IMPLICIT_BUNDLE_DEPS, ...(requiredPluginsStringArray || [])],
+    };
   }
 }
 

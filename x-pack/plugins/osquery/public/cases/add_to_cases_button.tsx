@@ -60,7 +60,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   const casePermissions = cases.helpers.canUseCases();
   const hasCasesPermissions =
     casePermissions.read && casePermissions.update && casePermissions.push;
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({});
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   const handleClick = useCallback(() => {
     const attachments: CaseAttachmentsWithoutOwner = [
@@ -76,7 +76,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
       },
     ];
     if (hasCasesPermissions) {
-      selectCaseModal.open({ attachments });
+      selectCaseModal.open({ getAttachments: () => attachments });
     }
   }, [actionId, agentIds, alertAttachments, hasCasesPermissions, queryId, selectCaseModal]);
 

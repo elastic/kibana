@@ -111,7 +111,7 @@ describe('EmailParamsFields renders', () => {
     const valueToSimulate = 'some new value';
     wrapper
       .find('[data-test-subj="messageTextArea"]')
-      .first()
+      .last()
       .simulate('change', { target: { value: valueToSimulate } });
     expect(editAction).toHaveBeenCalledWith('message', valueToSimulate, 0);
     wrapper.setProps({

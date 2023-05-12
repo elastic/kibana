@@ -8,6 +8,7 @@
 import createContainer from 'constate';
 import { useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
+import { LogViewReference } from '../../../../common/log_views';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
@@ -17,7 +18,7 @@ import { TimeKey } from '../../../../common/time';
 const FETCH_THROTTLE_INTERVAL = 3000;
 
 interface UseLogHighlightsStateProps {
-  sourceId: string;
+  logViewReference: LogViewReference;
   sourceVersion: string | undefined;
   centerCursor: TimeKey | null;
   size: number;
@@ -25,7 +26,7 @@ interface UseLogHighlightsStateProps {
 }
 
 export const useLogHighlightsState = ({
-  sourceId,
+  logViewReference,
   sourceVersion,
   centerCursor,
   size,
@@ -40,7 +41,7 @@ export const useLogHighlightsState = ({
 
   const { logEntryHighlights, logEntryHighlightsById, loadLogEntryHighlightsRequest } =
     useLogEntryHighlights(
-      sourceId,
+      logViewReference,
       sourceVersion,
       throttledStartTimestamp,
       throttledEndTimestamp,
@@ -51,7 +52,7 @@ export const useLogHighlightsState = ({
     );
 
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
-    sourceId,
+    logViewReference,
     sourceVersion,
     throttledStartTimestamp,
     throttledEndTimestamp,

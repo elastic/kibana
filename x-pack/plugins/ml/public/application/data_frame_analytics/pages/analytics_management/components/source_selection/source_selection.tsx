@@ -17,8 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
-import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';

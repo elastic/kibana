@@ -16,7 +16,8 @@ interface Props {
 }
 
 export function useSectionFormValidation({ getFieldState, getValues, formState, watch }: Props) {
-  let isIndicatorSectionValid: boolean;
+  let isIndicatorSectionValid: boolean = false;
+
   switch (watch('indicator.type')) {
     case 'sli.kql.custom':
       isIndicatorSectionValid =
@@ -26,9 +27,12 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.filter',
             'indicator.params.good',
             'indicator.params.total',
+            'indicator.params.timestampField',
           ] as const
-        ).every((field) => !getFieldState(field, formState).invalid) &&
-        getValues('indicator.params.index') !== '';
+        ).every((field) => !getFieldState(field).invalid) &&
+        (['indicator.params.index', 'indicator.params.timestampField'] as const).every(
+          (field) => !!getValues(field)
+        );
       break;
     case 'sli.apm.transactionDuration':
       isIndicatorSectionValid =
@@ -41,9 +45,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.threshold',
           ] as const
         ).every((field) => !getFieldState(field, formState).invalid && getValues(field) !== '') &&
-        (['indicator.params.index'] as const).every(
-          (field) => !getFieldState(field, formState).invalid
-        );
+        !getFieldState('indicator.params.index', formState).invalid;
       break;
     case 'sli.apm.transactionErrorRate':
       isIndicatorSectionValid =
@@ -55,7 +57,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.transactionName',
           ] as const
         ).every((field) => !getFieldState(field, formState).invalid && getValues(field) !== '') &&
-        (['indicator.params.index', 'indicator.params.goodStatusCodes'] as const).every(
+        (['indicator.params.index'] as const).every(
           (field) => !getFieldState(field, formState).invalid
         );
       break;
@@ -72,12 +74,12 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
       'objective.timesliceTarget',
       'objective.timesliceWindow',
     ] as const
-  ).every((field) => getFieldState(field, formState).error === undefined);
+  ).every((field) => getFieldState(field).error === undefined);
 
   const isDescriptionSectionValid =
-    !getFieldState('name', formState).invalid &&
+    !getFieldState('name').invalid &&
     getValues('name') !== '' &&
-    !getFieldState('description', formState).invalid;
+    !getFieldState('description').invalid;
 
   return {
     isIndicatorSectionValid,

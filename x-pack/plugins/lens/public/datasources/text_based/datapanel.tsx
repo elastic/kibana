@@ -18,17 +18,17 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FieldList,
   FieldListFilters,
-  FieldItemButton,
-  GetCustomFieldType,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
+  GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
-import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
+import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
+import { FieldItem } from '../common/field_item';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -52,6 +52,8 @@ export function TextBasedDataPanel({
   expressions,
   dataViews,
   layerFields,
+  hasSuggestionForField,
+  dropOntoWorkspace,
 }: TextBasedDataPanelProps) {
   const prevQuery = usePrevious(query);
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
@@ -108,33 +110,26 @@ export function TextBasedDataPanel({
   });
 
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, fieldSearchHighlight }) => {
+    ({ field, groupIndex, itemIndex, fieldSearchHighlight, groupName }) => {
       if (!field) {
         return <></>;
       }
+
       return (
-        <DragDrop
-          draggable
-          order={[itemIndex]}
-          value={{
-            field: field.name,
-            id: field.id,
-            humanData: { label: field.name },
-          }}
-          dataTestSubj={`lnsFieldListPanelField-${field.name}`}
-        >
-          <FieldItemButton<DatatableColumn>
-            isEmpty={false}
-            isActive={false}
-            field={field}
-            fieldSearchHighlight={fieldSearchHighlight}
-            getCustomFieldType={getCustomFieldType}
-            onClick={() => {}}
-          />
-        </DragDrop>
+        <FieldItem
+          field={field}
+          exists
+          hideDetails
+          itemIndex={itemIndex}
+          groupIndex={groupIndex}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
+          highlight={fieldSearchHighlight}
+          getCustomFieldType={getCustomFieldType}
+        />
       );
     },
-    []
+    [hasSuggestionForField, dropOntoWorkspace]
   );
 
   return (

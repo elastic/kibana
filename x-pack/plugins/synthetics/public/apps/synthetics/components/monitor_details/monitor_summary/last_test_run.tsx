@@ -60,6 +60,7 @@ export const LastTestRun = () => {
       latestPing={latestPing}
       loading={loading}
       stepsLoading={stepsLoading}
+      isErrorDetails={false}
     />
   );
 };
@@ -99,15 +100,13 @@ export const LastTestRunComponent = ({
           color="danger"
           iconType="warning"
         >
-          {isErrorDetails ? (
-            <></>
-          ) : (
+          {isErrorDetails ? null : (
             <EuiButton
               data-test-subj="monitorTestRunViewErrorDetails"
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: monitor?.id!,
+                configId: monitor?.[ConfigKey.CONFIG_ID]!,
                 locationId: selectedLocation!.id,
                 stateId: latestPing.state?.id!,
               })}
@@ -186,21 +185,21 @@ const PanelHeader = ({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
           <StatusBadge
             status={parseBadgeStatus(latestPing?.summary?.down! > 0 ? 'fail' : 'success')}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiText size="xs" color={euiTheme.colors.darkShade}>
+          <EuiText css={{ whiteSpace: 'nowrap' }} size="xs" color={euiTheme.colors.darkShade}>
             {lastRunTimestamp}
           </EuiText>
         </EuiFlexItem>
 
         {isBrowserMonitor ? (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem css={{ marginLeft: 'auto' }} grow={false}>
             <EuiButtonEmpty
               data-test-subj="monitorSummaryViewLastTestRun"
               size="xs"

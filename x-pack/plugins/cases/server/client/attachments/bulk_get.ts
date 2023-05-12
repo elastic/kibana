@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -12,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { partition } from 'lodash';
-import { CASE_SAVED_OBJECT, MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
+import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type { BulkGetAttachmentsResponse, CommentAttributes } from '../../../common/api';
 import {
   excess,
@@ -26,12 +25,11 @@ import type { CasesClientArgs, SOWithErrors } from '../types';
 import { Operations } from '../../authorization';
 import type { BulkGetArgs } from './types';
 import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
-import { CASE_REF_NAME } from '../../common/constants';
 import type { CasesClient } from '../client';
+import type { AttachmentSavedObject } from '../../common/types';
+import { partitionByCaseAssociation } from '../../common/partitioning';
 
 type AttachmentSavedObjectWithErrors = SOWithErrors<CommentAttributes>;
-
-type AttachmentSavedObject = SavedObject<CommentAttributes>;
 
 /**
  * Retrieves multiple attachments by id.
@@ -125,17 +123,6 @@ const partitionBySOError = (attachments: Array<OptionalAttributes<CommentAttribu
     attachments,
     (attachment) => attachment.error == null && attachment.attributes != null
   ) as [AttachmentSavedObject[], AttachmentSavedObjectWithErrors];
-
-const partitionByCaseAssociation = (caseId: string, attachments: AttachmentSavedObject[]) =>
-  partition(attachments, (attachment) => {
-    const ref = getCaseReference(attachment.references);
-
-    return caseId === ref?.id;
-  });
-
-const getCaseReference = (references: SavedObjectReference[]): SavedObjectReference | undefined => {
-  return references.find((ref) => ref.name === CASE_REF_NAME && ref.type === CASE_SAVED_OBJECT);
-};
 
 const constructErrors = ({
   caseId,

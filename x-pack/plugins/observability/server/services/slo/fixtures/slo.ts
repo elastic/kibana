@@ -34,7 +34,6 @@ export const createAPMTransactionErrorRateIndicator = (
     service: 'irrelevant',
     transactionName: 'irrelevant',
     transactionType: 'irrelevant',
-    goodStatusCodes: ['2xx', '3xx', '4xx'],
     index: 'metrics-apm*',
     ...params,
   },
@@ -64,6 +63,7 @@ export const createKQLCustomIndicator = (
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
+    timestampField: 'log_timestamp',
     ...params,
   },
 });

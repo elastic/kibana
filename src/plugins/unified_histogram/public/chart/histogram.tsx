@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
 import {
@@ -31,6 +31,7 @@ import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';
 import { useStableCallback } from './hooks/use_stable_callback';
 import { useLensProps } from './hooks/use_lens_props';
+import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
@@ -38,9 +39,10 @@ export interface HistogramProps {
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
+  isPlainRecord?: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  lensAttributes: TypedLensByValueInput['attributes'];
+  lensAttributesContext: LensAttributesContext;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
@@ -55,9 +57,10 @@ export function Histogram({
   request,
   hits,
   chart: { timeInterval },
+  isPlainRecord,
   getTimeRange,
   refetch$,
-  lensAttributes: attributes,
+  lensAttributesContext: attributesContext,
   disableTriggers,
   disabledActions,
   onTotalHitsChange,
@@ -66,12 +69,26 @@ export function Histogram({
   onBrushEnd,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
+  const [chartSize, setChartSize] = useState('100%');
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
     timeRange: getTimeRange(),
     timeInterval,
+    isPlainRecord,
   });
+  const chartRef = useRef<HTMLDivElement | null>(null);
+  const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
+  const { attributes } = attributesContext;
+
+  useEffect(() => {
+    if (attributes.visualizationType === 'lnsMetric') {
+      const size = containerHeight < containerWidth ? containerHeight : containerWidth;
+      setChartSize(`${size}px`);
+    } else {
+      setChartSize('100%');
+    }
+  }, [attributes, containerHeight, containerWidth]);
 
   const onLoad = useStableCallback(
     (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
@@ -91,7 +108,10 @@ export function Histogram({
         return;
       }
 
-      const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
+      const adapterTables = adapters?.tables?.tables;
+      const totalHits = isPlainRecord
+        ? Object.values(adapterTables ?? {})?.[0]?.rows?.length
+        : adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
@@ -114,11 +134,11 @@ export function Histogram({
     }
   );
 
-  const lensProps = useLensProps({
+  const { lensProps, requestData } = useLensProps({
     request,
     getTimeRange,
     refetch$,
-    attributes,
+    attributesContext,
     onLoad,
   });
 
@@ -129,6 +149,13 @@ export function Histogram({
 
     & > div {
       height: 100%;
+      position: absolute;
+      width: 100%;
+    }
+
+    & .lnsExpressionRenderer {
+      width: ${chartSize};
+      margin: auto;
     }
 
     & .echLegend .echLegendList {
@@ -145,7 +172,13 @@ export function Histogram({
 
   return (
     <>
-      <div data-test-subj="unifiedHistogramChart" data-time-range={timeRangeText} css={chartCss}>
+      <div
+        data-test-subj="unifiedHistogramChart"
+        data-time-range={timeRangeText}
+        data-request-data={requestData}
+        css={chartCss}
+        ref={chartRef}
+      >
         <lens.EmbeddableComponent
           {...lensProps}
           disableTriggers={disableTriggers}

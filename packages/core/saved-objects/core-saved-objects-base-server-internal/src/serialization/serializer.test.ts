@@ -104,13 +104,59 @@ describe('#rawToSavedObject', () => {
     });
   });
 
-  test(`if _source.migrationVersion is unspecified it doesn't set migrationVersion`, () => {
-    const actual = singleNamespaceSerializer.rawToSavedObject({
-      _id: 'foo:bar',
-      _source: {
-        type: 'foo',
+  test('derives original `migrationVersion` in compatibility mode', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject(
+      {
+        _id: 'foo:bar',
+        _source: {
+          migrationVersion: { foo: '1.0.0' },
+          type: 'foo',
+          typeMigrationVersion: '1.2.3',
+        },
       },
-    });
+      { migrationVersionCompatibility: 'compatible' }
+    );
+    expect(actual).toHaveProperty('migrationVersion', { foo: '1.0.0' });
+  });
+
+  test('derives `migrationVersion` in compatibility mode', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject(
+      {
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          typeMigrationVersion: '1.2.3',
+        },
+      },
+      { migrationVersionCompatibility: 'compatible' }
+    );
+    expect(actual).toHaveProperty('migrationVersion', { foo: '1.2.3' });
+  });
+
+  test('does not derive `migrationVersion` if there is no type version', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject(
+      {
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+        },
+      },
+      { migrationVersionCompatibility: 'compatible' }
+    );
+    expect(actual).not.toHaveProperty('migrationVersion');
+  });
+
+  test('does not derive `migrationVersion` in raw mode', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject(
+      {
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          typeMigrationVersion: '1.2.3',
+        },
+      },
+      { migrationVersionCompatibility: 'raw' }
+    );
     expect(actual).not.toHaveProperty('migrationVersion');
   });
 
@@ -170,6 +216,27 @@ describe('#rawToSavedObject', () => {
       },
     });
     expect(actual).not.toHaveProperty('coreMigrationVersion');
+  });
+
+  test('if specified it copies the _source.managed property to managed', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        managed: false,
+      },
+    });
+    expect(actual).toHaveProperty('managed', false);
+  });
+
+  test(`if _source.managed is unspecified it doesn't set managed`, () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+      },
+    });
+    expect(actual).not.toHaveProperty('managed');
   });
 
   test(`if version is unspecified it doesn't set version`, () => {
@@ -708,6 +775,25 @@ describe('#savedObjectToRaw', () => {
     } as any);
 
     expect(actual._source).not.toHaveProperty('coreMigrationVersion');
+  });
+
+  test('if specified, copies managed property to _source.managed', () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+      managed: false,
+    } as any);
+
+    expect(actual._source).toHaveProperty('managed', false);
+  });
+
+  test(`if unspecified it doesn't add managed property to _source`, () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+    } as any);
+
+    expect(actual._source.managed).toBe(undefined);
   });
 
   test('it decodes the version property to _seq_no and _primary_term', () => {

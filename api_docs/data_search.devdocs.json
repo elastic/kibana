@@ -481,7 +481,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3207,9 +3207,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ page?: number | undefined; filter?: any; aggs?: Record<string, ",
+                  "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
+                  "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3253,7 +3253,7 @@
                     "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
-                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; }"
+                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; migrationVersionCompatibility?: \"raw\" | \"compatible\" | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -7310,9 +7310,7 @@
                   "SearchResponse",
                   "<unknown, Record<string, ",
                   "AggregationsAggregate",
-                  ">>>; history: ",
-                  "SearchRequest",
-                  "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+                  ">>>; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7336,7 +7334,9 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; removeField: <K extends keyof ",
+                  "; history: ",
+                  "SearchRequest",
+                  "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7983,6 +7983,30 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
+              "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggTypesDependencies",
+                "text": "AggTypesDependencies"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
               "<any>>(name: N, type: T) => void; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
@@ -8023,7 +8047,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -17611,7 +17635,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -24545,6 +24569,30 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
+              "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggTypesDependencies",
+                "text": "AggTypesDependencies"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
               "<any>>(name: N, type: T) => void; }"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -24818,7 +24866,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -24944,7 +24992,7 @@
             "label": "fieldFormats",
             "description": [],
             "signature": [
-              "{ has: (id: string) => boolean; deserialize: ",
+              "{ deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -25184,7 +25232,7 @@
                 "section": "def-common.FieldFormatConfig",
                 "text": "FieldFormatConfig"
               },
-              ">) => void; }"
+              ">) => void; has: (id: string) => boolean; }"
             ],
             "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
             "deprecated": false,
@@ -26085,7 +26133,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
+              "\"concat\" | \"min\" | \"max\" | \"sum\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,
@@ -30413,7 +30461,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -32112,7 +32160,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>; getAll: () => { buckets: ",
+          "<any> | undefined; getAll: () => { buckets: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -32265,6 +32313,30 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
+          "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggTypesDependencies",
+            "text": "AggTypesDependencies"
+          },
+          ") => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any> | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
           "<any>>(name: N, type: T) => void; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
@@ -32296,7 +32368,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>; getAll: () => { buckets: ",
+          "<any> | undefined; getAll: () => { buckets: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34851,9 +34923,7 @@
           "SearchResponse",
           "<unknown, Record<string, ",
           "AggregationsAggregate",
-          ">>>; history: ",
-          "SearchRequest",
-          "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          ">>>; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34877,7 +34947,9 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; removeField: <K extends keyof ",
+          "; history: ",
+          "SearchRequest",
+          "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",

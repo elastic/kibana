@@ -13,6 +13,7 @@ import type { ISavedObjectsExporter, KibanaRequest, Logger } from '@kbn/core/ser
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
 import { isAlertType } from '../../../rule_schema';
@@ -21,8 +22,6 @@ import { transformRuleToExportableFormat } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
-// eslint-disable-next-line no-restricted-imports
-import { legacyGetBulkRuleActionsSavedObject } from '../../../rule_actions_legacy';
 import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
 import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
 
@@ -49,7 +48,8 @@ export const getExportByObjectIds = async (
   objects: Array<{ rule_id: string }>,
   logger: Logger,
   actionsExporter: ISavedObjectsExporter,
-  request: KibanaRequest
+  request: KibanaRequest,
+  actionsClient: ActionsClient
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
@@ -73,7 +73,8 @@ export const getExportByObjectIds = async (
   const { actionConnectors, actionConnectorDetails } = await getRuleActionConnectorsForExport(
     rules,
     actionsExporter,
-    request
+    request,
+    actionsClient
   );
 
   const rulesNdjson = transformDataToNdjson(rules);
@@ -120,12 +121,6 @@ export const getRulesFromObjects = async (
     sortField: undefined,
     sortOrder: undefined,
   });
-  const alertIds = rules.data.map((rule) => rule.id);
-  const legacyActions = await legacyGetBulkRuleActionsSavedObject({
-    alertIds,
-    savedObjectsClient,
-    logger,
-  });
 
   const alertsAndErrors = objects.map(({ rule_id: ruleId }) => {
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
@@ -136,9 +131,7 @@ export const getRulesFromObjects = async (
     ) {
       return {
         statusCode: 200,
-        rule: transformRuleToExportableFormat(
-          internalRuleToAPIResponse(matchingRule, legacyActions[matchingRule.id])
-        ),
+        rule: transformRuleToExportableFormat(internalRuleToAPIResponse(matchingRule)),
       };
     } else {
       return {

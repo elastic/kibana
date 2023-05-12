@@ -35,8 +35,9 @@
     "@kbn/logging-mocks",
     "@kbn/core-http-server",
     "@kbn/core-test-helpers-test-utils",
-    "@kbn/expressions-plugin",
     "@kbn/safer-lodash-set",
+    "@kbn/generate-csv",
+    "@kbn/reporting-common",
   ],
   "exclude": [
     "target/**/*",

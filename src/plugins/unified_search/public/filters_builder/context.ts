@@ -8,6 +8,7 @@
 
 import React, { Dispatch } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 import type { FiltersBuilderActions } from './reducer';
 
 interface FiltersBuilderContextType {
@@ -19,6 +20,7 @@ interface FiltersBuilderContextType {
   };
   dropTarget: string;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   disabled: boolean;
 }
 

@@ -14,15 +14,12 @@ import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 import { transform } from './utils';
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 
 export const transformValidate = (
-  rule: PartialRule<RuleParams>,
-  legacyRuleActions?: LegacyRulesActionsSavedObject | null
+  rule: PartialRule<RuleParams>
 ): [RuleResponse | null, string | null] => {
-  const transformed = transform(rule, legacyRuleActions);
+  const transformed = transform(rule);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {

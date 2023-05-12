@@ -18,7 +18,22 @@ import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../plugin';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
+const refresh = jest.fn();
+const caseHooksReturnedValue = {
+  open: () => {
+    refresh();
+  },
+  close: jest.fn(),
+};
+
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToNewCaseFlyout.mockReturnValue(
+  caseHooksReturnedValue
+);
+
+mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
+  caseHooksReturnedValue
+);
 
 jest.mock('../../../utils/kibana_react', () => ({
   __esModule: true,
@@ -26,7 +41,7 @@ jest.mock('../../../utils/kibana_react', () => ({
 }));
 
 jest.mock('../../../hooks/use_get_user_cases_permissions', () => ({
-  useGetUserCasesPermissions: jest.fn(() => ({})),
+  useGetUserCasesPermissions: jest.fn(() => ({ create: true, read: true })),
 }));
 
 const config = {
@@ -49,6 +64,10 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 }));
 
 describe('ObservabilityActions component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const setup = async (pageId: string) => {
     const props: Props = {
       config,
@@ -60,6 +79,7 @@ describe('ObservabilityActions component', () => {
       id: pageId,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       setFlyoutAlert: jest.fn(),
+      refresh,
     };
 
     const wrapper = mountWithIntl(<AlertActions {...props} />);
@@ -92,5 +112,43 @@ describe('ObservabilityActions component', () => {
     expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().prop('href')).toBe(
       '/app/observability/alerts/rules/06f53080-0f91-11ed-9d86-013908b232ef'
     );
+  });
+
+  it('should refresh when adding an alert to a new case', async () => {
+    const wrapper = await setup('nothing');
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+    expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(1);
+
+    wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().simulate('click');
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it('should refresh when when calling onSuccess of useCasesAddToNewCaseFlyout', async () => {
+    await setup('nothing');
+
+    // @ts-expect-error: The object will always be defined
+    mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
+
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it('should refresh when adding an alert to an existing case', async () => {
+    const wrapper = await setup('nothing');
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+    expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length).toBe(
+      1
+    );
+
+    wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().simulate('click');
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it('should refresh when when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
+    await setup('nothing');
+
+    // @ts-expect-error: The object will always be defined
+    mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
+
+    expect(refresh).toHaveBeenCalled();
   });
 });

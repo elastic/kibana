@@ -58,7 +58,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
@@ -207,7 +207,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           // validate user action
           const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
           );
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
@@ -244,7 +244,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           // validate user action
           const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
           );
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
@@ -266,22 +266,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           // validate user action
           const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
           );
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
 
         it('shows unsaved comment message when page is refreshed', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
-
-          await testSubjects.click('submit-comment');
-
-          await header.waitUntilLoadingHasFinished();
-
           await testSubjects.click('property-actions-user-action-ellipses');
 
           await header.waitUntilLoadingHasFinished();
@@ -291,13 +281,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await header.waitUntilLoadingHasFinished();
 
           const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
+            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
           );
 
           await header.waitUntilLoadingHasFinished();
 
           await editCommentTextArea.focus();
           await editCommentTextArea.type('Edited comment');
+
+          await header.waitUntilLoadingHasFinished();
 
           await browser.refresh();
 
@@ -307,18 +299,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows unsaved description message when page is refreshed', async () => {
-          await testSubjects.click('editable-description-edit-icon');
+          await testSubjects.click('description-edit-icon');
 
           await header.waitUntilLoadingHasFinished();
 
           const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
+            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
           );
 
           await header.waitUntilLoadingHasFinished();
 
           await editCommentTextArea.focus();
           await editCommentTextArea.type('Edited description');
+
+          await header.waitUntilLoadingHasFinished();
 
           await browser.refresh();
 
@@ -336,6 +330,104 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.singleCase.deleteCase();
         await cases.casesTable.waitForTableToFinishLoading();
         await cases.casesTable.validateCasesTableHasNthRows(0);
+      });
+    });
+
+    describe('Lens visualization', () => {
+      before(async () => {
+        await cases.testResources.installKibanaSampleData('logs');
+      });
+
+      after(async () => {
+        await cases.testResources.removeKibanaSampleData('logs');
+      });
+
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('adds lens visualization in description', async () => {
+        await testSubjects.click('description-edit-icon');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await header.waitUntilLoadingHasFinished();
+
+        await editCommentTextArea.focus();
+
+        const editableDescription = await testSubjects.find('editable-markdown-form');
+
+        const addVisualizationButton = await editableDescription.findByCssSelector(
+          '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
+        );
+        await addVisualizationButton.click();
+
+        await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('editable-save-markdown');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const description = await find.byCssSelector('[data-test-subj="description"]');
+
+        await description.findByCssSelector('[data-test-subj="xyVisChart"]');
+      });
+
+      it('adds lens visualization in existing comment', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('submit-comment');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('property-actions-user-action-ellipses');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('property-actions-user-action-pencil');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const editComment = await find.byCssSelector('[data-test-subj*="editable-markdown-form"]');
+
+        const addVisualizationButton = await editComment.findByCssSelector(
+          '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
+        );
+        await addVisualizationButton.click();
+
+        await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('editable-save-markdown');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const createdComment = await find.byCssSelector(
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+        );
+
+        await createdComment.findByCssSelector('[data-test-subj="xyVisChart"]');
+      });
+
+      it('adds lens visualization in new comment', async () => {
+        await cases.singleCase.addVisualizationToNewComment('[Logs] Bytes distribution');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const newComment = await find.byCssSelector('[data-test-subj*="comment-create-action"]');
+
+        await newComment.findByCssSelector('[data-test-subj="xyVisChart"]');
       });
     });
 
@@ -359,26 +451,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
-      it('filters by history successfully', async () => {
-        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
-
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await testSubjects.click('user-actions-filter-activity-button-history');
-
-        const historyBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
+      it('filters by comment successfully', async () => {
+        const commentBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
         );
 
-        expect(await historyBadge.getVisibleText()).equal('2');
-      });
-
-      it('filters by comment successfully', async () => {
-        await testSubjects.click('user-actions-filter-activity-button-comments');
-
-        await header.waitUntilLoadingHasFinished();
+        expect(await commentBadge.getVisibleText()).equal('0');
 
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -389,11 +467,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        const commentBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
+        expect(await commentBadge.getVisibleText()).equal('1');
+      });
+
+      it('filters by history successfully', async () => {
+        const historyBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
         );
 
-        expect(await commentBadge.getVisibleText()).equal('1');
+        expect(await historyBadge.getVisibleText()).equal('1');
+
+        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('user-actions-filter-activity-button-history');
+
+        expect(await historyBadge.getVisibleText()).equal('3');
       });
 
       it('sorts by newest first successfully', async () => {
@@ -403,7 +495,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
         );
 
-        expect(await AllBadge.getVisibleText()).equal('3');
+        expect(await AllBadge.getVisibleText()).equal('4');
 
         const sortDesc = await find.byCssSelector(
           '[data-test-subj="user-actions-sort-select"] [value="desc"]'
@@ -413,13 +505,63 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        const userActions = await find.byCssSelector('[data-test-subj="user-actions"]');
-
-        const actionsList = await userActions.findAllByClassName('euiComment');
-
-        expect(await actionsList[0].getAttribute('data-test-subj')).contain(
-          'comment-create-action'
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
         );
+
+        const actionList = await userActionsLists[0].findAllByClassName('euiComment');
+
+        expect(await actionList[0].getAttribute('data-test-subj')).contain('status-update-action');
+      });
+    });
+
+    describe('pagination', async () => {
+      let createdCase: any;
+
+      before(async () => {
+        await cases.navigation.navigateToApp();
+        createdCase = await cases.api.createCase({ title: 'Pagination feature' });
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('shows more actions on button click', async () => {
+        await cases.api.generateUserActions({
+          caseId: createdCase.id,
+          caseVersion: createdCase.version,
+          totalUpdates: 4,
+        });
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('case-refresh');
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(testSubjects.existOrFail('cases-show-more-user-actions'));
+
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
+
+        expect(userActionsLists).length(2);
+
+        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
+
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+
+        testSubjects.click('cases-show-more-user-actions');
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
+
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
       });
     });
 
@@ -565,6 +707,67 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it.skip("shows the 'alerts' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-content-alerts');
+      });
+
+      it("shows the 'files' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-content-files');
+      });
+    });
+
+    describe('Files', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('adds a file to the case', async () => {
+        // navigate to files tab
+        await testSubjects.click('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-content-files');
+
+        await cases.casesFilesTable.addFile(require.resolve('./elastic_logo.png'));
+
+        // make sure the uploaded file is displayed on the table
+        await find.byButtonText('elastic_logo.png');
+      });
+
+      it('search by file name', async () => {
+        await cases.casesFilesTable.searchByFileName('foobar');
+
+        await cases.casesFilesTable.emptyOrFail();
+
+        await cases.casesFilesTable.searchByFileName('elastic');
+
+        await find.byButtonText('elastic_logo.png');
+      });
+
+      it('displays the file preview correctly', async () => {
+        await cases.casesFilesTable.openFilePreview(0);
+
+        await testSubjects.existOrFail('cases-files-image-preview');
+      });
+
+      it('pressing escape key closes the file preview', async () => {
+        await testSubjects.existOrFail('cases-files-image-preview');
+
+        await browser.pressKeys(browser.keys.ESCAPE);
+
+        await testSubjects.missingOrFail('cases-files-image-preview');
+      });
+
+      it('files added to a case can be deleted', async () => {
+        await cases.casesFilesTable.deleteFile(0);
+
+        await cases.casesFilesTable.emptyOrFail();
+      });
+
+      describe('Files User Activity', () => {
+        it('file user action is displayed correctly', async () => {
+          await cases.casesFilesTable.addFile(require.resolve('./elastic_logo.png'));
+
+          await testSubjects.click('case-view-tab-title-activity');
+          await testSubjects.existOrFail('case-view-tab-content-activity');
+
+          await find.byButtonText('elastic_logo.png');
+        });
       });
     });
   });
