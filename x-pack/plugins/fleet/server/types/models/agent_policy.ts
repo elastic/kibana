@@ -47,6 +47,7 @@ export const AgentPolicyBaseSchema = {
       })
     )
   ),
+  is_protected: schema.maybe(schema.boolean()),
 };
 
 export const NewAgentPolicySchema = schema.object({
