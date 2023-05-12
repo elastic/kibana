@@ -20,11 +20,7 @@ import {
   isEqualFilters,
 } from '../application/main/services/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../common';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -40,10 +36,7 @@ export async function getSharingData(
   const index = searchSource.getField('index')!;
   let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
 
-  searchSource.setField(
-    'sort',
-    getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
-  );
+  searchSource.setField('sort', getSortForSearchSource(state.sort as SortOrder[], index, config));
 
   searchSource.removeField('filter');
   searchSource.removeField('highlight');

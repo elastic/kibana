@@ -8,6 +8,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getSortForSearchSource } from '../../utils/sorting';
 
 export const updateSearchSource = (
@@ -17,12 +18,13 @@ export const updateSearchSource = (
   useNewFieldsApi: boolean,
   defaults: {
     sampleSize: number;
-    defaultSort: string;
-  }
+    defaultSort: string; // TODO: remove
+  },
+  uiSettings: IUiSettingsClient
 ) => {
-  const { sampleSize, defaultSort } = defaults;
+  const { sampleSize } = defaults;
   searchSource.setField('size', sampleSize);
-  searchSource.setField('sort', getSortForSearchSource(sort, dataView, defaultSort));
+  searchSource.setField('sort', getSortForSearchSource(sort, dataView, uiSettings));
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
     const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };

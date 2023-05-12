@@ -195,7 +195,8 @@ export class SavedSearchEmbeddable
       {
         sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
         defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-      }
+      },
+      this.services.uiSettings
     );
 
     // Log request to inspector
