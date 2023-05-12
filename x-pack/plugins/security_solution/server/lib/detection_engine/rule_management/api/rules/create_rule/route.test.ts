@@ -177,6 +177,10 @@ describe('Create rule route', () => {
     });
   });
   describe('rule containing response actions', () => {
+    beforeEach(() => {
+      // @ts-expect-error
+      clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
+    });
     test('is successful', async () => {
       const request = requestMock.create({
         method: 'post',
