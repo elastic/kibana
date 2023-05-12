@@ -20,6 +20,7 @@ export function DimensionContainer({
   groupLabel: string;
   isFullscreen: boolean;
   panelRef: (el: HTMLDivElement) => void;
+  enableBackButton?: boolean;
 }) {
   return <FlyoutContainer {...props}>{panel}</FlyoutContainer>;
 }

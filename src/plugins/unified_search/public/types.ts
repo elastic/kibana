@@ -21,6 +21,7 @@ import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
+import { TextBasedLanguagesEditorProps } from './query_string_input/text_based_languages_editor';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -50,6 +51,7 @@ export interface UnifiedSearchPublicPluginStartUi {
     props: StatefulSearchBarProps<QT>
   ) => React.ReactElement;
   FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;
+  TextBasedLanguagesEditor: React.ComponentType<TextBasedLanguagesEditorProps>;
 }
 
 /**

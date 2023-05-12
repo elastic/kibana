@@ -17,7 +17,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+// import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ExpressionsServiceSetup,
@@ -100,6 +100,7 @@ import type {
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
+import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
@@ -110,6 +111,7 @@ import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/emb
 import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
+  TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
@@ -147,7 +149,7 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  dashboard: DashboardStart;
+  // dashboard: DashboardStart;
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
@@ -212,6 +214,14 @@ export interface LensPublicStart {
    */
   SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
   /**
+   * React component which can be used to embed a Lens Visualization Config Panel Component.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  ConfigPanelComponentApi: () => Promise<ConfigPanelComponent>;
+  /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
    *
@@ -253,6 +263,13 @@ export type LensSuggestionsApi = (
   dataViews: DataView,
   excludedVisualizations?: string[]
 ) => Suggestion[] | undefined;
+
+export type ConfigPanelComponent = React.ComponentType<{
+  attributes: TypedLensByValueInput['attributes'];
+  dataView: DataView;
+  updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
+  setIsFlyoutVisible?: (flag: boolean) => void;
+}>;
 
 export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
@@ -580,6 +597,13 @@ export class LensPlugin {
       );
     }
 
+    const editInLensAction = new ConfigureInLensPanelAction(
+      startDependencies,
+      core.overlays,
+      core.theme
+    );
+    startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+
     return {
       EmbeddableComponent: getEmbeddableComponent(core, startDependencies),
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
@@ -638,6 +662,17 @@ export class LensPlugin {
             });
           },
         };
+      },
+      ConfigPanelComponentApi: async () => {
+        const { getConfigPanel } = await import('./async_services');
+        if (!this.editorFrameService) {
+          this.initDependenciesForApi();
+        }
+        const [visualizationMap, datasourceMap] = await Promise.all([
+          this.editorFrameService!.loadVisualizations(),
+          this.editorFrameService!.loadDatasources(),
+        ]);
+        return getConfigPanel(core, startDependencies, visualizationMap, datasourceMap);
       },
     };
   }

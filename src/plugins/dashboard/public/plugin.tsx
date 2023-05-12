@@ -48,6 +48,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -80,6 +82,8 @@ export interface DashboardSetupDependencies {
   uiActions: UiActionsSetup;
   urlForwarding: UrlForwardingSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  lens: LensPublicStart;
+  expressions: ExpressionsStart;
 }
 
 export interface DashboardStartDependencies {
@@ -98,6 +102,8 @@ export interface DashboardStartDependencies {
   spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  lens: LensPublicStart;
+  expressions: ExpressionsStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;

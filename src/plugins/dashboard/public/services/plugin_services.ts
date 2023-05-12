@@ -27,6 +27,10 @@ import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { httpServiceFactory } from './http/http_service';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
 import { navigationServiceFactory } from './navigation/navigation_service';
+import { unifiedSearchServiceFactory } from './unified_search/unified_search_service';
+import { lensServiceFactory } from './lens/lens_service';
+import { expressionsServiceFactory } from './expression/expressions_service';
+
 import { notificationsServiceFactory } from './notifications/notifications_service';
 import { overlaysServiceFactory } from './overlays/overlays_service';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
@@ -70,6 +74,9 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   http: new PluginServiceProvider(httpServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
+  unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
+  lens: new PluginServiceProvider(lensServiceFactory),
+  expressions: new PluginServiceProvider(expressionsServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   savedObjectsTagging: new PluginServiceProvider(savedObjectsTaggingServiceFactory),

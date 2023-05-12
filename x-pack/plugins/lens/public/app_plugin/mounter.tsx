@@ -130,7 +130,7 @@ export async function getLensServices(
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
-    dashboard: startDependencies.dashboard,
+    // dashboard: startDependencies.dashboard,
     charts: startDependencies.charts,
     getOriginatingAppName: () => {
       const originatingApp =
@@ -139,7 +139,7 @@ export async function getLensServices(
     },
     dataViews: startDependencies.dataViews,
     // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
+    dashboardFeatureFlag: { allowByValueEmbeddables: true },
     spaces,
     share,
     unifiedSearch,

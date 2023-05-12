@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
+import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { IconType, useEuiTheme } from '@elastic/eui';
-
+import { IconType, useEuiTheme, EuiButton } from '@elastic/eui';
 import {
   AddFromLibraryButton,
   IconButton,
@@ -20,7 +19,6 @@ import {
 } from '@kbn/shared-ux-button-toolbar';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
-
 import {
   getCreateVisualizationButtonTitle,
   getQuickCreateButtonGroupLegend,
@@ -32,7 +30,11 @@ import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
-export function DashboardEditingToolbar() {
+export function DashboardEditingToolbar({
+  setIsFlyoutVisible,
+}: {
+  setIsFlyoutVisible: (q: boolean) => void;
+}) {
   const {
     usageCollection,
     data: { search },
@@ -40,8 +42,8 @@ export function DashboardEditingToolbar() {
     embeddable: { getStateTransfer, getEmbeddableFactory },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
-  const { euiTheme } = useEuiTheme();
 
+  const { euiTheme } = useEuiTheme();
   const dashboard = useDashboardAPI();
 
   const stateTransferService = getStateTransfer();
@@ -199,6 +201,16 @@ export function DashboardEditingToolbar() {
               label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
             />
+          ),
+          secondButton: (
+            <EuiButton
+              size="m"
+              color="success"
+              onClick={() => setIsFlyoutVisible(true)}
+              data-test-subj="dashboardAddFromESQL"
+            >
+              Create visualization from ESQL
+            </EuiButton>
           ),
           iconButtonGroup: (
             <IconButtonGroup buttons={quickButtons} legend={getQuickCreateButtonGroupLegend()} />

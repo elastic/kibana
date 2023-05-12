@@ -62,7 +62,7 @@ import type { IUnifiedSearchPluginServices } from '../../types';
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
   onTextLangQueryChange: (query: AggregateQuery) => void;
-  onTextLangQuerySubmit: () => void;
+  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
   errors?: Error[];
@@ -246,7 +246,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       // on CMD/CTRL + Enter submit the query
       // eslint-disable-next-line no-bitwise
       editor1.current?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
-        onTextLangQuerySubmit();
+        editor1.current?.getValue();
+        const currentValue = editor1.current?.getValue();
+        onQuerySubmmit(currentValue);
       });
       if (!isCodeEditorExpanded) {
         editor1.current?.onDidContentSizeChange(updateHeight);
@@ -341,6 +343,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       onTextLangQueryChange({ [language]: value } as AggregateQuery);
     },
     [language, onTextLangQueryChange]
+  );
+
+  const onQuerySubmmit = useCallback(
+    (value?: string) => {
+      onTextLangQuerySubmit({ [language]: value } as AggregateQuery);
+    },
+    [language, onTextLangQuerySubmit]
   );
 
   useEffect(() => {
@@ -597,7 +606,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         containerCSS={styles.bottomContainer}
                         errors={editorErrors}
                         onErrorClick={onErrorClick}
-                        refreshErrors={onTextLangQuerySubmit}
+                        refreshErrors={onQuerySubmmit}
                       />
                     )}
                   </div>
@@ -679,7 +688,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           containerCSS={styles.bottomContainer}
           errors={editorErrors}
           onErrorClick={onErrorClick}
-          refreshErrors={onTextLangQuerySubmit}
+          refreshErrors={onQuerySubmmit}
         />
       )}
       {isCodeEditorExpanded && (

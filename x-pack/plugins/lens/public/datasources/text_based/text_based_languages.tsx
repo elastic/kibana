@@ -121,6 +121,14 @@ export function getTextBasedDatasource({
       const query = context.query;
       const updatedState = {
         ...state,
+        fieldList:
+          newColumns?.map((c) => {
+            return {
+              id: c.columnId,
+              name: c.fieldName,
+              meta: c.meta,
+            };
+          }) ?? [],
         layers: {
           ...state.layers,
           [newLayerId]: {
