@@ -7,7 +7,6 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { isQueryRule } from '../../../../../../../common/detection_engine/utils';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { validateCreateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
 import { RuleCreateProps } from '../../../../../../../common/detection_engine/rule_schema';
@@ -94,9 +93,7 @@ export const createRuleRoute = (
           ruleId: undefined,
         });
 
-        if (isQueryRule(request.body.type)) {
-          await validateResponseActionsPermissions(ctx.securitySolution, request.body);
-        }
+        await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
         const createdRule = await createRules({
           rulesClient,

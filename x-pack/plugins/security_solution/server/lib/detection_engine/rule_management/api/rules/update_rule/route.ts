@@ -7,7 +7,6 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { isQueryRule } from '../../../../../../../common/detection_engine/utils';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { validateUpdateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
 import { RuleUpdateProps } from '../../../../../../../common/detection_engine/rule_schema';
@@ -72,13 +71,9 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           id: request.body.id,
         });
 
-        if (isQueryRule(request.body.type)) {
-          await validateResponseActionsPermissions(
-            ctx.securitySolution,
-            request.body,
-            existingRule
-          );
-        }
+        console.log({ ctx });
+        await validateResponseActionsPermissions(ctx.securitySolution, request.body, existingRule);
+
         const rule = await updateRules({
           rulesClient,
           existingRule,

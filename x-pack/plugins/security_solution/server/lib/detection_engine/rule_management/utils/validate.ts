@@ -9,6 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
+import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { getUiCommand, getRbacControl } from '../../../../../common/endpoint/utils/commands';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
@@ -72,6 +73,12 @@ export const validateResponseActionsPermissions = async (
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null
 ) => {
+  const { experimentalFeatures } = await securitySolution.getConfig();
+
+  if (!experimentalFeatures.endpointResponseActionsEnabled || !isQueryRule(ruleUpdate.type)) {
+    return;
+  }
+
   const payload = ruleUpdate as QueryRule;
   const existingPayload = existingRule as Rule<UnifiedQueryRuleParams>;
 
