@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-infra-forge'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/kbn-infra-forge'],
 };

@@ -63,10 +63,6 @@ export default function ({ getService }: FtrProviderContext) {
               params: {
                 documents: [
                   {
-                    groupByKeys: '{{context.groupByKeys}}',
-                    flapping: '{{alert.flapping}}',
-                    labels: '{{context.labels}}',
-                    ruleUrl: '{{rule.url}}',
                     ruleType: '{{rule.type}}',
                   },
                 ],
