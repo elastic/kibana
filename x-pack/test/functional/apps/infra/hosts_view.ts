@@ -371,7 +371,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         [
-          { metric: 'hosts', value: '6' },
+          { metric: 'hostsCount', value: '6' },
           { metric: 'cpu', value: '0.8%' },
           { metric: 'memory', value: '16.81%' },
           { metric: 'tx', value: 'N/A' },
@@ -510,7 +510,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should update the KPIs content on a search submit', async () => {
           await Promise.all(
             [
-              { metric: 'hosts', value: '3' },
+              { metric: 'hostsCount', value: '3' },
               { metric: 'cpu', value: '0.8%' },
               { metric: 'memory', value: '16.25%' },
               { metric: 'tx', value: 'N/A' },
@@ -543,6 +543,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
           });
+        });
+
+        it('should show an error message when an invalid KQL is submitted', async () => {
+          await pageObjects.infraHostsView.submitQuery('cloud.provider="gcp" A');
+          await testSubjects.existOrFail('hostsViewErrorCallout');
         });
       });
 
