@@ -74,6 +74,7 @@ export const getUseCellActionsHook = (tableId: TableId) => {
                   (row) => row.find((rowData) => rowData.field === col.id)?.value ?? []
                 ),
                 aggregatable: fieldMeta?.aggregatable ?? false,
+                searchable: fieldMeta?.searchable ?? false,
               };
             });
 

@@ -119,6 +119,8 @@ describe('Table Helpers', () => {
           maxOverflowItems={1}
           overflowIndexStart={1}
           fieldType="keyword"
+          isAggregatable={false}
+          isSearchable={false}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -133,6 +135,8 @@ describe('Table Helpers', () => {
           maxOverflowItems={5}
           overflowIndexStart={1}
           fieldType="keyword"
+          isAggregatable={false}
+          isSearchable={false}
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
@@ -148,6 +152,8 @@ describe('Table Helpers', () => {
             maxOverflowItems={5}
             overflowIndexStart={1}
             fieldType="keyword"
+            isAggregatable={false}
+            isSearchable={false}
           />
         </TestProviders>
       );
@@ -168,6 +174,8 @@ describe('Table Helpers', () => {
           maxOverflowItems={1}
           overflowIndexStart={1}
           fieldType="keyword"
+          isAggregatable={false}
+          isSearchable={false}
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);

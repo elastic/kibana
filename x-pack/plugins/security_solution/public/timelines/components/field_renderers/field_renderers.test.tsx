@@ -282,6 +282,8 @@ describe('Field Renderers', () => {
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
+            isAggregatable={false}
+            isSearchable={false}
           />
         </TestProviders>
       );
@@ -299,6 +301,8 @@ describe('Field Renderers', () => {
             overflowIndexStart={0}
             values={rowItems}
             fieldName="mock.attr"
+            isAggregatable={false}
+            isSearchable={false}
           />
         </TestProviders>
       );
@@ -318,6 +322,8 @@ describe('Field Renderers', () => {
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
+            isAggregatable={false}
+            isSearchable={false}
           />
         </TestProviders>
       );
@@ -335,6 +341,8 @@ describe('Field Renderers', () => {
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
+            isAggregatable={false}
+            isSearchable={false}
           />
         </TestProviders>
       );
@@ -354,6 +362,8 @@ describe('Field Renderers', () => {
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
+            isAggregatable={false}
+            isSearchable={false}
           />
         </TestProviders>
       );
@@ -376,6 +386,8 @@ describe('Field Renderers', () => {
             render={renderFn}
             values={rowItems}
             fieldName="mock.attr"
+            isAggregatable={false}
+            isSearchable={false}
           />
         </TestProviders>
       );
@@ -395,6 +407,7 @@ describe('Field Renderers', () => {
             fieldType="keyword"
             idPrefix={idPrefix}
             isAggregatable={true}
+            isSearchable={false}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             rowItems={rowItems}
@@ -416,6 +429,7 @@ describe('Field Renderers', () => {
             fieldType="keyword"
             idPrefix={idPrefix}
             isAggregatable={true}
+            isSearchable={false}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             rowItems={rowItems}

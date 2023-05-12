@@ -31,7 +31,13 @@ const element = document.createElement('div');
 document.body.appendChild(element);
 
 const context = {
-  field: { name: 'user.name', value: 'the-value', type: 'keyword' },
+  field: {
+    name: 'user.name',
+    value: 'the-value',
+    type: 'keyword',
+    searchable: true,
+    aggregatable: true,
+  },
   trigger: { id: 'trigger' },
   nodeRef: {
     current: element,

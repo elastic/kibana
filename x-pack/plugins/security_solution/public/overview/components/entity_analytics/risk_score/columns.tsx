@@ -58,6 +58,8 @@ export const getRiskScoreColumns = (
                 name: 'host.name',
                 value: entityName,
                 type: 'keyword',
+                searchable: true,
+                aggregatable: true,
               }}
               triggerId={SecurityCellActionsTrigger.DEFAULT}
               mode={CellActionsMode.INLINE}
@@ -79,6 +81,8 @@ export const getRiskScoreColumns = (
                 name: 'user.name',
                 value: entityName,
                 type: 'keyword',
+                aggregatable: true,
+                searchable: true,
               }}
               triggerId={SecurityCellActionsTrigger.DEFAULT}
               mode={CellActionsMode.INLINE}
@@ -160,6 +164,7 @@ export const getRiskScoreColumns = (
             value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
             type: 'keyword',
             aggregatable: true,
+            searchable: true,
           }}
           mode={CellActionsMode.INLINE}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}

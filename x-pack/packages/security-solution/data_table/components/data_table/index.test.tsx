@@ -184,6 +184,7 @@ describe('DataTable', () => {
             values: [data[0]?.data[0]?.value],
             type: 'date',
             aggregatable: true,
+            searchable: true,
           },
         ],
         metadata: {
