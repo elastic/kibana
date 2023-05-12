@@ -12,7 +12,7 @@ import {
   ConfigKey,
   LegacyProjectMonitorsRequest,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -91,6 +91,16 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'testGlobalParam', value: 'testGlobalParamValue' })
+        .expect(200);
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'testGlobalParam2', value: 'testGlobalParamValue2' })
+        .expect(200);
     });
 
     beforeEach(() => {

@@ -652,7 +652,8 @@ export const getTestProjectSyntheticsPolicy = (
               type: 'text',
             },
             params: {
-              value: '',
+              value:
+                '{"testGlobalParam2":"testGlobalParamValue2","testGlobalParam":"testGlobalParamValue"}',
               type: 'yaml',
             },
             playwright_options: {
@@ -702,6 +703,10 @@ export const getTestProjectSyntheticsPolicy = (
             playwright_options: { headless: true, chromiumSandbox: false },
             screenshots: 'on',
             'filter_journeys.match': 'check if title is present',
+            params: {
+              testGlobalParam: 'testGlobalParamValue',
+              testGlobalParam2: 'testGlobalParamValue2',
+            },
             processors: [
               {
                 add_fields: {
