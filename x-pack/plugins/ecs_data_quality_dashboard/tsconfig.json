@@ -18,6 +18,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-io-ts-utils",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",
