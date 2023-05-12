@@ -15,6 +15,10 @@ jest.mock('@kbn/core-elasticsearch-client-server-internal', () => {
 });
 
 // Mock this function to return empty results, as this simplifies test cases and we don't need to exercise alternate code paths for these
-jest.mock('../search_dsl', () => {
-  return { getSearchDsl: jest.fn() };
+jest.mock('../../search', () => {
+  const actual = jest.requireActual('../../search');
+  return {
+    ...actual,
+    getSearchDsl: jest.fn(),
+  };
 });
