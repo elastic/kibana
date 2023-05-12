@@ -26,10 +26,11 @@ import { ApiKey } from '@kbn/security-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';
+import { MANAGEMENT_API_KEYS } from '../../routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 
 export const ApiKeyPanel: React.FC = () => {
-  const { cloud, http, userProfile } = useKibanaServices();
+  const { application, cloud, http, userProfile } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ['apiKey'],
@@ -113,7 +114,12 @@ export const ApiKeyPanel: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <span>
-                      <EuiButton iconType="popout" size="s">
+                      <EuiButton
+                        iconType="popout"
+                        size="s"
+                        href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
+                        target="_blank"
+                      >
                         {i18n.translate('xpack.serverlessSearch.apiKey.manageLabel', {
                           defaultMessage: 'Manage',
                         })}
