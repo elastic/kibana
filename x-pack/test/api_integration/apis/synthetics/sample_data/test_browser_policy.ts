@@ -259,10 +259,7 @@ export const getTestBrowserSyntheticsPolicy = ({
           },
           id: 'synthetics/browser-browser.screenshot-abf904a4-cb9a-4b29-8c11-4d183cca289b-fe621d20-7b01-11ed-803f-475d82e1f9ca-default',
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
       ],
