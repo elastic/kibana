@@ -49,8 +49,14 @@ export class FleetFilesClient implements FleetFileClientInterface {
       throw new FleetFilesClientError('packageName is required');
     }
 
-    this.fileMetaIndex = getFileMetadataIndexName(packageName);
-    this.fileDataIndex = getFileDataIndexName(packageName);
+    if (type === 'from-host') {
+      this.fileMetaIndex = getFileMetadataIndexName(packageName);
+      this.fileDataIndex = getFileDataIndexName(packageName);
+    } else {
+      // FIXME:PT define once we have new index patterns
+      this.fileMetaIndex = getFileMetadataIndexName(packageName);
+      this.fileDataIndex = getFileDataIndexName(packageName);
+    }
 
     this.esFileClient = createEsFileClient({
       metadataIndex: this.fileDataIndex,
@@ -64,7 +70,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
 
   async get(fileId: string): Promise<FleetFile> {
     if (this.type === 'to-host') {
-      // FIXME:PT implement
+      return this.getFileCreatedByKibana(fileId);
     }
 
     return this.getFileCreatedByHost(fileId);
@@ -174,6 +180,11 @@ export class FleetFilesClient implements FleetFileClientInterface {
         error
       );
     }
+  }
+
+  protected async getFileCreatedByKibana(fileId: string): Promise<FleetFile> {
+    // FIXME:PT update once we have new index and understand what the fields are
+    return this.getFileCreatedByHost(fileId);
   }
 
   protected async getFileCreatedByHost(fileId: string): Promise<FleetFile> {
