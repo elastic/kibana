@@ -41,7 +41,7 @@ export const cellPopoverRendererFactory =
     const indicator = indicators[rowIndex % pagination.pageSize];
     const { key, value } = getIndicatorFieldAndValue(indicator, columnId);
     if (!fieldAndValueValid(key, value)) {
-      return <></>;
+      return null;
     }
 
     return (

@@ -56,7 +56,7 @@ export const FilterOutButtonIcon: VFC<FilterOutProps> = ({
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
   if (!filterFn) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -88,7 +88,7 @@ export const FilterOutButtonEmpty: VFC<FilterOutProps> = ({
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
   if (!filterFn) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -121,7 +121,7 @@ export const FilterOutContextMenu: VFC<FilterOutProps> = ({
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
   if (!filterFn) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -152,7 +152,7 @@ export const FilterOutCellAction: VFC<FilterOutCellActionProps> = ({
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
   if (!filterFn) {
-    return <></>;
+    return null;
   }
 
   return (
