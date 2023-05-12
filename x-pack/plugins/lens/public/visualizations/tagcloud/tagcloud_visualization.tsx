@@ -158,8 +158,10 @@ export const getTagcloudVisualization = ({
     }
 
     // shrink font size to fit in preview window
-    const PREVIEW_WINDOW_MAX_FONT_SIZE = 12;
-    const fontSizeRatio = state.maxFontSize / PREVIEW_WINDOW_MAX_FONT_SIZE;
+    const PREVIEW_WINDOW_MAX_FONT_SIZE = 24;
+    const fontSizeRatio = state.maxFontSize > PREVIEW_WINDOW_MAX_FONT_SIZE
+      ? state.maxFontSize / PREVIEW_WINDOW_MAX_FONT_SIZE
+      : 1;
 
     const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
     return {
@@ -172,9 +174,10 @@ export const getTagcloudVisualization = ({
           arguments: {
             bucket: [state.tagAccessor],
             metric: [state.valueAccessor],
-            maxFontSize: [Math.ceil(state.maxFontSize / fontSizeRatio)],
+            maxFontSize: [Math.floor(state.maxFontSize / fontSizeRatio)],
             minFontSize: [Math.ceil(state.minFontSize / fontSizeRatio)],
             showLabel: [false],
+            isPreview: [true],
           },
         },
       ],

@@ -137,6 +137,12 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         help: argHelp.ariaLabel,
         required: false,
       },
+      isPreview: {
+        types: ['boolean'],
+        help: 'Set isPreview to true to avoid showing out of room warnings',
+        default: false,
+        required: false,
+      }
     },
     fn(input, args, handlers) {
       validateAccessor(args.metric, input.columns);
@@ -157,6 +163,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
           args.ariaLabel ??
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
+        isPreview: Boolean(args.isPreview),
       };
 
       if (handlers?.inspectorAdapters?.tables) {
