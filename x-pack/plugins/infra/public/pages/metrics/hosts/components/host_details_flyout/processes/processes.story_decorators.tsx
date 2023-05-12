@@ -135,13 +135,6 @@ export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.R
   })!;
 
   const mockServices = {
-    data: {
-      query: {
-        filterManager: { filterManagerService: { addFilters: () => {}, removeFilter: () => {} } },
-      },
-    },
-    notifications: { toasts: { toastsService: { addSuccess: () => {} } } },
-    telemetry: () => {},
     http: {
       basePath: {
         prepend: (_: string) => '',
