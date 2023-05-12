@@ -47,19 +47,10 @@ export { getCoreVitalsComponent } from './components/core_web_vitals/get_core_we
 
 export { DatePickerContextProvider } from './context/date_picker_context';
 
-export type { UiTracker, TrackMetricOptions } from './hooks/use_track_metric';
-export {
-  useTrackPageview,
-  useUiTracker,
-  useTrackMetric,
-  METRIC_TYPE,
-} from './hooks/use_track_metric';
-
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';
-export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
-export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
-export { useEsSearch, createEsParams } from './hooks/use_es_search';
+
+export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
 export * from './typings';
 import { TopAlert } from './typings/alerts';
@@ -69,6 +60,7 @@ export type { TopAlert, AlertSummary, AlertSummaryField };
 
 export { observabilityFeatureId, observabilityAppId } from '../common';
 
+export { useEsSearch, createEsParams } from './hooks/use_es_search';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
