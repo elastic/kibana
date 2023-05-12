@@ -1167,6 +1167,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/test/api_integration/apis/lists @elastic/security-solution-platform
 /x-pack/test/lists_api_integration @elastic/security-solution-platform
 
+/x-pack/plugins/security_solution/public/common/components/utility_bar/ @elastic/security-solution-platform
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-solution-platform
