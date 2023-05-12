@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/resolver-test-plugin",
-  "owner": "@elastic/security-solution",
+  "owner": "@elastic/security-threat-hunting-investigations",
   "plugin": {
     "id": "resolverTest",
     "server": false,

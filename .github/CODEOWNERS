@@ -1002,13 +1002,8 @@ x-pack/test/observability_functional @elastic/actionable-observability
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
 # Security Solution
-/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
-/x-pack/test/security_solution_endpoint/ @elastic/security-solution
-/x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
-/x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
-/x-pack/test/detection_engine_api_integration @elastic/security-solution
-/x-pack/test/lists_api_integration @elastic/security-solution
-/x-pack/test/api_integration/apis/security_solution @elastic/security-solution
+/x-pack/test/accessibility/apps/security_solution.ts @elastic/security-solution
+/x-pack/test/api_integration_basic/apis/security_solution @elastic/security-solution
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
@@ -1032,16 +1027,25 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/public/detections/components/alerts_table @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_info @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/resolver @elastic/security-threat-hunting-investigations
+/x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-threat-hunting-investigations
+/x-pack/test/plugin_functional/test_suites/resolver @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/timelines @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting-investigations
+/x-pack/test/security_solution_ftr/services/timeline/ @elastic/security-threat-hunting-investigations
+/x-pack/test/timeline @elastic/security-threat-hunting-investigations
+/x-pack/test/security_solution_ftr/page_objects/timeline @elastic/security-threat-hunting-investigations
+/x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/ @elastic/security-threat-hunting-investigations
+/x-pack/test/api_integration/apis/security_solution/timeline_* @elastic/security-threat-hunting-investigations
 
 ## Security Solution sub teams - Threat Hunting Explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
+/x-pack/test/security_solution_ftr/page_objects/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
 
+/x-pack/test/functional/fixtures/kbn_archiver/cases/ @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/filters @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/host_details @elastic/security-threat-hunting-explore
@@ -1059,6 +1063,8 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
+/x-pack/test/security_solution_ftr/page_objects/detections @elastic/security-threat-hunting-explore
+/x-pack/test/security_solution_ftr/services/detections/ @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-explore
@@ -1084,10 +1090,15 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
+/x-pack/test/api_integration/apis/security_solution/host_details.ts @elastic/security-threat-hunting-explore
+/x-pack/test/api_integration_basic/apis/security_solution/cases_privileges.ts  @elastic/security-threat-hunting-explore
 
 ## Security Solution sub teams - Detections and Response Alerts
 /x-pack/plugins/security_solution/common/detection_engine/schemas/alerts @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/common/field_maps @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/common/detection_engine @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/cypress/data/detection_engine* @elastic/security-detections-response-alerts
+/x-pack/test/detection_engine_api_integration @elastic/security-detections-response-alerts
 
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/public/detections/pages/alerts @elastic/security-detections-response-alerts
@@ -1148,10 +1159,84 @@ x-pack/test/observability_functional @elastic/actionable-observability
 
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-solution-platform
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-solution-platform
+/x-pack/test/ftr_apis/security_and_spaces @elastic/security-solution-platform
+/x-pack/test/functional/es_archives/signals @elastic/security-solution-platform
+/x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution-platform
+/x-pack/test/functional/es_archives/lists @elastic/security-solution-platform
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-solution-platform
+/x-pack/test/api_integration/apis/lists @elastic/security-solution-platform
+/x-pack/test/lists_api_integration @elastic/security-solution-platform
+
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-solution-platform
+
+## Security Solution sub teams - security-defend-workflows
+/x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
+/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
+/x-pack/test/functional/es_archives/endpoint/ @elastic/security-defend-workflows
+/x-pack/test/osquery_cypress @elastic/security-defend-workflows
+/x-pack/test/api_integration/apis/osquery @elastic/security-defend-workflows
+/x-pack/test/defend_workflows_cypress @elastic/security-defend-workflows
+/test/scripts/jenkins_defend_workflows_cypress.sh @elastic/security-defend-workflows
+/test/scripts/jenkins_osquery_cypress.sh @elastic/security-defend-workflows
+
+## Security Solution sub teams - security-telemetry (Data Engineering)
+x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
+x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
+
+## Security Solution sub teams - security-engineering-productivity
+x-pack/plugins/security_solution/cypress/ccs_e2e @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/cypress/upgrade_e2e @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
+/test/scripts/jenkins_security_solution_cypress_chrome.sh @security-engineering-productivity
+/test/scripts/jenkins_security_solution_cypress_firefox.sh @security-engineering-productivity
+/.ci/Jenkinsfile_security_cypress @security-engineering-productivity
+/.github/ISSUE_TEMPLATE/Bug_report_security_solution.md @security-engineering-productivity
+
+## Security Solution sub teams - adaptive-workload-protection
+x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/sec-cloudnative-integrations
+x-pack/plugins/security_solution/public/kubernetes @elastic/sec-cloudnative-integrations
+x-pack/test/kubernetes_security @elastic/sec-cloudnative-integrations
+x-pack/test/functional/es_archives/kubernetes_security @elastic/sec-cloudnative-integrations
+
+## Security Solution sub teams - Protections Experience
+x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
+x-pack/test/threat_intelligence_cypress @elastic/protections-experience
+
+# Security Defend Workflows - OSQuery Ownership
+/x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
+
+# Cloud Defend
+/x-pack/plugins/cloud_defend/ @elastic/sec-cloudnative-integrations
+/x-pack/plugins/security_solution/public/cloud_defend @elastic/sec-cloudnative-integrations
+/x-pack/test/session_view @elastic/sec-cloudnative-integrations
+/x-pack/test/functional/es_archives/session_view/ @elastic/sec-cloudnative-integrations
+
+# Cloud Security Posture
+/x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
+/x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+/x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
+x-pack/test/cloud_security_posture_api @elastic/kibana-cloud-security-posture
+
+# Security Solution onboarding tour
+/x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
 
 ## Security Solution cross teams ownership
 /x-pack/plugins/security_solution/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
@@ -1172,55 +1257,15 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions @elastic/security-solution-platform @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/routes @elastic/security-detections-response @elastic/security-threat-hunting
 
-## Security Solution sub teams - security-defend-workflows
-/x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
+### This is code shared between the Detections and Response team and the Endpoint team
+/x-pack/test/common/services/security_solution @elastic/security-defend-workflows @elastic/security-detections-response
 
-## Security Solution sub teams - security-telemetry (Data Engineering)
-x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
-x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
-
-## Security Solution sub teams - security-engineering-productivity
-x-pack/plugins/security_solution/cypress/ccs_e2e @elastic/security-engineering-productivity
-x-pack/plugins/security_solution/cypress/upgrade_e2e @elastic/security-engineering-productivity
-x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
-x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
-
-## Security Solution sub teams - adaptive-workload-protection
-x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/sec-cloudnative-integrations
-x-pack/plugins/security_solution/public/kubernetes @elastic/sec-cloudnative-integrations
-
-## Security Solution sub teams - Protections Experience
-x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
-x-pack/test/threat_intelligence_cypress @elastic/protections-experience
-
-# Security Defend Workflows - OSQuery Ownership
-/x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
-
-# Cloud Defend
-/x-pack/plugins/cloud_defend/ @elastic/sec-cloudnative-integrations
-/x-pack/plugins/security_solution/public/cloud_defend @elastic/sec-cloudnative-integrations
-
-# Cloud Security Posture
-/x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
-/x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-/x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
-
-# Security Solution onboarding tour
-/x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
+### These tests directories contain files owned by multiple teams. The directory will be owned by the tech leads, and the files will be owned by sub teams.
+/x-pack/plugins/security_solution/cypress/e2e/dashboards/ @elastic/security-tech-leads
+/x-pack/plugins/security_solution/cypress/e2e/dashboards/detection_response* @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/cypress/e2e/dashboards/enable_risk_score* @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/dashboards/entity_analytics* @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/data_sources/create_runtime_field* @elastic/security-solution-platform
 
 # Observability design
 /x-pack/plugins/apm/**/*.scss @elastic/observability-design
