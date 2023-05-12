@@ -14,10 +14,21 @@ import type { Agent } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import { sendGetAgents, sendGetAgentPolicies } from '../../../../hooks';
+
 import { AgentBulkActions } from './bulk_actions';
 
 jest.mock('../../../../../../services/experimental_features');
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+
+jest.mock('../../../../hooks', () => ({
+  ...jest.requireActual('../../../../hooks'),
+  sendGetAgents: jest.fn(),
+  sendGetAgentPolicies: jest.fn(),
+}));
+
+const mockedSendGetAgents = sendGetAgents as jest.Mock;
+const mockedSendGetAgentPolicies = sendGetAgentPolicies as jest.Mock;
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
@@ -33,6 +44,11 @@ describe('AgentBulkActions', () => {
   }
 
   describe('When in manual mode', () => {
+    beforeAll(() => {
+      mockedSendGetAgentPolicies.mockResolvedValue({});
+      mockedSendGetAgents.mockResolvedValue({});
+    });
+
     it('should show only disabled actions if no agents are active', async () => {
       const selectedAgents: Agent[] = [{ id: 'agent1' }, { id: 'agent2' }] as Agent[];
 
@@ -46,7 +62,6 @@ describe('AgentBulkActions', () => {
         refreshAgents: () => undefined,
         allTags: [],
         agentPolicies: [],
-        unselectableAgents: [],
       };
       const results = render(props);
 
@@ -80,7 +95,6 @@ describe('AgentBulkActions', () => {
         refreshAgents: () => undefined,
         allTags: [],
         agentPolicies: [],
-        unselectableAgents: [],
       };
       const results = render(props);
 
@@ -135,8 +149,28 @@ describe('AgentBulkActions', () => {
 
   describe('When in query mode', () => {
     it('should show correct actions for the active agents', async () => {
+      mockedSendGetAgentPolicies.mockResolvedValue({
+        data: {
+          items: [
+            {
+              name: 'Managed agent policy',
+              namespace: 'default',
+              description: '',
+              monitoring_enabled: ['logs', 'metrics'],
+              is_managed: true,
+              id: 'test-managed-policy',
+            },
+          ],
+        },
+      });
+      mockedSendGetAgents.mockResolvedValueOnce({
+        data: {
+          items: [],
+          total: 0,
+          totalInactive: 0,
+        },
+      });
       const selectedAgents: Agent[] = [];
-      const unselectableAgents: string[] = [];
 
       const props = {
         totalAgents: 10,
@@ -148,7 +182,6 @@ describe('AgentBulkActions', () => {
         refreshAgents: () => undefined,
         allTags: [],
         agentPolicies: [],
-        unselectableAgents,
       };
       const results = render(props);
 
@@ -168,9 +201,29 @@ describe('AgentBulkActions', () => {
       ).toBeEnabled();
     });
 
-    it('should show correct actions for the active agents and exclude the unselectable agents from the count', async () => {
+    it('should show correct actions for the active agents and exclude the managed agents from the count', async () => {
       const selectedAgents: Agent[] = [];
-      const unselectableAgents = ['agentId1', 'agentId2'];
+      mockedSendGetAgentPolicies.mockResolvedValue({
+        data: {
+          items: [
+            {
+              name: 'Managed agent policy',
+              namespace: 'default',
+              description: '',
+              monitoring_enabled: ['logs', 'metrics'],
+              is_managed: true,
+              id: 'test-managed-policy',
+            },
+          ],
+        },
+      });
+      mockedSendGetAgents.mockResolvedValueOnce({
+        data: {
+          items: ['agentId1', 'agentId2'],
+          total: 2,
+          totalInactive: 0,
+        },
+      });
 
       const props = {
         totalAgents: 10,
@@ -182,7 +235,6 @@ describe('AgentBulkActions', () => {
         refreshAgents: () => undefined,
         allTags: [],
         agentPolicies: [],
-        unselectableAgents,
       };
       const results = render(props);
 

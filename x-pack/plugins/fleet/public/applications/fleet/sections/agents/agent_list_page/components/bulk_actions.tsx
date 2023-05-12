@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,8 +23,13 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
+import { useLicense, sendGetAgents, sendGetAgentPolicies } from '../../../../hooks';
+import {
+  LICENSE_FOR_SCHEDULE_UPGRADE,
+  AGENTS_PREFIX,
+  SO_SEARCH_LIMIT,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../../../../common/constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
@@ -44,7 +49,6 @@ export interface Props {
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
   agentPolicies: AgentPolicy[];
-  unselectableAgents: string[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -57,7 +61,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   refreshAgents,
   allTags,
   agentPolicies,
-  unselectableAgents,
 }) => {
   const licenseService = useLicense();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
@@ -74,18 +77,58 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
+  const [managedAgents, setManagedAgents] = useState<string[]>([]);
 
-  // update the query removing the "unselectable" agents
+  // get all the managed policies
+  const fetchManagedAgents = async () => {
+    const managedPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`;
+
+    const agentPoliciesResponse = await sendGetAgentPolicies({
+      kuery: managedPoliciesKuery,
+      perPage: SO_SEARCH_LIMIT,
+      full: false,
+    });
+
+    if (agentPoliciesResponse.error) {
+      throw new Error(agentPoliciesResponse.error.message);
+    }
+
+    const managedPolicies = agentPoliciesResponse.data?.items ?? [];
+    // find all the agents that have those policies and are not unenrolled
+    const policiesKuery = managedPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or ');
+    const kuery = `NOT (status:unenrolled) and ${policiesKuery}`;
+    const response = await sendGetAgents({
+      kuery,
+      perPage: SO_SEARCH_LIMIT,
+      showInactive: true,
+    });
+
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+
+    return response.data?.items ?? [];
+  };
+
+  useEffect(() => {
+    async function fetchDataAsync() {
+      const allManagedAgents = await fetchManagedAgents();
+      setManagedAgents(allManagedAgents.map((agent) => agent.id));
+    }
+    fetchDataAsync();
+  }, []);
+
+  // update the query removing the "managed" agents
   const selectionQuery = useMemo(() => {
-    if (unselectableAgents) {
-      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${unselectableAgents
+    if (managedAgents) {
+      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${managedAgents
         .map((id) => `"${id}"`)
         .join(' or ')})`;
       return `${currentQuery} and NOT (${excludedKuery})`;
     } else {
       return currentQuery;
     }
-  }, [currentQuery, unselectableAgents]);
+  }, [currentQuery, managedAgents]);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -95,9 +138,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const totalActiveAgents = totalAgents - totalInactiveAgents;
 
   const agentCount =
-    selectionMode === 'manual'
-      ? selectedAgents.length
-      : totalActiveAgents - unselectableAgents?.length;
+    selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents - managedAgents?.length;
 
   const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
 

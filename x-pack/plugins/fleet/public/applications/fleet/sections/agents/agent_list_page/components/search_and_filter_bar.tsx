@@ -62,7 +62,6 @@ export interface SearchAndFilterBarProps {
   visibleAgents: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
-  unselectableAgents: string[];
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -90,7 +89,6 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   visibleAgents,
   onClickAgentActivity,
   showAgentActivityTour,
-  unselectableAgents,
 }) => {
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
@@ -323,7 +321,6 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   refreshAgents={refreshAgents}
                   allTags={tags}
                   agentPolicies={agentPolicies}
-                  unselectableAgents={unselectableAgents}
                 />
               </EuiFlexItem>
             ) : null}
