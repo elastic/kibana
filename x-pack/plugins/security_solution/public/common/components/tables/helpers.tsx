@@ -75,6 +75,7 @@ export const getRowItemsWithActions = ({
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
           isAggregatable={aggregatable}
+          isSearchable={searchable}
         />
       </>
     ) : (
@@ -88,7 +89,8 @@ export const getRowItemsWithActions = ({
 interface RowItemOverflowProps {
   fieldName: string;
   fieldType: string;
-  isAggregatable?: boolean;
+  isAggregatable: boolean;
+  isSearchable: boolean;
   values: string[];
   idPrefix: string;
   maxOverflowItems: number;
@@ -100,6 +102,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   values,
   fieldType,
   isAggregatable,
+  isSearchable,
   idPrefix,
   maxOverflowItems = 5,
   overflowIndexStart = 5,
@@ -113,6 +116,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
               fieldName={fieldName}
               idPrefix={idPrefix}
               isAggregatable={isAggregatable}
+              isSearchable={isSearchable}
               fieldType={fieldType}
               values={values}
               overflowIndexStart={overflowIndexStart}

@@ -253,6 +253,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             fieldType="keyword"
             idPrefix={idPrefix}
             isAggregatable={true}
+            isSearchable={true}
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
             render={render}
@@ -277,7 +278,8 @@ interface DefaultFieldRendererOverflowProps {
   fieldType: string;
   rowItems: string[];
   idPrefix: string;
-  isAggregatable?: boolean;
+  isAggregatable: boolean;
+  isSearchable: boolean;
   render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
@@ -288,7 +290,8 @@ interface MoreContainerProps {
   fieldType: string;
   values: string[];
   idPrefix: string;
-  isAggregatable?: boolean;
+  isAggregatable: boolean;
+  isSearchable: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
@@ -300,6 +303,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
     fieldType,
     idPrefix,
     isAggregatable,
+    isSearchable,
     moreMaxHeight,
     overflowIndexStart,
     render,
@@ -326,6 +330,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                     value,
                     type: fieldType,
                     aggregatable: isAggregatable,
+                    searchable: isSearchable,
                   }}
                   metadata={{
                     scopeId: timelineId ?? undefined,
@@ -348,6 +353,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
         values,
         timelineId,
         isAggregatable,
+        isSearchable,
       ]
     );
 
@@ -379,6 +385,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
     rowItems,
     fieldType,
     isAggregatable,
+    isSearchable,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
@@ -422,6 +429,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               overflowIndexStart={overflowIndexStart}
               fieldType={fieldType}
               isAggregatable={isAggregatable}
+              isSearchable={isSearchable}
             />
           </EuiPopover>
         )}

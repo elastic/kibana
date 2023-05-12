@@ -337,7 +337,8 @@ export const DataTableComponent = React.memo<DataTableProps>(
               ({ data: columnData }) =>
                 columnData.find((rowData) => rowData.field === column.id)?.value
             ),
-            aggregatable: column.aggregatable,
+            aggregatable: column.aggregatable ?? false,
+            searchable: column.searchable ?? false,
           }));
 
       return {
