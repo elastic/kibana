@@ -86,6 +86,7 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
+    defaultBatchSize: 1000,
     maxBatchSizeBytes: 1e8,
     discardUnknownObjects: false,
     discardCorruptObjects: false,
@@ -1832,11 +1833,47 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(1);
+        expect(newState.defaultBatchSize).toBe(1000);
+        expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
               "level": "info",
               "message": "Starting to process 1 documents.",
+            },
+          ]
+        `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM increases batchSize if < defaultBatchSize', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+        });
+        const newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
+        expect(newState.batchSize).toBe(600);
+        expect(newState.defaultBatchSize).toBe(1000);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+        });
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(500); // halves the batch size
+        expect(newState.defaultBatchSize).toBe(1000); // leaves defaultBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half to 500.",
             },
           ]
         `);
@@ -2304,6 +2341,8 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(10);
+        expect(newState.defaultBatchSize).toBe(1000);
+        expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -2340,6 +2379,40 @@ describe('migrations v2 model', () => {
             Object {
               "level": "info",
               "message": "Processed 5 documents out of 10.",
+            },
+          ]
+        `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM increases batchSize if < defaultBatchSize', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+        });
+        const newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
+        expect(newState.batchSize).toBe(600);
+        expect(newState.defaultBatchSize).toBe(1000);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+        });
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(500); // halves the batch size
+        expect(newState.defaultBatchSize).toBe(1000); // leaves defaultBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half to 500.",
             },
           ]
         `);
