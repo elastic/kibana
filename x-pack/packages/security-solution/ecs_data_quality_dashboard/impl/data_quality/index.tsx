@@ -27,6 +27,12 @@ interface Props {
   canUserCreateAndReadCases: () => boolean;
   defaultNumberFormat: string;
   defaultBytesFormat: string;
+  getAppUrl: (param: {
+    appId?: string;
+    deepLinkId?: string;
+    path?: string;
+    absolute?: boolean;
+  }) => string;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -61,6 +67,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   canUserCreateAndReadCases,
   defaultBytesFormat,
   defaultNumberFormat,
+  getAppUrl,
   getGroupByFieldsOnClick,
   httpFetch,
   ilmPhases,
@@ -83,7 +90,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   );
 
   return (
-    <DataQualityProvider httpFetch={httpFetch}>
+    <DataQualityProvider httpFetch={httpFetch} getAppUrl={getAppUrl}>
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}

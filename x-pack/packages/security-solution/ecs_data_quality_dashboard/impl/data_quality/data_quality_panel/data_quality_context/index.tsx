@@ -10,6 +10,12 @@ import React, { useMemo } from 'react';
 
 interface DataQualityProviderProps {
   httpFetch: HttpHandler;
+  getAppUrl: (param: {
+    appId?: string;
+    deepLinkId?: string;
+    path?: string;
+    absolute?: boolean;
+  }) => string;
 }
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);
@@ -17,12 +23,14 @@ const DataQualityContext = React.createContext<DataQualityProviderProps | undefi
 export const DataQualityProvider: React.FC<DataQualityProviderProps> = ({
   children,
   httpFetch,
+  getAppUrl,
 }) => {
   const value = useMemo(
     () => ({
       httpFetch,
+      getAppUrl,
     }),
-    [httpFetch]
+    [httpFetch, getAppUrl]
   );
 
   return <DataQualityContext.Provider value={value}>{children}</DataQualityContext.Provider>;

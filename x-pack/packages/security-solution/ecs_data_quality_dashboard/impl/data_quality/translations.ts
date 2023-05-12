@@ -140,6 +140,12 @@ export const ERROR_UPDATING_UNALLOWED_VALUES = ({ details }: { details: string }
     }
   );
 
+export const ERROR_FETCHING_INDICES_DATA = ({ details }: { details: string }) =>
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.errorFetchingIndicesDataLabel', {
+    values: { details },
+    defaultMessage: 'Error fetching indices data: {details}',
+  });
+
 export const FIELDS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.fieldsLabel',
   {

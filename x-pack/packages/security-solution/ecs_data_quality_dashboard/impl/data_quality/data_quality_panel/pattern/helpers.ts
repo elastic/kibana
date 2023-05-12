@@ -18,8 +18,9 @@ import type {
   DataQualityCheckResult,
   PatternRollup,
   SortConfig,
+  IndicesStatsWithDataStream,
 } from '../../types';
-import { getDocsCount, getSizeInBytes } from '../../helpers';
+import { getDataStream, getDocsCount, getSizeInBytes } from '../../helpers';
 
 export const isManaged = (
   ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined
@@ -156,7 +157,7 @@ export const getSummaryTableItems = ({
   results: Record<string, DataQualityCheckResult> | undefined;
   sortByColumn: string;
   sortByDirection: 'desc' | 'asc';
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): IndexSummaryTableItem[] => {
   const summaryTableItems = indexNames.map((indexName) => ({
     docsCount: getDocsCount({ stats, indexName }),
@@ -166,6 +167,7 @@ export const getSummaryTableItems = ({
     pattern,
     patternDocsCount,
     sizeInBytes: getSizeInBytes({ stats, indexName }),
+    dataStream: getDataStream({ stats, indexName }),
   }));
 
   return orderBy([sortByColumn], [sortByDirection], summaryTableItems);

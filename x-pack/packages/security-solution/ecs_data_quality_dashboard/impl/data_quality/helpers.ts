@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  IlmExplainLifecycleLifecycleExplain,
-  IndicesStatsIndicesStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
 import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
@@ -17,9 +14,11 @@ import * as i18n from './translations';
 
 import type {
   DataQualityCheckResult,
+  DataStream,
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
+  IndicesStatsWithDataStream,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
   PatternRollup,
@@ -36,7 +35,7 @@ export const getIndexNames = ({
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   ilmPhases: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): string[] => {
   if (ilmExplain != null && stats != null) {
     const allIndexNames = Object.keys(stats);
@@ -259,7 +258,7 @@ export const getDocsCount = ({
   stats,
 }: {
   indexName: string;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
 
 export const getSizeInBytes = ({
@@ -267,15 +266,23 @@ export const getSizeInBytes = ({
   stats,
 }: {
   indexName: string;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): number => (stats && stats[indexName]?.primaries?.store?.size_in_bytes) ?? 0;
+
+export const getDataStream = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: IndicesStatsWithDataStream | null;
+}): string => (stats && stats[indexName]?.data_stream) ?? EMPTY_STAT;
 
 export const getTotalDocsCount = ({
   indexNames,
   stats,
 }: {
   indexNames: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): number =>
   indexNames.reduce(
     (acc: number, indexName: string) => acc + getDocsCount({ stats, indexName }),
@@ -287,7 +294,7 @@ export const getTotalSizeInBytes = ({
   stats,
 }: {
   indexNames: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): number =>
   indexNames.reduce(
     (acc: number, indexName: string) => acc + getSizeInBytes({ stats, indexName }),

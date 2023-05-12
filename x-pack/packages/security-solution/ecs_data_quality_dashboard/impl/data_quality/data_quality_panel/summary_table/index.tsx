@@ -13,6 +13,7 @@ import type { IndexSummaryTableItem } from './helpers';
 import { getShowPagination } from './helpers';
 import { defaultSort, MIN_PAGE_SIZE } from '../pattern/helpers';
 import { SortConfig } from '../../types';
+import { useDataQualityContext } from '../data_quality_context';
 
 export interface Props {
   formatBytes: (value: number | undefined) => string;
@@ -20,12 +21,19 @@ export interface Props {
   getTableColumns: ({
     formatBytes,
     formatNumber,
+    getAppUrl,
     itemIdToExpandedRowMap,
     pattern,
     toggleExpanded,
   }: {
     formatBytes: (value: number | undefined) => string;
     formatNumber: (value: number | undefined) => string;
+    getAppUrl: (param: {
+      appId?: string;
+      deepLinkId?: string;
+      path?: string;
+      absolute?: boolean;
+    }) => string;
     itemIdToExpandedRowMap: Record<string, React.ReactNode>;
     pattern: string;
     toggleExpanded: (indexName: string) => void;
@@ -57,16 +65,26 @@ const SummaryTableComponent: React.FC<Props> = ({
   sorting,
   toggleExpanded,
 }) => {
+  const { getAppUrl } = useDataQualityContext();
   const columns = useMemo(
     () =>
       getTableColumns({
+        getAppUrl,
         formatBytes,
         formatNumber,
         itemIdToExpandedRowMap,
         pattern,
         toggleExpanded,
       }),
-    [formatBytes, formatNumber, getTableColumns, itemIdToExpandedRowMap, pattern, toggleExpanded]
+    [
+      formatBytes,
+      formatNumber,
+      getTableColumns,
+      itemIdToExpandedRowMap,
+      pattern,
+      toggleExpanded,
+      getAppUrl,
+    ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);
 
