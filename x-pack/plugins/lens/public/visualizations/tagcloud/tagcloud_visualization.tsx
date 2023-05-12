@@ -14,6 +14,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
 import type { TagcloudState } from './types';
+import { suggestions } from './suggestions';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -63,9 +64,7 @@ export const getTagcloudVisualization = ({
     };
   },
 
-  getSuggestions(suggestionRequest: SuggestionRequest<TagcloudState>) {
-    return [];
-  },
+  getSuggestions: suggestions,
 
   initialize(addNewLayer, state) {
     return (
