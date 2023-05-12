@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-provider-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "coreProviderPlugin",
+    "server": false,
+    "browser": true,
+    "optionalPlugins": [
+      "corePluginA",
+      "corePluginB",
+      "coreHttp",
+      "licensing",
+      "globalSearchTest"
+    ]
+  }
+}

@@ -9,7 +9,7 @@ import { <%= upperCamelCase(name) %>Plugin } from './plugin';
   return new <%= upperCamelCase(name) %>Plugin(initializerContext);
 }
 
-export {
+export type {
   <%= upperCamelCase(name) %>PluginSetup,
   <%= upperCamelCase(name) %>PluginStart,
 } from './types';

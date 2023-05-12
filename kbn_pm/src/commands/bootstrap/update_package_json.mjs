@@ -64,7 +64,7 @@ export async function updatePackageJson(pkgs, log) {
     new Map(Object.entries(pkgJson.dependencies).filter(([k]) => k.startsWith('@kbn/'))),
     new Map(
       pkgs
-        .filter((p) => !p.isDevOnly)
+        .filter((p) => !p.isDevOnly())
         .map((p) => [p.manifest.id, `link:${p.normalizedRepoRelativeDir}`])
     )
   );
@@ -74,7 +74,7 @@ export async function updatePackageJson(pkgs, log) {
     new Map(Object.entries(pkgJson.devDependencies).filter(([k]) => k.startsWith('@kbn/'))),
     new Map(
       pkgs
-        .filter((p) => p.isDevOnly)
+        .filter((p) => p.isDevOnly())
         .map((p) => [p.manifest.id, `link:${p.normalizedRepoRelativeDir}`])
     )
   );

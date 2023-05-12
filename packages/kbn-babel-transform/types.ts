@@ -8,7 +8,6 @@
 
 export interface TransformConfig {
   disableSourceMaps?: boolean;
-  ignoredPkgIds?: string[];
 }
 
 export interface WorkerData {

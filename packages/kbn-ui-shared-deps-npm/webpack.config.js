@@ -153,7 +153,6 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
-      symlinks: false,
     },
 
     optimization: {
