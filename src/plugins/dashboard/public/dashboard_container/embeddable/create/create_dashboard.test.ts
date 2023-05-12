@@ -100,7 +100,7 @@ test('pulls state from creation options initial input which overrides all other 
   const dashboard = await createDashboard(
     {
       useSessionStorageIntegration: true,
-      initialInput: { description: 'wow this description is a masterpiece' },
+      getInitialInput: () => ({ description: 'wow this description is a masterpiece' }),
     },
     0,
     'wow-such-id'
@@ -120,7 +120,7 @@ test('applies filters and query from state to query service', async () => {
     unifiedSearchSettings: {
       kbnUrlStateStorage: createKbnUrlStateStorage(),
     },
-    initialInput: { filters, query },
+    getInitialInput: () => ({ filters, query }),
   });
   expect(pluginServices.getServices().data.query.queryString.setQuery).toHaveBeenCalledWith(query);
   expect(pluginServices.getServices().data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
@@ -136,7 +136,7 @@ test('applies time range and refresh interval from initial input to query servic
     unifiedSearchSettings: {
       kbnUrlStateStorage: createKbnUrlStateStorage(),
     },
-    initialInput: { timeRange, refreshInterval, timeRestore: true },
+    getInitialInput: () => ({ timeRange, refreshInterval, timeRestore: true }),
   });
   expect(
     pluginServices.getServices().data.query.timefilter.timefilter.setTime
@@ -171,7 +171,7 @@ test('replaces panel with incoming embeddable if id matches existing panel', asy
   };
   const dashboard = await createDashboard({
     getIncomingEmbeddable: () => incomingEmbeddable,
-    initialInput: {
+    getInitialInput: () => ({
       panels: {
         i_match: getSampleDashboardPanel<ContactCardEmbeddableInput>({
           explicitInput: {
@@ -181,7 +181,7 @@ test('replaces panel with incoming embeddable if id matches existing panel', asy
           type: CONTACT_CARD_EMBEDDABLE,
         }),
       },
-    },
+    }),
   });
   expect(dashboard.getState().explicitInput.panels.i_match.explicitInput).toStrictEqual(
     expect.objectContaining({
@@ -210,7 +210,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
 
   await createDashboard({
     getIncomingEmbeddable: () => incomingEmbeddable,
-    initialInput: {
+    getInitialInput: () => ({
       panels: {
         i_do_not_match: getSampleDashboardPanel<ContactCardEmbeddableInput>({
           explicitInput: {
@@ -220,7 +220,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
           type: CONTACT_CARD_EMBEDDABLE,
         }),
       },
-    },
+    }),
   });
 
   // flush promises
@@ -252,9 +252,9 @@ test('creates a control group from the control group factory and waits for it to
     .mockReturnValue(mockControlGroupFactory);
   await createDashboard({
     useControlGroupIntegration: true,
-    initialInput: {
+    getInitialInput: () => ({
       controlGroupInput: { controlStyle: 'twoLine' } as unknown as ControlGroupInput,
-    },
+    }),
   });
   // flush promises
   await new Promise((r) => setTimeout(r, 1));
