@@ -169,15 +169,15 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     })(),
   ]);
 
-  await context.alertingAudit?.log({
-    operation: AlertingAuditLogOperation.UPDATE,
-    subject: AlertingAuditSubject.RULE,
-    subjectId: id,
-    data: {
-      old: omit(alertSavedObject.attributes, ['monitoring', 'lastRun', 'executionStatus']),
-      new: omit(updateResult, ['monitoring', 'lastRun', 'executionStatus']),
-    },
-  });
+  // await context.alertingAudit?.log({
+  //   operation: AlertingAuditLogOperation.UPDATE,
+  //   subject: AlertingAuditSubject.RULE,
+  //   subjectId: id,
+  //   data: {
+  //     old: omit(alertSavedObject.attributes, ['monitoring', 'lastRun', 'executionStatus']),
+  //     new: omit(updateResult, ['monitoring', 'lastRun', 'executionStatus', 'id', 'actions.id']),
+  //   },
+  // });
 
   return updateResult;
 }
@@ -294,6 +294,16 @@ async function updateAlert<Params extends RuleTypeParams>(
       `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
     );
   }
+
+  await context.alertingAudit?.log({
+    operation: AlertingAuditLogOperation.UPDATE,
+    subject: AlertingAuditSubject.RULE,
+    subjectId: id,
+    data: {
+      old: omit(currentRule.attributes, ['monitoring', 'lastRun', 'executionStatus', 'apiKey']),
+      new: omit(updatedObject.attributes, ['monitoring', 'lastRun', 'executionStatus', 'apiKey']),
+    },
+  });
 
   return getPartialRuleFromRaw(
     context,

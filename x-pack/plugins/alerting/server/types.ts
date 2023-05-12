@@ -22,8 +22,10 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { Alert, type FieldMap } from '@kbn/alerts-as-data-utils';
+import { Alert } from '@kbn/alerts-as-data-utils';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
+import { AlertingAuditClient } from './audit/client/alerting_audit_client';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -70,6 +72,7 @@ export interface AlertingApiRequestHandlerContext {
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
+  getAlertingAuditClient: () => AlertingAuditClient;
 }
 
 /**

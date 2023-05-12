@@ -576,6 +576,7 @@ export class AlertingPlugin {
       rulesClientFactory,
       rulesSettingsClientFactory,
       maintenanceWindowClientFactory,
+      alertingAuditClientFactory,
     } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
@@ -589,6 +590,7 @@ export class AlertingPlugin {
         getMaintenanceWindowClient: () => {
           return maintenanceWindowClientFactory.createWithAuthorization(request);
         },
+        getAlertingAuditClient: () => alertingAuditClientFactory.createWithAuthorization(request),
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>
           await getHealth(savedObjects.createInternalRepository(['alert'])),

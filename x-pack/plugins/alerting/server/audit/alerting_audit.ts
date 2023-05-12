@@ -47,17 +47,17 @@ export class AlertingAudit {
       throw new Error('No context');
     }
     return this.context.client.log({
-      '@timestamp': new Date().toISOString(),
+      timestamp: new Date().toISOString(),
       user: await this.getUserName(),
       ...params,
     });
   }
 
   private async getUserName() {
-    if (!this.securityPluginStart) {
+    if (!this.securityPluginStart || !this.context?.request) {
       return '';
     }
-    const user = await this.securityPluginStart.authc.getCurrentUser(this.context!.request);
+    const user = await this.securityPluginStart.authc.getCurrentUser(this.context.request);
     return user ? user.username : '';
   }
 }

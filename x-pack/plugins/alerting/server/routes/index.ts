@@ -8,6 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { findAlertingAuditRoute } from './find_alerting_audit';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
@@ -110,4 +111,5 @@ export function defineRoutes(opts: RouteOptions) {
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
   activeMaintenanceWindowsRoute(router, licenseState);
+  findAlertingAuditRoute(router, licenseState);
 }

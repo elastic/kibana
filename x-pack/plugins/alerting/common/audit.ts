@@ -6,6 +6,7 @@
  */
 
 export const ALERTING_AUDIT_SAVED_OBJECT_TYPE = 'audit';
+export const ALERTING_AUDIT_FIND_PATH = '/api/alerting/audit/_find';
 
 export enum AlertingAuditLogOperation {
   CREATE = 'create',
@@ -18,15 +19,22 @@ export enum AlertingAuditSubject {
   RULE = 'rule',
 }
 
-export interface AlertingAuditLog {
-  id: string;
-  '@timestamp': string;
+export interface AlertingAuditSOAttributes {
+  timestamp: string;
   user: string;
   operation: AlertingAuditLogOperation;
   subject: string;
   subjectId: string;
+  data: {
+    old: unknown;
+    new: unknown;
+  };
 }
 
-export interface AlertingAuditSOAttributes {
-  operation: string;
+export interface AlertingAuditLog extends AlertingAuditSOAttributes {
+  id: string;
+}
+
+export interface AlertingAuditLogRaw extends Omit<AlertingAuditLog, 'subjectId'> {
+  subject_id: string;
 }

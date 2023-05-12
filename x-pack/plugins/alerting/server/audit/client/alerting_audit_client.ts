@@ -5,20 +5,12 @@
  * 2.0.
  */
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { AlertingAuditLog, AlertingAuditLogOperation } from '../../../common';
-import { log } from './methods/log';
+import { log, find, FindResult, AlertingAuditLogParams, AlertingAuditFindParams } from './methods';
+import { AlertingAuditLog } from '../../../common';
 
 export interface AlertingAuditClientContext {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-}
-
-export interface AlertingAuditLogParams {
-  '@timestamp': string;
-  user: string;
-  operation: AlertingAuditLogOperation;
-  subject: string;
-  subjectId: string;
 }
 
 export interface AlertingAuditClientConstructorOptions {
@@ -38,4 +30,7 @@ export class AlertingAuditClient {
 
   public log = (params: AlertingAuditLogParams): Promise<AlertingAuditLog> =>
     log(this.context, params);
+
+  public find = (params: AlertingAuditFindParams): Promise<FindResult> =>
+    find(this.context, params);
 }

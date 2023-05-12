@@ -10,9 +10,21 @@ import {
   ALERTING_AUDIT_SAVED_OBJECT_TYPE,
   AlertingAuditSOAttributes,
   AlertingAuditLog,
+  AlertingAuditLogOperation,
 } from '../../../../common';
-import { AlertingAuditLogParams } from '../../alerting_audit';
 import { AlertingAuditClientContext } from '../alerting_audit_client';
+
+export interface AlertingAuditLogParams {
+  timestamp: string;
+  user: string;
+  operation: AlertingAuditLogOperation;
+  subject: string;
+  subjectId: string;
+  data: {
+    old: unknown;
+    new: unknown;
+  };
+}
 
 export async function log(
   context: AlertingAuditClientContext,

@@ -9,6 +9,7 @@ import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import type { RuleAuditProps } from './rule_audit';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
@@ -34,6 +35,7 @@ import {
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
+const RuleAudit = lazy(() => import('./rule_audit'));
 
 type RuleProps = {
   rule: Rule;
@@ -50,6 +52,7 @@ type RuleProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
+const RULE_AUDIT_TAB = 'rule_audit';
 
 export function RuleComponent({
   rule,
@@ -130,6 +133,20 @@ export function RuleComponent({
         isLoadingRuleSummary: isLoadingChart,
         onChangeDuration,
         requestRefresh,
+      }),
+    },
+    {
+      id: RULE_AUDIT_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.ruleAuditText', {
+        defaultMessage: 'Audit',
+      }),
+      'data-test-subj': 'ruleAuditTab',
+      content: suspendedComponentWithProps<RuleAuditProps>(
+        RuleAudit,
+        'xl'
+      )({
+        ruleId: rule.id,
+        refreshToken,
       }),
     },
   ];
