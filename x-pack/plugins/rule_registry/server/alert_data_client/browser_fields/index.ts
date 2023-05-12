@@ -30,17 +30,27 @@ const browserFieldFactory = (
   };
 };
 
-export const fieldDescriptorToBrowserFieldMapper = (fields: FieldDescriptor[]): BrowserFields => {
-  return fields.reduce((browserFields: BrowserFields, field: FieldDescriptor) => {
-    const category = getFieldCategory(field);
-    const browserField = browserFieldFactory(field, category);
+export const fieldDescriptorToBrowserFieldMapper = async (
+  fields: FieldDescriptor[]
+): Promise<BrowserFields> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(
+        fields.reduce((browserFields: BrowserFields, field: FieldDescriptor) => {
+          const category = getFieldCategory(field);
+          const browserField = browserFieldFactory(field, category);
 
-    if (browserFields[category]) {
-      browserFields[category] = { fields: { ...browserFields[category].fields, ...browserField } };
-    } else {
-      browserFields[category] = { fields: browserField };
-    }
+          if (browserFields[category]) {
+            browserFields[category] = {
+              fields: { ...browserFields[category].fields, ...browserField },
+            };
+          } else {
+            browserFields[category] = { fields: browserField };
+          }
 
-    return browserFields;
-  }, {});
+          return browserFields;
+        }, {})
+      );
+    });
+  });
 };
