@@ -84,6 +84,12 @@ function mountDatePicker(initialParams: {
             get: (key: string) => [],
             get$: (key: string) => of(true),
           },
+          settings: {
+            client: {
+              get: (key: string) => [],
+              get$: (key: string) => of(true),
+            },
+          },
         }}
       >
         <DatePickerContextProvider>

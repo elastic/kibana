@@ -7,7 +7,7 @@
 
 import { Filter } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
-import * as hook from '../../hooks';
+import * as hook from '../../hooks/use_kibana';
 
 jest.mock('../../hooks/use_kibana');
 
