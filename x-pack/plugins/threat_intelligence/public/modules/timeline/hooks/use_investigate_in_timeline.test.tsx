@@ -6,7 +6,10 @@
  */
 
 import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import { useInvestigateInTimeline, UseInvestigateInTimelineValue } from '.';
+import {
+  useInvestigateInTimeline,
+  UseInvestigateInTimelineValue,
+} from './use_investigate_in_timeline';
 import {
   generateMockIndicator,
   generateMockUrlIndicator,

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import { RuntimeField } from '@kbn/data-views-plugin/public';
 import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
+import { getDataHandler } from '../../data_handler';
 import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
@@ -25,7 +26,6 @@ import {
   FieldFormatParams,
 } from '../../components/shared/exploratory_view/types';
 import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
-import { getDataHandler } from '../../data_handler';
 import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {

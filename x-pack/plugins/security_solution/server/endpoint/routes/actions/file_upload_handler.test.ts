@@ -7,7 +7,7 @@
 
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { UploadActionRequestBody } from '../../../../common/endpoint/schema/actions';
+import type { UploadActionApiRequestBody } from '../../../../common/endpoint/schema/actions';
 import type { getActionFileUploadHandler } from './file_upload_handler';
 import { registerActionFileUploadRoute } from './file_upload_handler';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
@@ -31,7 +31,7 @@ const deleteFileMock = _deleteFile as jest.Mock;
 const setFileActionIdMock = _setFileActionId as jest.Mock;
 
 describe('Upload response action create API handler', () => {
-  type UploadHttpApiTestSetupMock = HttpApiTestSetupMock<never, never, UploadActionRequestBody>;
+  type UploadHttpApiTestSetupMock = HttpApiTestSetupMock<never, never, UploadActionApiRequestBody>;
 
   let testSetup: UploadHttpApiTestSetupMock;
   let httpRequestMock: ReturnType<UploadHttpApiTestSetupMock['createRequestMock']>;
@@ -39,7 +39,7 @@ describe('Upload response action create API handler', () => {
   let httpResponseMock: UploadHttpApiTestSetupMock['httpResponseMock'];
 
   beforeEach(() => {
-    testSetup = createHttpApiTestSetupMock<never, never, UploadActionRequestBody>();
+    testSetup = createHttpApiTestSetupMock<never, never, UploadActionApiRequestBody>();
 
     ({ httpHandlerContextMock, httpResponseMock } = testSetup);
     httpRequestMock = testSetup.createRequestMock();
@@ -116,7 +116,7 @@ describe('Upload response action create API handler', () => {
         },
       });
 
-      const reqBody: UploadActionRequestBody = {
+      const reqBody: UploadActionApiRequestBody = {
         file: fileContent,
         endpoint_ids: ['123-456'],
         parameters: {
