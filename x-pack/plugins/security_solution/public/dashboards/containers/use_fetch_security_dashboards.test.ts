@@ -57,11 +57,12 @@ describe('useFetchSecurityDashboards', () => {
     await asyncRenderUseFetchSecurityDashboards();
 
     expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-    expect((getDashboardsByTagIds as jest.Mock).mock.calls[0][0]).toEqual(
-      expect.objectContaining({
+    expect(getDashboardsByTagIds).toHaveBeenCalledWith(
+      {
         http: mockHttp,
         tagIds: [MOCK_TAG_ID],
-      })
+      },
+      expect.any(Object)
     );
   });
 

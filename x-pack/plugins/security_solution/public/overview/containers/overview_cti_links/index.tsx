@@ -33,7 +33,7 @@ const useCtiInstalledDashboards = () => {
   } = useFetch(REQUEST_NAMES.CTI_TAGS, getDashboardsByTagIds);
 
   useEffect(() => {
-    if (!isLoadingTags && !errorTags && ctiTags && ctiTags.length === 0) {
+    if (!isLoadingTags && !errorTags && ctiTags?.length) {
       fetchDashboards({ http, tagIds: ctiTags.map((tag) => tag.id) });
     }
   }, [errorTags, fetchDashboards, http, isLoadingTags, ctiTags]);
