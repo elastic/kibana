@@ -12,7 +12,8 @@
     "@kbn/config-schema",
     "@kbn/security-plugin",
     "@kbn/core-chrome-browser-internal",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": ["target/**/*"]
 }
