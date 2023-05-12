@@ -21,7 +21,7 @@ export enum InfraRuleType {
 }
 
 export interface InfraRuleTypeParams {
-  [InfraRuleType.MetricThreshold]: InventoryMetricThresholdParams;
+  [InfraRuleType.MetricThreshold]: MetricThresholdParams;
   [InfraRuleType.InventoryThreshold]: InventoryMetricConditions;
   [InfraRuleType.Anomaly]: MetricAnomalyParams;
 }
@@ -98,6 +98,15 @@ export interface InventoryMetricThresholdParams {
   nodeType: InventoryItemType;
   sourceId?: string;
   alertOnNoData?: boolean;
+}
+
+export interface MetricThresholdParams {
+  criteria: MetricExpressionParams[];
+  filterQuery?: string;
+  filterQueryText?: string;
+  sourceId?: string;
+  alertOnNoData?: boolean;
+  alertOnGroupDisappear?: boolean;
 }
 
 interface BaseMetricExpressionParams {

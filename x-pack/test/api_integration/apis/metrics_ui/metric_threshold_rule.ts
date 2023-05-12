@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { generate } from '@kbn/infra-forge';
-import { InfraRuleType } from '@kbn/infra-plugin/common/alerting/metrics';
+import { Aggregators, Comparator, InfraRuleType } from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   waitForDocumentInIndex,
   waitForAlertInIndex,
@@ -44,8 +44,8 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: 'avg',
-                comparator: '>',
+                aggType: Aggregators.AVERAGE,
+                comparator: Comparator.GT,
                 threshold: [0.5],
                 timeSize: 5,
                 timeUnit: 'm',
