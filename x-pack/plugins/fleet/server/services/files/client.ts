@@ -68,7 +68,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
     }
 
     this.esFileClient = createEsFileClient({
-      metadataIndex: this.fileDataIndex,
+      metadataIndex: this.fileMetaIndex,
       blobStorageIndex: this.fileDataIndex,
       elasticsearchClient: esClient,
       logger,
