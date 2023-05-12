@@ -18,6 +18,7 @@ import * as i18n from './translations';
 import { SelectedPromptContexts } from './selected_prompt_contexts';
 
 interface Props {
+  isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
   promptTextPreview: string;
   selectedPromptContextIds: string[];
@@ -31,7 +32,8 @@ const PreviewText = styled(EuiText)`
   white-space: pre-line;
 `;
 
-const FirstPromptEditorComponent: React.FC<Props> = ({
+const PromptEditorComponent: React.FC<Props> = ({
+  isNewConversation,
   promptContexts,
   promptTextPreview,
   selectedPromptContextIds,
@@ -52,13 +54,16 @@ const FirstPromptEditorComponent: React.FC<Props> = ({
   const commentBody = useMemo(
     () => (
       <>
-        <SystemPrompt
-          selectedSystemPromptId={selectedSystemPromptId}
-          setSelectedSystemPromptId={setSelectedSystemPromptId}
-          systemPrompts={systemPrompts}
-        />
+        {isNewConversation && (
+          <SystemPrompt
+            selectedSystemPromptId={selectedSystemPromptId}
+            setSelectedSystemPromptId={setSelectedSystemPromptId}
+            systemPrompts={systemPrompts}
+          />
+        )}
 
         <SelectedPromptContexts
+          isNewConversation={isNewConversation}
           promptContexts={promptContexts}
           selectedPromptContextIds={selectedPromptContextIds}
           setSelectedPromptContextIds={setSelectedPromptContextIds}
@@ -71,6 +76,7 @@ const FirstPromptEditorComponent: React.FC<Props> = ({
       </>
     ),
     [
+      isNewConversation,
       promptContexts,
       promptTextPreview,
       selectedPromptContextIds,
@@ -102,4 +108,6 @@ const FirstPromptEditorComponent: React.FC<Props> = ({
   return <EuiCommentList comments={comments} aria-label={i18n.COMMENTS_LIST_ARIA_LABEL} />;
 };
 
-export const FirstPromptEditor = React.memo(FirstPromptEditorComponent);
+PromptEditorComponent.displayName = 'PromptEditorComponent';
+
+export const PromptEditor = React.memo(PromptEditorComponent);

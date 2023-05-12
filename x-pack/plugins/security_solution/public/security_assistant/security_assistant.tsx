@@ -41,10 +41,10 @@ import { useConversation } from './use_conversation';
 import { useSendMessages } from './use_send_messages';
 import type { Message } from './security_assistant_context/types';
 import { ConversationSelector } from './conversation_selector';
-import { FirstPromptEditor } from './first_prompt_editor';
+import { PromptEditor } from './prompt_editor';
 import { getDefaultSystemPrompt, getSuperheroPrompt } from './prompt/helpers';
 import type { Prompt } from './types';
-import { getPromptById } from './first_prompt_editor/helpers';
+import { getPromptById } from './prompt_editor/helpers';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -123,7 +123,8 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       }, []);
       useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'auto' });
-      }, [currentConversation.messages.length]);
+        promptTextAreaRef?.current?.focus();
+      }, [currentConversation.messages.length, selectedPromptContextIds.length]);
       ////
 
       // Attach to case support
@@ -202,6 +203,8 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
             const rawResponse = await sendMessages(updatedMessages);
             const responseMessage: Message = getMessageFromRawResponse(rawResponse);
             appendMessage({ conversationId: selectedConversationId, message: responseMessage });
+            setSelectedPromptContextIds([]);
+            setPromptTextPreview('');
           }
         },
         [
@@ -214,27 +217,6 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
           sendMessages,
           systemPrompts,
         ]
-      );
-
-      const handleSendContextMessage = useCallback(
-        async (content) => {
-          const message: Message = {
-            role: 'user',
-            content,
-            timestamp: new Date().toLocaleString(),
-          };
-
-          const updatedMessages = appendMessage({
-            conversationId: selectedConversationId,
-            message,
-          });
-
-          const rawResponse = await sendMessages(updatedMessages);
-          const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-
-          appendMessage({ conversationId: selectedConversationId, message: responseMessage });
-        },
-        [appendMessage, selectedConversationId, sendMessages]
       );
 
       // Drill in `Add To Timeline` action
@@ -369,8 +351,6 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
             })}
 
           <ContextPills
-            isNewChat={currentConversation.messages.length === 0}
-            onSendContextMessage={handleSendContextMessage}
             promptContexts={promptContexts}
             selectedPromptContextIds={selectedPromptContextIds}
             setSelectedPromptContextIds={setSelectedPromptContextIds}
@@ -379,18 +359,6 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
           <EuiSpacer />
 
           <CommentsContainer>
-            {currentConversation.messages.length === 0 && (
-              <FirstPromptEditor
-                promptContexts={promptContexts}
-                promptTextPreview={promptTextPreview}
-                selectedPromptContextIds={selectedPromptContextIds}
-                selectedSystemPromptId={selectedSystemPromptId}
-                setSelectedPromptContextIds={setSelectedPromptContextIds}
-                setSelectedSystemPromptId={setSelectedSystemPromptId}
-                systemPrompts={systemPrompts}
-              />
-            )}
-
             <StyledCommentList
               comments={currentConversation.messages.map((message, index) => {
                 const isUser = message.role === 'user';
@@ -442,6 +410,24 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
               })}
             />
             <div ref={bottomRef} />
+
+            <EuiSpacer />
+
+            <>
+              {(currentConversation.messages.length === 0 ||
+                selectedPromptContextIds.length > 0) && (
+                <PromptEditor
+                  isNewConversation={currentConversation.messages.length === 0}
+                  promptContexts={promptContexts}
+                  promptTextPreview={promptTextPreview}
+                  selectedPromptContextIds={selectedPromptContextIds}
+                  selectedSystemPromptId={selectedSystemPromptId}
+                  setSelectedPromptContextIds={setSelectedPromptContextIds}
+                  setSelectedSystemPromptId={setSelectedSystemPromptId}
+                  systemPrompts={systemPrompts}
+                />
+              )}
+            </>
           </CommentsContainer>
 
           <EuiSpacer />
@@ -451,7 +437,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
               onPromptSubmit={handleSendMessage}
               ref={promptTextAreaRef}
               handlePromptChange={setPromptTextPreview}
-              value={suggestedUserPrompt}
+              value={suggestedUserPrompt ?? ''}
             />
 
             <ChatOptionsFlexItem grow={false}>

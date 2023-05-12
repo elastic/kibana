@@ -25,12 +25,14 @@ const PromptContextText = styled(EuiText)`
 `;
 
 interface Props {
+  isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
   selectedPromptContextIds: string[];
   setSelectedPromptContextIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const SelectedPromptContextsComponent: React.FC<Props> = ({
+  isNewConversation,
   promptContexts,
   selectedPromptContextIds,
   setSelectedPromptContextIds,
@@ -67,13 +69,11 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
     return null;
   }
 
-  console.log('--> selectedPromptContexts', selectedPromptContexts);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       {selectedPromptContexts.map(({ description, id }) => (
         <EuiFlexItem grow={false} key={id}>
-          <EuiSpacer />
+          {isNewConversation || selectedPromptContexts.length > 1 ? <EuiSpacer /> : null}
           <EuiAccordion
             buttonContent={description}
             extraAction={

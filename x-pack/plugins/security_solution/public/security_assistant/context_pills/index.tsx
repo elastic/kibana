@@ -13,16 +13,12 @@ import React, { useCallback, useMemo } from 'react';
 import type { PromptContext } from '../prompt_context/types';
 
 interface Props {
-  isNewChat: boolean;
-  onSendContextMessage: (content: string) => void;
   promptContexts: Record<string, PromptContext>;
   selectedPromptContextIds: string[];
   setSelectedPromptContextIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const ContextPillsComponent: React.FC<Props> = ({
-  isNewChat,
-  onSendContextMessage,
   promptContexts,
   selectedPromptContextIds,
   setSelectedPromptContextIds,
@@ -41,21 +37,6 @@ const ContextPillsComponent: React.FC<Props> = ({
     [selectedPromptContextIds, setSelectedPromptContextIds]
   );
 
-  const selectAndSendContextMessage = useCallback(
-    async (id: string) => {
-      const promptContext: PromptContext | undefined = promptContexts[id];
-      if (promptContext != null) {
-        if (!selectedPromptContextIds.includes(id)) {
-          setSelectedPromptContextIds((prev) => [...prev, id]);
-        }
-
-        const content = await promptContext.getPromptContext();
-        onSendContextMessage(content);
-      }
-    },
-    [onSendContextMessage, promptContexts, selectedPromptContextIds, setSelectedPromptContextIds]
-  );
-
   return (
     <EuiFlexGroup gutterSize="none" wrap>
       {sortedPromptContexts.map(({ description, id, getPromptContext, tooltip }) => (
@@ -65,9 +46,7 @@ const ContextPillsComponent: React.FC<Props> = ({
               disabled={selectedPromptContextIds.includes(id)}
               iconSide="left"
               iconType="plus"
-              onClick={() =>
-                isNewChat ? selectPromptContext(id) : selectAndSendContextMessage(id)
-              }
+              onClick={() => selectPromptContext(id)}
             >
               {description}
             </EuiButton>

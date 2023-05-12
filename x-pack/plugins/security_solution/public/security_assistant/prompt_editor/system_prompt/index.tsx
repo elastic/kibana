@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
@@ -61,18 +63,24 @@ const SystemPromptComponent: React.FC<Props> = ({
 
   if (selectedPrompt == null || showSelectSystemPrompt) {
     return (
-      <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-        <EuiFlexItem grow>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>
           {showSelectSystemPrompt && (
-            <EuiSuperSelect
-              fullWidth={true}
-              hasDividers
-              itemLayoutAlign="top"
-              onChange={onChange}
-              options={options}
-              placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
-              valueOfSelected={selectedPrompt?.id}
-            />
+            <EuiFormRow
+              css={css`
+                min-width: 100%;
+              `}
+            >
+              <EuiSuperSelect
+                fullWidth={true}
+                hasDividers
+                itemLayoutAlign="top"
+                onChange={onChange}
+                options={options}
+                placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
+                valueOfSelected={selectedPrompt?.id}
+              />
+            </EuiFormRow>
           )}
         </EuiFlexItem>
 
@@ -115,17 +123,3 @@ const SystemPromptComponent: React.FC<Props> = ({
 SystemPromptComponent.displayName = 'SystemPromptComponent';
 
 export const SystemPrompt = React.memo(SystemPromptComponent);
-
-/*
-    return (
-      <EuiSuperSelect
-        fullWidth={true}
-        hasDividers
-        itemLayoutAlign="top"
-        onChange={onChange}
-        options={options}
-        placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
-        valueOfSelected={selectedPrompt?.id}
-      />
-    );
-    */

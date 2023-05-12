@@ -363,14 +363,6 @@ export async function getCombinedMessage({
   selectedPromptContextIds: string[];
   selectedSystemPrompt: Prompt | undefined;
 }): Promise<Message> {
-  if (!isNewChat) {
-    return {
-      role: 'user',
-      content: promptText,
-      timestamp: new Date().toLocaleString(),
-    };
-  }
-
   const selectedPromptContexts = selectedPromptContextIds.reduce<PromptContext[]>((acc, id) => {
     const promptContext = promptContexts[id];
     return promptContext != null ? [...acc, promptContext] : acc;
@@ -385,7 +377,9 @@ export async function getCombinedMessage({
   );
 
   return {
-    content: `${selectedSystemPrompt?.content ?? ''}
+    content: `${
+      isNewChat ? `${selectedSystemPrompt?.content ?? ''}` : `${promptContextsContent}\n\n`
+    }
 
 ${promptContextsContent}
 
