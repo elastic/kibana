@@ -116,7 +116,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
               username: defaultValues[ConfigKey.SOURCE_ZIP_USERNAME],
               password: defaultValues[ConfigKey.SOURCE_ZIP_PASSWORD],
               inlineScript: defaultValues[ConfigKey.SOURCE_INLINE],
-              params: defaultValues[ConfigKey.PARAMS],
+              params: defaultValues[ConfigKey.PARAMS] || '',
               isGeneratedScript:
                 defaultValues[ConfigKey.METADATA].script_source?.is_generated_script,
               fileName: defaultValues[ConfigKey.METADATA].script_source?.file_name,
