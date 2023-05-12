@@ -9,6 +9,8 @@ import type { Readable } from 'stream';
 
 import type { FileStatus } from '@kbn/shared-ux-file-types';
 
+export type FleetFileType = 'from-host' | 'to-host';
+
 export interface FleetFileClientInterface {
   /** Creates a new file. Only applicable when type of file is `to-host`. */
   create(fileStream: HapiReadableStream, agentIds: string[]): Promise<FleetFile>;

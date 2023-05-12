@@ -67,7 +67,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import { FleetFilesClient } from './services/files/client';
 
-import type { FleetFileClientInterface } from './services/files/types';
+import type { FleetFileClientInterface, FleetFileType } from './services/files/types';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -237,7 +237,7 @@ export interface FleetStartContract {
      * Use `to-host` when interacting with files that are being sent to the host
      * (via fleet-server)
      */
-    type: 'from-host' | 'to-host',
+    type: FleetFileType,
     /** Max size for files created when `type` is `to-host` */
     maxSizeBytes?: number
   ) => FleetFileClientInterface;

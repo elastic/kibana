@@ -35,6 +35,7 @@ import {
   createMockAgentService,
   createMockPackageService,
   createMessageSigningServiceMock,
+  createFleetFilesClientMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
@@ -169,6 +170,7 @@ export const createMockEndpointAppContextServiceStartContract =
       endpointFleetServicesFactory,
       logger,
       fleetAuthzService: createFleetAuthzServiceMock(),
+      createFleetFilesClient: jest.fn((..._) => createFleetFilesClientMock()),
       manifestManager: getManifestManagerMock(),
       security,
       alerting: alertsMock.createStart(),

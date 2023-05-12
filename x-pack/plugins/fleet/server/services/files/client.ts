@@ -25,7 +25,7 @@ import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common'
 
 import { FleetFileNotFound, FleetFilesClientError } from '../../errors';
 
-import type { FleetFile, FleetFileClientInterface } from './types';
+import type { FleetFile, FleetFileClientInterface, FleetFileType } from './types';
 import type { HapiReadableStream } from './types';
 import type { FleetFileUpdatableFields } from './types';
 
@@ -42,7 +42,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
     private esClient: ElasticsearchClient,
     private logger: Logger,
     packageName: string,
-    private type: 'from-host' | 'to-host',
+    private type: FleetFileType,
     maxSizeBytes?: number
   ) {
     if (!packageName) {
