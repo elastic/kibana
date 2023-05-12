@@ -19,7 +19,7 @@ import { requestContextMock, serverMock, requestMock } from '../../../../routes/
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
 import {
-  getUpdateQueryWithResponseActionsSchemaMock,
+  getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
@@ -188,12 +188,22 @@ describe('Update rule route', () => {
       // @ts-expect-error
       clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
     });
+    const getResponseAction = (command: string = 'isolate') => ({
+      action_type_id: '.endpoint',
+      params: {
+        command,
+        comment: '',
+      },
+    });
+    const defaultAction = getResponseAction();
+
     test('is successful', async () => {
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getUpdateQueryWithResponseActionsSchemaMock('isolate'),
+          ...getCreateRulesSchemaMock(),
+          response_actions: [defaultAction],
         },
       });
 
@@ -210,7 +220,8 @@ describe('Update rule route', () => {
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getUpdateQueryWithResponseActionsSchemaMock('isolate'),
+          ...getCreateRulesSchemaMock(),
+          response_actions: [defaultAction],
         },
       });
 
@@ -221,11 +232,14 @@ describe('Update rule route', () => {
       );
     });
     test('fails when provided with an unsupported command', async () => {
+      const wrongAction = getResponseAction('processes');
+
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getUpdateQueryWithResponseActionsSchemaMock('processes'),
+          ...getCreateRulesSchemaMock(),
+          response_actions: [wrongAction],
         },
       });
       const result = await server.validate(request);
