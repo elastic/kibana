@@ -14,7 +14,6 @@ import { isQuotaExceededError } from '../../../services/history';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { StorageQuotaError } from '../../components/storage_quota_error';
 import { sendRequest } from './send_request';
-import { track } from './track';
 import { replaceVariables } from '../../../lib/utils';
 import { StorageKeys } from '../../../services';
 import { DEFAULT_VARIABLES } from '../../../../common/constants';
@@ -46,7 +45,7 @@ export const useSendCurrentRequest = (editor: SenseEditor | null) => {
       dispatch({ type: 'sendRequest', payload: undefined });
 
       // Fire and forget
-      //setTimeout(() => track(requests, editor!, trackUiMetric), 0);
+      // setTimeout(() => track(requests, editor!, trackUiMetric), 0);
 
       const results = await sendRequest({ http, requests });
 
