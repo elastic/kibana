@@ -180,6 +180,7 @@ export const setRecoveredAlertsContext = ({
     let isUp = false;
     let linkMessage = '';
     let monitorSummary = {};
+    let lastErrorMessage;
 
     if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
       const { idWithLocation, locationId } = state;
@@ -225,6 +226,8 @@ export const setRecoveredAlertsContext = ({
 
     if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
       const { idWithLocation, configId, locationId, errorStartedAt } = state;
+      // pull the last error from state, since it is not available on the up ping
+      lastErrorMessage = state.lastErrorMessage;
       const upConfig = upConfigs[idWithLocation];
       isUp = Boolean(upConfig) || false;
       const ping = upConfig.ping;
@@ -271,6 +274,7 @@ export const setRecoveredAlertsContext = ({
     alert.setContext({
       ...state,
       ...monitorSummary,
+      lastErrorMessage,
       recoveryStatus,
       linkMessage,
       ...(isUp ? { status: 'up' } : {}),
