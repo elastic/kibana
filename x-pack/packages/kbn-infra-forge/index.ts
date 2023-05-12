@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { generate } from './src/run';
+export { cleanup, generate } from './src/run';

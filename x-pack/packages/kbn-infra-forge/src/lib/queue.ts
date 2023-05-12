@@ -11,6 +11,8 @@ import { omit } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+export const getIndexName = (namespace: string) => `kbn-data-forge-${namespace}`;
+
 export const createQueue = (
   esClient: Client,
   namespace: string,
@@ -18,7 +20,7 @@ export const createQueue = (
   concurrency = 5,
   logger: ToolingLog
 ) => {
-  const indexName = `kbn-data-forge-${namespace}`;
+  const indexName = getIndexName(namespace);
   logger.debug(`createQueue > index name: ${indexName}`);
   return async.cargoQueue(
     (docs: object[], callback) => {

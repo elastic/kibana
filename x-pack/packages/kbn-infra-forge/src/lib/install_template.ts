@@ -17,5 +17,12 @@ export function installTemplate(
   logger.debug(`installTemplate > template name: kbn-data-forge-${namespace}`);
   return client.indices
     .putTemplate({ name: `kbn-data-forge-${namespace}`, body: template })
-    .catch((error: any) => logger.error(`installTemplate > JSON.stringify(${error})`));
+    .catch((error: any) => logger.error(`installTemplate > ${JSON.stringify(error)}`));
+}
+
+export function deleteTemplate(client: Client, namespace: string, logger: ToolingLog) {
+  logger.debug(`deleteTemplate > template name: kbn-data-forge-${namespace}`);
+  return client.indices
+    .deleteTemplate({ name: `kbn-data-forge-${namespace}` })
+    .catch((error: any) => logger.error(`deleteTemplate > ${JSON.stringify(error)}`));
 }

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { generate } from '@kbn/infra-forge';
+import { cleanup, generate } from '@kbn/infra-forge';
 import { Aggregators, Comparator, InfraRuleType } from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   waitForDocumentInIndex,
@@ -25,13 +25,14 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Metric threshold rule >', () => {
     let ruleId: string;
     let actionId: string | undefined;
+    let infraDataIndex: string;
 
     const METRICS_ALERTS_INDEX = '.alerts-observability.metrics.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-metric-threshold';
 
     describe('alert and action creation', () => {
       before(async () => {
-        await generate({ esClient, loopback: 'now-15m', logger });
+        infraDataIndex = await generate({ esClient, loopback: 'now-15m', logger });
         actionId = await createIndexConnector({
           supertest,
           name: 'Index Connector: Metric threshold API test',
@@ -84,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
         await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-        await esDeleteAllIndices([ALERT_ACTION_INDEX]);
+        await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
         await esClient.deleteByQuery({
           index: METRICS_ALERTS_INDEX,
           query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -93,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
           index: '.kibana-event-log-*',
           query: { term: { 'kibana.alert.rule.consumer': 'infrastructure' } },
         });
+        await cleanup({ esClient, logger });
       });
 
       it('rule should be active', async () => {

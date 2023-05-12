@@ -11,8 +11,8 @@ import datemath from '@kbn/datemath';
 import type { Moment } from 'moment';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
-import { createQueue } from './lib/queue';
-import { installTemplate } from './lib/install_template';
+import { createQueue, getIndexName } from './lib/queue';
+import { deleteTemplate, installTemplate } from './lib/install_template';
 import * as fakeHosts from './data_sources/fake_hosts';
 
 const generateEventsFns = {
@@ -64,4 +64,9 @@ export const generate = async ({
   await installTemplate(esClient, template, DATASET, logger).then(() =>
     indexHistory(loopback, queue, logger)
   );
+  return getIndexName(DATASET);
+};
+
+export const cleanup = async ({ esClient, logger }: { esClient: Client; logger: ToolingLog }) => {
+  await deleteTemplate(esClient, DATASET, logger);
 };
