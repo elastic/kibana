@@ -30,6 +30,7 @@ export const SyntheticsMonitorStatusAlertStateCodec = t.type({
   locationName: t.string,
   errorStartedAt: t.string,
   lastErrorMessage: t.string,
+  stateId: t.string,
 });
 
 export type SyntheticsMonitorStatusAlertState = t.TypeOf<

@@ -120,9 +120,6 @@ export const getRelativeViewInAppUrl = ({
 };
 
 const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
-  // const endsAt = state.ends ? moment(state.ends) : moment();
-  // const startedAt = moment(state?.started_at);
-
   const diffInDays = endsAt.diff(startedAt, 'days');
   if (diffInDays > 1) {
     return i18n.translate('xpack.synthetics.errorDetails.errorDuration.days', {
@@ -228,10 +225,22 @@ export const setRecoveredAlertsContext = ({
       const { idWithLocation, configId, locationId, errorStartedAt } = state;
       // pull the last error from state, since it is not available on the up ping
       lastErrorMessage = state.lastErrorMessage;
+
       const upConfig = upConfigs[idWithLocation];
       isUp = Boolean(upConfig) || false;
       const ping = upConfig.ping;
-      const stateId = ping.state?.ends?.id;
+
+      monitorSummary = getMonitorSummary(
+        ping,
+        RECOVERED_LABEL,
+        locationId,
+        configId,
+        dateFormat,
+        tz
+      );
+
+      // When alert is flapping, the stateId is not available on ping.state.ends.id, use state instead
+      const stateId = ping.state?.ends?.id || state.stateId;
       const upTimestamp = ping['@timestamp'];
       const checkedAt = moment(upTimestamp).tz(tz).format(dateFormat);
       const duration = getErrorDuration(moment(errorStartedAt), moment(upTimestamp));
@@ -252,14 +261,6 @@ export const setRecoveredAlertsContext = ({
               checkedAt,
             },
           });
-      monitorSummary = getMonitorSummary(
-        ping,
-        RECOVERED_LABEL,
-        locationId,
-        configId,
-        dateFormat,
-        tz
-      );
 
       if (basePath && spaceId && stateId) {
         const relativeViewInAppUrl = getRelativeViewInAppUrl({
