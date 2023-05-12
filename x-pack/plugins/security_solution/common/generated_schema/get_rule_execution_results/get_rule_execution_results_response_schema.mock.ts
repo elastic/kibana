@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ruleExecutionResultMock } from '../../model/execution_result.mock';
-import type { GetRuleExecutionResultsResponse } from './response_schema';
+import { ruleExecutionResultMock } from '../../detection_engine/rule_monitoring/model/execution_result.mock';
+import type { GetRuleExecutionResultsResponse } from './get_rule_execution_results_response_schema.gen';
 
 const getSomeResponse = (): GetRuleExecutionResultsResponse => {
   const results = ruleExecutionResultMock.getSomeResults();

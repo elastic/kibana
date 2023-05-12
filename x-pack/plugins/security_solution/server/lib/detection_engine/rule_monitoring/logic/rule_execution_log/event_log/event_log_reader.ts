@@ -16,7 +16,6 @@ import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type {
   RuleExecutionEvent,
   GetRuleExecutionEventsResponse,
-  GetRuleExecutionResultsResponse,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 import {
   LogLevel,
@@ -37,6 +36,7 @@ import {
 } from './get_execution_event_aggregation';
 import type { ExecutionUuidAggResult } from './get_execution_event_aggregation/types';
 import { EXECUTION_UUID_FIELD } from './get_execution_event_aggregation/types';
+import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/generated_schema/get_rule_execution_results/get_rule_execution_results_response_schema.gen';
 
 export interface IEventLogReader {
   getExecutionEvents(args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;

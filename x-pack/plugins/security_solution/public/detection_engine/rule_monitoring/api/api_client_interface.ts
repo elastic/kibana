@@ -8,12 +8,14 @@
 import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
 import type {
   GetRuleExecutionEventsResponse,
-  GetRuleExecutionResultsResponse,
   LogLevel,
   RuleExecutionEventType,
+} from '../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleExecutionResultsResponse } from '../../../../common/generated_schema/get_rule_execution_results/get_rule_execution_results_response_schema.gen';
+import type {
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/generated_schema/common_schema.gen';
 
 export interface IRuleMonitoringApiClient {
   /**

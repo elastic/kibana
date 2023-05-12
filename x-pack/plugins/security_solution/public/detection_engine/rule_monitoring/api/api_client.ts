@@ -9,20 +9,16 @@ import dateMath from '@kbn/datemath';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 
-import type {
-  GetRuleExecutionEventsResponse,
-  GetRuleExecutionResultsResponse,
-} from '../../../../common/detection_engine/rule_monitoring';
-import {
-  getRuleExecutionEventsUrl,
-  getRuleExecutionResultsUrl,
-} from '../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleExecutionEventsResponse } from '../../../../common/detection_engine/rule_monitoring';
+import { getRuleExecutionEventsUrl } from '../../../../common/detection_engine/rule_monitoring';
 
 import type {
   FetchRuleExecutionEventsArgs,
   FetchRuleExecutionResultsArgs,
   IRuleMonitoringApiClient,
 } from './api_client_interface';
+import { getRuleExecutionResults } from '../../../common/generated_api_client/api_client.gen';
+import type { GetRuleExecutionResultsResponse } from '../../../../common/generated_schema/get_rule_execution_results/get_rule_execution_results_response_schema.gen';
 
 export const api: IRuleMonitoringApiClient = {
   fetchRuleExecutionEvents: (
@@ -61,12 +57,11 @@ export const api: IRuleMonitoringApiClient = {
       signal,
     } = args;
 
-    const url = getRuleExecutionResultsUrl(ruleId);
     const startDate = dateMath.parse(start);
     const endDate = dateMath.parse(end, { roundUp: true });
 
-    return http().fetch<GetRuleExecutionResultsResponse>(url, {
-      method: 'GET',
+    return getRuleExecutionResults({
+      signal,
       query: {
         start: startDate?.utc().toISOString(),
         end: endDate?.utc().toISOString(),
@@ -77,7 +72,9 @@ export const api: IRuleMonitoringApiClient = {
         page,
         per_page: perPage,
       },
-      signal,
+      params: {
+        ruleId,
+      },
     });
   },
 };

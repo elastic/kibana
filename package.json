@@ -87,6 +87,8 @@
   },
   "dependencies": {
     "@appland/sql-parser": "^1.5.1",
+    "@asyncapi/openapi-schema-parser": "^3.0.0",
+    "@asyncapi/parser": "^2.0.0",
     "@babel/runtime": "^7.21.0",
     "@dnd-kit/core": "^3.1.1",
     "@dnd-kit/sortable": "^4.0.0",
@@ -968,10 +970,11 @@
     "xstate": "^4.37.2",
     "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
-    "yazl": "^2.5.1"
+    "yazl": "^2.5.1",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^10.0.3",
+    "@apidevtools/swagger-parser": "^10.1.0",
     "@babel/cli": "^7.21.0",
     "@babel/core": "^7.21.0",
     "@babel/eslint-parser": "^7.19.1",

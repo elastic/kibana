@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { serverMock, requestContextMock, requestMock } from '../../../routes/__mocks__';
+import { serverMock, requestContextMock, requestMock } from '../../routes/__mocks__';
 
-import { GET_RULE_EXECUTION_RESULTS_URL } from '../../../../../../common/detection_engine/rule_monitoring';
-import { getRuleExecutionResultsResponseMock } from '../../../../../../common/detection_engine/rule_monitoring/mocks';
-import { getRuleExecutionResultsRoute } from './route';
+import { GET_RULE_EXECUTION_RESULTS_URL } from '../../../../../common/detection_engine/rule_monitoring';
+import { getRuleExecutionResultsResponseMock } from '../../../../../common/detection_engine/rule_monitoring/mocks';
+import { getRuleExecutionResultsRoute } from './get_rule_execution_results_route.gen';
 
 describe('getRuleExecutionResultsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;

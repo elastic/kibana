@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type {
+  RouteValidationError,
+  RouteValidationFunction,
+  RouteValidationResultFactory,
+} from '@kbn/core/server';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import type * as rt from 'io-ts';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import type {
-  RouteValidationFunction,
-  RouteValidationResultFactory,
-  RouteValidationError,
-} from '@kbn/core/server';
+import type { TypeOf, ZodType } from 'zod';
 import type { GenericIntersectionC } from '../runtime_types';
 import { excess } from '../runtime_types';
 
@@ -38,6 +39,17 @@ export const buildRouteValidation =
         (validatedInput: A) => validationResult.ok(validatedInput)
       )
     );
+
+export const buildRouteValidationWithZod =
+  <T extends ZodType, A = TypeOf<T>>(schema: T): RouteValidationFunction<A> =>
+  (inputValue: unknown, validationResult: RouteValidationResultFactory) => {
+    const decoded = schema.safeParse(inputValue);
+    if (decoded.success) {
+      return validationResult.ok(decoded.data);
+    } else {
+      return validationResult.badRequest(decoded.error.errors.join());
+    }
+  };
 
 export const buildRouteValidationNonExact =
   <T extends rt.Mixed, A = rt.TypeOf<T>>(schema: T): RouteValidationFunction<A> =>
