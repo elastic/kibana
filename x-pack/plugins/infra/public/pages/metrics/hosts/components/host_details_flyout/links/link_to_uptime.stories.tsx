@@ -11,7 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../../../test_utils/use_global_storybook_theme';
-import { LinkToUptime, LinkTUptimeProps } from './link_to_uptime';
+import { LinkToUptime, type LinkToUptimeProps } from './link_to_uptime';
 
 const mockServices = {
   share: {
@@ -59,19 +59,9 @@ export default {
   },
 } as Meta;
 
-const TemplateUptime: Story<LinkTUptimeProps> = (args) => {
+const TemplateUptime: Story<LinkToUptimeProps> = (args) => {
   return <LinkToUptime {...args} />;
 };
 
-// const TemplateApm: Story<LinkToApmServicesProps> = (args) => {
-//   return <LinkToApmServices {...args} />;
-// };
-
 export const UptimeLink = TemplateUptime.bind({});
 UptimeLink.args = {};
-
-// export const ApmServicesLink = TemplateApm.bind({});
-// ApmServicesLink.args = {
-//   apmField: 'services',
-//   hostName: 'host1',
-// };
