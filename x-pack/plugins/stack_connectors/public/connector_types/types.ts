@@ -68,6 +68,10 @@ export interface TeamsActionParams {
   message: string;
 }
 
+export interface WebhookActionParams {
+  body?: string;
+}
+
 export interface GenerativeAiActionParams {
   body?: string;
 }

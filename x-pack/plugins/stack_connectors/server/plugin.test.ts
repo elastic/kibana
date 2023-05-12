@@ -22,10 +22,9 @@ describe('Stack Connectors Plugin', () => {
       coreSetup = coreMock.createSetup();
     });
 
-    it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
       plugin.setup(coreSetup, { actions: actionsSetup });
-      expect(actionsSetup.registerType).toHaveBeenCalledTimes(17);
+      expect(actionsSetup.registerType).toHaveBeenCalledTimes(18);
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -129,6 +128,20 @@ describe('Stack Connectors Plugin', () => {
         expect.objectContaining({
           id: '.teams',
           name: 'Microsoft Teams',
+        })
+      );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        17,
+        expect.objectContaining({
+          id: '.torq',
+          name: 'Torq',
+        })
+      );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        18,
+        expect.objectContaining({
+          id: '.genAi',
+          name: 'Generative AI',
         })
       );
     });
