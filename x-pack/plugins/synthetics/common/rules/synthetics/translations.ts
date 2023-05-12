@@ -12,7 +12,7 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
-      defaultMessage: `"{monitorName}" is {status} from {locationName}.\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- Checked at: {checkedAt}  \n- From: {locationName}  \n- Error received: {lastErrorMessage}  \n{linkMessage}`,
+      defaultMessage: `"{monitorName}" is {status} from {locationName}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- Checked at: {checkedAt}  \n- From: {locationName}  \n- Error received: {lastErrorMessage}  \n{linkMessage}`,
       values: {
         monitorName: '{{context.monitorName}}',
         monitorType: '{{context.monitorType}}',
@@ -52,7 +52,7 @@ export const SyntheticsMonitorStatusTranslations = {
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
       defaultMessage:
-        'The alert for "{monitorName}" from {locationName} is no longer active: {recoveryReason}.\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}  \n{linkMessage}',
+        'The alert for "{monitorName}" from {locationName} is no longer active: {recoveryReason}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}  \n- Last error received: {lastErrorMessage}  \n{linkMessage}',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrlLabel: '{{context.monitorUrlLabel}}',
@@ -60,6 +60,7 @@ export const SyntheticsMonitorStatusTranslations = {
         monitorType: '{{context.monitorType}}',
         locationName: '{{context.locationName}}',
         recoveryReason: '{{context.recoveryReason}}',
+        lastErrorMessage: '{{{context.lastErrorMessage}}}',
         linkMessage: '{{{context.linkMessage}}}',
       },
     }
