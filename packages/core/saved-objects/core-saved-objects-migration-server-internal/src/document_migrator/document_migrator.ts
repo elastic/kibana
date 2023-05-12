@@ -78,14 +78,17 @@ export class DocumentMigrator implements VersionedTransformer {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
 
-    return Object.entries(this.migrations).reduce((acc, [prop, { latestVersion }]) => {
-      // some migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)
-      const latestMigrationVersion = maxVersion(latestVersion.migrate, latestVersion.convert);
-      if (latestMigrationVersion) {
-        return { ...acc, [prop]: latestMigrationVersion };
-      }
-      return acc;
-    }, {});
+    return Object.entries(this.migrations).reduce<SavedObjectsMigrationVersion>(
+      (acc, [prop, { latestVersion }]) => {
+        // some migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)
+        const latestMigrationVersion = maxVersion(latestVersion.migrate, latestVersion.convert);
+        if (latestMigrationVersion) {
+          acc[prop] = latestMigrationVersion;
+        }
+        return acc;
+      },
+      {}
+    );
   }
 
   /**
