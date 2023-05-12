@@ -19,14 +19,14 @@ export const getLensAttributes = ({
   query,
   dataView,
   suggestion,
-  queryService,
+  timefilter,
 }: {
   title?: string;
   filters: Filter[];
   query: Query | AggregateQuery;
   dataView?: DataView;
   suggestion: Suggestion | undefined;
-  queryService: DataPublicPluginStart['query'];
+  timefilter: DataPublicPluginStart['query']['timefilter'];
 }) => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
@@ -72,7 +72,7 @@ export const getLensAttributes = ({
   const props = {
     id: 'dashboardPreview',
     viewMode: ViewMode.VIEW,
-    timeRange: queryService.timefilter.timefilter.getTime(),
+    timeRange: timefilter.timefilter.getTime(),
     attributes,
     noPadding: true,
     searchSessionId: undefined,

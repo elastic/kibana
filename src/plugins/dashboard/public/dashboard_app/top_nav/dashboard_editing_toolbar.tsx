@@ -6,23 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { type AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
-
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  IconType,
-  useEuiTheme,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  useResizeObserver,
-} from '@elastic/eui';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
+import { IconType, useEuiTheme, EuiButton } from '@elastic/eui';
 import {
   AddFromLibraryButton,
   IconButton,
@@ -32,7 +19,6 @@ import {
 } from '@kbn/shared-ux-button-toolbar';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import {
   getCreateVisualizationButtonTitle,
   getQuickCreateButtonGroupLegend,
@@ -43,114 +29,22 @@ import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
-import { fetchFieldsFromTextBased } from './fetch_textBased';
-import { getLensAttributes } from './get_lens_props';
 
-export function DashboardEditingToolbar() {
+export function DashboardEditingToolbar({
+  setIsFlyoutVisible,
+}: {
+  setIsFlyoutVisible: (q: boolean) => void;
+}) {
   const {
     usageCollection,
-    data: { search, dataViews, query },
+    data: { search },
     notifications: { toasts },
     embeddable: { getStateTransfer, getEmbeddableFactory },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
-    unifiedSearch,
-    settings,
-    lens,
-    expressions,
   } = pluginServices.getServices();
 
-  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-    uiSettings: settings?.uiSettings,
-  });
   const { euiTheme } = useEuiTheme();
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
-  const [suggestions, setSuggestions] = useState<Suggestion[]>();
-  const [dv, setDv] = useState<DataView>();
-  const [chartSize, setChartSize] = useState('100%');
-  const [queryTextBased, setQueryTextBased] = useState<AggregateQuery>({
-    sql: 'SELECT * FROM kibana_sample_data_logs',
-  });
-  const chartCss = css`
-    position: relative;
-    flex-grow: 1;
-
-    & > div {
-      height: 100%;
-      position: absolute;
-      width: 100%;
-    }
-
-    & .lnsExpressionRenderer {
-      width: ${chartSize};
-      margin: auto;
-    }
-
-    & .echLegend .echLegendList {
-      padding-right: ${euiTheme.size.s};
-    }
-
-    & > .euiLoadingChart {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-  `;
   const dashboard = useDashboardAPI();
-  const chartRef = useRef<HTMLDivElement | null>(null);
-  const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
-
-  useEffect(() => {
-    async function getLensApi() {
-      const apiHelper = await lens.stateHelperApi();
-      setLensSuggestionsApi(() => apiHelper.suggestions);
-    }
-    getLensApi();
-  }, [lens]);
-  useEffect(() => {
-    async function getColumns() {
-      let indexPattern = '';
-      // sql queries
-      const table = await fetchFieldsFromTextBased(queryTextBased, expressions);
-      const columns = table?.columns?.map(({ name }) => name);
-      if ('sql' in queryTextBased) {
-        indexPattern = getIndexPatternFromSQLQuery(queryTextBased.sql);
-      }
-      if (indexPattern) {
-        const dataView = await dataViews.create({
-          title: indexPattern,
-        });
-        const context = {
-          dataViewSpec: dataView?.toSpec(),
-          fieldName: '',
-          contextualFields: columns,
-          query: queryTextBased,
-        };
-        const allSuggestions = lensSuggestionsApi?.(context, dataView) ?? [];
-
-        if (allSuggestions?.[0].visualizationId === 'lnsMetric') {
-          const size = containerHeight < containerWidth ? containerHeight : containerWidth;
-          setChartSize(`${size}px`);
-        } else {
-          setChartSize('100%');
-        }
-        setDv(dataView);
-        setSuggestions(allSuggestions);
-      }
-    }
-    if (lensSuggestionsApi) {
-      getColumns();
-    }
-  }, [containerHeight, containerWidth, dataViews, expressions, lensSuggestionsApi, queryTextBased]);
-  const lensProps = getLensAttributes({
-    title: '',
-    filters: [],
-    query: queryTextBased,
-    dataView: dv,
-    suggestion: suggestions?.[0],
-    queryService: query,
-  });
 
   const stateTransferService = getStateTransfer();
 
@@ -199,13 +93,6 @@ export function DashboardEditingToolbar() {
       });
     },
     [stateTransferService, search.session, trackUiMetric]
-  );
-
-  const openESQLFlyout = useCallback(
-    () => () => {
-      setIsFlyoutVisible(true);
-    },
-    []
   );
 
   const createNewEmbeddable = useCallback(
@@ -316,13 +203,21 @@ export function DashboardEditingToolbar() {
             />
           ),
           secondButton: (
-            <ToolbarButton
-              type="primary"
-              iconType="lensApp"
-              onClick={openESQLFlyout()}
-              label="Create visualization from ESQL"
+            // <ToolbarButton
+            //   type="empty"
+            //   iconType="lensApp"
+            //   onClick={() => setIsFlyoutVisible(true)}
+            //   label="Create visualization from ESQL"
+            //   data-test-subj="dashboardAddFromESQL"
+            // />
+            <EuiButton
+              size="m"
+              color="success"
+              onClick={() => setIsFlyoutVisible(true)}
               data-test-subj="dashboardAddFromESQL"
-            />
+            >
+              Create visualization from ESQL
+            </EuiButton>
           ),
           iconButtonGroup: (
             <IconButtonGroup buttons={quickButtons} legend={getQuickCreateButtonGroupLegend()} />
@@ -330,48 +225,6 @@ export function DashboardEditingToolbar() {
           extraButtons,
         }}
       </Toolbar>
-      {isFlyoutVisible && (
-        <EuiFlyout
-          type="push"
-          ownFocus
-          onClose={() => setIsFlyoutVisible(false)}
-          aria-labelledby={i18n.translate('dashboard.solutionToolbar.editLabel', {
-            defaultMessage: 'Create a chart with ESQL',
-          })}
-          size="m"
-          css={{ zIndex: 10000 }}
-        >
-          <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
-            <EuiTitle size="xs">
-              <h2 id="Edit Lens configuration">
-                {i18n.translate('dashboard.solutionToolbar.editLabel', {
-                  defaultMessage: 'Create a chart with ESQL',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <KibanaReactContextProvider>
-              <unifiedSearch.TextBasedLanguagesEditor
-                query={queryTextBased}
-                onTextLangQueryChange={(q) => {
-                  setQueryTextBased(q);
-                }}
-                expandCodeEditor={(status: boolean) => {}}
-                isCodeEditorExpanded={true}
-                errors={[]}
-                onTextLangQuerySubmit={() => {}}
-                isDisabled={false}
-              />
-            </KibanaReactContextProvider>
-            {/* {lensProps && (
-              <div data-test-subj="unifiedHistogramChart" css={chartCss} ref={chartRef}>
-                <lens.EmbeddableComponent {...lensProps} disableTriggers={true} />
-              </div>
-            )} */}
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      )}
     </div>
   );
 }

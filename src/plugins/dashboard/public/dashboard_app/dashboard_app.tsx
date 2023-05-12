@@ -9,12 +9,11 @@
 import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
 import useObservable from 'react-use/lib/useObservable';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -39,6 +38,8 @@ import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
+// import { fetchFieldsFromTextBased } from './top_nav/fetch_textBased';
+// import { getLensAttributes } from './get_lens_props';
 
 export interface DashboardAppProps {
   history: History;
@@ -64,7 +65,6 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
-
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
@@ -83,7 +83,6 @@ export function DashboardApp({
     customBranding,
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
-
   const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
     DASHBOARD_APP_ID,
     true
