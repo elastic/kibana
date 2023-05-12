@@ -9,6 +9,7 @@ import React, { memo, useRef } from 'react';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
+import { ID as MentionsPluginId } from '../markdown_editor/plugins/mentions/constants';
 
 interface Props {
   isLoading: boolean;
@@ -20,7 +21,7 @@ export const fieldName = 'description';
 const DescriptionComponent: React.FC<Props> = ({ isLoading, draftStorageKey }) => {
   const [{ title, tags }] = useFormData({ watch: ['title', 'tags'] });
   const editorRef = useRef<Record<string, unknown>>();
-  const disabledUiPlugins = [LensPluginId];
+  const disabledUiPlugins = [LensPluginId, MentionsPluginId];
 
   return (
     <UseField
