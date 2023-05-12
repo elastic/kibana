@@ -1239,6 +1239,7 @@ x-pack/test/cloud_security_posture_api @elastic/kibana-cloud-security-posture
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/common/guided_onboarding @elastic/security-threat-hunting-explore
 
 ## Security Solution cross teams ownership
 /x-pack/plugins/security_solution/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
