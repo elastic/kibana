@@ -7,6 +7,7 @@
 
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import { TEST_IDS } from './constants';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
 import {
@@ -56,7 +57,7 @@ export const FilterGroupContextMenu = () => {
       panels: {},
     });
 
-    for (let counter = 0; counter < initialControls.length; counter++) {
+    for (let counter = 0; counter < DEFAULT_DETECTION_PAGE_FILTERS.length; counter++) {
       const control = initialControls[counter];
       await controlGroup?.addOptionsListControl({
         controlId: String(counter),

@@ -68,7 +68,7 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
 
     setTimeout(() => {
       setLoadingPageFilters(false);
-    }, 1000);
+    }, 500);
   }, [activeTemplateId]);
 
   const handleFilterSetSave = useCallback(

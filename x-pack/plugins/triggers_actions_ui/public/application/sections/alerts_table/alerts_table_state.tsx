@@ -243,9 +243,9 @@ const AlertsTableStateWithQueryProvider = ({
 
   useEffect(() => {
     if (onUpdate) {
-      onUpdate({ isLoading, totalCount: alertsCount, refresh });
+      onUpdate({ isLoading, totalCount: alertsCount, refresh, columns });
     }
-  }, [isLoading, alertsCount, onUpdate, refresh]);
+  }, [isLoading, alertsCount, onUpdate, refresh, columns]);
 
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
 

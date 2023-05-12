@@ -8,9 +8,10 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter, Query } from '@kbn/es-query';
 import { EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
+import { useSecuritySolutionUserSettings } from '../../../../common/user_settings/use_security_solution_user_settings';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
@@ -32,6 +33,7 @@ import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translati
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { AddFilterProps } from '../../../components/alerts_kpis/common/types';
 import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
+import { useTemplates } from '../../../components/templates/use_templates';
 
 const TREND_CHART_HEIGHT = 240; // px
 const CHART_PANEL_HEIGHT = 375; // px
@@ -70,6 +72,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
   );
   const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
+  const { getUserSetting, setUserSettings } = useSecuritySolutionUserSettings();
+  const { activeTemplate } = useTemplates();
+
+  const activeTemplateRef = useRef<string>(null);
+
   const {
     alertViewSelection,
     countTableStackBy0,
@@ -88,6 +95,61 @@ const ChartPanelsComponent: React.FC<Props> = ({
     setTrendChartStackBy,
     trendChartStackBy,
   }: AlertsSettings = useAlertsLocalStorage();
+
+  const info = useMemo(
+    () => getUserSetting<any>('alertsPage', `charts.${activeTemplate}`),
+    [activeTemplate, getUserSetting]
+  );
+
+  useEffect(() => {
+    if (!info) return;
+    setAlertViewSelection(info.alertViewSelection);
+    setCountTableStackBy0(info.countTableStackBy0);
+    setCountTableStackBy1(info.countTableStackBy1);
+    setGroupBySelection(info.groupBySelection);
+    setIsTreemapPanelExpanded(info.isTreemapPanelExpanded);
+    setRiskChartStackBy0(info.riskChartStackBy0);
+    setRiskChartStackBy1(info.riskChartStackBy1);
+    setTrendChartStackBy(info.trendChartStackBy);
+  }, [
+    info,
+    setAlertViewSelection,
+    setCountTableStackBy0,
+    setCountTableStackBy1,
+    setGroupBySelection,
+    setIsTreemapPanelExpanded,
+    setRiskChartStackBy0,
+    setRiskChartStackBy1,
+    setTrendChartStackBy,
+  ]);
+
+  useEffect(() => {
+    if (activeTemplateRef.current !== activeTemplate) {
+      activeTemplateRef.current = activeTemplate;
+      return;
+    }
+    setUserSettings('alertsPage', `charts.${activeTemplate}`, {
+      alertViewSelection,
+      countTableStackBy0,
+      countTableStackBy1,
+      groupBySelection,
+      isTreemapPanelExpanded,
+      riskChartStackBy0,
+      riskChartStackBy1,
+      trendChartStackBy,
+    });
+  }, [
+    activeTemplate,
+    setUserSettings,
+    alertViewSelection,
+    countTableStackBy0,
+    countTableStackBy1,
+    groupBySelection,
+    isTreemapPanelExpanded,
+    riskChartStackBy0,
+    riskChartStackBy1,
+    trendChartStackBy,
+  ]);
 
   const updateCommonStackBy0 = useCallback(
     (value: string) => {

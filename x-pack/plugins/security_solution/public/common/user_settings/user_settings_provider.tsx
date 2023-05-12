@@ -8,14 +8,9 @@
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import type {
-  SecuritySolutionUserSetting,
-  SecuritySolutionUserSettings,
-  UserSettingScope,
-} from './types';
+import { isEqual } from 'lodash';
 import { SecuritySolutionUserSettingsContext } from './context';
-import { useLocalStorage } from 'react-use';
-import { NonUndefined } from 'utility-types';
+import type { SecuritySolutionUserSettings, UserSettingScope } from './types';
 
 type SecuritySoutionUserSettingsProviderProps = Record<string, unknown>;
 
@@ -53,13 +48,15 @@ export const SecuritySoutionUserSettingsProvider: FC<
   const saveUserSettings = useCallback(
     <T = unknown,>(userSettingScopeId: UserSettingScope, settingId: string, setting: T) => {
       setUserSettings((prev) => {
-        return {
+        const newSetting = {
           ...prev,
           [userSettingScopeId]: {
             ...(prev?.[userSettingScopeId] ?? {}),
             [settingId]: setting,
           },
         };
+        if (!isEqual(prev, newSetting)) return newSetting;
+        return prev;
       });
     },
     []

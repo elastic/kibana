@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
 import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
-import { groupByIdSelector } from './state';
+import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
 import { defaultGroup, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
@@ -99,6 +99,18 @@ export const useGrouping = <T,>({
     [groupingId, groupingState]
   );
 
+  const setSelectedGroups = useCallback(
+    (activeGroups: string[]) => {
+      dispatch(
+        groupActions.updateActiveGroups({
+          id: groupingId,
+          activeGroups,
+        })
+      );
+    },
+    [dispatch, groupingId]
+  );
+
   const groupSelector = useGetGroupSelector({
     defaultGroupingOptions,
     dispatch,
@@ -135,7 +147,8 @@ export const useGrouping = <T,>({
       getGrouping,
       groupSelector,
       selectedGroups,
+      setSelectedGroups,
     }),
-    [getGrouping, groupSelector, selectedGroups]
+    [getGrouping, groupSelector, selectedGroups, setSelectedGroups]
   );
 };

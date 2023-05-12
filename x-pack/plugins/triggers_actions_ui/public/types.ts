@@ -756,6 +756,7 @@ export interface TableUpdateHandlerArgs {
   totalCount: number;
   isLoading: boolean;
   refresh: () => void;
+  columns: EuiDataGridColumn[];
 }
 
 export interface LazyLoadProps {

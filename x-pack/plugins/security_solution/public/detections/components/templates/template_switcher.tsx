@@ -5,15 +5,22 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelectableOption,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiModal,
+  EuiButton,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiSelectable,
 } from '@elastic/eui';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiModal } from '@elastic/eui';
-import { EuiButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import React, { ChangeEvent, FC, useCallback, useState } from 'react';
+import type { ChangeEvent, FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { TEMPLATES_TITLE } from './translations';
 
 interface TemplateProps {
@@ -63,6 +70,10 @@ export const TemplateSwitcher = (props: TemplateProps) => {
     setIsPopoverOpen((prev) => !prev);
   }, []);
 
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, []);
+
   const button = (
     <EuiButton iconType={'arrowDown'} iconSide={'right'} onClick={togglePopover}>
       {options.find((opt) => opt.checked === 'on')?.label ?? TEMPLATES_TITLE}
@@ -71,7 +82,7 @@ export const TemplateSwitcher = (props: TemplateProps) => {
 
   const handleTemplateAddition = (id: string, name: string) => {
     if (onAddTemplate) onAddTemplate(id, name);
-    handleSelectableChange([
+    const newOpts = [
       {
         label: name,
         data: {
@@ -80,22 +91,34 @@ export const TemplateSwitcher = (props: TemplateProps) => {
         checked: 'on',
       },
       ...options.map((opt) => {
-        if ('isGroupLabel' in opt) return opt;
         return {
           ...opt,
-          checked: 'off',
+          isGroupLabel: false,
+          checked: undefined,
         };
       }),
-    ]);
+    ];
+    console.log({ newOpts });
+    handleSelectableChange(newOpts);
   };
 
   return (
-    <EuiPopover isOpen={isPopoverOpen} panelPaddingSize="s" button={button}>
+    <EuiPopover
+      anchorPosition="downRight"
+      isOpen={isPopoverOpen}
+      panelPaddingSize="s"
+      button={button}
+      ownFocus={false}
+      hasArrow={false}
+      closePopover={closePopover}
+    >
       <EuiSelectable singleSelection options={options} onChange={handleSelectableChange}>
         {(list) => (
           <div style={{ width: 240 }}>
             {list}
-            <AddNewTemplate onAdd={handleTemplateAddition} />
+            <EuiPopoverFooter>
+              <AddNewTemplate onAdd={handleTemplateAddition} />
+            </EuiPopoverFooter>
           </div>
         )}
       </EuiSelectable>
@@ -165,7 +188,7 @@ const AddNewTemplate: FC<AddNewTemplateProps> = ({ onAdd: onSave }) => {
 
   return (
     <>
-      <EuiButton iconSide="left" iconType={'plusInCircle'} onClick={showModal}>
+      <EuiButton fullWidth iconSide="left" iconType={'plusInCircle'} onClick={showModal}>
         {'Add New Template'}
       </EuiButton>
       {modal}

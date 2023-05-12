@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle, EuiFlyoutSize } from '@elastic/eui';
+import type {
+  EuiDataGridColumn,
+  EuiDataGridRowHeightsOptions,
+  EuiDataGridStyle,
+  EuiFlyoutSize,
+} from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
@@ -23,6 +28,8 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { differenceWith, isEqual, toPairs } from 'lodash';
+import { useSecuritySolutionUserSettings } from '../../../common/user_settings/use_security_solution_user_settings';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
@@ -48,6 +55,7 @@ import { eventsViewerSelector } from '../../../common/components/events_viewer/s
 import type { State } from '../../../common/store';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
+import { useTemplates } from '../templates/use_templates';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -210,9 +218,21 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     return undefined;
   }, [isEventRenderedView]);
 
+  const { getUserSetting, setUserSettings } = useSecuritySolutionUserSettings();
+
   const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
-  const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
-  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns(license);
+  // const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
+
+  const { activeTemplate } = useTemplates();
+  const columnsFormStorage = useMemo(
+    () =>
+      getUserSetting<ReturnType<typeof getColumns>>('alertsPage', `tableColumns.${activeTemplate}`),
+    [getUserSetting, activeTemplate]
+  );
+
+  const alertColumns =
+    columnsFormStorage && columnsFormStorage.length ? columnsFormStorage : getColumns(license);
+  console.log({ activeTemplate, columnsFormStorage, alertColumns });
 
   const finalBrowserFields = useMemo(
     () => (isEventRenderedView ? {} : browserFields),
@@ -224,8 +244,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [alertColumns, isEventRenderedView]
   );
 
+  const activeTemplateRef = useRef(null);
+
   const onAlertTableUpdate: AlertsTableStateProps['onUpdate'] = useCallback(
-    ({ isLoading: isAlertTableLoading, totalCount, refresh }) => {
+    ({ isLoading: isAlertTableLoading, totalCount, refresh, columns = undefined }) => {
       dispatch(
         updateIsLoading({
           id: tableId,
@@ -249,8 +271,34 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         refetch: refresh,
         inspect: null,
       });
+
+      const colsFromStorage = columnsFormStorage?.map((item) => item.id);
+      const colsArr = (columns as EuiDataGridColumn[]).map((col) => col.id);
+
+      if (activeTemplateRef.current !== activeTemplate) {
+        activeTemplateRef.current = activeTemplate;
+        return;
+      }
+
+      const changes = differenceWith(toPairs(colsFromStorage), toPairs(colsArr), isEqual);
+      console.log(
+        'columns isEqual : ',
+        colsFromStorage,
+        colsArr,
+        isEqual(columnsFormStorage, columns),
+        changes
+      );
+      setUserSettings('alertsPage', `tableColumns.${activeTemplate}`, columns);
     },
-    [dispatch, tableId, alertTableRefreshHandlerRef, setQuery]
+    [
+      dispatch,
+      tableId,
+      alertTableRefreshHandlerRef,
+      setQuery,
+      activeTemplate,
+      setUserSettings,
+      columnsFormStorage,
+    ]
   );
 
   const alertStateProps: AlertsTableStateProps = useMemo(
@@ -258,7 +306,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
       // stores saperate configuration based on the view of the table
-      id: `detection-engine-alert-table-${configId}-${tableView}`,
+      id: `detection-engine-alert-table-${configId}-${activeTemplate}-${tableView}`,
       flyoutSize,
       featureIds: ['siem'],
       query: finalBoolQuery,
@@ -277,6 +325,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
+      activeTemplate,
       configId,
       tableView,
       flyoutSize,

@@ -14,6 +14,7 @@ import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import { useSecuritySolutionUserSettings } from '../../../common/user_settings/use_security_solution_user_settings';
 import { groupSelectors } from '../../../common/store/grouping';
 import type { State } from '../../../common/store';
 import { updateGroupSelector } from '../../../common/store/grouping/actions';
@@ -25,6 +26,7 @@ import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './groupin
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
+import { useTemplates } from '../templates/use_templates';
 
 export interface AlertsTableComponentProps {
   currentAlertStatusFilterValue?: Status[];
@@ -89,7 +91,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [telemetry]
   );
 
-  const { groupSelector, getGrouping, selectedGroups } = useGrouping({
+  const { groupSelector, getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderer: getStats,
@@ -103,6 +105,31 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onGroupChange,
     tracker: track,
   });
+
+  const { activeTemplate } = useTemplates();
+  const { getUserSetting, setUserSettings } = useSecuritySolutionUserSettings();
+  const activeTemplateRef = useRef(null);
+
+  const groupingInfo = useMemo(
+    () => getUserSetting('alertsPage', `grouping.${props.tableId}.${activeTemplate}`),
+    [props.tableId, activeTemplate, getUserSetting]
+  );
+
+  useEffect(() => {
+    if (!groupingInfo) return;
+    setSelectedGroups(groupingInfo.selectedGroups);
+  }, [groupingInfo, setSelectedGroups]);
+
+  useEffect(() => {
+    if (activeTemplateRef.current !== activeTemplate) {
+      activeTemplateRef.current = activeTemplate;
+      return;
+    }
+
+    setUserSettings('alertsPage', `grouping.${props.tableId}.${activeTemplate}`, {
+      selectedGroups,
+    });
+  }, [setUserSettings, activeTemplate, selectedGroups, props.tableId]);
 
   const getGroupSelector = groupSelectors.getGroupSelector();
 
