@@ -5777,7 +5777,7 @@
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_utils.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-import-export-server-internal",
