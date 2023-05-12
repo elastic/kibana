@@ -16,7 +16,6 @@ import type {
   Reducer,
 } from 'redux';
 import { applyMiddleware, compose, createStore as createReduxStore } from 'redux';
-
 import { createEpicMiddleware } from 'redux-observable';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, pluck } from 'rxjs';
@@ -49,6 +48,9 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
+import type { AnalyzerOuterState } from '../../resolver/types';
+import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
+import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 
 type ComposeType = typeof compose;
 declare global {
@@ -133,6 +135,12 @@ export const createStoreFactory = async (
     groups: initialGroupingState,
   };
 
+  const analyzerInitialState: AnalyzerOuterState = {
+    analyzer: {
+      analyzerById: {},
+    },
+  };
+
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
     startPlugins.timelines?.getTimelineReducer() ?? {},
@@ -152,7 +160,8 @@ export const createStoreFactory = async (
       enableExperimental,
     },
     dataTableInitialState,
-    groupsInitialState
+    groupsInitialState,
+    analyzerInitialState
   );
 
   const rootReducer = {
@@ -163,6 +172,7 @@ export const createStoreFactory = async (
 
   return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
     ...(subPlugins.management.store.middleware ?? []),
+    ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
   ]);
 };
 

@@ -131,6 +131,9 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
     isActiveTimeline(scopeId)
   );
+  const filters = useMemo(() => {
+    return { from, to };
+  }, [from, to]);
 
   const sessionContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -170,7 +173,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
             resolverComponentInstanceID={scopeId}
             indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
-            filters={{ from, to }}
+            filters={filters}
           />
         ) : (
           <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
@@ -193,7 +196,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
             resolverComponentInstanceID={scopeId}
             indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
-            filters={{ from, to }}
+            filters={filters}
           />
         ) : (
           <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
