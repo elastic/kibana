@@ -13,7 +13,6 @@ import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
-import { useMentionsButtonToggle } from './plugins/mentions/use_mentions_button_toggle';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -48,13 +47,6 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
     useLensButtonToggle({
-      astRef,
-      uiPlugins,
-      editorRef: ref as React.MutableRefObject<MarkdownEditorRef>,
-      value,
-    });
-
-    useMentionsButtonToggle({
       astRef,
       uiPlugins,
       editorRef: ref as React.MutableRefObject<MarkdownEditorRef>,

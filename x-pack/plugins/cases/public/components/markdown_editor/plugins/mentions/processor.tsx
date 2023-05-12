@@ -7,9 +7,10 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
 import type { EuiMarkdownAstNodePosition } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { EuiText, EuiToolTip, EuiAvatar, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { MentionsNodeDetails } from './types';
 import { useGetUsers } from './use_get_users';
 
@@ -20,30 +21,36 @@ export const mentionsMarkdownRendererComponent: FunctionComponent<
 > = ({ mention }) => {
   const { euiTheme } = useEuiTheme();
   const { userList } = useGetUsers();
-  const match = userList.find(({ label }) => label === mention);
+  const match = userList.find((user) => user.username === mention);
 
   if (!match) {
     return <span>@{mention}</span>;
   }
 
-  // const { firstName, lastName } = match.data;
-  const { label } = match;
+  const { label, email } = match;
 
   const content = (
-    <div style={{ display: 'flex' }}>
-      <EuiAvatar name={label} size="s" />
-      <EuiText
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <div
         css={css`
-          margin-left: 8px;
+          display: flex;
         `}
       >
-        {label}
-      </EuiText>
-    </div>
+        <EuiAvatar name={label} size="s" />
+        <EuiText
+          css={css`
+            margin-left: 8px;
+          `}
+        >
+          {label}
+        </EuiText>
+      </div>
+      <EuiText size="s">{email}</EuiText>
+    </EuiFlexGroup>
   );
 
   return (
-    <EuiToolTip content={content}>
+    <EuiToolTip display="inlineBlock" content={content}>
       <EuiText color={euiTheme.colors.primary}>@{mention}</EuiText>
     </EuiToolTip>
   );

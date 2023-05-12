@@ -20,7 +20,7 @@ const MentionsEditorComponent: EuiMarkdownEditorUiPlugin['editor'] = (props) => 
   const onChange: EuiSelectableProps['onChange'] = (options) => {
     for (let i = 0; i < options.length; i++) {
       if (options[i].checked) {
-        onSave(`@${options[i].label} `, { block: false });
+        onSave(`@${options[i].username} `, { block: false });
         return;
       }
     }
@@ -37,7 +37,7 @@ const MentionsEditorComponent: EuiMarkdownEditorUiPlugin['editor'] = (props) => 
               margin-left: 8px;
             `}
           >
-            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+            <EuiHighlight search={searchValue}>{option.username}</EuiHighlight>
           </span>
         </span>
       </EuiFlexItem>

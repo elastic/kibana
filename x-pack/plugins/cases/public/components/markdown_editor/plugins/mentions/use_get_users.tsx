@@ -11,6 +11,8 @@ import { useCaseViewParams } from '../../../../common/navigation';
 
 interface UserOptions {
   label: string;
+  email: string;
+  username: string;
 }
 
 interface GetUsers {
@@ -32,12 +34,15 @@ export const useGetUsers = (): GetUsers => {
       ...users.assignees,
       ...users.participants,
       users.reporter,
-      ...users.unassignedUsers,
     ]) {
       if (user.uid != null && user.user.username != null) {
+        if((userProfiles.length && !userProfiles.find(profile => profile.username === user.user.username)) || !userProfiles.length) {
         userProfiles.push({
-          label: user.user.username,
+          username: user.user.username,
+          label: user.user.full_name ?? user.user.username,
+          email: user.user.email ?? '',
         });
+      }
       }
     }
 
