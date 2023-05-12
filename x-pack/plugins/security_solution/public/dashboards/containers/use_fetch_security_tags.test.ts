@@ -19,6 +19,7 @@ jest.mock('../../common/lib/kibana');
 
 const mockGet = jest.fn();
 const mockPut = jest.fn();
+const mockAbortSignal = {} as unknown as AbortSignal;
 
 const renderUseCreateSecurityDashboardLink = () => renderHook(() => useFetchSecurityTags(), {});
 
@@ -33,6 +34,11 @@ const asyncRenderUseCreateSecurityDashboardLink = async () => {
 describe('useFetchSecurityTags', () => {
   beforeAll(() => {
     useKibana().services.http = { get: mockGet, put: mockPut } as unknown as HttpStart;
+
+    global.AbortController = jest.fn().mockReturnValue({
+      abort: jest.fn(),
+      signal: mockAbortSignal,
+    });
   });
 
   beforeEach(() => {
@@ -43,22 +49,20 @@ describe('useFetchSecurityTags', () => {
     mockGet.mockResolvedValue([]);
     await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockGet).toHaveBeenCalledWith(
-      INTERNAL_TAGS_URL,
-      expect.objectContaining({ query: { name: SECURITY_TAG_NAME } })
-    );
+    expect(mockGet).toHaveBeenCalledWith(INTERNAL_TAGS_URL, {
+      query: { name: SECURITY_TAG_NAME },
+      signal: mockAbortSignal,
+    });
   });
 
   test('should create a Security Solution tag if no Security Solution tags were found', async () => {
     mockGet.mockResolvedValue([]);
     await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockPut).toHaveBeenCalledWith(
-      INTERNAL_TAGS_URL,
-      expect.objectContaining({
-        body: JSON.stringify({ name: SECURITY_TAG_NAME, description: SECURITY_TAG_DESCRIPTION }),
-      })
-    );
+    expect(mockPut).toHaveBeenCalledWith(INTERNAL_TAGS_URL, {
+      body: JSON.stringify({ name: SECURITY_TAG_NAME, description: SECURITY_TAG_DESCRIPTION }),
+      signal: mockAbortSignal,
+    });
   });
 
   test('should return Security Solution tags', async () => {

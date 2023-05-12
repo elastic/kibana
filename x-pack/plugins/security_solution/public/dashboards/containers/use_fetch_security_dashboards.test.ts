@@ -19,6 +19,7 @@ jest.mock('../../common/containers/tags/api');
 jest.mock('../../common/containers/dashboards/api');
 
 const mockHttp = {};
+const mockAbortSignal = {} as unknown as AbortSignal;
 
 const renderUseFetchSecurityDashboards = () =>
   renderHook(() => useFetchSecurityDashboards(), {
@@ -36,6 +37,11 @@ const asyncRenderUseFetchSecurityDashboards = async () => {
 describe('useFetchSecurityDashboards', () => {
   beforeAll(() => {
     useKibana().services.http = mockHttp as unknown as HttpStart;
+
+    global.AbortController = jest.fn().mockReturnValue({
+      abort: jest.fn(),
+      signal: mockAbortSignal,
+    });
   });
 
   beforeEach(() => {
@@ -57,6 +63,13 @@ describe('useFetchSecurityDashboards', () => {
         tagIds: [MOCK_TAG_ID],
       })
     );
+  });
+
+  it('should fetch Security Solution dashboards with abort signal', async () => {
+    await asyncRenderUseFetchSecurityDashboards();
+
+    expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+    expect((getDashboardsByTagIds as jest.Mock).mock.calls[0][1]).toEqual(mockAbortSignal);
   });
 
   it('should return Security Solution dashboards', async () => {
