@@ -14,7 +14,6 @@ import * as i18n from './translations';
 
 import type {
   DataQualityCheckResult,
-  DataStream,
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
