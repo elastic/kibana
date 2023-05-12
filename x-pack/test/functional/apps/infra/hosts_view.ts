@@ -364,6 +364,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      it('should render "N/A" when processes summary is not available in flyout', async () => {
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        const processesTotalValue =
+          await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+        const processValue = await processesTotalValue.getVisibleText();
+        expect(processValue).to.eql('N/A');
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
+      });
+
       describe('KPI tiles', () => {
         it('should render 5 metrics trend tiles', async () => {
           const hosts = await pageObjects.infraHostsView.getAllKPITiles();
@@ -543,6 +553,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
           });
+        });
+
+        it('should show an error message when an invalid KQL is submitted', async () => {
+          await pageObjects.infraHostsView.submitQuery('cloud.provider="gcp" A');
+          await testSubjects.existOrFail('hostsViewErrorCallout');
         });
       });
 
