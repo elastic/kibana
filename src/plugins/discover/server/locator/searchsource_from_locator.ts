@@ -147,7 +147,7 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
 
     // Inject sort
     if (savedSearch.sort) {
-      const sort = getSortForSearchSource(savedSearch.sort as Array<[string, string]>, index);
+      const sort = getSortForSearchSource(savedSearch.sort as Array<[string, string]>, index, null); // TODO: is it correct that it was using a `desc` as default sort here?
       searchSource.setField('sort', sort);
     }
 

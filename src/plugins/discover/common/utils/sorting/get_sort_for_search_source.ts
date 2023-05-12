@@ -28,9 +28,9 @@ import { SORT_DEFAULT_ORDER_SETTING } from '../..';
 export function getSortForSearchSource(
   sort: SortOrder[] | undefined,
   dataView: DataView | undefined,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient | null
 ): EsQuerySortValue[] {
-  const defaultDirection = uiSettings.get(SORT_DEFAULT_ORDER_SETTING) || 'desc';
+  const defaultDirection = uiSettings?.get(SORT_DEFAULT_ORDER_SETTING) || 'desc';
 
   if (!sort || !dataView || (Array.isArray(sort) && sort.length === 0)) {
     if (dataView?.timeFieldName) {
