@@ -20,6 +20,7 @@ import {
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { KibanaThemeProvider } from '../shared_imports';
 import {
   createStorage,
@@ -45,6 +46,7 @@ export interface BootDependencies {
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
 }
 
 export function renderApp({
@@ -58,6 +60,7 @@ export function renderApp({
   docLinks,
   autocompleteInfo,
   uiSettings,
+  settings,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -68,18 +71,19 @@ export function renderApp({
   });
   setStorage(storage);
   const history = createHistory({ storage });
-  const settings = createSettings({ storage });
+  const consoleSettings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
   const esHostService = createEsHostService({ api });
 
-  autocompleteInfo.mapping.setup(http, settings);
+  autocompleteInfo.mapping.setup(http, consoleSettings);
 
   render(
     <I18nContext>
       <KibanaContextProvider
         services={{
           uiSettings,
+          settings,
         }}
       >
         <KibanaThemeProvider theme$={theme$}>
@@ -91,7 +95,7 @@ export function renderApp({
                 esHostService,
                 storage,
                 history,
-                settings,
+                settings: consoleSettings,
                 notifications,
                 trackUiMetric,
                 objectStorageClient,
@@ -102,7 +106,7 @@ export function renderApp({
             }}
           >
             <RequestContextProvider>
-              <EditorContextProvider settings={settings.toJSON()}>
+              <EditorContextProvider settings={consoleSettings.toJSON()}>
                 <Main />
               </EditorContextProvider>
             </RequestContextProvider>
