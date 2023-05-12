@@ -151,7 +151,14 @@ export const useColumns = ({
     initialBrowserFields,
   });
 
-  const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
+  const [columns, setColumns] = useState<EuiDataGridColumn[]>(() => {
+    let cols = storageAlertsTable.current.columns;
+    // before restoring from storage, enrich the column data
+    if (initialBrowserFields && defaultColumns) {
+      cols = populateColumns(cols, initialBrowserFields, defaultColumns);
+    }
+    return cols;
+  });
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
   const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
@@ -165,14 +172,10 @@ export const useColumns = ({
     // if defaultColumns have changed, populate again
     if (didDefaultColumnChange) {
       defaultColumnsRef.current = defaultColumns;
-      let cols = storageAlertsTable.current.columns;
-      if (initialBrowserFields) {
-        cols = populateColumns(cols, initialBrowserFields, defaultColumns);
-      }
-      setColumns(cols);
+      setColumns(storageAlertsTable.current.columns);
       return;
     }
-  }, [initialBrowserFields, didDefaultColumnChange, storageAlertsTable, defaultColumns]);
+  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
 
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
