@@ -20,6 +20,7 @@ export interface Props {
   label: string;
   name: FieldPath<CreateSLOInput>;
   placeholder: string;
+  required?: boolean;
   tooltip?: ReactNode;
 }
 
@@ -30,6 +31,7 @@ export function QueryBuilder({
   label,
   name,
   placeholder,
+  required,
   tooltip,
 }: Props) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
@@ -55,6 +57,7 @@ export function QueryBuilder({
         defaultValue=""
         name={name}
         control={control}
+        rules={{ required }}
         render={({ field }) => (
           <QueryStringInput
             appName="Observability"
