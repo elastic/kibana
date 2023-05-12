@@ -165,10 +165,14 @@ export const useColumns = ({
     // if defaultColumns have changed, populate again
     if (didDefaultColumnChange) {
       defaultColumnsRef.current = defaultColumns;
-      setColumns(storageAlertsTable.current.columns);
+      let cols = storageAlertsTable.current.columns;
+      if (initialBrowserFields) {
+        cols = populateColumns(cols, initialBrowserFields, defaultColumns);
+      }
+      setColumns(cols);
       return;
     }
-  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
+  }, [initialBrowserFields, didDefaultColumnChange, storageAlertsTable, defaultColumns]);
 
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
