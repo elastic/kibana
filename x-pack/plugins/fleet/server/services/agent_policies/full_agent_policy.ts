@@ -129,7 +129,7 @@ export async function getFullAgentPolicy(
         return acc;
       }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
       protection: {
-        enabled: false,
+        enabled: agentPolicy.is_protected,
         uninstall_token_hash: '',
         signing_key: '',
       },
@@ -191,10 +191,14 @@ export async function getFullAgentPolicy(
   const messageSigningService = appContextService.getMessageSigningService();
   if (messageSigningService && fullAgentPolicy.agent) {
     const publicKey = await messageSigningService.getPublicKey();
+    const tokenHash =
+      (await appContextService
+        .getUninstallTokenService()
+        ?.getHashedTokenForPolicyId(fullAgentPolicy.id)) ?? '';
 
     fullAgentPolicy.agent.protection = {
-      enabled: false,
-      uninstall_token_hash: '',
+      enabled: agentPolicy.is_protected,
+      uninstall_token_hash: tokenHash,
       signing_key: publicKey,
     };
 

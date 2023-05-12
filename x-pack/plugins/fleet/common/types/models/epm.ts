@@ -583,7 +583,7 @@ export interface TemplateMapEntry {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
       }
     | {
-        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
       };
 }
 
