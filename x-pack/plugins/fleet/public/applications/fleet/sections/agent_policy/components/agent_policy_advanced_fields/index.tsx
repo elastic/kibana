@@ -303,20 +303,21 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             <h4>
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.tamperingLabel"
-                defaultMessage="Agent tampering"
+                defaultMessage="Agent tamper protection"
               />
             </h4>
           }
           description={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.tamperingDescription"
-              defaultMessage="some description"
+              defaultMessage="Prevent agents from being uninstalled locally. When enabled, agents can only be uninstalled using an authorization token in the uninstall command. Click { linkName } for the full command."
+              values={{ linkName: <strong>Get uninstall command</strong> }}
             />
           }
         >
           <EuiSwitch
             label={i18n.translate('xpack.fleet.agentPolicyForm.tamperingSwitchLabel', {
-              defaultMessage: 'Turn on agent tampering',
+              defaultMessage: 'Prevent agent tampering',
             })}
             checked={agentPolicy.is_protected ?? false}
             onChange={(e) => {
