@@ -847,7 +847,8 @@ class AgentPolicyService {
         fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
       }
 
-      return [...acc, fleetServerPolicy];
+      acc.push(fleetServerPolicy);
+      return acc;
     }, [] as FleetServerPolicy[]);
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
@@ -876,7 +877,8 @@ class AgentPolicyService {
           return acc;
         }
 
-        return [...acc, value];
+        acc.push(value);
+        return acc;
       }, [] as BulkResponseItem[]);
 
       logger.debug(

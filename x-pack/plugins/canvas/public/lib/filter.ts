@@ -27,17 +27,14 @@ export const defaultFormatter = (value: unknown) => (value || null ? `${value}` 
 export const formatFilterView =
   (filterValue: FilterType) => (filterView: FlattenFilterViewInstance) => {
     const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
-    return filterViewKeys.reduce(
-      (acc, key) => ({
-        ...acc,
-        [key]: {
-          label: filterView[key].label,
-          formattedValue: (filterView[key].formatter ?? defaultFormatter)(filterValue[key]),
-          component: filterView[key].component,
-        },
-      }),
-      {}
-    );
+    return filterViewKeys.reduce((acc, key) => {
+      acc[key] = {
+        label: filterView[key].label,
+        formattedValue: (filterView[key].formatter ?? defaultFormatter)(filterValue[key]),
+        component: filterView[key].component,
+      };
+      return acc;
+    }, {} as Record<string, unknown>);
   };
 
 export const flattenFilterView = (filterValue: FilterType) => (filterView: FilterViewInstance) => {

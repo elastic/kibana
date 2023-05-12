@@ -592,7 +592,7 @@ export class CasesService {
   }): Promise<AggregationResponse> {
     try {
       const builtAggs = aggregationBuilders.reduce((acc, agg) => {
-        return { ...acc, ...agg.build() };
+        return Object.assign(acc, agg.build());
       }, {});
 
       const res = await this.unsecuredSavedObjectsClient.find<
