@@ -26,6 +26,7 @@ import { type EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/com
 import { type DataView } from '@kbn/data-views-plugin/common';
 import type { FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
@@ -41,6 +42,7 @@ export interface AiopsAppDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
   lens: LensPublicStart;
+  fileUpload: FileUploadPluginStart;
   // deps for unified field stats
   fieldStats?: {
     useFieldStatsTrigger: () => {

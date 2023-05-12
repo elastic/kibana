@@ -256,6 +256,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
             onAddFilter={onAddFilter}
             onClose={onClose}
             enableRowActions={false}
+            dataView={dataView}
           />
         ) : null}
       </EuiFlyoutBody>

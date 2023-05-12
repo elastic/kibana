@@ -7,7 +7,7 @@
 
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
-import type { HasImportPermission, FindFileStructureResponse } from '../../common/types';
+import type { HasImportPermission, AnalysisResult } from '../../common/types';
 import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
 import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
@@ -50,10 +50,10 @@ interface HasImportPermissionParams {
 export async function analyzeFile(
   file: string,
   params: Record<string, string> = {}
-): Promise<FindFileStructureResponse> {
+): Promise<AnalysisResult> {
   const { getHttp } = await lazyLoadModules();
   const body = JSON.stringify(file);
-  return await getHttp().fetch<FindFileStructureResponse>({
+  return await getHttp().fetch<AnalysisResult>({
     path: `/internal/file_data_visualizer/analyze_file`,
     method: 'POST',
     body,

@@ -17,10 +17,12 @@ import {
   EuiTableSelectionType,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
 import { useDiscoverLinks, createFilter, QueryMode, QUERY_MODE } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
@@ -29,6 +31,7 @@ import type { EventRate, Category, SparkLinesPerCategory } from '../use_categori
 import { useTableState } from './use_table_state';
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
+import { ExpandedRow } from './expanded_row';
 
 interface Props {
   categories: Category[];
@@ -45,6 +48,7 @@ interface Props {
   onAddFilter?: (values: Filter, alias?: string) => void;
   onClose?: () => void;
   enableRowActions?: boolean;
+  dataView?: DataView;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -60,6 +64,7 @@ export const CategoryTable: FC<Props> = ({
   selectedCategory,
   setSelectedCategory,
   onAddFilter,
+  dataView,
   onClose = () => {},
   enableRowActions = true,
 }) => {
@@ -68,6 +73,9 @@ export const CategoryTable: FC<Props> = ({
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
+    {}
+  );
 
   const labels = useMemo(
     () => getLabels(onAddFilter !== undefined && onClose !== undefined),
@@ -104,7 +112,50 @@ export const CategoryTable: FC<Props> = ({
     );
   };
 
+  const toggleDetails = (category: Category) => {
+    const itemIdToExpandedRowMapValues = cloneDeep(itemIdToExpandedRowMap);
+    if (itemIdToExpandedRowMapValues[category.key]) {
+      delete itemIdToExpandedRowMapValues[category.key];
+    } else {
+      const timefilterActiveBounds = timefilter.getActiveBounds();
+      if (timefilterActiveBounds === undefined || selectedField === undefined) {
+        return;
+      }
+      itemIdToExpandedRowMapValues[category.key] = (
+        <ExpandedRow
+          category={category}
+          selectedField={selectedField as DataViewField}
+          timefilterActiveBounds={timefilterActiveBounds}
+          dataView={dataView!}
+          openInDiscover={() => openInDiscover(QUERY_MODE.INCLUDE, category)}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
   const columns: Array<EuiBasicTableColumn<Category>> = [
+    {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      render: (item: Category) => (
+        <EuiButtonIcon
+          onClick={toggleDetails.bind(null, item)}
+          aria-label={
+            itemIdToExpandedRowMap[item.key]
+              ? i18n.translate('xpack.ml.trainedModels.nodesList.collapseRow', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.ml.trainedModels.nodesList.expandRow', {
+                  defaultMessage: 'Expand',
+                })
+          }
+          iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
+        />
+      ),
+      'data-test-subj': 'mlNodesTableRowDetailsToggle',
+    },
     {
       field: 'count',
       name: i18n.translate('xpack.aiops.logCategorization.column.count', {
@@ -232,6 +283,8 @@ export const CategoryTable: FC<Props> = ({
         onTableChange={onTableChange}
         pagination={pagination}
         sorting={sorting}
+        isExpandable={true}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         rowProps={(category) => {
           return enableRowActions
             ? {
