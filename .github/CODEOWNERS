@@ -1254,3 +1254,9 @@ x-pack/plugins/translations/translations
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
+
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+
+**/*.scss  @elastic/kibana-design
