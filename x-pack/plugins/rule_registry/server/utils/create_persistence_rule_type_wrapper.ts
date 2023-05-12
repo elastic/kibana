@@ -188,6 +188,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 createdAlerts.forEach((alert) =>
                   options.services.alertFactory
                     .create(alert._id)
+                    .replaceState({
+                      signals_count: 1,
+                    })
                     .scheduleActions(type.defaultActionGroupId, {
                       rule: mapKeys(snakeCase, {
                         ...options.params,
@@ -380,6 +383,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 createdAlerts.forEach((alert) =>
                   options.services.alertFactory
                     .create(alert._id)
+                    .replaceState({
+                      signals_count: 1,
+                    })
                     .scheduleActions(type.defaultActionGroupId, {
                       rule: mapKeys(snakeCase, {
                         ...options.params,

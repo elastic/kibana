@@ -12,7 +12,7 @@ import type {
   ErrorCause,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
-import type { Either } from './internal_utils';
+import type { Either } from './apis/utils';
 import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 
 /**
