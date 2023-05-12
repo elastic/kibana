@@ -115,17 +115,26 @@ export const initializeDashboard = async ({
     dashboardSessionStorage,
     embeddable: { getEmbeddableFactory },
     data: {
+      query: queryService,
       search: { session },
     },
   } = pluginServices.getServices();
+  const {
+    queryString,
+    filterManager,
+    timefilter: { timefilter: timefilterService },
+  } = queryService;
 
   const {
+    getInitialInput,
     searchSessionSettings,
+    unifiedSearchSettings,
     validateLoadedSavedObject,
     useControlGroupIntegration,
-    initialInput: overrideInput,
+    useUnifiedSearchIntegration,
     useSessionStorageIntegration,
   } = creationOptions ?? {};
+  const overrideInput = getInitialInput?.();
 
   // --------------------------------------------------------------------------------------
   // Run validation.
@@ -164,20 +173,74 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
   // --------------------------------------------------------------------------------------
-  startUnifiedSearchIntegration({
-    input: initialInput,
-    untilDashboardReady,
-    creationOptions,
-  });
+  if (useUnifiedSearchIntegration && unifiedSearchSettings?.kbnUrlStateStorage) {
+    const { filters, query, timeRestore, timeRange, refreshInterval } = initialInput;
+    const { kbnUrlStateStorage } = unifiedSearchSettings;
+
+    // apply filters and query to the query service
+    filterManager.setAppFilters(cloneDeep(filters ?? []));
+    queryString.setQuery(query ?? queryString.getDefaultQuery());
+
+    /**
+     * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
+     * time range and refresh interval to the query service. Otherwise, set the current dashboard time range
+     * from the query service. The order of the following lines is very important.
+     */
+    if (timeRestore) {
+      if (timeRange) timefilterService.setTime(timeRange);
+      if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
+    }
+
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+      queryService,
+      kbnUrlStateStorage
+    );
+
+    if (!timeRestore) {
+      initialInput.timeRange = timefilterService.getTime();
+    }
+
+    untilDashboardReady().then((dashboardContainer) => {
+      const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(dashboardContainer)();
+      dashboardContainer.stopSyncingWithUnifiedSearch = () => {
+        stopSyncingUnifiedSearchState();
+        stopSyncingQueryServiceStateWithUrl();
+      };
+    });
+  }
 
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
-  const incomingEmbeddable = placeIncomingEmbeddable({
-    input: initialInput,
-    untilDashboardReady,
-    creationOptions,
-  });
+  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
+  if (incomingEmbeddable) {
+    initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
+    if (
+      incomingEmbeddable.embeddableId &&
+      Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
+    ) {
+      // this embeddable already exists, we will update the explicit input.
+      const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId];
+      const sameType = panelToUpdate.type === incomingEmbeddable.type;
+
+      panelToUpdate.type = incomingEmbeddable.type;
+      panelToUpdate.explicitInput = {
+        // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
+        ...(sameType ? panelToUpdate.explicitInput : {}),
+
+        ...incomingEmbeddable.input,
+        id: incomingEmbeddable.embeddableId,
+
+        // maintain hide panel titles setting.
+        hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
+      };
+    } else {
+      // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
+      untilDashboardReady().then((container) =>
+        container.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input)
+      );
+    }
+  }
 
   // --------------------------------------------------------------------------------------
   // Set up search sessions integration.
@@ -246,112 +309,10 @@ export const initializeDashboard = async ({
   // Start the data views integration.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboardContainer) => {
-    dashboardContainer.subscriptions.add(startSyncingDashboardDataViews.bind(dashboardContainer)());
+    dashboardContainer.integrationSubscriptions.add(
+      startSyncingDashboardDataViews.bind(dashboardContainer)()
+    );
   });
 
   return { input: initialInput, searchSessionId: initialSearchSessionId };
-};
-
-const startUnifiedSearchIntegration = ({
-  untilDashboardReady,
-  creationOptions,
-  input,
-}: {
-  untilDashboardReady: () => Promise<DashboardContainer>;
-  creationOptions?: DashboardCreationOptions;
-  input: DashboardContainerInput;
-}) => {
-  const {
-    data: { query: queryService },
-  } = pluginServices.getServices();
-
-  const {
-    queryString,
-    filterManager,
-    timefilter: { timefilter: timefilterService },
-  } = queryService;
-
-  const { useUnifiedSearchIntegration, unifiedSearchSettings } = creationOptions || {};
-  if (!useUnifiedSearchIntegration || !unifiedSearchSettings?.kbnUrlStateStorage) return;
-
-  const { filters, query, timeRestore, timeRange, refreshInterval } = input;
-  const { kbnUrlStateStorage } = unifiedSearchSettings;
-
-  // apply filters and query to the query service
-  filterManager.setAppFilters(cloneDeep(filters ?? []));
-  queryString.setQuery(query ?? queryString.getDefaultQuery());
-
-  /**
-   * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
-   * time range and refresh interval to the query service. Otherwise, set the current dashboard time range
-   * from the query service. The order of the following lines is very important.
-   */
-  if (timeRestore) {
-    if (timeRange) timefilterService.setTime(timeRange);
-    if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
-  }
-
-  const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-    queryService,
-    kbnUrlStateStorage
-  );
-
-  if (!timeRestore) {
-    input.timeRange = timefilterService.getTime();
-  }
-  // input.filters = filterManager.getFilters();
-
-  untilDashboardReady().then((dashboardContainer) => {
-    const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(dashboardContainer)();
-    dashboardContainer.stopSyncingWithUnifiedSearch = () => {
-      stopSyncingUnifiedSearchState();
-      stopSyncingQueryServiceStateWithUrl();
-    };
-  });
-};
-
-const placeIncomingEmbeddable = ({
-  untilDashboardReady,
-  creationOptions,
-  input,
-}: {
-  untilDashboardReady: () => Promise<DashboardContainer>;
-  creationOptions?: DashboardCreationOptions;
-  input: DashboardContainerInput;
-}) => {
-  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
-  if (!incomingEmbeddable) return;
-
-  input.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
-
-  const panelExists =
-    incomingEmbeddable.embeddableId && Boolean(input.panels[incomingEmbeddable.embeddableId]);
-  if (panelExists) {
-    // this embeddable already exists, we will update the explicit input.
-    const panelToUpdate = input.panels[incomingEmbeddable.embeddableId as string];
-    const sameType = panelToUpdate.type === incomingEmbeddable.type;
-
-    panelToUpdate.type = incomingEmbeddable.type;
-    panelToUpdate.explicitInput = {
-      // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
-      ...(sameType ? panelToUpdate.explicitInput : {}),
-
-      ...incomingEmbeddable.input,
-      id: incomingEmbeddable.embeddableId as string,
-
-      // maintain hide panel titles setting.
-      hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
-    };
-  } else {
-    // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
-    untilDashboardReady().then(async (container) => {
-      container.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input);
-    });
-  }
-
-  untilDashboardReady().then(async (container) => {
-    container.setScrollToPanelId(incomingEmbeddable.embeddableId);
-    container.setHighlightPanelId(incomingEmbeddable.embeddableId);
-  });
-  return incomingEmbeddable;
 };

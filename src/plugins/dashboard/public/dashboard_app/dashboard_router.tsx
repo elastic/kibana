@@ -9,13 +9,13 @@
 import './_dashboard_app.scss';
 
 import React from 'react';
-import { History } from 'history';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
 import { I18nProvider } from '@kbn/i18n-react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
@@ -56,6 +56,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     chrome: { setBadge, docTitle, setHelpExtension },
     dashboardCapabilities: { showWriteControls },
     documentationLinks: { dashboardDocLink },
+    application: { navigateToApp },
     settings: { uiSettings },
     data: dataStart,
     notifications,
@@ -63,7 +64,6 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   } = pluginServices.getServices();
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
-  let routerHistory: History;
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
@@ -73,17 +73,17 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     });
 
   const redirect = (redirectTo: RedirectToProps) => {
-    if (!routerHistory) return;
-    const historyFunction = redirectTo.useReplace ? routerHistory.replace : routerHistory.push;
-    let destination;
+    let path;
+    let state;
     if (redirectTo.destination === 'dashboard') {
-      destination = redirectTo.id
-        ? createDashboardEditUrl(redirectTo.id, redirectTo.editMode)
-        : CREATE_NEW_DASHBOARD_URL;
+      path = redirectTo.id ? createDashboardEditUrl(redirectTo.id) : CREATE_NEW_DASHBOARD_URL;
+      if (redirectTo.editMode) {
+        state = { viewMode: ViewMode.EDIT };
+      }
     } else {
-      destination = createDashboardListingFilterUrl(redirectTo.filter);
+      path = createDashboardListingFilterUrl(redirectTo.filter);
     }
-    historyFunction(destination);
+    navigateToApp(DASHBOARD_APP_ID, { path: `#/${path}`, state, replace: redirectTo.useReplace });
   };
 
   const getDashboardEmbedSettings = (
@@ -102,9 +102,6 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     if (routeParams.embed && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
-    if (!routerHistory) {
-      routerHistory = routeProps.history;
-    }
     return (
       <DashboardApp
         history={routeProps.history}
@@ -120,9 +117,6 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
-    if (!routerHistory) {
-      routerHistory = routeProps.history;
-    }
     return (
       <DashboardListingPage
         initialFilter={filter}

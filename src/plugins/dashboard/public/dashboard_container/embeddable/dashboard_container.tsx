@@ -95,7 +95,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public dispatch: DashboardReduxEmbeddableTools['dispatch'];
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
 
-  public subscriptions: Subscription = new Subscription();
+  public integrationSubscriptions: Subscription = new Subscription();
+  public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
@@ -282,7 +283,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     super.destroy();
     this.cleanupStateTools();
     this.controlGroup?.destroy();
-    this.subscriptions.unsubscribe();
+    this.diffingSubscription.unsubscribe();
+    this.integrationSubscriptions.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
@@ -347,12 +349,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     newSavedObjectId?: string,
     newCreationOptions?: Partial<DashboardCreationOptions>
   ) => {
-    if (newSavedObjectId === this.getState().componentState.lastSavedId) {
-      return;
-    }
-
-    this.subscriptions.unsubscribe();
-    this.subscriptions = new Subscription();
+    this.integrationSubscriptions.unsubscribe();
+    this.integrationSubscriptions = new Subscription();
     this.stopSyncingWithUnifiedSearch?.();
 
     const {
@@ -379,7 +377,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       loadDashboardReturn,
     });
 
-    newInput.viewMode = this.getState().explicitInput.viewMode;
     this.searchSessionId = searchSessionId;
 
     batch(() => {

@@ -34,7 +34,7 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  initialInput?: Partial<DashboardContainerInput>;
+  getInitialInput?: () => Partial<DashboardContainerInput>;
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
