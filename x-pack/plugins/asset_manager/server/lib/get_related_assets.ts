@@ -90,8 +90,8 @@ export async function getRelatedAssets({
 
   debug('Performing Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
 
-  const response = await esClient.search(dsl);
-  return response.hits.hits.map((hit) => hit._source as Asset);
+  const response = await esClient.search<Asset>(dsl);
+  return response.hits.hits.map((hit) => hit._source).filter((asset): asset is Asset => !!asset);
 }
 
 function relationToIndirectField(relation: Relation): RelationField {

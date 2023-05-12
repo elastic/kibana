@@ -21,10 +21,12 @@ export { toJsonSchema } from './src/to_json_schema';
 export { nonEmptyStringRt } from './src/non_empty_string_rt';
 export { createLiteralValueFromUndefinedRT } from './src/literal_value_from_undefined_rt';
 export { createRouteValidationFunction } from './src/route_validation';
-export { inRangeRt, type InRangeBrand, type InRange } from './src/in_range_rt';
+export { inRangeRt, type InRangeBrand, type InRange, inRangeFromStringRt } from './src/in_range_rt';
 export { dateRt } from './src/date_rt';
 export {
   isGreaterOrEqualRt,
   type IsGreaterOrEqualBrand,
   type IsGreaterOrEqual,
 } from './src/is_greater_or_equal';
+
+export { datemathStringRt } from './src/datemath_string_rt';
