@@ -118,6 +118,21 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'split',
+    insertText: 'split',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.splitDoc', {
+      defaultMessage: 'Splits a single valued string into multiple strings.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `ROW words="foo;bar;baz;qux;quux;corge"
+        | EVAL word = SPLIT(words, ";")`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'date_format',
     insertText: 'date_format',
     kind: 1,
@@ -187,6 +202,20 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
           languages <= 1, "monolingual",
           languages <= 2, "bilingual",
            "polyglot")`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'length',
+    insertText: 'length',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.lengthDoc', {
+      defaultMessage: 'Returns the character length of a string.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value" | eval fn_length = length(field)`,
       ]),
     },
     sortText: 'C',

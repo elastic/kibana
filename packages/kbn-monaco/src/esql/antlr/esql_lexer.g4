@@ -7,12 +7,10 @@
 
 lexer grammar esql_lexer;
 
-options { caseInsensitive = true; }
-
 DISSECT : D I S S E C T -> pushMode(EXPRESSION);
 GROK : G R O K -> pushMode(EXPRESSION);
 EVAL : E V A L -> pushMode(EXPRESSION);
-EXPLAIN : E X P L A I N -> pushMode(EXPRESSION);
+EXPLAIN : E X P L A I N -> pushMode(EXPLAIN_MODE);
 FROM : F R O M -> pushMode(SOURCE_IDENTIFIERS);
 ROW : R O W -> pushMode(EXPRESSION);
 STATS : S T A T S -> pushMode(EXPRESSION);
@@ -35,7 +33,12 @@ MULTILINE_COMMENT
 WS
     : [ \r\n\t]+ -> channel(HIDDEN)
     ;
-
+mode EXPLAIN_MODE;
+EXPLAIN_OPENING_BRACKET : '[' -> type(OPENING_BRACKET), pushMode(DEFAULT_MODE);
+EXPLAIN_PIPE : '|' -> type(PIPE), popMode;
+EXPLAIN_WS : WS -> channel(HIDDEN);
+EXPLAIN_LINE_COMMENT : LINE_COMMENT -> channel(HIDDEN);
+EXPLAIN_MULTILINE_COMMENT : MULTILINE_COMMENT -> channel(HIDDEN);
 mode EXPRESSION;
 
 PIPE : '|' -> popMode;
@@ -92,8 +95,8 @@ ASSIGN : '=';
 COMMA : ',';
 DOT : '.';
 LP : '(';
-OPENING_BRACKET : '[' -> pushMode(DEFAULT_MODE);
-CLOSING_BRACKET : ']' -> popMode, popMode; // pop twice, once to clear mode of current cmd and once to exit DEFAULT_MODE
+OPENING_BRACKET : '[' -> pushMode(EXPRESSION), pushMode(EXPRESSION);
+CLOSING_BRACKET : ']' -> popMode, popMode;
 NOT : 'not';
 LIKE: 'like';
 RLIKE: 'rlike';
@@ -146,6 +149,12 @@ MATH_FUNCTION
     | I S UNDERSCORE F I N I T E
     | I S UNDERSCORE I N F I N I T E
     | C A S E
+    | L E N G T H
+    | M V UNDERSCORE M A X
+    | M V UNDERSCORE M I N
+    | M V UNDERSCORE M A X
+    | M V UNDERSCORE S U M
+    | S P L I T
     ;
 
 UNARY_FUNCTION

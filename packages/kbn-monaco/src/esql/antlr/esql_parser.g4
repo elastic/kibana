@@ -167,10 +167,18 @@ functionIdentifier
     ;
 
 constant
-    : NULL                                                                              #nullLiteral
-    | number                                                                            #numericLiteral
-    | booleanValue                                                                      #booleanLiteral
-    | string                                                                            #stringLiteral
+    : NULL
+    | numericValue
+    | booleanValue
+    | string
+    | OPENING_BRACKET numericValue (COMMA numericValue)* CLOSING_BRACKET
+    | OPENING_BRACKET booleanValue (COMMA booleanValue)* CLOSING_BRACKET
+    | OPENING_BRACKET string (COMMA string)* CLOSING_BRACKET
+    ;
+
+numericValue
+    : decimalValue
+    | integerValue
     ;
 
 limitCommand
@@ -228,6 +236,14 @@ booleanValue
 number
     : DECIMAL_LITERAL  #decimalLiteral
     | INTEGER_LITERAL  #integerLiteral
+    ;
+
+decimalValue
+    : DECIMAL_LITERAL
+    ;
+
+integerValue
+    : INTEGER_LITERAL
     ;
 
 string

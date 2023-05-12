@@ -127,11 +127,13 @@ describe('autocomplete_listener', () => {
       'concat',
       'substring',
       'starts_with',
+      'split',
       'date_format',
       'date_trunc',
       'is_finite',
       'is_infinite',
       'case',
+      'length',
       'FieldIdentifier',
     ]);
     testSuggestions('from a | eval a=b', ['|', '+', '-', '/', '*']);
