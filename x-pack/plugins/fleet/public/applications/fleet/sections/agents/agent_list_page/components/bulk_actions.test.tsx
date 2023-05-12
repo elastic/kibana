@@ -44,11 +44,6 @@ describe('AgentBulkActions', () => {
   }
 
   describe('When in manual mode', () => {
-    beforeAll(() => {
-      mockedSendGetAgentPolicies.mockResolvedValue({});
-      mockedSendGetAgents.mockResolvedValue({});
-    });
-
     it('should show only disabled actions if no agents are active', async () => {
       const selectedAgents: Agent[] = [{ id: 'agent1' }, { id: 'agent2' }] as Agent[];
 

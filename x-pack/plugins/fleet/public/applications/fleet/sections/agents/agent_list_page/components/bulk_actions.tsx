@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -80,43 +80,49 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [managedAgents, setManagedAgents] = useState<string[]>([]);
 
   // get all the managed policies
-  const fetchManagedAgents = async () => {
-    const managedPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`;
+  const fetchManagedAgents = useCallback(async () => {
+    if (selectionMode === 'query') {
+      const managedPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`;
 
-    const agentPoliciesResponse = await sendGetAgentPolicies({
-      kuery: managedPoliciesKuery,
-      perPage: SO_SEARCH_LIMIT,
-      full: false,
-    });
+      const agentPoliciesResponse = await sendGetAgentPolicies({
+        kuery: managedPoliciesKuery,
+        perPage: SO_SEARCH_LIMIT,
+        full: false,
+      });
 
-    if (agentPoliciesResponse.error) {
-      throw new Error(agentPoliciesResponse.error.message);
+      if (agentPoliciesResponse.error) {
+        throw new Error(agentPoliciesResponse.error.message);
+      }
+
+      const managedPolicies = agentPoliciesResponse.data?.items ?? [];
+
+      // find all the agents that have those policies and are not unenrolled
+      const policiesKuery = managedPolicies
+        .map((policy) => `policy_id:"${policy.id}"`)
+        .join(' or ');
+      const kuery = `NOT (status:unenrolled) and ${policiesKuery}`;
+      const response = await sendGetAgents({
+        kuery,
+        perPage: SO_SEARCH_LIMIT,
+        showInactive: true,
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      return response.data?.items ?? [];
     }
-
-    const managedPolicies = agentPoliciesResponse.data?.items ?? [];
-    // find all the agents that have those policies and are not unenrolled
-    const policiesKuery = managedPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or ');
-    const kuery = `NOT (status:unenrolled) and ${policiesKuery}`;
-    const response = await sendGetAgents({
-      kuery,
-      perPage: SO_SEARCH_LIMIT,
-      showInactive: true,
-    });
-
-    if (response.error) {
-      throw new Error(response.error.message);
-    }
-
-    return response.data?.items ?? [];
-  };
+    return [];
+  }, [selectionMode]);
 
   useEffect(() => {
     async function fetchDataAsync() {
       const allManagedAgents = await fetchManagedAgents();
-      setManagedAgents(allManagedAgents.map((agent) => agent.id));
+      setManagedAgents(allManagedAgents?.map((agent) => agent.id));
     }
     fetchDataAsync();
-  }, []);
+  }, [fetchManagedAgents]);
 
   // update the query removing the "managed" agents
   const selectionQuery = useMemo(() => {
@@ -124,7 +130,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${managedAgents
         .map((id) => `"${id}"`)
         .join(' or ')})`;
-      return `${currentQuery} and NOT (${excludedKuery})`;
+      return `${currentQuery} AND NOT (${excludedKuery})`;
     } else {
       return currentQuery;
     }
