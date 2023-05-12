@@ -19,7 +19,7 @@ x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
-packages/kbn-alerts @elastic/security-solution
+packages/kbn-alerts @elastic/security-threat-hunting-explore
 packages/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
@@ -519,7 +519,7 @@ packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
-x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-threat-hunting-investigations
 examples/response_stream @elastic/ml-ui
 packages/kbn-rison @elastic/kibana-operations
 x-pack/plugins/rollup @elastic/platform-deployment-management
