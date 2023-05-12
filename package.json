@@ -437,6 +437,7 @@
     "@kbn/index-lifecycle-management-plugin": "link:x-pack/plugins/index_lifecycle_management",
     "@kbn/index-management-plugin": "link:x-pack/plugins/index_management",
     "@kbn/index-patterns-test-plugin": "link:test/plugin_functional/plugins/index_patterns",
+    "@kbn/infra-forge": "link:x-pack/packages/kbn-infra-forge",
     "@kbn/infra-plugin": "link:x-pack/plugins/infra",
     "@kbn/ingest-pipelines-plugin": "link:x-pack/plugins/ingest_pipelines",
     "@kbn/input-control-vis-plugin": "link:src/plugins/input_control_vis",

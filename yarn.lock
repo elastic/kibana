@@ -4382,6 +4382,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/infra-forge@link:x-pack/packages/kbn-infra-forge":
+  version "0.0.0"
+  uid ""
+
 "@kbn/infra-plugin@link:x-pack/plugins/infra":
   version "0.0.0"
   uid ""
@@ -5025,7 +5029,7 @@
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
-  
+
 "@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
   version "0.0.0"
   uid ""
@@ -5034,19 +5038,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-types@link:packages/serverless/types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/serverless-search@link:x-pack/plugins/serverless_search":
   version "0.0.0"
   uid ""
 
 "@kbn/serverless-security@link:x-pack/plugins/serverless_security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-types@link:packages/serverless/types":
   version "0.0.0"
   uid ""
 

@@ -822,6 +822,8 @@
       "@kbn/index-management-plugin/*": ["x-pack/plugins/index_management/*"],
       "@kbn/index-patterns-test-plugin": ["test/plugin_functional/plugins/index_patterns"],
       "@kbn/index-patterns-test-plugin/*": ["test/plugin_functional/plugins/index_patterns/*"],
+      "@kbn/infra-forge": ["x-pack/packages/kbn-infra-forge"],
+      "@kbn/infra-forge/*": ["x-pack/packages/kbn-infra-forge/*"],
       "@kbn/infra-plugin": ["x-pack/plugins/infra"],
       "@kbn/infra-plugin/*": ["x-pack/plugins/infra/*"],
       "@kbn/ingest-pipelines-plugin": ["x-pack/plugins/ingest_pipelines"],
