@@ -9,7 +9,7 @@
 import './discover_field.scss';
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiSpacer, EuiTitle, EuiPopoverFooter, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -25,7 +25,6 @@ import { DragDrop } from '@kbn/dom-drag-drop';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
-import { useDiscoverCustomization } from '../../../../customizations/customization_provider';
 
 interface GetCommonFieldItemButtonPropsParams {
   field: DataViewField;
@@ -257,8 +256,6 @@ function DiscoverFieldComponent({
     }),
     [field.name]
   );
-
-  const fieldPopoverCustomization = useDiscoverCustomization('field_popover');
 
   const renderPopover = () => {
     return (
