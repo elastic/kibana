@@ -32,6 +32,8 @@ export interface QueryMatch {
   operator: QueryOperator;
 }
 
+export type QueryType = 'eql' | 'kql' | 'dsl' | 'json' | 'no-type';
+
 export interface DataProvider {
   /** Uniquely identifies a data provider */
   id: string;
@@ -67,6 +69,8 @@ export interface DataProvider {
    * Array of multiple values for a field
    */
   valueArray?: string[] | null;
+
+  queryType?: QueryType;
 }
 
 export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;

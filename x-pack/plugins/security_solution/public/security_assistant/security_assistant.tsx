@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -21,17 +20,18 @@ import {
   EuiAvatar,
   EuiPageHeader,
   EuiMarkdownFormat,
-  EuiIcon,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
-import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 import styled from 'styled-components';
+import { createPortal } from 'react-dom';
 import * as i18n from './translations';
 
 import { useKibana } from '../common/lib/kibana';
 import { getCombinedMessage, getMessageFromRawResponse, isFileHash } from './helpers';
 import { SendToTimelineButton } from './send_to_timeline_button';
+
 import { SettingsPopover } from './settings_popover';
 import { useSecurityAssistantContext } from './security_assistant_context';
 import { ContextPills } from './context_pills';
@@ -46,7 +46,7 @@ import { getDefaultSystemPrompt, getSuperheroPrompt } from './prompt/helpers';
 import type { Prompt } from './types';
 import { getPromptById } from './prompt_editor/helpers';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+import { analyzeMarkdown } from './use_conversation/helpers';
 
 const CommentsContainer = styled.div`
   max-height: 600px;
@@ -100,6 +100,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
 
       const { cases } = useKibana().services;
       const bottomRef = useRef<HTMLDivElement | null>(null);
+      const lastCommentRef = useRef<HTMLDivElement | null>(null);
 
       const [promptTextPreview, setPromptTextPreview] = useState<string>('');
       const [systemPrompts] = useState<Prompt[]>([getDefaultSystemPrompt(), getSuperheroPrompt()]);
@@ -220,49 +221,48 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       );
 
       // Drill in `Add To Timeline` action
-      // Grab all relevant dom elements
-      const commentBlocks = [...document.getElementsByClassName('euiMarkdownFormat')];
-      // Filter if no code block exists as to not make extra portals
-      commentBlocks.filter((cb) => cb.querySelectorAll('.euiCodeBlock__code').length > 0);
-
-      let commentDetails: Array<{
-        commentBlock: Element;
-        codeBlocks: Element[];
-        codeBlockControls: Element[];
-        dataProviders: DataProvider[];
-      }> =
-        currentConversation.messages.length > 0
-          ? commentBlocks.map((commentBlock) => {
-              return {
-                commentBlock,
-                codeBlocks: [...commentBlock.querySelectorAll('.euiCodeBlock__code')],
-                codeBlockControls: [...commentBlock.querySelectorAll('.euiCodeBlock__controls')],
-                dataProviders: [],
-              };
-            })
-          : [];
-      commentDetails = commentDetails.map((details) => {
-        const dataProviders: DataProvider[] = details.codeBlocks.map((codeBlock, i) => {
-          return {
-            id: 'assistant-data-provider',
-            name: 'Assistant Query',
-            enabled: true,
-            // overriding to use as isEQL
-            excluded: details.commentBlock?.textContent?.includes('EQL') ?? false,
-            kqlQuery: codeBlock.textContent ?? '',
-            queryMatch: {
-              field: 'host.name',
-              operator: ':',
-              value: 'test',
-            },
-            and: [],
-          };
+      // First let's find
+      const messageCodeBlocks = useMemo(() => {
+        const cbd = currentConversation.messages.map(({ content }) => {
+          return analyzeMarkdown(content);
         });
-        return {
-          ...details,
-          dataProviders,
-        };
-      });
+        return cbd.map((codeBlocks, messageIndex) => {
+          return codeBlocks.map((codeBlock, codeBlockIndex) => {
+            return {
+              ...codeBlock,
+              controlContainer: document.querySelectorAll(
+                `.message-${messageIndex} .euiCodeBlock__controls`
+              )[codeBlockIndex],
+              button: (
+                <SendToTimelineButton
+                  asEmptyButton={true}
+                  dataProviders={[
+                    {
+                      id: 'assistant-data-provider',
+                      name: `Assistant Query from conversation ${currentConversation.id}`,
+                      enabled: true,
+                      excluded: false,
+                      queryType: codeBlock.type,
+                      kqlQuery: codeBlock.content ?? '',
+                      queryMatch: {
+                        field: 'host.name',
+                        operator: ':',
+                        value: 'test',
+                      },
+                      and: [],
+                    },
+                  ]}
+                  keepDataView={true}
+                >
+                  <EuiToolTip position="right" content={'Add to timeline'}>
+                    <EuiIcon type="timeline" />
+                  </EuiToolTip>
+                </SendToTimelineButton>
+              ),
+            };
+          });
+        });
+      }, [currentConversation.messages, lastCommentRef.current]);
       ////
 
       // Add min-height to all codeblocks so timeline icon doesn't overflow
@@ -324,31 +324,15 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
           )}
 
           {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-          {currentConversation.messages.length > 0 &&
-            commentDetails.length > 0 &&
-            // eslint-disable-next-line array-callback-return
-            commentDetails.map((e) => {
-              if (e.dataProviders != null && e.dataProviders.length > 0) {
-                return e.codeBlocks.map((block, i) => {
-                  if (e.codeBlockControls[i] != null) {
-                    return createPortal(
-                      <SendToTimelineButton
-                        asEmptyButton={true}
-                        dataProviders={[e.dataProviders?.[i] ?? []]}
-                        keepDataView={true}
-                      >
-                        <EuiToolTip position="right" content={'Add to timeline'}>
-                          <EuiIcon type="timeline" />
-                        </EuiToolTip>
-                      </SendToTimelineButton>,
-                      e.codeBlockControls[i]
-                    );
-                  } else {
-                    return <></>;
-                  }
-                });
-              }
-            })}
+          {messageCodeBlocks.map((codeBlocks) => {
+            return codeBlocks.map((codeBlock) => {
+              return codeBlock.controlContainer != null ? (
+                createPortal(codeBlock.button, codeBlock.controlContainer)
+              ) : (
+                <></>
+              );
+            });
+          })}
 
           <ContextPills
             promptContexts={promptContexts}
@@ -366,6 +350,14 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
                   username: isUser ? 'You' : 'Assistant',
                   actions: (
                     <>
+                      <EuiToolTip position="top" content={'Add to timeline note'}>
+                        <EuiButtonIcon
+                          onClick={() => handleAddToExistingCaseClick(message.content)}
+                          iconType="editorComment"
+                          color="primary"
+                          aria-label="Add message content as a timeline note"
+                        />
+                      </EuiToolTip>
                       <EuiToolTip position="top" content={'Add to case'}>
                         <EuiButtonIcon
                           onClick={() => handleAddToExistingCaseClick(message.content)}
@@ -389,11 +381,21 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
                     </>
                   ),
                   // event: isUser ? 'Asked a question' : 'Responded with',
-                  children: (
-                    <EuiText>
-                      <EuiMarkdownFormat>{message.content}</EuiMarkdownFormat>
-                    </EuiText>
-                  ),
+                  children:
+                    index !== currentConversation.messages.length - 1 ? (
+                      <EuiText>
+                        <EuiMarkdownFormat className={`message-${index}`}>
+                          {message.content}
+                        </EuiMarkdownFormat>
+                      </EuiText>
+                    ) : (
+                      <EuiText>
+                        <EuiMarkdownFormat className={`message-${index}`}>
+                          {message.content}
+                        </EuiMarkdownFormat>
+                        <span ref={lastCommentRef} />
+                      </EuiText>
+                    ),
                   timelineAvatar: isUser ? (
                     <EuiAvatar name="user" size="l" color="subdued" iconType={'logoSecurity'} />
                   ) : (

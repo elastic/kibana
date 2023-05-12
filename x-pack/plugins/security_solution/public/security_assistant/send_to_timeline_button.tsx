@@ -10,10 +10,10 @@ import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 
-import { sourcererSelectors } from '../../public/common/store';
+import { sourcererSelectors } from '../common/store';
 import { InputsModelId } from '../common/store/inputs/constants';
-import { TimeRange } from '../common/store/inputs/model';
-import { inputsActions } from '../../public/common/store/inputs';
+import type { TimeRange } from '../common/store/inputs/model';
+import { inputsActions } from '../common/store/inputs';
 import {
   applyKqlFilterQuery,
   setActiveTabTimeline,
@@ -21,11 +21,10 @@ import {
   updateDataView,
   updateEqlOptions,
 } from '../timelines/store/timeline/actions';
-import { sourcererActions } from '../../public/common/store/actions';
+import { sourcererActions } from '../common/store/actions';
 import { SourcererScopeName } from '../common/store/sourcerer/model';
-import { TimelineTabs } from '../../common/types';
-import { TimelineId, TimelineType } from '../../common/types';
-import { DataProvider } from '../timelines/components/timeline/data_providers/data_provider';
+import { TimelineTabs, TimelineId, TimelineType } from '../../common/types';
+import type { DataProvider } from '../timelines/components/timeline/data_providers/data_provider';
 import { useCreateTimeline } from '../timelines/components/timeline/properties/use_create_timeline';
 import { useDeepEqualSelector } from '../common/hooks/use_selector';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../detections/components/alerts_table/translations';
@@ -86,42 +85,66 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
           })
         );
 
-        // overriding `excluded` to use as `isEQL`
-        if (dataProviders[0].excluded) {
-          // is EQL
-          dispatch(
-            updateEqlOptions({
-              id: TimelineId.active,
-              field: 'query',
-              value: dataProviders[0].kqlQuery,
-            })
-          );
-          dispatch(
-            setActiveTabTimeline({
-              id: TimelineId.active,
-              activeTab: TimelineTabs.eql,
-            })
-          );
-        } else {
-          // is KQL
-          dispatch(
-            applyKqlFilterQuery({
-              id: TimelineId.active,
-              filterQuery: {
-                kuery: {
-                  kind: 'kuery',
-                  expression: dataProviders[0].kqlQuery,
+        // Added temporary queryType to dataproviders to support EQL/DSL
+        switch (dataProviders[0].queryType) {
+          case 'eql':
+            // is EQL
+            dispatch(
+              updateEqlOptions({
+                id: TimelineId.active,
+                field: 'query',
+                value: dataProviders[0].kqlQuery,
+              })
+            );
+            dispatch(
+              setActiveTabTimeline({
+                id: TimelineId.active,
+                activeTab: TimelineTabs.eql,
+              })
+            );
+            break;
+          case 'kql':
+            // is KQL
+            dispatch(
+              applyKqlFilterQuery({
+                id: TimelineId.active,
+                filterQuery: {
+                  kuery: {
+                    kind: 'kuery',
+                    expression: dataProviders[0].kqlQuery,
+                  },
+                  serializedQuery: dataProviders[0].kqlQuery,
                 },
-                serializedQuery: dataProviders[0].kqlQuery,
+              })
+            );
+            dispatch(
+              setActiveTabTimeline({
+                id: TimelineId.active,
+                activeTab: TimelineTabs.query,
+              })
+            );
+            break;
+          case 'dsl':
+            const filter = {
+              meta: {
+                type: 'custom',
+                disabled: false,
+                negate: false,
+                alias: dataProviders[0].name,
+                key: 'query',
+                value: dataProviders[0].kqlQuery,
               },
-            })
-          );
-          dispatch(
-            setActiveTabTimeline({
-              id: TimelineId.active,
-              activeTab: TimelineTabs.query,
-            })
-          );
+              // TODO: Now you be careful parsing json directly from the robots, mmmkay?
+              query: JSON.parse(dataProviders[0].kqlQuery),
+            };
+            dispatch(setFilters({ id: TimelineId.active, filters: [filter] }));
+            dispatch(
+              setActiveTabTimeline({
+                id: TimelineId.active,
+                activeTab: TimelineTabs.query,
+              })
+            );
+            break;
         }
       }
       // Use filters if more than a certain amount of ids for dom performance.
