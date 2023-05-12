@@ -1207,6 +1207,7 @@ x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 /test/scripts/jenkins_security_solution_cypress_firefox.sh @security-engineering-productivity
 /.ci/Jenkinsfile_security_cypress @security-engineering-productivity
 /.github/ISSUE_TEMPLATE/Bug_report_security_solution.md @security-engineering-productivity
+/x-pack/plugins/security_solution/cypress/ @security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/sec-cloudnative-integrations
