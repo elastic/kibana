@@ -140,14 +140,13 @@ export function fetchMoreDocuments(
   const searchSource = savedSearch.searchSource.createChild();
 
   try {
-    const latestDocuments = dataSubjects.documents$.getValue().result || [];
-    const lastDocumentSort = latestDocuments[latestDocuments.length - 1]?.raw?.sort;
+    const lastDocuments = dataSubjects.documents$.getValue().result || [];
+    const lastDocumentSort = lastDocuments[lastDocuments.length - 1]?.raw?.sort;
 
     if (!lastDocumentSort) {
       return Promise.resolve();
     }
 
-    // TODO: add tie breaker field
     searchSource.setField('searchAfter', lastDocumentSort);
 
     const dataView = searchSource.getField('index')!;

@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EsQuerySortValue } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EsQuerySortValue, SortDirection } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getSort } from './get_sort';
+import {
+  getESQuerySortForTimeField,
+  getESQuerySortForTieBreaker,
+  getTieBreakerField,
+} from './get_es_query_sort';
+import { SORT_DEFAULT_ORDER_SETTING } from '../..';
 
 /**
  * Prepares sort for search source, that's sending the request to ES
@@ -19,10 +26,12 @@ import { getSort } from './get_sort';
  *   when there are indices with date and indices with date_nanos field
  */
 export function getSortForSearchSource(
-  sort?: SortOrder[],
-  dataView?: DataView,
-  defaultDirection: string = 'desc'
+  sort: SortOrder[] | undefined,
+  dataView: DataView | undefined,
+  uiSettings: IUiSettingsClient
 ): EsQuerySortValue[] {
+  const defaultDirection = uiSettings.get(SORT_DEFAULT_ORDER_SETTING) || 'desc';
+
   if (!sort || !dataView || (Array.isArray(sort) && sort.length === 0)) {
     if (dataView?.timeFieldName) {
       // sorting by index order
@@ -31,17 +40,31 @@ export function getSortForSearchSource(
       return [{ _score: defaultDirection } as EsQuerySortValue];
     }
   }
+
   const { timeFieldName } = dataView;
-  return getSort(sort, dataView).map((sortPair: Record<string, string>) => {
-    if (dataView.isTimeNanosBased() && timeFieldName && sortPair[timeFieldName]) {
-      return {
-        [timeFieldName]: {
-          order: sortPair[timeFieldName],
-          numeric_type: 'date_nanos',
-          format: 'strict_date_optional_time_nanos',
-        },
-      } as EsQuerySortValue;
+  const sortPairs = getSort(sort, dataView);
+
+  const sortForSearchSource = sortPairs.map((sortPair: Record<string, string>) => {
+    if (timeFieldName && sortPair[timeFieldName]) {
+      return getESQuerySortForTimeField(
+        timeFieldName,
+        sortPair[timeFieldName] as SortDirection,
+        dataView.isTimeNanosBased()
+      );
     }
     return sortPair as EsQuerySortValue;
   });
+
+  // TODO: do we need to a tie breaker like this?
+  if (dataView.isTimeBased() && sortPairs.length) {
+    const firstSortPair = sortPairs[0];
+    const firstPairSortDir = Array.isArray(firstSortPair)
+      ? firstSortPair[1]
+      : Object.values(firstSortPair)[0];
+    sortForSearchSource.push(
+      getESQuerySortForTieBreaker(getTieBreakerField(dataView, uiSettings), firstPairSortDir)
+    );
+  }
+
+  return sortForSearchSource;
 }

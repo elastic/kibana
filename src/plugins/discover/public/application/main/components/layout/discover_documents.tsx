@@ -131,7 +131,11 @@ function DiscoverDocumentsComponent({
 
   const totalHitsState = useDataState(totalHits$);
   const totalHits = totalHitsState.result || 0;
-  const canFetchMoreRecords = !isPlainRecord && totalHits > (documentState.result?.length || 0);
+  const canFetchMoreRecords =
+    !isPlainRecord &&
+    rows.length > 0 &&
+    totalHits > rows.length &&
+    Boolean(rows[rows.length - 1].raw.sort?.length);
 
   const onFetchMoreRecords = useMemo(
     () =>

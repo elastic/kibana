@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import {
@@ -20,10 +19,12 @@ import {
   LoadingStatus,
 } from '../services/context_query_state';
 import { AppState } from '../services/context_state';
-import { getFirstSortableField } from '../utils/sorting';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../../types';
-import { getEsQuerySort } from '../utils/get_es_query_sort';
+import {
+  getTieBreakerField,
+  getEsQuerySort,
+} from '../../../../common/utils/sorting/get_es_query_sort';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -54,10 +55,7 @@ export function useContextAppFetch({
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
   }, [data.search.searchSource]);
-  const tieBreakerField = useMemo(
-    () => getFirstSortableField(dataView, config.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),
-    [config, dataView]
-  );
+  const tieBreakerField = useMemo(() => getTieBreakerField(dataView, config), [config, dataView]);
 
   const [fetchedState, setFetchedState] = useState<ContextFetchState>(
     getInitialContextQueryState()
