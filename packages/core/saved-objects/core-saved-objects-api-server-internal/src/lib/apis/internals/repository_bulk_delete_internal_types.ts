@@ -12,8 +12,8 @@ import type {
   ErrorCause,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
-import type { Either } from './apis/utils';
-import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
+import type { Either } from '../utils';
+import type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
 
 /**
  * @internal
