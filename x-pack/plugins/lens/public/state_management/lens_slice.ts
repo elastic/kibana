@@ -1242,16 +1242,14 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const currentState = current(_state);
       return moveStateThroughHistory(
         currentState,
-        currentState.changes[currentState.changes.length - 1].created,
-        'backward'
+        currentState.changes[currentState.changes.length - 1].created
       );
     },
     [redo.type]: (_state) => {
       const currentState = current(_state);
       return moveStateThroughHistory(
         currentState,
-        currentState.reversedChanges[currentState.reversedChanges.length - 1].created,
-        'forward'
+        currentState.reversedChanges[currentState.reversedChanges.length - 1].created
       );
     },
     [applyPatches.type]: (_state, { payload: { patches } }: { payload: { patches: Patch[] } }) => {
@@ -1279,11 +1277,12 @@ function moveLastItemToAnotherReadonlyArray<T>(from: T[], to: T[]): [T[], T[], T
 const applyToLastElement = <T>(arr: T[], transform: (item: T) => T): T[] =>
   arr.map((item, index) => (index === arr.length - 1 ? transform(item) : item));
 
-function moveStateThroughHistory(
-  _state: LensAppState,
-  targetTimestamp: number,
-  direction: 'forward' | 'backward'
-) {
+function moveStateThroughHistory(_state: LensAppState, targetTimestamp: number) {
+  const currentTimestamp = _state.changes[_state.changes.length - 1]?.created as number | undefined;
+
+  const direction: 'backward' | 'forward' =
+    currentTimestamp && currentTimestamp >= targetTimestamp ? 'backward' : 'forward';
+
   const comparator =
     direction === 'backward'
       ? (source: number, target: number) => source >= target
