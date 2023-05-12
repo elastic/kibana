@@ -12,8 +12,8 @@ import {
   SecretsFieldSchema,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ButtonGroupField } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { ButtonGroupField as SelectField } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { OpenAiProviderType } from '../types';
@@ -112,13 +112,13 @@ const azureAiSecrets: SecretsFieldSchema[] = [
   },
 ];
 
-const providerButtons = [
+const providerOptions = [
   {
-    id: OpenAiProviderType.OpenAi,
+    value: OpenAiProviderType.OpenAi,
     label: i18n.OPEN_AI,
   },
   {
-    id: OpenAiProviderType.AzureAi,
+    value: OpenAiProviderType.AzureAi,
     label: i18n.AZURE_AI,
   },
 ];
@@ -160,18 +160,31 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
 
   return (
     <>
-      <EuiTitle size="xxs">
-        <h4>{i18n.API_PROVIDER_HEADING}</h4>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <ButtonGroupField
+      <SelectField
         defaultValue={selectedProviderDefaultValue}
         path="config.apiProvider"
         label={i18n.API_PROVIDER_LABEL}
-        options={providerButtons}
+        options={providerOptions}
+        isButton={false}
+        fullWidth
       />
       <EuiSpacer size="s" />
-      {form}
+      {config != null && config.apiProvider === OpenAiProviderType.OpenAi && (
+        <SimpleConnectorForm
+          isEdit={isEdit}
+          readOnly={readOnly}
+          configFormSchema={openAiConfig}
+          secretsFormSchema={openAiSecrets}
+        />
+      )}
+      {config != null && config.apiProvider === OpenAiProviderType.AzureAi && (
+        <SimpleConnectorForm
+          isEdit={isEdit}
+          readOnly={readOnly}
+          configFormSchema={azureAiConfig}
+          secretsFormSchema={azureAiSecrets}
+        />
+      )}
     </>
   );
 };
