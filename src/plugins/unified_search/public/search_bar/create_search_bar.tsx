@@ -15,7 +15,6 @@ import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-pl
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -59,7 +58,7 @@ const defaultFiltersUpdated = (
 // Respond to user changing the refresh settings
 const defaultOnRefreshChange = (
   queryService: QueryStart,
-  onRefreshChange?: (payload: OnRefreshChangeProps) => void
+  onRefreshChange?: (payload: { isPaused: boolean; refreshInterval: number }) => void
 ) => {
   const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
