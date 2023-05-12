@@ -16,7 +16,7 @@ import { ButtonGroupField as SelectField } from '@kbn/triggers-actions-ui-plugin
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { OpenAiProviderType } from '../types';
+import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
 import * as i18n from './translations';
 import { DEFAULT_URL, DEFAULT_URL_AZURE } from './constants';
 
@@ -127,7 +127,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
 }) => {
-  const { setFieldValue, getFieldDefaultValue } = useFormContext();
+  const { getFieldDefaultValue } = useFormContext();
   const [{ config }] = useFormData({
     watch: ['config.apiProvider'],
   });
@@ -136,26 +136,6 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     () =>
       getFieldDefaultValue<OpenAiProviderType>('config.apiProvider') ?? OpenAiProviderType.OpenAi,
     [getFieldDefaultValue]
-  );
-
-  const form = useMemo(
-    () =>
-      config == null || config.apiProvider === OpenAiProviderType.OpenAi ? (
-        <SimpleConnectorForm
-          isEdit={isEdit}
-          readOnly={readOnly}
-          configFormSchema={openAiConfig}
-          secretsFormSchema={openAiSecrets}
-        />
-      ) : (
-        <SimpleConnectorForm
-          isEdit={isEdit}
-          readOnly={readOnly}
-          configFormSchema={azureAiConfig}
-          secretsFormSchema={azureAiSecrets}
-        />
-      ),
-    [config, isEdit, readOnly]
   );
 
   return (
@@ -177,6 +157,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           secretsFormSchema={openAiSecrets}
         />
       )}
+      {/* ^v These are intentionally not if/else because of the way the `config.defaultValue` renders */}
       {config != null && config.apiProvider === OpenAiProviderType.AzureAi && (
         <SimpleConnectorForm
           isEdit={isEdit}

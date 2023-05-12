@@ -6,6 +6,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
+import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export interface EmailActionParams {
@@ -74,11 +75,6 @@ export interface WebhookActionParams {
 
 export interface GenerativeAiActionParams {
   body?: string;
-}
-
-export enum OpenAiProviderType {
-  OpenAi = 'OpenAI',
-  AzureAi = 'Azure OpenAI',
 }
 
 export interface GenerativeAiConfig {

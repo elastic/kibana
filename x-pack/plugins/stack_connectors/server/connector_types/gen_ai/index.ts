@@ -19,7 +19,7 @@ import type {
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { GeneralConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { OpenAiProviderType } from '../../../public/connector_types/types';
+import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { isOk, promiseResult, Result } from '../lib/result_type';
 
