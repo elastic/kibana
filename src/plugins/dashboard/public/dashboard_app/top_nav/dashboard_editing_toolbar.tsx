@@ -203,13 +203,6 @@ export function DashboardEditingToolbar({
             />
           ),
           secondButton: (
-            // <ToolbarButton
-            //   type="empty"
-            //   iconType="lensApp"
-            //   onClick={() => setIsFlyoutVisible(true)}
-            //   label="Create visualization from ESQL"
-            //   data-test-subj="dashboardAddFromESQL"
-            // />
             <EuiButton
               size="m"
               color="success"
