@@ -64,7 +64,7 @@ const testBrowserConfig: Partial<MonitorFields> = {
   type: DataStream.BROWSER,
   enabled: true,
   schedule: { number: '3', unit: ScheduleUnit.MINUTES },
-  'service.name': '',
+  'service.name': 'APM Service',
   tags: [],
   timeout: '16',
   name: 'Test',
@@ -188,6 +188,7 @@ describe('browser fields', () => {
       locations: [],
       schedule: '@every 3m',
       screenshots: 'on',
+      'service.name': 'APM Service',
       'source.inline.script':
         "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
       throttling: {
