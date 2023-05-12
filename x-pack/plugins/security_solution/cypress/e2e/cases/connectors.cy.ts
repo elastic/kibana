@@ -45,7 +45,6 @@ describe('Cases connectors', () => {
   };
 
   const snConnector = getServiceNowConnector();
-  let connectorId = '';
 
   before(() => {
     cleanKibana();
@@ -100,7 +99,6 @@ describe('Cases connectors', () => {
 
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      connectorId = response?.body.id ?? '';
 
       verifyNewConnectorSelected(snConnector);
 
