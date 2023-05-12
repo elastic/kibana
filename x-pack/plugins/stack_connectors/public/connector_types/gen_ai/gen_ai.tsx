@@ -11,25 +11,25 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { OpenAiActionParams, OpenAiConfig, OpenAiSecrets } from '../types';
+import { GenerativeAiActionParams, GenerativeAiConfig, GenerativeAiSecrets } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<
-  OpenAiConfig,
-  OpenAiSecrets,
-  OpenAiActionParams
+  GenerativeAiConfig,
+  GenerativeAiSecrets,
+  GenerativeAiActionParams
 > {
   return {
-    id: '.openAi',
+    id: '.genAi',
     iconClass: lazy(() => import('./logo')),
-    selectMessage: i18n.translate('xpack.stackConnectors.components.openAi.selectMessageText', {
-      defaultMessage: 'Send a request to Open AI',
+    selectMessage: i18n.translate('xpack.stackConnectors.components.genAi.selectMessageText', {
+      defaultMessage: 'Send a request to Generative AI',
     }),
-    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.openAi.connectorTypeTitle', {
-      defaultMessage: 'Open AI data',
+    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.genAi.connectorTypeTitle', {
+      defaultMessage: 'Generative AI data',
     }),
     validateParams: async (
-      actionParams: OpenAiActionParams
-    ): Promise<GenericValidationResult<OpenAiActionParams>> => {
+      actionParams: GenerativeAiActionParams
+    ): Promise<GenericValidationResult<GenerativeAiActionParams>> => {
       const translations = await import('./translations');
       const errors = {
         body: new Array<string>(),

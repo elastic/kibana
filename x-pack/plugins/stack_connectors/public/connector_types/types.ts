@@ -68,19 +68,25 @@ export interface TeamsActionParams {
   message: string;
 }
 
-export interface OpenAiActionParams {
+export interface GenerativeAiActionParams {
   body?: string;
 }
 
-export interface OpenAiConfig {
+export enum OpenAiProviderType {
+  OpenAi = 'OpenAI',
+  AzureAi = 'Azure OpenAI',
+}
+
+export interface GenerativeAiConfig {
+  apiProvider: OpenAiProviderType;
   apiUrl: string;
 }
 
-export interface OpenAiSecrets {
+export interface GenerativeAiSecrets {
   apiKey: string;
 }
 
-export interface OpenAiActionParams {
+export interface GenerativeAiActionParams {
   body?: string;
 }
 

@@ -25,7 +25,7 @@ export const AlertingConnectorFeatureId = 'alerting';
 export const CasesConnectorFeatureId = 'cases';
 export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
-export const GeneralConnectorFeatureId = 'siem';
+export const GeneralConnectorFeatureId = 'general';
 
 const compatibilityGeneral = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.general',

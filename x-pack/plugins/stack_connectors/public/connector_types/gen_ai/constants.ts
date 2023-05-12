@@ -6,3 +6,5 @@
  */
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
+export const DEFAULT_URL_AZURE =
+  'https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/completions?api-version={api-version}' as const;

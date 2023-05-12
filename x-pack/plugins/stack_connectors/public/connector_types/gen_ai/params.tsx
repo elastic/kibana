@@ -9,30 +9,23 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { OpenAiActionParams } from '../types';
+import { GenerativeAiActionParams } from '../types';
 
-const OpenAiParamsFields: React.FunctionComponent<ActionParamsProps<OpenAiActionParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  messageVariables,
-  errors,
-}) => {
+const GenerativeAiParamsFields: React.FunctionComponent<
+  ActionParamsProps<GenerativeAiActionParams>
+> = ({ actionParams, editAction, index, messageVariables, errors }) => {
   const { body } = actionParams;
   return (
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'body'}
       inputTargetValue={body}
-      label={i18n.translate('xpack.stackConnectors.components.openAi.bodyFieldLabel', {
+      label={i18n.translate('xpack.stackConnectors.components.genAi.bodyFieldLabel', {
         defaultMessage: 'Body',
       })}
-      aria-label={i18n.translate(
-        'xpack.stackConnectors.components.openAi.bodyCodeEditorAriaLabel',
-        {
-          defaultMessage: 'Code editor',
-        }
-      )}
+      aria-label={i18n.translate('xpack.stackConnectors.components.genAi.bodyCodeEditorAriaLabel', {
+        defaultMessage: 'Code editor',
+      })}
       errors={errors.body as string[]}
       onDocumentsChange={(json: string) => {
         editAction('body', json, index);
@@ -47,4 +40,4 @@ const OpenAiParamsFields: React.FunctionComponent<ActionParamsProps<OpenAiAction
 };
 
 // eslint-disable-next-line import/no-default-export
-export { OpenAiParamsFields as default };
+export { GenerativeAiParamsFields as default };
