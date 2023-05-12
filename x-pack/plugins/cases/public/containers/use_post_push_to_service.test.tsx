@@ -14,6 +14,7 @@ import type { CaseConnector } from '../../common/api';
 import { ConnectorTypes } from '../../common/api';
 import { createAppMockRenderer } from '../common/mock';
 import type { AppMockRenderer } from '../common/mock';
+import { casesQueriesKeys } from './constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -37,6 +38,23 @@ describe('usePostPushToService', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+  });
+
+  it('refresh the case after pushing', async () => {
+    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+
+    const { waitForNextUpdate, result } = renderHook(() => usePostPushToService(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    act(() => {
+      result.current.mutate({ caseId, connector });
+    });
+
+    await waitForNextUpdate();
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });
 
   it('calls the api when invoked with the correct parameters', async () => {

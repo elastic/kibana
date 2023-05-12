@@ -13,6 +13,7 @@ import * as i18n from './translations';
 import { useCasesToast } from '../common/use_cases_toast';
 import { casesMutationsKeys } from './constants';
 import type { ServerError } from '../types';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 interface PushToServiceRequest {
   caseId: string;
@@ -21,6 +22,7 @@ interface PushToServiceRequest {
 
 export const usePostPushToService = () => {
   const { showErrorToast, showSuccessToast } = useCasesToast();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
     (request: PushToServiceRequest) => {
@@ -31,6 +33,7 @@ export const usePostPushToService = () => {
       mutationKey: casesMutationsKeys.pushCase,
       onSuccess: (_, { connector }) => {
         showSuccessToast(i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name));
+        refreshCaseViewPage();
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
