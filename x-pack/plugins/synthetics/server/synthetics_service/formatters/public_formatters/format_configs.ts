@@ -15,7 +15,7 @@ import {
   SyntheticsMonitor,
   TLSFields,
 } from '../../../../common/runtime_types';
-import { formatters } from '.';
+import { publicFormatters } from '.';
 import { PARAMS_KEYS_TO_SKIP } from '../private_formatters/format_synthetics_policy';
 import { replaceStringWithParams } from '../private_formatters/formatting_utils';
 
@@ -52,8 +52,8 @@ export const formatMonitorConfigFields = (
         return;
       }
 
-      if (!!formatters[key]) {
-        const formatter = formatters[key];
+      if (!!publicFormatters[key]) {
+        const formatter = publicFormatters[key];
         if (typeof formatter === 'function') {
           formattedMonitor[key] = formatter(config, key);
         } else {

@@ -13,7 +13,7 @@ import { commonFormatters, CommonFormatMap } from './common';
 
 type Formatters = HTTPFormatMap & TCPFormatMap & ICMPFormatMap & BrowserFormatMap & CommonFormatMap;
 
-export const formatters: Formatters = {
+export const publicFormatters: Formatters = {
   ...httpFormatters,
   ...icmpFormatters,
   ...tcpFormatters,
