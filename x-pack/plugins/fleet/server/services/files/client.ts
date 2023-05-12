@@ -14,8 +14,8 @@ import type { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { FileClient } from '@kbn/files-plugin/server';
-import { createFileHashTransform } from '@kbn/files-plugin/server';
-import { createEsFileClient } from '@kbn/files-plugin/server';
+import { createFileHashTransform, createEsFileClient } from '@kbn/files-plugin/server';
+import type { File } from '@kbn/files-plugin/common';
 
 import type { BaseFileMetadata, FileCompression } from '@kbn/shared-ux-file-types';
 
@@ -111,7 +111,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
       new FleetFilesClientError('File hash was not generated!')
     );
 
-    return this.get(uploadedFile.id);
+    return this.mapIndexedDocToFleetFile(uploadedFile);
   }
 
   async update(
@@ -193,8 +193,8 @@ export class FleetFilesClient implements FleetFileClientInterface {
   }
 
   protected async getFileCreatedByKibana(fileId: string): Promise<FleetFile> {
-    // FIXME:PT update once we have new index and understand what the fields are (defend workflows team issue #6553)
-    return this.getFileCreatedByHost(fileId);
+    const file = await this.esFileClient.get<FileCustomMeta>({ id: fileId });
+    return this.mapIndexedDocToFleetFile(file);
   }
 
   protected async getFileCreatedByHost(fileId: string): Promise<FleetFile> {
@@ -214,7 +214,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
       const docSearchHit = fileDocSearchResult.hits.hits[0] ?? {};
 
       if (!docSearchHit._source) {
-        throw new FleetFileNotFound(`File with id [${fileId}] not found`);
+        throw new FleetFileNotFound(`File with id [${fileId}] not found`, fileDocSearchResult);
       }
 
       const fleetFile = this.mapIndexedDocToFleetFile(docSearchHit);
@@ -245,30 +245,47 @@ export class FleetFilesClient implements FleetFileClientInterface {
   }
 
   protected mapIndexedDocToFleetFile(
-    fileDoc: estypes.SearchHit<HostUploadedFileMetadata>
+    fileDoc: estypes.SearchHit<HostUploadedFileMetadata> | File<FileCustomMeta>
   ): FleetFile {
-    if (!fileDoc._source) {
-      throw new FleetFilesClientError('Missing file document `_source`');
+    if (isSearchHit(fileDoc)) {
+      if (!fileDoc._source) {
+        throw new FleetFilesClientError('Missing file document `_source`');
+      }
+
+      const {
+        action_id: actionId,
+        agent_id: agentId,
+        file: { name, Status: status, mime_type: mimeType = '', size = 0, hash = {} },
+      } = fileDoc._source;
+
+      const file: FleetFile = {
+        id: fileDoc._id,
+        agents: [agentId],
+        sha256: hash?.sha256 ?? '',
+        actionId,
+        name,
+        status,
+        mimeType,
+        size,
+      };
+
+      return file;
+    } else {
+      const { name, meta, id, mimeType = '', size = 0, status, hash } = fileDoc.toJSON();
+
+      const file: FleetFile = {
+        id,
+        agents: meta?.target_agents ?? [],
+        sha256: hash?.sha256 ?? '',
+        actionId: meta?.action_id ?? '',
+        name,
+        status,
+        mimeType,
+        size,
+      };
+
+      return file;
     }
-
-    const {
-      action_id: actionId,
-      agent_id: agentId,
-      file: { name, Status: status, mime_type: mimeType = '', size = 0, hash = {} },
-    } = fileDoc._source;
-
-    const file: FleetFile = {
-      id: fileDoc._id,
-      agents: [agentId],
-      sha256: hash?.sha256 ?? '',
-      actionId,
-      name,
-      status,
-      mimeType,
-      size,
-    };
-
-    return file;
   }
 
   protected ensureTypeIsToHost() {
@@ -277,6 +294,17 @@ export class FleetFilesClient implements FleetFileClientInterface {
     }
   }
 }
+
+const isSearchHit = (data: unknown): data is estypes.SearchHit<HostUploadedFileMetadata> => {
+  return (
+    data !== undefined &&
+    data !== null &&
+    typeof data === 'object' &&
+    '_source' in data &&
+    '_id' in data &&
+    '_index' in data
+  );
+};
 
 /**
  * File upload metadata information. Stored by endpoint/fleet-server when a file is uploaded to ES in connection with
