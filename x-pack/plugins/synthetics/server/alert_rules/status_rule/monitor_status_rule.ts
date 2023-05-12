@@ -31,7 +31,6 @@ import {
   ALERT_DETAILS_URL,
   VIEW_IN_APP_URL,
 } from '../../legacy_uptime/lib/alerts/action_variables';
-import { getInstanceId } from '../../legacy_uptime/lib/alerts/status_check';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { UptimeRuleTypeAlertDefinition } from '../../legacy_uptime/lib/alerts/common';
@@ -92,7 +91,7 @@ export const registerSyntheticsStatusCheckRule = (
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
         const locationId = statusRule.getLocationId(ping.observer?.geo?.name!) ?? '';
         const monitorSummary = getMonitorSummary(ping, DOWN_LABEL, locationId, configId);
-        const alertId = getInstanceId(ping, idWithLocation);
+        const alertId = idWithLocation;
         const alert = alertWithLifecycle({
           id: alertId,
           fields: getMonitorAlertDocument(monitorSummary),
