@@ -23,7 +23,11 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 
-import { type AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+} from '@kbn/es-query';
 import {
   EuiFlyoutHeader,
   EuiFlyout,
@@ -71,7 +75,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const [isLabsShown, setIsLabsShown] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryTextBased, setQueryTextBased] = useState<AggregateQuery>({
-    sql: 'SELECT * FROM kibana_sample_data_logs',
+    sql: 'from kibana_sample_data_logs | limit 10',
   });
 
   const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
@@ -256,7 +260,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     async function getDefaultDataView() {
       const defaultDataview = await dataViewsService.getDefaultDataView();
       setDefaultDv(defaultDataview);
-      setQueryTextBased({ sql: `SELECT * FROM ${defaultDataview?.title}` });
+      setQueryTextBased({ esql: `from ${defaultDataview?.title} | limit 10` });
     }
     if (!defaultDv) {
       getDefaultDataView();
@@ -271,6 +275,8 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       const columns = table?.columns?.map(({ name }) => name);
       if ('sql' in queryTextBased) {
         indexPattern = getIndexPatternFromSQLQuery(queryTextBased.sql);
+      } else {
+        indexPattern = getIndexPatternFromESQLQuery(queryTextBased.esql);
       }
       if (indexPattern) {
         const dataView = await dataViewsService.create({

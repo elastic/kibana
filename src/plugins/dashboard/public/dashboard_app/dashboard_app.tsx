@@ -38,8 +38,6 @@ import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
-// import { fetchFieldsFromTextBased } from './top_nav/fetch_textBased';
-// import { getLensAttributes } from './get_lens_props';
 
 export interface DashboardAppProps {
   history: History;
