@@ -20,18 +20,18 @@ import {
   isQueryAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
-import Color from 'color';
+import chroma from 'chroma-js';
 import { pick } from 'lodash';
 import moment from 'moment';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYDataLayerConfig } from '../../types';
 
 export const toRangeAnnotationColor = (color = defaultAnnotationColor) => {
-  return new Color(transparentize(color, 0.1)).hexa();
+  return chroma(transparentize(color, 0.1)).hex().toUpperCase();
 };
 
 export const toLineAnnotationColor = (color = defaultAnnotationRangeColor) => {
-  return new Color(transparentize(color, 1)).hex();
+  return chroma(transparentize(color, 1)).hex().toUpperCase();
 };
 
 export const getEndTimestamp = (

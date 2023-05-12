@@ -132,6 +132,17 @@ export function getMlClient(
     }
   }
 
+  function switchDeploymentId(
+    p: Parameters<MlClient['stopTrainedModelDeployment']>
+  ): Parameters<MlClient['stopTrainedModelDeployment']> {
+    const [params] = p;
+    if (params.deployment_id !== undefined) {
+      params.model_id = params.deployment_id;
+      delete params.deployment_id;
+    }
+    return p;
+  }
+
   async function checkModelIds(modelIds: string[], allowWildcards: boolean = false) {
     const filteredModelIds = await mlSavedObjectService.filterTrainedModelIdsForSpace(modelIds);
     let missingIds = modelIds.filter((j) => filteredModelIds.indexOf(j) === -1);
@@ -491,17 +502,24 @@ export function getMlClient(
       return mlClient.startTrainedModelDeployment(...p);
     },
     async updateTrainedModelDeployment(...p: Parameters<MlClient['updateTrainedModelDeployment']>) {
-      const { model_id: modelId, number_of_allocations: numberOfAllocations } = p[0];
+      await modelIdsCheck(p);
+
+      const { deployment_id: deploymentId, number_of_allocations: numberOfAllocations } = p[0];
       return client.asInternalUser.transport.request({
         method: 'POST',
-        path: `/_ml/trained_models/${modelId}/deployment/_update`,
+        path: `/_ml/trained_models/${deploymentId}/deployment/_update`,
         body: { number_of_allocations: numberOfAllocations },
       });
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
+      await modelIdsCheck(p);
+      switchDeploymentId(p);
+
       return mlClient.stopTrainedModelDeployment(...p);
     },
     async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
+      await modelIdsCheck(p);
+      switchDeploymentId(p);
       // Temporary workaround for the incorrect inferTrainedModelDeployment function in the esclient
       if (
         // @ts-expect-error TS complains it's always false

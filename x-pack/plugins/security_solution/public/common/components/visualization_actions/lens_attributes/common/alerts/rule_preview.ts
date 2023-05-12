@@ -23,7 +23,7 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
         title: 'Empty XY chart',
         legend: {
           isVisible: false,
-          position: 'left',
+          position: 'right',
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-plugin/public';
 import React, { ComponentType, useRef, useState } from 'react';
+import { breadcrumbsApp } from '../../../application/app';
 import {
   FilmstripFrame,
   FilmstripTransition,
@@ -16,8 +17,6 @@ import {
 } from '../../shared/filmstrip_transition';
 import { Provider as WizardProvider, Step as WizardStep } from './wizard';
 import { HorizontalSteps } from './wizard/horizontal_steps';
-import { PageTitle } from './wizard/page_title';
-import { breadcrumbsApp } from '../../../application/app';
 
 export function CustomLogs() {
   useBreadcrumbs(
@@ -62,7 +61,16 @@ function AnimatedTransitionsWizard() {
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSpacer size="l" />
-          <PageTitle />
+          <EuiTitle size="l">
+            <h1>
+              {i18n.translate(
+                'xpack.observability_onboarding.title.collectCustomLogs',
+                {
+                  defaultMessage: 'Collect custom logs',
+                }
+              )}
+            </h1>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ width: '50%' }}>
           <HorizontalSteps />
