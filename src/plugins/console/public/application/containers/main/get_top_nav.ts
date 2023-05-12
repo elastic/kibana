@@ -13,6 +13,7 @@ interface Props {
   onClickSettings: () => void;
   onClickHelp: () => void;
   onClickVariables: () => void;
+  onClickRedesign: () => void;
 }
 
 export function getTopNavConfig({
@@ -20,6 +21,7 @@ export function getTopNavConfig({
   onClickSettings,
   onClickHelp,
   onClickVariables,
+  onClickRedesign,
 }: Props) {
   return [
     {
@@ -73,6 +75,19 @@ export function getTopNavConfig({
         onClickHelp();
       },
       testId: 'consoleHelpButton',
+    },
+    {
+      id: 'redesign',
+      label: i18n.translate('console.topNav.redesignTabLabel', {
+        defaultMessage: 'Toggle redesign',
+      }),
+      description: i18n.translate('console.topNav.redesignTabDescription', {
+        defaultMessage: 'Toggle the redesign',
+      }),
+      onClick: () => {
+        onClickRedesign();
+      },
+      testId: 'consoleRedesignButton',
     },
   ];
 }

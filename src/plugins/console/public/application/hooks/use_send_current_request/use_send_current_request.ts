@@ -11,7 +11,6 @@ import { useCallback } from 'react';
 
 import { toMountPoint } from '../../../shared_imports';
 import { isQuotaExceededError } from '../../../services/history';
-import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { StorageQuotaError } from '../../components/storage_quota_error';
 import { sendRequest } from './send_request';
@@ -19,8 +18,9 @@ import { track } from './track';
 import { replaceVariables } from '../../../lib/utils';
 import { StorageKeys } from '../../../services';
 import { DEFAULT_VARIABLES } from '../../../../common/constants';
+import { SenseEditor } from '../../models';
 
-export const useSendCurrentRequest = () => {
+export const useSendCurrentRequest = (editor: SenseEditor | null) => {
   const {
     services: { history, settings, notifications, trackUiMetric, http, autocompleteInfo, storage },
     theme$,
@@ -30,9 +30,8 @@ export const useSendCurrentRequest = () => {
 
   return useCallback(async () => {
     try {
-      const editor = registry.getInputEditor();
       const variables = storage.get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
-      let requests = await editor.getRequestsInRange();
+      let requests = await editor!.getRequestsInRange();
       requests = replaceVariables(requests, variables);
       if (!requests.length) {
         notifications.toasts.add(
@@ -47,7 +46,7 @@ export const useSendCurrentRequest = () => {
       dispatch({ type: 'sendRequest', payload: undefined });
 
       // Fire and forget
-      setTimeout(() => track(requests, editor, trackUiMetric), 0);
+      //setTimeout(() => track(requests, editor!, trackUiMetric), 0);
 
       const results = await sendRequest({ http, requests });
 
@@ -142,5 +141,6 @@ export const useSendCurrentRequest = () => {
     history,
     theme$,
     autocompleteInfo,
+    editor,
   ]);
 };

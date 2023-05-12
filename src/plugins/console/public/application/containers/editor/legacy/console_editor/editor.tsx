@@ -80,11 +80,11 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequest = useSendCurrentRequest();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
+  const sendCurrentRequest = useSendCurrentRequest(editorInstanceRef.current);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
   useUIAceKeyboardMode(textArea);

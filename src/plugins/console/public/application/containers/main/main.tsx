@@ -54,6 +54,7 @@ export function Main() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showVariables, setShowVariables] = useState(false);
+  const [showRedesign, setShowRedesign] = useState(false);
 
   const [editorInstance, setEditorInstance] = useState<SenseEditor | null>(null);
 
@@ -97,6 +98,7 @@ export function Main() {
                   onClickSettings: () => setShowSettings(true),
                   onClickHelp: () => setShowHelp(!showHelp),
                   onClickVariables: () => setShowVariables(!showVariables),
+                  onClickRedesign: () => setShowRedesign(!showRedesign),
                 })}
               />
             </EuiFlexItem>
@@ -120,7 +122,11 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} setEditorInstance={setEditorInstance} />
+          <Editor
+            loading={!done}
+            setEditorInstance={setEditorInstance}
+            showRedesign={showRedesign}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

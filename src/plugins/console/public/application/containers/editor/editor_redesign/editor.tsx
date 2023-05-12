@@ -15,6 +15,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
   EuiPopover,
   EuiSelect,
@@ -23,8 +24,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { JsonEditor, OnJsonEditorUpdateHandler } from '@kbn/es-ui-shared-plugin/public';
-import { useServicesContext } from '../../../contexts';
-import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
+import { useSendCurrentRequest } from '../../../hooks/use_send_current_request';
+import { SenseEditor } from '../../../models';
 
 interface Request {
   method: 'get' | 'post' | 'put';
@@ -32,6 +33,11 @@ interface Request {
   body: any;
 }
 export const Editor = () => {
+  const editor = {
+    getRequestsInRange: () => {
+      return [{ url: request.url, method: request.method, data: [JSON.stringify(request.body)] }];
+    },
+  };
   const [request, setRequest] = useState<Request>({
     method: 'get',
     url: '_search',
@@ -67,19 +73,8 @@ export const Editor = () => {
     prefix: 'console-editor-request-actions',
   });
 
-  const {
-    services: { http },
-  } = useServicesContext();
+  const sendCurrentRequst = useSendCurrentRequest(editor as unknown as SenseEditor);
 
-  const sendRequestButtonHandler = async () => {
-    const results = await sendRequest({
-      http,
-      requests: [
-        { url: request.url, method: request.method, data: [JSON.stringify(request.body)] },
-      ],
-    });
-    console.log({ results });
-  };
   const requestActions = [
     <EuiContextMenuItem key="copy-as-curl" onClick={closePopover}>
       Copy as cURL
@@ -92,75 +87,78 @@ export const Editor = () => {
     </EuiContextMenuItem>,
   ];
   return (
-    <div style={{ width: '100%' }}>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiFormRow label="Method">
-            <EuiSelect
-              id="console-editor-method-input"
-              options={methods}
-              value={request.method}
-              onChange={(e) => {
-                setRequest((prevRequest) => {
-                  return { ...prevRequest, method: e.target.value as Request['method'] };
-                });
-              }}
-              aria-label="Use aria labels when no actual label is in use"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow label="URL" fullWidth>
-            <EuiFieldText
-              fullWidth
-              value={request.url}
-              onChange={(e) => {
-                setRequest((prevRequest) => {
-                  return { ...prevRequest, url: e.target.value };
-                });
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace display="center">
-            <EuiButton iconType="play" onClick={sendRequestButtonHandler}>
-              Send
-            </EuiButton>
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace display="center">
-            <EuiPopover
-              id={requestActionsButtonId}
-              button={
-                <EuiButtonIcon
-                  display="base"
-                  size="m"
-                  iconType="boxesVertical"
-                  aria-label="More"
-                  onClick={onButtonClick}
-                />
-              }
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenuPanel size="s" items={requestActions} />
-            </EuiPopover>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <JsonEditor
-        label="Request body"
-        onUpdate={updateBody}
-        defaultValue={request.body}
-        codeEditorProps={{
-          height: '300px',
-        }}
-      />
-    </div>
+    <>
+      <EuiForm style={{ width: '100%' }} component="form">
+        <EuiSpacer />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiFormRow label="Method">
+              <EuiSelect
+                id="console-editor-method-input"
+                options={methods}
+                value={request.method}
+                onChange={(e) => {
+                  setRequest((prevRequest) => {
+                    return { ...prevRequest, method: e.target.value as Request['method'] };
+                  });
+                }}
+                aria-label="Use aria labels when no actual label is in use"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow label="URL" fullWidth>
+              <EuiFieldText
+                fullWidth
+                value={request.url}
+                onChange={(e) => {
+                  setRequest((prevRequest) => {
+                    return { ...prevRequest, url: e.target.value };
+                  });
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace display="center">
+              <EuiButton iconType="play" onClick={sendCurrentRequst}>
+                Send
+              </EuiButton>
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace display="center">
+              <EuiPopover
+                id={requestActionsButtonId}
+                button={
+                  <EuiButtonIcon
+                    display="base"
+                    size="m"
+                    iconType="boxesVertical"
+                    aria-label="More"
+                    onClick={onButtonClick}
+                  />
+                }
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenuPanel size="s" items={requestActions} />
+              </EuiPopover>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <JsonEditor
+          label="Request body"
+          onUpdate={updateBody}
+          defaultValue={request.body}
+          codeEditorProps={{
+            height: '300px',
+          }}
+        />
+      </EuiForm>
+    </>
   );
 };

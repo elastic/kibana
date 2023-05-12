@@ -13,7 +13,8 @@ import { EuiProgress } from '@elastic/eui';
 import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { EditorOutput } from './legacy/console_editor';
-import { Editor as EditorUI } from './editor_redesign';
+import { Editor as EditorUIRedesign } from './editor_redesign';
+import { Editor as EditorUI } from './legacy';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
 import type { SenseEditor } from '../../models';
@@ -24,9 +25,10 @@ const PANEL_MIN_WIDTH = '100px';
 interface Props {
   loading: boolean;
   setEditorInstance: (instance: SenseEditor) => void;
+  showRedesign: boolean;
 }
 
-export const Editor = memo(({ loading, setEditorInstance }: Props) => {
+export const Editor = memo(({ loading, setEditorInstance, showRedesign }: Props) => {
   const {
     services: { storage },
   } = useServicesContext();
@@ -58,6 +60,13 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
 
   if (!currentTextObject) return null;
 
+  const renderEditor = () => {
+    return showRedesign ? (
+      <EditorUIRedesign />
+    ) : (
+      <EditorUI initialTextValue={currentTextObject.text} setEditorInstance={setEditorInstance} />
+    );
+  };
   return (
     <>
       {requestInFlight || fetchingMappings ? (
@@ -70,14 +79,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={firstPanelWidth}
         >
-          {loading ? (
-            <EditorContentSpinner />
-          ) : (
-            <EditorUI
-            // initialTextValue={currentTextObject.text}
-            // setEditorInstance={setEditorInstance}
-            />
-          )}
+          {loading ? <EditorContentSpinner /> : renderEditor()}
         </Panel>
         <Panel
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
