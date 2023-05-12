@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ConfigKey, HTTPFields } from '../../../../../common/runtime_types';
 import { tlsFormatters } from '../tls/formatters';
-import { HTTPFields, ConfigKey } from '../../runtime_types/monitor_management';
 
 import { Formatter, commonFormatters } from '../common/formatters';
 import {

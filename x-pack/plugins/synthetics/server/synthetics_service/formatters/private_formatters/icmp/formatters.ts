@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ConfigKey, ICMPFields } from '../../../../../common/runtime_types';
 import { secondsToCronFormatter } from '../formatting_utils';
-import { ICMPFields, ConfigKey } from '../../runtime_types/monitor_management';
 
 import { Formatter, commonFormatters } from '../common/formatters';
 import { stringToJsonFormatter } from '../formatting_utils';

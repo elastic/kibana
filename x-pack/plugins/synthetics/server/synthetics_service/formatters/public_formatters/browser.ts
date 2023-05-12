@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { browserFormatters as basicBrowserFormatters } from '../../../common/formatters/browser/formatters';
+import {
+  arrayToJsonFormatter,
+  objectToJsonFormatter,
+  stringToJsonFormatter,
+} from '../private_formatters/formatting_utils';
+import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 import { Formatter, commonFormatters } from './common';
-import { BrowserFields, ConfigKey } from '../../../common/runtime_types/monitor_management';
-import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../common/constants/monitor_defaults';
 import { tlsFormatters } from './tls';
 import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './formatting_utils';
 
@@ -34,7 +38,21 @@ const throttlingFormatter: Formatter = (fields) => {
 };
 
 export const browserFormatters: BrowserFormatMap = {
-  ...basicBrowserFormatters,
+  [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
+  [ConfigKey.SCREENSHOTS]: null,
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
+  [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,
+  [ConfigKey.PORT]: stringToJsonFormatter,
+  [ConfigKey.URLS]: stringToJsonFormatter,
+  [ConfigKey.METADATA]: objectToJsonFormatter,
+  [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
+  [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
+  [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
+  [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
+  ...commonFormatters,
+  ...tlsFormatters,
   [ConfigKey.METADATA]: objectFormatter,
   [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,

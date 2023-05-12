@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { TCPFields, ConfigKey } from '../../runtime_types/monitor_management';
-
-import { Formatter, commonFormatters } from '../common/formatters';
-import { objectToJsonFormatter } from '../formatting_utils';
-import { tlsFormatters } from '../tls/formatters';
-import { stringToJsonFormatter } from '../formatting_utils';
+import { ConfigKey, TCPFields } from '../../../../common/runtime_types';
+import {
+  objectToJsonFormatter,
+  stringToJsonFormatter,
+} from '../private_formatters/formatting_utils';
+import { Formatter, commonFormatters } from './common';
+import { tlsFormatters } from './tls';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
-
 export const tcpFormatters: TCPFormatMap = {
+  ...tlsFormatters,
+  ...commonFormatters,
   [ConfigKey.METADATA]: objectToJsonFormatter,
   [ConfigKey.HOSTS]: stringToJsonFormatter,
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: null,
@@ -28,4 +30,5 @@ export const tcpFormatters: TCPFormatMap = {
   [ConfigKey.IPV6]: null,
   ...tlsFormatters,
   ...commonFormatters,
+  [ConfigKey.METADATA]: null,
 };

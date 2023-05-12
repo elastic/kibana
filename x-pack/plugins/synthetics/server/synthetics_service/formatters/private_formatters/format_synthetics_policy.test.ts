@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, DataStream } from '../runtime_types';
+import { ConfigKey, DataStream } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
-import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants/monitor_defaults';
+import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
 
 const gParams = { proxyUrl: 'https://proxy.com' };
 describe('formatSyntheticsPolicy', () => {

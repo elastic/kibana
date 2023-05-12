@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../../runtime_types';
-import { throttlingFormatter } from './formatters';
+import { ConfigKey } from '../../../../common/runtime_types';
+import { throttlingFormatter } from '../private_formatters/browser/formatters';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {

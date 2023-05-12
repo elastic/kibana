@@ -9,8 +9,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { stringifyString } from '../../../common/formatters/formatting_utils';
-import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   ConfigKey,
   HeartbeatConfig,
@@ -19,6 +18,7 @@ import {
   SourceType,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;

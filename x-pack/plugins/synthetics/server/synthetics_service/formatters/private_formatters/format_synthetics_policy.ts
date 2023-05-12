@@ -7,11 +7,11 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
+import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
+import { ConfigKey, DataStream, MonitorFields } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser/formatters';
-import { LegacyConfigKey } from '../constants/monitor_management';
 import { replaceStringWithParams } from './formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
-import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
 
 export const PARAMS_KEYS_TO_SKIP = [
   'secrets',

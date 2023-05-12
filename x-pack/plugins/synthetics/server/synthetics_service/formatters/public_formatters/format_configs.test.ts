@@ -11,6 +11,8 @@ import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from './format_configs';
+
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   ConfigKey,
   DataStream,
@@ -20,8 +22,7 @@ import {
   ScheduleUnit,
   SyntheticsMonitor,
   VerificationMode,
-} from '../../../common/runtime_types';
-import { loggerMock } from '@kbn/logging-mocks';
+} from '../../../../common/runtime_types';
 
 const testHTTPConfig: Partial<MonitorFields> = {
   type: 'http' as DataStream,

@@ -5,13 +5,34 @@
  * 2.0.
  */
 
-import { CommonFields, ConfigKey, SourceType } from '../../runtime_types/monitor_management';
-import { arrayToJsonFormatter, stringToJsonFormatter, FormatterFn } from '../formatting_utils';
+import { secondsToCronFormatter } from '../private_formatters/common/formatters';
+import {
+  arrayToJsonFormatter,
+  stringToJsonFormatter,
+} from '../private_formatters/formatting_utils';
+import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
+import {
+  CommonFields,
+  ConfigKey,
+  MonitorFields,
+  SourceType,
+} from '../../../../common/runtime_types';
 
-export type Formatter = null | FormatterFn;
+export type FormattedValue =
+  | boolean
+  | number
+  | string
+  | string[]
+  | Record<string, unknown>
+  | null
+  | Function;
 
-export type CommonFormatMap = Record<keyof CommonFields | ConfigKey.NAME, Formatter>;
+export type Formatter =
+  | null
+  | ((fields: Partial<MonitorFields>, key: ConfigKey) => FormattedValue)
+  | Function;
 
+export type CommonFormatMap = Record<keyof CommonFields, Formatter>;
 export const commonFormatters: CommonFormatMap = {
   [ConfigKey.APM_SERVICE_NAME]: stringToJsonFormatter,
   [ConfigKey.NAME]: stringToJsonFormatter,
@@ -20,7 +41,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.ENABLED]: null,
   [ConfigKey.ALERT_CONFIG]: null,
   [ConfigKey.CONFIG_ID]: null,
-  [ConfigKey.NAMESPACE]: stringToJsonFormatter,
+  [ConfigKey.NAMESPACE]: null,
   [ConfigKey.REVISION]: null,
   [ConfigKey.MONITOR_SOURCE_TYPE]: null,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
@@ -39,6 +60,8 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
+  [ConfigKey.PARAMS]: stringToObjectFormatter,
+  [ConfigKey.SCHEDULE]: (fields) =>
+    `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
+  [ConfigKey.TAGS]: arrayFormatter,
 };
-
-export const secondsToCronFormatter = (value: string = '') => (value ? `${value}s` : null);

@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BrowserFields, ConfigKey } from '../../runtime_types/monitor_management';
 
+import { DEFAULT_THROTTLING_VALUE } from '../../../../../common/constants/monitor_defaults';
 import { Formatter, commonFormatters } from '../common/formatters';
 import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
 } from '../formatting_utils';
-import { DEFAULT_THROTTLING_VALUE } from '../../constants/monitor_defaults';
 
 import { tlsFormatters } from '../tls/formatters';
+import { BrowserFields, ConfigKey } from '../../../../../common/runtime_types';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 

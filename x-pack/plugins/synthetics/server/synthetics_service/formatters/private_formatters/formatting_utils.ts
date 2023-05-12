@@ -6,9 +6,9 @@
  */
 
 import { Logger } from '@kbn/logging';
+import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
 import { replaceVarsWithParams, ParsedVars } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
-import { ConfigKey, MonitorFields } from '../runtime_types';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
 

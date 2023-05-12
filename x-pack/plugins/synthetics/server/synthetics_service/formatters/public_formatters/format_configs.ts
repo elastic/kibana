@@ -7,17 +7,17 @@
 
 import { isEmpty, isNil, omitBy } from 'lodash';
 import { Logger } from '@kbn/logging';
-import { PARAMS_KEYS_TO_SKIP } from '../../../common/formatters/format_synthetics_policy';
-import { replaceStringWithParams } from '../../../common/formatters/formatting_utils';
 import {
   BrowserFields,
   ConfigKey,
+  HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
-  HeartbeatConfig,
   TLSFields,
-} from '../../../common/runtime_types';
+} from '../../../../common/runtime_types';
 import { formatters } from '.';
+import { PARAMS_KEYS_TO_SKIP } from '../private_formatters/format_synthetics_policy';
+import { replaceStringWithParams } from '../private_formatters/formatting_utils';
 
 const UI_KEYS_TO_SKIP = [
   ConfigKey.JOURNEY_ID,
