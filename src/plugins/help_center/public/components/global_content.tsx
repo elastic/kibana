@@ -8,7 +8,15 @@
 
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexItem, EuiText, EuiPanel, EuiFlexGroup, EuiButton, EuiImage } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiText,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiButton,
+  EuiImage,
+  EuiSpacer,
+} from '@elastic/eui';
 import { HelpCenterContext } from './help_center_header_nav_button';
 
 export const GlobalContent = () => {
@@ -30,8 +38,11 @@ export const GlobalContent = () => {
               `}
             >
               <EuiFlexItem grow={2}>
-                <EuiText>
+                <EuiText size="xs">
                   <h2>{text}</h2>
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiText>
                   <p>{description}</p>
                   <EuiButton target="_blank" color="primary" fill href={href}>
                     Get started!

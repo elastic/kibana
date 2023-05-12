@@ -22,9 +22,10 @@ export const Contact = () => {
               hasBorder={true}
               id={`contact_card_${i}`}
               layout={'horizontal'}
-              icon={<EuiIcon size="xl" type={contact.iconType ?? 'discuss'} />}
+              icon={<EuiIcon size="l" type={contact.iconType ?? 'discuss'} />}
               title={contact.title ?? ''}
               target="_blank"
+              paddingSize="s"
               href={contact.href}
               titleSize="xs"
             />
