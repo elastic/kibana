@@ -1037,6 +1037,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/test/security_solution_ftr/page_objects/timeline @elastic/security-threat-hunting-investigations
 /x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/ @elastic/security-threat-hunting-investigations
 /x-pack/test/api_integration/apis/security_solution/timeline_* @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/common/components/alerts_treemap @elastic/security-threat-hunting-investigations
 
 ## Security Solution sub teams - Threat Hunting Explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
