@@ -54,7 +54,7 @@ import { pickupUpdatedMappings } from './pickup_updated_mappings';
 export type { OpenPitResponse, OpenPitParams } from './open_pit';
 export { openPit } from './open_pit';
 
-export type { ReadWithPit, ReadWithPitParams } from './read_with_pit';
+export type { ReadWithPit, ReadWithPitParams, EsResponseTooLargeError } from './read_with_pit';
 export { readWithPit } from './read_with_pit';
 
 export type { ClosePitParams } from './close_pit';
@@ -108,6 +108,7 @@ export {
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
 import { ClusterShardLimitExceeded } from './create_index';
+import { EsResponseTooLargeError } from './read_with_pit';
 
 export type {
   CheckForUnknownDocsParams,
@@ -175,6 +176,7 @@ export interface ActionErrorTypeMap {
   index_not_green_timeout: IndexNotGreenTimeout;
   index_not_yellow_timeout: IndexNotYellowTimeout;
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
+  es_response_too_large: EsResponseTooLargeError;
 }
 
 /**

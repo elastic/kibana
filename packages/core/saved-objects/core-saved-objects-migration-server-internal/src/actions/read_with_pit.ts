@@ -9,6 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
@@ -34,6 +35,10 @@ export interface ReadWithPitParams {
   seqNoPrimaryTerm?: boolean;
 }
 
+export interface EsResponseTooLargeError {
+  type: 'es_response_too_large';
+}
+
 /*
  * Requests documents from the index using PIT mechanism.
  * */
@@ -45,7 +50,10 @@ export const readWithPit =
     batchSize,
     searchAfter,
     seqNoPrimaryTerm,
-  }: ReadWithPitParams): TaskEither.TaskEither<RetryableEsClientError, ReadWithPit> =>
+  }: ReadWithPitParams): TaskEither.TaskEither<
+    RetryableEsClientError | EsResponseTooLargeError,
+    ReadWithPit
+  > =>
   () => {
     return client
       .search<SavedObjectsRawDoc>({
@@ -92,6 +100,18 @@ export const readWithPit =
           lastHitSortValue: undefined,
           totalHits,
         });
+      })
+      .catch((e) => {
+        if (
+          e instanceof EsErrors.RequestAbortedError &&
+          e.message.match(/The content length \(\d+\) is bigger than the maximum/) != null
+        ) {
+          return Either.left({
+            type: 'es_response_too_large' as const,
+          });
+        } else {
+          throw e;
+        }
       })
       .catch(catchRetryableEsClientErrors);
   };

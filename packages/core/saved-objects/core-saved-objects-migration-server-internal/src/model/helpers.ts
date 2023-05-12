@@ -17,6 +17,7 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
+import { OutdatedDocumentsSearchRead } from '../state';
 
 /** @internal */
 export type Aliases = Partial<Record<string, string>>;
@@ -285,3 +286,11 @@ export function getMigrationType({
  */
 export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): string =>
   `${indexPrefix}_${kibanaVersion}_reindex_temp`;
+
+/** Increase batchSize by 20% until a maximum of defaultBatchSize */
+export const increaseBatchSize = (stateP: OutdatedDocumentsSearchRead) => {
+  const increasedBatchSize = stateP.batchSize * 1.2;
+  return increasedBatchSize > stateP.defaultBatchSize
+    ? stateP.defaultBatchSize
+    : increasedBatchSize;
+};

@@ -43,6 +43,7 @@ import {
   versionMigrationCompleted,
   buildRemoveAliasActions,
   MigrationType,
+  increaseBatchSize,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -875,7 +876,25 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      throwBadResponse(stateP, res);
+      const left = res.left;
+      if (isTypeof(left, 'es_response_too_large')) {
+        return {
+          ...stateP,
+          batchSize: stateP.batchSize / 2,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'warning',
+              message: `Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half to ${
+                stateP.batchSize / 2
+              }.`,
+            },
+          ],
+        };
+      } else {
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -1175,11 +1194,31 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // and can proceed to the next step
         return {
           ...stateP,
+          // We succeeded in reading this batch, so increase the default batch
+          // size up to the default
+          batchSize: increaseBatchSize(stateP),
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
         };
       }
     } else {
-      throwBadResponse(stateP, res);
+      const left = res.left;
+      if (isTypeof(left, 'es_response_too_large')) {
+        return {
+          ...stateP,
+          batchSize: stateP.batchSize / 2,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'warning',
+              message:
+                'Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half.',
+            },
+          ],
+        };
+      } else {
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
