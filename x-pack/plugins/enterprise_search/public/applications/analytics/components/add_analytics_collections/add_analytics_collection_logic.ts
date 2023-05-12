@@ -13,11 +13,7 @@ import { HttpError, Status } from '../../../../../common/types/api';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import {
-  flashAPIErrors,
-  FlashMessagesLogic,
-  flashSuccessToast,
-} from '../../../shared/flash_messages';
+import { FlashMessagesLogic, flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   AddAnalyticsCollectionsAPILogic,
@@ -73,24 +69,33 @@ export const AddAnalyticsCollectionLogic = kea<
   listeners: ({ values, actions }) => ({
     apiError: async (error) => {
       if (values.isSystemError) {
-        if (error?.body?.message) {
-          FlashMessagesLogic.actions.setFlashMessages([
-            {
-              description: error.body.message,
-              message: i18n.translate(
-                'xpack.enterpriseSearch.analytics.collectionsCreate.action.systemErrorMessage',
-                {
-                  defaultMessage: 'Sorry, there was an error creating your collection.',
-                }
-              ),
-              type: 'error',
-            },
-          ]);
-        } else {
-          flashAPIErrors(error);
-        }
+        FlashMessagesLogic.actions.setFlashMessages([
+          {
+            description: i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsCreate.action.checkKibanaLogsMessage',
+              {
+                defaultMessage: 'Check Kibana Server logs for details.',
+              }
+            ),
+            message: i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsCreate.action.systemErrorMessage',
+              {
+                defaultMessage: 'Sorry, there was an error creating your collection.',
+              }
+            ),
+            type: 'error',
+          },
+        ]);
       } else {
-        actions.setInputError(error?.body?.message || null);
+        actions.setInputError(
+          error?.body?.message ||
+            i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsCreate.action.somethingWentWrong',
+              {
+                defaultMessage: 'Something went wrong',
+              }
+            )
+        );
       }
     },
     apiSuccess: async ({ name }) => {
