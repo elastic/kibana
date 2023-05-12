@@ -159,6 +159,7 @@ export const useColumns = ({
     }
     return cols;
   });
+
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
   const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
@@ -169,13 +170,19 @@ export const useColumns = ({
   );
 
   useEffect(() => {
-    // if defaultColumns have changed, populate again
+    // if defaultColumns have changed,
+    // get the latest columns provided by client and
     if (didDefaultColumnChange) {
       defaultColumnsRef.current = defaultColumns;
-      setColumns(storageAlertsTable.current.columns);
+      let cols = storageAlertsTable.current.columns;
+      // before restoring from storage, enrich the column data
+      if (initialBrowserFields && defaultColumns) {
+        cols = populateColumns(cols, initialBrowserFields, defaultColumns);
+      }
+      setColumns(cols);
       return;
     }
-  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
+  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns, initialBrowserFields]);
 
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
