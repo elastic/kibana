@@ -7,11 +7,16 @@
 
 import { APM_INDICES } from '../../../constants';
 import { Asset } from '../../../../common/types_api';
-import { CollectorOptions } from '.';
+import { CollectorOptions, QUERY_MAX_SIZE } from '.';
+import { withSpan } from './helpers';
 
 const MISSING_KEY = '__unknown__';
 
-export async function collectServices({ client, from }: CollectorOptions): Promise<Asset[]> {
+export async function collectServices({
+  client,
+  from,
+  transaction,
+}: CollectorOptions): Promise<Asset[]> {
   const dsl = {
     index: APM_INDICES,
     size: 0,
@@ -44,7 +49,7 @@ export async function collectServices({ client, from }: CollectorOptions): Promi
     aggs: {
       service_environment: {
         multi_terms: {
-          size: 100,
+          size: QUERY_MAX_SIZE,
           terms: [
             {
               field: 'service.name',
@@ -58,7 +63,7 @@ export async function collectServices({ client, from }: CollectorOptions): Promi
         aggs: {
           container_host: {
             multi_terms: {
-              size: 100,
+              size: QUERY_MAX_SIZE,
               terms: [
                 { field: 'container.id', missing: MISSING_KEY },
                 { field: 'host.hostname', missing: MISSING_KEY },
@@ -71,40 +76,43 @@ export async function collectServices({ client, from }: CollectorOptions): Promi
   };
 
   const esResponse = await client.search(dsl);
-  const serviceEnvironment = esResponse.aggregations?.service_environment as { buckets: any[] };
 
-  const services = (serviceEnvironment?.buckets ?? []).reduce<Asset[]>((acc: Asset[], hit: any) => {
-    const [serviceName, environment] = hit.key;
-    const containerHosts = hit.container_host.buckets;
+  const services = withSpan({ transaction, name: 'processing_response' }, () => {
+    const serviceEnvironment = esResponse.aggregations?.service_environment as { buckets: any[] };
 
-    const service: Asset = {
-      '@timestamp': new Date().toISOString(),
-      'asset.kind': 'service',
-      'asset.id': serviceName,
-      'asset.ean': `service:${serviceName}`,
-      'asset.references': [],
-      'asset.parents': [],
-    };
+    return (serviceEnvironment?.buckets ?? []).reduce<Asset[]>((acc: Asset[], hit: any) => {
+      const [serviceName, environment] = hit.key;
+      const containerHosts = hit.container_host.buckets;
 
-    if (environment !== MISSING_KEY) {
-      service['service.environment'] = environment;
-    }
+      const service: Asset = {
+        '@timestamp': new Date().toISOString(),
+        'asset.kind': 'service',
+        'asset.id': serviceName,
+        'asset.ean': `service:${serviceName}`,
+        'asset.references': [],
+        'asset.parents': [],
+      };
 
-    containerHosts.forEach((nestedHit: any) => {
-      const [containerId, hostname] = nestedHit.key;
-      if (containerId !== MISSING_KEY) {
-        (service['asset.parents'] as string[]).push(`container:${containerId}`);
+      if (environment !== MISSING_KEY) {
+        service['service.environment'] = environment;
       }
 
-      if (hostname !== MISSING_KEY) {
-        (service['asset.references'] as string[]).push(`host:${hostname}`);
-      }
-    });
+      containerHosts.forEach((nestedHit: any) => {
+        const [containerId, hostname] = nestedHit.key;
+        if (containerId !== MISSING_KEY) {
+          (service['asset.parents'] as string[]).push(`container:${containerId}`);
+        }
 
-    acc.push(service);
+        if (hostname !== MISSING_KEY) {
+          (service['asset.references'] as string[]).push(`host:${hostname}`);
+        }
+      });
 
-    return acc;
-  }, []);
+      acc.push(service);
+
+      return acc;
+    }, []);
+  });
 
   return services;
 }
