@@ -15,6 +15,7 @@ import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-pl
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -56,13 +57,22 @@ const defaultFiltersUpdated = (
 };
 
 // Respond to user changing the refresh settings
-const defaultOnRefreshChange = (queryService: QueryStart) => {
+const defaultOnRefreshChange = (
+  queryService: QueryStart,
+  onRefreshChange?: (payload: OnRefreshChangeProps) => void
+) => {
   const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
       value: options.refreshInterval,
       pause: options.isPaused,
     });
+    if (onRefreshChange) {
+      onRefreshChange({
+        refreshInterval: options.refreshInterval,
+        isPaused: options.isPaused,
+      });
+    }
   };
 };
 
@@ -218,9 +228,10 @@ export function createSearchBar({
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-            onRefreshChange={defaultOnRefreshChange(data.query)}
+            onRefreshChange={defaultOnRefreshChange(data.query, props.onRefreshChange)}
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
             onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
