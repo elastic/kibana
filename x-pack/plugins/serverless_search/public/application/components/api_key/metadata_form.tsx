@@ -58,6 +58,7 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({ metadata, onChangeMe
       <EuiSpacer />
       <CodeEditorField
         allowFullScreen
+        fullWidth
         height="600px"
         languageId="json"
         isCopyable

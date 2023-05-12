@@ -61,6 +61,7 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
       <EuiSpacer />
       <CodeEditorField
         allowFullScreen
+        fullWidth
         height="600px"
         languageId="json"
         isCopyable
