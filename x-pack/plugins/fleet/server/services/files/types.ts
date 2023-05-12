@@ -9,6 +9,13 @@ import type { Readable } from 'stream';
 
 import type { FileStatus } from '@kbn/shared-ux-file-types';
 
+/**
+ * The type of file.
+ * Use `from-host` when interacting with files that were sent to ES from the
+ * host (via Fleet-Server)
+ * Use `to-host` when interacting with files that are being sent to the host
+ * (via fleet-server)
+ */
 export type FleetFileType = 'from-host' | 'to-host';
 
 export interface FleetFileClientInterface {

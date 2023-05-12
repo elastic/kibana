@@ -230,13 +230,7 @@ export interface FleetStartContract {
   createFilesClient: (
     /** The integration package name */
     packageName: string,
-    /**
-     * Type of file.
-     * Use `from-host` when interacting with files that were sent to ES from the
-     * host (via Fleet-Server)
-     * Use `to-host` when interacting with files that are being sent to the host
-     * (via fleet-server)
-     */
+    /** Type of file */
     type: FleetFileType,
     /** Max size for files created when `type` is `to-host` */
     maxSizeBytes?: number
