@@ -41,6 +41,24 @@ function findFile(paths: string[]) {
   return availablePath || paths[0];
 }
 
+export const buildDataPaths = (): string[] => {
+  const configDataPath = getConfigFromFiles([getConfigPath()]).path?.data;
+  const argv = process.argv.slice(2);
+  const options = getopts(argv, {
+    string: ['pathData'],
+    alias: {
+      pathData: 'path.data',
+    },
+  });
+
+  return [
+    !!options.pathData && join(REPO_ROOT, options.pathData),
+    configDataPath && join(REPO_ROOT, configDataPath),
+    join(REPO_ROOT, 'data'),
+    '/var/lib/kibana',
+  ].filter(isString);
+};
+
 /**
  * Get the path of kibana.yml
  * @internal
@@ -53,26 +71,11 @@ export const getConfigPath = () => findFile(CONFIG_PATHS);
  */
 export const getConfigDirectory = () => findFile(CONFIG_DIRECTORIES);
 
-const configDataPath = getConfigFromFiles([getConfigPath()]).path?.data;
-const argv = process.argv.slice(2);
-const options = getopts(argv, {
-  alias: {
-    pathData: 'path.data',
-  },
-});
-
-const DATA_PATHS = [
-  options.pathData && join(REPO_ROOT, options.pathData),
-  configDataPath && join(REPO_ROOT, configDataPath),
-  join(REPO_ROOT, 'data'),
-  '/var/lib/kibana',
-].filter(isString);
-
 /**
  * Get the directory containing runtime data
  * @internal
  */
-export const getDataPath = () => findFile(DATA_PATHS);
+export const getDataPath = () => findFile(buildDataPaths());
 
 /**
  * Get the directory containing logs
