@@ -852,6 +852,195 @@ FROM employees
     },
     {
       label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentation.lengthFunction',
+        {
+          defaultMessage: 'LENGTH',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.lengthFunction.markdown',
+            {
+              defaultMessage: `### LENGTH
+Returns the character length of a string.
+
+\`\`\`
+FROM employees
+| PROJECT first_name, last_name, height
+| EVAL fn_length = LENGTH(first_name)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvAvgFunction',
+        {
+          defaultMessage: 'MV_AVG',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvAvgFunction.markdown',
+            {
+              defaultMessage: `### MV_AVG
+Converts a multivalued field into a single valued field containing the average of all of the values. For example:
+
+\`\`\`
+ROW a=[3, 5, 1, 6]
+| EVAL avg_a = MV_AVG(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[3, 5, 1, 6] | 3.75
+\`\`\`
+
+NOTE: The output type is always a double and the input type can be any number.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvMaxFunction',
+        {
+          defaultMessage: 'MV_MAX',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvMaxFunction.markdown',
+            {
+              defaultMessage: `### MV_MAX
+Converts a multivalued field into a single valued field containing the maximum value. For example:
+
+\`\`\`
+ROW a=[3, 5, 1]
+| EVAL max_a = MV_MAX(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[3, 5, 1] | 5
+\`\`\`
+
+It can be used by any field type, including \`keyword\` fields. In that case picks the last string, comparing their utf-8 representation byte by byte:
+
+\`\`\`
+ROW a=["foo", "zoo", "bar"]
+| EVAL max_a = MV_MAX(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["foo", "zoo", "bar"] | "zoo"
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvMinFunction',
+        {
+          defaultMessage: 'MV_MIN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvMinFunction.markdown',
+            {
+              defaultMessage: `### MV_MIN
+Converts a multivalued field into a single valued field containing the minimum value. For example:
+
+\`\`\`
+ROW a=[2, 1]
+| EVAL min_a = MV_MIN(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[2, 1] | 1
+\`\`\`
+
+It can be used by any field type, including \`keyword\` fields. In that case picks the last string, comparing their utf-8 representation byte by byte:
+
+\`\`\`
+ROW a=["foo", "bar"]
+| EVAL min_a = MV_MIN(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["foo", "bar"] | "bar"
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvSumFunction',
+        {
+          defaultMessage: 'MV_SUM',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvSumFunction.markdown',
+            {
+              defaultMessage: `### MV_SUM
+Converts a multivalued field into a single valued field containing the sum of all of the values. For example:
+\`\`\`
+ROW a=[3, 5, 6]
+| EVAL sum_a = MV_SUM(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[3, 5, 6] | 14
+\`\`\`
+
+NOTE: The input type can be any number and the output type is the same as the input type.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'unifiedSearch.query.textBasedLanguagesEditor.documentation.powFunction',
         {
           defaultMessage: 'POW',
@@ -897,6 +1086,41 @@ FROM employees
 | PROJECT first_name, last_name, height
 | EVAL height = ROUND(height * 3.281, 1)
 \`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentation.splitFunction',
+        {
+          defaultMessage: 'SPLIT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.splitFunction.markdown',
+            {
+              defaultMessage: `### SPLIT
+Splits a single valued string into multiple strings. For example:
+
+\`\`\`
+ROW words="foo;bar;baz;qux;quux;corge"
+| EVAL word = SPLIT(words, ";")
+\`\`\`
+
+Which splits \`"foo;bar;baz;qux;quux;corge"\` on \`;\` and returns an array:
+
+\`\`\`
+foo;bar;baz;qux;quux;corge | [foo,bar,baz,qux,quux,corge]
+\`\`\`
+
+NOTE: Only single byte delimiters are currently supported.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
