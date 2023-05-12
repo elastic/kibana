@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IntegrationsStaticConfig } from '../../../common/integrations';
 import { IntegrationsClient } from './integrations_client';
 import {
   IntegrationsServiceStartDeps,
@@ -14,7 +13,7 @@ import {
 } from './types';
 
 export class IntegrationsService {
-  constructor(private readonly config: IntegrationsStaticConfig) {}
+  constructor() {}
 
   public setup(): IntegrationsServiceSetup {}
 

@@ -9,15 +9,22 @@ import React, { useState } from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { DataStream } from '../../common/integrations';
 import { DataStreamSelector } from '../components/data_stream_selector';
-import { useDataView } from '../utils/internal_state_container_context';
+import { InternalStateProvider, useDataView } from '../utils/internal_state_container_context';
+import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
+import {
+  ObservabilityLogsPluginProvider,
+  ObservabilityLogsPluginProviderProps,
+} from '../hooks/use_kibana';
 
-interface Props {
+interface CustomDataStreamSelectorProps {
   stateContainer: DiscoverStateContainer;
 }
 
-export function CustomDataStreamSelector({ stateContainer }: Props) {
+export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
+  const { integrations } = useIntegrationsContext();
+  console.log({ integrations });
 
   const handleStreamSelection = (dataStream: DataStream) => {
     return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream);
@@ -41,7 +48,10 @@ export function CustomDataStreamSelector({ stateContainer }: Props) {
       onUncategorizedClick={() => console.log('fetch uncategorized streams')}
     />
   );
-}
+});
+
+// eslint-disable-next-line import/no-default-export
+export default CustomDataStreamSelector;
 
 const mockUncategorized = [{ name: 'metrics-*' }, { name: 'logs-*' }];
 
@@ -84,3 +94,25 @@ const mockIntegrations = [
     ],
   },
 ];
+
+export type CustomDataStreamSelectorBuilderProps = ObservabilityLogsPluginProviderProps &
+  CustomDataStreamSelectorProps;
+
+function withProviders(Component: React.FunctionComponent<CustomDataStreamSelectorProps>) {
+  return function ComponentWithProviders({
+    core,
+    plugins,
+    pluginStart,
+    stateContainer,
+  }: CustomDataStreamSelectorBuilderProps) {
+    return (
+      <ObservabilityLogsPluginProvider core={core} plugins={plugins} pluginStart={pluginStart}>
+        <InternalStateProvider value={stateContainer.internalState}>
+          <IntegrationsProvider integrationsClient={pluginStart.integrationsService.client}>
+            <Component stateContainer={stateContainer} />
+          </IntegrationsProvider>
+        </InternalStateProvider>
+      </ObservabilityLogsPluginProvider>
+    );
+  };
+}

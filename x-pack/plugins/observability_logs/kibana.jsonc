@@ -8,7 +8,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "observability_logs"],
-    "requiredPlugins": ["discover", "fleet","kibanaUtils"],
+    "requiredPlugins": ["discover", "fleet", "kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],
     "requiredBundles": []
   }

@@ -7,6 +7,7 @@
 
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { actions, createMachine } from 'xstate';
+import { IIntegrationsClient } from '../../../services/integrations';
 import {
   DefaultIntegrationsContext,
   IntegrationsContext,
@@ -17,13 +18,13 @@ import {
 const defaultContext = {
   integrations: [],
   error: null,
-  page: 0,
+  page: [],
 };
 
 export const createPureIntegrationsStateMachine = (
   initialContext: DefaultIntegrationsContext = defaultContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAJgDsnMrICc8hbIBs0zgBZ5ADgA0IAJ4yAzCrLT5KgKybO92Z2cHNmgL5eTaTDj4xKRk9ES4EDRQrAAyAPIAggAiyAByAOIA+gDKAKoAwvkAokVJpVy8SCCCwqKo4lIIBioGZBb20va6mgYWnJ7yuibmCAoWZOqauhadKppdBl0+fhhYeHXkYRFRsYkpGZkAYgnIMeU84jUiwQ0y3bpknCrSuk-NHbYWw4gWv2SaFm6PUW80MKmWIH8ayCJE24UiqCgAFkiNgwLtkmksnlCiUykkKpchNcxFVGrILJobLpdB0LB4DINZC9vgh7M42jN6Z1NIZ2rJ7BCoYENqF4VEUWiMfsssdTudKgJiXVbggALT2R6aAWfAxyeyGZz2VlOKm2XRyTqyWSvAVC1Yi4LkWBgXDYADGAAsosL1k7pVicgViqUFUTajcyYgKWaaXSGUyWWYZG4yB4tFpXtpAep7QE-bCyC63V6fQ6C6QAwc5WcCRcqlcVVH1UoprTdB4ZgL5IMPKy1VM2pxGczBp4LQZZHnoaKthA2AAlIrxZKZNIAFSK6QXCXXyDiqWyhIbysjoEaBgMD0ZlM4WhenkvrN01rIKhmk+0Bk4L0W08dhZzmwK5JJkSJxEua6pJu267vuh7HkqEakue0aeBMfQ0umBrfsayYIPSVKvA40i2Ko9jtAY-4VnCERsNkRQJAu+QABJQTBO57geR71khJL1M2sh6soBp2BS8g4f0rKZm+pE0taLzvlM8jUTCIRzlEhy4AQ9CLsuezsVunHwTxirVKeKGSHcHb-D0t5ZjML7SV0abaBaqiKb+Pi+CAqBEPO8BVL6amBXxTaoeq342GReiXvqPZ4SMaqdNIabDuo5rjtIk6qaKVA0NcDDMJA4b8aqchWI8iwqNa758hYsistI1iuKoKgOFerhXrouVOmK2yIqV4VWQgpGMo8lrSACTj6L00mUv8cntBR8ieM4vWAeKiKSmAQ1niNaqqG+FpZgKz4WPIbSGDaNq-O0nDtBtITFh63qIsFGx7ZZjRqg10XqLFerdhJTWKMoepyLSnXDjST20fOEBfQJEVOLIZDdCO3SAg9tLSeNpFzIYjIqN0hgqT5H19RpiJaTpJUnshyMjVN7U2HZFEs-YDjSRa6NyS+zK6Ep+jeV4QA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAJlmcyAFgCsAZiVrZa6QHY1ATk66ANCACeMgGxlOVjfq27ZKlbOkBfD2bSYc+YlIyeiJcCBooVgAZAHkAQQARZAA5AHEAfQBlAFUAYVyAUQKE4q5eJBBBYVFUcSkEAA4lBrIVY107dV0VBs5pM0sEaTayK2lODSUlCd1VYy8fDCw8GvIQsIjo+KS09IAxOOQo0p5xKpFAupklaSUyWSVuqwMrTgU1PoHEd0UVaQaetIrPZdN1VAsQL5lgESGtQuFUFAALJEbBgLaJFIZHL5IolBJlM5CC5iCr1FwGMhqFQvQzqexWFRWL4ILR3KyyBryUEGaS8gwPCFQ-yrYLwiIotEYnYZA5HE7lATEmpXBAAWhUdyM9hUuissw0bQMLOaalsPQmmlkBhpvKFSxFgThYTYACUCrFEukUgAVAqpV1xH3IGLJTKEirnFVkxANam2a167TuQEqFnWykNYb6BoGBr6Oa6e1+FZOsUuiDS9JImLu73JP0BoMhsMRpXVS4xoZA+56Pq9Xqgy3pzgqVqMrPSNQ6B4NAHF6Gi9YQNiZApxV25AAS9cbgeDofDp0jys7oHq+tkVKBnC5b0MALTFkQY3uBmn+asWZ5fQXjth5YIlAey4AQ9Buh62y7v6+4tkeiqVKepLnjID5kFyqgKNIU7yF+LJTtIZCzOoLjOO42HUl43ggKgRArvAFTCqWsJEh2yGSIgapyLoREAg8jKaLezgNCyXG8lSeazLotzPO4Ux-sxQRUDQFwMMwkCsSStRdthub3EoChclYUyzMyz7quMZq8h8n63jSKgKTCQTLhEmnRih3ZqDxQJcnqdj6Lysj4VOyg2hocZTACHQOdRTFOc6QGSmAblnhx6q6JSuh8UoAk2cJLI6HcsgcsMbjTJqzyOUu8IaSebHaR5rhXhyzRNBonAGI8QXmUCdycBMNI+cCxlKFVZYuYiIFgbV7ZaaqvWUmyfycnqbQiT1-xvuorhvO405vFRHhAA */
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
       context: initialContext,
@@ -68,27 +69,12 @@ export const createPureIntegrationsStateMachine = (
             },
           },
         },
-        searchingIntegrations: {
-          invoke: {
-            src: 'searchIntegrations',
-          },
-          on: {
-            LOADING_SUCCEEDED: {
-              target: 'loaded',
-              actions: 'storeIntegrations',
-            },
-            LOADING_FAILED: {
-              target: 'loadingFailed',
-              actions: 'storeError',
-            },
-          },
-        },
         loaded: {
           entry: 'notifyLoadingSucceeded',
           on: {
             RELOAD_INTEGRATIONS: 'loading',
             LOAD_MORE_INTEGRATIONS: 'loadingMore',
-            SEARCH_INTEGRATIONS: 'searchingIntegrations',
+            SEARCH_INTEGRATIONS: 'loading',
           },
         },
         loadingFailed: {
@@ -111,21 +97,21 @@ export const createPureIntegrationsStateMachine = (
   );
 
 export interface IntegrationsStateMachineDependencies {
-  initialContext: IntegrationsContext;
-  logViews: IIntegrationsClient;
+  initialContext?: IntegrationsContext;
+  integrationsClient: IIntegrationsClient;
 }
 
 export const createIntegrationStateMachine = ({
   initialContext,
-  integrations,
+  integrationsClient,
 }: IntegrationsStateMachineDependencies) =>
   createPureIntegrationsStateMachine(initialContext).withConfig({
     actions: {},
     services: {
-      loadIntegrations: (context) =>
+      loadIntegrations: (_context, event) =>
         from(
-          'logViewReference' in context
-            ? integrations.getIntegrations()
+          'search' in event
+            ? integrationsClient.findIntegrations(event.search)
             : throwError(() => new Error('Failed to load integrations'))
         ).pipe(
           map(
