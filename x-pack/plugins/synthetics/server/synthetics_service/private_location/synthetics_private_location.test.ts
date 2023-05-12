@@ -107,7 +107,7 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.createMonitors(
+      await syntheticsPrivateLocation.createPackagePolicies(
         [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
