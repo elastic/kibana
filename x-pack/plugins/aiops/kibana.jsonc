@@ -14,6 +14,7 @@
       "licensing",
       "uiActions",
       "unifiedFieldList",
+      "fileUpload",
     ],
     "requiredBundles": [
       "fieldFormats",

@@ -27,6 +27,7 @@
     "@kbn/es-types",
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
+    "@kbn/file-upload-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
