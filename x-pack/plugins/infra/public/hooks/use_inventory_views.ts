@@ -17,7 +17,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
