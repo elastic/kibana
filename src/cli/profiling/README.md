@@ -87,20 +87,14 @@ Basic algorithm is `getBackgroundlugins()` in `get_background_tasks.js`:
 - find all plugins ultimately dependent on taskManager
 - find all the required plugins of those plugins
 
-This resulted in 83 of 172 plugins being marked as "background task only"
+This resulted in 109 of 172 plugins being marked as "background task only".
 
-For the second point - how would we prevent the code from being loaded -
-there are some points in the plugin service that will bypass loading
-plugins, if they aren't enabled, if pre-reqs aren't available, etc.  So
-that's how we could arrange to **NOT** load some plugins.  Modules and
-"packages" are another story though.   Hopefully starting with the
-"roots" that we need (only plugins that we want to load), only the
-modules and "packages" we'd need would also be loaded.
-
-This could potentially save some time in the setup / start phases,
-but that's only 2 seconds out of the 13, so not going to be much bang
-for the buck in that approach.  Still, if we want to shave every,
-millisecond off, we'll want to do that.
+Once we know what plugins we should disable, there's a place in the plugin
+setup that allows us to do that.  The result is that `setup()` finishes
+in 8.0s instead of 8.3s, which is good.  However, there's still the
+two second wait for migration before `start()`, so in the end, 
+background tasks still end up finishing `start()` after a normal
+Kibana start.  More work required ...
 
 I generated some graphs of the 
 [dependencies of all plugins together](./plugin-deps-graphviz.md)
@@ -137,7 +131,10 @@ type- / code-sharing package would be needed as well.
 
 There's another obvious split.  No plugin needs routes for background tasks,
 so plugins with routes should split them into separate plugins, so they
-don't need to be loaded.  
+don't need to be loaded.  In addition, at least some of the code adding
+routes is fairly slow.  There's a point in core that registers about 10
+routes that takes around 250ms to run.  In addition, the http server is
+actually still running!
 
 ### marking plugins declaratively
 

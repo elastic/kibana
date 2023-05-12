@@ -32,6 +32,7 @@ import type { PluginDependencies } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
+import { getBackgroundPlugins } from './plugins_background';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -322,14 +323,24 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     const pluginDump: any[] = [];
-    for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
+    for (const [pluginName, { plugin }] of pluginEnableStatuses) {
       pluginDump.push({
         pluginName,
         optionalPlugins: plugin.optionalPlugins,
         requiredPlugins: plugin.requiredPlugins,
       });
     }
+    // all plugins
     this.log.info(JSON.stringify(pluginDump));
+
+    if (isBackgroundTaskOnly) {
+      const backgroundPlugins = getBackgroundPlugins(plugins);
+      this.log.info(`starting ${backgroundPlugins.size} background plugin out of ${plugins.length}`);
+      for (const plugin of plugins) {
+        if (backgroundPlugins.has(plugin.name)) continue;
+        pluginEnableStatuses.set(plugin.name, { plugin, isEnabled: false });
+      }
+    }
 
     // Add the plugins to the Plugin System if enabled and its dependencies are met
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
