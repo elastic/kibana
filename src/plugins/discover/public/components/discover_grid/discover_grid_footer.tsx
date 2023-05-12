@@ -53,10 +53,7 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
             >
               <FormattedMessage
                 id="discover.gridSampleSize.fetchMoreLinkLabel"
-                defaultMessage="Load {sampleSize} more"
-                values={{
-                  sampleSize,
-                }}
+                defaultMessage="Load more"
               />
             </EuiButtonEmpty>
           </>

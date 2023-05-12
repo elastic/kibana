@@ -9,6 +9,13 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { updateSearchSource } from './update_search_source';
 import { dataViewMock } from '../../__mocks__/data_view';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+
+const uiSettingWithAscSorting = coreMock.createStart().uiSettings;
+jest
+  .spyOn(uiSettingWithAscSorting, 'get')
+  .mockImplementation((key) => (key === SORT_DEFAULT_ORDER_SETTING ? 'asc' : null));
 
 describe('updateSearchSource', () => {
   const defaults = {
@@ -18,7 +25,14 @@ describe('updateSearchSource', () => {
 
   it('updates a given search source', async () => {
     const searchSource = createSearchSourceMock({});
-    updateSearchSource(searchSource, dataViewMock, [] as SortOrder[], false, defaults);
+    updateSearchSource(
+      searchSource,
+      dataViewMock,
+      [] as SortOrder[],
+      false,
+      defaults,
+      uiSettingWithAscSorting
+    );
     expect(searchSource.getField('fields')).toBe(undefined);
     // does not explicitly request fieldsFromSource when not using fields API
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
@@ -26,7 +40,14 @@ describe('updateSearchSource', () => {
 
   it('updates a given search source with the usage of the new fields api', async () => {
     const searchSource = createSearchSourceMock({});
-    updateSearchSource(searchSource, dataViewMock, [] as SortOrder[], true, defaults);
+    updateSearchSource(
+      searchSource,
+      dataViewMock,
+      [] as SortOrder[],
+      true,
+      defaults,
+      uiSettingWithAscSorting
+    );
     expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
   });

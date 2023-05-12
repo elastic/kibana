@@ -8,33 +8,49 @@
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from './get_sort_for_search_source';
 import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
+import { coreMock } from '@kbn/core/public/mocks';
+import { SORT_DEFAULT_ORDER_SETTING } from '../..';
 
 describe('getSortForSearchSource function', function () {
+  const core = coreMock.createStart();
+  const uiSettings = core.uiSettings;
+
+  const uiSettingWithAscSorting = coreMock.createStart().uiSettings;
+  jest
+    .spyOn(uiSettingWithAscSorting, 'get')
+    .mockImplementation((key) => (key === SORT_DEFAULT_ORDER_SETTING ? 'asc' : null));
+
   test('should be a function', function () {
     expect(typeof getSortForSearchSource === 'function').toBeTruthy();
   });
 
   test('should return an object to use for searchSource when columns are given', function () {
     const cols = [['bytes', 'desc']] as SortOrder[];
-    expect(getSortForSearchSource(cols, stubDataView)).toEqual([{ bytes: 'desc' }]);
-    expect(getSortForSearchSource(cols, stubDataView, 'asc')).toEqual([{ bytes: 'desc' }]);
-
-    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField)).toEqual([{ bytes: 'desc' }]);
-    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField, 'asc')).toEqual([
+    expect(getSortForSearchSource(cols, stubDataView, uiSettings)).toEqual([{ bytes: 'desc' }]);
+    expect(getSortForSearchSource(cols, stubDataView, uiSettingWithAscSorting)).toEqual([
       { bytes: 'desc' },
     ]);
+
+    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField, uiSettings)).toEqual([
+      { bytes: 'desc' },
+    ]);
+    expect(
+      getSortForSearchSource(cols, stubDataViewWithoutTimeField, uiSettingWithAscSorting)
+    ).toEqual([{ bytes: 'desc' }]);
   });
 
   test('should return an object to use for searchSource when no columns are given', function () {
     const cols = [] as SortOrder[];
-    expect(getSortForSearchSource(cols, stubDataView)).toEqual([{ _doc: 'desc' }]);
-    expect(getSortForSearchSource(cols, stubDataView, 'asc')).toEqual([{ _doc: 'asc' }]);
+    expect(getSortForSearchSource(cols, stubDataView, uiSettings)).toEqual([{ _doc: 'desc' }]);
+    expect(getSortForSearchSource(cols, stubDataView, uiSettingWithAscSorting)).toEqual([
+      { _doc: 'asc' },
+    ]);
 
-    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField)).toEqual([
+    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField, uiSettings)).toEqual([
       { _score: 'desc' },
     ]);
-    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField, 'asc')).toEqual([
-      { _score: 'asc' },
-    ]);
+    expect(
+      getSortForSearchSource(cols, stubDataViewWithoutTimeField, uiSettingWithAscSorting)
+    ).toEqual([{ _score: 'asc' }]);
   });
 });

@@ -13,8 +13,8 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getSort } from './get_sort';
 import {
   getESQuerySortForTimeField,
-  getESQuerySortForTieBreaker,
-  getTieBreakerField,
+  // getESQuerySortForTieBreaker,
+  // getTieBreakerField,
 } from './get_es_query_sort';
 import { SORT_DEFAULT_ORDER_SETTING } from '../..';
 
@@ -55,16 +55,16 @@ export function getSortForSearchSource(
     return sortPair as EsQuerySortValue;
   });
 
-  // TODO: do we need to a tie breaker like this?
-  if (dataView.isTimeBased() && sortPairs.length) {
-    const firstSortPair = sortPairs[0];
-    const firstPairSortDir = Array.isArray(firstSortPair)
-      ? firstSortPair[1]
-      : Object.values(firstSortPair)[0];
-    sortForSearchSource.push(
-      getESQuerySortForTieBreaker(getTieBreakerField(dataView, uiSettings), firstPairSortDir)
-    );
-  }
+  // TODO: do we need to have a tie breaker like this?
+  // if (dataView.isTimeBased() && sortPairs.length) {
+  //   const firstSortPair = sortPairs[0];
+  //   const firstPairSortDir = Array.isArray(firstSortPair)
+  //     ? firstSortPair[1]
+  //     : Object.values(firstSortPair)[0];
+  //   sortForSearchSource.push(
+  //     getESQuerySortForTieBreaker(getTieBreakerField(dataView, uiSettings), firstPairSortDir)
+  //   );
+  // }
 
   return sortForSearchSource;
 }
