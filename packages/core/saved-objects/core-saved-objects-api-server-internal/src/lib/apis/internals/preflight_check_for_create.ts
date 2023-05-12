@@ -21,7 +21,7 @@ import {
   getObjectKey,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { findLegacyUrlAliases } from '../../legacy_url_aliases';
+import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import { left, right, isLeft, isRight, rawDocExistsInNamespaces, type Either } from '../utils';
