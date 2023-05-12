@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "@kbn/ambient-ftr-types"]
+    "rootDirs": [".", "../test"],
+    "types": ["node", "@kbn/ambient-ftr-types"],
   },
   "include": [
     "**/*",
@@ -16,6 +17,7 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
+    { "path": "../test/tsconfig.json" },
     "@kbn/expect",
     "@kbn/test",
   ]
