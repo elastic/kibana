@@ -13,6 +13,8 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
         fieldName="attrName"
         fieldType="keyword"
         idPrefix="idPrefix"
+        isAggregatable={false}
+        isSearchable={false}
         moreMaxHeight="none"
         overflowIndexStart={1}
         values={
