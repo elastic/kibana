@@ -90,6 +90,7 @@ export default async () => {
         },
         cliArgs: {
           oss: false,
+          watch: true,
         },
       },
     },
@@ -132,12 +133,7 @@ export default async () => {
   const runOptions = await cypress.cli.parseRunArguments(process.argv.slice(2));
   console.log('runOptions', runOptions);
   return cypress
-    .run(
-      deepMerge(runOptions, {
-        ...runOptions,
-        commonCypressConfig,
-      })
-    )
+    .run(deepMerge(runOptions, commonCypressConfig))
     .then((results) => {
       process.exit();
     })
