@@ -18,7 +18,10 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
-import { getUpdateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import {
+  getCreateRulesSchemaMock,
+  getUpdateRulesSchemaMock,
+} from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
 jest.mock('../../../../../machine_learning/authz');
@@ -178,6 +181,55 @@ describe('Update rule route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+    });
+  });
+  describe('rule containing response actions', () => {
+    test('is successful', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [
+            {
+              action_type_id: '.endpoint',
+              params: {
+                command: 'isolate',
+                comment: '',
+              },
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+    });
+
+    test('fails when isolate rbac is set to false', async () => {
+      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
+        canIsolateHost: jest.fn().mockReturnValue(false),
+      }));
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [
+            {
+              action_type_id: '.endpoint',
+              params: {
+                command: 'isolate',
+                comment: '',
+              },
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(401);
     });
   });
 });

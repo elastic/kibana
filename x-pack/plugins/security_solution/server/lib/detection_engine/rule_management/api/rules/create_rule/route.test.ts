@@ -176,4 +176,53 @@ describe('Create rule route', () => {
       expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
     });
   });
+  describe('rule containing response actions', () => {
+    test('is successful', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [
+            {
+              action_type_id: '.endpoint',
+              params: {
+                command: 'isolate',
+                comment: '',
+              },
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+    });
+
+    test('fails when isolate rbac is set to false', async () => {
+      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
+        canIsolateHost: jest.fn().mockReturnValue(false),
+      }));
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [
+            {
+              action_type_id: '.endpoint',
+              params: {
+                command: 'isolate',
+                comment: '',
+              },
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(401);
+    });
+  });
 });

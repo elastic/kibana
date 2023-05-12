@@ -17,6 +17,7 @@ export const createMockConfig = (): ConfigType => {
     // remove property below once `execute` FF is enabled or removed
     'responseActionExecuteEnabled',
     'responseActionUploadEnabled',
+    'endpointResponseActionsEnabled',
   ];
 
   return {
