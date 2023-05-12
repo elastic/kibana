@@ -51,15 +51,15 @@ const getTabBreadCrumb = (tabId: string) => {
 };
 
 export const EngineConnect: React.FC = () => {
-  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
+  const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
   const { connectTabId = SearchApplicationConnectTabs.API } = useParams<{
     connectTabId?: string;
   }>();
   const onTabClick = (tab: SearchApplicationConnectTabs) => () => {
     KibanaLogic.values.navigateToUrl(
       generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
-        engineName,
         connectTabId: tab,
+        engineName,
       })
     );
   };
@@ -76,6 +76,7 @@ export const EngineConnect: React.FC = () => {
           rightSideItems: [],
         }}
         engineName={engineName}
+        hasSchemaConflicts={hasSchemaConflicts}
       >
         <EngineError notFound />
       </EnterpriseSearchEnginesPageTemplate>
@@ -101,6 +102,7 @@ export const EngineConnect: React.FC = () => {
         ],
       }}
       engineName={engineName}
+      hasSchemaConflicts={hasSchemaConflicts}
     >
       {connectTabId === SearchApplicationConnectTabs.API && <SearchApplicationAPI />}
     </EnterpriseSearchEnginesPageTemplate>

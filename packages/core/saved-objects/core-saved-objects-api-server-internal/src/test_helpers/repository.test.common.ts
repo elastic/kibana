@@ -333,7 +333,9 @@ export const createType = (
   hidden: false,
   namespaceType: 'single',
   mappings: {
-    properties: mappings.properties[type].properties! as SavedObjectsMappingProperties,
+    properties: (mappings.properties[type]
+      ? mappings.properties[type].properties!
+      : {}) as SavedObjectsMappingProperties,
   },
   migrations: { '1.1.1': (doc) => doc },
   ...parts,
