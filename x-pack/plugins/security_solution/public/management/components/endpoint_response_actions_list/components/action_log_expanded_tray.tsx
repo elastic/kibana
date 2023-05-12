@@ -161,7 +161,11 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
         <EuiFlexGroup direction="column" data-test-subj={getTestId('uploadDetails')}>
           <p>{OUTPUT_MESSAGES.wasSuccessful(command)}</p>
 
-          <EndpointUploadActionResult action={action} data-test-subj={getTestId('uploadOutput')} />
+          <EndpointUploadActionResult
+            action={action}
+            data-test-subj={getTestId('uploadOutput')}
+            textSize="xs"
+          />
         </EuiFlexGroup>
       );
     }
