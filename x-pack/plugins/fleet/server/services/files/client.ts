@@ -25,9 +25,18 @@ import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common'
 
 import { FleetFileNotFound, FleetFilesClientError } from '../../errors';
 
-import type { FleetFile, FleetFileClientInterface, FleetFileType } from './types';
-import type { HapiReadableStream } from './types';
-import type { FleetFileUpdatableFields } from './types';
+import type {
+  FleetFile,
+  FleetFileClientInterface,
+  FleetFileType,
+  HapiReadableStream,
+  FleetFileUpdatableFields,
+} from './types';
+
+interface FileCustomMeta {
+  target_agents: string[];
+  action_id: string;
+}
 
 /**
  * Public interface for interacting with Files stored in Fleet indexes. Service is consumed via
@@ -81,7 +90,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
 
     assert(agentIds.length > 0, new FleetFilesClientError('Missing agentIds!'));
 
-    const uploadedFile = await this.esFileClient.create<FleetFileUpdatableFields>({
+    const uploadedFile = await this.esFileClient.create<FileCustomMeta>({
       id: uuidV4(),
       metadata: {
         name: fileStream.hapi.filename ?? 'unknown_file_name',
@@ -111,16 +120,17 @@ export class FleetFilesClient implements FleetFileClientInterface {
   ): Promise<FleetFile> {
     this.ensureTypeIsToHost();
 
-    const file = await this.esFileClient.get<FleetFileUpdatableFields>({
+    const file = await this.esFileClient.get<FileCustomMeta>({
       id: fileId,
     });
 
-    await file.update({
-      meta: {
-        ...(file.data.meta ?? { action_id: '', target_agents: [] }),
-        ...updates,
-      },
-    });
+    const { agents, actionId } = updates;
+    const meta: FileCustomMeta = {
+      target_agents: agents ?? file.data.meta?.target_agents ?? [],
+      action_id: actionId ?? file.data.meta?.action_id ?? '',
+    };
+
+    await file.update({ meta });
 
     return this.get(fileId);
   }

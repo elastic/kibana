@@ -26,7 +26,7 @@ export interface FleetFileClientInterface {
   delete(fileId: string): Promise<void>;
 
   /** Updates metadata for the file. Only applicable when type of file is `to-host`. */
-  update(fileId: string, updates: {}): Promise<FleetFile>;
+  update(fileId: string, updates: Partial<FleetFileUpdatableFields>): Promise<FleetFile>;
 
   /** Checks if a file has chunks */
   doesFileHaveData(fileId: string): Promise<boolean>;
@@ -60,6 +60,6 @@ export interface HapiReadableStream extends Readable {
 }
 
 export interface FleetFileUpdatableFields {
-  target_agents: string[];
-  action_id: string;
+  agents: string[];
+  actionId: string;
 }
