@@ -1222,9 +1222,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
 
-# Design (at the bottom for specificity of SASS files)
-**/*.scss  @elastic/kibana-design
-
 # Observability design
 /x-pack/plugins/apm/**/*.scss @elastic/observability-design
 /x-pack/plugins/infra/**/*.scss @elastic/observability-design
@@ -1255,12 +1252,5 @@ x-pack/plugins/translations/translations
 ## These rules are always last so they take ultimate priority over everything else
 ####
 
-
 # Design (at the bottom for specificity of SASS files)
-**/*.scss  @elastic/kibana-design
-
-####
-## These rules are always last so they take ultimate priority over everything else
-####
-
 **/*.scss  @elastic/kibana-design
