@@ -834,6 +834,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           lastHitSortValue: res.right.lastHitSortValue,
           progress,
           logs,
+          // We succeeded in reading this batch, so increase the batch size for the next request.
+          batchSize: increaseBatchSize(stateP),
         };
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
@@ -1158,6 +1160,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           lastHitSortValue: res.right.lastHitSortValue,
           progress,
           logs,
+          // We succeeded in reading this batch, so increase the batch size for the next request.
+          batchSize: increaseBatchSize(stateP),
         };
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
@@ -1194,9 +1198,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // and can proceed to the next step
         return {
           ...stateP,
-          // We succeeded in reading this batch, so increase the default batch
-          // size up to the default
-          batchSize: increaseBatchSize(stateP),
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
         };
       }
@@ -1211,8 +1212,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP.logs,
             {
               level: 'warning',
-              message:
-                'Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half.',
+              message: `Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half to ${
+                stateP.batchSize / 2
+              }.`,
             },
           ],
         };
