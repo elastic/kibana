@@ -1004,6 +1004,10 @@ x-pack/test/observability_functional @elastic/actionable-observability
 # Security Solution
 /x-pack/test/accessibility/apps/security_solution.ts @elastic/security-solution
 /x-pack/test/api_integration_basic/apis/security_solution @elastic/security-solution
+
+## The explore team is one of the main contributors to this module, so they own it for now
+/x-pack/plugins/security_solution/server/search_strategy @elastic/security-threat-hunting-explore
+
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
