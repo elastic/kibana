@@ -705,3 +705,7 @@ export const DiscoverGrid = ({
     </DiscoverGridContext.Provider>
   );
 };
+
+// enable lazy loading
+// eslint-disable-next-line import/no-default-export
+export default DiscoverGrid;

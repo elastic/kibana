@@ -72,6 +72,7 @@ import {
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
+import { useDiscoverGrid } from './exports/discover_grid';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -156,6 +157,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
+  useDiscoverGrid: () => ReturnType<typeof useDiscoverGrid>;
 }
 
 /**
@@ -392,8 +394,20 @@ export class DiscoverPlugin
 
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
+    const services = buildServices(
+      core,
+      plugins,
+      this.initializerContext,
+      this.locator!,
+      this.contextLocator!,
+      this.singleDocLocator!
+    );
+
     return {
       locator: this.locator,
+      useDiscoverGrid: () => {
+        return useDiscoverGrid(services);
+      },
     };
   }
 

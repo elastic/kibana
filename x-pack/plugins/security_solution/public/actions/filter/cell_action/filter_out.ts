@@ -11,7 +11,6 @@ import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types';
-import { isTimelineScope } from '../../../helpers';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
 
@@ -33,15 +32,12 @@ export const createFilterOutCellActionFactory = ({
     execute: async ({ field, metadata }) => {
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterIn with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterIn : addFilterOut;
+      const timeline = getTimelineById(store.getState(), TimelineId.active);
 
-      if (metadata?.scopeId && isTimelineScope(metadata.scopeId)) {
-        const timelineFilterManager = getTimelineById(
-          store.getState(),
-          TimelineId.active
-        )?.filterManager;
-
+      if (timeline.show) {
+        // if the timeline is open, we add the filter directly to the timeline
         addFilter({
-          filterManager: timelineFilterManager,
+          filterManager: timeline.filterManager,
           fieldName: field.name,
           value: field.value,
         });

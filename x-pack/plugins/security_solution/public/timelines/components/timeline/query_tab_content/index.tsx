@@ -22,8 +22,10 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
-import { FilterManager } from '@kbn/data-plugin/public';
+import { FilterManager, flattenHit } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-plugin/public/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
@@ -65,6 +67,8 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
+import { SecurityCellActionsTrigger } from '../../../../actions/constants';
+
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
   width: 100%;
@@ -87,6 +91,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
   flex: 1;
+  margin-top: 10px;
 
   .euiFlyoutBody__overflow {
     overflow: hidden;
@@ -97,6 +102,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     padding: 0;
     height: 100%;
     display: flex;
+    flex-direction: column;
   }
 `;
 
@@ -203,9 +209,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
+    sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { uiSettings } = useKibana().services;
+  const {
+    uiSettings,
+    discover: { useDiscoverGrid },
+  } = useKibana().services;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
@@ -265,12 +275,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [combinedQueries, end, loadingSourcerer, start]
   );
 
-  const getTimelineQueryFields = () => {
+  const visibleColumns = useMemo(() => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    const columnFields = columnsHeader.map((c) => c.id);
+    return columnsHeader.map((c) => c.id);
+  }, [columns]);
 
-    return [...columnFields, ...requiredFieldsForActions];
-  };
+  const getTimelineQueryFields = useCallback(() => {
+    return [...visibleColumns, ...requiredFieldsForActions];
+  }, [visibleColumns]);
 
   const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
@@ -339,6 +351,24 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [ACTION_BUTTON_COUNT]
   );
 
+  const DiscoverGrid = useDiscoverGrid();
+
+  const discoverGridRows: DataTableRecord[] = useMemo(
+    () =>
+      events.map(({ _id, _index, ecs }) => {
+        const _source = ecs as unknown as Record<string, unknown>;
+        const hit = { _id, _index: String(_index), _source };
+        return {
+          id: _id,
+          raw: hit,
+          flattened: flattenHit(hit, sourcererDataView, {
+            includeIgnoredValues: true,
+          }),
+        };
+      }),
+    [events, sourcererDataView]
+  );
+
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
@@ -401,7 +431,33 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
               className="timeline-flyout-body"
             >
-              <StatefulBody
+              {sourcererDataView && (
+                <DiscoverGrid
+                  columns={visibleColumns}
+                  dataView={sourcererDataView}
+                  sort={[]}
+                  rows={discoverGridRows}
+                  ariaLabelledBy={''}
+                  isLoading={isQueryLoading}
+                  onAddColumn={function (column: string): void {
+                    throw new Error('Function not implemented.');
+                  }}
+                  onFilter={() => {
+                    console.log('onFilter called');
+                  }}
+                  onRemoveColumn={() => {
+                    console.log('onRemoveColumn called');
+                  }}
+                  onSetColumns={() => {
+                    console.log('onSetColumns called');
+                  }}
+                  sampleSize={0}
+                  showTimeCol={true}
+                  useNewFieldsApi={false}
+                  cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+                />
+              )}
+              {/* <StatefulBody
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
                 data={isBlankTimeline ? EMPTY_EVENTS : events}
@@ -417,10 +473,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 })}
                 leadingControlColumns={leadingControlColumns}
                 trailingControlColumns={trailingControlColumns}
-              />
+              /> */}
             </StyledEuiFlyoutBody>
 
-            <StyledEuiFlyoutFooter
+            {/* <StyledEuiFlyoutFooter
               data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
               className="timeline-flyout-footer"
             >
@@ -440,7 +496,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   totalCount={isBlankTimeline ? 0 : totalCount}
                 />
               )}
-            </StyledEuiFlyoutFooter>
+            </StyledEuiFlyoutFooter> */}
           </EventDetailsWidthProvider>
         </ScrollableFlexItem>
         {showExpandedDetails && (
