@@ -76,6 +76,7 @@ describe('createInitialState', () => {
         "batchSize": 1000,
         "controlState": "INIT",
         "currentAlias": ".kibana_task_manager",
+        "defaultBatchSize": 1000,
         "discardCorruptObjects": false,
         "discardUnknownObjects": false,
         "excludeFromUpgradeFilterHooks": Object {},

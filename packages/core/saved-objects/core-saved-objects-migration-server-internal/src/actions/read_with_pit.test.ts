@@ -52,6 +52,33 @@ describe('readWithPit', () => {
     });
   });
 
+  it('returns left es_response_too_large when client throws RequestAbortedError', async () => {
+    // Create a mock client that rejects all methods with a RequestAbortedError
+    // response.
+    const retryableError = new EsErrors.RequestAbortedError(
+      'The content length (536870889) is bigger than the maximum allow string (536870888)'
+    );
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
+
+    const task = readWithPit({
+      client,
+      pitId: 'pitId',
+      query: { match_all: {} },
+      batchSize: 10_000,
+    });
+    try {
+      await task();
+    } catch (e) {
+      /** ignore */
+    }
+    await expect(task()).resolves.toEqual({
+      _tag: 'Left',
+      left: { type: 'es_response_too_large' },
+    });
+  });
+
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
     // Create a mock client that rejects all methods with a 503 status code
     // response.
