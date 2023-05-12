@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useState } from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiPopover, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 
 import type { AttachmentAction } from '../../client/attachment_framework/types';
 
@@ -106,7 +113,9 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
                     customDataTestSubj={customDataTestSubj}
                   />
                 )) ||
-                  (action.type === AttachmentActionType.CUSTOM && action.render())}
+                  (action.type === AttachmentActionType.CUSTOM && (
+                    <Suspense fallback={<EuiLoadingSpinner />}>{action.render()}</Suspense>
+                  ))}
               </span>
             </EuiFlexItem>
           ))}
