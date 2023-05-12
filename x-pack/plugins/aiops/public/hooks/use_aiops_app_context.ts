@@ -27,6 +27,7 @@ import { type DataView } from '@kbn/data-views-plugin/common';
 import type { FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
@@ -43,6 +44,7 @@ export interface AiopsAppDependencies {
   share: SharePluginStart;
   lens: LensPublicStart;
   fileUpload: FileUploadPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   // deps for unified field stats
   fieldStats?: {
     useFieldStatsTrigger: () => {

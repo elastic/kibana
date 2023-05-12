@@ -16,10 +16,15 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import { cloneDeep, isEqual } from 'lodash';
-import { Field } from '../fields_table';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { Field } from '../../fields_table';
+import { TopValues } from './top_values';
+import { FieldVisStats } from './top_values/field_request_config';
+import { createFields } from './create_fields';
 
 interface Props {
   field: Field;
@@ -30,6 +35,7 @@ interface Props {
   isNewField: boolean;
   updateField: (field: Field) => void;
   addField?: (field: Field) => void;
+  results: FindFileStructureResponse;
 }
 export const FieldPopover: FC<Props> = ({
   field: fieldIn,
@@ -40,15 +46,21 @@ export const FieldPopover: FC<Props> = ({
   updateField,
   addField,
   isNewField,
+  results,
   children,
 }) => {
   const [field, setField] = useState<Field | null>(null);
   const [originalField, setOriginalField] = useState<Field | null>(null);
+  const [fieldStats, setFieldStats] = useState<FieldVisStats | undefined>();
 
   useEffect(() => {
     setOriginalField(cloneDeep(fieldIn));
     setField(fieldIn);
-  }, [fieldIn]);
+
+    const fields = createFields(results);
+    const stats = fields.fields.find((f) => f.fieldName === fieldIn.name)?.stats;
+    setFieldStats(stats);
+  }, [fieldIn, results]);
 
   const onChange = useCallback(
     (newName: string) => {
@@ -98,6 +110,7 @@ export const FieldPopover: FC<Props> = ({
     <EuiPopover
       isOpen={isPopoverOpen === index}
       closePopover={() => closePopover()}
+      id={`field-popover-${index}`}
       anchorPosition="downCenter"
       button={
         <EuiButtonEmpty
@@ -144,6 +157,13 @@ export const FieldPopover: FC<Props> = ({
           />
         </EuiFormRow>
       </EuiForm>
+
+      {isNewField ? null : (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <TopValues stats={fieldStats} barColor="success" />
+        </>
+      )}
     </EuiPopover>
   );
 };

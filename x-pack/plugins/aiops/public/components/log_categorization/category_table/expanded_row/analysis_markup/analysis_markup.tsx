@@ -6,7 +6,7 @@
  */
 
 // import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, useEffect, useState, useCallback } from 'react';
+import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 
 // import {
 //   // EuiSpacer,
@@ -113,7 +113,7 @@ interface Props {
 }
 
 export const AnalysisMarkup: FC<Props> = ({
-  results,
+  results: resultsIn,
   data,
   setGrokPattern,
   createRuntimeField,
@@ -122,9 +122,13 @@ export const AnalysisMarkup: FC<Props> = ({
   // const [showEditFieldModal, setShowEditFieldModal] = useState(false);
   // const [editFieldCache, setEditFieldCache] = useState<any>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState<number | null>(null);
-  const [results2, setResults2] = useState(results);
+  const [results2, setResults2] = useState(resultsIn);
 
-  const originalGrokPattern = results?.grok_pattern ?? '';
+  const originalGrokPattern = useMemo(() => resultsIn?.grok_pattern ?? '', [resultsIn]);
+
+  useEffect(() => {
+    setResults2(resultsIn);
+  }, [resultsIn]);
 
   const updateField = useCallback(
     (field: Field) => {
@@ -304,7 +308,7 @@ export const AnalysisMarkup: FC<Props> = ({
               createRuntimeField(results2.grok_pattern!.replace(/^%{POSINT:timestamp} /g, ''))
             }
           >
-            Create temporary fields
+            Create runtime fields
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem />
@@ -532,6 +536,7 @@ function processLine(
           index={i}
           isNewField={false}
           updateField={updateField}
+          results={results}
         >
           <FieldBadge type={field.type} value={value} />
         </FieldPopover>
@@ -552,6 +557,7 @@ function processLine(
           isNewField={true}
           updateField={updateField}
           addField={addField2}
+          results={results}
         >
           <span
             css={{

@@ -15,6 +15,7 @@
       "uiActions",
       "unifiedFieldList",
       "fileUpload",
+      "dataViews"
     ],
     "requiredBundles": [
       "fieldFormats",

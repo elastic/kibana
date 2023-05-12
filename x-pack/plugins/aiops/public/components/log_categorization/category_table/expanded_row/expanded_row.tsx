@@ -22,8 +22,8 @@ import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import moment from 'moment';
 import { FindFileStructureResponse, InputOverrides } from '@kbn/file-upload-plugin/common';
-import { cloneDeep } from 'lodash';
-import { EuiSpacer } from '@elastic/eui';
+// import { cloneDeep } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import { useAiopsAppContext } from '../../../../hooks/use_aiops_app_context';
 import { Category } from '../../use_categorize_request';
 import { AnalysisMarkup } from './analysis_markup';
@@ -48,12 +48,14 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
   const {
     fileUpload,
     data: { search },
+    // dataViews,
   } = useAiopsAppContext();
 
   const abortCtrl = useRef(new AbortController());
 
   const [data, setData] = useState<string | null>(null);
   const [lines, setLines] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   // const [linesWithTimestamp, setLinesWithTimestamp] = useState<string[]>([]);
 
   const [results, setResults] = useState<FindFileStructureResponse | null>(null);
@@ -68,7 +70,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
         {
           params: {
             index: dataView.getIndexPattern(),
-            size: 1000,
+            size: 1001,
             fields: ['message'],
             query: {
               bool: {
@@ -123,18 +125,26 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
 
       setData(tempLinesWithTimestamp.join('\n'));
 
+      const defaultOverrides: Record<string, string> = {
+        format: 'semi_structured_text',
+        lines_to_sample: '1001',
+      };
+
       const tempOverrides = {
         ...(overrides?.grok_pattern
-          ? { grok_pattern: overrides.grok_pattern, format: 'semi_structured_text' }
-          : { format: 'semi_structured_text' }),
+          ? {
+              grok_pattern: overrides.grok_pattern,
+              ...defaultOverrides,
+            }
+          : defaultOverrides),
       };
 
       const resp = await fileUpload.analyzeFile(tempLinesWithTimestamp.join('\n'), tempOverrides);
       // eslint-disable-next-line no-console
       console.log(resp);
 
-      const tempResults = removeTimestamp(resp.results);
-      setResults(tempResults);
+      // const tempResults = removeTimestamp(resp.results);
+      setResults({ ...resp.results });
     },
     [fileUpload]
   );
@@ -143,67 +153,87 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
   //   return { results: (await fileUpload.analyzeFile(data2, {})).results };
   // };
 
-  const setGrokPattern = async (grokPattern: string) => {
-    runAnalysis(lines, { grok_pattern: grokPattern });
-  };
+  const setGrokPattern = useCallback(
+    async (grokPattern: string) => {
+      runAnalysis(lines, { grok_pattern: grokPattern });
+    },
+    [lines, runAnalysis]
+  );
 
-  const createRuntimeField = async (grokPattern: string) => {
-    if (false) {
-      await createRuntimeField2(grokPattern);
-    } else {
-      await createCompositeRuntimeField(grokPattern);
-    }
-    openInDiscover();
-  };
+  const createRuntimeField2 = useCallback(
+    async (grokPattern: string) => {
+      const dd = getFieldsFromGrokPattern(grokPattern);
+      const escapedGrokPattern = grokPattern.replaceAll('\\', `\\\\`);
 
-  const createRuntimeField2 = async (grokPattern: string) => {
-    const dd = getFieldsFromGrokPattern(grokPattern);
-    const escapedGrokPattern = grokPattern.replaceAll('\\', `\\\\`);
-
-    for (const field of dd) {
-      const script = `Map field = grok('${escapedGrokPattern}').extract(params._source.message);
+      for (const field of dd) {
+        const script = `Map field = grok('${escapedGrokPattern}').extract(params._source.message);
       if (field !== null && field.get('${field.name}') != null){
         emit(field.get('${field.name}'));
       }
       `;
-      const type = grokTypeToRuntimePrimitiveType(field.type);
+        const type = grokTypeToRuntimePrimitiveType(field.type);
 
-      const xx = dataView.addRuntimeField(field.name, {
-        type,
-        script: { source: script },
-      });
+        dataView.addRuntimeField(field.name, {
+          type,
+          script: { source: script },
+        });
+        if (dataView.isPersisted()) {
+          // await dataViews.updateSavedObject(dataView);
+        }
 
-      // console.log(xx);
-    }
-  };
+        // console.log(xx);
+      }
+    },
+    [dataView]
+  );
 
-  const createCompositeRuntimeField = async (grokPattern: string) => {
-    const fieldName = `${selectedField.name}_grok`;
-    const dd = getFieldsFromGrokPattern(grokPattern);
-    const escapedGrokPattern = grokPattern.replaceAll('\\', `\\\\`);
-    const script = `Map fields = grok('${escapedGrokPattern}').extract(params._source.message);
+  const createCompositeRuntimeField = useCallback(
+    async (grokPattern: string) => {
+      const fieldName = `${selectedField.name}_grok`;
+      const dd = getFieldsFromGrokPattern(grokPattern);
+      const escapedGrokPattern = grokPattern.replaceAll('\\', `\\\\`);
+      const script = `Map fields = grok('${escapedGrokPattern}').extract(params._source.message);
     if (fields != null){
       emit(fields);
     }
     `;
-    const fields = dd.reduce<RuntimeFieldSubFields>((acc, { name, type }) => {
-      acc[name] = { type: grokTypeToRuntimePrimitiveType(type) };
-      return acc;
-    }, {});
+      const fields = dd.reduce<RuntimeFieldSubFields>((acc, { name, type }) => {
+        acc[name] = { type: grokTypeToRuntimePrimitiveType(type) };
+        return acc;
+      }, {});
 
-    const xx = dataView.addRuntimeField(fieldName, {
-      type: 'composite',
-      script: { source: script },
-      fields,
-    });
-  };
+      dataView.addRuntimeField(fieldName, {
+        type: 'composite',
+        script: { source: script },
+        fields,
+      });
+      if (dataView.isPersisted()) {
+        // await dataViews.updateSavedObject(dataView);
+      }
+    },
+    [dataView, selectedField.name]
+  );
+
+  const createRuntimeField = useCallback(
+    async (grokPattern: string) => {
+      if (false) {
+        await createRuntimeField2(grokPattern);
+      } else {
+        await createCompositeRuntimeField(grokPattern);
+      }
+      openInDiscover();
+    },
+    [createCompositeRuntimeField, createRuntimeField2, openInDiscover]
+  );
 
   useEffect(() => {
+    setLoading(true);
     getData().then((tempLines) => {
       setLines(tempLines);
       runAnalysis(tempLines).then((resp) => {
         // eslint-disable-next-line no-console
         console.log(resp);
+        setLoading(false);
       });
     });
   }, [fileUpload, getData, runAnalysis, selectedField, timefilterActiveBounds]);
@@ -215,6 +245,20 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
         margin-right: 40px;
       `}
     >
+      {loading && (
+        <>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <EuiLoadingElastic size="xl" />
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+          <EuiSpacer />
+        </>
+      )}
+
       {data !== null && results !== null && (
         <>
           <AnalysisMarkup
@@ -235,14 +279,14 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
   );
 };
 
-function removeTimestamp(originalResults: FindFileStructureResponse) {
-  const results = cloneDeep(originalResults);
-  // if (results.grok_pattern !== undefined) {
-  //   results.grok_pattern = results.grok_pattern.replace(/%{POSINT:timestamp} /g, '');
-  // }
-  // if (results.mappings !== undefined) {
-  //   delete results.mappings.properties['@timestamp'];
-  // }
+// function removeTimestamp(originalResults: FindFileStructureResponse) {
+//   const results = cloneDeep(originalResults);
+//   // if (results.grok_pattern !== undefined) {
+//   //   results.grok_pattern = results.grok_pattern.replace(/%{POSINT:timestamp} /g, '');
+//   // }
+//   // if (results.mappings !== undefined) {
+//   //   delete results.mappings.properties['@timestamp'];
+//   // }
 
-  return results;
-}
+//   return results;
+// }

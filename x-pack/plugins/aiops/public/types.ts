@@ -16,6 +16,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiopsPluginSetupDeps {}
@@ -32,6 +33,7 @@ export interface AiopsPluginStartDeps {
   licensing: LicensingPluginStart;
   executionContext: ExecutionContextStart;
   fileUpload: FileUploadPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /**
