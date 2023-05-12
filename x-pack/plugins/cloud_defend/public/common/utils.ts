@@ -5,6 +5,7 @@
  * 2.0.
  */
 import yaml from 'js-yaml';
+import { uniq } from 'lodash';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { errorBlockActionRequiresTargetFilePath } from '../components/control_general_view/translations';
@@ -209,7 +210,7 @@ export function validateStringValuesForCondition(condition: SelectorCondition, v
     }
   });
 
-  return errors;
+  return uniq(errors);
 }
 
 export function getRestrictedValuesForCondition(
