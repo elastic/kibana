@@ -275,7 +275,7 @@ export const getDataStream = ({
 }: {
   indexName: string;
   stats: IndicesStatsWithDataStream | null;
-}): string => (stats && stats[indexName]?.data_stream) ?? EMPTY_STAT;
+}): string | null => (stats && stats[indexName]?.data_stream) ?? null;
 
 export const getTotalDocsCount = ({
   indexNames,

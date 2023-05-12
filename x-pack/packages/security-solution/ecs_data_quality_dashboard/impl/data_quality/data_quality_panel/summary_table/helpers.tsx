@@ -238,19 +238,22 @@ export const getSummaryTableColumns = ({
   {
     field: 'dataStream',
     name: i18n.DATA_STREAM,
-    render: (_, { dataStream }) => (
-      <EuiLink
-        href={getAppUrl({
-          appId: 'management',
-          path: `data/index_management/data_streams/${dataStream}`,
-        })}
-        external={false}
-        target="_blank"
-        data-test-subj="viewDataStreamLink"
-      >
-        <span data-test-subj="dataStream">{dataStream}</span>
-      </EuiLink>
-    ),
+    render: (_, { dataStream }) =>
+      dataStream ? (
+        <EuiLink
+          href={getAppUrl({
+            appId: 'management',
+            path: `data/index_management/data_streams/${dataStream}`,
+          })}
+          external={false}
+          target="_blank"
+          data-test-subj="viewDataStreamLink"
+        >
+          <span data-test-subj="dataStream">{dataStream}</span>
+        </EuiLink>
+      ) : (
+        <span>{EMPTY_STAT}</span>
+      ),
     sortable: true,
     truncateText: false,
   },

@@ -13,6 +13,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 
 interface DataStream {
   data_stream?: string;
+  template?: string;
 }
 type IndicesStatsIndicesStatsWithDataStream = Record<string, IndicesStatsIndicesStats & DataStream>;
 
@@ -32,10 +33,14 @@ export const fetchStats = async (
   });
 
   const indicesStatsDataStream = dataStreams.reduce<IndicesStatsIndicesStatsWithDataStream>(
-    (acc, { indices: dataStreamIndices, name: dataStreamName }) => {
+    (acc, { indices: dataStreamIndices, name: dataStreamName, template }) => {
       dataStreamIndices.forEach(({ index_name: indexName }) => {
         if (stats?.indices?.[indexName]) {
-          acc[indexName] = { ...stats?.indices?.[indexName], data_stream: dataStreamName };
+          acc[indexName] = {
+            ...stats?.indices?.[indexName],
+            data_stream: dataStreamName,
+            template,
+          };
         }
       });
       return acc;

@@ -9,6 +9,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 
 import { EcsDataQualityDashboardPluginSetup, EcsDataQualityDashboardPluginStart } from './types';
 import {
+  fixIndexMappingRoute,
   getILMExplainRoute,
   getIndexMappingsRoute,
   getIndexStatsRoute,
@@ -35,6 +36,7 @@ export class EcsDataQualityDashboardPlugin
     getUnallowedFieldValuesRoute(router);
     updateUnallowedFieldValuesRoute(router);
     getILMExplainRoute(router);
+    fixIndexMappingRoute(router);
     return {};
   }
 
