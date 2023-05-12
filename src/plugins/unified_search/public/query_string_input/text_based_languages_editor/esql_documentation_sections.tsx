@@ -440,6 +440,7 @@ The following aggregation functions are supported:
 
 * \`AVG\`
 * \`COUNT\`
+* \`COUNT_DISTINCT\`
 * \`MAX\`
 * \`MEDIAN\`
 * \`MEDIAN_ABSOLUTE_DEVIATION\`
