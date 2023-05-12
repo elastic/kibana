@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Case } from '@kbn/cases-plugin/common';
+import { CaseStatuses, CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
 import { flatten } from 'lodash';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline } from './timeline';
@@ -60,6 +61,37 @@ export const getCase1 = (): TestCase => ({
   timeline: getTimeline(),
   reporter: 'elastic',
   owner: 'securitySolution',
+});
+
+export const getCaseResponse = (): Case => ({
+  title: 'This is the title of the case',
+  tags: ['Tag1', 'Tag2'],
+  description: 'This is the case description',
+  created_at: '2023-05-11T06:41:41.479Z',
+  created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
+  owner: 'securitySolution',
+  status: CaseStatuses.open,
+  severity: CaseSeverity.HIGH,
+  assignees: [],
+  settings: {
+    syncAlerts: false,
+  },
+  connector: {
+    id: 'none',
+    name: 'None',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  duration: 0,
+  closed_at: null,
+  closed_by: null,
+  external_service: null,
+  updated_at: null,
+  updated_by: null,
+  id: 'test-case',
+  totalComment: 0,
+  totalAlerts: 0,
+  version: 'test-version',
 });
 
 export const getServiceNowConnector = (): Connector => ({

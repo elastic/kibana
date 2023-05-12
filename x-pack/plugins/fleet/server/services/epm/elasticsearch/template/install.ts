@@ -219,8 +219,44 @@ export async function installComponentAndIndexTemplateForDataStream({
   componentTemplates: TemplateMap;
   indexTemplate: IndexTemplateEntry;
 }) {
+  // update index template first in case TSDS was removed, so that it does not become invalid
+  await updateIndexTemplateIfTsdsDisabled({ esClient, logger, indexTemplate });
+
   await installDataStreamComponentTemplates({ esClient, logger, componentTemplates });
   await installTemplate({ esClient, logger, template: indexTemplate });
+}
+
+async function updateIndexTemplateIfTsdsDisabled({
+  esClient,
+  logger,
+  indexTemplate,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  indexTemplate: IndexTemplateEntry;
+}) {
+  try {
+    const existingIndexTemplate = await esClient.indices.getIndexTemplate({
+      name: indexTemplate.templateName,
+    });
+    if (
+      existingIndexTemplate.index_templates?.[0]?.index_template.template?.settings?.index?.mode ===
+        'time_series' &&
+      indexTemplate.indexTemplate.template.settings.index.mode !== 'time_series'
+    ) {
+      await installTemplate({ esClient, logger, template: indexTemplate });
+    }
+  } catch (e) {
+    if (e.statusCode === 404) {
+      logger.debug(
+        `Index template ${indexTemplate.templateName} does not exist, skipping time_series check`
+      );
+    } else {
+      logger.warn(
+        `Error while trying to install index template before component template: ${e.message}`
+      );
+    }
+  }
 }
 
 function putComponentTemplate(
@@ -519,7 +555,7 @@ export function prepareTemplate({
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     experimentalDataStreamFeature?.features.tsdb;
 
-  const mappings = generateMappings(validFields, { isIndexModeTimeSeries });
+  const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);

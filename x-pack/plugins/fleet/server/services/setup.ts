@@ -122,10 +122,8 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
-  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
-    logger.debug('Setting up Fleet Elasticsearch assets');
-    await ensureFleetGlobalEsAssets(soClient, esClient);
-  }
+  logger.debug('Setting up Fleet Elasticsearch assets');
+  await ensureFleetGlobalEsAssets(soClient, esClient);
 
   await ensureFleetFileUploadIndices(soClient, esClient);
   // Ensure that required packages are always installed even if they're left out of the config
