@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
-import * as i18n from './translations';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -19,12 +18,12 @@ const LoadingChart = styled(EuiLoadingChart)`
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
 
-export const LoadingHistogram = () => {
+export const LoadingHistogram = ({ title }: { title: string }) => {
   return (
     <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
       <EuiFlexGroup gutterSize="none" direction="column">
         <EuiFlexItem grow={1}>
-          <HeaderSection title={i18n.QUERY_GRAPH_HITS_TITLE} titleSize="xs" subtitle={'loading'} />
+          <HeaderSection title={title} titleSize="xs" subtitle={'loading'} />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <LoadingChart size="l" data-test-subj="preview-histogram-loading" />

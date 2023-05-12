@@ -12,7 +12,7 @@ import { useMatrixHistogramCombined } from '../../../../common/containers/matrix
 import { MatrixHistogramType } from '../../../../../common/search_strategy';
 import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
-import { QUERY_PREVIEW_ERROR } from './translations';
+import { QUERY_AD_HOC_RUN_ERROR } from './translations';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 
 interface AdHocRunHistogramParams {
@@ -52,7 +52,7 @@ export const useAdHocRunHistogram = ({
   const matrixHistogramRequest = useMemo(() => {
     return {
       endDate,
-      errorMessage: QUERY_PREVIEW_ERROR,
+      errorMessage: QUERY_AD_HOC_RUN_ERROR,
       filterQuery,
       // TODO: Should this be preview or alerts?
       histogramType: MatrixHistogramType.preview,

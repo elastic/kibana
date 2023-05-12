@@ -14,6 +14,7 @@ import type { AdHocRunResponse } from '../../../../../common/detection_engine/ru
 import { adHocRunRule } from '../../../../detection_engine/rule_management/api/api';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from '../rule_preview/use_preview_invocation_count';
+import { RULE_AD_HOC_ERROR } from './translations';
 
 const emptyPreviewRule: AdHocRunResponse = {
   adHocRunId: undefined,
@@ -75,7 +76,7 @@ export const useAdHocRunner = ({
           }
         } catch (error) {
           if (isSubscribed) {
-            addError(error, { title: 'ERROR' });
+            addError(error, { title: RULE_AD_HOC_ERROR });
           }
         }
         if (isSubscribed) {

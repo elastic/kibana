@@ -37,7 +37,7 @@ export const useAdHocRunnerRoute = ({ rule, timeframeOptions }: AdHocRunnerRoute
     setHasNoiseWarning(true);
   }, [setHasNoiseWarning]);
 
-  const clearPreview = useCallback(() => {
+  const clearAdHocRun = useCallback(() => {
     setLogs([]);
     setIsAborted(false);
     setIsRequestTriggered(false);
@@ -45,14 +45,14 @@ export const useAdHocRunnerRoute = ({ rule, timeframeOptions }: AdHocRunnerRoute
   }, []);
 
   useEffect(() => {
-    clearPreview();
-  }, [clearPreview]);
+    clearAdHocRun();
+  }, [clearAdHocRun]);
 
   return {
     hasNoiseWarning,
     addNoiseWarning,
-    createPreview: () => setIsRequestTriggered(true),
-    clearPreview,
+    createAdHocRun: () => setIsRequestTriggered(true),
+    clearAdHocRun,
     isAdHocRunRequestInProgress: isLoading,
     adHocRunId: response.adHocRunId ?? '',
     executionId: response.executionId ?? '',

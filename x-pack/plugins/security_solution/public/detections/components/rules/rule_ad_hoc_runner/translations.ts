@@ -23,153 +23,62 @@ export const LAST_MONTH = i18n.translate('xpack.securitySolution.stepDefineRule.
   defaultMessage: 'Last month',
 });
 
-export const QUERY_PREVIEW_BUTTON = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.previewQueryButton',
+export const RULE_AD_HOC_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryAdHocRun.rulePreviewError',
   {
-    defaultMessage: 'Preview results',
+    defaultMessage: 'Failed to run rule',
   }
 );
 
-export const QUICK_PREVIEW_TOGGLE_BUTTON = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.quickPreviewToggleButton',
+export const QUERY_AD_HOC_RUN_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryAdHocRun.queryAdHocRunLabel',
   {
-    defaultMessage: 'Quick query preview',
+    defaultMessage: 'Select an ad hoc execution timeframe',
   }
 );
 
-export const ADVANCED_PREVIEW_TOGGLE_BUTTON = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.advancedPreviewToggleButton',
+export const QUERY_AD_HOC_INVOCATION_COUNT_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryAdHocRun.queryAdHocRunInvocationCountWarningTitle',
   {
-    defaultMessage: 'Advanced query preview',
+    defaultMessage: 'Ad hoc rule execution timeframe might cause timeout',
   }
 );
 
-export const PREVIEW_TIMEOUT_WARNING = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.previewTimeoutWarning',
+export const QUERY_AD_HOC_INVOCATION_COUNT_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryAdHocRun.queryAdHocRunInvocationCountWarningMessage',
   {
-    defaultMessage: 'Preview timed out after 60 seconds',
-  }
-);
-
-export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.previewQueryAriaLabel',
-  {
-    defaultMessage: 'Query preview timeframe select',
-  }
-);
-
-export const RULE_PREVIEW_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.rulePreviewError',
-  {
-    defaultMessage: 'Failed to preview rule',
-  }
-);
-
-export const QUERY_PREVIEW_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel',
-  {
-    defaultMessage: 'Select a preview timeframe',
-  }
-);
-
-export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvocationCountWarningTitle',
-  {
-    defaultMessage: 'Rule preview timeframe might cause timeout',
-  }
-);
-
-export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvocationCountWarningMessage',
-  {
-    defaultMessage: `The timeframe and rule interval that you selected for previewing this rule might cause timeout or take long time to execute. Try to decrease the timeframe and/or increase the interval if preview has timed out (this won't affect the actual rule run).`,
+    defaultMessage: `The timeframe and rule interval that you selected for running this rule might cause timeout or take long time to execute. Try to decrease the timeframe and/or increase the interval if the execution has timed out.`,
   }
 );
 
 export const QUERY_GRAPH_COUNT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel',
+  'xpack.securitySolution.detectionEngine.queryAdHocRun.queryGraphCountLabel',
   {
     defaultMessage: 'Count',
   }
 );
 
 export const QUERY_GRAPH_HITS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewTitle',
+  'xpack.securitySolution.detectionEngine.queryAdHocRun.queryAdHocRunTitle',
   {
-    defaultMessage: 'Rule Preview',
+    defaultMessage: 'Alerts',
   }
 );
 
 export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewNoiseWarning',
+  'xpack.securitySolution.detectionEngine.queryAdHocRun.queryGraphPreviewNoiseWarning',
   {
     defaultMessage:
       'Noise warning: This rule may cause a lot of noise. Consider narrowing your query. This is based on a linear progression of 1 alert per hour.',
   }
 );
 
-export const QUERY_PREVIEW_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError',
+export const QUERY_AD_HOC_RUN_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryAdHocRun.queryGraphAdHocRunFetchError',
   {
-    defaultMessage: 'Error fetching preview',
+    defaultMessage: 'Error fetching ad hoc execution',
   }
 );
-
-export const PREVIEW_HISTOGRAM_DISCLAIMER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.histogramDisclaimer',
-  {
-    defaultMessage:
-      'Note: Alerts with multiple event.category values will be counted more than once.',
-  }
-);
-
-export const ML_PREVIEW_HISTOGRAM_DISCLAIMER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.mlHistogramDisclaimer',
-  {
-    defaultMessage: 'Note: Alerts with multiple host.name values will be counted more than once.',
-  }
-);
-
-export const QUERY_PREVIEW_SEE_ALL_ERRORS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSeeAllErrors',
-  {
-    defaultMessage: 'See all errors',
-  }
-);
-
-export const QUERY_PREVIEW_SEE_ALL_WARNINGS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSeeAllWarnings',
-  {
-    defaultMessage: 'See all warnings',
-  }
-);
-
-export const ACTIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.actions',
-  {
-    defaultMessage: 'Actions',
-  }
-);
-
-export const VIEW_DETAILS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.viewDetailsAriaLabel',
-  {
-    defaultMessage: 'View details',
-  }
-);
-
-export const VIEW_DETAILS_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-}) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.viewDetailsForRowAriaLabel', {
-    values: { ariaRowindex, columnValues },
-    defaultMessage:
-      'View details for the alert or event in row {ariaRowindex}, with columns {columnValues}',
-  });
 
 export const RULE_AD_HOC_RUN_FLYOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.adHocRun.flyoutTitle',
@@ -183,5 +92,20 @@ export const RULE_AD_HOC_RUN_FLYOUT_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Run the rule on an ad hoc defined time range and cover gaps in your detection.',
+  }
+);
+
+export const AD_HOC_RUN_HISTOGRAM_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.adHocRun.histogramDisclaimer',
+  {
+    defaultMessage:
+      'Note: Alerts with multiple event.category values will be counted more than once.',
+  }
+);
+
+export const ML_AD_HOC_RUN_HISTOGRAM_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.adHocRun.mlHistogramDisclaimer',
+  {
+    defaultMessage: 'Note: Alerts with multiple host.name values will be counted more than once.',
   }
 );

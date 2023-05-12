@@ -23,15 +23,19 @@ import moment from 'moment';
 
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import * as i18n from './translations';
-import { PreviewLogsComponent } from '../rule_preview/preview_logs';
+
 import { useKibana } from '../../../../common/lib/kibana';
-import { LoadingHistogram } from '../rule_preview/loading_histogram';
+
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
-import { usePreviewInvocationCount } from '../rule_preview/use_preview_invocation_count';
 import { useAdHocRunnerRoute } from './use_ad_hoc_runner_route';
 import { AdHocRunHistogram } from './ad_hoc_run_histogram';
+
+/* Imported from Rule Preview */
+import { usePreviewInvocationCount } from '../rule_preview/use_preview_invocation_count';
+import { LoadingHistogram } from '../rule_preview/loading_histogram';
+import { PreviewLogsComponent } from '../rule_preview/preview_logs';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
@@ -83,7 +87,7 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
     setTimeframeEnd(end);
   }, [startDate, endDate]);
 
-  // The data state that we used for the last preview results
+  // The data state that we used for the last ad hoc run results
   const [adHocRunOptions, setAdHocRunOptions] = useState<TimeframePreviewOptions>({
     timeframeStart,
     timeframeEnd,
@@ -103,7 +107,7 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
 
   const {
     addNoiseWarning,
-    createPreview,
+    createAdHocRun,
     isAdHocRunRequestInProgress,
     executionId,
     logs,
@@ -121,9 +125,9 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
     if (!isRefreshing) {
       return;
     }
-    createPreview();
+    createAdHocRun();
     setIsRefreshing(false);
-  }, [isRefreshing, createPreview]);
+  }, [isRefreshing, createAdHocRun]);
 
   useEffect(() => {
     const { start, end } = refreshedTimeframe(startDate, endDate);
@@ -177,20 +181,20 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
         <>
           <EuiCallOut
             color="warning"
-            title={i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE}
-            data-test-subj="previewInvocationCountWarning"
+            title={i18n.QUERY_AD_HOC_INVOCATION_COUNT_WARNING_TITLE}
+            data-test-subj="adHocRunInvocationCountWarning"
           >
-            {i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE}
+            {i18n.QUERY_AD_HOC_INVOCATION_COUNT_WARNING_MESSAGE}
           </EuiCallOut>
           <EuiSpacer />
         </>
       )}
       <EuiFormRow
-        label={i18n.QUERY_PREVIEW_LABEL}
+        label={i18n.QUERY_AD_HOC_RUN_LABEL}
         error={undefined}
         isInvalid={false}
-        data-test-subj="rule-preview"
-        describedByIds={['rule-preview']}
+        data-test-subj="rule-ad-hoc-run"
+        describedByIds={['rule-ad-hoc-run']}
       >
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiSuperDatePicker
@@ -200,7 +204,7 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
             showUpdateButton={false}
             commonlyUsedRanges={timeRanges}
             onRefresh={onTimeframeRefresh}
-            data-test-subj="preview-time-frame"
+            data-test-subj="ad-hoc-run-time-frame"
           />
           <EuiFlexItem grow={false}>
             <EuiSuperUpdateButton
@@ -209,14 +213,14 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
               onClick={onTimeframeRefresh}
               color={isDirty ? 'success' : 'primary'}
               fill={true}
-              data-test-subj="previewSubmitButton"
+              data-test-subj="adHocRunSubmitButton"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
 
       <EuiSpacer size="l" />
-      {isAdHocRunRequestInProgress && <LoadingHistogram />}
+      {isAdHocRunRequestInProgress && <LoadingHistogram title={i18n.QUERY_GRAPH_HITS_TITLE} />}
       {!isAdHocRunRequestInProgress && executionId && spaceId && (
         <AdHocRunHistogram
           ruleType={rule.type}

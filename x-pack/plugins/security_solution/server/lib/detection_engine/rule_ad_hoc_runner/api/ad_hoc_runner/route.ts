@@ -27,7 +27,16 @@ import type { RulePreviewLogs } from '../../../../../../common/detection_engine/
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
-import type { RuleParams } from '../../../rule_schema/model/rule_schemas';
+import type {
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  NewTermsRuleParams,
+  QueryRuleParams,
+  RuleParams,
+  SavedQueryRuleParams,
+  ThreatRuleParams,
+  ThresholdRuleParams,
+} from '../../../rule_schema/model/rule_schemas';
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -199,10 +208,10 @@ export const adHocRunnerRoute = async (
 
           let previousStartedAt = null;
 
+          // TODO: Review all of these
           const ruleToExecute = {
             ...rule,
             id: rule.params.ruleId ?? uuidv4(),
-            // createdAt: new Date(),
             createdBy: username ?? 'ad-hoc-runner-created-by',
             producer: 'ad-hoc-runner-producer',
             revision: 0,
@@ -280,6 +289,14 @@ export const adHocRunnerRoute = async (
           }
         };
 
+        const ruleParamsForExecutors: RuleParams = {
+          ...rule.params,
+          // Need to override the timestamp otherwise the alerts get created when the execution gets run
+          // instead of when the event happened
+          timestampOverride: 'event.start',
+          timestampOverrideFallbackDisabled: true,
+        };
+
         switch (rule.params.type) {
           case 'query':
             const queryAlertType = adHocRunnerRuleTypeWrapper(
@@ -293,14 +310,7 @@ export const adHocRunnerRoute = async (
               queryAlertType.executor,
               queryAlertType.id,
               queryAlertType.name,
-              {
-                ...rule.params,
-                // Need to override the timestamp otherwise the alerts get created when the execution gets run
-                // instead of when the event happened
-                timestampOverride: 'event.start',
-                timestampOverrideFallbackDisabled: true,
-                pepito: 3,
-              },
+              ruleParamsForExecutors as QueryRuleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -324,7 +334,7 @@ export const adHocRunnerRoute = async (
               savedQueryAlertType.executor,
               savedQueryAlertType.id,
               savedQueryAlertType.name,
-              rule.params,
+              ruleParamsForExecutors as SavedQueryRuleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -344,7 +354,7 @@ export const adHocRunnerRoute = async (
               thresholdAlertType.executor,
               thresholdAlertType.id,
               thresholdAlertType.name,
-              rule.params,
+              ruleParamsForExecutors as ThresholdRuleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -364,7 +374,7 @@ export const adHocRunnerRoute = async (
               threatMatchAlertType.executor,
               threatMatchAlertType.id,
               threatMatchAlertType.name,
-              rule.params,
+              ruleParamsForExecutors as ThreatRuleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -382,7 +392,7 @@ export const adHocRunnerRoute = async (
               eqlAlertType.executor,
               eqlAlertType.id,
               eqlAlertType.name,
-              rule.params,
+              ruleParamsForExecutors as EqlRuleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -400,7 +410,7 @@ export const adHocRunnerRoute = async (
               mlAlertType.executor,
               mlAlertType.id,
               mlAlertType.name,
-              rule.params,
+              ruleParamsForExecutors as MachineLearningRuleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -420,7 +430,7 @@ export const adHocRunnerRoute = async (
               newTermsAlertType.executor,
               newTermsAlertType.id,
               newTermsAlertType.name,
-              rule.params,
+              ruleParamsForExecutors as NewTermsRuleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,

@@ -263,7 +263,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <EuiSpacer size="l" />
-      {isPreviewRequestInProgress && <LoadingHistogram />}
+      {isPreviewRequestInProgress && <LoadingHistogram title={i18n.QUERY_GRAPH_HITS_TITLE} />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram
           ruleType={ruleType}

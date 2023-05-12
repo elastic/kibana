@@ -62,7 +62,7 @@ export const ID = 'adHocRunHistogram';
 
 const CHART_HEIGHT = 150;
 
-interface PreviewHistogramProps {
+interface AdHocRunHistogramProps {
   executionId: string;
   addNoiseWarning: () => void;
   spaceId: string;
@@ -80,7 +80,7 @@ export const AdHocRunHistogram = ({
   ruleType,
   indexPattern,
   timeframeOptions,
-}: PreviewHistogramProps) => {
+}: AdHocRunHistogramProps) => {
   const { uiSettings } = useKibana().services;
   const { setQuery, isInitializing } = useGlobalTime();
   const startDate = useMemo(
@@ -192,7 +192,7 @@ export const AdHocRunHistogram = ({
 
   return (
     <>
-      <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
+      <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'adHocRun-histogram-panel'}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
             <HeaderSection
@@ -204,7 +204,7 @@ export const AdHocRunHistogram = ({
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             {isLoading ? (
-              <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
+              <LoadingChart size="l" data-test-subj="adHocRun-histogram-loading" />
             ) : isAlertsPreviewChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
                 applyGlobalQueriesAndFilters={false}
@@ -222,7 +222,7 @@ export const AdHocRunHistogram = ({
               <BarChart
                 configs={barConfig}
                 barChart={chartData}
-                data-test-subj="preview-histogram-bar-chart"
+                data-test-subj="ad-hoc-run-histogram-bar-chart"
               />
             )}
           </EuiFlexItem>
@@ -232,8 +232,8 @@ export const AdHocRunHistogram = ({
               <EuiText size="s" color="subdued">
                 <p>
                   {isMlRule
-                    ? i18n.ML_PREVIEW_HISTOGRAM_DISCLAIMER
-                    : i18n.PREVIEW_HISTOGRAM_DISCLAIMER}
+                    ? i18n.ML_AD_HOC_RUN_HISTOGRAM_DISCLAIMER
+                    : i18n.AD_HOC_RUN_HISTOGRAM_DISCLAIMER}
                 </p>
               </EuiText>
             </>
