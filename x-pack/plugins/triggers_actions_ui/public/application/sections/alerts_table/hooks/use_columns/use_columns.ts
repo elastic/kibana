@@ -10,7 +10,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
@@ -174,18 +174,14 @@ export const useColumns = ({
     // get the latest columns provided by client and
     if (didDefaultColumnChange) {
       defaultColumnsRef.current = defaultColumns;
-      let cols = storageAlertsTable.current.columns;
-      // before restoring from storage, enrich the column data
-      if (initialBrowserFields && defaultColumns) {
-        cols = populateColumns(cols, initialBrowserFields, defaultColumns);
-      }
-      setColumns(cols);
+      setColumnsPopulated(false);
+      setColumns(storageAlertsTable.current.columns);
       return;
     }
-  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns, initialBrowserFields]);
+  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
 
   useEffect(() => {
-    if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
+    if (isEmpty(browserFields) || isColumnsPopulated) return;
 
     const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
 
