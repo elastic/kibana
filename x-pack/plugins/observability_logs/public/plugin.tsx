@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { IntegrationsService } from './services/integrations';
-import {
-  ObservabilityLogsClientPluginClass,
-  ObservabilityLogsPluginSetup,
-  ObservabilityLogsPluginStart,
-  ObservabilityLogsStartDeps,
-} from './types';
-import { InternalStateProvider } from './utils/internal_state_container_context';
+import { ObservabilityLogsClientPluginClass, ObservabilityLogsStartDeps } from './types';
 
 export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginClass {
   private integrationsService: IntegrationsService;
