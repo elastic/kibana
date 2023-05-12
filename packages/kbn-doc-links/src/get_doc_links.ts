@@ -702,6 +702,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
       agentPolicy: `${FLEET_DOCS}agent-policy.html`,
       api: `${FLEET_DOCS}fleet-api-docs.html`,
+      uninstallAgent: `${SECURITY_SOLUTION_DOCS}uninstall-agent.html`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
