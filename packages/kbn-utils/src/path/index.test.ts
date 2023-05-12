@@ -7,7 +7,7 @@
  */
 
 import { accessSync, constants } from 'fs';
-import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory } from '.';
+import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory, buildDataPaths } from '.';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 expect.addSnapshotSerializer(
@@ -45,4 +45,37 @@ describe('Default path finder', () => {
     const configPath = getConfigPath();
     expect(() => accessSync(configPath, constants.R_OK)).not.toThrow();
   });
+});
+
+describe('Custom data path finder', () => {
+  const originalArgv = process.argv;
+
+  beforeEach(() => {
+    process.argv = originalArgv;
+  });
+
+  it('overrides path.data when provided as command line argument', () => {
+    process.argv = ['--foo', 'bar', '--path.data', '/some/data/path', '--baz', 'xyz'];
+
+    expect(buildDataPaths()).toMatchInlineSnapshot(`
+      Array [
+        <absolute path>/some/data/path,
+        <absolute path>/data,
+        "/var/lib/kibana",
+      ]
+    `);
+  });
+
+  it('ignores the path.data flag when no value is provided', () => {
+    process.argv = ['--foo', 'bar', '--path.data', '--baz', 'xyz'];
+
+    expect(buildDataPaths()).toMatchInlineSnapshot(`
+      Array [
+        <absolute path>/data,
+        "/var/lib/kibana",
+      ]
+    `);
+  });
+
+  // test config file override
 });
