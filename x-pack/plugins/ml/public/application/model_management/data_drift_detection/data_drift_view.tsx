@@ -39,8 +39,11 @@ import { NUMERIC_TYPE_LABEL } from './constants';
 import { Histogram, ComparisionHistogram, Feature, FETCH_STATUS, DataDriftField } from './types';
 
 const formatSignificanceLevel = (significanceLevel: number) => {
-  if (significanceLevel < 0.01) {
-    return significanceLevel.toExponential(2);
+  if (significanceLevel < 1e-6) {
+    return <span>&lt; 0.000001</span>;
+  }
+  else if (significanceLevel < 0.01) {
+    return significanceLevel.toExponential(0);
   } else {
     return significanceLevel.toFixed(2);
   }
