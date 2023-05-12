@@ -8,6 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import type { NetworkTlsNode } from '../../../../../common/search_strategy';
 import type { Columns } from '../../../components/paginated_table';
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
@@ -35,9 +36,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: issuers,
         fieldName: 'tls.server.issuer',
-        fieldType: 'keyword',
-        searchable: true,
-        aggregatable: true,
         idPrefix: `${tableId}-${_id}-table-issuers`,
       }),
   },
@@ -51,9 +49,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: subjects,
         fieldName: 'tls.server.subject',
-        fieldType: 'keyword',
-        searchable: true,
-        aggregatable: true,
         idPrefix: `${tableId}-${_id}-table-subjects`,
       }),
   },
@@ -67,9 +62,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: sha1 ? [sha1] : undefined,
         fieldName: 'tls.server.hash.sha1',
-        fieldType: 'keyword',
-        aggregatable: true,
-        searchable: true,
         idPrefix: `${tableId}-${sha1}-table-sha1`,
       }),
   },
@@ -83,9 +75,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: ja3,
         fieldName: 'tls.server.ja3s',
-        fieldType: 'keyword',
-        aggregatable: true,
-        searchable: true,
         idPrefix: `${tableId}-${_id}-table-ja3`,
       }),
   },
@@ -99,9 +88,9 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: notAfter,
         fieldName: 'tls.server.not_after',
-        fieldType: 'date',
+        fieldType: KBN_FIELD_TYPES.DATE,
+        esTypes: [ES_FIELD_TYPES.DATE],
         aggregatable: false,
-        searchable: true,
         idPrefix: `${tableId}-${_id}-table-notAfter`,
         render: (validUntil) => (
           <LocalizedDateTooltip date={moment(new Date(validUntil)).toDate()}>

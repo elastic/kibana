@@ -8,11 +8,11 @@
 import { has } from 'lodash/fp';
 import React from 'react';
 
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import type { Columns, ItemsPerRow } from '../paginated_table';
 import { getRowItemsWithActions } from '../../../common/components/tables/helpers';
-
 import * as i18n from './translations';
 import {
   HostDetailsLink,
@@ -102,9 +102,8 @@ const LAST_SUCCESSFUL_SOURCE_COLUMN: Columns<AuthenticationsEdges, Authenticatio
     getRowItemsWithActions({
       values: node.lastSuccess?.source?.ip || null,
       fieldName: 'source.ip',
-      fieldType: 'ip',
-      aggregatable: true,
-      searchable: true,
+      fieldType: KBN_FIELD_TYPES.IP,
+      esTypes: [ES_FIELD_TYPES.IP],
       idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
       render: (item) => <NetworkDetailsLink ip={item} />,
     }),
@@ -117,9 +116,6 @@ const LAST_SUCCESSFUL_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenti
     getRowItemsWithActions({
       values: node.lastSuccess?.host?.name ?? null,
       fieldName: 'host.name',
-      fieldType: 'keyword',
-      aggregatable: true,
-      searchable: true,
       idPrefix: `authentications-table-${node._id}-lastSuccessfulDestination`,
       render: (item) => <HostDetailsLink hostName={item} />,
     }),
@@ -143,9 +139,8 @@ const LAST_FAILED_SOURCE_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEd
     getRowItemsWithActions({
       values: node.lastFailure?.source?.ip || null,
       fieldName: 'source.ip',
-      fieldType: 'ip',
-      aggregatable: true,
-      searchable: true,
+      fieldType: KBN_FIELD_TYPES.IP,
+      esTypes: [ES_FIELD_TYPES.IP],
       idPrefix: `authentications-table-${node._id}-lastFailureSource`,
       render: (item) => <NetworkDetailsLink ip={item} />,
     }),
@@ -158,9 +153,6 @@ const LAST_FAILED_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenticati
     getRowItemsWithActions({
       values: node.lastFailure?.host?.name || null,
       fieldName: 'host.name',
-      fieldType: 'keyword',
-      aggregatable: true,
-      searchable: true,
       idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
       render: (item) => <HostDetailsLink hostName={item} />,
     }),
@@ -175,9 +167,6 @@ const USER_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
       values: node.stackedValue,
       fieldName: 'user.name',
       idPrefix: `authentications-table-${node._id}-userName`,
-      fieldType: 'keyword',
-      aggregatable: true,
-      searchable: true,
       render: (item) => <UserDetailsLink userName={item} />,
     }),
 };
@@ -191,9 +180,6 @@ const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
       values: node.stackedValue,
       fieldName: 'host.name',
       idPrefix: `authentications-table-${node._id}-hostName`,
-      fieldType: 'keyword',
-      aggregatable: true,
-      searchable: true,
       render: (item) => <HostDetailsLink hostName={item} />,
     }),
 };

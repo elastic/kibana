@@ -123,9 +123,6 @@ export const getNetworkTopNFlowColumns = (
         return getRowItemsWithActions({
           values: domains,
           fieldName: domainAttr,
-          fieldType: 'keyword',
-          aggregatable: true,
-          searchable: true,
           idPrefix: id,
           displayCount: 1,
         });
@@ -148,9 +145,6 @@ export const getNetworkTopNFlowColumns = (
               getRowItemsWithActions({
                 values: [as.name],
                 fieldName: `${flowTarget}.as.organization.name`,
-                fieldType: 'keyword',
-                aggregatable: true,
-                searchable: true,
                 idPrefix: `${id}-name`,
               })}
 
@@ -161,9 +155,6 @@ export const getNetworkTopNFlowColumns = (
                   values: [`${as.number}`],
                   fieldName: `${flowTarget}.as.number`,
                   idPrefix: `${id}-number`,
-                  fieldType: 'keyword',
-                  aggregatable: true,
-                  searchable: true,
                 })}
               </>
             )}

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 
 interface Props {
@@ -19,7 +20,8 @@ export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) =>
       field={{
         name: entityName,
         value: entityValue,
-        type: 'keyword',
+        type: KBN_FIELD_TYPES.STRING,
+        esTypes: [ES_FIELD_TYPES.KEYWORD],
         aggregatable: true,
         searchable: true,
       }}

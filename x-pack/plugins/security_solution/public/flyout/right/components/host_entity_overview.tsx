@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import styled from 'styled-components';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
   buildHostNamesFilter,
@@ -119,6 +120,8 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           <DefaultFieldRenderer
             rowItems={getOr([], 'host.ip', hostDetails)}
             attrName={'host.ip'}
+            esTypes={[ES_FIELD_TYPES.IP]}
+            fieldType={KBN_FIELD_TYPES.IP}
             idPrefix={CONTEXT_ID}
             isDraggable={false}
             render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}

@@ -8,6 +8,7 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
@@ -21,25 +22,27 @@ const Subtext = styled.div`
 interface GetRowItemsWithActionsParams {
   values: string[] | null | undefined;
   fieldName: string;
-  fieldType?: string;
+  fieldType?: KBN_FIELD_TYPES;
+  esTypes?: ES_FIELD_TYPES[];
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
   maxOverflow?: number;
-  aggregatable: boolean;
-  searchable: boolean;
+  aggregatable?: boolean;
+  searchable?: boolean;
 }
 
 export const getRowItemsWithActions = ({
   values,
   fieldName,
-  fieldType = 'keyword',
   idPrefix,
   render,
   displayCount = 5,
   maxOverflow = 5,
-  aggregatable,
-  searchable,
+  fieldType = KBN_FIELD_TYPES.STRING,
+  esTypes = [ES_FIELD_TYPES.KEYWORD],
+  aggregatable = true,
+  searchable = true,
 }: GetRowItemsWithActionsParams): JSX.Element => {
   if (values != null && values.length > 0) {
     const visibleItems = values.slice(0, displayCount).map((value, index) => {
@@ -54,6 +57,7 @@ export const getRowItemsWithActions = ({
           field={{
             name: fieldName,
             value,
+            esTypes,
             type: fieldType,
             aggregatable,
             searchable,
@@ -71,6 +75,7 @@ export const getRowItemsWithActions = ({
           fieldName={fieldName}
           values={values}
           fieldType={fieldType}
+          esTypes={esTypes}
           idPrefix={idPrefix}
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
@@ -88,7 +93,8 @@ export const getRowItemsWithActions = ({
 
 interface RowItemOverflowProps {
   fieldName: string;
-  fieldType: string;
+  fieldType: KBN_FIELD_TYPES;
+  esTypes: ES_FIELD_TYPES[];
   isAggregatable: boolean;
   isSearchable: boolean;
   values: string[];
@@ -101,6 +107,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   fieldName,
   values,
   fieldType,
+  esTypes,
   isAggregatable,
   isSearchable,
   idPrefix,
@@ -118,6 +125,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
               isAggregatable={isAggregatable}
               isSearchable={isSearchable}
               fieldType={fieldType}
+              esTypes={esTypes}
               values={values}
               overflowIndexStart={overflowIndexStart}
               moreMaxHeight="none"

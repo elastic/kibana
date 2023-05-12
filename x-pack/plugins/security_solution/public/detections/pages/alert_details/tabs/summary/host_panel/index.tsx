@@ -10,6 +10,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { useCallback, useMemo } from 'react';
 import { find } from 'lodash/fp';
 import type { EuiFlexItemProps } from '@elastic/eui';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { TimelineId } from '../../../../../../../common/types';
 import { isAlertFromEndpointEvent } from '../../../../../../common/utils/endpoint_alert_check';
 import { SummaryValueCell } from '../../../../../../common/components/event_details/table/summary_value_cell';
@@ -168,6 +169,8 @@ export const HostPanel = React.memo(
                 <DefaultFieldRenderer
                   rowItems={hostIpFields}
                   attrName={'host.ip'}
+                  esTypes={[ES_FIELD_TYPES.IP]}
+                  fieldType={KBN_FIELD_TYPES.IP}
                   idPrefix="alert-details-page-user"
                   render={renderHostIp}
                 />

@@ -7,12 +7,12 @@
 
 import React from 'react';
 
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Columns } from '../../../../explore/components/paginated_table';
 import type { Anomaly, AnomaliesByNetwork } from '../types';
 import { getRowItemsWithActions } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
 import { NetworkDetailsLink } from '../../links';
-
 import * as i18n from './translations';
 import { NetworkType } from '../../../../explore/network/store/model';
 import type { FlowTarget } from '../../../../../common/search_strategy';
@@ -41,9 +41,8 @@ export const getAnomaliesNetworkTableColumns = (
         idPrefix: `anomalies-network-table-ip-${createCompoundAnomalyKey(
           anomaliesByNetwork.anomaly
         )}`,
-        aggregatable: true,
-        searchable: true,
-        fieldType: 'ip',
+        fieldType: KBN_FIELD_TYPES.IP,
+        esTypes: [ES_FIELD_TYPES.IP],
         render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
       }),
   },

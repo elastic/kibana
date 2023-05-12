@@ -18,6 +18,7 @@ import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { getEmptyValue } from '../empty_value';
 import { render } from '@testing-library/react';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../lib/kibana');
 
@@ -118,7 +119,8 @@ describe('Table Helpers', () => {
           idPrefix="idPrefix"
           maxOverflowItems={1}
           overflowIndexStart={1}
-          fieldType="keyword"
+          esTypes={[ES_FIELD_TYPES.KEYWORD]}
+          fieldType={KBN_FIELD_TYPES.STRING}
           isAggregatable={false}
           isSearchable={false}
         />
@@ -134,7 +136,8 @@ describe('Table Helpers', () => {
           idPrefix="idPrefix"
           maxOverflowItems={5}
           overflowIndexStart={1}
-          fieldType="keyword"
+          esTypes={[ES_FIELD_TYPES.KEYWORD]}
+          fieldType={KBN_FIELD_TYPES.STRING}
           isAggregatable={false}
           isSearchable={false}
         />
@@ -151,7 +154,8 @@ describe('Table Helpers', () => {
             idPrefix="idPrefix"
             maxOverflowItems={5}
             overflowIndexStart={1}
-            fieldType="keyword"
+            esTypes={[ES_FIELD_TYPES.KEYWORD]}
+            fieldType={KBN_FIELD_TYPES.STRING}
             isAggregatable={false}
             isSearchable={false}
           />
@@ -173,7 +177,8 @@ describe('Table Helpers', () => {
           idPrefix="idPrefix"
           maxOverflowItems={1}
           overflowIndexStart={1}
-          fieldType="keyword"
+          esTypes={[ES_FIELD_TYPES.KEYWORD]}
+          fieldType={KBN_FIELD_TYPES.STRING}
           isAggregatable={false}
           isSearchable={false}
         />

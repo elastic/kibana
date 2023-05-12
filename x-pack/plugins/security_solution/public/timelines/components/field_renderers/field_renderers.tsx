@@ -12,6 +12,7 @@ import React, { useCallback, Fragment, useMemo, useState, useContext } from 'rea
 import styled from 'styled-components';
 
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -193,6 +194,8 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
 
 interface DefaultFieldRendererProps {
   attrName: string;
+  fieldType?: KBN_FIELD_TYPES;
+  esTypes?: ES_FIELD_TYPES[];
   displayCount?: number;
   idPrefix: string;
   isDraggable?: boolean;
@@ -203,6 +206,8 @@ interface DefaultFieldRendererProps {
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
+  fieldType = KBN_FIELD_TYPES.STRING,
+  esTypes = [ES_FIELD_TYPES.KEYWORD],
   displayCount = 1,
   idPrefix,
   isDraggable = false,
@@ -250,7 +255,8 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
             attrName={attrName}
-            fieldType="keyword"
+            fieldType={fieldType}
+            esTypes={esTypes}
             idPrefix={idPrefix}
             isAggregatable={true}
             isSearchable={true}
@@ -275,7 +281,8 @@ DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
 interface DefaultFieldRendererOverflowProps {
   attrName: string;
-  fieldType: string;
+  fieldType: KBN_FIELD_TYPES;
+  esTypes: ES_FIELD_TYPES[];
   rowItems: string[];
   idPrefix: string;
   isAggregatable: boolean;
@@ -287,7 +294,8 @@ interface DefaultFieldRendererOverflowProps {
 
 interface MoreContainerProps {
   fieldName: string;
-  fieldType: string;
+  fieldType?: KBN_FIELD_TYPES;
+  esTypes?: ES_FIELD_TYPES[];
   values: string[];
   idPrefix: string;
   isAggregatable: boolean;
@@ -300,7 +308,8 @@ interface MoreContainerProps {
 export const MoreContainer = React.memo<MoreContainerProps>(
   ({
     fieldName,
-    fieldType,
+    fieldType = KBN_FIELD_TYPES.STRING,
+    esTypes = [ES_FIELD_TYPES.KEYWORD],
     idPrefix,
     isAggregatable,
     isSearchable,
@@ -329,6 +338,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                     name: fieldName,
                     value,
                     type: fieldType,
+                    esTypes,
                     aggregatable: isAggregatable,
                     searchable: isSearchable,
                   }}
@@ -345,15 +355,16 @@ export const MoreContainer = React.memo<MoreContainerProps>(
           return acc;
         }, []),
       [
+        values,
+        overflowIndexStart,
+        idPrefix,
         fieldName,
         fieldType,
-        idPrefix,
-        overflowIndexStart,
-        render,
-        values,
-        timelineId,
+        esTypes,
         isAggregatable,
         isSearchable,
+        timelineId,
+        render,
       ]
     );
 
@@ -384,6 +395,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
     render,
     rowItems,
     fieldType,
+    esTypes,
     isAggregatable,
     isSearchable,
   }) => {
@@ -428,6 +440,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
               fieldType={fieldType}
+              esTypes={esTypes}
               isAggregatable={isAggregatable}
               isSearchable={isSearchable}
             />

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -30,7 +31,8 @@ export const ScoreComponent = ({
       field={{
         name: score.entityName,
         value: score.entityValue,
-        type: 'keyword',
+        type: KBN_FIELD_TYPES.STRING,
+        esTypes: [ES_FIELD_TYPES.KEYWORD],
         aggregatable: true,
         searchable: true,
       }}

@@ -29,6 +29,7 @@ import { mockData } from '../../../explore/network/components/details/mock';
 import type { AutonomousSystem } from '../../../../common/search_strategy';
 import { FlowTarget } from '../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/lib/kibana/kibana_react', () => {
@@ -276,7 +277,6 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <MoreContainer
-            fieldType="keyword"
             idPrefix={idPrefix}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
@@ -295,7 +295,6 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <MoreContainer
-            fieldType="keyword"
             idPrefix={idPrefix}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={0}
@@ -316,7 +315,6 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <MoreContainer
-            fieldType="keyword"
             idPrefix={idPrefix}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
@@ -335,7 +333,6 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <MoreContainer
-            fieldType="keyword"
             idPrefix={idPrefix}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
@@ -356,7 +353,6 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <MoreContainer
-            fieldType="keyword"
             idPrefix={idPrefix}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
@@ -379,7 +375,6 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <MoreContainer
-            fieldType="keyword"
             idPrefix={idPrefix}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
@@ -404,7 +399,8 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <DefaultFieldRendererOverflow
-            fieldType="keyword"
+            esTypes={[ES_FIELD_TYPES.KEYWORD]}
+            fieldType={KBN_FIELD_TYPES.STRING}
             idPrefix={idPrefix}
             isAggregatable={true}
             isSearchable={false}
@@ -426,7 +422,8 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <DefaultFieldRendererOverflow
-            fieldType="keyword"
+            esTypes={[ES_FIELD_TYPES.KEYWORD]}
+            fieldType={KBN_FIELD_TYPES.STRING}
             idPrefix={idPrefix}
             isAggregatable={true}
             isSearchable={false}

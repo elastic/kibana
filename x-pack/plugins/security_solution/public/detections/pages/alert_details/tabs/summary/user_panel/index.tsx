@@ -10,6 +10,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { useCallback, useMemo } from 'react';
 import { find } from 'lodash/fp';
 import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
@@ -133,6 +134,8 @@ export const UserPanel = React.memo(
                 <DefaultFieldRenderer
                   rowItems={sourceIpFields}
                   attrName={'source.ip'}
+                  esTypes={[ES_FIELD_TYPES.IP]}
+                  fieldType={KBN_FIELD_TYPES.IP}
                   idPrefix="alert-details-page-user"
                   render={renderSourceIp}
                 />

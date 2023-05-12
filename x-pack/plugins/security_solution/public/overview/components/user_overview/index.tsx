@@ -10,6 +10,7 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
@@ -242,6 +243,8 @@ export const UserOverview = React.memo<UserSummaryProps>(
               <DefaultFieldRenderer
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
+                esTypes={[ES_FIELD_TYPES.IP]}
+                fieldType={KBN_FIELD_TYPES.IP}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}

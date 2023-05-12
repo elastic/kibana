@@ -10,6 +10,7 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
@@ -228,6 +229,8 @@ export const HostOverview = React.memo<HostSummaryProps>(
               <DefaultFieldRenderer
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
+                esTypes={[ES_FIELD_TYPES.IP]}
+                fieldType={KBN_FIELD_TYPES.IP}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
