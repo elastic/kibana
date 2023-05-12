@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type {
   EqlSearchRequest,
   FieldCapsRequest,
@@ -313,8 +314,22 @@ export class APMEventClient {
       operationName,
       requestType: 'index_template',
       params,
-      cb: (abortOptions) =>
-        this.esClient.indices.getIndexTemplate(params, abortOptions),
+      cb: async (abortOptions) => {
+        try {
+          return await this.esClient.indices.getIndexTemplate(
+            params,
+            abortOptions
+          );
+        } catch (e) {
+          if (e instanceof errors.ResponseError && e.statusCode === 404) {
+            return {
+              body: e.body,
+            };
+          }
+
+          throw e;
+        }
+      },
     });
   }
 
