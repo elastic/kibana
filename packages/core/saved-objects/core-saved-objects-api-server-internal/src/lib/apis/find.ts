@@ -28,10 +28,12 @@ import {
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { ApiExecutionContext } from './types';
-import { validateConvertFilterToKueryNode } from '../filter_utils';
-import { validateAndConvertAggregations } from '../aggregations';
-import { includedFields } from '../included_fields';
-import { getSearchDsl } from '../search_dsl';
+import {
+  validateConvertFilterToKueryNode,
+  getSearchDsl,
+  validateAndConvertAggregations,
+} from '../search';
+import { includedFields } from '../utils';
 
 export interface PerformFindParams {
   options: SavedObjectsFindOptions;

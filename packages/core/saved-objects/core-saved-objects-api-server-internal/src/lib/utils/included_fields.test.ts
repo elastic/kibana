@@ -38,34 +38,26 @@ describe('includedFields', () => {
 
   it('accepts type and field as string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toEqual(['config.foo', ...rootFields, 'foo']);
+    expect(fields).toEqual(['config.foo', ...rootFields]);
   });
 
   it('accepts type as array and field as string', () => {
     const fields = includedFields(['config', 'secret'], 'foo');
-    expect(fields).toEqual(['config.foo', 'secret.foo', ...rootFields, 'foo']);
+    expect(fields).toEqual(['config.foo', 'secret.foo', ...rootFields]);
   });
 
   it('accepts type as string and field as array', () => {
     const fields = includedFields('config', ['foo', 'bar']);
-    expect(fields).toEqual(['config.foo', 'config.bar', ...rootFields, 'foo', 'bar']);
+    expect(fields).toEqual(['config.foo', 'config.bar', ...rootFields]);
   });
 
   it('accepts type as array and field as array', () => {
     const fields = includedFields(['config', 'secret'], ['foo', 'bar']);
-    expect(fields).toEqual([
-      'config.foo',
-      'config.bar',
-      'secret.foo',
-      'secret.bar',
-      ...rootFields,
-      'foo',
-      'bar',
-    ]);
+    expect(fields).toEqual(['config.foo', 'config.bar', 'secret.foo', 'secret.bar', ...rootFields]);
   });
 
   it('uses wildcard when type is not provided', () => {
     const fields = includedFields(undefined, 'foo');
-    expect(fields).toEqual(['*.foo', ...rootFields, 'foo']);
+    expect(fields).toEqual(['*.foo', ...rootFields]);
   });
 });

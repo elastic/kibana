@@ -9,7 +9,6 @@
 import { mockGetEsErrorMessage } from './delete_legacy_url_aliases.test.mock'; // Note: importing this file applies default mocks for other functions too
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';

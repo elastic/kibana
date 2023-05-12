@@ -11,6 +11,7 @@ import { ObjectType } from '@kbn/config-schema';
 import { isPlainObject, isArray } from 'lodash';
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { getRootFields } from '../../utils';
 import {
   isObjectTypeAttribute,
   rewriteObjectTypeAttribute,
@@ -18,7 +19,6 @@ import {
   rewriteRootLevelAttribute,
 } from './validation_utils';
 import { aggregationSchemas } from './aggs_types';
-import { getRootFields } from '../included_fields';
 
 const aggregationKeys = ['aggs', 'aggregations'];
 

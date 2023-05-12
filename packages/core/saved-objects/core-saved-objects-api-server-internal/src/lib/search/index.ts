@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { findLegacyUrlAliases } from './find_legacy_url_aliases';
-
-export { deleteLegacyUrlAliases } from './delete_legacy_url_aliases';
-export type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
+export { getSearchDsl } from './search_dsl';
+export { validateAndConvertAggregations } from './aggregations';
+export { validateConvertFilterToKueryNode } from './utils';
