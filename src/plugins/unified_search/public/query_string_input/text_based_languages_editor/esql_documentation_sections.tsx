@@ -80,6 +80,12 @@ The \`ROW\` source command produces a row with one or more columns with values t
 ROW a = 1, b = "two", c = null
 \`\`\`
 
+Use angle brackets to create multi-value columns:
+
+\`\`\`
+ROW a = [2, 1]
+\`\`\`
+
 ROW supports the use of functions:
 
 \`\`\`
