@@ -33,7 +33,7 @@ export const ElasticsearchOverview = () => {
   const { http } = useKibanaServices();
 
   return (
-    <EuiPageTemplate offset={0} grow restrictWidth>
+    <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
