@@ -17,8 +17,8 @@ import type {
 } from '../prompt_context/types';
 import type { SecurityAssistantUiSettings } from '../helpers';
 import type { Conversation } from './types';
-import { DEFAULT_CONVERSATION_STATE } from '../use_conversation';
 import { useLocalStorage } from '../../common/components/local_storage';
+import { ALL_QUERIES_CONVERSATION } from '../use_conversation/sample_conversations';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -90,7 +90,7 @@ export const SecurityAssistantProvider: React.FC<SecurityAssistantProviderProps>
    * Conversation state/actions
    */
   const [conversations, setConversations] = useLocalStorage<Record<string, Conversation>>({
-    defaultValue: { default: DEFAULT_CONVERSATION_STATE },
+    defaultValue: { default: ALL_QUERIES_CONVERSATION.default },
     key: LOCAL_STORAGE_KEY,
     isInvalidDefault: (valueFromStorage) => {
       return !valueFromStorage;

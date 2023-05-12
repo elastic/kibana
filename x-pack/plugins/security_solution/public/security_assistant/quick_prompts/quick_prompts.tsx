@@ -8,20 +8,32 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
+import { css } from '@emotion/react';
+import * as i18n from './translations';
 
 const QuickPromptsFlexGroup = styled(EuiFlexGroup)`
   margin: 16px;
 `;
 
-type QuickPrompt = {
-  text: string;
+interface QuickPrompt {
+  title: string;
+  prompt: string;
   color: string;
-};
+}
 const quickPrompts: QuickPrompt[] = [
-  { text: 'Alert Summarization', color: 'accent' },
-  { text: 'Rule Creation', color: 'success' },
-  { text: 'Workflow Analysis', color: 'primary' },
-  { text: 'Threat Investigation Guides', color: 'warning' },
+  {
+    title: i18n.ALERT_SUMMARIZATION_TITLE,
+    prompt: i18n.ALERT_SUMMARIZATION_PROMPT,
+    color: 'accent',
+  },
+  { title: i18n.RULE_CREATION_TITLE, prompt: i18n.RULE_CREATION_PROMPT, color: 'success' },
+  { title: i18n.WORKFLOW_ANALYSIS_TITLE, prompt: i18n.WORKFLOW_ANALYSIS_PROMPT, color: 'primary' },
+  {
+    title: i18n.THREAT_INVESTIGATION_GUIDES_TITLE,
+    prompt: i18n.THREAT_INVESTIGATION_GUIDES_PROMPT,
+    color: 'warning',
+  },
+  { title: i18n.OMNI_QUERY_5000_TITLE, prompt: i18n.OMNI_QUERY_5000_PROMPT, color: '#BADA55' },
 ];
 interface QuickPromptsProps {
   setInput: (input: string) => void;
@@ -33,10 +45,12 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
         <EuiFlexItem key={index} grow={false}>
           <EuiBadge
             color={badge.color}
-            onClick={() => setInput(badge.text)}
-            onClickAriaLabel={badge.text}
+            onClick={() => setInput(badge.prompt)}
+            onClickAriaLabel={badge.title}
+            css={css``}
           >
-            {badge.text}
+            {/* <EuiText size="s">{badge.title}</EuiText>*/}
+            {badge.title}
           </EuiBadge>
         </EuiFlexItem>
       ))}

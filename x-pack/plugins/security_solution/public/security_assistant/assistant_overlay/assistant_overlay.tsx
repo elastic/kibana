@@ -6,12 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiModal, EuiSpacer } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
 import styled from 'styled-components';
 import { SecurityAssistant } from '../security_assistant';
-import { QuickPrompts } from './quick_prompts';
 import type { ShowAssistantOverlayProps } from '../security_assistant_context';
 import { useSecurityAssistantContext } from '../security_assistant_context';
 
@@ -29,7 +28,6 @@ const StyledEuiModal = styled(EuiModal)`
  */
 export const AssistantOverlay: React.FC = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [input, setInput] = useState<string | undefined>();
   const [conversationId, setConversationId] = useState<string | undefined>('default');
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { setShowAssistantOverlay } = useSecurityAssistantContext();
@@ -80,10 +78,6 @@ export const AssistantOverlay: React.FC = React.memo(() => {
       {isModalVisible && (
         <StyledEuiModal onClose={handleCloseModal}>
           <SecurityAssistant conversationId={conversationId} promptContextId={promptContextId} />
-
-          <EuiSpacer size="xs" />
-
-          <QuickPrompts setInput={setInput} />
         </StyledEuiModal>
       )}
     </>

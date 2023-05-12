@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MAKE_IT_GO_BUTTON = i18n.translate(
-  'xpack.securitySolution.securityAssistant.overlay.makeItGoButton',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
 export const CANCEL_BUTTON = i18n.translate(
   'xpack.securitySolution.securityAssistant.overlay.CancelButton',
   {

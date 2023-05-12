@@ -11,6 +11,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { css } from '@emotion/react';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
@@ -229,6 +230,9 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
           $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
           isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
           data-test-subj={`timeline-tab-content-security-assistant`}
+          css={css`
+            overflow: hidden !important;
+          `}
         >
           <SecurityAssistantTab
             renderCellValue={renderCellValue}
