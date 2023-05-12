@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Agent } from '@kbn/fleet-plugin/common';
+import type { PolicyData } from '../../../../../common/endpoint/types';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
   inputConsoleCommand,
   openResponseConsoleFromEndpointList,
@@ -15,12 +16,7 @@ import {
   waitForEndpointListPageToBeLoaded,
 } from '../../tasks/response_console';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import {
-  getAgentByHostName,
-  getEndpointIntegrationVersion,
-  reassignAgentPolicy,
-  createAgentPolicyTask,
-} from '../../tasks/fleet';
+import { getEndpointIntegrationVersion, createAgentPolicyTask } from '../../tasks/fleet';
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
@@ -28,6 +24,9 @@ import {
 
 import { login } from '../../tasks/login';
 import { ENDPOINT_VM_NAME } from '../../tasks/common';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
 describe('Response console', () => {
   const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
@@ -37,27 +36,37 @@ describe('Response console', () => {
   });
 
   describe('User journey for Isolate command: isolate and release an endpoint', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
-
       getEndpointIntegrationVersion().then((version) =>
         createAgentPolicyTask(version).then((data) => {
-          response = data;
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+          });
         })
       );
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost).then(() => {});
       }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
     });
 
@@ -87,29 +96,40 @@ describe('Response console', () => {
   });
 
   describe('User journey for Processes operations: list, kill and suspend process', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
     let cronPID: string;
     let newCronPID: string;
 
-    before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
 
+    before(() => {
       getEndpointIntegrationVersion().then((version) =>
         createAgentPolicyTask(version).then((data) => {
-          response = data;
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+          });
         })
       );
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost).then(() => {});
       }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
     });
 
@@ -172,36 +192,45 @@ describe('Response console', () => {
   });
 
   describe('File operations: get-file and execute', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
-
     const homeFilePath = `/home/ubuntu`;
 
-    before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
 
+    before(() => {
       getEndpointIntegrationVersion().then((version) =>
         createAgentPolicyTask(version).then((data) => {
-          response = data;
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+          });
         })
       );
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost).then(() => {});
       }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
     });
 
     it('"get-file --path" - should retrieve a file', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
       openResponseConsoleFromEndpointList();
-      // TODO: change this to fetch the agent log file
       inputConsoleCommand('get-file --path "/opt/Elastic/Endpoint/state/log/endpoint-000000.log"');
       submitCommand();
       waitForCommandToBeExecuted('get-file');
@@ -217,27 +246,37 @@ describe('Response console', () => {
   });
 
   describe('document signing', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
-
       getEndpointIntegrationVersion().then((version) =>
         createAgentPolicyTask(version).then((data) => {
-          response = data;
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+          });
         })
       );
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost).then(() => {});
       }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
     });
 

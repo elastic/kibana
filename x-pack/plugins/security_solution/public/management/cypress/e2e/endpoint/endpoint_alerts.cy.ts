@@ -10,6 +10,7 @@ import { getAlertsTableRows, navigateToAlertsList } from '../../screens/alerts';
 import { waitForEndpointAlerts } from '../../tasks/alerts';
 import { request } from '../../tasks/common';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import type { PolicyData, ResponseActionApiResponse } from '../../../../../common/endpoint/types';
@@ -31,17 +32,9 @@ describe('Endpoint generated alerts', () => {
 
         return enableAllPolicyProtections(policy.id).then(() => {
           // Create and enroll a new Endpoint host
-          return cy
-            .task(
-              'createEndpointHost',
-              {
-                agentPolicyId: policy.policy_id,
-              },
-              { timeout: 180000 }
-            )
-            .then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
-            });
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
         });
       });
     });
