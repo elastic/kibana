@@ -9,15 +9,14 @@
 import { getReferencesFilterMock } from './query_params.tests.mocks';
 
 import * as esKuery from '@kbn/es-query';
-
-type KueryNode = any;
-
 import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { getQueryParams } from './query_params';
+
+type KueryNode = any;
 
 const registerTypes = (registry: SavedObjectTypeRegistry) => {
   registry.registerType({

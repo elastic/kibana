@@ -12,8 +12,8 @@ import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { ApiExecutionContext } from './types';
-import { getSearchDsl } from '../search_dsl';
+import { getSearchDsl } from '../search';
+import type { ApiExecutionContext } from './types';
 
 export interface PerformRemoveReferencesToParams {
   type: string;

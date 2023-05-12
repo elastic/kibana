@@ -44,7 +44,7 @@ import type { RepositoryEsClient } from '../../repository_es_client';
 import {
   deleteLegacyUrlAliases,
   type DeleteLegacyUrlAliasesParams,
-} from '../../legacy_url_aliases';
+} from './delete_legacy_url_aliases';
 
 /**
  * Parameters for the updateObjectsSpaces function.
