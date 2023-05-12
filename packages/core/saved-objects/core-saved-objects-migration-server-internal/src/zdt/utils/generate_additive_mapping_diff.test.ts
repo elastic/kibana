@@ -15,7 +15,9 @@ describe('generateAdditiveMappingDiff', () => {
   const deletedTypes = ['deletedType'];
 
   const stubMigration = jest.fn();
-  const stubModelVersion: SavedObjectsModelVersion = { modelChange: { type: 'expansion' } };
+  const stubModelVersion: SavedObjectsModelVersion = {
+    changes: [{ type: 'mappings_addition', addedMappings: {} }],
+  };
 
   const getTypes = () => {
     const foo = createType({
