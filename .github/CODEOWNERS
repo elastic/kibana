@@ -1109,6 +1109,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/common/search_strategy/eql @elastic/security-detections-response-alerts
 
 ## Security Solution sub teams - Detections and Response Rules
 /x-pack/plugins/security_solution/common/detection_engine/fleet_integrations @elastic/security-detections-response-rules
