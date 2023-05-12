@@ -54,7 +54,7 @@ const response = z.array(
     config: soObject.optional(),
     id: nonEmptyString,
     is_deprecated: z.boolean(),
-    is_preconfigured: z.boolean,
+    is_preconfigured: z.boolean(),
     name: nonEmptyString,
     referenced_by_count: z.number,
   })
