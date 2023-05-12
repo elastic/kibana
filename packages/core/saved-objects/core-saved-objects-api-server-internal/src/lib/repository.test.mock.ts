@@ -11,7 +11,7 @@ import type { internalBulkResolve } from './apis/internals/internal_bulk_resolve
 import type * as InternalUtils from './apis/utils/internal_utils';
 import type { preflightCheckForCreate } from './apis/internals/preflight_check_for_create';
 import type { updateObjectsSpaces } from './apis/internals/update_objects_spaces';
-import type { deleteLegacyUrlAliases } from './legacy_url_aliases';
+import type { deleteLegacyUrlAliases } from './apis/internals/delete_legacy_url_aliases';
 
 export const mockCollectMultiNamespaceReferences = jest.fn() as jest.MockedFunction<
   typeof collectMultiNamespaceReferences
@@ -66,9 +66,9 @@ jest.doMock('./point_in_time_finder', () => ({
 export const mockDeleteLegacyUrlAliases = jest.fn() as jest.MockedFunction<
   typeof deleteLegacyUrlAliases
 >;
-jest.mock('./legacy_url_aliases', () => ({
+jest.mock('./apis/internals/delete_legacy_url_aliases', () => ({
   deleteLegacyUrlAliases: mockDeleteLegacyUrlAliases,
 }));
 
 export const mockGetSearchDsl = jest.fn();
-jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: mockGetSearchDsl }));
+jest.mock('./search/search_dsl', () => ({ getSearchDsl: mockGetSearchDsl }));

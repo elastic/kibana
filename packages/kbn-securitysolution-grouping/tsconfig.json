@@ -26,6 +26,5 @@
     "@kbn/shared-svg",
     "@kbn/ui-theme",
     "@kbn/analytics",
-    "@kbn/field-types"
   ]
 }
