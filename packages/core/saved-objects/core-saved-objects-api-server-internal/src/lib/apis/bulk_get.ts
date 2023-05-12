@@ -21,6 +21,7 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
+import { includedFields } from '../utils';
 import {
   Either,
   errorContent,
@@ -32,12 +33,16 @@ import {
   rawDocExistsInNamespaces,
 } from './utils';
 import { ApiExecutionContext } from './types';
-import { includedFields } from '../included_fields';
 
 export interface PerformBulkGetParams<T = unknown> {
   objects: SavedObjectsBulkGetObject[];
   options: SavedObjectsGetOptions;
 }
+
+type ExpectedBulkGetResult = Either<
+  { type: string; id: string; error: Payload },
+  { type: string; id: string; fields?: string[]; namespaces?: string[]; esRequestIndex: number }
+>;
 
 export const performBulkGet = async <T>(
   { objects, options }: PerformBulkGetParams<T>,
@@ -75,10 +80,6 @@ export const performBulkGet = async <T>(
   };
 
   let bulkGetRequestIndexCounter = 0;
-  type ExpectedBulkGetResult = Either<
-    { type: string; id: string; error: Payload },
-    { type: string; id: string; fields?: string[]; namespaces?: string[]; esRequestIndex: number }
-  >;
   const expectedBulkGetResults = await Promise.all(
     objects.map<Promise<ExpectedBulkGetResult>>(async (object) => {
       const { type, id, fields } = object;

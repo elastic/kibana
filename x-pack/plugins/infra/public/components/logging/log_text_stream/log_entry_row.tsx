@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useUiTracker } from '@kbn/observability-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
-import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
+import {
+  useUiTracker,
+  getContextMenuItemsFromActions,
+} from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
