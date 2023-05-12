@@ -19,7 +19,7 @@ import { requestContextMock, serverMock, requestMock } from '../../../../routes/
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
 import {
-  getCreateRulesSchemaMock,
+  getUpdateQueryWithResponseActionsSchemaMock,
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
@@ -193,16 +193,7 @@ describe('Update rule route', () => {
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getCreateRulesSchemaMock(),
-          response_actions: [
-            {
-              action_type_id: '.endpoint',
-              params: {
-                command: 'isolate',
-                comment: '',
-              },
-            },
-          ],
+          ...getUpdateQueryWithResponseActionsSchemaMock('isolate'),
         },
       });
 
@@ -219,16 +210,7 @@ describe('Update rule route', () => {
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getCreateRulesSchemaMock(),
-          response_actions: [
-            {
-              action_type_id: '.endpoint',
-              params: {
-                command: 'isolate',
-                comment: '',
-              },
-            },
-          ],
+          ...getUpdateQueryWithResponseActionsSchemaMock('isolate'),
         },
       });
 
@@ -236,6 +218,19 @@ describe('Update rule route', () => {
       expect(response.status).toEqual(401);
       expect(response.body.message).toEqual(
         'User is not authorized to change isolate response actions'
+      );
+    });
+    test('fails when provided with an unsupported command', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getUpdateQueryWithResponseActionsSchemaMock('processes'),
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'Invalid value "processes" supplied to "response_actions,params,command"'
       );
     });
   });

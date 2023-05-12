@@ -18,7 +18,10 @@ import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { createRuleRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import {
+  getCreateRulesSchemaMock,
+  getUpdateQueryWithResponseActionsSchemaMock,
+} from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
@@ -186,16 +189,7 @@ describe('Create rule route', () => {
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getCreateRulesSchemaMock(),
-          response_actions: [
-            {
-              action_type_id: '.endpoint',
-              params: {
-                command: 'isolate',
-                comment: '',
-              },
-            },
-          ],
+          ...getUpdateQueryWithResponseActionsSchemaMock('isolate'),
         },
       });
 
@@ -212,16 +206,7 @@ describe('Create rule route', () => {
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getCreateRulesSchemaMock(),
-          response_actions: [
-            {
-              action_type_id: '.endpoint',
-              params: {
-                command: 'isolate',
-                comment: '',
-              },
-            },
-          ],
+          ...getUpdateQueryWithResponseActionsSchemaMock('isolate'),
         },
       });
 
@@ -229,6 +214,19 @@ describe('Create rule route', () => {
       expect(response.status).toEqual(401);
       expect(response.body.message).toEqual(
         'User is not authorized to change isolate response actions'
+      );
+    });
+    test('fails when provided with an unsupported command', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getUpdateQueryWithResponseActionsSchemaMock('processes'),
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'Invalid value "processes" supplied to "response_actions,params,command"'
       );
     });
   });

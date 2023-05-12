@@ -195,3 +195,16 @@ export const getUpdateNewTermsSchemaMock = (
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
 });
+
+export const getUpdateQueryWithResponseActionsSchemaMock = (command: string) => ({
+  ...getCreateRulesSchemaMock(),
+  response_actions: [
+    {
+      action_type_id: '.endpoint',
+      params: {
+        command,
+        comment: '',
+      },
+    },
+  ],
+});

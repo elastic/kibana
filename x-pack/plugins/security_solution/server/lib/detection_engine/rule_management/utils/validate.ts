@@ -100,9 +100,9 @@ export const validateResponseActionsPermissions = async (
             RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP[action.params.command]
           ];
 
-        const isInvalid = endpointAuthz[authzPropName];
+        const isValid = endpointAuthz[authzPropName];
 
-        if (isInvalid) {
+        if (!isValid) {
           throw new CustomHttpRequestError(
             `User is not authorized to change ${action.params.command} response actions`,
             401
