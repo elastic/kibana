@@ -27,6 +27,23 @@ const mockInstallation: Installation = {
 };
 
 describe('calculateIntegrationStatus for cspm', () => {
+  it('Verify status when CSP package is not installed', async () => {
+    const statusCode = calculateIntegrationStatus(
+      CSPM_POLICY_TEMPLATE,
+      {
+        latest: 'not-empty',
+        stream: 'not-empty',
+        score: 'not-empty',
+      },
+      undefined,
+      1,
+      1,
+      ['cspm']
+    );
+
+    expect(statusCode).toMatch('not-installed');
+  });
+
   it('Verify status when there are no permission for cspm', async () => {
     const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
