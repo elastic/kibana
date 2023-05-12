@@ -7,7 +7,7 @@
  */
 
 import type * as InternalUtils from '../utils/internal_utils';
-import type { deleteLegacyUrlAliases } from '../../legacy_url_aliases';
+import type { deleteLegacyUrlAliases } from './delete_legacy_url_aliases';
 
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getBulkOperationError']
@@ -32,6 +32,6 @@ jest.mock('../utils/internal_utils', () => {
 export const mockDeleteLegacyUrlAliases = jest.fn() as jest.MockedFunction<
   typeof deleteLegacyUrlAliases
 >;
-jest.mock('../../legacy_url_aliases', () => ({
+jest.mock('./delete_legacy_url_aliases', () => ({
   deleteLegacyUrlAliases: mockDeleteLegacyUrlAliases,
 }));

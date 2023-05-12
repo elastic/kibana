@@ -110,6 +110,7 @@ export interface DocLinks {
   readonly enterpriseSearch: {
     readonly apiKeys: string;
     readonly behavioralAnalytics: string;
+    readonly behavioralAnalyticsCORS: string;
     readonly behavioralAnalyticsEvents: string;
     readonly buildConnector: string;
     readonly bulkApi: string;
@@ -471,6 +472,7 @@ export interface DocLinks {
     secureLogstash: string;
     agentPolicy: string;
     api: string;
+    uninstallAgent: string;
   }>;
   readonly ecs: {
     readonly guide: string;
