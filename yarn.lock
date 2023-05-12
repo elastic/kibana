@@ -3025,6 +3025,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-collaboration-notifications@link:packages/cloud/collaboration/notifications":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-collaboration-plugin@link:x-pack/plugins/cloud_integrations/cloud_collaboration":
   version "0.0.0"
   uid ""

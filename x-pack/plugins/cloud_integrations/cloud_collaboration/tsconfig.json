@@ -18,6 +18,7 @@
     "@kbn/config-schema",
     "@kbn/security-plugin",
     "@kbn/cloud-collaboration-presence",
+    "@kbn/cloud-collaboration-notifications",
     "@kbn/kibana-react-plugin",
   ],
   "exclude": [

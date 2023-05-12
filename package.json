@@ -169,6 +169,7 @@
     "@kbn/chart-icons": "link:packages/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/plugins/charts",
     "@kbn/cloud-chat-plugin": "link:x-pack/plugins/cloud_integrations/cloud_chat",
+    "@kbn/cloud-collaboration-notifications": "link:packages/cloud/collaboration/notifications",
     "@kbn/cloud-collaboration-plugin": "link:x-pack/plugins/cloud_integrations/cloud_collaboration",
     "@kbn/cloud-collaboration-presence": "link:packages/cloud/collaboration/presence",
     "@kbn/cloud-collaboration-threads": "link:packages/cloud/collaboration/threads",

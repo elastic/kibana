@@ -9,10 +9,12 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { CordProvider } from '@cord-sdk/react';
 import useObservable from 'react-use/lib/useObservable';
+import ReactDOM from 'react-dom';
 
 import { CoreStart, CoreSetup, Plugin } from '@kbn/core/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { BreadcrumbPresence } from '@kbn/cloud-collaboration-presence';
+import { NotificationButton } from '@kbn/cloud-collaboration-notifications';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
@@ -53,7 +55,7 @@ export class CloudCollaborationPlugin
   }
 
   public start({
-    chrome: { setBreadcrumbsAppendExtension },
+    chrome: { setBreadcrumbsAppendExtension, navControls },
   }: CoreStart): CloudCollaborationPluginStart {
     const setBreadcrumbPresence = (application: string, savedObjectId: string) => {
       const Presence = () => {
@@ -75,6 +77,23 @@ export class CloudCollaborationPlugin
         content: toMountPoint(<></>),
       });
     };
+
+    const Notifications = () => {
+      const token = useObservable(this.token$);
+      return (
+        <CordProvider clientAuthToken={token}>
+          <NotificationButton />
+        </CordProvider>
+      );
+    };
+
+    navControls.registerRight({
+      order: 800,
+      mount: (target) => {
+        ReactDOM.render(<Notifications />, target);
+        return () => ReactDOM.unmountComponentAtNode(target);
+      },
+    });
 
     return {
       getIsAvailable$: () => this.isAvailable$,

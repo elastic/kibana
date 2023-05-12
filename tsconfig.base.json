@@ -130,6 +130,8 @@
       "@kbn/cli-dev-mode/*": ["packages/kbn-cli-dev-mode/*"],
       "@kbn/cloud-chat-plugin": ["x-pack/plugins/cloud_integrations/cloud_chat"],
       "@kbn/cloud-chat-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_chat/*"],
+      "@kbn/cloud-collaboration-notifications": ["packages/cloud/collaboration/notifications"],
+      "@kbn/cloud-collaboration-notifications/*": ["packages/cloud/collaboration/notifications/*"],
       "@kbn/cloud-collaboration-plugin": ["x-pack/plugins/cloud_integrations/cloud_collaboration"],
       "@kbn/cloud-collaboration-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_collaboration/*"],
       "@kbn/cloud-collaboration-presence": ["packages/cloud/collaboration/presence"],
