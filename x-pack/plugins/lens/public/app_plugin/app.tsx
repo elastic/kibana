@@ -59,7 +59,7 @@ import {
   type IndexPatternServiceAPI,
   createIndexPatternService,
 } from '../data_views_service/service';
-import { replaceIndexpattern } from '../state_management/lens_slice';
+import { replaceIndexpattern, timeTravel } from '../state_management/lens_slice';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
@@ -748,6 +748,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
 });
 
 const RevisionHistoryFlyout = ({ onClose }: { onClose: () => void }) => {
+  const dispatch = useLensDispatch();
   const changes = useLensSelector(selectRevisionHistory);
 
   return (
@@ -758,10 +759,9 @@ const RevisionHistoryFlyout = ({ onClose }: { onClose: () => void }) => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {changes.map((change, index) => (
-          <>
+        {changes.map((change) => (
+          <div key={change.created}>
             <EuiCard
-              key={index}
               title={i18n.translate('xpack.lens.revisionCreated', {
                 defaultMessage: '{dateCreated, date, medium} @ {dateCreated, time, short}',
                 values: { dateCreated: new Date(change.created) },
@@ -770,10 +770,10 @@ const RevisionHistoryFlyout = ({ onClose }: { onClose: () => void }) => {
               display={change.active ? 'primary' : 'plain'}
               hasBorder
               layout="horizontal"
-              onClick={change.active ? undefined : () => {}}
+              onClick={change.active ? undefined : () => dispatch(timeTravel(change.created))}
             />
-            <EuiSpacer size="s" key={index} />
-          </>
+            <EuiSpacer size="s" />
+          </div>
         ))}
       </EuiFlyoutBody>
     </EuiFlyout>

@@ -13,6 +13,7 @@ import {
   beginReversibleOperation,
   completeReversibleOperation,
   recordReversibleStateChange,
+  timeTravel,
 } from './lens_slice';
 import { StateCoordinator } from './state_coordinator';
 import { LensAppState, StateRevision } from './types';
@@ -64,7 +65,7 @@ export const stateHistoryMiddleware = () => (store: MiddlewareAPI) => (next: Dis
 
   return (action: Action) => {
     if (
-      [initEmpty, recordReversibleStateChange, undo, redo].some((testAction) =>
+      [initEmpty, recordReversibleStateChange, undo, redo, timeTravel].some((testAction) =>
         testAction.match(action)
       )
     ) {

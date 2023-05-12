@@ -7,7 +7,7 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { mapValues, uniq } from 'lodash';
+import { cloneDeep, mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { applyPatch } from 'fast-json-patch';
@@ -252,6 +252,7 @@ export const recordReversibleStateChange = createAction<{
 }>('lens/recordReversibleStateChange');
 export const undo = createAction('lens/undo');
 export const redo = createAction('lens/redo');
+export const timeTravel = createAction<number>('lens/timeTravel');
 export const beginReversibleOperation = createAction('lens/beginReversibleOperation');
 export const completeReversibleOperation = createAction('lens/completeReversibleOperation');
 export const applyPatches = createAction<{ patches: Patch[] }>('lens/applyPatches');
@@ -1240,17 +1241,20 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
     [undo.type]: (_state) => {
       const currentState = current(_state);
-      return moveStateThroughHistory(
+      return applyTimeTravel(
         currentState,
-        currentState.changes[currentState.changes.length - 1].created
+        currentState.changes[currentState.changes.length - 1].created - 1 // TODO - revisit this quirk
       );
     },
     [redo.type]: (_state) => {
       const currentState = current(_state);
-      return moveStateThroughHistory(
+      return applyTimeTravel(
         currentState,
         currentState.reversedChanges[currentState.reversedChanges.length - 1].created
       );
+    },
+    [timeTravel.type]: (_state, { payload: targetTimestamp }: { payload: number }) => {
+      return applyTimeTravel(current(_state), targetTimestamp);
     },
     [applyPatches.type]: (_state, { payload: { patches } }: { payload: { patches: Patch[] } }) => {
       let newState = current(_state);
@@ -1262,22 +1266,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   });
 };
 
-function moveLastItemToAnotherReadonlyArray<T>(from: T[], to: T[]): [T[], T[], T] {
-  const movedItem = from[from.length - 1];
-  let newFrom = from;
-  let newTo = to;
-  if (movedItem) {
-    newFrom = from.slice(0, from.length - 1);
-    newTo = [...to, movedItem];
-  }
-
-  return [newFrom, newTo, movedItem];
-}
-
 const applyToLastElement = <T>(arr: T[], transform: (item: T) => T): T[] =>
   arr.map((item, index) => (index === arr.length - 1 ? transform(item) : item));
 
-function moveStateThroughHistory(_state: LensAppState, targetTimestamp: number) {
+function applyTimeTravel(_state: LensAppState, targetTimestamp: number) {
   const currentTimestamp = _state.changes[_state.changes.length - 1]?.created as number | undefined;
 
   const direction: 'backward' | 'forward' =
@@ -1285,40 +1277,36 @@ function moveStateThroughHistory(_state: LensAppState, targetTimestamp: number) 
 
   const comparator =
     direction === 'backward'
-      ? (source: number, target: number) => source >= target
+      ? (source: number, target: number) => source > target
       : (source: number, target: number) => source <= target;
+
   const [fromAccessor, toAccessor] =
     direction === 'backward'
       ? (['changes', 'reversedChanges'] as const)
       : (['reversedChanges', 'changes'] as const);
 
-  let state = {
+  let state = cloneDeep({
     ..._state,
     changes: _state.changes.map((change) => ({ ...change, active: false })),
     reversedChanges: _state.reversedChanges.map((reversedChange) => ({
       ...reversedChange,
       active: false,
     })),
-  };
+  });
 
   while (
     state[fromAccessor].length &&
     comparator(state[fromAccessor][state[fromAccessor].length - 1].created, targetTimestamp)
   ) {
-    const [fromArray, toArray, change] = moveLastItemToAnotherReadonlyArray(
-      state[fromAccessor],
-      state[toAccessor]
-    );
+    const change = state[fromAccessor].pop();
 
     if (!change) {
       return state;
     }
 
-    state = {
-      ...applyPatch(state, change[direction], false, false).newDocument,
-      [fromAccessor]: fromArray,
-      [toAccessor]: toArray,
-    };
+    state[toAccessor].push(change);
+
+    state = applyPatch(state, change[direction], false, false).newDocument;
   }
 
   return {
