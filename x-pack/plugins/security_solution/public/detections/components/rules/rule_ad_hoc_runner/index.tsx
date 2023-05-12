@@ -23,7 +23,6 @@ import moment from 'moment';
 
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import * as i18n from './translations';
-// import { PreviewHistogram } from '../rule_preview/preview_histogram';
 import { PreviewLogsComponent } from '../rule_preview/preview_logs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from '../rule_preview/loading_histogram';
@@ -32,7 +31,7 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from '../rule_preview/use_preview_invocation_count';
 import { useAdHocRunnerRoute } from './use_ad_hoc_runner_route';
-import { PreviewHistogram } from '../rule_preview/preview_histogram';
+import { AdHocRunHistogram } from './ad_hoc_run_histogram';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
@@ -106,7 +105,7 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
     addNoiseWarning,
     createPreview,
     isAdHocRunRequestInProgress,
-    adHocRunId,
+    executionId,
     logs,
     hasNoiseWarning,
     isAborted,
@@ -215,12 +214,13 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
+
       <EuiSpacer size="l" />
       {isAdHocRunRequestInProgress && <LoadingHistogram />}
-      {!isAdHocRunRequestInProgress && adHocRunId && spaceId && (
-        <PreviewHistogram
+      {!isAdHocRunRequestInProgress && executionId && spaceId && (
+        <AdHocRunHistogram
           ruleType={rule.type}
-          previewId={adHocRunId}
+          executionId={executionId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
           indexPattern={undefined}

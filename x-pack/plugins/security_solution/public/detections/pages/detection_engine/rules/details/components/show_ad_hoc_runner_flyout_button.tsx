@@ -11,8 +11,6 @@ import {
   EuiButtonIcon,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';

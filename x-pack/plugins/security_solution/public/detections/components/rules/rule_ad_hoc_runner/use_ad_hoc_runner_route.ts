@@ -55,6 +55,7 @@ export const useAdHocRunnerRoute = ({ rule, timeframeOptions }: AdHocRunnerRoute
     clearPreview,
     isAdHocRunRequestInProgress: isLoading,
     adHocRunId: response.adHocRunId ?? '',
+    executionId: response.executionId ?? '',
     logs,
     isAborted,
   };

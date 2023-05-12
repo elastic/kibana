@@ -17,6 +17,8 @@ import { usePreviewInvocationCount } from '../rule_preview/use_preview_invocatio
 
 const emptyPreviewRule: AdHocRunResponse = {
   adHocRunId: undefined,
+  executionId: undefined,
+  initialInvocationCount: 0,
   logs: [],
   isAborted: false,
 };
