@@ -21,7 +21,6 @@ import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import { getAllCasesSelectorModalLazy } from './client/ui/get_all_cases_selector_modal';
 import { getCasesLazy } from './client/ui/get_cases';
 import { getCasesContextLazy } from './client/ui/get_cases_context';
-import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
@@ -140,14 +139,6 @@ export class CasesUiPlugin
         getCasesContext,
         getRecentCases: (props) =>
           getRecentCasesLazy({
-            ...props,
-            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
-            persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-            getFilesClient: plugins.files.filesClientFactory.asScoped,
-          }),
-        // @deprecated Please use the hook useCasesAddToNewCaseFlyout
-        getCreateCaseFlyout: (props) =>
-          getCreateCaseFlyoutLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
