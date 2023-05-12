@@ -41,7 +41,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
   const { chrome, setBreadcrumbs } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
-  console.log('here3');
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;

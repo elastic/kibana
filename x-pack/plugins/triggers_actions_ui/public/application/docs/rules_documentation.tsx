@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 
 export function RulesHelp() {
   return (
@@ -101,6 +101,7 @@ export function RulesHelp() {
           />
         </p>
       </EuiText>
+      <EuiSpacer size="l" />
     </>
   );
 }

@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Plugin } from '@kbn/core/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { defineRoutes } from './routes';
 
 export class HelpCenterPlugin implements Plugin {
-  public setup() {}
+  public setup(core: CoreSetup) {
+    defineRoutes({ core });
+  }
 
   public start() {}
 

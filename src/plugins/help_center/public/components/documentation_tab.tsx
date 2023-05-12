@@ -28,30 +28,120 @@ import { ReactElement } from 'react-markdown';
 import { HelpCenterContext } from './help_center_header_nav_button';
 import { GlobalContent } from './global_content';
 import { CustomContent } from './custom_content';
+import { getCoreStart } from './docs_gpt';
+import { ChromeHelpExtensionMenuDocumentationLink } from '@kbn/core-chrome-browser';
+
+const MainDocumentationTabWithSearch = ({ setPanelTitle }) => {
+  const { helpFetchResults } = useContext(HelpCenterContext);
+  const [searchResult, setSearchResult] = useState<ChromeHelpExtensionMenuDocumentationLink[]>([]);
+
+  const searchForDocs = async (searchTerm: string) => {
+    const trimmedSearchTerm = searchTerm.trim();
+    if (!trimmedSearchTerm) {
+      setSearchResult([]);
+      return;
+    }
+
+    try {
+      const response = await getCoreStart().http.get<{
+        links: Array<{ title: string; url: string }>;
+      }>('/internal/help_center/kibana_docs', {
+        query: { query: trimmedSearchTerm },
+      });
+
+      if (response.links.length) {
+        const links = response.links.map(({ title, url }) => {
+          return {
+            title,
+            href: url,
+            linkType: 'documentation',
+          } as ChromeHelpExtensionMenuDocumentationLink;
+        });
+        setSearchResult(links);
+      }
+    } catch (e) {
+      console.log('ERRORS');
+    }
+  };
+
+  return (
+    <>
+      <EuiSearchBar
+        onChange={({ queryText }) => {
+          searchForDocs(queryText);
+        }}
+      />
+      <MainDocumentationTab setPanelTitle={setPanelTitle} searchResult />
+    </>
+  );
+};
 
 const MainDocumentationTab = ({
+  searchString,
+  documentation,
   setCurrentTab,
   setPanelTitle,
-}: {
+  setDocumentation,
+  setSearchString,
+}: // documentation,
+{
+  searchString: string;
+  documentation: ChromeHelpExtensionMenuDocumentationLink[];
   setCurrentTab: (newTab: number) => void;
   setPanelTitle: (el: ReactElement) => void;
+  setDocumentation: (docs: ChromeHelpExtensionMenuDocumentationLink[]) => void;
+  setSearchString: (search: string) => void;
+  // documentation?: ChromeHelpExtensionMenuDocumentationLink[];
 }) => {
   const { helpFetchResults } = useContext(HelpCenterContext);
+
+  const searchForDocs = async (searchTerm: string) => {
+    const trimmedSearchTerm = searchTerm.trim();
+    if (!trimmedSearchTerm) {
+      setSearchString('');
+      setDocumentation(helpFetchResults?.documentation ?? []);
+      return;
+    }
+
+    setSearchString(trimmedSearchTerm);
+    try {
+      const response = await getCoreStart().http.get<{
+        links: Array<{ title: string; url: string }>;
+      }>('/internal/help_center/kibana_docs', {
+        query: { query: trimmedSearchTerm },
+      });
+
+      if (response.links.length) {
+        const links = response.links.map(({ title, url }) => {
+          return {
+            title,
+            href: url,
+            linkType: 'documentation',
+          } as ChromeHelpExtensionMenuDocumentationLink;
+        });
+        setDocumentation(links);
+      }
+    } catch (e) {
+      console.log('ERRORS');
+    }
+  };
 
   return (
     <div>
       <EuiSearchBar
-      // defaultQuery={initialQuery}
-      // box={{
-      //   placeholder: 'type:visualization -is:active joe',
-      //   incremental,
-      //   schema,
-      // }}
-      // filters={filters}
-      // onChange={onChange}
+        defaultQuery={searchString}
+        // box={{
+        //   placeholder: 'type:visualization -is:active joe',
+        //   incremental,
+        //   schema,
+        // }}
+        // filters={filters}
+        onChange={({ queryText }) => {
+          searchForDocs(queryText);
+        }}
       />
       <EuiSpacer size="m" />
-      {(helpFetchResults?.documentation ?? []).map((doc, i) => {
+      {(documentation ?? []).map((doc, i) => {
         return (
           <>
             <EuiCard
@@ -139,14 +229,19 @@ export const DocumentationTab = ({
 }: {
   setPanelTitle: (el: ReactElement) => void;
 }) => {
+  const [searchString, setSearchString] = useState('');
   const [currentTab, setCurrentTab] = useState(0);
   const { helpFetchResults } = useContext(HelpCenterContext);
   const parser = useMemo(() => new DOMParser(), []);
 
+  const [documentation, setDocumentation] = useState<ChromeHelpExtensionMenuDocumentationLink[]>(
+    helpFetchResults?.documentation ?? []
+  );
+
   const { loading: documentationLoading, value: panels = [] as ReactElement[] } =
     useAsync(async () => {
       const mainPanels = await Promise.all(
-        (helpFetchResults?.documentation ?? []).map(async (doc, i) => {
+        documentation.map(async (doc, i) => {
           if (doc.content) return doc.content;
 
           const response = await fetch(doc.href);
@@ -181,10 +276,17 @@ export const DocumentationTab = ({
         })
       );
       return mainPanels;
-    }, [helpFetchResults?.documentation]);
+    }, [documentation]);
 
   return currentTab === 0 || documentationLoading ? (
-    <MainDocumentationTab setCurrentTab={setCurrentTab} setPanelTitle={setPanelTitle} />
+    <MainDocumentationTab
+      searchString={searchString}
+      documentation={documentation}
+      setCurrentTab={setCurrentTab}
+      setPanelTitle={setPanelTitle}
+      setDocumentation={setDocumentation}
+      setSearchString={setSearchString}
+    />
   ) : (
     panels[currentTab - 1]
   );
