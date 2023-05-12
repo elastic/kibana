@@ -15,7 +15,6 @@ import type {
 } from '../../../common/api';
 import { getCasesFromAlertsUrl } from '../../../common/api';
 import type { CasesFindResponseUI, CasesStatus, CasesMetrics } from '../../../common/ui';
-import { bulkGetCases, getCases, getCasesMetrics, getCasesStatus } from '../../api';
 import type { CasesUiStart } from '../../types';
 
 export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['api'] => {
@@ -26,13 +25,28 @@ export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['ap
     ): Promise<CasesByAlertId> =>
       http.get<CasesByAlertId>(getCasesFromAlertsUrl(alertId), { query }),
     cases: {
-      find: (query: CasesFindRequest, signal?: AbortSignal): Promise<CasesFindResponseUI> =>
-        getCases({ http, query, signal }),
-      getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal): Promise<CasesStatus> =>
-        getCasesStatus({ http, query, signal }),
-      getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal): Promise<CasesMetrics> =>
-        getCasesMetrics({ http, signal, query }),
-      bulkGet: (params, signal?: AbortSignal) => bulkGetCases({ http, signal, params }),
+      find: async (query: CasesFindRequest, signal?: AbortSignal): Promise<CasesFindResponseUI> => {
+        const { getCases } = await import('../../api');
+        return getCases({ http, query, signal });
+      },
+      getCasesStatus: async (
+        query: CasesStatusRequest,
+        signal?: AbortSignal
+      ): Promise<CasesStatus> => {
+        const { getCasesStatus } = await import('../../api');
+        return getCasesStatus({ http, query, signal });
+      },
+      getCasesMetrics: async (
+        query: CasesMetricsRequest,
+        signal?: AbortSignal
+      ): Promise<CasesMetrics> => {
+        const { getCasesMetrics } = await import('../../api');
+        return getCasesMetrics({ http, query, signal });
+      },
+      bulkGet: async (params, signal?: AbortSignal) => {
+        const { bulkGetCases } = await import('../../api');
+        return bulkGetCases({ http, signal, params });
+      },
     },
   };
 };
