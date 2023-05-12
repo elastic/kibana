@@ -15,7 +15,7 @@ import { DecorateWithKibanaContext } from './processes.story_decorators';
 import { Processes, ProcessesProps } from './processes';
 
 export default {
-  title: 'infra/Host Details View/Processes',
+  title: 'infra/Host Details View/Components/Processes',
   decorators: [
     (wrappedStory) => <EuiCard title="Processes">{wrappedStory()}</EuiCard>,
     (wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>,
