@@ -73,7 +73,6 @@ export const getMonitorSummary = (
     monitorUrlLabel: typeToUrlLabelMap[monitorType] || 'URL',
     monitorId: monitorInfo.monitor?.id,
     monitorName,
-    monitorNameTruncated: truncateString(monitorName || '', MAX_NAME_CHARS),
     monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
     lastErrorMessage: monitorInfo.error?.message!,
     locationName: monitorInfo.observer?.geo?.name!,
@@ -111,16 +110,6 @@ export const getReasonMessage = ({
       checkedAt,
     },
   });
-};
-
-export const MAX_NAME_CHARS = 30;
-
-export const truncateString = (str: string, maxLength: number) => {
-  if (str.length > maxLength) {
-    return str.substring(0, maxLength).concat('...');
-  } else {
-    return str;
-  }
 };
 
 export const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.downLabel', {

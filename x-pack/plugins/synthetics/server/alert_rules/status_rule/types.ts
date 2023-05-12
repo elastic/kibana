@@ -16,7 +16,6 @@ export interface MonitorSummaryStatusRule {
   locationId: string;
   monitorType: string;
   monitorName: string;
-  monitorNameTruncated: string;
   locationName: string;
   lastErrorMessage: string;
   stateId: string | null;

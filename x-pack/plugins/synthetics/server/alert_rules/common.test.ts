@@ -268,7 +268,6 @@ describe('setRecoveredAlertsContext', () => {
       monitorName: 'test-monitor',
       recoveryReason: 'the monitor has been deleted',
       recoveryStatus: 'has been deleted',
-      monitorNameTruncated: 'test-monitor',
       monitorUrl: '(unavailable)',
       monitorUrlLabel: 'URL',
       reason:
@@ -322,7 +321,6 @@ describe('setRecoveredAlertsContext', () => {
     expect(setContext).toBeCalledWith({
       configId: '12345',
       checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
-      monitorNameTruncated: 'test-monitor',
       monitorUrl: '(unavailable)',
       reason:
         'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
@@ -394,7 +392,6 @@ describe('setRecoveredAlertsContext', () => {
       checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
       linkMessage:
         '- Link: https://localhost:5601/app/synthetics/monitor/12345-67891/errors/123456?locationId=us_west',
-      monitorNameTruncated: 'test-monitor',
       monitorUrl: '(unavailable)',
       monitorUrlLabel: 'URL',
       reason:
