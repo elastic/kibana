@@ -15,6 +15,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
 import type { TagcloudState } from './types';
 import { suggestions } from './suggestions';
+import { TagcloudToolbar } from './tagcloud_toolbar';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -146,6 +147,8 @@ export const getTagcloudVisualization = ({
           arguments: {
             bucket: [state.tagAccessor],
             metric: [state.valueAccessor],
+            maxFontSize: [state.maxFontSize],
+            minFontSize: [state.minFontSize],
           },
         },
       ],
@@ -211,5 +214,16 @@ export const getTagcloudVisualization = ({
 
   renderDimensionEditor(domElement, props) {
     return null;
+  },
+
+  renderToolbar(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <TagcloudToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 });
