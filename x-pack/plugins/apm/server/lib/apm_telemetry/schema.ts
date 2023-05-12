@@ -164,19 +164,62 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
 
 export const apmSchema: MakeSchemaFrom<APMUsage> = {
   ...apmPerAgentSchema,
-  has_any_services: { type: 'boolean' },
+  has_any_services: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Indicates whether any service is being monitored. This is determined by checking all agents.',
+    },
+  },
   version: {
     apm_server: {
-      major: long,
-      minor: long,
-      patch: long,
+      major: {
+        ...long,
+        _meta: {
+          description: 'The major version of the APM server. Example: 7',
+        },
+      },
+      minor: {
+        ...long,
+        _meta: {
+          description: 'The minor version of the APM server. Example: 17',
+        },
+      },
+      patch: {
+        ...long,
+        _meta: {
+          description: 'The patch version of the APM server. Example 3',
+        },
+      },
     },
   },
   environments: {
-    services_without_environment: long,
-    services_with_multiple_environments: long,
-    top_environments: { type: 'array', items: { type: 'keyword' } },
+    services_without_environment: {
+      ...long,
+      _meta: {
+        description:
+          'Number of services without an assigned environment. This is determined by checking the "service.environment" field and counting instances where it is null',
+      },
+    },
+    services_with_multiple_environments: {
+      ...long,
+      _meta: {
+        description:
+          'Number of services with more than one assigned environment',
+      },
+    },
+    top_environments: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of the top 5 environments in terms of document count',
+        },
+      },
+    },
   },
+  // #NOTE No task identified for extracting the following information
   aggregated_transactions: {
     current_implementation: aggregatedTransactionCountSchema,
     no_observer_name: aggregatedTransactionCountSchema,
@@ -186,11 +229,51 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     only_rum_no_observer_name: aggregatedTransactionCountSchema,
   },
   cloud: {
-    availability_zone: { type: 'array', items: { type: 'keyword' } },
-    provider: { type: 'array', items: { type: 'keyword' } },
-    region: { type: 'array', items: { type: 'keyword' } },
+    availability_zone: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of the top 10 cloud availability zones in terms of document count. Example: [us-east1-c, us-east1-b]',
+        },
+      },
+    },
+    provider: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of the top 10 cloud providers in terms of document count. Example: [azure]',
+        },
+      },
+    },
+    region: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of the top 10 cloud regions in terms of document count. Example: [us-west1, us-central1]',
+        },
+      },
+    },
   },
-  host: { os: { platform: { type: 'array', items: { type: 'keyword' } } } },
+  host: {
+    os: {
+      platform: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 10 operating system platforms in terms of document count. Example: [linux, win32]',
+          },
+        },
+      },
+    },
+  },
   counts: {
     transaction: timeframeMapSchema,
     span: timeframeMapSchema,
@@ -260,20 +343,167 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   },
   per_service: { type: 'array', items: { ...apmPerServiceSchema } },
   tasks: {
-    aggregated_transactions: { took: { ms: long } },
-    cloud: { took: { ms: long } },
-    host: { took: { ms: long } },
-    processor_events: { took: { ms: long } },
-    agent_configuration: { took: { ms: long } },
-    services: { took: { ms: long } },
-    versions: { took: { ms: long } },
-    groupings: { took: { ms: long } },
-    integrations: { took: { ms: long } },
-    agents: { took: { ms: long } },
-    indices_stats: { took: { ms: long } },
-    cardinality: { took: { ms: long } },
-    environments: { took: { ms: long } },
-    service_groups: { took: { ms: long } },
-    per_service: { took: { ms: long } },
+    aggregated_transactions: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "aggregated_transactions" task',
+          },
+        },
+      },
+    },
+    cloud: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description: 'Execution time in milliseconds for the "cloud" task',
+          },
+        },
+      },
+    },
+    host: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description: 'Execution time in milliseconds for the "host" task',
+          },
+        },
+      },
+    },
+    processor_events: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "processor_events" task',
+          },
+        },
+      },
+    },
+    agent_configuration: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "agent_configuration" task',
+          },
+        },
+      },
+    },
+    services: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "services" task',
+          },
+        },
+      },
+    },
+    versions: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "versions" task',
+          },
+        },
+      },
+    },
+    groupings: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "groupings" task',
+          },
+        },
+      },
+    },
+    integrations: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "integrations" task',
+          },
+        },
+      },
+    },
+    agents: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description: 'Execution time in milliseconds for the "agents" task',
+          },
+        },
+      },
+    },
+    indices_stats: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "indices_stats" task',
+          },
+        },
+      },
+    },
+    cardinality: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "cardinality" task',
+          },
+        },
+      },
+    },
+    environments: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "environments" task',
+          },
+        },
+      },
+    },
+    service_groups: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "service_groups" task',
+          },
+        },
+      },
+    },
+    per_service: {
+      took: {
+        ms: {
+          ...long,
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "per_service" task',
+          },
+        },
+      },
+    },
   },
 };
