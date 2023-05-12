@@ -51,7 +51,7 @@ export function IndexTemplatesStatus() {
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
         {isOk ? (
-          'Default index templates were found'
+          'Default index templates exists'
         ) : isEveryExpectedIndexTemplateInstalled === false ? (
           <>Some index templates could not be found {indexTemplatesLink}</>
         ) : (

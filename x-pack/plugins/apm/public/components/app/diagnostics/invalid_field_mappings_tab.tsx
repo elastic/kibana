@@ -18,7 +18,7 @@ export function DiagnosticsInvalidFieldMappings() {
     return (
       <EuiTitle size="s">
         <h2>
-          <EuiIcon size="m" type="check" /> Field mappings are correct
+          <EuiIcon size="m" type="check" /> No invalid field mappings detected
         </h2>
       </EuiTitle>
     );

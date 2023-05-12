@@ -18,9 +18,10 @@ export function DataStreamsStatus() {
 
   const router = useApmRouter();
   const isLoading = status === FETCH_STATUS.LOADING;
-  const isEveryTemplateNameValid = data?.dataStreams.every((ds) =>
+  const isEveryTemplateNameValid = (data?.dataStreams ?? []).every((ds) =>
     getIsValidIndexTemplateName(ds.template)
   );
+
   const isOk = !data?.nonDataStreamIndices.length && isEveryTemplateNameValid;
 
   return (
@@ -43,10 +44,10 @@ export function DataStreamsStatus() {
         {isLoading ? (
           '...'
         ) : isOk ? (
-          'Datastreams correctly installed'
+          'No problems with data streams'
         ) : (
           <>
-            Data streams are not correctly installed
+            Problems with data streams
             <EuiLink
               data-test-subj="apmDataStreamsStatusSeeDetailsLink"
               href={router.link('/diagnostics/data_streams')}

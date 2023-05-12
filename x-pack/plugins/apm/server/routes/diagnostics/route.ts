@@ -34,9 +34,9 @@ const fieldMappingsRoute = createApmServerRoute({
       filter_path: ['fields'],
     });
 
-    const invalidFieldMappings = Object.values(res.fields[SERVICE_NAME]).filter(
-      ({ type }): boolean => type !== 'keyword'
-    );
+    const invalidFieldMappings = Object.values(
+      res.fields[SERVICE_NAME] ?? {}
+    ).filter(({ type }): boolean => type !== 'keyword');
 
     // const invalidFieldMappings = getInvalidFieldMappings(res);
     return { invalidFieldMappings };
