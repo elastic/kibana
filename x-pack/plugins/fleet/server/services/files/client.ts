@@ -7,20 +7,27 @@
 
 import type { Readable } from 'stream';
 
+import assert from 'assert';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { FileClient } from '@kbn/files-plugin/server';
+import { createFileHashTransform } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 
 import type { BaseFileMetadata, FileCompression } from '@kbn/shared-ux-file-types';
+
+import { v4 as uuidV4 } from 'uuid';
 
 import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
 
 import { FleetFileNotFound, FleetFilesClientError } from '../../errors';
 
 import type { FleetFile, FleetFileClientInterface } from './types';
+import type { HapiReadableStream } from './types';
+import type { FleetFileUpdatableFields } from './types';
 
 /**
  * Public interface for interacting with Files stored in Fleet indexes. Service is consumed via
@@ -63,15 +70,60 @@ export class FleetFilesClient implements FleetFileClientInterface {
     return this.getFileCreatedByHost(fileId);
   }
 
-  async create(): Promise<FleetFile> {
-    // FIXME:PT implement
+  async create(fileStream: HapiReadableStream, agentIds: string[]): Promise<FleetFile> {
+    this.ensureTypeIsToHost();
+
+    assert(agentIds.length > 0, new FleetFilesClientError('Missing agentIds!'));
+
+    const uploadedFile = await this.esFileClient.create<FleetFileUpdatableFields>({
+      id: uuidV4(),
+      metadata: {
+        name: fileStream.hapi.filename ?? 'unknown_file_name',
+        mime: fileStream.hapi.headers['content-type'] ?? 'application/octet-stream',
+        meta: {
+          target_agents: agentIds,
+          action_id: '',
+        },
+      },
+    });
+
+    await uploadedFile.uploadContent(fileStream, undefined, {
+      transforms: [createFileHashTransform()],
+    });
+
+    assert(
+      uploadedFile.data.hash && uploadedFile.data.hash.sha256,
+      new FleetFilesClientError('File hash was not generated!')
+    );
+
+    return this.get(uploadedFile.id);
   }
 
-  async update(): Promise<FleetFile> {
-    // FIXME:PT implement
+  async update(
+    fileId: string,
+    updates: Partial<FleetFileUpdatableFields> = {}
+  ): Promise<FleetFile> {
+    this.ensureTypeIsToHost();
+
+    const file = await this.esFileClient.get<FleetFileUpdatableFields>({
+      id: fileId,
+    });
+
+    await file.update({
+      meta: {
+        ...(file.data.meta ?? { action_id: '', target_agents: [] }),
+        ...updates,
+      },
+    });
+
+    return this.get(fileId);
   }
 
-  async delete(): Promise<void> {}
+  async delete(fileId: string): Promise<void> {
+    this.ensureTypeIsToHost();
+
+    await this.esFileClient.delete({ id: fileId, hasContent: true });
+  }
 
   async doesFileHaveChunks(fileId: string): Promise<boolean> {
     try {
@@ -124,7 +176,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
     }
   }
 
-  private async getFileCreatedByHost(fileId: string): Promise<FleetFile> {
+  protected async getFileCreatedByHost(fileId: string): Promise<FleetFile> {
     try {
       const fileDocSearchResult = await this.esClient.search<HostUploadedFileMetadata>({
         index: this.fileMetaIndex,
@@ -171,7 +223,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
     }
   }
 
-  private mapIndexedDocToFleetFile(
+  protected mapIndexedDocToFleetFile(
     fileDoc: estypes.SearchHit<HostUploadedFileMetadata>
   ): FleetFile {
     if (!fileDoc._source) {
@@ -196,6 +248,12 @@ export class FleetFilesClient implements FleetFileClientInterface {
     };
 
     return file;
+  }
+
+  protected ensureTypeIsToHost() {
+    if (this.type !== 'to-host') {
+      throw new FleetFilesClientError('Method is only supported when `type` is `to-host`');
+    }
   }
 }
 

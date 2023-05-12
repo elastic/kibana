@@ -51,3 +51,8 @@ export interface HapiReadableStream extends Readable {
     headers: Record<string, string>;
   };
 }
+
+export interface FleetFileUpdatableFields {
+  target_agents: string[];
+  action_id: string;
+}
