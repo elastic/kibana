@@ -18,9 +18,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import welcomeGraphicLight from '../../../../../assets/images/welcome_light.svg';
+import { docLinks } from '../../../../shared/doc_links';
 
 export const SearchApplicationDocumentation = () => {
   return (
@@ -32,7 +34,7 @@ export const SearchApplicationDocumentation = () => {
           <EuiText>
             <h2>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplication.documentation.text.title',
+                'xpack.enterpriseSearch.content.searchApplication.documentation.searchApplication.title',
                 {
                   defaultMessage: 'Learn more about Search Applications',
                 }
@@ -43,18 +45,18 @@ export const SearchApplicationDocumentation = () => {
           <EuiText>
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplication.documentation.text.paragraph',
+                'xpack.enterpriseSearch.content.searchApplication.documentation.searchApplication.description',
                 {
                   defaultMessage:
-                    'Search Applications help make your Elasticsearch data searchable for end users, with out-of-the-box relevance, analytics and personalization tools.',
+                    'Search Applications help make your Elasticsearch data easily searchable for end users.',
                 }
               )}
             </p>
           </EuiText>
 
-          <EuiLink href="#" external>
+          <EuiLink href={docLinks.searchApplications} external>
             {i18n.translate(
-              'xpack.enterpriseSearch.content.searchApplication.documentation.readMoreLink',
+              'xpack.enterpriseSearch.content.searchApplication.documentation.searchApplication.readDocumentation',
               {
                 defaultMessage: 'Read our documentation',
               }
@@ -96,7 +98,7 @@ export const SearchApplicationDocumentation = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <EuiLink href="#" external>
+                    <EuiLink href={docLinks.apiKeys} external>
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.searchApplication.documentation.manageAPIKeys.learnMore',
                         {
@@ -143,7 +145,7 @@ export const SearchApplicationDocumentation = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <EuiLink href="#" external>
+                    <EuiLink href={docLinks.clientsGuide} external>
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.searchApplication.documentation.languageClients.learnMore',
                         {
@@ -166,8 +168,8 @@ export const SearchApplicationDocumentation = () => {
                   <EuiTitle size="s">
                     <EuiText>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.monitorPerformance.title',
-                        { defaultMessage: 'Monitor performance' }
+                        'xpack.enterpriseSearch.content.searchApplication.documentation.searchInsights.title',
+                        { defaultMessage: 'Search insights' }
                       )}
                     </EuiText>
                   </EuiTitle>
@@ -179,10 +181,10 @@ export const SearchApplicationDocumentation = () => {
                   <EuiText>
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.monitorPerformance.description',
+                        'xpack.enterpriseSearch.content.searchApplication.documentation.searchInsights.description',
                         {
                           defaultMessage:
-                            'Gain insights into the performance of your search application easily with Behavioral Analytics.',
+                            'Gain insights into the performance of your search application with Behavioral Analytics.',
                         }
                       )}
                     </p>
@@ -190,9 +192,9 @@ export const SearchApplicationDocumentation = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <EuiLink href="#" external>
+                    <EuiLink href={docLinks.behavioralAnalytics} external>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.monitorPerformance.learnMore',
+                        'xpack.enterpriseSearch.content.searchApplication.documentation.searchInsights.learnMore',
                         {
                           defaultMessage: 'Learn more',
                         }
