@@ -21,6 +21,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
         switch (scenario.id) {
           case 'everything_space':
             expect(uiCapabilities.success).to.be(true);
+            // Failure was here VVV
             expect(uiCapabilities.value).to.have.property('foo');
             expect(uiCapabilities.value!.foo).to.eql({
               create: true,
