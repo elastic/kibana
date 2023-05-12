@@ -12,9 +12,9 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  value: string;
-  onPromptSubmit: (value: string) => void;
   handlePromptChange?: (value: string) => void;
+  onPromptSubmit: (value: string) => void;
+  value: string;
 }
 
 const StyledTextArea = styled(EuiTextArea)`

@@ -22,8 +22,9 @@ import React, { useCallback, useRef, useState } from 'react';
 import type { Cancelable } from 'lodash';
 import { debounce } from 'lodash';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '@kbn/timelines-plugin/common';
+
+import { YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT } from './content/prompts/system/translations';
 import * as i18n from './translations';
-import { getDefaultPrompt } from './prompt/helpers';
 
 export interface Props {
   optionsData?: {
@@ -41,7 +42,7 @@ const singleSelection = { asPlainText: true };
 
 const defaultOptionsData: Props['optionsData'] = {
   models: [{ label: 'text-davinci-003' }, { label: 'gpt-3.5-turbo' }, { label: 'gpt-4' }],
-  prompt: getDefaultPrompt(''),
+  prompt: YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT,
   temperature: 0.2,
 };
 

@@ -23,13 +23,11 @@ const StyledEuiModal = styled(EuiModal)`
   height: 100%;
 `;
 
-interface AssistantOverlayProps {}
-
 /**
  * Modal container for Security Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export const AssistantOverlay: React.FC<AssistantOverlayProps> = React.memo(({}) => {
+export const AssistantOverlay: React.FC = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [input, setInput] = useState<string | undefined>();
   const [conversationId, setConversationId] = useState<string | undefined>('default');

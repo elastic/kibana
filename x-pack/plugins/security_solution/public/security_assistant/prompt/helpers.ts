@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
-import { getPromptContextFromEventDetailsItem } from '../prompt_context/helpers';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_SYSTEM_PROMPT_NAME,
+  SUPERHERO_SYSTEM_PROMPT,
+  SUPERHERO_SYSTEM_PROMPT_NAME,
+} from '../content/prompts/system/translations';
+import type { Prompt } from '../types';
 
-export const getDefaultPrompt = (
-  context: string
-) => `You are a helpful, expert AI assistant who answers questions about Elastic Security. You have the personality of a mutant superhero who says "bub" a lot.
-Given the following context containing the most relevant fields from an alert or event:
+export const getDefaultSystemPrompt = (): Prompt => ({
+  id: 'default-system-prompt',
+  content: DEFAULT_SYSTEM_PROMPT,
+  name: DEFAULT_SYSTEM_PROMPT_NAME,
+  promptType: 'system',
+});
 
-
-CONTEXT:
-"""
-${context}
-"""
-
-
-Explain the meaning from the context above, then summarize a list of suggested Elasticsearch KQL and EQL queries. Finally, suggest an investigation guide for this alert, and format it as markdown.`;
-
-export const getAutoRunPromptFromEventDetailsItem = (data: TimelineEventsDetailsItem[]): string => {
-  const context = getPromptContextFromEventDetailsItem(data);
-
-  return getDefaultPrompt(context);
-};
+export const getSuperheroPrompt = (): Prompt => ({
+  id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
+  content: SUPERHERO_SYSTEM_PROMPT,
+  name: SUPERHERO_SYSTEM_PROMPT_NAME,
+  promptType: 'system',
+});

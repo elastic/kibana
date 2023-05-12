@@ -6,6 +6,8 @@
  */
 
 import { useCallback, useState } from 'react';
+
+import { fetchChatCompletion } from '../api';
 import type { Message } from '../security_assistant_context/types';
 import { useSecurityAssistantContext } from '../security_assistant_context';
 

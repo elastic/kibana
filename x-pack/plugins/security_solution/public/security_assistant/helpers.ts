@@ -7,9 +7,12 @@
 
 // eslint-disable-next-line import/no-nodejs-modules
 import crypto from 'crypto';
-import { fetchOpenAlerts, fetchVirusTotalAnalysis, sendFileToVirusTotal } from './api';
 
+import { fetchOpenAlerts, fetchVirusTotalAnalysis, sendFileToVirusTotal } from './api';
+import { SYSTEM_PROMPT_CONTEXT } from './content/prompts/system/translations';
+import type { PromptContext } from './prompt_context/types';
 import type { Message } from './security_assistant_context/types';
+import type { Prompt } from './types';
 
 /**
  * Do it like this in your `kibana.dev.yml`, use 'overrides' as keys aren't actually defined
@@ -326,3 +329,68 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
     };
   }
 };
+
+export const getSystemMessages = ({
+  isNewChat,
+  selectedSystemPrompt,
+}: {
+  isNewChat: boolean;
+  selectedSystemPrompt: Prompt | undefined;
+}): Message[] => {
+  if (!isNewChat || selectedSystemPrompt == null) {
+    return [];
+  }
+
+  const message: Message = {
+    content: selectedSystemPrompt.content,
+    role: 'system',
+    timestamp: new Date().toLocaleString(),
+  };
+
+  return [message];
+};
+
+export async function getCombinedMessage({
+  isNewChat,
+  promptContexts,
+  promptText,
+  selectedPromptContextIds,
+  selectedSystemPrompt,
+}: {
+  isNewChat: boolean;
+  promptContexts: Record<string, PromptContext>;
+  promptText: string;
+  selectedPromptContextIds: string[];
+  selectedSystemPrompt: Prompt | undefined;
+}): Promise<Message> {
+  if (!isNewChat) {
+    return {
+      role: 'user',
+      content: promptText,
+      timestamp: new Date().toLocaleString(),
+    };
+  }
+
+  const selectedPromptContexts = selectedPromptContextIds.reduce<PromptContext[]>((acc, id) => {
+    const promptContext = promptContexts[id];
+    return promptContext != null ? [...acc, promptContext] : acc;
+  }, []);
+
+  const promptContextsContent = await Promise.all(
+    selectedPromptContexts.map(async ({ getPromptContext, id }) => {
+      const promptContext = await getPromptContext();
+
+      return `\n\n${SYSTEM_PROMPT_CONTEXT(promptContext)}\n\n`;
+    })
+  );
+
+  return {
+    content: `${selectedSystemPrompt?.content ?? ''}
+
+${promptContextsContent}
+
+${promptText}`,
+    role: 'user', // we are combining the system and user messages into one message
+    timestamp: new Date().toLocaleString(),
+  };
+}

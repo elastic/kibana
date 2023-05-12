@@ -40,9 +40,9 @@ export interface PromptContext {
   getPromptContext: () => Promise<string>;
 
   /**
-   * An optional prompt that's run automatically when the Security Assistant opens
+   * An optional user prompt that's filled in, but not sent, when the Security Assistant opens
    */
-  getAutoRunPrompt?: () => Promise<string>;
+  suggestedUserPrompt?: string;
 
   /**
    * A unique identifier for this prompt context
