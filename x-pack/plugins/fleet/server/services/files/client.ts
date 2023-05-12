@@ -53,7 +53,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
       this.fileMetaIndex = getFileMetadataIndexName(packageName);
       this.fileDataIndex = getFileDataIndexName(packageName);
     } else {
-      // FIXME:PT define once we have new index patterns
+      // FIXME:PT define once we have new index patterns (defend workflows team issue #6553)
       this.fileMetaIndex = getFileMetadataIndexName(packageName);
       this.fileDataIndex = getFileDataIndexName(packageName);
     }
@@ -183,7 +183,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
   }
 
   protected async getFileCreatedByKibana(fileId: string): Promise<FleetFile> {
-    // FIXME:PT update once we have new index and understand what the fields are
+    // FIXME:PT update once we have new index and understand what the fields are (defend workflows team issue #6553)
     return this.getFileCreatedByHost(fileId);
   }
 
