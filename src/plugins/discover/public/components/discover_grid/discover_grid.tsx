@@ -84,6 +84,10 @@ export interface DiscoverGridProps {
    */
   isLoading: boolean;
   /**
+   * Determines if it's loading more data (next chunk)
+   */
+  isLoadingMore?: boolean;
+  /**
    * Function used to add a column in the document flyout
    */
   onAddColumn: (column: string) => void;
@@ -207,9 +211,9 @@ export interface DiscoverGridProps {
     toastNotifications: ToastsStart;
   };
   /**
-   * Is number of fetched records less than the total number of found hits?
+   * Number total hits from ES
    */
-  canFetchMoreRecords?: boolean;
+  totalHits?: number;
   /**
    * To fetch more
    */
@@ -225,6 +229,7 @@ export const DiscoverGrid = ({
   columns,
   dataView,
   isLoading,
+  isLoadingMore,
   expandedDoc,
   onAddColumn,
   filters,
@@ -256,7 +261,7 @@ export const DiscoverGrid = ({
   onFieldEdited,
   DocumentView,
   services,
-  canFetchMoreRecords,
+  totalHits,
   onFetchMoreRecords,
 }: DiscoverGridProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
@@ -623,15 +628,17 @@ export const DiscoverGrid = ({
             gridStyle={GRID_STYLE}
           />
         </div>
-        <DiscoverGridFooter
-          isLoading={isLoading}
-          rowCount={rowCount}
-          sampleSize={sampleSize}
-          pageCount={pageCount}
-          pageIndex={paginationObj?.pageIndex}
-          canFetchMoreRecords={canFetchMoreRecords}
-          onFetchMoreRecords={onFetchMoreRecords}
-        />
+        {!isLoading && typeof isLoadingMore === 'boolean' && (
+          <DiscoverGridFooter
+            isLoadingMore={isLoadingMore}
+            rowCount={rowCount}
+            sampleSize={sampleSize}
+            pageCount={pageCount}
+            pageIndex={paginationObj?.pageIndex}
+            totalHits={totalHits}
+            onFetchMoreRecords={onFetchMoreRecords}
+          />
+        )}
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>

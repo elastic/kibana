@@ -72,6 +72,18 @@ export function sendLoadingMsg<T extends DataMsg>(
 }
 
 /**
+ * Send LOADING_MORE message via main observable
+ */
+export function sendLoadingMoreMsg<T extends DataMsg>(data$: BehaviorSubject<T>) {
+  if (data$.getValue().fetchStatus !== FetchStatus.LOADING_MORE) {
+    data$.next({
+      ...data$.getValue(),
+      fetchStatus: FetchStatus.LOADING_MORE,
+    } as T);
+  }
+}
+
+/**
  * Send ERROR message
  */
 export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error: Error) {

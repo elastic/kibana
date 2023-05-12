@@ -9,6 +9,7 @@
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading',
+  LOADING_MORE = 'loading_more',
   PARTIAL = 'partial',
   COMPLETE = 'complete',
   ERROR = 'error',

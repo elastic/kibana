@@ -12,33 +12,33 @@ import classnames from 'classnames';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 export interface DiscoverGridFooterProps {
-  isLoading: boolean;
+  isLoadingMore: boolean;
   rowCount: number;
   sampleSize: number;
   pageIndex?: number;
   pageCount: number;
-  canFetchMoreRecords?: boolean;
+  totalHits?: number;
   onFetchMoreRecords?: () => void;
 }
 
 export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => {
   const {
-    isLoading,
+    isLoadingMore,
     rowCount,
     sampleSize,
     pageIndex,
     pageCount,
-    canFetchMoreRecords,
+    totalHits = 0,
     onFetchMoreRecords,
   } = props;
-  const isOnLastPage = pageIndex === pageCount - 1;
+  const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
 
   if (!isOnLastPage) {
     return null;
   }
 
   // allow to fetch more records on Discover page
-  if (canFetchMoreRecords && onFetchMoreRecords) {
+  if (onFetchMoreRecords) {
     // TODO: define a limit
     if (rowCount <= 3000 - sampleSize) {
       return (
@@ -46,7 +46,7 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
           <>
             {' '}
             <EuiButtonEmpty
-              isLoading={isLoading}
+              isLoading={isLoadingMore}
               flush="both"
               data-test-subj="dscGridSampleSizeFetchMoreLink"
               onClick={onFetchMoreRecords}
@@ -67,7 +67,7 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
     return <DiscoverGridFooterContainer hasButton={false} {...props} />;
   }
 
-  if (rowCount === sampleSize) {
+  if (rowCount < totalHits) {
     // show only a message for embeddable
     return <DiscoverGridFooterContainer hasButton={false} {...props} />;
   }
@@ -82,7 +82,6 @@ interface DiscoverGridFooterContainerProps extends DiscoverGridFooterProps {
 const DiscoverGridFooterContainer: React.FC<DiscoverGridFooterContainerProps> = ({
   hasButton,
   rowCount,
-  sampleSize,
   children,
 }) => {
   return (

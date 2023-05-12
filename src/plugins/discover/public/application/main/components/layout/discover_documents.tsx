@@ -116,6 +116,7 @@ function DiscoverDocumentsComponent({
 
   const documentState = useDataState(documents$);
   const isDataLoading = documentState.fetchStatus === FetchStatus.LOADING;
+  const isMoreDataLoading = documentState.fetchStatus === FetchStatus.LOADING_MORE;
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
   // 1. When switching the data view, the sorting in the URL is reset to the default sorting of the selected data view.
   // 2. The new sort param is already available in this component and propagated to the EuiDataGrid.
@@ -129,12 +130,18 @@ function DiscoverDocumentsComponent({
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const totalHitsState = useDataState(totalHits$);
-  const canFetchMoreRecords =
-    !isPlainRecord && (totalHitsState.result || 0) > (documentState.result?.length || 0);
+  const totalHits = totalHitsState.result || 0;
+  const canFetchMoreRecords = !isPlainRecord && totalHits > (documentState.result?.length || 0);
 
-  const onFetchMoreRecords = useCallback(() => {
-    stateContainer.dataState.fetchMore();
-  }, [stateContainer.dataState]);
+  const onFetchMoreRecords = useMemo(
+    () =>
+      canFetchMoreRecords
+        ? () => {
+            stateContainer.dataState.fetchMore();
+          }
+        : undefined,
+    [canFetchMoreRecords, stateContainer.dataState]
+  );
 
   const {
     columns: currentColumns,
@@ -242,6 +249,7 @@ function DiscoverDocumentsComponent({
               expandedDoc={expandedDoc}
               dataView={dataView}
               isLoading={isDataLoading}
+              isLoadingMore={isMoreDataLoading}
               rows={rows}
               sort={(sort as SortOrder[]) || []}
               sampleSize={sampleSize}
@@ -267,7 +275,7 @@ function DiscoverDocumentsComponent({
               savedSearchId={savedSearch.id}
               DocumentView={DiscoverGridFlyout}
               services={services}
-              canFetchMoreRecords={canFetchMoreRecords}
+              totalHits={totalHits}
               onFetchMoreRecords={onFetchMoreRecords}
             />
           </div>

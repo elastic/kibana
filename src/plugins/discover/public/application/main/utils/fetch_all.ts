@@ -17,6 +17,7 @@ import {
   sendErrorMsg,
   sendErrorTo,
   sendLoadingMsg,
+  sendLoadingMoreMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
@@ -167,11 +168,7 @@ export function fetchMoreDocuments(
     });
 
     // Mark subjects as loading
-    sendLoadingMsg(dataSubjects.documents$, {
-      recordRawType,
-      query,
-      result: dataSubjects.documents$.getValue().result,
-    });
+    sendLoadingMoreMsg(dataSubjects.documents$);
 
     // Start fetching all required requests
     const response = fetchDocuments(searchSource, fetchDeps);
