@@ -21,7 +21,7 @@ interface SloGlobalDiagnosisResponse {
   licenseAndFeatures: PublicLicenseJSON;
   userPrivileges: SecurityGetUserPrivilegesResponse;
   sloResources: {
-    [x: string]: "OK" | "NOT_OK";
+    [x: string]: 'OK' | 'NOT_OK';
   };
 }
 
