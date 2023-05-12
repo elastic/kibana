@@ -723,7 +723,8 @@ describe('migration actions', () => {
       `);
 
       const results = await client.search({ index: 'reindex_target', size: 1000 });
-      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
@@ -757,7 +758,8 @@ describe('migration actions', () => {
       `);
 
       const results = await client.search({ index: 'reindex_target_excluded_docs', size: 1000 });
-      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
@@ -784,7 +786,8 @@ describe('migration actions', () => {
       `);
 
       const results = await client.search({ index: 'reindex_target_2', size: 1000 });
-      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
           "doc 2_updated",
@@ -832,7 +835,8 @@ describe('migration actions', () => {
 
       // Assert that documents weren't overridden by the second, unscripted reindex
       const results = await client.search({ index: 'reindex_target_3', size: 1000 });
-      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
           "doc 2_updated",
@@ -880,7 +884,8 @@ describe('migration actions', () => {
       // Assert that existing documents weren't overridden, but that missing
       // documents were added by the reindex
       const results = await client.search({ index: 'reindex_target_4', size: 1000 });
-      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
@@ -1411,13 +1416,12 @@ describe('migration actions', () => {
 
       // Assert that we can't search over the unmapped fields of the document
 
-
       const originalSearchResults = await client.search({
         index: 'existing_index_without_mappings',
         size: 1000,
         query: {
           match: { title: { query: 'doc' } },
-        }
+        },
       });
       expect(originalSearchResults.hits?.hits.length).toBe(0);
 
@@ -1441,7 +1445,7 @@ describe('migration actions', () => {
         size: 1000,
         query: {
           match: { title: { query: 'doc' } },
-        }
+        },
       });
       expect(pickedUpSearchResults.hits?.hits.length).toBe(4);
     });
