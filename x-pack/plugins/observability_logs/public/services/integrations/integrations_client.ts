@@ -6,9 +6,10 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   FindIntegrationsRequestQuery,
+  findIntegrationsRequestQueryRT,
   FindIntegrationsResponse,
   findIntegrationsResponseRT,
   getIntegrationsUrl,
@@ -20,9 +21,14 @@ export class IntegrationsClient implements IIntegrationsClient {
   constructor(private readonly http: HttpStart) {}
 
   public async findIntegrations(
-    params: FindIntegrationsRequestQuery
+    params: FindIntegrationsRequestQuery = {}
   ): Promise<FindIntegrationsResponse> {
-    const response = await this.http.get(getIntegrationsUrl(params)).catch((error) => {
+    const search = decodeOrThrow(
+      findIntegrationsRequestQueryRT,
+      (message: string) => new Error(`Failed to decode integrations search param: ${message}"`)
+    )(params);
+
+    const response = await this.http.get(getIntegrationsUrl(search)).catch((error) => {
       throw new Error(`Failed to fetch integrations": ${error}`);
     });
 

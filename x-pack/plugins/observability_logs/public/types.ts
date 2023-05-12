@@ -4,11 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Plugin } from '@kbn/core/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import { IntegrationsServiceStart } from './services/integrations';
 
 export type ObservabilityLogsPluginSetup = void;
-export type ObservabilityLogsPluginStart = void;
+export interface ObservabilityLogsPluginStart {
+  integrationsService: IntegrationsServiceStart;
+}
 
 export interface ObservabilityLogsStartDeps {
   discover: DiscoverStart;
 }
+
+export type ObservabilityLogsClientPluginClass = Plugin<
+  ObservabilityLogsPluginSetup,
+  ObservabilityLogsPluginStart
+>;

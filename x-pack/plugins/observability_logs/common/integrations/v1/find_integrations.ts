@@ -32,5 +32,6 @@ export const findIntegrationsRequestQueryRT = rt.partial({
   sortDirection: sortDirectionRT,
 });
 
+export type PageAfter = rt.TypeOf<typeof pageAfterRT>;
 export type FindIntegrationsRequestQuery = rt.TypeOf<typeof findIntegrationsRequestQueryRT>;
 export type FindIntegrationsResponse = rt.TypeOf<typeof findIntegrationsResponseRT>;

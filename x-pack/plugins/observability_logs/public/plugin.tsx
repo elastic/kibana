@@ -5,22 +5,38 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import React from 'react';
+import { IntegrationsService } from './services/integrations';
 import {
+  ObservabilityLogsClientPluginClass,
   ObservabilityLogsPluginSetup,
   ObservabilityLogsPluginStart,
   ObservabilityLogsStartDeps,
 } from './types';
 import { InternalStateProvider } from './utils/internal_state_container_context';
 
-export class ObservabilityLogsPlugin
-  implements Plugin<ObservabilityLogsPluginSetup, ObservabilityLogsPluginStart>
-{
-  public setup(core: CoreSetup): ObservabilityLogsPluginSetup {}
+export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginClass {
+  private integrationsService: IntegrationsService;
 
-  public start(core: CoreStart, plugins: ObservabilityLogsStartDeps): ObservabilityLogsPluginStart {
+  constructor() {
+    this.integrationsService = new IntegrationsService();
+  }
+
+  public setup() {}
+
+  public start(core: CoreStart, plugins: ObservabilityLogsStartDeps) {
     const { discover } = plugins;
+
+    const getStartServices = () => ({ core, plugins, pluginStart });
+
+    const integrationsService = this.integrationsService.start({
+      http: core.http,
+    });
+
+    const pluginStart = {
+      integrationsService,
+    };
 
     /**
      * Replace the DataViewPicker with a custom DataStreamSelector to access only integrations streams
@@ -34,9 +50,7 @@ export class ObservabilityLogsPlugin
         id: 'search_bar',
         CustomDataViewPicker: () => {
           return (
-            <InternalStateProvider value={stateContainer.internalState}>
-              <CustomDataStreamSelector stateContainer={stateContainer} />
-            </InternalStateProvider>
+            <CustomDataStreamSelector {...getStartServices()} stateContainer={stateContainer} />
           );
         },
       });
@@ -58,5 +72,7 @@ export class ObservabilityLogsPlugin
         console.log('Cleaning up Logs explorer customizations');
       };
     });
+
+    return pluginStart;
   }
 }

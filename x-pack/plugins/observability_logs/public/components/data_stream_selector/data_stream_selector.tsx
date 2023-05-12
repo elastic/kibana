@@ -266,7 +266,7 @@ const buildIntegrationsTree = ({ list, onItemClick, onStreamSelected }: Integrat
       res.items.push({
         name: entry.name,
         onClick: () => onItemClick(entryId),
-        icon: <PackageIcon packageName={entry.name} version={entry.version} size="m" />,
+        icon: <PackageIcon packageName={entry.name} version={entry.version} size="m" tryApi />,
         panel: entryId,
       });
 
