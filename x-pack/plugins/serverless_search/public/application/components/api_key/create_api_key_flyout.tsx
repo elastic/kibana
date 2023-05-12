@@ -23,8 +23,9 @@ import { ApiKey } from '@kbn/security-plugin/common';
 import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { BACK_LABEL, CANCEL_LABEL, NEXT_LABEL } from '../../../../common/i18n_string';
+import { CreateAPIKeyArgs } from '../../../../common/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { BasicSetupForm } from './basic_setup_form';
+import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';
 import { SecurityPrivilegesForm } from './security_privileges_form';
 
@@ -62,20 +63,6 @@ function getPreviousStep(currentStep: Steps): Steps {
   }
 }
 
-const DEFAULT_ROLE_DESCRIPTORS = `{
-  "serverless_search": {
-    "indices": [{
-      "names": ["*"],
-      "privileges": [
-        "all"
-      ]
-    }]
-  }
-}`;
-const DEFAULT_METADATA = `{
-  "application": "myapp"
-}`;
-
 export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   onClose,
   username,
@@ -84,17 +71,39 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   const { http } = useKibanaServices();
   const [currentStep, setCurrentStep] = useState<Steps>(Steps.BASIC_SETUP);
   const [name, setName] = useState('');
-  const [expires, setExpires] = useState('60d');
-  const [roleDescriptors, setRoleDescriptors] = useState(DEFAULT_ROLE_DESCRIPTORS);
-  const [metadata, setMetadata] = useState(DEFAULT_METADATA);
+  const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);
+  const [roleDescriptors, setRoleDescriptors] = useState('');
+  const [metadata, setMetadata] = useState('');
 
-  const { isLoading, isError, error, data, mutate } = useMutation({
-    mutationFn: async (input: {
-      expiration: string;
-      name: string;
-      role_descriptors: string;
-      metadata: string;
-    }) => {
+  const onCreateClick = () => {
+    let parsedRoleDescriptors: Record<string, any> | undefined;
+    try {
+      parsedRoleDescriptors = roleDescriptors.length > 0 ? JSON.parse(roleDescriptors) : undefined;
+    } catch (e) {
+      setCurrentStep(Steps.PRIVILEGES);
+      // TODO: set error
+      return;
+    }
+    let parsedMetadata: Record<string, any> | undefined;
+    try {
+      parsedMetadata = metadata.length > 0 ? JSON.parse(metadata) : undefined;
+    } catch (e) {
+      setCurrentStep(Steps.METADATA);
+      // TODO: set error
+      return;
+    }
+    const expiration = expires !== null ? `${expires}d` : undefined;
+
+    mutate({
+      expiration,
+      metadata: parsedMetadata,
+      name,
+      role_descriptors: parsedRoleDescriptors,
+    });
+  };
+
+  const { isLoading, isError, error, mutate } = useMutation({
+    mutationFn: async (input: CreateAPIKeyArgs) => {
       const result = await http.post<{ apiKey: ApiKey }>('/internal/serverless_search/api_keys', {
         body: JSON.stringify(input),
       });
@@ -125,7 +134,9 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
               defaultMessage: 'Error creating API key',
             })}
           >
-            {JSON.stringify(error)}
+            {
+              JSON.stringify(error) // TODO: parse error from backend
+            }
           </EuiCallOut>
         )}
         <EuiStepsHorizontal
@@ -165,7 +176,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
             user={username}
             expires={expires}
             onChangeName={(newName: string) => setName(newName)}
-            onChangeExpires={(newExpires: string) => setExpires(newExpires)}
+            onChangeExpires={(newExpires: string | null) => setExpires(newExpires)}
           />
         )}
         {currentStep === Steps.PRIVILEGES && (
@@ -200,18 +211,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
               )}
               <EuiFlexItem>
                 {currentStep === Steps.METADATA ? (
-                  <EuiButton
-                    fill
-                    isLoading={isLoading}
-                    onClick={() =>
-                      mutate({
-                        expiration: expires,
-                        name,
-                        role_descriptors: roleDescriptors,
-                        metadata,
-                      })
-                    }
-                  >
+                  <EuiButton fill isLoading={isLoading} onClick={onCreateClick}>
                     {i18n.translate('xpack.serverlessSearch.apiKey.flyOutCreateLabel', {
                       defaultMessage: 'Create API Key',
                     })}
@@ -219,7 +219,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
                 ) : (
                   <EuiButton
                     fill
-                    disabled={!name || !roleDescriptors}
+                    disabled={!name}
                     onClick={() => setCurrentStep(getNextStep(currentStep))}
                   >
                     {NEXT_LABEL}

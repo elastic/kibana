@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { EuiForm, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiText,
+  EuiForm,
+  EuiFieldText,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiRadioGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -13,10 +23,11 @@ interface BasicSetupFormProps {
   isLoading: boolean;
   name: string;
   user: string;
-  expires: string;
+  expires: string | null;
   onChangeName: (name: string) => void;
-  onChangeExpires: (expires: string) => void;
+  onChangeExpires: (expires: string | null) => void;
 }
+export const DEFAULT_EXPIRES_VALUE = '60';
 
 export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
   isLoading,
@@ -29,6 +40,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
   return (
     <EuiForm>
       <EuiFormRow
+        fullWidth
         isInvalid={!name}
         helpText={i18n.translate('xpack.serverlessSearch.apiKey.nameFieldHelpText', {
           defaultMessage: 'A good name makes it clear what your API key does.',
@@ -38,12 +50,14 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
         })}
       >
         <EuiFieldText
+          fullWidth
           isLoading={isLoading}
           value={name}
           onChange={(e) => onChangeName(e.currentTarget.value)}
         />
       </EuiFormRow>
       <EuiFormRow
+        fullWidth
         helpText={i18n.translate('xpack.serverlessSearch.apiKey.userFieldHelpText', {
           defaultMessage: 'ID of the user creating the API key.',
         })}
@@ -52,27 +66,66 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
         })}
       >
         <EuiFieldText
+          fullWidth
           disabled={true}
-          placeholder="3058000678"
           value={user}
           onChange={(e) => onChangeName(e.currentTarget.value)}
         />
       </EuiFormRow>
       <EuiFormRow
-        helpText={i18n.translate('xpack.serverlessSearch.apiKey.expiresFieldHelpText', {
-          defaultMessage: 'API keys should be rotated regularly.',
-        })}
+        fullWidth
+        labelAppend={
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" size="s" color="subdued" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs">
+                {i18n.translate('xpack.serverlessSearch.apiKey.expiresFieldHelpText', {
+                  defaultMessage: 'API keys should be rotated regularly.',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         label={i18n.translate('xpack.serverlessSearch.apiKey.expiresFieldLabel', {
           defaultMessage: 'Expires',
         })}
       >
-        <EuiFieldText
-          disabled={isLoading}
-          placeholder="1d"
-          value={expires}
-          onChange={(e) => onChangeExpires(e.currentTarget.value)}
+        <EuiRadioGroup
+          options={[
+            {
+              id: 'never',
+              label: i18n.translate('xpack.serverlessSearch.apiKey.expiresField.neverLabel', {
+                defaultMessage: 'Never',
+              }),
+            },
+            {
+              id: 'days',
+              label: i18n.translate('xpack.serverlessSearch.apiKey.expiresField.daysLabel', {
+                defaultMessage: 'in days',
+              }),
+            },
+          ]}
+          idSelected={expires === null ? 'never' : 'days'}
+          onChange={(id) => onChangeExpires(id === 'never' ? null : DEFAULT_EXPIRES_VALUE)}
         />
       </EuiFormRow>
+      {expires !== null && (
+        <EuiFormRow fullWidth>
+          <EuiFieldNumber
+            fullWidth
+            disabled={isLoading}
+            append={i18n.translate('xpack.serverlessSearch.apiKey.expiresFieldUnit', {
+              defaultMessage: 'days',
+            })}
+            placeholder="1"
+            defaultValue={expires}
+            min={1}
+            onChange={(e) => onChangeExpires(e.currentTarget.value)}
+          />
+        </EuiFormRow>
+      )}
     </EuiForm>
   );
 };

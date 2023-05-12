@@ -30,7 +30,7 @@ import { MANAGEMENT_API_KEYS } from '../../routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 
 export const ApiKeyPanel: React.FC = () => {
-  const { application, cloud, http, userProfile } = useKibanaServices();
+  const { cloud, http, userProfile } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ['apiKey'],
