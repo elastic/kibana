@@ -53,7 +53,7 @@ const response = z.array(
     connector_type_id: connectorTypesEnum,
     config: soObject.optional(),
     id: nonEmptyString,
-    is_deprecated: z.boolean,
+    is_deprecated: z.boolean(),
     is_preconfigured: z.boolean,
     name: nonEmptyString,
     referenced_by_count: z.number,
