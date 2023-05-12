@@ -30,14 +30,12 @@ import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
-const embeddableId = 'create-dat-dashboard';
-
 test('throws error when no data views are available', async () => {
   pluginServices.getServices().data.dataViews.getDefaultDataView = jest
     .fn()
     .mockReturnValue(undefined);
   await expect(async () => {
-    await createDashboard(embeddableId);
+    await createDashboard();
   }).rejects.toThrow('Dashboard requires at least one data view before it can be initialized.');
 
   // reset get default data view
@@ -49,7 +47,7 @@ test('throws error when provided validation function returns invalid', async () 
     validateLoadedSavedObject: jest.fn().mockImplementation(() => false),
   };
   await expect(async () => {
-    await createDashboard(embeddableId, creationOptions, 0, 'test-id');
+    await createDashboard(creationOptions, 0, 'test-id');
   }).rejects.toThrow('Dashboard failed saved object result validation');
 });
 
@@ -62,7 +60,7 @@ test('pulls state from dashboard saved object when given a saved object id', asy
         description: `wow would you look at that? Wow.`,
       },
     });
-  const dashboard = await createDashboard(embeddableId, {}, 0, 'wow-such-id');
+  const dashboard = await createDashboard({}, 0, 'wow-such-id');
   expect(
     pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject
   ).toHaveBeenCalledWith({ id: 'wow-such-id' });
@@ -81,12 +79,7 @@ test('pulls state from session storage which overrides state from saved object',
   pluginServices.getServices().dashboardSessionStorage.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
-  const dashboard = await createDashboard(
-    embeddableId,
-    { useSessionStorageIntegration: true },
-    0,
-    'wow-such-id'
-  );
+  const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
   expect(dashboard.getState().explicitInput.description).toBe(
     'wow this description marginally better'
   );
@@ -105,7 +98,6 @@ test('pulls state from creation options initial input which overrides all other 
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
   const dashboard = await createDashboard(
-    embeddableId,
     {
       useSessionStorageIntegration: true,
       initialInput: { description: 'wow this description is a masterpiece' },
@@ -123,7 +115,7 @@ test('applies filters and query from state to query service', async () => {
     { meta: { alias: 'test', disabled: false, negate: false, index: 'test' } },
   ];
   const query = { language: 'kql', query: 'query' };
-  await createDashboard(embeddableId, {
+  await createDashboard({
     useUnifiedSearchIntegration: true,
     unifiedSearchSettings: {
       kbnUrlStateStorage: createKbnUrlStateStorage(),
@@ -139,7 +131,7 @@ test('applies filters and query from state to query service', async () => {
 test('applies time range and refresh interval from initial input to query service if time restore is on', async () => {
   const timeRange = { from: new Date().toISOString(), to: new Date().toISOString() };
   const refreshInterval = { pause: false, value: 42 };
-  await createDashboard(embeddableId, {
+  await createDashboard({
     useUnifiedSearchIntegration: true,
     unifiedSearchSettings: {
       kbnUrlStateStorage: createKbnUrlStateStorage(),
@@ -159,7 +151,7 @@ test('applied time range from query service to initial input if time restore is 
   pluginServices.getServices().data.query.timefilter.timefilter.getTime = jest
     .fn()
     .mockReturnValue(timeRange);
-  const dashboard = await createDashboard(embeddableId, {
+  const dashboard = await createDashboard({
     useUnifiedSearchIntegration: true,
     unifiedSearchSettings: {
       kbnUrlStateStorage: createKbnUrlStateStorage(),
@@ -177,8 +169,8 @@ test('replaces panel with incoming embeddable if id matches existing panel', asy
     } as ContactCardEmbeddableInput,
     embeddableId: 'i_match',
   };
-  const dashboard = await createDashboard(embeddableId, {
-    incomingEmbeddable,
+  const dashboard = await createDashboard({
+    getIncomingEmbeddable: () => incomingEmbeddable,
     initialInput: {
       panels: {
         i_match: getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -216,8 +208,8 @@ test('creates new embeddable with incoming embeddable if id does not match exist
     .fn()
     .mockReturnValue(mockContactCardFactory);
 
-  await createDashboard(embeddableId, {
-    incomingEmbeddable,
+  await createDashboard({
+    getIncomingEmbeddable: () => incomingEmbeddable,
     initialInput: {
       panels: {
         i_do_not_match: getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -258,7 +250,7 @@ test('creates a control group from the control group factory and waits for it to
   pluginServices.getServices().embeddable.getEmbeddableFactory = jest
     .fn()
     .mockReturnValue(mockControlGroupFactory);
-  await createDashboard(embeddableId, {
+  await createDashboard({
     useControlGroupIntegration: true,
     initialInput: {
       controlGroupInput: { controlStyle: 'twoLine' } as unknown as ControlGroupInput,
@@ -302,7 +294,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
     sessionCount++;
     return `searchSessionId${sessionCount}`;
   };
-  const dashboard = await createDashboard(embeddableId, {
+  const dashboard = await createDashboard({
     searchSessionSettings: {
       getSearchSessionIdFromURL: () => undefined,
       removeSessionIdFromUrl: () => {},

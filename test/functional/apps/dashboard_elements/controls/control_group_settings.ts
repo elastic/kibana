@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
   ]);
 
-  describe('Dashboard control group settings', () => {
+  describe.only('Dashboard control group settings', () => {
     before(async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
