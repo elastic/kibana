@@ -20,6 +20,7 @@ import {
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import { AlertOverviewStatus } from './status_rule/status_rule_executor';
+import type { MonitorSummaryStatusRule } from './status_rule/types';
 
 export const updateState = (
   state: SyntheticsCommonState,
@@ -176,7 +177,7 @@ export const setRecoveredAlertsContext = ({
     );
     let isUp = false;
     let linkMessage = '';
-    let monitorSummary = {};
+    let monitorSummary: MonitorSummaryStatusRule | null = null;
     let lastErrorMessage;
 
     if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
@@ -191,6 +192,7 @@ export const setRecoveredAlertsContext = ({
         dateFormat,
         tz
       );
+      lastErrorMessage = monitorSummary.lastErrorMessage;
 
       if (downConfig.isDeleted) {
         recoveryStatus = i18n.translate(
@@ -274,7 +276,7 @@ export const setRecoveredAlertsContext = ({
 
     alert.setContext({
       ...state,
-      ...monitorSummary,
+      ...(monitorSummary ? monitorSummary : {}),
       lastErrorMessage,
       recoveryStatus,
       linkMessage,
