@@ -151,7 +151,7 @@ export const initializeCanvas = async (
       },
       {
         priority: 100,
-        iconType: 'canvasApp',
+        iconType: 'keyboard',
         linkType: 'documentation',
         title: 'Keyboard shortcuts',
         content: <KeyboardShortcutsDoc onClose={() => {}} />,
