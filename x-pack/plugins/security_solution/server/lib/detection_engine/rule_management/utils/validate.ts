@@ -9,8 +9,11 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
+import {
+  RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
-import { getUiCommand, getRbacControl } from '../../../../../common/endpoint/utils/commands';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import type {
@@ -72,7 +75,7 @@ export const validateResponseActionsPermissions = async (
   securitySolution: SecuritySolutionApiRequestHandlerContext,
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null
-) => {
+): Promise<void> => {
   const { experimentalFeatures } = await securitySolution.getConfig();
 
   if (!experimentalFeatures.endpointResponseActionsEnabled || !isQueryRule(ruleUpdate.type)) {
@@ -92,10 +95,12 @@ export const validateResponseActionsPermissions = async (
 
     difference.forEach((action) => {
       if ('command' in action?.params) {
-        const isInvalid = !getRbacControl({
-          commandName: getUiCommand(action.params.command),
-          privileges: { ...endpointAuthz, loading: false },
-        });
+        const authzPropName =
+          RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
+            RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP[action.params.command]
+          ];
+
+        const isInvalid = endpointAuthz[authzPropName];
 
         if (isInvalid) {
           throw new CustomHttpRequestError(

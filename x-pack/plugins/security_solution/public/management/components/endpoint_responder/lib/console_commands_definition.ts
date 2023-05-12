@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
-import { getRbacControl } from '../../../../../common/endpoint/utils/commands';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -35,7 +34,10 @@ import {
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
-import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -69,6 +71,16 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
         'Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds). Example: 37m.',
     });
   }
+};
+
+export const getRbacControl = ({
+  commandName,
+  privileges,
+}: {
+  commandName: ConsoleResponseActionCommands;
+  privileges: EndpointPrivileges;
+}): boolean => {
+  return Boolean(privileges[RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName]]);
 };
 
 const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
