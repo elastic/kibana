@@ -221,47 +221,20 @@ function _getInputSecretPaths(
 ): SecretPath[] {
   if (!packageInfo?.policy_templates?.length) return [];
 
-  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
-  const inputSecretVarDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
-    Record<string, Record<string, RegistryVarsEntry>>
-  >((varDefs, policyTemplate) => {
-    const inputs = getNormalizedInputs(policyTemplate);
-    inputs.forEach((input) => {
-      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
-      const secretVars = input?.vars?.filter(isSecretVar);
-      if (secretVars?.length) {
-        varDefs[varDefKey] = keyBy(secretVars, 'name');
-      }
-    });
-    return varDefs;
-  }, {});
+  const inputSecretVarDefsByPolicyTemplateAndType =
+    _getInputSecretVarDefsByPolicyTemplateAndType(packageInfo);
 
-  const dataStreams = getNormalizedDataStreams(packageInfo);
-  const streamsByDatasetAndInput = dataStreams.reduce<Record<string, RegistryStream>>(
-    (streams, dataStream) => {
-      dataStream.streams?.forEach((stream) => {
-        streams[`${dataStream.dataset}-${stream.input}`] = stream;
-      });
-      return streams;
-    },
-    {}
-  );
-  const streamSecretVarDefsByDatasetAndInput = Object.entries(streamsByDatasetAndInput).reduce<
-    Record<string, Record<string, RegistryVarsEntry>>
-  >((varDefs, [path, stream]) => {
-    if (stream.vars && containsSecretVar(stream.vars)) {
-      const secretVars = stream.vars.filter(isSecretVar);
-      varDefs[path] = keyBy(secretVars, 'name');
-    }
-    return varDefs;
-  }, {});
+  const streamSecretVarDefsByDatasetAndInput =
+    _getStreamSecretVarDefsByDatasetAndInput(packageInfo);
 
   return packagePolicy.inputs.flatMap((input, inputIndex) => {
     if (!input.vars && !input.streams) {
       return [];
     }
     const currentInputVarPaths: SecretPath[] = [];
-    const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
+    const inputKey = doesPackageHaveIntegrations(packageInfo)
+      ? `${input.policy_template}-${input.type}`
+      : input.type;
     const inputVars = Object.entries(input.vars || {});
     if (inputVars.length) {
       inputVars.forEach(([name, configEntry]) => {
@@ -293,4 +266,49 @@ function _getInputSecretPaths(
 
     return currentInputVarPaths;
   });
+}
+
+// a map of all secret vars for each dataset and input combo
+function _getStreamSecretVarDefsByDatasetAndInput(packageInfo: PackageInfo) {
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const streamsByDatasetAndInput = dataStreams.reduce<Record<string, RegistryStream>>(
+    (streams, dataStream) => {
+      dataStream.streams?.forEach((stream) => {
+        streams[`${dataStream.dataset}-${stream.input}`] = stream;
+      });
+      return streams;
+    },
+    {}
+  );
+
+  return Object.entries(streamsByDatasetAndInput).reduce<
+    Record<string, Record<string, RegistryVarsEntry>>
+  >((varDefs, [path, stream]) => {
+    if (stream.vars && containsSecretVar(stream.vars)) {
+      const secretVars = stream.vars.filter(isSecretVar);
+      varDefs[path] = keyBy(secretVars, 'name');
+    }
+    return varDefs;
+  }, {});
+}
+
+// a map of all secret vars for each policyTemplate and input type combo
+function _getInputSecretVarDefsByPolicyTemplateAndType(packageInfo: PackageInfo) {
+  if (!packageInfo?.policy_templates?.length) return {};
+
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  return packageInfo.policy_templates.reduce<Record<string, Record<string, RegistryVarsEntry>>>(
+    (varDefs, policyTemplate) => {
+      const inputs = getNormalizedInputs(policyTemplate);
+      inputs.forEach((input) => {
+        const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
+        const secretVars = input?.vars?.filter(isSecretVar);
+        if (secretVars?.length) {
+          varDefs[varDefKey] = keyBy(secretVars, 'name');
+        }
+      });
+      return varDefs;
+    },
+    {}
+  );
 }
