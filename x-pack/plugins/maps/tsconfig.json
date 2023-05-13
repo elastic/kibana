@@ -69,6 +69,8 @@
     "@kbn/field-types",
     "@kbn/content-management-utils",
     "@kbn/core-saved-objects-server",
+    "@kbn/cloud-collaboration-plugin",
+    "@kbn/cloud-collaboration-threads",
   ],
   "exclude": [
     "target/**/*",
