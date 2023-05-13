@@ -18,6 +18,9 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
+import { CordProvider } from '@cord-sdk/react';
+import { ThreadButton } from '@kbn/cloud-collaboration-threads';
+
 import {
   getNavigateToApp,
   getMapsCapabilities,
@@ -26,6 +29,7 @@ import {
   getCoreOverlays,
   getSavedObjectsTagging,
   getPresentationUtilContext,
+  getCloudCollaborationService,
 } from '../../kibana_services';
 import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import { SavedMap } from './saved_map';
@@ -269,6 +273,26 @@ export function getTopNavConfig({
           });
         },
         testId: 'mapSaveAndReturnButton',
+      });
+    }
+
+    const savedObjectId = savedMap.getSavedObjectId();
+    const token = getCloudCollaborationService()?.getToken$().getValue();
+
+    if (savedObjectId && token) {
+      topNavConfigs.push({
+        label: '',
+        id: 'threads',
+        run: () => {},
+        render: () => (
+          <CordProvider clientAuthToken={token}>
+            <ThreadButton
+              application="maps"
+              savedObjectId={savedObjectId}
+              savedObjectName={savedMap.getTitle()}
+            />
+          </CordProvider>
+        ),
       });
     }
   }

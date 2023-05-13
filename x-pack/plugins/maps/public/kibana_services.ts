@@ -71,6 +71,7 @@ export const getContentManagement = () => pluginsStart.contentManagement;
 export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };
+export const getCloudCollaborationService = () => pluginsStart.cloudCollaboration;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

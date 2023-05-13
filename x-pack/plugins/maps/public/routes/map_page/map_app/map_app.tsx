@@ -42,6 +42,7 @@ import {
   getSpacesApi,
   getTimeFilter,
   getToasts,
+  getCloudCollaborationService,
 } from '../../../kibana_services';
 import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
@@ -203,6 +204,12 @@ export class MapApp extends React.Component<Props, State> {
     }
     if (this._globalSyncChangeMonitorSubscription) {
       this._globalSyncChangeMonitorSubscription.unsubscribe();
+    }
+
+    const collaboration = getCloudCollaborationService();
+    if (collaboration) {
+      collaboration.clearBreadcrumbPresence();
+      collaboration.clearPageTitle();
     }
 
     this.props.onAppLeave((actions) => {
@@ -464,6 +471,13 @@ export class MapApp extends React.Component<Props, State> {
     this._initMapAndLayerSettings(serializedMapState);
 
     this.setState({ initialized: true });
+
+    const collaboration = getCloudCollaborationService();
+
+    if (collaboration && savedObjectId) {
+      collaboration.setBreadcrumbPresence('maps', savedObjectId);
+      collaboration.setPageTitle(this.props.savedMap.getTitle());
+    }
   }
 
   _renderTopNav() {
