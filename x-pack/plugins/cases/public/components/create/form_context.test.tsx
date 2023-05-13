@@ -145,7 +145,39 @@ describe.each(Array(50).fill(null))('Create case', () => {
   const createAttachments = jest.fn();
   let appMockRender: AppMockRenderer;
 
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
   beforeAll(() => {
+    // The JSDOM implementation is too slow
+    // Especially for dropdowns that try to position themselves
+    // perf issue - https://github.com/jsdom/jsdom/issues/3234
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
+
     postCase.mockResolvedValue({
       id: sampleId,
       ...sampleDataWithoutTags,
@@ -172,6 +204,10 @@ describe.each(Array(50).fill(null))('Create case', () => {
     });
 
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
   });
 
   beforeEach(() => {
@@ -459,7 +495,7 @@ describe.each(Array(50).fill(null))('Create case', () => {
   });
 
   describe('Step 2 - Connector Fields', () => {
-    it(`should submit and push to resilient connector`, async () => {
+    it('should submit and push to resilient connector', async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         data: connectorsMock,
@@ -476,25 +512,20 @@ describe.each(Array(50).fill(null))('Create case', () => {
       await fillFormReactTestingLib({ renderer: screen });
 
       userEvent.click(screen.getByTestId('dropdown-connectors'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
-      });
-
       userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
         skipPointerEventsCheck: true,
       });
 
       await waitFor(() => {
         expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: 'Low' }));
       });
 
       const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
         'comboBoxSearchInput'
       );
 
-      userEvent.type(checkbox, 'Denial of Service{enter}');
+      userEvent.paste(checkbox, 'Denial of Service');
+      userEvent.keyboard('{enter}');
       userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
       userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -554,7 +585,6 @@ describe.each(Array(50).fill(null))('Create case', () => {
       await fillFormReactTestingLib({ renderer: screen });
 
       userEvent.click(screen.getByTestId('dropdown-connectors'));
-      await waitForEuiPopoverOpen();
       userEvent.click(screen.getByTestId('dropdown-connector-servicenow-1'));
 
       await waitFor(() => {
@@ -565,12 +595,7 @@ describe.each(Array(50).fill(null))('Create case', () => {
       expect(screen.getByTestId('severitySelect')).toHaveValue('4');
 
       userEvent.click(screen.getByTestId('dropdown-connectors'));
-      await waitForEuiPopoverOpen();
       userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
-
-      await waitFor(() => {
-        expect(screen.getByText('My SN connector 2')).toBeInTheDocument();
-      });
 
       userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -804,6 +829,18 @@ describe.each(Array(50).fill(null))('Create case', () => {
   });
 
   describe('Assignees', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     it('should submit assignees', async () => {
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
@@ -822,11 +859,8 @@ describe.each(Array(50).fill(null))('Create case', () => {
       });
 
       userEvent.paste(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr');
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId('comboBoxOptionsList createCaseAssigneesComboBox-optionsList')
-        ).toBeInTheDocument();
+      act(() => {
+        jest.advanceTimersByTime(500);
       });
 
       userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
