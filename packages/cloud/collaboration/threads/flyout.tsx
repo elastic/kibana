@@ -8,16 +8,7 @@
 
 import React, { useState } from 'react';
 import { Composer } from '@cord-sdk/react';
-import {
-  EuiFieldText,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ThreadList } from './thread_list';
 import { Thread } from './thread';
@@ -34,18 +25,18 @@ export const ThreadFlyout = ({ onClose, application, savedObjectId, savedObjectN
   const location = { page: pageId };
   const [threadId, setThreadId] = React.useState<string | null>(null);
   const defaultThreadName = `Comment on ${savedObjectName}`;
-  const [threadName, setThreadName] = useState(defaultThreadName);
+  const [threadName, _setThreadName] = useState(defaultThreadName);
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setThreadName(e.target.value);
-  };
+  // const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setThreadName(e.target.value);
+  // };
 
   const threadListCSS = css`
     visibility: ${threadId ? 'hidden' : 'visible'};
   `;
 
   return (
-    <EuiFlyout onClose={onClose} ownFocus={false} size="s" paddingSize="m">
+    <EuiFlyout onClose={onClose} size="s" paddingSize="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>Threads</h2>
@@ -61,15 +52,19 @@ export const ThreadFlyout = ({ onClose, application, savedObjectId, savedObjectN
       </EuiFlyoutBody>
       {threadId ? null : (
         <EuiFlyoutFooter>
-          <EuiFormRow label="Thread name" display="rowCompressed">
+          {/*
+          this isn't currently working.
+
+          <EuiFormRow label="Thread title" display="rowCompressed">
             <EuiFieldText
               placeholder={defaultThreadName}
               value={threadName === defaultThreadName ? '' : threadName}
               onChange={(e) => onChange(e)}
-              aria-label="Thread name"
+              aria-label="Thread title"
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
+          */}
           <Composer showExpanded={true} {...{ location, threadName }} />
         </EuiFlyoutFooter>
       )}

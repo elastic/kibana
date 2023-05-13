@@ -29,19 +29,19 @@ export const cloudServiceFactory: CloudServiceFactory = ({ startPlugins }) => {
       isCollaborationAvailable: false,
       setBreadcrumbPresence: () => {},
       clearBreadcrumbPresence: () => {},
+      setPageTitle: () => {},
+      clearPageTitle: () => {},
     };
   }
 
+  const noop = () => {};
   const { isCloudEnabled } = cloud;
   const isCollaborationAvailable = cloudCollaboration!.getIsAvailable$().getValue();
 
-  const setBreadcrumbPresence = isCollaborationAvailable
-    ? cloudCollaboration!.setBreadcrumbPresence
-    : () => {};
-
-  const clearBreadcrumbPresence = isCollaborationAvailable
-    ? cloudCollaboration!.clearBreadcrumbPresence
-    : () => {};
+  const setBreadcrumbPresence = cloudCollaboration?.setBreadcrumbPresence || noop;
+  const clearBreadcrumbPresence = cloudCollaboration?.clearBreadcrumbPresence || noop;
+  const setPageTitle = cloudCollaboration?.setPageTitle || noop;
+  const clearPageTitle = cloudCollaboration?.clearPageTitle || noop;
 
   const CollaborationContextProvider: FC = ({ children }) => {
     const token = useObservable(cloudCollaboration!.getToken$());
@@ -54,5 +54,7 @@ export const cloudServiceFactory: CloudServiceFactory = ({ startPlugins }) => {
     isCloudEnabled,
     isCollaborationAvailable,
     setBreadcrumbPresence,
+    clearPageTitle,
+    setPageTitle,
   };
 };

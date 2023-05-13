@@ -13,10 +13,12 @@ import { BehaviorSubject } from 'rxjs';
 export interface CloudCollaborationPluginSetup {}
 
 export interface CloudCollaborationPluginStart {
+  clearBreadcrumbPresence: () => void;
+  clearPageTitle: () => void;
   getIsAvailable$: () => BehaviorSubject<boolean>;
   getToken$: () => BehaviorSubject<string | null>;
   setBreadcrumbPresence: (application: string, savedObjectId: string) => void;
-  clearBreadcrumbPresence: () => void;
+  setPageTitle: (title: string | null) => void;
 }
 
 export interface CloudCollaborationPluginSetupDependencies {

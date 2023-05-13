@@ -45,7 +45,6 @@ export const NotificationFlyout = ({ onClose }: Props) => {
     ${currentSection === 'inbox' ? hideCSS : ''}
     --cord-notification-list-box-shadow: none;
     --cord-notification-list-border: none;
-    margin-top: -48px;
   `;
 
   const bodyCSS = css`
@@ -61,7 +60,12 @@ export const NotificationFlyout = ({ onClose }: Props) => {
   `;
 
   return (
-    <EuiFlyout onClose={onClose} size="m" css={flyoutCSS}>
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      css={flyoutCSS}
+      maskProps={{ headerZindexLocation: 'above' }}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>Notification Center</h2>

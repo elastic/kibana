@@ -30,6 +30,29 @@ interface SetupDeps extends CloudCollaborationPluginSetupDependencies {
   http: HttpSetup;
 }
 
+const selector = 'meta[property="cord:title"]';
+
+const clearPageTitle = () => {
+  const meta = document.querySelector(selector);
+  if (meta) {
+    meta.parentNode?.removeChild(meta);
+  }
+};
+
+const setPageTitle = (title: string | null) => {
+  const meta = document.querySelector('meta[property="cord:title"]');
+  if (meta && title) {
+    meta.setAttribute('content', title);
+  } else if (title) {
+    const newMeta = document.createElement('meta');
+    newMeta.setAttribute('property', 'cord:title');
+    newMeta.setAttribute('content', title);
+    document.head.appendChild(newMeta);
+  } else {
+    clearPageTitle();
+  }
+};
+
 export class CloudCollaborationPlugin
   implements
     Plugin<
@@ -96,10 +119,12 @@ export class CloudCollaborationPlugin
     });
 
     return {
+      clearBreadcrumbPresence,
+      clearPageTitle,
       getIsAvailable$: () => this.isAvailable$,
       getToken$: () => this.token$,
       setBreadcrumbPresence,
-      clearBreadcrumbPresence,
+      setPageTitle,
     };
   }
 

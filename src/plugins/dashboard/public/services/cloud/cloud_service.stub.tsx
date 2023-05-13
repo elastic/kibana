@@ -19,5 +19,7 @@ export const cloudServiceFactory: CloudServiceFactory = () => {
     isCollaborationAvailable: false,
     setBreadcrumbPresence: () => {},
     clearBreadcrumbPresence: () => {},
+    setPageTitle: () => {},
+    clearPageTitle: () => {},
   };
 };

@@ -86,6 +86,8 @@ export function DashboardApp({
       CollaborationContextProvider,
       isCollaborationAvailable,
       setBreadcrumbPresence,
+      setPageTitle,
+      clearPageTitle,
     },
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
@@ -194,14 +196,22 @@ export function DashboardApp({
   useEffect(() => {
     if (!showNoDataPage && isCollaborationAvailable && savedDashboardId) {
       setBreadcrumbPresence('dashboard', savedDashboardId);
+      setPageTitle(dashboardAPI?.getTitle() || null);
     }
-    return () => clearBreadcrumbPresence();
+
+    return () => {
+      clearBreadcrumbPresence();
+      clearPageTitle();
+    };
   }, [
-    savedDashboardId,
-    showNoDataPage,
     isCollaborationAvailable,
     setBreadcrumbPresence,
     clearBreadcrumbPresence,
+    dashboardAPI,
+    savedDashboardId,
+    showNoDataPage,
+    setPageTitle,
+    clearPageTitle,
   ]);
 
   return (
