@@ -143,7 +143,7 @@ describe('Create case', () => {
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
-  let mockedContext: AppMockRenderer;
+  let appMockRender: AppMockRenderer;
 
   beforeAll(() => {
     postCase.mockResolvedValue({
@@ -175,7 +175,7 @@ describe('Create case', () => {
   });
 
   beforeEach(() => {
-    mockedContext = createAppMockRenderer();
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -185,7 +185,7 @@ describe('Create case', () => {
 
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -209,7 +209,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -234,7 +234,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -267,7 +267,7 @@ describe('Create case', () => {
     it('does not submits the title when the length is longer than 160 characters', async () => {
       const longTitle = 'a'.repeat(161);
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -296,7 +296,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -322,7 +322,7 @@ describe('Create case', () => {
     });
 
     it('should set sync alerts to false when the sync feature setting is false', async () => {
-      mockedContext = createAppMockRenderer({
+      appMockRender = createAppMockRenderer({
         features: { alerts: { sync: false, enabled: true } },
       });
 
@@ -331,7 +331,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -354,7 +354,7 @@ describe('Create case', () => {
     });
 
     it('should select LOW as the default severity', async () => {
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -386,7 +386,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -436,7 +436,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -465,7 +465,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -531,6 +531,69 @@ describe('Create case', () => {
         ...sampleDataWithoutTags,
       });
     });
+
+    it('resets fields when changing between connectors of the same type', async () => {
+      const connectors = [
+        ...connectorsMock,
+        { ...connectorsMock[0], id: 'servicenow-2', name: 'My SN connector 2' },
+      ];
+
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectors,
+      });
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
+      await waitForEuiPopoverOpen();
+      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+      });
+
+      userEvent.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
+      expect(screen.getByTestId('severitySelect')).toHaveValue('4');
+
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
+      await waitForEuiPopoverOpen();
+      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
+
+      await waitFor(() => {
+        expect(screen.getByText('My SN connector 2')).toBeInTheDocument();
+      });
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalledWith({
+          request: {
+            ...sampleDataWithoutTags,
+            connector: {
+              fields: {
+                category: null,
+                subcategory: null,
+                impact: null,
+                severity: null,
+                urgency: null,
+              },
+              id: 'servicenow-2',
+              name: 'My SN connector 2',
+              type: '.servicenow',
+            },
+          },
+        });
+      });
+    });
   });
 
   it('should call afterCaseCreated', async () => {
@@ -539,7 +602,7 @@ describe('Create case', () => {
       data: connectorsMock,
     });
 
-    mockedContext.render(
+    appMockRender.render(
       <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
@@ -602,7 +665,7 @@ describe('Create case', () => {
       },
     ];
 
-    mockedContext.render(
+    appMockRender.render(
       <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
@@ -633,7 +696,7 @@ describe('Create case', () => {
 
     const attachments: CaseAttachments = [];
 
-    mockedContext.render(
+    appMockRender.render(
       <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
@@ -668,7 +731,7 @@ describe('Create case', () => {
       },
     ];
 
-    mockedContext.render(
+    appMockRender.render(
       <FormContext
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
@@ -718,12 +781,12 @@ describe('Create case', () => {
 
   describe('Permissions', () => {
     it('should not push to service if the user does not have access to actions', async () => {
-      mockedContext.coreStart.application.capabilities = {
-        ...mockedContext.coreStart.application.capabilities,
+      appMockRender.coreStart.application.capabilities = {
+        ...appMockRender.coreStart.application.capabilities,
         actions: { save: false, show: false },
       };
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -742,7 +805,7 @@ describe('Create case', () => {
 
   describe('Assignees', () => {
     it('should submit assignees', async () => {
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -784,7 +847,7 @@ describe('Create case', () => {
     it('should not render the assignees on basic license', async () => {
       useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -809,7 +872,7 @@ describe('Create case', () => {
       });
 
       it('should have session storage value same as draft comment', async () => {
-        mockedContext.render(
+        appMockRender.render(
           <FormContext onSuccess={onFormSubmitSuccess}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
@@ -837,7 +900,7 @@ describe('Create case', () => {
       });
 
       it('should have session storage value same as draft comment', async () => {
-        mockedContext.render(
+        appMockRender.render(
           <FormContext onSuccess={onFormSubmitSuccess}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
