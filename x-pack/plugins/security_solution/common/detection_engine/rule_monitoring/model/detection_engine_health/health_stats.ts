@@ -26,7 +26,16 @@ export interface StatsBucket<TStats> {
 // -------------------------------------------------------------------------------------------------
 // Rule stats
 
-// TODO: https://github.com/elastic/kibana/issues/125642 Extend rule stats
+// TODO: https://github.com/elastic/kibana/issues/125642 Add more stats, such as:
+// - number of Kibana instances
+// - number of Kibana spaces
+// - number of rules with exceptions
+// - number of rules with notification actions (total, normal, legacy)
+// - number of rules with response actions
+// - top X last failed status messages + rule ids for each status
+// - top X last partial failure status messages + rule ids for each status
+// - top X slowest rules by any metrics (last total execution time, search time, indexing time, etc)
+// - top X rules with the largest schedule delay (drift)
 
 export interface RuleStats {
   number_of_rules: NumberOfRules;
@@ -36,10 +45,7 @@ export interface NumberOfRules {
   all: TotalEnabledDisabled;
   by_origin: Record<'prebuilt' | 'custom', TotalEnabledDisabled>;
   by_type: Record<string, TotalEnabledDisabled>;
-  by_status: Record<string, TotalEnabledDisabled>;
-  with_exceptions: TotalEnabledDisabled;
-  with_notification_actions: TotalEnabledDisabled;
-  with_response_actions: TotalEnabledDisabled;
+  by_outcome: Record<string, TotalEnabledDisabled>;
 }
 
 export interface TotalEnabledDisabled {
@@ -50,6 +56,13 @@ export interface TotalEnabledDisabled {
 
 // -------------------------------------------------------------------------------------------------
 // Rule execution stats
+
+// TODO: https://github.com/elastic/kibana/issues/125642 Add more stats, such as:
+// - number of detected alerts (source event "hits")
+// - number of created alerts (those we wrote to the .alerts-* index)
+// - number of times rule hit cirquit breaker, number of not created alerts because of that
+// - number of triggered actions
+// - top gaps
 
 export interface RuleExecutionStats {
   number_of_executions: NumberOfExecutions;

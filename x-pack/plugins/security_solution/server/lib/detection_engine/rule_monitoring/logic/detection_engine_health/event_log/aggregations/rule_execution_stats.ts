@@ -190,12 +190,6 @@ export const normalizeRuleExecutionStatsAggregationResult = (
   const searchDurationMs = executionMetricsEvents.searchDurationMs || {};
   const indexingDurationMs = executionMetricsEvents.indexingDurationMs || {};
 
-  // TODO: https://github.com/elastic/kibana/issues/125642 Add more stats, such as:
-  // - number of detected alerts (source event "hits")
-  // - number of generated alerts (those we wrote to the index)
-  // - number of times rule hit cirquit breaker, number of missed alerts
-  // - number of triggered actions
-  // - top gaps
   return {
     number_of_executions: normalizeNumberOfExecutions(totalExecutions, executionsByStatus),
     number_of_logged_messages: normalizeNumberOfLoggedMessages(messageContainingEvents),

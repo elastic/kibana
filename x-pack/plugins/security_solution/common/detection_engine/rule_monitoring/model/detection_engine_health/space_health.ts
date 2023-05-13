@@ -6,7 +6,7 @@
  */
 
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { RuleStats, StatsHistory } from './health_stats';
+import type { RuleExecutionStats, RuleStats, StatsHistory } from './health_stats';
 
 // TODO: https://github.com/elastic/kibana/issues/125642 Implement
 
@@ -20,6 +20,4 @@ export interface SpaceHealthSnapshot extends HealthSnapshot {
 
 export type SpaceHealthStatsAtTheMoment = RuleStats;
 
-export interface SpaceHealthStatsOverInterval {
-  message: 'Not implemented';
-}
+export type SpaceHealthStatsOverInterval = RuleExecutionStats;

@@ -12,6 +12,10 @@ import type {
   SpaceHealthParameters,
   SpaceHealthSnapshot,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
+import {
+  getSpaceHealthAggregation,
+  normalizeSpaceHealthAggregationResult,
+} from './aggregations/health_stats_for_space';
 
 /**
  * Client for calculating health stats based on rule saved objects.
@@ -29,50 +33,15 @@ export const createRuleObjectsHealthClient = (
 ): IRuleObjectsHealthClient => {
   return {
     async calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
-      // TODO: https://github.com/elastic/kibana/issues/125642 Implement
+      const aggs = getSpaceHealthAggregation();
+      const aggregations = await rulesClient.aggregate({ aggs });
+
       return {
-        stats_at_the_moment: {
-          number_of_rules: {
-            all: {
-              total: 0,
-              enabled: 0,
-              disabled: 0,
-            },
-            by_origin: {
-              prebuilt: {
-                total: 0,
-                enabled: 0,
-                disabled: 0,
-              },
-              custom: {
-                total: 0,
-                enabled: 0,
-                disabled: 0,
-              },
-            },
-            by_type: {},
-            by_status: {},
-            with_exceptions: {
-              total: 0,
-              enabled: 0,
-              disabled: 0,
-            },
-            with_notification_actions: {
-              total: 0,
-              enabled: 0,
-              disabled: 0,
-            },
-            with_response_actions: {
-              total: 0,
-              enabled: 0,
-              disabled: 0,
-            },
-          },
-        },
+        stats_at_the_moment: normalizeSpaceHealthAggregationResult(aggregations),
         debug: {
           rulesClient: {
-            request: {},
-            response: {},
+            request: { aggs },
+            response: { aggregations },
           },
         },
       };
@@ -101,22 +70,7 @@ export const createRuleObjectsHealthClient = (
               },
             },
             by_type: {},
-            by_status: {},
-            with_exceptions: {
-              total: 0,
-              enabled: 0,
-              disabled: 0,
-            },
-            with_notification_actions: {
-              total: 0,
-              enabled: 0,
-              disabled: 0,
-            },
-            with_response_actions: {
-              total: 0,
-              enabled: 0,
-              disabled: 0,
-            },
+            by_outcome: {},
           },
         },
         debug: {

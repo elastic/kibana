@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KueryNode } from '@kbn/es-query';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type {
   ClusterHealthParameters,
@@ -62,21 +63,29 @@ export const createEventLogHealthClient = (eventLog: IEventLogClient): IEventLog
     },
 
     async calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
-      // TODO: https://github.com/elastic/kibana/issues/125642 Implement
-      return {
-        stats_over_interval: {
-          message: 'Not implemented',
+      const { interval } = args;
+      const soType = RULE_SAVED_OBJECT_TYPE;
+      const authFilter = {} as KueryNode;
+      const namespaces = undefined; // means current Kibana space
+      const eventProviders = [RULE_EXECUTION_LOG_PROVIDER, ALERTING_PROVIDER];
+
+      const kqlFilter = `${f.EVENT_PROVIDER}:${kqlOr(eventProviders)}`;
+      const aggs = getRuleHealthAggregation(interval.granularity);
+
+      // TODO: https://github.com/elastic/kibana/issues/125642 Check with ResponseOps that this is correct usage of this method
+      const result = await eventLog.aggregateEventsWithAuthFilter(
+        soType,
+        authFilter,
+        {
+          start: interval.from,
+          end: interval.to,
+          filter: kqlFilter,
+          aggs,
         },
-        history_over_interval: {
-          buckets: [],
-        },
-        debug: {
-          eventLog: {
-            request: {},
-            response: {},
-          },
-        },
-      };
+        namespaces
+      );
+
+      return normalizeRuleHealthAggregationResult(result, aggs);
     },
 
     async calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth> {
