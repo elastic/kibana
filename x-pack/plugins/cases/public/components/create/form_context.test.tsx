@@ -138,7 +138,7 @@ const waitForFormToRender = async (renderer: Screen) => {
   });
 };
 
-describe.each(Array(50).fill(null))('Create case', () => {
+describe.each(Array(55).fill(null))('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
