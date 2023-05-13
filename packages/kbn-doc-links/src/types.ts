@@ -110,13 +110,16 @@ export interface DocLinks {
   readonly enterpriseSearch: {
     readonly apiKeys: string;
     readonly behavioralAnalytics: string;
+    readonly behavioralAnalyticsCORS: string;
     readonly behavioralAnalyticsEvents: string;
     readonly buildConnector: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsAzureBlobStorage: string;
+    readonly connectorsConfluence: string;
     readonly connectorsGoogleCloudStorage: string;
+    readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
@@ -124,6 +127,7 @@ export interface DocLinks {
     readonly connectorsOracle: string;
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
+    readonly connectorsSharepoint: string;
     readonly connectorsWorkplaceSearch: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
@@ -283,6 +287,7 @@ export interface DocLinks {
     readonly networkMap: string;
     readonly troubleshootGaps: string;
     readonly ruleApiOverview: string;
+    readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
     readonly trustedApps: string;
