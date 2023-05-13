@@ -224,7 +224,7 @@ export const setRecoveredAlertsContext = ({
     }
 
     if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
-      const { idWithLocation, configId, locationId, errorStartedAt } = state;
+      const { idWithLocation, configId, locationId } = state;
       // pull the last error from state, since it is not available on the up ping
       lastErrorMessage = state.lastErrorMessage;
 
@@ -245,24 +245,18 @@ export const setRecoveredAlertsContext = ({
       const stateId = ping.state?.ends?.id || state.stateId;
       const upTimestamp = ping['@timestamp'];
       const checkedAt = moment(upTimestamp).tz(tz).format(dateFormat);
-      const duration = getErrorDuration(moment(errorStartedAt), moment(upTimestamp));
       recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
         defaultMessage: `is now up`,
       });
-      recoveryReason = errorStartedAt
-        ? i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithDuration', {
-            defaultMessage: `the monitor is now up again. It ran successfully at {checkedAt} after a {duration} downtime`,
-            values: {
-              checkedAt,
-              duration,
-            },
-          })
-        : i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithoutDuration', {
-            defaultMessage: `the monitor is now up again. It ran successfully at {checkedAt}`,
-            values: {
-              checkedAt,
-            },
-          });
+      recoveryReason = i18n.translate(
+        'xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithoutDuration',
+        {
+          defaultMessage: `the monitor is now up again. It ran successfully at {checkedAt}`,
+          values: {
+            checkedAt,
+          },
+        }
+      );
 
       if (basePath && spaceId && stateId) {
         const relativeViewInAppUrl = getRelativeViewInAppUrl({
