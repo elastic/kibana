@@ -15,11 +15,13 @@ import getopts from 'getopts';
 
 const isString = (v: any): v is string => typeof v === 'string';
 
-const CONFIG_PATHS = [
-  process.env.KBN_PATH_CONF && join(process.env.KBN_PATH_CONF, 'kibana.yml'),
-  join(REPO_ROOT, 'config/kibana.yml'),
-  '/etc/kibana/kibana.yml',
-].filter(isString);
+const buildConfigPaths = () => {
+  return [
+    process.env.KBN_PATH_CONF && join(process.env.KBN_PATH_CONF, 'kibana.yml'),
+    join(REPO_ROOT, 'config/kibana.yml'),
+    '/etc/kibana/kibana.yml',
+  ].filter(isString);
+};
 
 const CONFIG_DIRECTORIES = [
   process.env.KBN_PATH_CONF,
@@ -63,7 +65,7 @@ export const buildDataPaths = (): string[] => {
  * Get the path of kibana.yml
  * @internal
  */
-export const getConfigPath = () => findFile(CONFIG_PATHS);
+export const getConfigPath = () => findFile(buildConfigPaths());
 
 /**
  * Get the directory containing configuration files
