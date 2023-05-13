@@ -97,7 +97,7 @@ const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
 const defaultPostPushToService = {
   isLoading: false,
   isError: false,
-  pushCaseToExternalService,
+  mutateAsync: pushCaseToExternalService,
 };
 
 const sampleDataWithoutTags = {
@@ -151,7 +151,7 @@ describe('Create case', () => {
       ...sampleDataWithoutTags,
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
-    useCreateAttachmentsMock.mockImplementation(() => ({ createAttachments }));
+    useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
@@ -620,7 +620,7 @@ describe('Create case', () => {
 
     expect(createAttachments).toHaveBeenCalledWith({
       caseId: 'case-id',
-      data: attachments,
+      attachments,
       caseOwner: 'securitySolution',
     });
   });
