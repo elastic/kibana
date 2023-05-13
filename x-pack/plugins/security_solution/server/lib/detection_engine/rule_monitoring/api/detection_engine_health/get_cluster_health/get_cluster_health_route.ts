@@ -15,12 +15,16 @@ import {
   GET_CLUSTER_HEALTH_URL,
   GetClusterHealthRequestBody,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
+import { calculateHealthTimings } from '../health_timings';
+import { validateGetClusterHealthRequest } from './get_cluster_health_request';
 
 /**
  * Get health overview of the whole cluster. Scope: all detection rules in all Kibana spaces.
  * Returns:
- *   - current health stats at the moment of the API call
- *   - health history over a given period of time
+ * - health stats at the moment of the API call
+ * - health stats over a specified period of time ("health interval")
+ * - health stats history within the same interval in the form of a histogram
+ *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
  */
 export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -34,14 +38,25 @@ export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
       },
     },
     async (context, request, response) => {
-      const { body } = request;
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
+        const params = validateGetClusterHealthRequest(request.body);
+
+        const ctx = await context.resolve(['securitySolution']);
+        const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+
+        const clusterHealthParameters = { interval: params.interval };
+        const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
         const responseBody: GetClusterHealthResponse = {
-          foo: 'bar',
+          message: 'Not implemented',
+          timings: calculateHealthTimings(params.requestReceivedAt),
+          parameters: clusterHealthParameters,
+          health: {
+            ...clusterHealth,
+            debug: params.debug ? clusterHealth.debug : undefined,
+          },
         };
 
         return response.ok({ body: responseBody });

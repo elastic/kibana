@@ -15,16 +15,16 @@ import type {
   NumberOfLoggedMessages,
   RuleExecutionStats,
   TopMessages,
-} from '../../../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../../common/detection_engine/rule_monitoring';
 import {
   RuleExecutionEventType,
   RuleExecutionStatus,
   LogLevel,
-} from '../../../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../../common/detection_engine/rule_monitoring';
 
-import { DEFAULT_PERCENTILES } from '../../../utils/aggregations';
+import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
 import type { RawData } from '../../../utils/normalization';
-import * as f from '../../event_log_fields';
+import * as f from '../../../event_log/event_log_fields';
 
 export type RuleExecutionStatsAggregationLevel = 'whole-interval' | 'histogram';
 
@@ -173,7 +173,7 @@ export const getRuleExecutionStatsAggregation = (
   };
 };
 
-export const normalizeExecutionStats = (
+export const normalizeRuleExecutionStatsAggregationResult = (
   aggregations: Record<string, RawData>,
   aggregationLevel: RuleExecutionStatsAggregationLevel
 ): RuleExecutionStats => {

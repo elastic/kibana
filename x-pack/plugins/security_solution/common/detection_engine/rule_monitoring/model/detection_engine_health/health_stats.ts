@@ -5,10 +5,51 @@
  * 2.0.
  */
 
+import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
 import type { LogLevel } from '../log_level';
 
 // TODO: https://github.com/elastic/kibana/issues/125642 Add JSDoc comments
+
+// -------------------------------------------------------------------------------------------------
+// Stats history (date histogram)
+
+export interface StatsHistory<TStats> {
+  buckets: Array<StatsBucket<TStats>>;
+}
+
+export interface StatsBucket<TStats> {
+  timestamp: IsoDateString;
+  stats: TStats;
+}
+
+// -------------------------------------------------------------------------------------------------
+// Rule stats
+
+// TODO: https://github.com/elastic/kibana/issues/125642 Extend rule stats
+
+export interface RuleStats {
+  number_of_rules: NumberOfRules;
+}
+
+export interface NumberOfRules {
+  all: TotalEnabledDisabled;
+  by_origin: Record<'prebuilt' | 'custom', TotalEnabledDisabled>;
+  by_type: Record<string, TotalEnabledDisabled>;
+  by_status: Record<string, TotalEnabledDisabled>;
+  with_exceptions: TotalEnabledDisabled;
+  with_notification_actions: TotalEnabledDisabled;
+  with_response_actions: TotalEnabledDisabled;
+}
+
+export interface TotalEnabledDisabled {
+  total: number;
+  enabled: number;
+  disabled: number;
+}
+
+// -------------------------------------------------------------------------------------------------
+// Rule execution stats
 
 export interface RuleExecutionStats {
   number_of_executions: NumberOfExecutions;

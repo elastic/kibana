@@ -15,12 +15,16 @@ import {
   GET_SPACE_HEALTH_URL,
   GetSpaceHealthRequestBody,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
+import { calculateHealthTimings } from '../health_timings';
+import { validateGetSpaceHealthRequest } from './get_space_health_request';
 
 /**
  * Get health overview of the current Kibana space. Scope: all detection rules in the space.
  * Returns:
- *   - current health stats at the moment of the API call
- *   - health history over a given period of time
+ * - health stats at the moment of the API call
+ * - health stats over a specified period of time ("health interval")
+ * - health stats history within the same interval in the form of a histogram
+ *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
  */
 export const getSpaceHealthRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -34,14 +38,25 @@ export const getSpaceHealthRoute = (router: SecuritySolutionPluginRouter) => {
       },
     },
     async (context, request, response) => {
-      const { body } = request;
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
+        const params = validateGetSpaceHealthRequest(request.body);
+
+        const ctx = await context.resolve(['securitySolution']);
+        const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+
+        const spaceHealthParameters = { interval: params.interval };
+        const spaceHealth = await healthClient.calculateSpaceHealth(spaceHealthParameters);
 
         const responseBody: GetSpaceHealthResponse = {
-          foo: 'bar',
+          message: 'Not implemented',
+          timings: calculateHealthTimings(params.requestReceivedAt),
+          parameters: spaceHealthParameters,
+          health: {
+            ...spaceHealth,
+            debug: params.debug ? spaceHealth.debug : undefined,
+          },
         };
 
         return response.ok({ body: responseBody });

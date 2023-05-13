@@ -13,9 +13,11 @@ import { RuleObjectId } from '../../../rule_schema';
 
 import type { HealthInterval } from '../../model/detection_engine_health/health_interval';
 import { HealthIntervalParameters } from '../../model/detection_engine_health/health_interval';
-import type { HealthResponseMetadata } from '../../model/detection_engine_health/health_response_metadata';
-import type { StatsHistory } from '../../model/execution_stats/stats_history';
-import type { RuleExecutionStats } from '../../model/execution_stats/stats';
+import type { HealthTimings } from '../../model/detection_engine_health/health_metadata';
+import type {
+  RuleHealthParameters,
+  RuleHealthSnapshot,
+} from '../../model/detection_engine_health/rule_health';
 
 // TODO: https://github.com/elastic/kibana/issues/125642 Add JSDoc comments
 
@@ -27,6 +29,7 @@ export const GetRuleHealthRequestBody = t.exact(
     }),
     t.partial({
       interval: HealthIntervalParameters,
+      debug: t.boolean,
     }),
   ])
 );
@@ -34,13 +37,13 @@ export const GetRuleHealthRequestBody = t.exact(
 export interface GetRuleHealthRequest {
   ruleId: RuleObjectId;
   interval: HealthInterval;
+  debug: boolean;
   requestReceivedAt: IsoDateString;
 }
 
 export interface GetRuleHealthResponse {
-  meta: HealthResponseMetadata;
+  timings: HealthTimings;
+  parameters: RuleHealthParameters;
   rule: RuleResponse;
-  stats: RuleExecutionStats;
-  stats_history: StatsHistory<RuleExecutionStats>;
-  debug?: unknown;
+  health: RuleHealthSnapshot;
 }

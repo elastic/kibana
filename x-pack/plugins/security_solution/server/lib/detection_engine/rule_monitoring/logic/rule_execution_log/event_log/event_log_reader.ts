@@ -24,12 +24,11 @@ import {
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
+import { kqlAnd, kqlOr } from '../../utils/kql';
 
 import type {
   GetExecutionEventsArgs,
   GetExecutionResultsArgs,
-  GetExecutionStatsForRuleArgs,
-  GetExecutionStatsForRuleResult,
 } from '../client_for_routes/client_interface';
 import {
   formatExecutionEventResponse,
@@ -37,24 +36,16 @@ import {
   mapRuleExecutionStatusToPlatformStatus,
 } from './aggregations/execution_results';
 import type { ExecutionUuidAggResult } from './aggregations/execution_results/types';
-import {
-  getExecutionStatsForRuleAggregation,
-  normalizeExecutionStatsForRuleAggregationResult,
-} from './aggregations/execution_stats/execution_stats_for_rule';
 
+import * as f from '../../event_log/event_log_fields';
 import {
-  ALERTING_PROVIDER,
   RULE_EXECUTION_LOG_PROVIDER,
   RULE_SAVED_OBJECT_TYPE,
-} from './constants';
-import * as f from './event_log_fields';
+} from '../../event_log/event_log_constants';
 
 export interface IEventLogReader {
   getExecutionEvents(args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
   getExecutionResults(args: GetExecutionResultsArgs): Promise<GetRuleExecutionResultsResponse>;
-  getExecutionStatsForRule(
-    args: GetExecutionStatsForRuleArgs
-  ): Promise<GetExecutionStatsForRuleResult>;
 }
 
 export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader => {
@@ -172,35 +163,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
 
       return formatExecutionEventResponse(results, totalExecutions);
     },
-
-    async getExecutionStatsForRule(
-      args: GetExecutionStatsForRuleArgs
-    ): Promise<GetExecutionStatsForRuleResult> {
-      const { ruleId, interval } = args;
-      const soType = RULE_SAVED_OBJECT_TYPE;
-      const soIds = [ruleId];
-      const eventProviders = [RULE_EXECUTION_LOG_PROVIDER, ALERTING_PROVIDER];
-
-      const kqlFilter = `${f.EVENT_PROVIDER}:${kqlOr(eventProviders)}`;
-
-      const result = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
-        start: interval.from,
-        end: interval.to,
-        filter: kqlFilter,
-        aggs: getExecutionStatsForRuleAggregation(interval.granularity),
-      });
-
-      return normalizeExecutionStatsForRuleAggregationResult(result);
-    },
   };
-};
-
-const kqlAnd = <T>(items: T[]): string => {
-  return items.filter(Boolean).map(String).join(' and ');
-};
-
-const kqlOr = <T>(items: T[]): string => {
-  return items.filter(Boolean).map(String).join(' or ');
 };
 
 const normalizeEvent = (rawEvent: IValidatedEvent): RuleExecutionEvent => {

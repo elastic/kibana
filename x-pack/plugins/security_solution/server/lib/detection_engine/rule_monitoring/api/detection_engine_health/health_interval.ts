@@ -10,12 +10,12 @@ import moment from 'moment';
 import type {
   HealthInterval,
   HealthIntervalParameters,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/detection_engine/rule_monitoring';
 import {
   HealthIntervalGranularity,
   HealthIntervalType,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
+} from '../../../../../../common/detection_engine/rule_monitoring';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 
 const DEFAULT_INTERVAL_PARAMETERS: HealthIntervalParameters = {
   type: HealthIntervalType.last_day,

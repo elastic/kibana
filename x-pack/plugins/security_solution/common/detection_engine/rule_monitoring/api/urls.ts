@@ -12,25 +12,19 @@ import { INTERNAL_DETECTION_ENGINE_URL as INTERNAL_URL } from '../../../constant
 
 /**
  * Get health overview of the whole cluster. Scope: all detection rules in all Kibana spaces.
- * Returns:
- *   - current health stats at the moment of the API call
- *   - health history over a given period of time
+ * See the corresponding route handler for more details.
  */
 export const GET_CLUSTER_HEALTH_URL = `${INTERNAL_URL}/health/_cluster` as const;
 
 /**
  * Get health overview of the current Kibana space. Scope: all detection rules in the space.
- * Returns:
- *   - current health stats at the moment of the API call
- *   - health history over a given period of time
+ * See the corresponding route handler for more details.
  */
 export const GET_SPACE_HEALTH_URL = `${INTERNAL_URL}/health/_space` as const;
 
 /**
  * Get health overview of a rule. Scope: a given detection rule in the current Kibana space.
- * Returns:
- *   - current health stats at the moment of the API call
- *   - health history over a given period of time
+ * See the corresponding route handler for more details.
  */
 export const GET_RULE_HEALTH_URL = `${INTERNAL_URL}/health/_rule` as const;
 

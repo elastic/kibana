@@ -8,13 +8,10 @@
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-  HealthInterval,
   LogLevel,
   RuleExecutionEventType,
-  RuleExecutionStats,
   RuleExecutionStatus,
   SortFieldOfRuleExecutionResult,
-  StatsHistory,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 import type { RuleObjectId } from '../../../../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../../../../common/detection_engine/schemas/common';
@@ -36,13 +33,6 @@ export interface IRuleExecutionLogForRoutes {
    * and security-solution event-log documents.
    */
   getExecutionResults(args: GetExecutionResultsArgs): Promise<GetRuleExecutionResultsResponse>;
-
-  /**
-   * TODO: https://github.com/elastic/kibana/issues/125642 Add description
-   */
-  getExecutionStatsForRule(
-    args: GetExecutionStatsForRuleArgs
-  ): Promise<GetExecutionStatsForRuleResult>;
 }
 
 export interface GetExecutionEventsArgs {
@@ -92,21 +82,4 @@ export interface GetExecutionResultsArgs {
 
   /** Number of results to fetch per page. */
   perPage: number;
-}
-
-// TODO: https://github.com/elastic/kibana/issues/125642 Add JSDoc comments
-
-export interface GetExecutionStatsForRuleArgs {
-  /** Saved object id of the rule (`rule.id`). */
-  ruleId: RuleObjectId;
-
-  interval: HealthInterval;
-}
-
-export interface GetExecutionStatsForRuleResult {
-  stats: RuleExecutionStats;
-
-  statsHistory: StatsHistory<RuleExecutionStats>;
-
-  debug?: unknown;
 }

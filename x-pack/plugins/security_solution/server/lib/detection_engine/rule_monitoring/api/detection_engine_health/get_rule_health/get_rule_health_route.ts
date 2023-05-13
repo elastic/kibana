@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import type {
-  GetRuleHealthRequest,
-  GetRuleHealthResponse,
-  HealthResponseMetadata,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleHealthResponse } from '../../../../../../../common/detection_engine/rule_monitoring';
 import {
   GetRuleHealthRequestBody,
   GET_RULE_HEALTH_URL,
@@ -21,14 +16,17 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
+import { calculateHealthTimings } from '../health_timings';
 import { fetchRuleById } from './fetch_rule_by_id';
-import { validateGetRuleHealthRequest } from './validate_get_rule_health_request';
+import { validateGetRuleHealthRequest } from './get_rule_health_request';
 
 /**
  * Get health overview of a rule. Scope: a given detection rule in the current Kibana space.
  * Returns:
- *   - current health stats at the moment of the API call
- *   - health history over a given period of time
+ * - rule and its execution summary at the moment of the API call
+ * - health stats over a specified period of time ("health interval")
+ * - health stats history within the same interval in the form of a histogram
+ *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
  */
 export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -49,7 +47,7 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
 
         const ctx = await context.resolve(['alerting', 'securitySolution']);
         const rulesClient = ctx.alerting.getRulesClient();
-        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
 
         const fetchRuleResult = await fetchRuleById(rulesClient, params.ruleId);
         if (fetchRuleResult.error) {
@@ -60,18 +58,17 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
         }
 
         const rule = fetchRuleResult.value;
-
-        const stats = await ruleExecutionLog.getExecutionStatsForRule({
-          ruleId: params.ruleId,
-          interval: params.interval,
-        });
+        const ruleHealthParameters = { interval: params.interval, rule_id: params.ruleId };
+        const ruleHealth = await healthClient.calculateRuleHealth(ruleHealthParameters);
 
         const responseBody: GetRuleHealthResponse = {
-          meta: getResponseMetadata(params),
+          timings: calculateHealthTimings(params.requestReceivedAt),
+          parameters: ruleHealthParameters,
           rule,
-          stats: stats.stats,
-          stats_history: stats.statsHistory,
-          debug: stats.debug,
+          health: {
+            ...ruleHealth,
+            debug: params.debug ? ruleHealth.debug : undefined,
+          },
         };
 
         return response.ok({ body: responseBody });
@@ -84,17 +81,4 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
       }
     }
   );
-};
-
-const getResponseMetadata = (params: GetRuleHealthRequest): HealthResponseMetadata => {
-  const requestReceivedAt = moment(params.requestReceivedAt);
-  const responseGeneratedAt = moment().utc();
-  const processingTime = moment.duration(responseGeneratedAt.diff(requestReceivedAt));
-
-  return {
-    request_received_at: requestReceivedAt.toISOString(),
-    response_generated_at: responseGeneratedAt.toISOString(),
-    processing_time_ms: processingTime.asMilliseconds(),
-    interval: params.interval,
-  };
 };

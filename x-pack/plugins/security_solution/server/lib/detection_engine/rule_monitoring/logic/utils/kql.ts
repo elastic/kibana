@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export * from './client_for_executors/client_interface';
-export * from './client_for_routes/client_interface';
+export const kqlAnd = <T>(items: T[]): string => {
+  return items.filter(Boolean).map(String).join(' and ');
+};
 
-export { createRuleExecutionSummary } from './create_rule_execution_summary';
+export const kqlOr = <T>(items: T[]): string => {
+  return items.filter(Boolean).map(String).join(' or ');
+};

@@ -10,16 +10,19 @@ import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/s
 
 import type {
   HealthIntervalGranularity,
-  RuleExecutionStats,
+  RuleHealthSnapshot,
+  RuleHealthStatsOverInterval,
   StatsHistory,
-} from '../../../../../../../../../common/detection_engine/rule_monitoring';
-import type { GetExecutionStatsForRuleResult } from '../../../client_for_routes/client_interface';
+} from '../../../../../../../../common/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
 
-import * as f from '../../event_log_fields';
-import { getRuleExecutionStatsAggregation, normalizeExecutionStats } from './execution_stats';
+import * as f from '../../../event_log/event_log_fields';
+import {
+  getRuleExecutionStatsAggregation,
+  normalizeRuleExecutionStatsAggregationResult,
+} from './rule_execution_stats';
 
-export const getExecutionStatsForRuleAggregation = (
+export const getRuleHealthAggregation = (
   granularity: HealthIntervalGranularity
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   // Let's say we want to calculate rule execution statistics over some date interval, where:
@@ -51,26 +54,38 @@ const getRuleExecutionStatsHistoryAggregation = (
   };
 };
 
-export const normalizeExecutionStatsForRuleAggregationResult = (
-  result: AggregateEventsBySavedObjectResult
-): GetExecutionStatsForRuleResult => {
+export const normalizeRuleHealthAggregationResult = (
+  result: AggregateEventsBySavedObjectResult,
+  requestAggs: Record<string, estypes.AggregationsAggregationContainer>
+): RuleHealthSnapshot => {
   const aggregations = result.aggregations ?? {};
   return {
-    stats: normalizeExecutionStats(aggregations, 'whole-interval'),
-    statsHistory: normalizeExecutionStatsHistory(aggregations),
-    debug: undefined, // aggregations,
+    stats_over_interval: normalizeStatsOverInterval(aggregations),
+    history_over_interval: normalizeHistoryOverInterval(aggregations),
+    debug: {
+      eventLog: {
+        request: { aggs: requestAggs },
+        response: { aggregations },
+      },
+    },
   };
 };
 
-export const normalizeExecutionStatsHistory = (
+const normalizeStatsOverInterval = (
   aggregations: Record<string, RawData>
-): StatsHistory<RuleExecutionStats> => {
+): RuleHealthStatsOverInterval => {
+  return normalizeRuleExecutionStatsAggregationResult(aggregations, 'whole-interval');
+};
+
+const normalizeHistoryOverInterval = (
+  aggregations: Record<string, RawData>
+): StatsHistory<RuleHealthStatsOverInterval> => {
   const statsHistory = aggregations.statsHistory || {};
 
   return {
     buckets: statsHistory.buckets.map((rawBucket: RawData) => {
       const timestamp: string = String(rawBucket.key_as_string);
-      const stats = normalizeExecutionStats(rawBucket, 'histogram');
+      const stats = normalizeRuleExecutionStatsAggregationResult(rawBucket, 'histogram');
       return { timestamp, stats };
     }),
   };

@@ -7,20 +7,20 @@
 
 import moment from 'moment';
 import type {
-  GetRuleHealthRequest,
-  GetRuleHealthRequestBody,
+  GetClusterHealthRequest,
+  GetClusterHealthRequestBody,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
-import { validateHealthInterval } from './validate_health_interval';
+import { validateHealthInterval } from '../health_interval';
 
-export const validateGetRuleHealthRequest = (
-  body: GetRuleHealthRequestBody
-): GetRuleHealthRequest => {
+export const validateGetClusterHealthRequest = (
+  body: GetClusterHealthRequestBody
+): GetClusterHealthRequest => {
   const now = moment();
   const interval = validateHealthInterval(body.interval, now);
 
   return {
-    ruleId: body.rule_id,
     interval,
+    debug: body.debug ?? false,
     requestReceivedAt: now.utc().toISOString(),
   };
 };

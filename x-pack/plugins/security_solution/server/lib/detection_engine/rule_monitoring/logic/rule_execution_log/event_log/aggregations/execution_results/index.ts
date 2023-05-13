@@ -21,7 +21,7 @@ import type {
   ExecutionUuidAggResult,
   ExecutionUuidAggBucket,
 } from './types';
-import * as f from '../../event_log_fields';
+import * as f from '../../../../event_log/event_log_fields';
 
 // TODO: https://github.com/elastic/kibana/issues/125642 Move the fields from this file to `event_log_fields.ts`
 
