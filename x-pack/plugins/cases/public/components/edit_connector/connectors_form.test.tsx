@@ -358,6 +358,7 @@ describe('ConnectorsForm ', () => {
       expect(onSubmit).toHaveBeenCalledWith({
         fields: {
           category: null,
+          subcategory: null,
           impact: null,
           severity: null,
           urgency: null,

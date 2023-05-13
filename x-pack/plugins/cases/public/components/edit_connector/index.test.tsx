@@ -178,7 +178,9 @@ describe('EditConnector ', () => {
       expect(screen.queryByTestId('edit-connectors-submit')).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText('My SN connector')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('My SN connector')).toBeInTheDocument();
+    });
   });
 
   it('disabled the edit button when is loading', async () => {
