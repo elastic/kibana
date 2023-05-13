@@ -81,8 +81,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   const fieldPreview$ = useRef(new BehaviorSubject<FieldPreview[] | undefined>(undefined));
 
-  /** Possible error while fetching sample documents */
-  // const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
 
@@ -299,7 +297,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     if (script?.source === undefined) {
       // Whenever the source is not defined ("Set value" is toggled off or the
       // script is empty) we clear the error and update the params cache.
-      // lastExecutePainlessRequestParams.current.script = undefined;
       controller.setLastExecutePainlessRequestParams({ script: undefined });
       controller.setPreviewError(null);
     }
