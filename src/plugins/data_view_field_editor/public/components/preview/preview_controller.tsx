@@ -136,9 +136,11 @@ export class PreviewController {
     }
   };
 
+  /* disabled while investigating issues with painless script editor
   setScriptEditorValidation = (scriptEditorValidation: PreviewState['scriptEditorValidation']) => {
     this.updateState({ scriptEditorValidation });
   };
+  */
 
   setPreviewError = (error: PreviewState['previewResponse']['error']) => {
     this.updateState({

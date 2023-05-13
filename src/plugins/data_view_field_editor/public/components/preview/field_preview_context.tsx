@@ -64,8 +64,6 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
-const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
-
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
   children,
@@ -84,11 +82,11 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
 
-  /** Flag to indicate if we are loading a single document by providing its ID */
-  const scriptEditorValidation = useStateSelector(
-    controller.state$,
-    scriptEditorValidationSelector
-  );
+  const [scriptEditorValidation, setScriptEditorValidation] = useState<{
+    isValidating: boolean;
+    isValid: boolean;
+    message: string | null;
+  }>({ isValidating: false, isValid: true, message: null });
 
   const { currentDocument, currentDocIndex, currentDocId } = useStateSelector(
     controller.state$,
@@ -210,6 +208,10 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       params: {
         value: params,
         update: updateParams,
+      },
+      validation: {
+        // todo do this next
+        setScriptEditorValidation,
       },
     }),
     [controller, fieldPreview$, params, updateParams]
