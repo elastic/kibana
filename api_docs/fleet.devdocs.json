@@ -18186,6 +18186,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.FullAgentPolicy.secret_references",
+            "type": "Array",
+            "tags": [],
+            "label": "secret_references",
+            "description": [],
+            "signature": [
+              "PolicySecretReference",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.FullAgentPolicy.signed",
             "type": "Object",
             "tags": [],
@@ -20525,6 +20540,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.PackagePolicy.secret_references",
+            "type": "Array",
+            "tags": [],
+            "label": "secret_references",
+            "description": [],
+            "signature": [
+              "PolicySecretReference",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.PackagePolicy.updated_at",
             "type": "string",
             "tags": [],
@@ -22037,6 +22067,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "[RegistryVarsEntryKeys.required]",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.secret",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[RegistryVarsEntryKeys.secret]",
             "description": [],
             "signature": [
               "boolean | undefined"
