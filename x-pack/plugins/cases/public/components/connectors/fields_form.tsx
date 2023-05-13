@@ -6,7 +6,7 @@
  */
 
 import React, { memo, Suspense } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 
 import type { CaseActionConnector } from '../types';
 import { getCaseConnectors } from '.';
@@ -30,8 +30,8 @@ const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector }) => {
         <Suspense
           fallback={
             <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
+              <EuiFlexItem>
+                <EuiSkeletonText lines={5} size="m" />
               </EuiFlexItem>
             </EuiFlexGroup>
           }
