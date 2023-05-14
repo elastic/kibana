@@ -6,7 +6,6 @@
  */
 
 import { LOADING_INDICATOR } from '../screens/security_header';
-import { login } from './login';
 
 const primaryButton = 0;
 
