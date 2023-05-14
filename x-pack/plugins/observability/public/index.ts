@@ -71,9 +71,6 @@ export type {
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
 
 export { DatePickerContextProvider } from './context/date_picker_context';
-export type { AddInspectorRequest } from './context/inspector/inspector_context';
-export { InspectorContextProvider } from './context/inspector/inspector_context';
-export { useInspectorContext } from './context/inspector/use_inspector_context';
 
 export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
