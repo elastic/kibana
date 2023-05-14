@@ -42,8 +42,6 @@
     "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/utility-types",
-    "@kbn/es-types",
-    "@kbn/rison",
     "@kbn/datemath",
     "@kbn/core-ui-settings-browser",
     "@kbn/es-query",
