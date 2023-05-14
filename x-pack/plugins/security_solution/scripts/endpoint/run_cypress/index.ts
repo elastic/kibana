@@ -18,7 +18,13 @@ import { KbnClient, readConfigFile, EsVersion } from '@kbn/test';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server/src/create_root';
 import { extendEsArchiver } from '@kbn/ftr-common-functional-services/services/kibana_server';
 
-export default async ({ esPort, kibanaPort, filePath: singleSpecPath, index, argv }) => {
+export default async (
+  { esPort, kibanaPort, filePath: singleSpecPath, index, argv } = {
+    esPort: 9220,
+    kibanaPort: 5620,
+    argv: process.argv.slice(2),
+  }
+) => {
   console.error('params', singleSpecPath);
 
   const yargsData = yargs(argv);
@@ -57,8 +63,8 @@ export default async ({ esPort, kibanaPort, filePath: singleSpecPath, index, arg
   console.error('ftrConfig', ftrConfig);
 
   const HOSTNAME = 'localhost';
-  const ES_PORT = esPort ?? parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
-  const KIBANA_PORT = kibanaPort ?? parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
+  const ES_PORT = esPort;
+  const KIBANA_PORT = kibanaPort;
 
   const servers = createTestServers({
     adjustTimeout: (t) => t,
@@ -129,8 +135,8 @@ export default async ({ esPort, kibanaPort, filePath: singleSpecPath, index, arg
     // defaults: config.get('uiSettings.defaults'),
   });
 
-  if (ftrConfig.esArchiver) {
-    await esArchiver.load(ftrConfig.esArchiver[0]);
+  if (ftrConfig.esArchiver?.archives) {
+    await Promise.allSettled(ftrConfig.esArchiver?.archives.map((path) => esArchiver.load(path)));
   }
 
   const commonCypressConfig = {
@@ -150,14 +156,14 @@ export default async ({ esPort, kibanaPort, filePath: singleSpecPath, index, arg
     },
   };
 
-  const ftrConfigIndex = argv.indexOf('--ftr-config-file');
+  const ftrConfigIndex = argv?.indexOf('--ftr-config-file');
   if (ftrConfigIndex !== -1) {
     argv.splice(ftrConfigIndex, 2);
   }
 
   if (yargs.parse(argv)._.includes('open')) {
     return cypress.open({
-      configFile: argv.configFile,
+      configFile: yargsData.configFile,
       ...commonCypressConfig,
     });
   }

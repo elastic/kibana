@@ -264,6 +264,7 @@ export const schema = Joi.object()
     esArchiver: Joi.object()
       .keys({
         baseDirectory: Joi.string().optional(),
+        archives: Joi.array().items(Joi.string()).optional(),
       })
       .default(),
 
