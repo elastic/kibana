@@ -9,9 +9,9 @@ import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { EsErrorBody } from '../util/errors';
+import { EsErrorBody } from '@kbn/ml-error-utils';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
-import type { UrlConfig } from './custom_urls';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
@@ -59,7 +59,7 @@ export interface ClassificationAnalysis {
 
 export type AnalysisConfig = estypes.MlDataframeAnalysisContainer;
 export interface DataFrameAnalyticsMeta {
-  custom_urls?: UrlConfig[];
+  custom_urls?: MlUrlConfig[];
   [key: string]: any;
 }
 export interface DataFrameAnalyticsConfig

@@ -36,6 +36,9 @@ export interface CyLoadEndpointDataOptions
   enableFleetIntegration: boolean;
   generatorSeed: string;
   waitUntilTransformed: boolean;
+  withResponseActions: boolean;
+  isolation: boolean;
+  bothIsolatedAndNormalEndpoints?: boolean;
 }
 
 /**
@@ -58,10 +61,12 @@ export const cyLoadEndpointDataHandler = async (
     waitUntilTransformed = true,
     version = kibanaPackageJson.version,
     os,
+    withResponseActions,
+    isolation,
   } = options;
 
   const DocGenerator = EndpointDocGenerator.custom({
-    CustomMetadataGenerator: EndpointMetadataGenerator.custom({ version, os }),
+    CustomMetadataGenerator: EndpointMetadataGenerator.custom({ version, os, isolation }),
   });
 
   if (waitUntilTransformed) {
@@ -85,7 +90,8 @@ export const cyLoadEndpointDataHandler = async (
     alertsPerHost,
     enableFleetIntegration,
     undefined,
-    DocGenerator
+    DocGenerator,
+    withResponseActions
   );
 
   if (waitUntilTransformed) {

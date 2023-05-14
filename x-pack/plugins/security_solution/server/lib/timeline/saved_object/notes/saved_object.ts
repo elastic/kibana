@@ -38,12 +38,26 @@ export const deleteNoteByTimelineId = async (request: FrameworkRequest, timeline
   };
   const notesToBeDeleted = await getAllSavedNote(request, options);
   const savedObjectsClient = (await request.context.core).savedObjects.client;
+  const noteObjects = notesToBeDeleted.notes.map((note) => {
+    return {
+      id: note.noteId,
+      type: noteSavedObjectType,
+    };
+  });
 
-  await Promise.all(
-    notesToBeDeleted.notes.map((note) =>
-      savedObjectsClient.delete(noteSavedObjectType, note.noteId)
-    )
-  );
+  await savedObjectsClient.bulkDelete(noteObjects);
+};
+
+export const deleteNote = async ({
+  request,
+  noteId,
+}: {
+  request: FrameworkRequest;
+  noteId: string;
+}) => {
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
+
+  await savedObjectsClient.delete(noteSavedObjectType, noteId);
 };
 
 export const getNote = async (

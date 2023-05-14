@@ -29,6 +29,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
   public migrationVersion: SavedObjectType<T>['migrationVersion'];
   public coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
   public typeMigrationVersion: SavedObjectType<T>['typeMigrationVersion'];
+  public managed: SavedObjectType<T>['managed'];
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
   public updatedAt: SavedObjectType<T>['updated_at'];
@@ -47,6 +48,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
       migrationVersion,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
       namespaces,
       updated_at: updatedAt,
       created_at: createdAt,
@@ -60,6 +62,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
     this.migrationVersion = migrationVersion;
     this.coreMigrationVersion = coreMigrationVersion;
     this.typeMigrationVersion = typeMigrationVersion;
+    this.managed = managed;
     this.namespaces = namespaces;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
@@ -96,6 +99,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
           migrationVersion: this.migrationVersion,
           coreMigrationVersion: this.coreMigrationVersion,
           typeMigrationVersion: this.typeMigrationVersion,
+          managed: this.managed,
           references: this.references,
         })
         .then((sso) => {

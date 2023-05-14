@@ -18,6 +18,7 @@ export interface FormProps {
   title: string;
   startDate: string;
   endDate: string;
+  timezone?: string[];
   recurring: boolean;
   recurringSchedule?: RecurringScheduleFormProps;
 }
@@ -45,6 +46,7 @@ export const schema: FormSchema<FormProps> = {
   },
   startDate: {},
   endDate: {},
+  timezone: {},
   recurring: {
     type: FIELD_TYPES.TOGGLE,
     label: i18n.CREATE_FORM_REPEAT,

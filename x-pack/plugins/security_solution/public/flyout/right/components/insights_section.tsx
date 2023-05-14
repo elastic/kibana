@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { INSIGHTS_TEST_ID } from './test_ids';
 import { INSIGHTS_TITLE } from './translations';
 import { EntitiesOverview } from './entities_overview';
@@ -25,6 +26,7 @@ export const InsightsSection: React.FC<InsightsSectionProps> = ({ expanded = fal
   return (
     <ExpandableSection title={INSIGHTS_TITLE} expanded={expanded} data-test-subj={INSIGHTS_TEST_ID}>
       <EntitiesOverview />
+      <ThreatIntelligenceOverview />
     </ExpandableSection>
   );
 };

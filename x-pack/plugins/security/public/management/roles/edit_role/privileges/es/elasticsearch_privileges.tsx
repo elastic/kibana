@@ -40,6 +40,7 @@ interface Props {
   validator: RoleValidator;
   builtinESPrivileges: BuiltinESPrivileges;
   indexPatterns: string[];
+  canUseRemoteIndices?: boolean;
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
@@ -62,6 +63,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       indexPatterns,
       license,
       builtinESPrivileges,
+      canUseRemoteIndices,
     } = this.props;
 
     return (
@@ -170,37 +172,42 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           availableIndexPrivileges={builtinESPrivileges.index}
           editable={editable}
         />
-        <EuiSpacer />
-        <EuiSpacer />
 
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.security.management.editRole.elasticSearchPrivileges.remoteIndexPrivilegesTitle"
-              defaultMessage="Remote index privileges"
+        {canUseRemoteIndices && (
+          <>
+            <EuiSpacer />
+            <EuiSpacer />
+
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.remoteIndexPrivilegesTitle"
+                  defaultMessage="Remote index privileges"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterDataDescription"
+                  defaultMessage="Control access to the data in remote clusters. "
+                />
+                {this.learnMore(docLinks.links.security.indicesPrivileges)}
+              </p>
+            </EuiText>
+            <IndexPrivileges
+              indexType="remote_indices"
+              role={role}
+              indicesAPIClient={indicesAPIClient}
+              validator={validator}
+              license={license}
+              onChange={onChange}
+              availableIndexPrivileges={builtinESPrivileges.index}
+              editable={editable}
             />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterDataDescription"
-              defaultMessage="Control access to the data in remote clusters. "
-            />
-            {this.learnMore(docLinks.links.security.indicesPrivileges)}
-          </p>
-        </EuiText>
-        <IndexPrivileges
-          indexType="remote_indices"
-          role={role}
-          indicesAPIClient={indicesAPIClient}
-          validator={validator}
-          license={license}
-          onChange={onChange}
-          availableIndexPrivileges={builtinESPrivileges.index}
-          editable={editable}
-        />
+          </>
+        )}
       </Fragment>
     );
   };

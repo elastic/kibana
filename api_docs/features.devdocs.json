@@ -367,6 +367,10 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/feature.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
               },
@@ -1797,6 +1801,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/feature.ts"
               },
               {
                 "plugin": "fleet",
@@ -3672,6 +3680,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/feature.ts"
               },
               {
                 "plugin": "fleet",

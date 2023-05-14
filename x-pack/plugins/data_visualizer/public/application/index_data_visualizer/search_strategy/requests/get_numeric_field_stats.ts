@@ -18,6 +18,7 @@ import type {
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { processTopValues } from './utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
@@ -32,7 +33,6 @@ import type {
   FieldStatsError,
 } from '../../../../../common/types/field_stats';
 import { processDistributionData } from '../../utils/process_distribution_data';
-import { extractErrorProperties } from '../../utils/error_utils';
 import {
   isIKibanaSearchResponse,
   isNormalSamplingOption,

@@ -75,7 +75,7 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
   padding-top: 45px;
 `;
 
-const ChartSize = '120px';
+const ChartSize = 120;
 
 interface AlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];

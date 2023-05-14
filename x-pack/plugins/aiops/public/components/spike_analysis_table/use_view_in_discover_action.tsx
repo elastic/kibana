@@ -7,14 +7,13 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
+import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
 import type { GroupTableItem, TableItemAction } from './types';
 
@@ -83,19 +82,26 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
   };
 
   return {
-    name: () => (
-      <EuiToolTip content={discoverUrlError ? discoverUrlError : viewInDiscoverMessage}>
-        <EuiIcon type="discoverApp" />
-      </EuiToolTip>
-    ),
-    description: viewInDiscoverMessage,
-    type: 'button',
-    onClick: async (tableItem) => {
-      const openInDiscoverUrl = await generateDiscoverUrl(tableItem);
-      if (typeof openInDiscoverUrl === 'string') {
-        await application.navigateToUrl(openInDiscoverUrl);
-      }
+    render: (tableItem: SignificantTerm | GroupTableItem) => {
+      const tooltipText = discoverUrlError ? discoverUrlError : viewInDiscoverMessage;
+
+      const clickHandler = async () => {
+        const openInDiscoverUrl = await generateDiscoverUrl(tableItem);
+        if (typeof openInDiscoverUrl === 'string') {
+          await application.navigateToUrl(openInDiscoverUrl);
+        }
+      };
+
+      return (
+        <TableActionButton
+          dataTestSubjPostfix="Discover"
+          iconType="discoverApp"
+          isDisabled={discoverUrlError !== undefined}
+          label={viewInDiscoverMessage}
+          tooltipText={tooltipText}
+          onClick={clickHandler}
+        />
+      );
     },
-    enabled: () => discoverUrlError === undefined,
   };
 };

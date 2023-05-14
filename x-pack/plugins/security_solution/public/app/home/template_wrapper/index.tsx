@@ -27,6 +27,7 @@ import { useShowTimeline } from '../../../common/utils/timeline/use_show_timelin
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
 import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
+import { useSyncFlyoutStateWithUrl } from '../../../flyout/url/use_sync_flyout_state_with_url';
 
 const NO_DATA_PAGE_MAX_WIDTH = 950;
 
@@ -75,6 +76,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
 
     const showEmptyState = useShowPagesWithEmptyView() || rest.isEmptyState;
 
+    const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
+
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
      * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
@@ -82,7 +85,11 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
      * between EuiPageTemplate and the security solution pages.
      */
     return (
-      <ExpandableFlyoutProvider>
+      <ExpandableFlyoutProvider
+        onChanges={handleFlyoutChangedOrClosed}
+        onClosePanels={handleFlyoutChangedOrClosed}
+        ref={flyoutRef}
+      >
         <StyledKibanaPageTemplate
           $addBottomPadding={addBottomPadding}
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
@@ -108,7 +115,11 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
               </EuiThemeProvider>
             </KibanaPageTemplate.BottomBar>
           )}
-          <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} onClose={() => {}} />
+          <ExpandableFlyout
+            registeredPanels={expandableFlyoutDocumentsPanels}
+            onClose={() => {}}
+            handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
+          />
         </StyledKibanaPageTemplate>
       </ExpandableFlyoutProvider>
     );

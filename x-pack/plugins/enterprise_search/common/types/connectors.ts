@@ -23,7 +23,13 @@ export enum DisplayType {
   NUMERIC = 'numeric',
   TOGGLE = 'toggle',
   DROPDOWN = 'dropdown',
-  CHECKBOX = 'checkbox',
+}
+
+export enum FieldType {
+  STRING = 'str',
+  INTEGER = 'int',
+  LIST = 'list',
+  BOOLEAN = 'bool',
 }
 
 export interface ConnectorConfigProperties {
@@ -36,6 +42,9 @@ export interface ConnectorConfigProperties {
   required: boolean;
   sensitive: boolean;
   tooltip: string;
+  type: FieldType;
+  ui_restrictions: string[];
+  validations: string[];
   value: string | number | boolean | null;
 }
 
@@ -223,6 +232,7 @@ export interface ConnectorSyncJob {
   metadata: Record<string, unknown>;
   started_at: string | null;
   status: SyncStatus;
+  total_document_count: number | null;
   trigger_method: TriggerMethod;
   worker_hostname: string | null;
 }

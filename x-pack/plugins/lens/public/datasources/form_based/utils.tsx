@@ -25,6 +25,7 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
+import { isQueryValid } from '@kbn/visualization-ui-components/public';
 import type { DateRange } from '../../../common/types';
 import type {
   FramePublicAPI,
@@ -58,7 +59,6 @@ import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import { isQueryValid } from '../../shared_components';
 import { ReducedSamplingSectionEntries } from './info_badges';
 
 function isMinOrMaxColumn(

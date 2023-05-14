@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 export const dashboardListingErrorStrings = {
@@ -91,32 +92,32 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'Continue editing',
     }),
   getDiscardAriaLabel: (title: string) =>
-    i18n.translate('dashboard.listing.unsaved.discardAria', {
-      defaultMessage: 'Discard changes to {title}',
+    i18n.translate('dashboard.listing.unsaved.resetAria', {
+      defaultMessage: 'Reset changes to {title}',
       values: { title },
     }),
   getDiscardTitle: () =>
-    i18n.translate('dashboard.listing.unsaved.discardTitle', {
-      defaultMessage: 'Discard changes',
+    i18n.translate('dashboard.listing.unsaved.resetTitle', {
+      defaultMessage: 'Reset changes',
     }),
 };
 
-export const discardConfirmStrings = {
-  getDiscardTitle: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesTitle', {
-      defaultMessage: 'Discard changes to dashboard?',
+export const resetConfirmStrings = {
+  getResetTitle: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.resetChangesTitle', {
+      defaultMessage: 'Reset dashboard?',
     }),
-  getDiscardSubtitle: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
-      defaultMessage: `Once you discard your changes, there's no getting them back.`,
-    }),
-  getDiscardConfirmButtonText: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Discard changes',
-    }),
-  getDiscardCancelButtonText: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
+  getResetSubtitle: (viewMode: ViewMode) =>
+    viewMode === ViewMode.EDIT
+      ? i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
+          defaultMessage: `All unsaved changes will be lost.`,
+        })
+      : i18n.translate('dashboard.resetChangesConfirmModal.resetChangesDescription', {
+          defaultMessage: `This dashboard will return to its last saved state.  You might lose changes to filters and queries.`,
+        }),
+  getResetConfirmButtonText: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Reset dashboard',
     }),
 };
 

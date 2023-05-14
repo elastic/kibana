@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiFlexGroup,
   EuiFlexGroupProps,
@@ -13,30 +11,30 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isMobileAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { ApmDatePicker } from '../date_picker/apm_date_picker';
-import { KueryBar } from '../kuery_bar';
 import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
+import { UnifiedSearchBar } from '../unified_search_bar';
 
 interface Props {
   hidden?: boolean;
-  showKueryBar?: boolean;
+  showUnifiedSearchBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
-  kueryBarPlaceholder?: string;
-  kueryBarBoolFilter?: QueryDslQueryContainer[];
+  searchBarPlaceholder?: string;
+  searchBarBoolFilter?: QueryDslQueryContainer[];
 }
 
 export function SearchBar({
   hidden = false,
-  showKueryBar = true,
+  showUnifiedSearchBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
-  kueryBarBoolFilter,
-  kueryBarPlaceholder,
+  searchBarPlaceholder,
+  searchBarBoolFilter,
 }: Props) {
   const { agentName } = useApmServiceContext();
   const isMobileAgent = isMobileAgentName(agentName);
@@ -69,11 +67,11 @@ export function SearchBar({
               </EuiFlexItem>
             )}
 
-            {showKueryBar && (
+            {showUnifiedSearchBar && (
               <EuiFlexItem>
-                <KueryBar
-                  placeholder={kueryBarPlaceholder}
-                  boolFilter={kueryBarBoolFilter}
+                <UnifiedSearchBar
+                  placeholder={searchBarPlaceholder}
+                  boolFilter={searchBarBoolFilter}
                 />
               </EuiFlexItem>
             )}
@@ -91,9 +89,6 @@ export function SearchBar({
                 <TimeComparison />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <ApmDatePicker />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

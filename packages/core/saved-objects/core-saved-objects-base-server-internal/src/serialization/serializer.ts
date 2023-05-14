@@ -94,6 +94,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       references,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
       migrationVersion = migrationVersionCompatibility === 'compatible' && typeMigrationVersion
         ? { [type]: typeMigrationVersion }
         : undefined,
@@ -116,6 +117,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(originId && { originId }),
       attributes: _source[type],
       references: references || [],
+      ...(managed != null ? { managed } : {}),
       ...(migrationVersion && { migrationVersion }),
       ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
@@ -146,11 +148,13 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       references,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
     } = savedObj;
     const source = {
       [type]: attributes,
       type,
       references,
+      ...(managed != null ? { managed } : {}),
       ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
       ...(originId && { originId }),
@@ -160,7 +164,6 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(updated_at && { updated_at }),
       ...(createdAt && { created_at: createdAt }),
     };
-
     return {
       _id: this.generateRawId(namespace, type, id),
       _source: source,

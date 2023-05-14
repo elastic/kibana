@@ -75,6 +75,9 @@ describe('useUserProfileForm', () => {
             "imageUrl": "",
             "initials": "fn",
           },
+          "userSettings": Object {
+            "darkMode": "",
+          },
         },
         "user": Object {
           "email": "email",
@@ -228,6 +231,80 @@ describe('useUserProfileForm', () => {
       );
 
       expect(testWrapper.exists('UserAvatar')).toBeFalsy();
+    });
+  });
+
+  describe('Dark Mode Form', () => {
+    it('should display if the User is not a cloud user', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      expect(testWrapper.exists('[data-test-subj="darkModeButton"]')).toBeTruthy();
+    });
+
+    it('should not display if the User is a cloud user', () => {
+      const data: UserProfileData = {};
+
+      const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={cloudUser} data={data} />
+        </Providers>
+      );
+
+      expect(testWrapper.exists('[data-test-subj="darkModeButton"]')).toBeFalsy();
+    });
+
+    it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
+      const data: UserProfileData = {};
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
+        1,
+        { title: 'Profile updated' },
+        {}
+      );
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ title: 'Profile updated' }),
+        expect.objectContaining({ toastLifeTimeMs: 300000 })
+      );
     });
   });
 });

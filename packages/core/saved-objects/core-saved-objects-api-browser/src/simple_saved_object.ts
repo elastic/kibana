@@ -49,6 +49,14 @@ export interface SimpleSavedObject<T = unknown> {
    * `namespaceType: 'agnostic'`.
    */
   namespaces: SavedObjectType<T>['namespaces'];
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false)
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed: SavedObjectType<T>['managed'];
 
   /**
    * Gets an attribute of this object

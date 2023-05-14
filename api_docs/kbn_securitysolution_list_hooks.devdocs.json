@@ -255,7 +255,15 @@
         "label": "useApi",
         "description": [],
         "signature": [
-          "(http: HttpStart) => ",
+          "(http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          ") => ",
           {
             "pluginId": "@kbn/securitysolution-list-hooks",
             "scope": "common",
@@ -276,7 +284,13 @@
             "label": "http",
             "description": [],
             "signature": [
-              "HttpStart"
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
             ],
             "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
             "deprecated": false,
@@ -1013,6 +1027,52 @@
                     "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
                     "section": "def-common.ApiCallMemoProps",
                     "text": "ApiCallMemoProps"
+                  }
+                ],
+                "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-hooks",
+            "id": "def-common.ExceptionsApi.duplicateExceptionList",
+            "type": "Function",
+            "tags": [],
+            "label": "duplicateExceptionList",
+            "description": [],
+            "signature": [
+              "(arg: ",
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.ApiListDuplicateProps",
+                "text": "ApiListDuplicateProps"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-list-hooks",
+                "id": "def-common.ExceptionsApi.duplicateExceptionList.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "arg",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                    "section": "def-common.ApiListDuplicateProps",
+                    "text": "ApiListDuplicateProps"
                   }
                 ],
                 "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",

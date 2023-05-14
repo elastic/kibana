@@ -359,6 +359,9 @@ beforeEach(() => {
       return { state: {} };
     },
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   }));
 
   ruleTypeRegistry.get.mockReturnValue({
@@ -373,6 +376,9 @@ beforeEach(() => {
       return { state: {} };
     },
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   });
 
   rulesClient = new RulesClient(rulesClientParams);

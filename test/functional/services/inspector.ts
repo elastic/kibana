@@ -238,6 +238,19 @@ export class InspectorService extends FtrService {
     });
   }
 
+  public async getTableDataWithId(tableTestSubj: string): Promise<string[][]> {
+    const chooserDataTestId = 'inspectorTableChooser';
+    if (!(await this.testSubjects.exists(chooserDataTestId))) {
+      return [];
+    }
+
+    return await this.retry.try(async () => {
+      await this.testSubjects.click(chooserDataTestId);
+      await this.testSubjects.click(tableTestSubj);
+      return this.getTableData();
+    });
+  }
+
   /**
    * Returns the selected option value from combobox
    */

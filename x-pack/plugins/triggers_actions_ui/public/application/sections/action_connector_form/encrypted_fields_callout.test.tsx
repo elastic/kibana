@@ -35,14 +35,14 @@ const renderWithSecretFields = ({
 
 describe('EncryptedFieldsCallout', () => {
   const isCreateTests: Array<[number, string]> = [
-    [1, 'Remember value label0. You must reenter it each time you edit the connector.'],
+    [1, 'Remember your label0 value. You must reenter it each time you edit the connector.'],
     [
       2,
-      'Remember values label0 and label1. You must reenter them each time you edit the connector.',
+      'Remember your label0 and label1 values. You must reenter them each time you edit the connector.',
     ],
     [
       3,
-      'Remember values label0, label1, and label2. You must reenter them each time you edit the connector.',
+      'Remember your label0, label1, and label2 values. You must reenter them each time you edit the connector.',
     ],
   ];
 

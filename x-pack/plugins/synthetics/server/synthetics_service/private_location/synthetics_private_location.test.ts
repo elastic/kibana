@@ -107,7 +107,7 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.createMonitors(
+      await syntheticsPrivateLocation.createPackagePolicies(
         [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
@@ -263,7 +263,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'throttling.config': {
           type: 'text',
-          value: '5d/3u/20l',
+          value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
         },
         timeout: {
           type: 'text',

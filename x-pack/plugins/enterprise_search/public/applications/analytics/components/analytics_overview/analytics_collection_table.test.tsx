@@ -16,6 +16,7 @@ import { EuiButtonGroup, EuiSuperDatePicker } from '@elastic/eui';
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
+import { AnalyticsCollectionNotFound } from './analytics_collection_not_found';
 
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
@@ -30,13 +31,18 @@ describe('AnalyticsCollectionTable', () => {
       name: 'example2',
     },
   ];
+  const props = {
+    collections: analyticsCollections,
+    isSearching: false,
+    onSearch: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders cards', () => {
-    const wrapper = shallow(<AnalyticsCollectionTable collections={analyticsCollections} />);
+    const wrapper = shallow(<AnalyticsCollectionTable {...props} />);
     const collectionCards = wrapper.find(AnalyticsCollectionCardWithLens);
 
     expect(collectionCards).toHaveLength(analyticsCollections.length);
@@ -44,9 +50,7 @@ describe('AnalyticsCollectionTable', () => {
   });
 
   it('renders filters', () => {
-    const buttonGroup = shallow(
-      <AnalyticsCollectionTable collections={analyticsCollections} />
-    ).find(EuiButtonGroup);
+    const buttonGroup = shallow(<AnalyticsCollectionTable {...props} />).find(EuiButtonGroup);
 
     expect(buttonGroup).toHaveLength(1);
     expect(buttonGroup.prop('options')).toHaveLength(4);
@@ -54,12 +58,16 @@ describe('AnalyticsCollectionTable', () => {
   });
 
   it('renders datePick', () => {
-    const datePicker = shallow(
-      <AnalyticsCollectionTable collections={analyticsCollections} />
-    ).find(EuiSuperDatePicker);
+    const datePicker = shallow(<AnalyticsCollectionTable {...props} />).find(EuiSuperDatePicker);
 
     expect(datePicker).toHaveLength(1);
     expect(datePicker.prop('start')).toEqual('now-7d');
     expect(datePicker.prop('end')).toEqual('now');
+  });
+
+  it('renders not found page', () => {
+    const wrapper = shallow(<AnalyticsCollectionTable {...props} collections={[]} />);
+
+    expect(wrapper.find(AnalyticsCollectionNotFound)).toHaveLength(1);
   });
 });

@@ -11,9 +11,5 @@ import type React from 'react';
 const actionCreator = actionCreatorFactory('x-pack/security_solution/groups');
 
 export const updateGroupSelector = actionCreator<{
-  groupSelector: React.ReactElement;
+  groupSelector: React.ReactElement | null;
 }>('UPDATE_GROUP_SELECTOR');
-
-export const updateSelectedGroup = actionCreator<{
-  selectedGroup: string;
-}>('UPDATE_SELECTED_GROUP');

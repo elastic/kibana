@@ -10,8 +10,7 @@ import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import { extractErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';

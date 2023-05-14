@@ -23,6 +23,7 @@ import {
 import { lastValueFrom } from 'rxjs';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EuiOverlayMaskProps } from '@elastic/eui/src/components/overlay_mask';
 import { useWithArtifactSubmitData } from '../../../../components/artifact_list_page/hooks/use_with_artifact_submit_data';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
@@ -40,9 +41,7 @@ import { getCreationSuccessMessage, getCreationErrorMessage } from '../translati
 export interface EventFiltersFlyoutProps {
   data?: Ecs;
   onCancel(): void;
-  maskProps?: {
-    style?: string;
-  };
+  maskProps?: EuiOverlayMaskProps;
 }
 
 export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(

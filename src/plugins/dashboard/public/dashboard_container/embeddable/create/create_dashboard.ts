@@ -181,12 +181,13 @@ export const createDashboard = async (
   const incomingEmbeddable = creationOptions?.incomingEmbeddable;
   if (incomingEmbeddable) {
     initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
-    if (
+
+    const panelExists =
       incomingEmbeddable.embeddableId &&
-      Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
-    ) {
+      Boolean(initialInput.panels[incomingEmbeddable.embeddableId]);
+    if (panelExists) {
       // this embeddable already exists, we will update the explicit input.
-      const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId];
+      const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId as string];
       const sameType = panelToUpdate.type === incomingEmbeddable.type;
 
       panelToUpdate.type = incomingEmbeddable.type;
@@ -195,22 +196,28 @@ export const createDashboard = async (
         ...(sameType ? panelToUpdate.explicitInput : {}),
 
         ...incomingEmbeddable.input,
-        id: incomingEmbeddable.embeddableId,
+        id: incomingEmbeddable.embeddableId as string,
 
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
     } else {
       // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
-      untilDashboardReady().then((container) =>
-        container.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input)
-      );
+      untilDashboardReady().then(async (container) => {
+        container.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input);
+      });
     }
+
+    untilDashboardReady().then(async (container) => {
+      container.setScrollToPanelId(incomingEmbeddable.embeddableId);
+      container.setHighlightPanelId(incomingEmbeddable.embeddableId);
+    });
   }
 
   // --------------------------------------------------------------------------------------
   // Set up search sessions integration.
   // --------------------------------------------------------------------------------------
+  let initialSearchSessionId;
   if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
@@ -223,7 +230,7 @@ export const createDashboard = async (
     }
     const existingSession = session.getSessionId();
 
-    const initialSearchSessionId =
+    initialSearchSessionId =
       sessionIdToRestore ??
       (existingSession && incomingEmbeddable ? existingSession : session.start());
 
@@ -232,7 +239,6 @@ export const createDashboard = async (
         creationOptions?.searchSessionSettings
       );
     });
-    initialInput.searchSessionId = initialSearchSessionId;
   }
 
   // --------------------------------------------------------------------------------------
@@ -278,6 +284,7 @@ export const createDashboard = async (
   const dashboardContainer = new DashboardContainer(
     initialInput,
     reduxEmbeddablePackage,
+    initialSearchSessionId,
     savedObjectResult?.dashboardInput,
     dashboardCreationStartTime,
     undefined,

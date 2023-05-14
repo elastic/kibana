@@ -12,7 +12,7 @@ import type { RuleUpdateProps } from '../../../../../../common/detection_engine/
 import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
-import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
+import { transformToActionFrequency } from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
 
 export interface UpdateRulesOptions {
@@ -29,6 +29,9 @@ export const updateRules = async ({
   if (existingRule == null) {
     return null;
   }
+
+  const alertActions = ruleUpdate.actions?.map(transformRuleToAlertAction) ?? [];
+  const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
@@ -70,9 +73,7 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    throttle: transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+    actions,
   };
 
   const update = await rulesClient.update({

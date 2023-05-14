@@ -8,6 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -111,7 +112,7 @@ export default function (providerContext: FtrProviderContext) {
       await deletePackage(testPkgName, testPkgVersion);
 
       const epmPackageRes = await esClient.search({
-        index: '.kibana',
+        index: INGEST_SAVED_OBJECT_INDEX,
         size: 0,
         rest_total_hits_as_int: true,
         query: {
@@ -127,7 +128,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
       const epmPackageAssetsRes = await esClient.search({
-        index: '.kibana',
+        index: INGEST_SAVED_OBJECT_INDEX,
         size: 0,
         rest_total_hits_as_int: true,
         query: {

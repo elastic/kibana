@@ -9,7 +9,10 @@ import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { cleanKibana } from '../../../tasks/common';
 import { ROLES } from '../../../../common/test';
 import { getExceptionList } from '../../../objects/exception';
-import { EXCEPTIONS_TABLE_SHOWING_LISTS } from '../../../screens/exceptions';
+import {
+  EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
+  EXCEPTIONS_TABLE_SHOWING_LISTS,
+} from '../../../screens/exceptions';
 import { createExceptionList, deleteExceptionList } from '../../../tasks/api_calls/exceptions';
 import {
   dismissCallOut,
@@ -55,5 +58,9 @@ describe('All exception lists - read only', () => {
 
       getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
     });
+  });
+
+  it('Exception list actions should be disabled', () => {
+    cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().should('be.disabled');
   });
 });

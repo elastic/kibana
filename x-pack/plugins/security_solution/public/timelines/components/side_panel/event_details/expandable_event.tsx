@@ -123,24 +123,32 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             </>
           )}
         </EuiFlexItem>
-        {handleOnEventClosed && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
-          </EuiFlexItem>
-        )}
-        {isAlert && (
-          <EuiCopy textToCopy={alertDetailsLink}>
-            {(copy) => (
-              <EuiButtonEmpty
-                onClick={copy}
-                iconType="share"
-                data-test-subj="copy-alert-flyout-link"
-              >
-                {i18n.SHARE_ALERT}
-              </EuiButtonEmpty>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" alignItems="flexEnd">
+            {handleOnEventClosed && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.CLOSE}
+                  onClick={handleOnEventClosed}
+                />
+              </EuiFlexItem>
             )}
-          </EuiCopy>
-        )}
+            {isAlert && alertDetailsLink && (
+              <EuiCopy textToCopy={alertDetailsLink}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    onClick={copy}
+                    iconType="share"
+                    data-test-subj="copy-alert-flyout-link"
+                  >
+                    {i18n.SHARE_ALERT}
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </StyledEuiFlexGroup>
     );
   }

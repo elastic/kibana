@@ -14,10 +14,12 @@ describe('validateTypeMigrations', () => {
   const defaultConvertVersion = '8.0.0';
 
   const someModelVersion: SavedObjectsModelVersion = {
-    modelChange: {
-      type: 'expansion',
-      transformation: { up: jest.fn(), down: jest.fn() },
-    },
+    changes: [
+      {
+        type: 'data_backfill',
+        transform: jest.fn(),
+      },
+    ],
   };
 
   const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({

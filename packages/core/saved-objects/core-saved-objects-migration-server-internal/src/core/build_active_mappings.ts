@@ -156,6 +156,9 @@ export function getBaseMappings(): IndexMapping {
       typeMigrationVersion: {
         type: 'version',
       },
+      managed: {
+        type: 'boolean',
+      },
     },
   };
 }

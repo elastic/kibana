@@ -13,13 +13,14 @@ import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('PrivateLocationMonitor', function () {
+  describe('PrivateLocationAddMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');
@@ -34,9 +35,10 @@ export default function ({ getService }: FtrProviderContext) {
     const security = getService('security');
 
     before(async () => {
+      await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.12.0')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -83,6 +85,39 @@ export default function ({ getService }: FtrProviderContext) {
           agentPolicyId: testFleetPolicyID,
         },
       ]);
+    });
+
+    it('does not add a monitor if there is an error in creating integration', async () => {
+      const newMonitor = { ...httpMonitorJson };
+
+      const invalidName = '[] -  invalid name';
+
+      newMonitor.locations.push({
+        id: testFleetPolicyID,
+        label: 'Test private location 0',
+        isServiceManaged: false,
+      });
+
+      newMonitor.name = invalidName;
+
+      const apiResponse = await supertestAPI
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(newMonitor)
+        .expect(500);
+
+      expect(apiResponse.body).eql({
+        statusCode: 500,
+        message:
+          'YAMLException: end of the stream or a document separator is expected at line 3, column 10:\n    name: [] -  invalid name\n             ^',
+        error: 'Internal Server Error',
+      });
+
+      const apiGetResponse = await supertestAPI
+        .get(API_URLS.SYNTHETICS_MONITORS + `?query="${invalidName}"`)
+        .expect(200);
+      // verify that no monitor was added
+      expect(apiGetResponse.body.monitors?.length).eql(0);
     });
 
     let newMonitorId: string;
@@ -455,7 +490,7 @@ export default function ({ getService }: FtrProviderContext) {
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
 
-        expect(packagePolicy.package.version).eql('0.11.4');
+        expect(packagePolicy.package.version).eql('0.12.0');
 
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
@@ -465,7 +500,7 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '0.11.4')).eql(true);
+        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '0.12.0')).eql(true);
       } finally {
         await supertestAPI
           .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

@@ -88,6 +88,35 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for text-based co
 />
 `;
 
+exports[`UnifiedFieldList <FieldItemButton /> renders properly for wildcard search 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview script date: date",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
+  fieldIcon={
+    <WrappedFieldIcon
+      scripted={true}
+      type="date"
+    />
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-script date"
+      search="script date"
+      title="script date"
+    >
+      script date
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-script date"
+  size="s"
+/>
+`;
+
 exports[`UnifiedFieldList <FieldItemButton /> renders properly when a conflict field 1`] = `
 <FieldButton
   buttonProps={

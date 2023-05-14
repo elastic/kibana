@@ -9,6 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { KibanaThemeProvider } from './shared_imports';
 import { App, AppDeps } from './app';
@@ -27,9 +28,13 @@ export const renderApp = (bootDeps: BootDeps) => {
 
   render(
     <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <App {...appDeps} />
-      </KibanaThemeProvider>
+      <KibanaContextProvider
+        services={{ uiSettings: bootDeps.uiSettings, settings: bootDeps.settings }}
+      >
+        <KibanaThemeProvider theme$={theme$}>
+          <App {...appDeps} />
+        </KibanaThemeProvider>
+      </KibanaContextProvider>
     </I18nContext>,
     element
   );

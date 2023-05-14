@@ -38,7 +38,7 @@ export const getHostsColumns = (
         if (hostName != null && hostName.length > 0) {
           return (
             <SecurityCellActions
-              mode={CellActionsMode.HOVER}
+              mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
@@ -96,7 +96,7 @@ export const getHostsColumns = (
         if (hostOsName != null) {
           return (
             <SecurityCellActions
-              mode={CellActionsMode.HOVER}
+              mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
@@ -123,7 +123,7 @@ export const getHostsColumns = (
         if (hostOsVersion != null) {
           return (
             <SecurityCellActions
-              mode={CellActionsMode.HOVER}
+              mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}

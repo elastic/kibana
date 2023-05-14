@@ -8,6 +8,6 @@
 
 import path from 'path';
 
-export function getSynthtraceEnvironment(filename: string) {
-  return `Synthtrace: ${path.parse(filename).name}`;
+export function getSynthtraceEnvironment(filename: string, suffix = '') {
+  return `Synthtrace: ${path.parse(filename).name} ${suffix}`.trim();
 }
