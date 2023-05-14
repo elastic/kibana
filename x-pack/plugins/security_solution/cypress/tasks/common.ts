@@ -198,11 +198,7 @@ export const deleteConnectors = () => {
 };
 
 export const postDataView = (dataSource: string) => {
-  cy.request({
-    auth: {
-      user: Cypress.env('ELASTICSEARCH_USERNAME'),
-      pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
-    },
+  rootRequest({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {
@@ -219,11 +215,7 @@ export const postDataView = (dataSource: string) => {
 };
 
 export const deleteDataView = (dataSource: string) => {
-  cy.request({
-    auth: {
-      user: Cypress.env('ELASTICSEARCH_USERNAME'),
-      pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
-    },
+  rootRequest({
     method: 'DELETE',
     url: `api/data_views/data_view/${dataSource}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },

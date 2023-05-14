@@ -57,9 +57,9 @@ export default async (
     writeTo: process.stdout,
   });
 
-  const { default: getStackConfig } = await import(
-    yargsData.argv.ftrConfigFile ?? '../../../../../test/security_solution_cypress/config'
-  );
+  // const { default: getStackConfig } = await import(
+  //   yargsData.argv.ftrConfigFile ?? '../../../../../test/security_solution_cypress/config'
+  // );
 
   // console.log('moduleA', getStackConfig);
 
