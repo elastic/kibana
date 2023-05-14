@@ -120,7 +120,7 @@ export const getRelativeViewInAppUrl = ({
   return relativeViewInAppUrl;
 };
 
-const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
+export const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
   const diffInDays = endsAt.diff(startedAt, 'days');
   if (diffInDays > 1) {
     return i18n.translate('xpack.synthetics.errorDetails.errorDuration.days', {
