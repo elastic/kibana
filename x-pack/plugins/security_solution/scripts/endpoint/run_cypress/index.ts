@@ -86,6 +86,7 @@ export default async ({ esPort, kibanaPort, filePath: singleSpecPath, index, arg
         },
         cliArgs: {
           oss: false,
+          watch: true,
         },
       },
     },
