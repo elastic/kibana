@@ -21,10 +21,10 @@ export default defineCypressConfig({
   retries: {
     runMode: 2,
   },
+  numTestsKeptInMemory: 0,
   e2e: {
     baseUrl: 'http://localhost:5601',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 20,
   },
 });

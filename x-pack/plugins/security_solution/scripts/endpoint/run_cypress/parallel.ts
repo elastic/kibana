@@ -82,7 +82,7 @@ export default async () => {
           return error;
         });
     },
-    { concurrency: 4 }
+    { concurrency: 3 }
   ).then((results) => {
     // console.error('results', JSON.stringify(results));
 
