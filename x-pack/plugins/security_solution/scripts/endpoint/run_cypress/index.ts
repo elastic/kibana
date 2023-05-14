@@ -14,6 +14,7 @@ import yargs from 'yargs';
 import cypress from 'cypress';
 import deepMerge from 'deepmerge';
 import { ToolingLog } from '@kbn/tooling-log';
+import pMap from 'p-map';
 import { KbnClient, readConfigFile, EsVersion } from '@kbn/test';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server/src/create_root';
 import { extendEsArchiver } from '@kbn/ftr-common-functional-services/services/kibana_server';
@@ -25,11 +26,17 @@ export default async (
     argv: process.argv.slice(2),
   }
 ) => {
+  console.error('process.argv', process.env);
   console.error('params', singleSpecPath);
 
   const yargsData = yargs(argv);
 
-  console.error('argv', argv, yargsData.argv);
+  console.error(
+    'argv',
+    argv,
+    yargsData.argv,
+    require.resolve(`../../../${yargsData.argv.configFile}`)
+  );
 
   console.error('argv.ftrConfigFile', yargsData.ftrConfigFile);
   // console.error('process.argv', argv);
@@ -135,8 +142,8 @@ export default async (
     // defaults: config.get('uiSettings.defaults'),
   });
 
-  if (ftrConfig.esArchiver?.archives) {
-    await Promise.allSettled(ftrConfig.esArchiver?.archives.map((path) => esArchiver.load(path)));
+  if (ftrConfig.esArchiver?.archives?.length) {
+    await pMap(ftrConfig.esArchiver?.archives, (path) => esArchiver.load(path), { concurrency: 1 });
   }
 
   const commonCypressConfig = {
@@ -163,7 +170,7 @@ export default async (
 
   if (yargs.parse(argv)._.includes('open')) {
     return cypress.open({
-      configFile: yargsData.configFile,
+      configFile: require.resolve(`../../../${yargsData.argv.configFile}`),
       ...commonCypressConfig,
     });
   }
