@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-default-export */
-
-import Url from 'url';
-import { EsArchiver } from '@kbn/es-archiver';
-import { omit } from 'lodash';
 import yargs from 'yargs';
 import cypress from 'cypress';
 import deepMerge from 'deepmerge';
 import { ToolingLog } from '@kbn/tooling-log';
 import pMap from 'p-map';
-import { runElasticsearch, runKibanaServer, KbnClient, readConfigFile, EsVersion } from '@kbn/test';
-import { createTestServers } from '@kbn/core-test-helpers-kbn-server/src/create_root';
-import { extendEsArchiver } from '@kbn/ftr-common-functional-services/services/kibana_server';
+import { runElasticsearch, runKibanaServer, readConfigFile, EsVersion } from '@kbn/test';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import {
   Lifecycle,
