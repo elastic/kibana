@@ -23,7 +23,7 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { useTimeZone } from '../../../../../../../observability_shared/public/hooks/use_time_zone';
+import { useTimeZone } from '@kbn/observability-shared-plugin/public/hooks/use_time_zone';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../data_handler';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
