@@ -10,11 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../typings/**/*",
-    "../observability_shared/public/components/date_picker/date_picker.test.tsx",
-    "../observability_shared/public/hooks/use_chart_theme.tsx",
-    "../observability_shared/public/utils/navigation_warning_prompt",
-    "../observability_shared/public/hooks/use_prefix_path_with_basepath.tsx",
-    "../observability_shared/public/hooks/use_link_props.test.tsx"
+    "../observability_shared/public/components/date_picker/date_picker.test.tsx"
   ],
   "kbn_references": [
     "@kbn/core",
