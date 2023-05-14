@@ -2,10 +2,11 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/steps/functional/common.sh
+# source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
-node scripts/build_kibana_platform_plugins.js
+# .buildkite/scripts/bootstrap.sh
+# node scripts/build_kibana_platform_plugins.js
 
 export JOB=kibana-security-solution-chrome
 # export CLI_NUMBER=${CLI_NUMBER:-$((BUILDKITE_PARALLEL_JOB+1))}

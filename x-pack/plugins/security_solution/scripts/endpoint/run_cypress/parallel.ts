@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable import/no-default-export */
+
 import _ from 'lodash';
 import globby from 'globby';
 import pMap from 'p-map';

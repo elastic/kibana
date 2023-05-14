@@ -16,6 +16,22 @@ const primaryButton = 0;
  */
 const dndSloppyClickDetectionThreshold = 5;
 
+export const API_AUTH = Object.freeze({
+  user: Cypress.env('ELASTICSEARCH_USERNAME'),
+  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+});
+
+export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+
+export const rootRequest = <T = unknown>(
+  options: Partial<Cypress.RequestOptions>
+): Cypress.Chainable<Cypress.Response<T>> =>
+  cy.request<T>({
+    auth: API_AUTH,
+    headers: API_HEADERS,
+    ...options,
+  });
+
 /** Starts dragging the subject */
 export const drag = (subject: JQuery<HTMLElement>) => {
   const subjectLocation = subject[0].getBoundingClientRect();
@@ -76,11 +92,10 @@ export const cleanKibana = () => {
 };
 
 export const deleteAlertsAndRules = () => {
-  login();
   cy.log('Delete all alerts and rules');
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: '/api/detection_engine/rules/_bulk_action',
     body: {
@@ -92,63 +107,74 @@ export const deleteAlertsAndRules = () => {
     timeout: 300000,
   });
 
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'alert',
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'alert',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   });
 
-  cy.request(
-    'POST',
-    `${Cypress.env(
+  rootRequest({
+    method: 'POST',
+    url: `${Cypress.env(
       'ELASTICSEARCH_URL'
     )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
-    {
+    body: {
       query: {
         match_all: {},
       },
-    }
-  );
+    },
+  });
 };
 
 export const deleteTimelines = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'siem-ui-timeline',
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'siem-ui-timeline',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   });
 };
 
 export const deleteCases = () => {
-  login();
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'cases',
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'cases',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   });
