@@ -25188,7 +25188,6 @@
     "xpack.observability.apmServiceInventoryOptimizedSorting": "优化 APM 中的服务列表加载性能",
     "xpack.observability.apmTraceExplorerTab": "APM Trace Explorer",
     "xpack.observability.breadcrumbs.alertsLinkText": "告警",
-    "xpack.observability.breadcrumbs.observabilityLinkText": "Observability",
     "xpack.observability.breadcrumbs.overviewLinkText": "概览",
     "xpack.observability.breadcrumbs.rulesLinkText": "规则",
     "xpack.observability.breadcrumbs.sloDetailsLinkText": "详情",
