@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...kibanaCommonTestsConfig.getAll(),
 
     esArchiver: {
+      ...xpackFunctionalTestsConfig.get('esArchiver'),
       archives: ['x-pack/test/security_solution_cypress/es_archives/auditbeat'],
     },
 
