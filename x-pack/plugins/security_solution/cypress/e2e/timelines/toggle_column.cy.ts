@@ -25,10 +25,10 @@ describe('toggle column in timeline', () => {
   before(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
-    login();
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();

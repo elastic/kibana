@@ -22,16 +22,13 @@ import { ALL_USERS_TABLE } from '../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../tasks/table_pagination';
 
 describe('Pagination', () => {
-  before(() => {
-    login();
-  });
-
   describe('Host uncommon processes table)', () => {
     before(() => {
       esArchiverLoad('host_uncommon_processes');
     });
 
     beforeEach(() => {
+      login();
       visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
       waitForUncommonProcessesToBeLoaded();
     });
@@ -104,6 +101,10 @@ describe('Pagination', () => {
   describe('All users and all Hosts tables', () => {
     before(() => {
       esArchiverLoad('all_users');
+    });
+
+    beforeEach(() => {
+      login();
     });
 
     after(() => {

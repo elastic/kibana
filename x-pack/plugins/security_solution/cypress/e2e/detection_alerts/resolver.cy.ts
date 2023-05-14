@@ -23,7 +23,9 @@ describe('Analyze events view for alerts', () => {
     login();
     createRule(getNewRule());
   });
+
   beforeEach(() => {
+    login();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });

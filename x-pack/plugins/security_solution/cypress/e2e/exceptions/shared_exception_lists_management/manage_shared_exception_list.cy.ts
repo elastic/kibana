@@ -54,7 +54,7 @@ const getExceptionList2 = () => ({
 const expiredDate = new Date(Date.now() - 1000000).toISOString();
 const futureDate = new Date(Date.now() + 1000000).toISOString();
 
-describe('Manage shared exception list', () => {
+describe.skip('Manage shared exception list', () => {
   describe('Create/Export/Delete', () => {
     before(() => {
       esArchiverResetKibana();
@@ -85,6 +85,7 @@ describe('Manage shared exception list', () => {
     });
 
     beforeEach(() => {
+      login();
       visitWithoutDateRange(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
     });

@@ -43,6 +43,10 @@ describe('Alerts detection rules', () => {
     createRule(getNewThresholdRule({ rule_id: '4' }));
   });
 
+  beforeEach(() => {
+    login();
+  });
+
   it('Sorts by enabled rules', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();

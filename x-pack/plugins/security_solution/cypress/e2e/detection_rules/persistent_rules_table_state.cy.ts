@@ -102,10 +102,10 @@ describe('Persistent rules table state', () => {
   before(() => {
     cleanKibana();
     createTestRules();
-    login();
   });
 
   beforeEach(() => {
+    login();
     resetRulesTableState();
   });
 
@@ -203,6 +203,7 @@ describe('Persistent rules table state', () => {
 
     describe('and on the rules management tab', () => {
       beforeEach(() => {
+        login();
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
       });
 
@@ -313,6 +314,7 @@ describe('Persistent rules table state', () => {
   describe('when persisted state is partially unavailable', () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
+        login();
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
       });
 
@@ -346,6 +348,7 @@ describe('Persistent rules table state', () => {
   describe('when corrupted', () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
+        login();
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
       });
 

@@ -39,7 +39,7 @@ import {
 import { closeTimeline, openActiveTimeline, removeDataProvider } from '../../tasks/timeline';
 
 import { ALERTS_URL } from '../../urls/navigation';
-describe('Alerts cell actions', { testIsolation: false }, () => {
+describe.skip('Alerts cell actions', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();

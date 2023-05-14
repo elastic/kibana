@@ -49,6 +49,7 @@ describe('Save Timeline Prompts', () => {
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     createNewTimeline();
   });

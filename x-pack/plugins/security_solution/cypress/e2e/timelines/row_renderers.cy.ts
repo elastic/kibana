@@ -27,10 +27,11 @@ import { HOSTS_URL } from '../../urls/navigation';
 describe('Row renderers', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
     deleteTimelines();
+    login();
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();

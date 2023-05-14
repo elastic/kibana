@@ -96,6 +96,7 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');

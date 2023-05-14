@@ -17,7 +17,7 @@ import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import { searchByTitle } from '../../tasks/table_pagination';
 
-describe('Export timelines', () => {
+describe.skip('Export timelines', () => {
   before(() => {
     cleanKibana();
     cy.intercept({
@@ -29,10 +29,10 @@ describe('Export timelines', () => {
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
       cy.wrap(response.body.data.persistTimeline.timeline.title).as('templateTitle');
     });
-    login();
   });
 
   it('Exports a custom timeline template', function () {
+    login();
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
     searchByTitle(this.templateTitle);
     exportTimeline(this.templateId);

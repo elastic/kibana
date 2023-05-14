@@ -20,9 +20,10 @@ const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 describe('Import rules', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     cy.intercept('POST', '/api/detection_engine/rules/_import*').as('import');
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);

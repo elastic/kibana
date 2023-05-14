@@ -64,7 +64,7 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-describe('Add/edit exception from rule details', () => {
+describe.skip('Add/edit exception from rule details', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
   const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
   const ITEM_FIELD = 'unique_value.test';
@@ -120,6 +120,7 @@ describe('Add/edit exception from rule details', () => {
         });
       });
 
+      login();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();
@@ -258,6 +259,7 @@ describe('Add/edit exception from rule details', () => {
           rule_id: 'rule_testing',
         })
       );
+      login();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();

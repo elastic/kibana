@@ -55,9 +55,10 @@ const expectedNumberOfCustomRulesToBeEdited = 6;
 describe('Bulk editing index patterns of rules with a data view only', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     esArchiverResetKibana();
 

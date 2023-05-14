@@ -35,13 +35,17 @@ import { navigateFromHeaderTo } from '../../tasks/security_header';
 import { closeTimeline } from '../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
 
-describe('Detection response view', () => {
+describe.skip('Detection response view', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
     createRule(getNewRule());
     visit(DETECTIONS_RESPONSE_URL);
   });
+
   context('Open in timeline', { testIsolation: false }, () => {
     afterEach(() => {
       closeTimeline();

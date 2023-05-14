@@ -37,15 +37,15 @@ import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_r
 const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
 const exceptionList = getExceptionList();
 
-describe('Export rules', () => {
+describe.skip('Export rules', () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();

@@ -26,10 +26,10 @@ describe('Users stats and tables', () => {
     esArchiverLoad('users');
 
     esArchiverLoad('risk_users');
-    login();
   });
 
   beforeEach(() => {
+    login();
     visit(USERS_URL);
   });
 

@@ -22,6 +22,9 @@ describe('Alerts Table Action column', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('process_ancestry');
+  });
+
+  beforeEach(() => {
     login();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();

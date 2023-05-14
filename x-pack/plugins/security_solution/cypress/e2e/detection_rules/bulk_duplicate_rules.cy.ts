@@ -53,9 +53,10 @@ const NON_EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item with future expir
 describe('Detection rules, bulk duplicate', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();

@@ -1,0 +1,1243 @@
+[
+    {
+        "status": "finished",
+        "startedTestsAt": "2023-05-14T14:42:49.535Z",
+        "endedTestsAt": "2023-05-14T14:43:30.233Z",
+        "totalDuration": 40698,
+        "totalSuites": 1,
+        "totalTests": 1,
+        "totalPassed": 1,
+        "totalPending": 0,
+        "totalFailed": 0,
+        "totalSkipped": 0,
+        "runs": [
+            {
+                "stats": {
+                    "suites": 1,
+                    "tests": 1,
+                    "passes": 1,
+                    "pending": 0,
+                    "skipped": 0,
+                    "failures": 0,
+                    "duration": 40698,
+                    "startedAt": "2023-05-14T14:42:49.535Z",
+                    "endedAt": "2023-05-14T14:43:30.233Z"
+                },
+                "reporter": "../../../node_modules/cypress-multi-reporters",
+                "reporterStats": {
+                    "suites": 1,
+                    "tests": 1,
+                    "passes": 1,
+                    "pending": 0,
+                    "failures": 0,
+                    "start": "2023-05-14T14:42:49.539Z",
+                    "end": "2023-05-14T14:43:30.310Z",
+                    "duration": 40771,
+                    "testsRegistered": 1,
+                    "passPercent": 100,
+                    "pendingPercent": 0,
+                    "other": 0,
+                    "hasOther": false,
+                    "skipped": 0,
+                    "hasSkipped": false
+                },
+                "hooks": [
+                    {
+                        "hookName": "before all",
+                        "title": [
+                            "\"before all\" hook"
+                        ],
+                        "body": "() => {\n    Object(_tasks_common__WEBPACK_IMPORTED_MODULE_8__[\"cleanKibana\"])();\n    Object(_tasks_login__WEBPACK_IMPORTED_MODULE_10__[\"login\"])();\n    Object(_tasks_api_calls_timelines__WEBPACK_IMPORTED_MODULE_6__[\"createTimeline\"])(Object(_objects_case__WEBPACK_IMPORTED_MODULE_0__[\"getCase1\"])().timeline).then(response => cy.wrap({\n      ...Object(_objects_case__WEBPACK_IMPORTED_MODULE_0__[\"getCase1\"])(),\n      timeline: {\n        ...Object(_objects_case__WEBPACK_IMPORTED_MODULE_0__[\"getCase1\"])().timeline,\n        id: response.body.data.persistTimeline.timeline.savedObjectId\n      }\n    }).as('mycase'));\n  }"
+                    }
+                ],
+                "tests": [
+                    {
+                        "title": [
+                            "Cases",
+                            "Creates a new case with timeline and opens the timeline"
+                        ],
+                        "state": "passed",
+                        "body": "function () {\n    Object(_tasks_login__WEBPACK_IMPORTED_MODULE_10__[\"login\"])();\n    Object(_tasks_login__WEBPACK_IMPORTED_MODULE_10__[\"visitWithoutDateRange\"])(_urls_navigation__WEBPACK_IMPORTED_MODULE_11__[\"CASES_URL\"]);\n    Object(_tasks_all_cases__WEBPACK_IMPORTED_MODULE_5__[\"goToCreateNewCase\"])();\n    Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_9__[\"fillCasesMandatoryfields\"])(this.mycase);\n    Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_9__[\"attachTimeline\"])(this.mycase);\n    Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_9__[\"createCase\"])();\n    Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_9__[\"backToCases\"])();\n    Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_9__[\"filterStatusOpen\"])();\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_PAGE_TITLE\"]).should('have.text', 'Cases');\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_OPEN_CASES_STATS\"]).should('have.text', '1');\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_CLOSED_CASES_STATS\"]).should('have.text', '0');\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_IN_PROGRESS_CASES_STATS\"]).should('have.text', '0');\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_OPEN_CASES_COUNT\"]).should('have.text', 'Open (1)');\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_TAGS_COUNT\"]).should('have.text', 'Tags2');\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_NAME\"]).should('have.text', this.mycase.name);\n    this.mycase.tags.forEach(tag => {\n      cy.get(Object(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_TAGS\"])(tag)).should('have.text', tag);\n    });\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_COMMENTS_COUNT\"]).should('have.text', '0');\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_OPENED_ON\"]).should('include.text', 'ago');\n    cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"ALL_CASES_SERVICE_NOW_INCIDENT\"]).should('have.text', 'Not pushed');\n    Object(_tasks_all_cases__WEBPACK_IMPORTED_MODULE_5__[\"goToCaseDetails\"])();\n    const expectedTags = this.mycase.tags.join('');\n    cy.get(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASE_DETAILS_PAGE_TITLE\"]).should('have.text', this.mycase.name);\n    cy.get(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASE_DETAILS_STATUS\"]).should('have.text', 'Open');\n    cy.get(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT\"]).should('have.text', 'Description');\n    cy.get(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASE_DETAILS_DESCRIPTION\"]).should('have.text', `${this.mycase.description} ${this.mycase.timeline.title}`);\n    cy.get(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASE_DETAILS_USERNAMES\"]).eq(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"REPORTER\"]).should('have.text', this.mycase.reporter);\n    cy.get(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASE_DETAILS_USERNAMES\"]).eq(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"PARTICIPANTS\"]).should('have.text', this.mycase.reporter);\n    cy.get(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASE_DETAILS_TAGS\"]).should('have.text', expectedTags);\n    _screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"EXPECTED_METRICS\"].forEach(metric => {\n      cy.get(Object(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASES_METRIC\"])(metric)).should('exist');\n    });\n    _screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"UNEXPECTED_METRICS\"].forEach(metric => {\n      cy.get(Object(_screens_case_details__WEBPACK_IMPORTED_MODULE_2__[\"CASES_METRIC\"])(metric)).should('not.exist');\n    });\n    Object(_tasks_case_details__WEBPACK_IMPORTED_MODULE_7__[\"openCaseTimeline\"])();\n    cy.get(_screens_timeline__WEBPACK_IMPORTED_MODULE_3__[\"TIMELINE_TITLE\"]).contains(this.mycase.timeline.title);\n    cy.get(_screens_timeline__WEBPACK_IMPORTED_MODULE_3__[\"TIMELINE_DESCRIPTION\"]).contains(this.mycase.timeline.description);\n    cy.get(_screens_timeline__WEBPACK_IMPORTED_MODULE_3__[\"TIMELINE_QUERY\"]).should('have.text', this.mycase.timeline.query);\n    cy.visit(_urls_navigation__WEBPACK_IMPORTED_MODULE_11__[\"OVERVIEW_URL\"]);\n    cy.get(_screens_overview__WEBPACK_IMPORTED_MODULE_4__[\"OVERVIEW_CASE_NAME\"]).should('have.text', this.mycase.name);\n    cy.get(_screens_overview__WEBPACK_IMPORTED_MODULE_4__[\"OVERVIEW_CASE_DESCRIPTION\"]).should('have.text', `${this.mycase.description} ${this.mycase.timeline.title}`);\n  }",
+                        "displayError": null,
+                        "attempts": [
+                            {
+                                "state": "passed",
+                                "error": null,
+                                "videoTimestamp": null,
+                                "duration": 40685,
+                                "startedAt": "2023-05-14T14:42:49.539Z",
+                                "screenshots": []
+                            }
+                        ]
+                    }
+                ],
+                "error": null,
+                "video": null,
+                "spec": {
+                    "fileExtension": ".ts",
+                    "baseName": "creation.cy.ts",
+                    "fileName": "creation",
+                    "specFileExtension": ".cy.ts",
+                    "relativeToCommonRoot": "creation.cy.ts",
+                    "specType": "integration",
+                    "name": "cypress/e2e/cases/creation.cy.ts",
+                    "relative": "cypress/e2e/cases/creation.cy.ts",
+                    "absolute": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/e2e/cases/creation.cy.ts"
+                },
+                "shouldUploadVideo": true
+            }
+        ],
+        "browserPath": "",
+        "browserName": "electron",
+        "browserVersion": "106.0.5249.51",
+        "osName": "darwin",
+        "osVersion": "22.4.0",
+        "cypressVersion": "12.12.0",
+        "config": {
+            "defaultCommandTimeout": 60000,
+            "execTimeout": 60000,
+            "pageLoadTimeout": 60000,
+            "screenshotsFolder": "/Users/patrykkopycinski/Projects/kibana/target/kibana-security-solution/cypress/screenshots",
+            "trashAssetsBeforeRuns": false,
+            "video": false,
+            "videosFolder": "/Users/patrykkopycinski/Projects/kibana/target/kibana-security-solution/cypress/videos",
+            "viewportHeight": 946,
+            "viewportWidth": 1680,
+            "retries": {
+                "runMode": 2,
+                "openMode": 0
+            },
+            "baseUrl": "http://localhost:5678",
+            "experimentalRunAllSpecs": true,
+            "experimentalMemoryManagement": true,
+            "numTestsKeptInMemory": 0,
+            "setupNodeEvents": "[Function setupNodeEvents]",
+            "specPattern": "**/cypress/e2e/cases/creation.cy.ts",
+            "projectRoot": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution",
+            "projectName": "security_solution",
+            "repoRoot": "/Users/patrykkopycinski/Projects/kibana",
+            "rawJson": {
+                "defaultCommandTimeout": 60000,
+                "execTimeout": 60000,
+                "pageLoadTimeout": 60000,
+                "screenshotsFolder": "../../../target/kibana-security-solution/cypress/screenshots",
+                "trashAssetsBeforeRuns": false,
+                "video": false,
+                "videosFolder": "../../../target/kibana-security-solution/cypress/videos",
+                "viewportHeight": 946,
+                "viewportWidth": 1680,
+                "retries": {
+                    "runMode": 2
+                },
+                "e2e": {
+                    "baseUrl": "http://localhost:5601",
+                    "experimentalRunAllSpecs": true,
+                    "experimentalMemoryManagement": true,
+                    "numTestsKeptInMemory": 20,
+                    "setupNodeEvents": "[Function setupNodeEvents]"
+                },
+                "baseUrl": "http://localhost:5678",
+                "experimentalRunAllSpecs": true,
+                "experimentalMemoryManagement": true,
+                "numTestsKeptInMemory": 20,
+                "setupNodeEvents": "[Function setupNodeEvents]",
+                "specPattern": "**/cypress/e2e/cases/creation.cy.ts",
+                "envFile": {},
+                "projectRoot": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution",
+                "projectName": "security_solution",
+                "repoRoot": "/Users/patrykkopycinski/Projects/kibana"
+            },
+            "configFile": "cypress.config.ts",
+            "morgan": false,
+            "isTextTerminal": true,
+            "socketId": "ri7pmq7t7f",
+            "report": true,
+            "reporter": "../../../node_modules/cypress-multi-reporters",
+            "reporterOptions": {
+                "configFile": "./cypress/reporter_config.json"
+            },
+            "animationDistanceThreshold": 5,
+            "arch": "arm64",
+            "blockHosts": null,
+            "chromeWebSecurity": true,
+            "clientCertificates": [],
+            "downloadsFolder": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/downloads",
+            "env": {
+                "KIBANA_URL": "http://localhost:5678",
+                "ELASTICSEARCH_USERNAME": "elastic",
+                "ELASTICSEARCH_PASSWORD": "changeme",
+                "ELASTICSEARCH_URL": "http://system_indices_superuser:changeme@localhost:9288",
+                "configport": 5678,
+                "hostname": "localhost"
+            },
+            "experimentalFetchPolyfill": false,
+            "experimentalInteractiveRunEvents": false,
+            "experimentalModifyObstructiveThirdPartyCode": false,
+            "experimentalSkipDomainInjection": null,
+            "experimentalOriginDependencies": false,
+            "experimentalSourceRewriting": false,
+            "experimentalSingleTabRunMode": false,
+            "experimentalStudio": false,
+            "experimentalWebKitSupport": false,
+            "fileServerFolder": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution",
+            "fixturesFolder": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/fixtures",
+            "excludeSpecPattern": "*.hot-update.js",
+            "includeShadowDom": false,
+            "keystrokeDelay": 0,
+            "modifyObstructiveCode": true,
+            "platform": "darwin",
+            "port": 60056,
+            "projectId": null,
+            "redirectionLimit": 20,
+            "requestTimeout": 5000,
+            "resolvedNodePath": "/Users/patrykkopycinski/.nvm/versions/node/v16.19.1/bin/node",
+            "resolvedNodeVersion": "16.19.1",
+            "responseTimeout": 30000,
+            "screenshotOnRunFailure": true,
+            "slowTestThreshold": 10000,
+            "scrollBehavior": "top",
+            "supportFile": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/support/e2e.js",
+            "supportFolder": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/support",
+            "taskTimeout": 60000,
+            "testIsolation": true,
+            "userAgent": null,
+            "videoCompression": 32,
+            "videoUploadOnPasses": true,
+            "waitForAnimations": true,
+            "watchForFileChanges": false,
+            "additionalIgnorePattern": [],
+            "autoOpen": false,
+            "browsers": [
+                {
+                    "name": "chrome",
+                    "family": "chromium",
+                    "channel": "stable",
+                    "displayName": "Chrome",
+                    "version": "113.0.5672.92",
+                    "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                    "minSupportedVersion": 64,
+                    "majorVersion": "113"
+                },
+                {
+                    "name": "firefox",
+                    "family": "firefox",
+                    "channel": "stable",
+                    "displayName": "Firefox",
+                    "version": "113.0.1",
+                    "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
+                    "minSupportedVersion": 86,
+                    "majorVersion": "113"
+                },
+                {
+                    "name": "electron",
+                    "channel": "stable",
+                    "family": "chromium",
+                    "displayName": "Electron",
+                    "version": "106.0.5249.51",
+                    "path": "",
+                    "majorVersion": 106
+                }
+            ],
+            "clientRoute": "/__/",
+            "cypressBinaryRoot": "/Users/patrykkopycinski/Library/Caches/Cypress/12.12.0/Cypress.app/Contents/Resources/app",
+            "devServerPublicPathRoute": "/__cypress/src",
+            "hosts": null,
+            "isInteractive": true,
+            "namespace": "__cypress",
+            "reporterRoute": "/__cypress/reporter",
+            "socketIoCookie": "__socket",
+            "socketIoRoute": "/__socket",
+            "version": "12.12.0",
+            "cypressEnv": "production",
+            "resolved": {
+                "animationDistanceThreshold": {
+                    "value": 5,
+                    "from": "default"
+                },
+                "arch": {
+                    "value": "arm64",
+                    "from": "default"
+                },
+                "baseUrl": {
+                    "value": "http://localhost:5678",
+                    "from": "config"
+                },
+                "blockHosts": {
+                    "value": null,
+                    "from": "default"
+                },
+                "chromeWebSecurity": {
+                    "value": true,
+                    "from": "default"
+                },
+                "clientCertificates": {
+                    "value": [],
+                    "from": "default"
+                },
+                "defaultCommandTimeout": {
+                    "value": 60000,
+                    "from": "config"
+                },
+                "downloadsFolder": {
+                    "value": "cypress/downloads",
+                    "from": "default"
+                },
+                "env": {
+                    "KIBANA_URL": {
+                        "value": "http://localhost:5678",
+                        "from": "cli"
+                    },
+                    "ELASTICSEARCH_USERNAME": {
+                        "value": "elastic",
+                        "from": "cli"
+                    },
+                    "ELASTICSEARCH_PASSWORD": {
+                        "value": "changeme",
+                        "from": "cli"
+                    },
+                    "ELASTICSEARCH_URL": {
+                        "value": "http://system_indices_superuser:changeme@localhost:9288",
+                        "from": "cli"
+                    },
+                    "configport": {
+                        "value": 5678,
+                        "from": "cli"
+                    },
+                    "hostname": {
+                        "value": "localhost",
+                        "from": "cli"
+                    }
+                },
+                "execTimeout": {
+                    "value": 60000,
+                    "from": "default"
+                },
+                "experimentalFetchPolyfill": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalInteractiveRunEvents": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalRunAllSpecs": {
+                    "value": true,
+                    "from": "config"
+                },
+                "experimentalMemoryManagement": {
+                    "value": true,
+                    "from": "config"
+                },
+                "experimentalModifyObstructiveThirdPartyCode": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalSkipDomainInjection": {
+                    "value": null,
+                    "from": "default"
+                },
+                "experimentalOriginDependencies": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalSourceRewriting": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalSingleTabRunMode": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalStudio": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalWebKitSupport": {
+                    "value": false,
+                    "from": "default"
+                },
+                "fileServerFolder": {
+                    "value": "",
+                    "from": "default"
+                },
+                "fixturesFolder": {
+                    "value": "cypress/fixtures",
+                    "from": "default"
+                },
+                "excludeSpecPattern": {
+                    "value": "*.hot-update.js",
+                    "from": "default"
+                },
+                "includeShadowDom": {
+                    "value": false,
+                    "from": "default"
+                },
+                "keystrokeDelay": {
+                    "value": 0,
+                    "from": "default"
+                },
+                "modifyObstructiveCode": {
+                    "value": true,
+                    "from": "default"
+                },
+                "nodeVersion": {
+                    "from": "default"
+                },
+                "numTestsKeptInMemory": {
+                    "value": 0,
+                    "from": "config"
+                },
+                "platform": {
+                    "value": "darwin",
+                    "from": "default"
+                },
+                "pageLoadTimeout": {
+                    "value": 60000,
+                    "from": "default"
+                },
+                "port": {
+                    "value": null,
+                    "from": "default"
+                },
+                "projectId": {
+                    "value": null,
+                    "from": "default"
+                },
+                "redirectionLimit": {
+                    "value": 20,
+                    "from": "default"
+                },
+                "reporter": {
+                    "value": "../../../node_modules/cypress-multi-reporters",
+                    "from": "cli"
+                },
+                "reporterOptions": {
+                    "value": {
+                        "configFile": "./cypress/reporter_config.json"
+                    },
+                    "from": "cli"
+                },
+                "requestTimeout": {
+                    "value": 5000,
+                    "from": "default"
+                },
+                "resolvedNodePath": {
+                    "value": null,
+                    "from": "default"
+                },
+                "resolvedNodeVersion": {
+                    "value": null,
+                    "from": "default"
+                },
+                "responseTimeout": {
+                    "value": 30000,
+                    "from": "default"
+                },
+                "retries": {
+                    "value": {
+                        "runMode": 2,
+                        "openMode": 0
+                    },
+                    "from": "config"
+                },
+                "screenshotOnRunFailure": {
+                    "value": true,
+                    "from": "default"
+                },
+                "screenshotsFolder": {
+                    "value": "../../../target/kibana-security-solution/cypress/screenshots",
+                    "from": "config"
+                },
+                "slowTestThreshold": {
+                    "value": 10000,
+                    "from": "default"
+                },
+                "scrollBehavior": {
+                    "value": "top",
+                    "from": "default"
+                },
+                "supportFile": {
+                    "value": "cypress/support/e2e.{js,jsx,ts,tsx}",
+                    "from": "default"
+                },
+                "supportFolder": {
+                    "value": false,
+                    "from": "default"
+                },
+                "taskTimeout": {
+                    "value": 60000,
+                    "from": "default"
+                },
+                "testIsolation": {
+                    "value": true,
+                    "from": "default"
+                },
+                "trashAssetsBeforeRuns": {
+                    "value": false,
+                    "from": "config"
+                },
+                "userAgent": {
+                    "value": null,
+                    "from": "default"
+                },
+                "video": {
+                    "value": false,
+                    "from": "config"
+                },
+                "videoCompression": {
+                    "value": 32,
+                    "from": "default"
+                },
+                "videosFolder": {
+                    "value": "../../../target/kibana-security-solution/cypress/videos",
+                    "from": "config"
+                },
+                "videoUploadOnPasses": {
+                    "value": true,
+                    "from": "default"
+                },
+                "viewportHeight": {
+                    "value": 946,
+                    "from": "config"
+                },
+                "viewportWidth": {
+                    "value": 1680,
+                    "from": "config"
+                },
+                "waitForAnimations": {
+                    "value": true,
+                    "from": "default"
+                },
+                "watchForFileChanges": {
+                    "value": false,
+                    "from": "config"
+                },
+                "specPattern": {
+                    "value": "**/cypress/e2e/cases/creation.cy.ts",
+                    "from": "config"
+                },
+                "browsers": {
+                    "value": [
+                        {
+                            "name": "chrome",
+                            "family": "chromium",
+                            "channel": "stable",
+                            "displayName": "Chrome",
+                            "version": "113.0.5672.92",
+                            "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                            "minSupportedVersion": 64,
+                            "majorVersion": "113"
+                        },
+                        {
+                            "name": "firefox",
+                            "family": "firefox",
+                            "channel": "stable",
+                            "displayName": "Firefox",
+                            "version": "113.0.1",
+                            "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
+                            "minSupportedVersion": 86,
+                            "majorVersion": "113"
+                        },
+                        {
+                            "name": "electron",
+                            "channel": "stable",
+                            "family": "chromium",
+                            "displayName": "Electron",
+                            "version": "106.0.5249.51",
+                            "path": "",
+                            "majorVersion": 106,
+                            "isHeadless": true,
+                            "isHeaded": false
+                        }
+                    ],
+                    "from": "runtime"
+                },
+                "hosts": {
+                    "value": null,
+                    "from": "default"
+                },
+                "isInteractive": {
+                    "value": true,
+                    "from": "default"
+                }
+            },
+            "testingType": "e2e",
+            "remote": {
+                "origin": "http://localhost:5678",
+                "strategy": "http",
+                "fileServer": null,
+                "domainName": "localhost",
+                "props": {
+                    "port": "5678",
+                    "protocol": "http:",
+                    "subdomain": null,
+                    "domain": "",
+                    "tld": "localhost"
+                }
+            },
+            "browser": null,
+            "specs": [],
+            "proxyUrl": "http://localhost:60056",
+            "browserUrl": "http://localhost:5678/__/",
+            "reporterUrl": "http://localhost:5678/__cypress/reporter",
+            "proxyServer": "http://localhost:60056",
+            "state": {}
+        }
+    },
+    {
+        "status": "finished",
+        "startedTestsAt": "2023-05-14T14:42:49.999Z",
+        "endedTestsAt": "2023-05-14T14:43:44.111Z",
+        "totalDuration": 54112,
+        "totalSuites": 1,
+        "totalTests": 4,
+        "totalPassed": 4,
+        "totalPending": 0,
+        "totalFailed": 0,
+        "totalSkipped": 0,
+        "runs": [
+            {
+                "stats": {
+                    "suites": 1,
+                    "tests": 4,
+                    "passes": 4,
+                    "pending": 0,
+                    "skipped": 0,
+                    "failures": 0,
+                    "duration": 54112,
+                    "startedAt": "2023-05-14T14:42:49.999Z",
+                    "endedAt": "2023-05-14T14:43:44.111Z"
+                },
+                "reporter": "../../../node_modules/cypress-multi-reporters",
+                "reporterStats": {
+                    "suites": 1,
+                    "tests": 4,
+                    "passes": 4,
+                    "pending": 0,
+                    "failures": 0,
+                    "start": "2023-05-14T14:42:50.013Z",
+                    "end": "2023-05-14T14:43:44.116Z",
+                    "duration": 54103,
+                    "testsRegistered": 4,
+                    "passPercent": 100,
+                    "pendingPercent": 0,
+                    "other": 0,
+                    "hasOther": false,
+                    "skipped": 0,
+                    "hasSkipped": false
+                },
+                "hooks": [
+                    {
+                        "hookName": "before all",
+                        "title": [
+                            "\"before all\" hook"
+                        ],
+                        "body": "() => {\n    Object(_tasks_common__WEBPACK_IMPORTED_MODULE_2__[\"cleanKibana\"])();\n    Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"login\"])();\n    Object(_tasks_privileges__WEBPACK_IMPORTED_MODULE_5__[\"createUsersAndRoles\"])(usersToCreate, rolesToCreate);\n    visitSecuritySolution();\n  }"
+                    },
+                    {
+                        "hookName": "before each",
+                        "title": [
+                            "\"before each\" hook"
+                        ],
+                        "body": "() => {\n    Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"login\"])();\n    Object(_tasks_common__WEBPACK_IMPORTED_MODULE_2__[\"deleteCases\"])();\n  }"
+                    },
+                    {
+                        "hookName": "after all",
+                        "title": [
+                            "\"after all\" hook"
+                        ],
+                        "body": "() => {\n    Object(_tasks_privileges__WEBPACK_IMPORTED_MODULE_5__[\"deleteUsersAndRoles\"])(usersToCreate, rolesToCreate);\n  }"
+                    }
+                ],
+                "tests": [
+                    {
+                        "title": [
+                            "Cases privileges",
+                            "User sec_all_user with role(s) sec_all_role can create a case"
+                        ],
+                        "state": "passed",
+                        "body": "() => {\n      Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"loginWithUser\"])(user);\n      Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"visitWithUser\"])(_urls_navigation__WEBPACK_IMPORTED_MODULE_6__[\"CASES_URL\"], user);\n      Object(_tasks_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"goToCreateNewCase\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"fillCasesMandatoryfields\"])(testCase);\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"createCase\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"backToCases\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"filterStatusOpen\"])();\n      cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_0__[\"ALL_CASES_NAME\"]).should('have.text', testCase.name);\n    }",
+                        "displayError": null,
+                        "attempts": [
+                            {
+                                "state": "passed",
+                                "error": null,
+                                "videoTimestamp": null,
+                                "duration": 33863,
+                                "startedAt": "2023-05-14T14:42:50.011Z",
+                                "screenshots": []
+                            }
+                        ]
+                    },
+                    {
+                        "title": [
+                            "Cases privileges",
+                            "User sec_read_cases_all_user with role(s) sec_read_cases_all_role can create a case"
+                        ],
+                        "state": "passed",
+                        "body": "() => {\n      Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"loginWithUser\"])(user);\n      Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"visitWithUser\"])(_urls_navigation__WEBPACK_IMPORTED_MODULE_6__[\"CASES_URL\"], user);\n      Object(_tasks_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"goToCreateNewCase\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"fillCasesMandatoryfields\"])(testCase);\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"createCase\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"backToCases\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"filterStatusOpen\"])();\n      cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_0__[\"ALL_CASES_NAME\"]).should('have.text', testCase.name);\n    }",
+                        "displayError": null,
+                        "attempts": [
+                            {
+                                "state": "passed",
+                                "error": null,
+                                "videoTimestamp": null,
+                                "duration": 8742,
+                                "startedAt": "2023-05-14T14:43:23.891Z",
+                                "screenshots": []
+                            }
+                        ]
+                    },
+                    {
+                        "title": [
+                            "Cases privileges",
+                            "User sec_all_cases_no_delete_user with role(s) sec_all_cases_no_delete can create a case"
+                        ],
+                        "state": "passed",
+                        "body": "() => {\n      Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"loginWithUser\"])(user);\n      Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"visitWithUser\"])(_urls_navigation__WEBPACK_IMPORTED_MODULE_6__[\"CASES_URL\"], user);\n      Object(_tasks_all_cases__WEBPACK_IMPORTED_MODULE_1__[\"goToCreateNewCase\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"fillCasesMandatoryfields\"])(testCase);\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"createCase\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"backToCases\"])();\n      Object(_tasks_create_new_case__WEBPACK_IMPORTED_MODULE_3__[\"filterStatusOpen\"])();\n      cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_0__[\"ALL_CASES_NAME\"]).should('have.text', testCase.name);\n    }",
+                        "displayError": null,
+                        "attempts": [
+                            {
+                                "state": "passed",
+                                "error": null,
+                                "videoTimestamp": null,
+                                "duration": 8986,
+                                "startedAt": "2023-05-14T14:43:32.636Z",
+                                "screenshots": []
+                            }
+                        ]
+                    },
+                    {
+                        "title": [
+                            "Cases privileges",
+                            "User sec_all_cases_only_read_delete_user with role(s) sec_all_cases_only_read_delete cannot create a case"
+                        ],
+                        "state": "passed",
+                        "body": "() => {\n      Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"loginWithUser\"])(user);\n      Object(_tasks_login__WEBPACK_IMPORTED_MODULE_4__[\"visitWithUser\"])(_urls_navigation__WEBPACK_IMPORTED_MODULE_6__[\"CASES_URL\"], user);\n      cy.get(_screens_all_cases__WEBPACK_IMPORTED_MODULE_0__[\"ALL_CASES_CREATE_NEW_CASE_BTN\"]).should('not.exist');\n    }",
+                        "displayError": null,
+                        "attempts": [
+                            {
+                                "state": "passed",
+                                "error": null,
+                                "videoTimestamp": null,
+                                "duration": 2484,
+                                "startedAt": "2023-05-14T14:43:41.625Z",
+                                "screenshots": []
+                            }
+                        ]
+                    }
+                ],
+                "error": null,
+                "video": null,
+                "spec": {
+                    "fileExtension": ".ts",
+                    "baseName": "privileges.cy.ts",
+                    "fileName": "privileges",
+                    "specFileExtension": ".cy.ts",
+                    "relativeToCommonRoot": "privileges.cy.ts",
+                    "specType": "integration",
+                    "name": "cypress/e2e/cases/privileges.cy.ts",
+                    "relative": "cypress/e2e/cases/privileges.cy.ts",
+                    "absolute": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/e2e/cases/privileges.cy.ts"
+                },
+                "shouldUploadVideo": true
+            }
+        ],
+        "browserPath": "",
+        "browserName": "electron",
+        "browserVersion": "106.0.5249.51",
+        "osName": "darwin",
+        "osVersion": "22.4.0",
+        "cypressVersion": "12.12.0",
+        "config": {
+            "defaultCommandTimeout": 60000,
+            "execTimeout": 60000,
+            "pageLoadTimeout": 60000,
+            "screenshotsFolder": "/Users/patrykkopycinski/Projects/kibana/target/kibana-security-solution/cypress/screenshots",
+            "trashAssetsBeforeRuns": false,
+            "video": false,
+            "videosFolder": "/Users/patrykkopycinski/Projects/kibana/target/kibana-security-solution/cypress/videos",
+            "viewportHeight": 946,
+            "viewportWidth": 1680,
+            "retries": {
+                "runMode": 2,
+                "openMode": 0
+            },
+            "baseUrl": "http://localhost:5651",
+            "experimentalRunAllSpecs": true,
+            "experimentalMemoryManagement": true,
+            "numTestsKeptInMemory": 0,
+            "setupNodeEvents": "[Function setupNodeEvents]",
+            "specPattern": "**/cypress/e2e/cases/privileges.cy.ts",
+            "projectRoot": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution",
+            "projectName": "security_solution",
+            "repoRoot": "/Users/patrykkopycinski/Projects/kibana",
+            "rawJson": {
+                "defaultCommandTimeout": 60000,
+                "execTimeout": 60000,
+                "pageLoadTimeout": 60000,
+                "screenshotsFolder": "../../../target/kibana-security-solution/cypress/screenshots",
+                "trashAssetsBeforeRuns": false,
+                "video": false,
+                "videosFolder": "../../../target/kibana-security-solution/cypress/videos",
+                "viewportHeight": 946,
+                "viewportWidth": 1680,
+                "retries": {
+                    "runMode": 2
+                },
+                "e2e": {
+                    "baseUrl": "http://localhost:5601",
+                    "experimentalRunAllSpecs": true,
+                    "experimentalMemoryManagement": true,
+                    "numTestsKeptInMemory": 20,
+                    "setupNodeEvents": "[Function setupNodeEvents]"
+                },
+                "baseUrl": "http://localhost:5651",
+                "experimentalRunAllSpecs": true,
+                "experimentalMemoryManagement": true,
+                "numTestsKeptInMemory": 20,
+                "setupNodeEvents": "[Function setupNodeEvents]",
+                "specPattern": "**/cypress/e2e/cases/privileges.cy.ts",
+                "envFile": {},
+                "projectRoot": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution",
+                "projectName": "security_solution",
+                "repoRoot": "/Users/patrykkopycinski/Projects/kibana"
+            },
+            "configFile": "cypress.config.ts",
+            "morgan": false,
+            "isTextTerminal": true,
+            "socketId": "9h0us5wotf",
+            "report": true,
+            "reporter": "../../../node_modules/cypress-multi-reporters",
+            "reporterOptions": {
+                "configFile": "./cypress/reporter_config.json"
+            },
+            "animationDistanceThreshold": 5,
+            "arch": "arm64",
+            "blockHosts": null,
+            "chromeWebSecurity": true,
+            "clientCertificates": [],
+            "downloadsFolder": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/downloads",
+            "env": {
+                "KIBANA_URL": "http://localhost:5651",
+                "ELASTICSEARCH_USERNAME": "elastic",
+                "ELASTICSEARCH_PASSWORD": "changeme",
+                "ELASTICSEARCH_URL": "http://system_indices_superuser:changeme@localhost:9259",
+                "configport": 5651,
+                "hostname": "localhost"
+            },
+            "experimentalFetchPolyfill": false,
+            "experimentalInteractiveRunEvents": false,
+            "experimentalModifyObstructiveThirdPartyCode": false,
+            "experimentalSkipDomainInjection": null,
+            "experimentalOriginDependencies": false,
+            "experimentalSourceRewriting": false,
+            "experimentalSingleTabRunMode": false,
+            "experimentalStudio": false,
+            "experimentalWebKitSupport": false,
+            "fileServerFolder": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution",
+            "fixturesFolder": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/fixtures",
+            "excludeSpecPattern": "*.hot-update.js",
+            "includeShadowDom": false,
+            "keystrokeDelay": 0,
+            "modifyObstructiveCode": true,
+            "platform": "darwin",
+            "port": 60087,
+            "projectId": null,
+            "redirectionLimit": 20,
+            "requestTimeout": 5000,
+            "resolvedNodePath": "/Users/patrykkopycinski/.nvm/versions/node/v16.19.1/bin/node",
+            "resolvedNodeVersion": "16.19.1",
+            "responseTimeout": 30000,
+            "screenshotOnRunFailure": true,
+            "slowTestThreshold": 10000,
+            "scrollBehavior": "top",
+            "supportFile": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/support/e2e.js",
+            "supportFolder": "/Users/patrykkopycinski/Projects/kibana/x-pack/plugins/security_solution/cypress/support",
+            "taskTimeout": 60000,
+            "testIsolation": true,
+            "userAgent": null,
+            "videoCompression": 32,
+            "videoUploadOnPasses": true,
+            "waitForAnimations": true,
+            "watchForFileChanges": false,
+            "additionalIgnorePattern": [],
+            "autoOpen": false,
+            "browsers": [
+                {
+                    "name": "chrome",
+                    "family": "chromium",
+                    "channel": "stable",
+                    "displayName": "Chrome",
+                    "version": "113.0.5672.92",
+                    "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                    "minSupportedVersion": 64,
+                    "majorVersion": "113"
+                },
+                {
+                    "name": "firefox",
+                    "family": "firefox",
+                    "channel": "stable",
+                    "displayName": "Firefox",
+                    "version": "113.0.1",
+                    "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
+                    "minSupportedVersion": 86,
+                    "majorVersion": "113"
+                },
+                {
+                    "name": "electron",
+                    "channel": "stable",
+                    "family": "chromium",
+                    "displayName": "Electron",
+                    "version": "106.0.5249.51",
+                    "path": "",
+                    "majorVersion": 106
+                }
+            ],
+            "clientRoute": "/__/",
+            "cypressBinaryRoot": "/Users/patrykkopycinski/Library/Caches/Cypress/12.12.0/Cypress.app/Contents/Resources/app",
+            "devServerPublicPathRoute": "/__cypress/src",
+            "hosts": null,
+            "isInteractive": true,
+            "namespace": "__cypress",
+            "reporterRoute": "/__cypress/reporter",
+            "socketIoCookie": "__socket",
+            "socketIoRoute": "/__socket",
+            "version": "12.12.0",
+            "cypressEnv": "production",
+            "resolved": {
+                "animationDistanceThreshold": {
+                    "value": 5,
+                    "from": "default"
+                },
+                "arch": {
+                    "value": "arm64",
+                    "from": "default"
+                },
+                "baseUrl": {
+                    "value": "http://localhost:5651",
+                    "from": "config"
+                },
+                "blockHosts": {
+                    "value": null,
+                    "from": "default"
+                },
+                "chromeWebSecurity": {
+                    "value": true,
+                    "from": "default"
+                },
+                "clientCertificates": {
+                    "value": [],
+                    "from": "default"
+                },
+                "defaultCommandTimeout": {
+                    "value": 60000,
+                    "from": "config"
+                },
+                "downloadsFolder": {
+                    "value": "cypress/downloads",
+                    "from": "default"
+                },
+                "env": {
+                    "KIBANA_URL": {
+                        "value": "http://localhost:5651",
+                        "from": "cli"
+                    },
+                    "ELASTICSEARCH_USERNAME": {
+                        "value": "elastic",
+                        "from": "cli"
+                    },
+                    "ELASTICSEARCH_PASSWORD": {
+                        "value": "changeme",
+                        "from": "cli"
+                    },
+                    "ELASTICSEARCH_URL": {
+                        "value": "http://system_indices_superuser:changeme@localhost:9259",
+                        "from": "cli"
+                    },
+                    "configport": {
+                        "value": 5651,
+                        "from": "cli"
+                    },
+                    "hostname": {
+                        "value": "localhost",
+                        "from": "cli"
+                    }
+                },
+                "execTimeout": {
+                    "value": 60000,
+                    "from": "default"
+                },
+                "experimentalFetchPolyfill": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalInteractiveRunEvents": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalRunAllSpecs": {
+                    "value": true,
+                    "from": "config"
+                },
+                "experimentalMemoryManagement": {
+                    "value": true,
+                    "from": "config"
+                },
+                "experimentalModifyObstructiveThirdPartyCode": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalSkipDomainInjection": {
+                    "value": null,
+                    "from": "default"
+                },
+                "experimentalOriginDependencies": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalSourceRewriting": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalSingleTabRunMode": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalStudio": {
+                    "value": false,
+                    "from": "default"
+                },
+                "experimentalWebKitSupport": {
+                    "value": false,
+                    "from": "default"
+                },
+                "fileServerFolder": {
+                    "value": "",
+                    "from": "default"
+                },
+                "fixturesFolder": {
+                    "value": "cypress/fixtures",
+                    "from": "default"
+                },
+                "excludeSpecPattern": {
+                    "value": "*.hot-update.js",
+                    "from": "default"
+                },
+                "includeShadowDom": {
+                    "value": false,
+                    "from": "default"
+                },
+                "keystrokeDelay": {
+                    "value": 0,
+                    "from": "default"
+                },
+                "modifyObstructiveCode": {
+                    "value": true,
+                    "from": "default"
+                },
+                "nodeVersion": {
+                    "from": "default"
+                },
+                "numTestsKeptInMemory": {
+                    "value": 0,
+                    "from": "config"
+                },
+                "platform": {
+                    "value": "darwin",
+                    "from": "default"
+                },
+                "pageLoadTimeout": {
+                    "value": 60000,
+                    "from": "default"
+                },
+                "port": {
+                    "value": null,
+                    "from": "default"
+                },
+                "projectId": {
+                    "value": null,
+                    "from": "default"
+                },
+                "redirectionLimit": {
+                    "value": 20,
+                    "from": "default"
+                },
+                "reporter": {
+                    "value": "../../../node_modules/cypress-multi-reporters",
+                    "from": "cli"
+                },
+                "reporterOptions": {
+                    "value": {
+                        "configFile": "./cypress/reporter_config.json"
+                    },
+                    "from": "cli"
+                },
+                "requestTimeout": {
+                    "value": 5000,
+                    "from": "default"
+                },
+                "resolvedNodePath": {
+                    "value": null,
+                    "from": "default"
+                },
+                "resolvedNodeVersion": {
+                    "value": null,
+                    "from": "default"
+                },
+                "responseTimeout": {
+                    "value": 30000,
+                    "from": "default"
+                },
+                "retries": {
+                    "value": {
+                        "runMode": 2,
+                        "openMode": 0
+                    },
+                    "from": "config"
+                },
+                "screenshotOnRunFailure": {
+                    "value": true,
+                    "from": "default"
+                },
+                "screenshotsFolder": {
+                    "value": "../../../target/kibana-security-solution/cypress/screenshots",
+                    "from": "config"
+                },
+                "slowTestThreshold": {
+                    "value": 10000,
+                    "from": "default"
+                },
+                "scrollBehavior": {
+                    "value": "top",
+                    "from": "default"
+                },
+                "supportFile": {
+                    "value": "cypress/support/e2e.{js,jsx,ts,tsx}",
+                    "from": "default"
+                },
+                "supportFolder": {
+                    "value": false,
+                    "from": "default"
+                },
+                "taskTimeout": {
+                    "value": 60000,
+                    "from": "default"
+                },
+                "testIsolation": {
+                    "value": true,
+                    "from": "default"
+                },
+                "trashAssetsBeforeRuns": {
+                    "value": false,
+                    "from": "config"
+                },
+                "userAgent": {
+                    "value": null,
+                    "from": "default"
+                },
+                "video": {
+                    "value": false,
+                    "from": "config"
+                },
+                "videoCompression": {
+                    "value": 32,
+                    "from": "default"
+                },
+                "videosFolder": {
+                    "value": "../../../target/kibana-security-solution/cypress/videos",
+                    "from": "config"
+                },
+                "videoUploadOnPasses": {
+                    "value": true,
+                    "from": "default"
+                },
+                "viewportHeight": {
+                    "value": 946,
+                    "from": "config"
+                },
+                "viewportWidth": {
+                    "value": 1680,
+                    "from": "config"
+                },
+                "waitForAnimations": {
+                    "value": true,
+                    "from": "default"
+                },
+                "watchForFileChanges": {
+                    "value": false,
+                    "from": "config"
+                },
+                "specPattern": {
+                    "value": "**/cypress/e2e/cases/privileges.cy.ts",
+                    "from": "config"
+                },
+                "browsers": {
+                    "value": [
+                        {
+                            "name": "chrome",
+                            "family": "chromium",
+                            "channel": "stable",
+                            "displayName": "Chrome",
+                            "version": "113.0.5672.92",
+                            "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                            "minSupportedVersion": 64,
+                            "majorVersion": "113"
+                        },
+                        {
+                            "name": "firefox",
+                            "family": "firefox",
+                            "channel": "stable",
+                            "displayName": "Firefox",
+                            "version": "113.0.1",
+                            "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
+                            "minSupportedVersion": 86,
+                            "majorVersion": "113"
+                        },
+                        {
+                            "name": "electron",
+                            "channel": "stable",
+                            "family": "chromium",
+                            "displayName": "Electron",
+                            "version": "106.0.5249.51",
+                            "path": "",
+                            "majorVersion": 106,
+                            "isHeadless": true,
+                            "isHeaded": false
+                        }
+                    ],
+                    "from": "runtime"
+                },
+                "hosts": {
+                    "value": null,
+                    "from": "default"
+                },
+                "isInteractive": {
+                    "value": true,
+                    "from": "default"
+                }
+            },
+            "testingType": "e2e",
+            "remote": {
+                "origin": "http://localhost:5651",
+                "strategy": "http",
+                "fileServer": null,
+                "domainName": "localhost",
+                "props": {
+                    "port": "5651",
+                    "protocol": "http:",
+                    "subdomain": null,
+                    "domain": "",
+                    "tld": "localhost"
+                }
+            },
+            "browser": null,
+            "specs": [],
+            "proxyUrl": "http://localhost:60087",
+            "browserUrl": "http://localhost:5651/__/",
+            "reporterUrl": "http://localhost:5651/__cypress/reporter",
+            "proxyServer": "http://localhost:60087",
+            "state": {}
+        }
+    }
+]

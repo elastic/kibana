@@ -49,10 +49,11 @@ const savedQueryFilterKey = 'testAgent.value';
 describe('Custom saved_query rules', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   describe('Custom saved_query detection rule creation', () => {
     beforeEach(() => {
+      login();
       deleteAlertsAndRules();
       deleteSavedQueries();
     });

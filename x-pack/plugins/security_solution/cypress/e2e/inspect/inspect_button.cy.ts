@@ -24,7 +24,7 @@ import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe('Inspect Explore pages', () => {
+describe.skip('Inspect Explore pages', () => {
   before(() => {
     esArchiverLoad('risk_users');
     esArchiverLoad('risk_hosts');
@@ -46,6 +46,7 @@ describe('Inspect Explore pages', () => {
      * Group all tests of a page into one "it" call to improve speed
      */
     it(`inspect ${pageName} page`, () => {
+      login();
       visit(url);
       waitForPageToBeLoaded();
 

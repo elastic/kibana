@@ -48,9 +48,10 @@ describe('Cases connectors', () => {
 
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     deleteCases();
     cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
       statusCode: 200,
@@ -92,14 +93,14 @@ describe('Cases connectors', () => {
     openAddNewConnectorOption();
     addServiceNowConnector(snConnector);
 
+    cy.get(TOASTER).should('have.text', "Created 'New connector'");
+    cy.get(TOASTER).should('have.text', 'Saved external connection settings');
+    cy.get(TOASTER).should('not.exist');
+
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
 
       verifyNewConnectorSelected(snConnector);
-
-      cy.get(TOASTER).should('have.text', "Created 'New connector'");
-      cy.get(TOASTER).should('have.text', 'Saved external connection settings');
-      cy.get(TOASTER).should('not.exist');
 
       cy.wait('@saveConnector').its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');

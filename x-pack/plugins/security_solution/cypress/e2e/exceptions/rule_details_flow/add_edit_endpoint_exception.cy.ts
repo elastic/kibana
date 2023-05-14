@@ -78,6 +78,7 @@ describe('Add endpoint exception from rule details', () => {
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     goToEndpointExceptionsTab();

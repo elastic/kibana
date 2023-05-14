@@ -58,6 +58,7 @@ describe('Open timeline', () => {
 
   describe('Open timeline modal', () => {
     beforeEach(function () {
+      login();
       visitWithoutDateRange(TIMELINES_URL);
       openTimelineFromSettings();
       openTimelineById(this.timelineId);

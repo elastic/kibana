@@ -72,6 +72,9 @@ describe('Detection rules, override', () => {
 
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
   });
 

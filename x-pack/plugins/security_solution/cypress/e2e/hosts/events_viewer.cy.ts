@@ -50,7 +50,6 @@ const defaultHeadersInDefaultEcsCategory = [
 describe('Events Viewer', () => {
   before(() => {
     esArchiverLoad('auditbeat_big');
-    login();
   });
 
   after(() => {
@@ -59,6 +58,7 @@ describe('Events Viewer', () => {
 
   context('Fields rendering', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openEvents();
       openEventsViewerFieldsBrowser();
@@ -86,15 +86,9 @@ describe('Events Viewer', () => {
     });
   });
 
-  context('Events viewer query modal', () => {
-    beforeEach(() => {
-      visit(HOSTS_URL);
-      openEvents();
-    });
-  });
-
   context('Events viewer fields behaviour', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openEvents();
       openEventsViewerFieldsBrowser();
@@ -122,6 +116,7 @@ describe('Events Viewer', () => {
 
   context('Events behavior', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();

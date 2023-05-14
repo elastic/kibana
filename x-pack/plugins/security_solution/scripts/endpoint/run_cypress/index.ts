@@ -7,84 +7,80 @@
 
 /* eslint-disable import/no-default-export */
 
-const serverArgs = [
-  '--server.port=5620',
-  '--status.allowAnonymous=true',
-  '--elasticsearch.hosts=http://localhost:9220',
-  '--elasticsearch.username=kibana_system',
-  '--elasticsearch.password=changeme',
-  '--data.search.aggs.shardDelay.enabled=true',
-  '--security.showInsecureClusterWarning=false',
-  '--telemetry.banner=false',
-  '--telemetry.optIn=false',
-  '--telemetry.sendUsageTo=staging',
-  '--server.maxPayload=1679958',
-  // '--plugin-path=/Users/patrykkopycinski/Projects/kibana/test/common/plugins/newsfeed',
-  // '--plugin-path=/Users/patrykkopycinski/Projects/kibana/test/common/plugins/otel_metrics',
-  '--newsfeed.service.urlRoot=http://localhost:5620',
-  '--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json',
-  '--logging.appenders.deprecation={"type":"console","layout":{"type":"json"}}',
-  '--logging.loggers=[{"name":"elasticsearch.deprecation","level":"all","appenders":["deprecation"]}]',
-  '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
-  '--xpack.maps.showMapsInspectorAdapter=true',
-  '--xpack.maps.preserveDrawingBuffer=true',
-  '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-  '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
-  '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
-  '--savedObjects.maxImportPayloadBytes=10485760',
-  '--savedObjects.allowHttpApiAccess=false',
-  '--csp.warnLegacyBrowsers=false',
-  '--csp.strict=false',
-  '--elasticsearch.ssl.certificateAuthorities=/Users/patrykkopycinski/Projects/kibana/packages/kbn-dev-utils/certs/ca.crt',
-  `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-    'endpointRbacEnabled',
-    'endpointResponseActionsEnabled',
-  ])}`,
-  // '--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]',
-  // '--xpack.fleet.agents.elasticsearch.host=http://host.docker.internal:9220',
-  // '--xpack.fleet.packages.0.name=osquery_manager',
-  // '--xpack.fleet.packages.0.version=latest',
-];
-
+import Url from 'url';
+import { EsArchiver } from '@kbn/es-archiver';
 import { omit } from 'lodash';
 import yargs from 'yargs';
 import cypress from 'cypress';
-// import globby from 'globby';
 import deepMerge from 'deepmerge';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient, readConfigFile, EsVersion } from '@kbn/test';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server/src/create_root';
+import { extendEsArchiver } from '@kbn/ftr-common-functional-services/services/kibana_server';
 
-// import cypressConfig from '../../../public/management/cypress.config';
+export default async ({ esPort, kibanaPort, filePath: singleSpecPath, index, argv }) => {
+  console.error('params', singleSpecPath);
 
-export default async () => {
-  console.error('process.argv', yargs.parse(process.argv));
+  const yargsData = yargs(argv);
 
-  console.log(JSON.stringify(yargs.parse(serverArgs), null, 2));
+  console.error('argv', argv, yargsData.argv);
 
-  console.log('process.env.CYPRESS_THREAD;', process.env.CYPRESS_THREAD);
+  console.error('argv.ftrConfigFile', yargsData.ftrConfigFile);
+  // console.error('process.argv', argv);
+  // console.error('argv', argv);
+
+  // console.log(JSON.stringify(yargs.parse(serverArgs), null, 2));
+
+  // console.log('process.env.CYPRESS_THREAD;', process.env.CYPRESS_THREAD);
+
+  const log = new ToolingLog({
+    level: 'debug',
+    writeTo: process.stdout,
+  });
+
+  const { default: getStackConfig } = await import(
+    yargsData.ftrConfigFile ?? '../../../../../test/security_solution_cypress/config'
+  );
+
+  // console.log('moduleA', getStackConfig);
+
+  // const ftrConfigFile = fs.readFileSync(argv.ftrConfigFile, 'utf-8');
+
+  // const ftrConfigFile = require.resolve(argv.ftrConfigFile);
+
+  // console.error('ftrConfigFile', ftrConfigFile);
+
+  const ftrConfig = await getStackConfig({
+    readConfigFile: (path) => readConfigFile(log, EsVersion.getDefault(), path),
+  });
+
+  console.error('ftrConfig', ftrConfig);
 
   const HOSTNAME = 'localhost';
-  const ES_PORT = process.env.CYPRESS_THREAD ? 9220 + Number(process.env.CYPRESS_THREAD) : 9220;
-  const KIBANA_PORT = process.env.CYPRESS_THREAD ? 5620 + Number(process.env.CYPRESS_THREAD) : 5620;
+  const ES_PORT = esPort ?? parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
+  const KIBANA_PORT = kibanaPort ?? parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
 
   const servers = createTestServers({
     adjustTimeout: (t) => t,
     settings: {
       es: {
-        clusterName: `es-test-cluster-${process.env.CYPRESS_THREAD || 0}`,
+        clusterName: `es-test-cluster-${process.env.CYPRESS_THREAD || index || 0}`,
         license: 'trial',
-        esArgs: [
-          'path.repo=/tmp/',
-          'xpack.security.authc.api_key.enabled=true',
-          'cluster.routing.allocation.disk.threshold_enabled=true',
-          'xpack.security.enabled=true',
-          'http.host=0.0.0.0',
-        ],
+        esArgs: ftrConfig.esTestCluster.serverArgs,
         esFrom: 'snapshot',
         ssl: false,
         port: ES_PORT,
       },
       kbn: {
-        ...omit(yargs.parse(serverArgs), ['_', '$0']),
+        ...omit(yargs.parse(ftrConfig.kbnTestServer.serverArgs), [
+          '_',
+          '$0',
+          'pluginPath',
+          'plugin-path',
+        ]),
+        status: {
+          allowAnonymous: true,
+        },
         server: {
           port: KIBANA_PORT,
         },
@@ -97,13 +93,43 @@ export default async () => {
 
   const es = await servers.startES();
 
+  let kibana;
   try {
-    const kibana = await servers.startKibana();
-    console.error('kibana', kibana, kibana);
-    console.error('kibana', kibana, kibana.root.server.env);
-    console.error('kibana', kibana, kibana.coreStart.http.getServerInfo());
+    kibana = await servers.startKibana();
   } catch (e) {
     console.error('error', e);
+  }
+
+  const kbnClient = new KbnClient({
+    log,
+    url: Url.format({
+      protocol: 'http',
+      hostname: 'localhost',
+      port: KIBANA_PORT,
+      auth: 'elastic:changeme',
+      username: 'elastic',
+      password: 'changeme',
+    }),
+    certificateAuthorities: ftrConfig.servers.kibana.certificateAuthorities,
+    // uiSettingDefaults: defaults,
+  });
+
+  const esArchiver = new EsArchiver({
+    // baseDir: config.get('esArchiver.baseDirectory'),
+    client: kibana?.coreStart.elasticsearch.client.asInternalUser,
+    log,
+    kbnClient,
+  });
+
+  extendEsArchiver({
+    esArchiver,
+    kibanaServer: kbnClient,
+    // retry,
+    // defaults: config.get('uiSettings.defaults'),
+  });
+
+  if (ftrConfig.esArchiver) {
+    await esArchiver.load(ftrConfig.esArchiver[0]);
   }
 
   const commonCypressConfig = {
@@ -118,30 +144,30 @@ export default async () => {
     config: {
       e2e: {
         baseUrl: `http://${HOSTNAME}:${KIBANA_PORT}`,
+        ...(singleSpecPath ? { specPattern: `**/${singleSpecPath}` } : {}),
       },
     },
   };
 
-  if (yargs.parse(process.argv)._.includes('open')) {
+  const ftrConfigIndex = argv.indexOf('--ftr-config-file');
+  if (ftrConfigIndex !== -1) {
+    argv.splice(ftrConfigIndex, 2);
+  }
+
+  if (yargs.parse(argv)._.includes('open')) {
     return cypress.open({
-      configFile: './public/management/cypress.config.ts',
+      configFile: argv.configFile,
       ...commonCypressConfig,
     });
   }
 
-  const runOptions = await cypress.cli.parseRunArguments(process.argv.slice(2));
+  const runOptions = await cypress.cli.parseRunArguments(argv);
   console.log('runOptions', runOptions);
-  return cypress
-    .run(
-      deepMerge(runOptions, {
-        ...runOptions,
-        commonCypressConfig,
-      })
-    )
-    .then((results) => {
-      process.exit();
-    })
-    .catch((e) => {
-      process.exit();
-    });
+  return cypress.run(deepMerge(runOptions, commonCypressConfig));
+  // .then((results) => {
+  //   process.exit();
+  // })
+  // .catch((e) => {
+  //   process.exit();
+  // });
 };

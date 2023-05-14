@@ -52,6 +52,7 @@ describe('Timeline notes tab', () => {
   });
 
   beforeEach(function () {
+    login();
     visitWithoutDateRange(TIMELINES_URL);
     openTimelineById(this?.timelineId as string)
       .then(() => goToNotesTab())

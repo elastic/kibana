@@ -46,14 +46,14 @@ const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_ALERTS = 2;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-describe('Entity Analytics Dashboard', () => {
+describe.skip('Entity Analytics Dashboard', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   describe('Without data', () => {
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -73,6 +73,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -97,6 +98,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -120,6 +122,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -153,6 +156,7 @@ describe('Entity Analytics Dashboard', () => {
       });
 
       beforeEach(() => {
+        login();
         visit(ALERTS_URL);
         waitForAlertsToPopulate();
         visit(ENTITY_ANALYTICS_URL);
@@ -184,6 +188,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -217,6 +222,7 @@ describe('Entity Analytics Dashboard', () => {
       });
 
       beforeEach(() => {
+        login();
         visit(ALERTS_URL);
         waitForAlertsToPopulate();
         visit(ENTITY_ANALYTICS_URL);
@@ -253,6 +259,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 

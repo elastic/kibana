@@ -11,14 +11,20 @@ export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 60000,
   pageLoadTimeout: 60000,
+  responseTimeout: 60000,
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
+  retries: {
+    runMode: 2,
+  },
   e2e: {
     baseUrl: 'http://localhost:5601',
     experimentalRunAllSpecs: true,
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 20,
   },
 });

@@ -59,11 +59,9 @@ describe('Sourcerer', () => {
   });
 
   describe('Default scope', () => {
-    before(() => {
-      login();
-    });
     beforeEach(() => {
       cy.clearLocalStorage();
+      login();
       visit(HOSTS_URL);
     });
 
@@ -134,11 +132,9 @@ describe('Sourcerer', () => {
   });
 });
 describe('Timeline scope', () => {
-  before(() => {
-    login();
-  });
   beforeEach(() => {
     cy.clearLocalStorage();
+    login();
     visit(TIMELINES_URL);
   });
 
@@ -201,10 +197,13 @@ describe('Timeline scope', () => {
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
       );
     });
+
     beforeEach(() => {
+      login();
       visit(TIMELINES_URL);
       refreshUntilAlertsIndexExists();
     });
+
     it('Modifies timeline to alerts only, and switches to different saved timeline without issue', function () {
       openTimelineById(this.timelineId).then(() => {
         cy.get(SOURCERER.badgeAlerts).should(`not.exist`);

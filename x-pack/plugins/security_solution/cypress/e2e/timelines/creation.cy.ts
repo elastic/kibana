@@ -51,10 +51,12 @@ import { EQL_QUERY_VALIDATION_ERROR } from '../../screens/create_new_rule';
 describe('Create a timeline from a template', () => {
   before(() => {
     deleteTimelines();
+    login();
     createTimelineTemplate(getTimeline());
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
   });
 
@@ -77,7 +79,7 @@ describe('Timelines', (): void => {
 
   describe('Toggle create timeline from plus icon', () => {
     context('Privileges: CRUD', () => {
-      before(() => {
+      beforeEach(() => {
         login();
         visit(OVERVIEW_URL);
       });
@@ -90,7 +92,7 @@ describe('Timelines', (): void => {
     });
 
     context('Privileges: READ', () => {
-      before(() => {
+      beforeEach(() => {
         login(ROLES.reader);
         visit(OVERVIEW_URL, undefined, ROLES.reader);
       });
@@ -110,11 +112,8 @@ describe('Timelines', (): void => {
   });
 
   describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
-    before(() => {
-      login();
-    });
-
     beforeEach(() => {
+      login();
       visit(OVERVIEW_URL);
       openTimelineUsingToggle();
       addNameAndDescriptionToTimeline(getTimeline());

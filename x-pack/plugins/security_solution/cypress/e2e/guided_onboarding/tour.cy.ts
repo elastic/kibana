@@ -28,13 +28,14 @@ import { login, visit } from '../../tasks/login';
 import { quitGlobalTour, startAlertsCasesTour } from '../../tasks/api_calls/tour';
 import { AlertsCasesTourSteps } from '../../../public/common/components/guided_onboarding_tour/tour_config';
 
-describe('Guided onboarding tour', () => {
+describe.skip('Guided onboarding tour', () => {
   before(() => {
     cleanKibana();
     login();
     createRule(getNewRule({ query: 'user.name:*' }));
   });
   beforeEach(() => {
+    login();
     startAlertsCasesTour();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();

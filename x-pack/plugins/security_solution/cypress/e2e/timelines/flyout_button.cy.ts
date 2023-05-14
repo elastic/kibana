@@ -26,10 +26,10 @@ import { HOSTS_URL } from '../../urls/navigation';
 describe('timeline flyout button', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });

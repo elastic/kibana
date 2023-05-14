@@ -74,6 +74,7 @@ describe('Cases privileges', () => {
   });
 
   beforeEach(() => {
+    login();
     deleteCases();
   });
 

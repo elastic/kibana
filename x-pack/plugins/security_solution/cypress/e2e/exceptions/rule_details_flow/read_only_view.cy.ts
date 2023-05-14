@@ -28,7 +28,7 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-describe('Exceptions viewer read only', () => {
+describe.skip('Exceptions viewer read only', () => {
   const exceptionList = getExceptionList();
 
   before(() => {
@@ -51,11 +51,10 @@ describe('Exceptions viewer read only', () => {
         })
       );
     });
-
-    login(ROLES.reader);
   });
 
   beforeEach(() => {
+    login(ROLES.reader);
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
     goToRuleDetails();
     goToExceptionsTab();

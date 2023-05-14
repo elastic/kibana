@@ -75,6 +75,7 @@ describe('New Terms rules', () => {
 
     beforeEach(() => {
       deleteAlertsAndRules();
+      login();
     });
 
     it('Creates and enables a new terms rule', function () {

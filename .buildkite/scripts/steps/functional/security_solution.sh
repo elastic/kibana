@@ -10,7 +10,9 @@ export CLI_COUNT=${CLI_COUNT:-$BUILDKITE_PARALLEL_JOB_COUNT}
 
 echo "--- Security Solution tests (Chrome)"
 
-node scripts/functional_tests \
-  --debug --bail \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --config x-pack/test/security_solution_cypress/cli_config_parallel.ts
+yarn --cwd x-pack/plugins/security_solution cypress:run-as-ci-parallel
+
+# node scripts/functional_tests \
+#   --debug --bail \
+#   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+#   --config x-pack/test/security_solution_cypress/cli_config_parallel.ts

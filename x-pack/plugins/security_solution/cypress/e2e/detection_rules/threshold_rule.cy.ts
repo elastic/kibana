@@ -69,10 +69,10 @@ describe('Detection rules, threshold', () => {
 
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     visitWithoutDateRange(RULE_CREATION);
   });

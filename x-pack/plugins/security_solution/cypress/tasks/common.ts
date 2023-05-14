@@ -6,6 +6,7 @@
  */
 
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { login } from './login';
 
 const primaryButton = 0;
 
@@ -75,6 +76,7 @@ export const cleanKibana = () => {
 };
 
 export const deleteAlertsAndRules = () => {
+  login();
   cy.log('Delete all alerts and rules');
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
@@ -135,6 +137,7 @@ export const deleteTimelines = () => {
 };
 
 export const deleteCases = () => {
+  login();
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
     query: {
@@ -170,6 +173,10 @@ export const deleteConnectors = () => {
 
 export const postDataView = (dataSource: string) => {
   cy.request({
+    auth: {
+      user: Cypress.env('ELASTICSEARCH_USERNAME'),
+      pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+    },
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {
@@ -187,6 +194,10 @@ export const postDataView = (dataSource: string) => {
 
 export const deleteDataView = (dataSource: string) => {
   cy.request({
+    auth: {
+      user: Cypress.env('ELASTICSEARCH_USERNAME'),
+      pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+    },
     method: 'DELETE',
     url: `api/data_views/data_view/${dataSource}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },

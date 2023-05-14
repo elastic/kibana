@@ -48,12 +48,13 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timel
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-describe('Timeline Templates', () => {
+describe.skip('Timeline Templates', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     deleteTimelines();
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });

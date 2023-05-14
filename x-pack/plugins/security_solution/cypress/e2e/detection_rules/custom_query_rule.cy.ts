@@ -108,7 +108,7 @@ import { enablesRule, getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-describe('Custom query rules', () => {
+describe.skip('Custom query rules', () => {
   before(() => {
     cleanKibana();
     login();

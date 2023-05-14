@@ -28,11 +28,11 @@ import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
 describe('Timeline search and filters', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
     });
 
@@ -56,6 +56,7 @@ describe('Timeline search and filters', () => {
 
   describe('Update kqlMode for timeline', () => {
     beforeEach(() => {
+      login();
       visitWithoutDateRange(TIMELINES_URL);
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();

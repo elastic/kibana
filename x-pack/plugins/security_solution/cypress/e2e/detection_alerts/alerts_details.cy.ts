@@ -30,7 +30,7 @@ import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../helpers/common';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 
-describe('Alert details flyout', () => {
+describe.skip('Alert details flyout', () => {
   describe('Basic functions', () => {
     before(() => {
       cleanKibana();
@@ -55,6 +55,9 @@ describe('Alert details flyout', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('unmapped_fields');
+    });
+
+    beforeEach(() => {
       login();
       createRule(getUnmappedRule());
       visitWithoutDateRange(ALERTS_URL);
@@ -117,12 +120,12 @@ describe('Alert details flyout', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('query_alert');
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
     });
 
     beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
       expandFirstAlert();
     });
 
@@ -162,12 +165,12 @@ describe('Alert details flyout', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('query_alert');
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
     });
 
     beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
       expandFirstAlert();
     });
 

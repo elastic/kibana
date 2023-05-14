@@ -74,6 +74,10 @@ describe('Exceptions Table', () => {
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
   });
 
+  beforeEach(() => {
+    login();
+  });
+
   it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 

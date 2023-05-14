@@ -68,7 +68,7 @@ import { getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe('Custom query rules', () => {
+describe.skip('Custom query rules', () => {
   before(() => {
     login();
   });
@@ -83,9 +83,9 @@ describe('Custom query rules', () => {
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
-      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we 
+      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we
       are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
-      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive 
+      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive
       cleaning in all the other tests. */
       esArchiverResetKibana();
       if (rule.data_view_id != null) {

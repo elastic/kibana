@@ -20,7 +20,7 @@ import {
   STORED_SCRIPTS_URL,
   TRANSFORMS_URL,
 } from '../../urls/risk_score';
-import { intercepInstallRiskScoreModule } from '../api_calls/risk_scores';
+import { interceptInstallRiskScoreModule } from '../api_calls/risk_scores';
 
 import { RiskScoreEntity } from './common';
 import { getIngestPipelineName, getLegacyIngestPipelineName } from './ingest_pipelines';
@@ -42,7 +42,7 @@ export const interceptUpgradeRiskScoreModule = (
     'deleteIngestPipelines'
   );
   cy.intercept(`DELETE`, `${STORED_SCRIPTS_URL}/delete`).as('deleteScripts');
-  intercepInstallRiskScoreModule();
+  interceptInstallRiskScoreModule();
 };
 
 export const waitForUpgradeRiskScoreModule = () => {

@@ -32,10 +32,10 @@ import { cleanKibana, scrollToBottom } from '../../tasks/common';
 describe('timeline data providers', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();
     scrollToBottom();
