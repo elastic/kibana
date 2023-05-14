@@ -8,7 +8,6 @@
 import * as t from 'io-ts';
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
-import type { RuleResponse } from '../../../rule_schema';
 import { RuleObjectId } from '../../../rule_schema';
 
 import type { HealthInterval } from '../../model/detection_engine_health/health_interval';
@@ -44,6 +43,5 @@ export interface GetRuleHealthRequest {
 export interface GetRuleHealthResponse {
   timings: HealthTimings;
   parameters: RuleHealthParameters;
-  rule: RuleResponse;
   health: RuleHealthSnapshot;
 }

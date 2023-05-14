@@ -9,6 +9,8 @@ import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type {
   ClusterHealthParameters,
   ClusterHealthSnapshot,
+  RuleHealthParameters,
+  RuleHealthSnapshot,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
@@ -16,15 +18,18 @@ import {
   getSpaceHealthAggregation,
   normalizeSpaceHealthAggregationResult,
 } from './aggregations/health_stats_for_space';
+import { fetchRuleById } from './fetch_rule_by_id';
 
 /**
  * Client for calculating health stats based on rule saved objects.
  */
 export interface IRuleObjectsHealthClient {
+  calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealth>;
   calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth>;
   calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth>;
 }
 
+type RuleHealth = Pick<RuleHealthSnapshot, 'stats_at_the_moment' | 'debug'>;
 type SpaceHealth = Pick<SpaceHealthSnapshot, 'stats_at_the_moment' | 'debug'>;
 type ClusterHealth = Pick<ClusterHealthSnapshot, 'stats_at_the_moment' | 'debug'>;
 
@@ -32,6 +37,14 @@ export const createRuleObjectsHealthClient = (
   rulesClient: RulesClientApi
 ): IRuleObjectsHealthClient => {
   return {
+    async calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealth> {
+      const rule = await fetchRuleById(rulesClient, args.rule_id);
+      return {
+        stats_at_the_moment: { rule },
+        debug: {},
+      };
+    },
+
     async calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
       const aggs = getSpaceHealthAggregation();
       const aggregations = await rulesClient.aggregate({ aggs });

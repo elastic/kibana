@@ -17,13 +17,12 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { calculateHealthTimings } from '../health_timings';
-import { fetchRuleById } from './fetch_rule_by_id';
 import { validateGetRuleHealthRequest } from './get_rule_health_request';
 
 /**
  * Get health overview of a rule. Scope: a given detection rule in the current Kibana space.
  * Returns:
- * - rule and its execution summary at the moment of the API call
+ * - health stats at the moment of the API call (rule and its execution summary)
  * - health stats over a specified period of time ("health interval")
  * - health stats history within the same interval in the form of a histogram
  *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
@@ -45,26 +44,15 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
       try {
         const params = validateGetRuleHealthRequest(request.body);
 
-        const ctx = await context.resolve(['alerting', 'securitySolution']);
-        const rulesClient = ctx.alerting.getRulesClient();
+        const ctx = await context.resolve(['securitySolution']);
         const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
 
-        const fetchRuleResult = await fetchRuleById(rulesClient, params.ruleId);
-        if (fetchRuleResult.error) {
-          return siemResponse.error({
-            body: fetchRuleResult.error.message,
-            statusCode: fetchRuleResult.error.statusCode,
-          });
-        }
-
-        const rule = fetchRuleResult.value;
         const ruleHealthParameters = { interval: params.interval, rule_id: params.ruleId };
         const ruleHealth = await healthClient.calculateRuleHealth(ruleHealthParameters);
 
         const responseBody: GetRuleHealthResponse = {
           timings: calculateHealthTimings(params.requestReceivedAt),
           parameters: ruleHealthParameters,
-          rule,
           health: {
             ...ruleHealth,
             debug: params.debug ? ruleHealth.debug : undefined,

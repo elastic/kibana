@@ -33,7 +33,20 @@ export const createDetectionEngineHealthClient = (
       return withSecuritySpan('IDetectionEngineHealthClient.calculateRuleHealth', async () => {
         const ruleId = args.rule_id;
         try {
-          return await eventLogHealthClient.calculateRuleHealth(args);
+          // We call these two sequentially, because if the rule doesn't exist we need to throw 404
+          // from ruleObjectsHealthClient before we calculate expensive stats in eventLogHealthClient.
+          const statsBasedOnRuleObjects = await ruleObjectsHealthClient.calculateRuleHealth(args);
+          const statsBasedOnEventLog = await eventLogHealthClient.calculateRuleHealth(args);
+
+          return {
+            stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
+            stats_over_interval: statsBasedOnEventLog.stats_over_interval,
+            history_over_interval: statsBasedOnEventLog.history_over_interval,
+            debug: {
+              ...statsBasedOnRuleObjects.debug,
+              ...statsBasedOnEventLog.debug,
+            },
+          };
         } catch (e) {
           const logMessage = 'Error calculating rule health';
           const logReason = e instanceof Error ? e.message : String(e);

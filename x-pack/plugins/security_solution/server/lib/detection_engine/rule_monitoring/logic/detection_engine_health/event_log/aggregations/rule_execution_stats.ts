@@ -149,6 +149,7 @@ export const getRuleExecutionStatsAggregation = (
                     categorize_text: {
                       field: 'message',
                       size: 5,
+                      similarity_threshold: 99,
                     },
                   },
                 },
@@ -162,6 +163,7 @@ export const getRuleExecutionStatsAggregation = (
                     categorize_text: {
                       field: 'message',
                       size: 5,
+                      similarity_threshold: 99,
                     },
                   },
                 },

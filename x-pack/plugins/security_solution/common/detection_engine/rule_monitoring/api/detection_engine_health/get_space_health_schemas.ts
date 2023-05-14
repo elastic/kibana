@@ -30,8 +30,6 @@ export interface GetSpaceHealthRequest {
 }
 
 export interface GetSpaceHealthResponse {
-  // TODO: https://github.com/elastic/kibana/issues/125642 Implement and remove the property
-  message: 'Not implemented';
   timings: HealthTimings;
   parameters: SpaceHealthParameters;
   health: SpaceHealthSnapshot;

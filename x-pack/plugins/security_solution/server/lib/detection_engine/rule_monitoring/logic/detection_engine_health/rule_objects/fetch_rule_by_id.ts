@@ -5,27 +5,21 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleObjectId,
   RuleResponse,
 } from '../../../../../../../common/detection_engine/rule_schema';
-import type { OutputError } from '../../../../routes/utils';
 import { readRules } from '../../../../rule_management/logic/crud/read_rules';
-import { getIdError, transform } from '../../../../rule_management/utils/utils';
+import { transform } from '../../../../rule_management/utils/utils';
 
 // TODO: https://github.com/elastic/kibana/issues/125642 Move to rule_management into a RuleManagementClient
-
-export type Either<TValue, TError> =
-  | { value: TValue; error?: never }
-  | { value?: never; error: TError };
-
-export type FetchRuleByIdResult = Either<RuleResponse, OutputError>;
 
 export const fetchRuleById = async (
   rulesClient: RulesClient,
   id: RuleObjectId
-): Promise<FetchRuleByIdResult> => {
+): Promise<RuleResponse> => {
   const rawRule = await readRules({
     id,
     rulesClient,
@@ -33,19 +27,14 @@ export const fetchRuleById = async (
   });
 
   if (rawRule == null) {
-    const error = getIdError({ id, ruleId: undefined });
-    return { error };
+    throw Boom.notFound(`Rule not found, id: "${id}" `);
   }
 
   const normalizedRule = transform(rawRule);
 
   if (normalizedRule == null) {
-    const error: OutputError = {
-      statusCode: 500,
-      message: 'Internal error normalizing rule object',
-    };
-    return { error };
+    throw Boom.internal('Internal error normalizing rule object');
   }
 
-  return { value: normalizedRule };
+  return normalizedRule;
 };

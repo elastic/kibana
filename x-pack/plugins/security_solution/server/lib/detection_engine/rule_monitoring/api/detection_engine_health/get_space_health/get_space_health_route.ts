@@ -50,7 +50,6 @@ export const getSpaceHealthRoute = (router: SecuritySolutionPluginRouter) => {
         const spaceHealth = await healthClient.calculateSpaceHealth(spaceHealthParameters);
 
         const responseBody: GetSpaceHealthResponse = {
-          message: 'Not implemented',
           timings: calculateHealthTimings(params.requestReceivedAt),
           parameters: spaceHealthParameters,
           health: {

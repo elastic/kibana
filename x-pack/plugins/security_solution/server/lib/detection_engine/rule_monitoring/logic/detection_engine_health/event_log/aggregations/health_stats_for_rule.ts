@@ -57,7 +57,7 @@ const getRuleExecutionStatsHistoryAggregation = (
 export const normalizeRuleHealthAggregationResult = (
   result: AggregateEventsBySavedObjectResult,
   requestAggs: Record<string, estypes.AggregationsAggregationContainer>
-): RuleHealthSnapshot => {
+): Omit<RuleHealthSnapshot, 'stats_at_the_moment'> => {
   const aggregations = result.aggregations ?? {};
   return {
     stats_over_interval: normalizeStatsOverInterval(aggregations),
