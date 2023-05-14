@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useEffect, useMemo, useCallback, useState } from 'react';
+import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
 
 import type { ObservabilityAppServices } from '../../application/types';
 import { LoadingObservability } from '../../components/loading_observability';
@@ -23,9 +24,7 @@ import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityStatusProgress } from './components/observability_status/observability_status_progress';
 import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
 import { paths } from '../../config/paths';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
-import { useFetcher } from '../../hooks/use_fetcher';
 import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';

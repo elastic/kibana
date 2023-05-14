@@ -12,7 +12,6 @@ interface Props {
   prompt?: string;
 }
 
-// eslint-disable-next-line react/function-component-definition
 export const Prompt: React.FC<Props> = ({ prompt }) => {
   const { setPrompt } = useNavigationWarningPrompt();
 

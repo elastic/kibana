@@ -10,7 +10,7 @@ import { stringify } from 'query-string';
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
-import { useNavigationWarningPrompt } from '../utils/navigation_warning_prompt';
+import { useNavigationWarningPrompt } from '../components/navigation_warning_prompt';
 
 type Search = Record<string, string | string[]>;
 

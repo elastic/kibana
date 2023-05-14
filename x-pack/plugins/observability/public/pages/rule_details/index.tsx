@@ -38,6 +38,7 @@ import { Query, BoolQuery } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
 import {
   defaultTimeRange,
@@ -55,7 +56,6 @@ import {
   SEARCH_BAR_URL_STORAGE_KEY,
 } from './constants';
 import { RuleDetailsPathParams, TabId } from './types';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { PageTitle } from './components';

@@ -11,10 +11,10 @@ import { ThemeContext } from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { paths } from '../../../../../config/paths';
 import { ObservabilityAppServices } from '../../../../../application/types';
-import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 

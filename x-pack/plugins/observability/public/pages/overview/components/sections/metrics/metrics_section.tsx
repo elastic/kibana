@@ -16,6 +16,7 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
   MetricsFetchDataResponse,
   MetricsFetchDataSeries,
@@ -23,8 +24,7 @@ import {
   StringOrNull,
 } from '../../../../..';
 import { SectionContainer } from '../section_container';
-import { getDataHandler } from '../../../../../data_handler';
-import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
+import { getDataHandler } from '../../../../../services/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { HostLink } from './host_link';

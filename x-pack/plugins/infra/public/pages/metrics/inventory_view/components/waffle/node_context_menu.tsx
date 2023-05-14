@@ -21,7 +21,7 @@ import {
   SectionLink,
   ActionMenuDivider,
 } from '@kbn/observability-shared-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';

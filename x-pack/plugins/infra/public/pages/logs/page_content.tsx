@@ -12,7 +12,7 @@ import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';

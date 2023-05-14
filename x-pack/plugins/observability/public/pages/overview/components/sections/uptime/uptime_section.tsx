@@ -23,11 +23,14 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { useTimeZone } from '../../../../../../../observability_shared/public/hooks/use_time_zone';
+import {
+  useTimeZone,
+  useChartTheme,
+  useFetcher,
+  FETCH_STATUS,
+} from '@kbn/observability-shared-plugin/public';
 import { SectionContainer } from '../section_container';
-import { getDataHandler } from '../../../../../data_handler';
-import { useChartTheme } from '../../../../../hooks/use_chart_theme';
-import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
+import { getDataHandler } from '../../../../../services/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { Series } from '../../../../../typings';

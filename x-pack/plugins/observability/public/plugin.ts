@@ -53,7 +53,7 @@ import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
-import { registerDataHandler } from './data_handler';
+import { registerDataHandler } from './services/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,

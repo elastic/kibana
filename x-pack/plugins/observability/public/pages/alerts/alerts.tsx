@@ -13,10 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
 import { LoadingObservability } from '../../components/loading_observability';

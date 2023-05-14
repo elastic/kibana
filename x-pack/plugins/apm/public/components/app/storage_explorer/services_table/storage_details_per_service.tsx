@@ -17,7 +17,7 @@ import {
   EuiFlexGrid,
   EuiSpacer,
 } from '@elastic/eui';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import {
   Chart,
   Partition,

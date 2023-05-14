@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { HasDataContextValue } from '../../../../../context/has_data_context';
-import * as fetcherHook from '../../../../../hooks/use_fetcher';
+import * as fetcherHook from '@kbn/observability-shared-plugin/public';
 import * as hasDataHook from '../../../../../hooks/use_has_data';
 import { render, data as dataMock } from '../../../../../utils/test_helper';
 import { UXSection } from './ux_section';
