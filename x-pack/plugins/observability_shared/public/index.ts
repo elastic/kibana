@@ -36,6 +36,7 @@ export type { SectionLinkProps } from './components/section/section';
 export { LoadWhenInView } from './components/load_when_in_view/get_load_when_in_view_lazy';
 
 export { InspectorContextProvider } from './contexts/inspector/inspector_context';
+export type { AddInspectorRequest } from './contexts/inspector/inspector_context';
 export { useInspectorContext } from './contexts/inspector/use_inspector_context';
 
 export { useTheme } from './hooks/use_theme';
@@ -52,6 +53,7 @@ export {
 export type { TrackEvent } from './hooks/use_track_metric';
 export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
 export { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
+export { useTimeZone } from './hooks/use_time_zone';
 
 export type { ApmIndicesConfig, UXMetrics } from './types';
 

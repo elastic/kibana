@@ -8,11 +8,11 @@
 import React from 'react';
 import { StepScreenshotDisplay } from './step_screenshot_display';
 import { render } from '../../lib/helper/rtl_helpers';
-import * as observabilityPublic from '@kbn/observability-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import '../../lib/__mocks__/legacy_use_composite_image.mock';
 import { mockRef } from '../../lib/__mocks__/legacy_screenshot_ref.mock';
 
-jest.mock('@kbn/observability-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('react-use/lib/useIntersection', () => () => ({
   isIntersecting: true,
@@ -20,9 +20,9 @@ jest.mock('react-use/lib/useIntersection', () => () => ({
 
 describe('StepScreenshotDisplayProps', () => {
   beforeAll(() => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       data: null,
-      status: observabilityPublic.FETCH_STATUS.SUCCESS,
+      status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       refetch: () => {},
     });
   });

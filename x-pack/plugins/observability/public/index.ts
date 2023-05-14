@@ -64,7 +64,6 @@ export { useEsSearch, createEsParams } from './hooks/use_es_search';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
-export { useTimeZone } from './hooks/use_time_zone';
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
