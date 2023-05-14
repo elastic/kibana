@@ -28,7 +28,7 @@ describe('StepScreenshotDisplayProps', () => {
   });
 
   afterAll(() => {
-    (observabilityPublic.useFetcher as any).mockClear();
+    (observabilitySharedPublic.useFetcher as any).mockClear();
   });
   it('displays screenshot thumbnail when present', () => {
     const { getByAltText } = render(
@@ -71,8 +71,8 @@ describe('StepScreenshotDisplayProps', () => {
   });
 
   it('displays screenshot thumbnail for ref', () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-      status: observabilityPublic.FETCH_STATUS.SUCCESS,
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+      status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       data: { ...mockRef },
       refetch: () => null,
     });

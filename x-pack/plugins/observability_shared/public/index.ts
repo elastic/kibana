@@ -42,6 +42,7 @@ export { useInspectorContext } from './contexts/inspector/use_inspector_context'
 export { useTheme } from './hooks/use_theme';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
+export type { FetcherResult } from './hooks/use_fetcher';
 export { useKibanaSpace } from './hooks/use_kibana_space';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export {

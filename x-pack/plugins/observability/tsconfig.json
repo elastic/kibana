@@ -10,8 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../typings/**/*",
-    "../observability_shared/public/components/date_picker/date_picker.test.tsx",
-    "../observability_shared/public/hooks/use_time_zone.ts"
+    "../observability_shared/public/components/date_picker/date_picker.test.tsx"
   ],
   "kbn_references": [
     "@kbn/core",

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
