@@ -7,10 +7,10 @@
 
 import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../objects/case';
 
-import { SERVICE_NOW_MAPPING, TOASTER } from '../../screens/configure_cases';
+import { SERVICE_NOW_MAPPING } from '../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../tasks/all_cases';
-import { cleanKibana, deleteCases } from '../../tasks/common';
+import { cleanKibana, deleteCases, deleteConnectors } from '../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
@@ -85,6 +85,10 @@ describe('Cases connectors', () => {
         res.send(200, resBody);
       });
     });
+  });
+
+  after(() => {
+    deleteConnectors();
   });
 
   it('Configures a new connector', () => {
