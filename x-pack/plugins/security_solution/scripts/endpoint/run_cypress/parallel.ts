@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-default-export */
-
-import Spec from 'mocha/lib/reporters/spec';
-import { merge } from 'mochawesome-merge';
 import _ from 'lodash';
-import yargs from 'yargs';
 import globby from 'globby';
 import pMap from 'p-map';
 import deepMerge from 'deepmerge';
 import runCypress from '.';
 import { renderSummaryTable } from './print_run';
-import results from './results.json';
 
 export default async () => {
   const argv = process.argv.slice(2);
