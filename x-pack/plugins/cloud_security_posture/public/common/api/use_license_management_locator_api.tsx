@@ -17,6 +17,7 @@ export const useLicenseManagementLocatorApi = () => {
 
   return useQuery([getLicenseManagementLocatorKey], () => {
     const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
+    // license management does not exist on serverless
     if (!locator) return;
 
     return locator.getUrl({

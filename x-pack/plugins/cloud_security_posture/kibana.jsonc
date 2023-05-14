@@ -21,7 +21,7 @@
       "licensing",
       "share"
     ],
-    "optionalPlugins": ["usageCollection", "licenseManagement"],
+    "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["kibanaReact", "usageCollection"]
   }
 }
