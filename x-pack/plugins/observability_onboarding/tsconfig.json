@@ -23,6 +23,9 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/i18n-react",
+    "@kbn/cloud-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/usage-collection-plugin",
   ],
   "exclude": [
     "target/**/*",
