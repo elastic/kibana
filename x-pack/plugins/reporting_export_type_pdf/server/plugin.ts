@@ -1,5 +1,4 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-import { ReportingExportTypeSetup } from '@kbn/reporting-export-types-plugin';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 
 import { defineRoutes } from './routes';

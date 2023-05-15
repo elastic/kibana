@@ -520,6 +520,7 @@
     "@kbn/repo-packages": "link:packages/kbn-repo-packages",
     "@kbn/reporting-common": "link:packages/kbn-reporting/common",
     "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
+    "@kbn/reporting-export-type-pdf-plugin": "link:x-pack/plugins/reporting_export_type_pdf",
     "@kbn/reporting-plugin": "link:x-pack/plugins/reporting",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
     "@kbn/response-stream-plugin": "link:examples/response_stream",
@@ -968,8 +969,7 @@
     "xstate": "^4.37.2",
     "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
-    "yazl": "^2.5.1",
-    "@kbn/reporting-export-type-pdf-plugin": "link:x-pack/plugins/reporting_export_type_pdf"
+    "yazl": "^2.5.1"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
