@@ -1,0 +1,14 @@
+{
+  "id": "@kbn/reporting-export-type-PDF",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "@elastic/appex-sharedux",
+    "githubTeam": ""
+  },
+  "description": "",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}

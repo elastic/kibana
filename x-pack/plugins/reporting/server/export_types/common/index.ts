@@ -10,6 +10,7 @@ export { getFullUrls } from './get_full_urls';
 export { validateUrls } from './validate_urls';
 export { generatePngObservable } from './generate_png';
 export { getCustomLogo } from './get_custom_logo';
+export { getTracker } from './pdf_tracker';
 
 export interface TimeRangeParams {
   min?: Date | string | number | null;

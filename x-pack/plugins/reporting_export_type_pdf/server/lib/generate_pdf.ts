@@ -7,12 +7,14 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../../..';
-import type { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../../common/types';
-import type { PdfScreenshotOptions } from '../../../types';
-import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
-import { getTracker } from '../../common/pdf_tracker';
-import type { TaskPayloadPDFV2 } from '../types';
+import type { ReportingExportTypesCore } from '@kbn/reporting-export-types-core';
+import { PdfMetrics } from '@kbn/reporting-common/metrics';
+import { PdfScreenshotOptions } from '@kbn/screenshotting-plugin/server';
+import { LocatorParams } from '@kbn/reporting-plugin/common';
+import { getTracker } from '@kbn/reporting-plugin/server/export_types/common';
+import { UrlOrUrlLocatorTuple } from '@kbn/reporting-plugin/common/types';
+import { getFullRedirectAppUrl } from '@kbn/reporting-plugin/server/export_types/common/v2/get_full_redirect_app_url';
+import { TaskPayloadPDFV2 } from './printable_pdfs_v2';
 
 interface PdfResult {
   buffer: Uint8Array | null;
@@ -21,7 +23,7 @@ interface PdfResult {
 }
 
 export function generatePdfObservable(
-  reporting: ReportingCore,
+  reporting: ReportingExportTypesCore,
   job: TaskPayloadPDFV2,
   locatorParams: LocatorParams[],
   options: Omit<PdfScreenshotOptions, 'urls'>

@@ -8,4 +8,4 @@
 export type {
   JobParamsPDFV2,
   TaskPayloadPDFV2,
-} from '../../../common/types/export_types/printable_pdf_v2';
+} from '@kbn/reporting-plugin/common/types/export_types/printable_pdf_v2';
