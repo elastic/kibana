@@ -400,7 +400,8 @@ describe('split .kibana index into multiple system indices', () => {
     });
   });
 
-  describe('when multiple Kibana migrators run in parallel', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/157510
+  describe.skip('when multiple Kibana migrators run in parallel', () => {
     it('correctly migrates 7.7.2_xpack_100k_obj.zip archive', async () => {
       esServer = await startElasticsearch({
         dataArchive: Path.join(__dirname, '..', 'archives', '7.7.2_xpack_100k_obj.zip'),
