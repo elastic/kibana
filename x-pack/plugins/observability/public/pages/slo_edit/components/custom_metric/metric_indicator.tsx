@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -34,6 +34,8 @@ interface MetricIndicatorProps {
   isLoadingIndex: boolean;
   metricLabel: string;
   equationLabel: string;
+  metricTooltip: ReactNode;
+  equationTooltip: ReactNode;
 }
 
 export const NEW_CUSTOM_METRIC = { name: 'A', aggregation: 'sum' as const, field: '' };
@@ -67,6 +69,8 @@ export function MetricIndicator({
   isLoadingIndex,
   metricLabel,
   equationLabel,
+  metricTooltip,
+  equationTooltip,
 }: MetricIndicatorProps) {
   const { control, watch, setValue } = useFormContext<CreateSLOInput>();
 
@@ -116,7 +120,15 @@ export function MetricIndicator({
     <>
       <EuiFlexItem>
         {metrics?.map((metric, index) => (
-          <EuiFormRow fullWidth label={`${metricLabel} ${metric.name}`} key={metric.name}>
+          <EuiFormRow
+            fullWidth
+            label={
+              <span>
+                {metricLabel} {metric.name} {metricTooltip}
+              </span>
+            }
+            key={metric.name}
+          >
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem>
                 <Controller
@@ -227,10 +239,17 @@ export function MetricIndicator({
           render={({ field: { ref, ...field }, fieldState }) => (
             <EuiFormRow
               fullWidth
-              label={equationLabel}
+              label={
+                <span>
+                  {equationLabel} {equationTooltip}
+                </span>
+              }
               helpText={i18n.translate(
                 'xpack.observability.slo.sloEdit.sliType.customMetric.equationHelpText',
-                { defaultMessage: 'Supports basic math equations' }
+                {
+                  defaultMessage:
+                    'Supports basic math equations, valid charaters are: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+                }
               )}
               isInvalid={fieldState.invalid}
               error={[

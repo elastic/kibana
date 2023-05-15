@@ -150,6 +150,30 @@ export function CustomMetricIndicatorTypeForm() {
             'xpack.observability.slo.sloEdit.sliType.customMetric.goodMetricLabel',
             { defaultMessage: 'Good metric' }
           )}
+          metricTooltip={
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.observability.slo.sloEdit.sliType.customMetric.goodMetric.tooltip',
+                {
+                  defaultMessage:
+                    'This data from this field will be aggregated with the "sum" aggregation.',
+                }
+              )}
+              position="top"
+            />
+          }
+          equationTooltip={
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.observability.slo.sloEdit.sliType.customMetric.goodEquation.tooltip',
+                {
+                  defaultMessage:
+                    'This supports bacic math (A + B / C) and boolean logic (A < B ? A : B).',
+                }
+              )}
+              position="top"
+            />
+          }
         />
       </EuiPanel>
       <EuiPanel hasBorder={true}>
@@ -165,6 +189,30 @@ export function CustomMetricIndicatorTypeForm() {
             'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetricLabel',
             { defaultMessage: 'Total metric' }
           )}
+          metricTooltip={
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip',
+                {
+                  defaultMessage:
+                    'This data from this field will be aggregated with the "sum" aggregation.',
+                }
+              )}
+              position="top"
+            />
+          }
+          equationTooltip={
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
+                {
+                  defaultMessage:
+                    'This supports bacic math (A + B / C) and boolean logic (A < B ? A : B).',
+                }
+              )}
+              position="top"
+            />
+          }
         />
       </EuiPanel>
     </EuiFlexGroup>
