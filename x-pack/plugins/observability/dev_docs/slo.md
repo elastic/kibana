@@ -346,7 +346,7 @@ curl --request POST \
 			"total": {
         "metrics": [
           {
-            "id": "A",
+            "name": "A",
             "aggregation": "sum",
             "processor.accepted"
           }
