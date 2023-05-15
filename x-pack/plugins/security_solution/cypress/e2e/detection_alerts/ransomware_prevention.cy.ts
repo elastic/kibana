@@ -10,7 +10,7 @@ import { login, visit } from '../../tasks/login';
 
 import { ALERTS_URL, TIMELINES_URL } from '../../urls/navigation';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../screens/alerts';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { esArchiverLoad } from '../../tasks/es_archiver';
 import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../screens/timeline';
 import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
@@ -19,10 +19,6 @@ describe('Ransomware Prevention Alerts', () => {
   before(() => {
     login();
     esArchiverLoad('ransomware_prevention');
-  });
-
-  after(() => {
-    esArchiverUnload('ransomware_prevention');
   });
 
   describe('Ransomware display in Alerts Section', () => {
