@@ -487,7 +487,10 @@ export class SavedSearchEmbeddable
     searchProps.searchTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
-    searchProps.sampleSizeState = this.input.sampleSize || this.savedSearch.sampleSize;
+    searchProps.sampleSizeState =
+      this.input.sampleSize ||
+      this.savedSearch.sampleSize ||
+      this.services.uiSettings.get(SAMPLE_SIZE_SETTING);
     searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
     searchProps.savedSearchId = this.savedSearch.id;
     if (forceFetch || isFetchRequired) {
