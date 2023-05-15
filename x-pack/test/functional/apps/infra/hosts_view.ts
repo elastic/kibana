@@ -223,7 +223,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('#Single host Flyout', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157719
+    describe.skip('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await loginWithReadOnlyUser();
