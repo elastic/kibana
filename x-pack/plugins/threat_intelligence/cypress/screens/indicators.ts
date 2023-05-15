@@ -7,53 +7,44 @@
 
 /* Breadcrumbs */
 
-import { INSPECT_BUTTON_TEST_ID } from '../../public/modules/indicators/components/table/hooks/test_ids';
-import { PANEL_TEST_ID } from '../../public/components/empty_state/test_ids';
+import { INSPECT_BUTTON_TEST_ID } from '../../public/modules/indicators/hooks/test_ids';
+import { PANEL_TEST_ID, TITLE_TEST_ID } from '../../public/components/test_ids';
 import {
+  DROPDOWN_TEST_ID,
   FILTER_IN_BUTTON_TEST_ID as LEGEND_FILTER_IN_BUTTON_TEST_ID,
   FILTER_OUT_BUTTON_TEST_ID as LEGEND_FILTER_OUT_BUTTON_TEST_ID,
   POPOVER_BUTTON_TEST_ID as LEGEND_POPOVER_BUTTON_TEST_ID,
   TIMELINE_BUTTON_TEST_ID as LEGEND_TIMELINE_BUTTON_TEST_ID,
-} from '../../public/modules/indicators/components/barchart/legend_action/test_ids';
-import { DROPDOWN_TEST_ID } from '../../public/modules/indicators/components/barchart/field_selector/test_ids';
+} from '../../public/modules/indicators/components/barchart/test_ids';
 import {
   ADD_TO_BLOCK_LIST_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_ADD_TO_BLOCK_LIST_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_ADD_TO_EXISTING_CASE_TEST_ID,
   ADD_TO_NEW_CASE_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_ADD_TO_NEW_CASE_TEST_ID,
   INVESTIGATE_IN_TIMELINE_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_INVESTIGATE_IN_TIMELINE_TEST_ID,
   TAKE_ACTION_BUTTON_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_TAKE_ACTION_BUTTON_TEST_ID,
-} from '../../public/modules/indicators/components/flyout/take_action/test_ids';
-import {
   INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
   INDICATORS_FLYOUT_OVERVIEW_TABLE,
-} from '../../public/modules/indicators/components/flyout/overview_tab/test_ids';
-import { CODE_BLOCK_TEST_ID } from '../../public/modules/indicators/components/flyout/json_tab/test_ids';
-import { FLYOUT_TABLE_TEST_ID } from '../../public/modules/indicators/components/flyout/table_tab/test_ids';
-import {
+  CODE_BLOCK_TEST_ID,
+  FLYOUT_TABLE_TEST_ID,
   INDICATORS_FLYOUT_TABS_TEST_ID,
   INDICATORS_FLYOUT_TITLE_TEST_ID,
+  TIMELINE_BUTTON_TEST_ID as VALUE_ACTION_TIMELINE_BUTTON_TEST_ID,
+  FILTER_IN_BUTTON_TEST_ID as VALUE_ACTION_FILTER_IN_BUTTON_TEST_ID,
+  FILTER_OUT_BUTTON_TEST_ID as VALUE_ACTION_FILTER_OUT_BUTTON_TEST_ID,
+  POPOVER_BUTTON_TEST_ID as VALUE_ACTION_POPOVER_BUTTON_TEST_ID,
 } from '../../public/modules/indicators/components/flyout/test_ids';
 import {
   ADD_TO_BLOCK_LIST_TEST_ID as INDICATORS_TABLE_ADD_TO_BLOCK_LIST_TEST_ID,
   ADD_TO_EXISTING_TEST_ID as INDICATORS_TABLE_ADD_TO_EXISTING_TEST_ID,
   ADD_TO_NEW_CASE_TEST_ID as INDICATORS_TABLE_ADD_TO_NEW_CASE_TEST_ID,
   MORE_ACTIONS_TEST_ID as INDICATORS_TABLE_MORE_ACTIONS_TEST_ID,
-} from '../../public/modules/indicators/components/table/components/more_actions/test_ids';
-import { BUTTON_TEST_ID } from '../../public/modules/indicators/components/table/components/open_flyout_button/test_ids';
-import {
+  BUTTON_TEST_ID,
   FILTER_IN_BUTTON_TEST_ID as CELL_FILTER_IN_BUTTON_TEST_ID,
   FILTER_OUT_BUTTON_TEST_ID as CELL_FILTER_OUT_BUTTON_TEST_ID,
   TIMELINE_BUTTON_TEST_ID as CELL_TIMELINE_BUTTON_TEST_ID,
   INVESTIGATE_IN_TIMELINE_TEST_ID as CELL_INVESTIGATE_IN_TIMELINE_TEST_ID,
-} from '../../public/modules/indicators/components/table/components/test_ids';
-import { TABLE_TEST_ID } from '../../public/modules/indicators/components/table/test_ids';
-import { TITLE_TEST_ID } from '../../public/components/layout/test_ids';
-import {
-  TIMELINE_BUTTON_TEST_ID as VALUE_ACTION_TIMELINE_BUTTON_TEST_ID,
-  FILTER_IN_BUTTON_TEST_ID as VALUE_ACTION_FILTER_IN_BUTTON_TEST_ID,
-  FILTER_OUT_BUTTON_TEST_ID as VALUE_ACTION_FILTER_OUT_BUTTON_TEST_ID,
-  POPOVER_BUTTON_TEST_ID as VALUE_ACTION_POPOVER_BUTTON_TEST_ID,
-} from '../../public/modules/indicators/components/flyout/indicator_value_actions/test_ids';
+  TABLE_TEST_ID,
+} from '../../public/modules/indicators/components/table/test_ids';
 
 export const BREADCRUMBS = `[data-test-subj="breadcrumbs"]`;
 
