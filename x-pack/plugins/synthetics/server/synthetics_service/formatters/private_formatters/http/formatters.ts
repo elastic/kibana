@@ -18,6 +18,8 @@ import {
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
 export const httpFormatters: HTTPFormatMap = {
+  ...commonFormatters,
+  ...tlsFormatters,
   [ConfigKey.MAX_REDIRECTS]: null,
   [ConfigKey.REQUEST_METHOD_CHECK]: null,
   [ConfigKey.RESPONSE_BODY_INDEX]: null,
@@ -43,6 +45,4 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.MODE]: null,
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
-  ...tlsFormatters,
-  ...commonFormatters,
 };

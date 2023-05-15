@@ -14,6 +14,8 @@ import { stringToJsonFormatter } from '../formatting_utils';
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 
 export const tcpFormatters: TCPFormatMap = {
+  ...commonFormatters,
+  ...tlsFormatters,
   [ConfigKey.METADATA]: objectToJsonFormatter,
   [ConfigKey.HOSTS]: stringToJsonFormatter,
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: null,
@@ -25,6 +27,4 @@ export const tcpFormatters: TCPFormatMap = {
   [ConfigKey.MODE]: null,
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
-  ...tlsFormatters,
-  ...commonFormatters,
 };

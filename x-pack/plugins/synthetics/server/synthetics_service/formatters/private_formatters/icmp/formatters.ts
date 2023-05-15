@@ -14,10 +14,10 @@ import { stringToJsonFormatter } from '../formatting_utils';
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 
 export const icmpFormatters: ICMPFormatMap = {
+  ...commonFormatters,
   [ConfigKey.HOSTS]: stringToJsonFormatter,
   [ConfigKey.WAIT]: secondsToCronFormatter,
   [ConfigKey.MODE]: null,
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
-  ...commonFormatters,
 };
