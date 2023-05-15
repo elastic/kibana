@@ -37,7 +37,7 @@ export interface CustomAssetsAccordionProps {
 export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps> = ({
   views,
   initialIsOpen = false,
-  title = undefined,
+  title,
 }) => {
   const { application } = useStartServices();
 
@@ -48,7 +48,7 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="m">
-              <h3>{title === undefined ? AssetTitleMap.view : title}</h3>
+              <h3>{title ?? AssetTitleMap.view}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
