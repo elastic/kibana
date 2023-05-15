@@ -8,9 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getActionsMigrations } from './actions_migrations';
 import { RawAction } from '../types';
-import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -23,9 +24,9 @@ describe('successful migrations', () => {
 
   describe('7.10.0', () => {
     test('add hasAuth config property for .email actions', () => {
-      const migration710 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.10.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.10.0']
+      );
       const action = getMockDataForEmail({});
       const migratedAction = migration710(action, context);
       expect(migratedAction.attributes.config).toEqual({
@@ -43,9 +44,9 @@ describe('successful migrations', () => {
     });
 
     test('rename cases configuration object', () => {
-      const migration710 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.10.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.10.0']
+      );
       const action = getCasesMockData({});
       const migratedAction = migration710(action, context);
       expect(migratedAction.attributes.config).toEqual({
@@ -65,9 +66,9 @@ describe('successful migrations', () => {
 
   describe('7.11.0', () => {
     test('add hasAuth = true for .webhook actions with user and password', () => {
-      const migration711 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.11.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.11.0']
+      );
       const action = getMockDataForWebhook({}, true);
       expect(migration711(action, context)).toMatchObject({
         ...action,
@@ -81,9 +82,9 @@ describe('successful migrations', () => {
     });
 
     test('add hasAuth = false for .webhook actions without user and password', () => {
-      const migration711 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.11.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.11.0']
+      );
       const action = getMockDataForWebhook({}, false);
       expect(migration711(action, context)).toMatchObject({
         ...action,
@@ -96,9 +97,9 @@ describe('successful migrations', () => {
       });
     });
     test('remove cases mapping object', () => {
-      const migration711 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.11.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.11.0']
+      );
       const action = getMockData({
         config: { incidentConfiguration: { mapping: [] }, isCaseOwned: true, another: 'value' },
       });
@@ -116,9 +117,9 @@ describe('successful migrations', () => {
 
   describe('7.14.0', () => {
     test('add isMissingSecrets property for actions', () => {
-      const migration714 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.14.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration714 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.14.0']
+      );
       const action = getMockData({ isMissingSecrets: undefined });
       const migratedAction = migration714(action, context);
       expect(migratedAction).toEqual({
@@ -133,9 +134,9 @@ describe('successful migrations', () => {
 
   describe('7.16.0', () => {
     test('set service config property for .email connectors if service is undefined', () => {
-      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.16.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0']
+      );
       const action = getMockDataForEmail({ config: { service: undefined } });
       const migratedAction = migration716(action, context);
       expect(migratedAction.attributes.config).toEqual({
@@ -153,9 +154,9 @@ describe('successful migrations', () => {
     });
 
     test('set service config property for .email connectors if service is null', () => {
-      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.16.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0']
+      );
       const action = getMockDataForEmail({ config: { service: null } });
       const migratedAction = migration716(action, context);
       expect(migratedAction.attributes.config).toEqual({
@@ -173,9 +174,9 @@ describe('successful migrations', () => {
     });
 
     test('skips migrating .email connectors if service is defined, even if value is nonsense', () => {
-      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.16.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0']
+      );
       const action = getMockDataForEmail({ config: { service: 'gobbledygook' } });
       const migratedAction = migration716(action, context);
       expect(migratedAction.attributes.config).toEqual({
@@ -185,9 +186,9 @@ describe('successful migrations', () => {
     });
 
     test('set usesTableApi config property for .servicenow', () => {
-      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.16.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0']
+      );
       const action = getMockDataForServiceNow716({ usesTableApi: true });
       const migratedAction = migration716(action, context);
 
@@ -204,9 +205,9 @@ describe('successful migrations', () => {
     });
 
     test('set usesTableApi config property for .servicenow-sir', () => {
-      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.16.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0']
+      );
       const action = getMockDataForServiceNow716({ actionTypeId: '.servicenow-sir' });
       const migratedAction = migration716(action, context);
 
@@ -223,9 +224,9 @@ describe('successful migrations', () => {
     });
 
     test('it does not set usesTableApi config for other connectors', () => {
-      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.16.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0']
+      );
       const action = getMockData();
       const migratedAction = migration716(action, context);
       expect(migratedAction).toEqual(action);
@@ -234,9 +235,9 @@ describe('successful migrations', () => {
 
   describe('8.0.0', () => {
     test('no op migration for rules SO', () => {
-      const migration800 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '8.0.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['8.0.0']
+      );
       const action = getMockData({});
       expect(migration800(action, context)).toEqual(action);
     });
@@ -244,9 +245,9 @@ describe('successful migrations', () => {
 
   describe('8.3.0', () => {
     test('set isOAuth config property for .servicenow', () => {
-      const migration830 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '8.3.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['8.3.0']
+      );
       const action = getMockDataForServiceNow83();
       const migratedAction = migration830(action, context);
 
@@ -258,9 +259,9 @@ describe('successful migrations', () => {
     });
 
     test('set isOAuth config property for .servicenow-sir', () => {
-      const migration830 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '8.3.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['8.3.0']
+      );
       const action = getMockDataForServiceNow83({ actionTypeId: '.servicenow-sir' });
       const migratedAction = migration830(action, context);
 
@@ -272,9 +273,9 @@ describe('successful migrations', () => {
     });
 
     test('set isOAuth config property for .servicenow-itom', () => {
-      const migration830 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '8.3.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['8.3.0']
+      );
       const action = getMockDataForServiceNow83({ actionTypeId: '.servicenow-itom' });
       const migratedAction = migration830(action, context);
 
@@ -286,9 +287,9 @@ describe('successful migrations', () => {
     });
 
     test('it does not set isOAuth config for other connectors', () => {
-      const migration830 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '8.3.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['8.3.0']
+      );
       const action = getMockData();
       const migratedAction = migration830(action, context);
 
@@ -307,9 +308,9 @@ describe('handles errors during migrations', () => {
 
   describe('7.10.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration710 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.10.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.10.0']
+      );
       const action = getMockDataForEmail({});
       expect(() => {
         migration710(action, context);
@@ -327,9 +328,9 @@ describe('handles errors during migrations', () => {
 
   describe('7.11.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration711 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.11.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.11.0']
+      );
       const action = getMockDataForEmail({});
       expect(() => {
         migration711(action, context);
@@ -347,9 +348,9 @@ describe('handles errors during migrations', () => {
 
   describe('7.14.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration714 = getActionsMigrations(encryptedSavedObjectsSetup)[
-        '7.14.0'
-      ] as SavedObjectMigrationFn<unknown, RawAction>;
+      const migration714 = SavedObjectsUtils.getMigrationFunction(
+        getActionsMigrations(encryptedSavedObjectsSetup)['7.14.0']
+      );
       const action = getMockDataForEmail({});
       expect(() => {
         migration714(action, context);

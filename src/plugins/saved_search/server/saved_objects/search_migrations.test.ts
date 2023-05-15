@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectMigrationContext,
-  SavedObjectMigrationFn,
-  SavedObjectUnsanitizedDoc,
-} from '@kbn/core/server';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getAllMigrations, searchMigrations } from './search_migrations';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
@@ -374,7 +371,7 @@ Object {
     });
 
     expect(
-      (migrations[versionToTest] as SavedObjectMigrationFn)(
+      SavedObjectsUtils.getMigrationFunction(migrations[versionToTest])(
         savedSearch,
         {} as SavedObjectMigrationContext
       )
@@ -405,7 +402,7 @@ Object {
     });
 
     expect(
-      (migrations[versionToTest] as SavedObjectMigrationFn)(
+      SavedObjectsUtils.getMigrationFunction(migrations[versionToTest])(
         savedSearch,
         {} as SavedObjectMigrationContext
       )

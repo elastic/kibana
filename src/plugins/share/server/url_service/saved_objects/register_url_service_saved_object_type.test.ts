@@ -8,11 +8,11 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 import type {
-  SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { ServerShortUrlClientFactory } from '..';
 import { UrlService, LocatorDefinition } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
@@ -102,9 +102,9 @@ describe('migrations', () => {
 
     service.locators.create(new FooLocatorDefinition());
 
-    const migrationFunction = (type.migrations as () => SavedObjectMigrationMap)()['8.0.0'];
-
-    expect(typeof migrationFunction).toBe('function');
+    const migrationFunction = SavedObjectsUtils.getMigrationFunction(
+      (type.migrations as () => SavedObjectMigrationMap)()['8.0.0']
+    );
 
     const doc1: SavedObjectUnsanitizedDoc<ShortUrlSavedObjectAttributes> = {
       id: 'foo',
@@ -125,12 +125,7 @@ describe('migrations', () => {
       type: 'url',
     };
 
-    const doc2 = (
-      migrationFunction as SavedObjectMigrationFn<
-        ShortUrlSavedObjectAttributes,
-        ShortUrlSavedObjectAttributes
-      >
-    )(doc1, {} as any);
+    const doc2 = migrationFunction(doc1, {} as any);
 
     expect(doc2.id).toBe('foo');
     expect(doc2.type).toBe('url');

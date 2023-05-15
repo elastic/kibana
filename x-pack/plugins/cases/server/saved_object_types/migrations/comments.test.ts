@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isFunction } from 'lodash';
 import {
   createCommentsMigrations,
   migrateByValueLensVisualizations,
@@ -28,6 +27,7 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
@@ -246,10 +246,10 @@ describe('comments migrations', () => {
         });
 
         expect(migrations['7.14.0']).toBeDefined();
-        const transform = isFunction(migrations['7.14.0'])
-          ? migrations['7.14.0']
-          : migrations['7.14.0'].transform;
-        const result = transform(caseComment, contextMock);
+        const result = SavedObjectsUtils.getMigrationFunction(migrations['7.14.0'])(
+          caseComment,
+          contextMock
+        );
 
         const parsedComment = parseCommentString(result.attributes.comment);
         const lensVisualizations = getLensVisualizations(
@@ -334,11 +334,7 @@ describe('comments migrations', () => {
         };
 
         const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
-        const transform = isFunction(mergedFunctions['1.0.0'])
-          ? mergedFunctions['1.0.0']
-          : mergedFunctions['1.0.0'].transform;
-
-        transform(caseComment, contextMock);
+        SavedObjectsUtils.getMigrationFunction(mergedFunctions['1.0.0'])(caseComment, contextMock);
 
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
         expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
@@ -367,11 +363,10 @@ describe('comments migrations', () => {
         };
 
         const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
-        const transform = isFunction(mergedFunctions['2.0.0'])
-          ? mergedFunctions['2.0.0']
-          : mergedFunctions['2.0.0'].transform;
 
-        expect(() => transform(caseComment, contextMock)).toThrow();
+        expect(() =>
+          SavedObjectsUtils.getMigrationFunction(mergedFunctions['2.0.0'])(caseComment, contextMock)
+        ).toThrow();
 
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
         expect(log.error).not.toHaveBeenCalled();
@@ -597,9 +592,7 @@ describe('comments migrations', () => {
     });
 
     it('migrates a persistable state attachment correctly', () => {
-      const migrationFn = isFunction(migrations['8.4.0'])
-        ? migrations['8.4.0']
-        : migrations['8.4.0'].transform;
+      const migrationFn = SavedObjectsUtils.getMigrationFunction(migrations['8.4.0']);
       const res = migrationFn(
         {
           id: '123',
@@ -630,9 +623,7 @@ describe('comments migrations', () => {
     });
 
     it('should not change any other attribute expect persistableStateAttachmentState or put excess attributes', () => {
-      const migrationFn = isFunction(migrations['8.4.0'])
-        ? migrations['8.4.0']
-        : migrations['8.4.0'].transform;
+      const migrationFn = SavedObjectsUtils.getMigrationFunction(migrations['8.4.0']);
       const res = migrationFn(
         {
           id: '123',
@@ -670,10 +661,7 @@ describe('comments migrations', () => {
        * combined along with the persistable state attachment
        * migrations
        */
-      const migrationFn = isFunction(migrations['7.14.0'])
-        ? migrations['7.14.0']
-        : migrations['7.14.0'].transform;
-
+      const migrationFn = SavedObjectsUtils.getMigrationFunction(migrations['7.14.0']);
       const res = migrationFn(
         {
           id: '123',
@@ -706,9 +694,7 @@ describe('comments migrations', () => {
     });
 
     it('does not run persistable state migration on other attachments', () => {
-      const migrationFn = isFunction(migrations['8.4.0'])
-        ? migrations['8.4.0']
-        : migrations['8.4.0'].transform;
+      const migrationFn = SavedObjectsUtils.getMigrationFunction(migrations['8.4.0']);
       const res = migrationFn(
         {
           id: '123',

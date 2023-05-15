@@ -6,8 +6,9 @@
  */
 
 import { omit, cloneDeep } from 'lodash';
-import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type {
   RuleTaskState,
   WrappedLifecycleRuleState,
@@ -20,7 +21,7 @@ import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 type RawAlertInstances = Record<string, RawAlertInstance>;
 
 const migrationContext = migrationMocks.createContext();
-const migration880 = getMigrations()['8.8.0'] as SavedObjectMigrationFn<unknown, { state: string }>;
+const migration880 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.8.0']);
 
 describe('successful migrations for 8.8.0', () => {
   beforeEach(() => {

@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectMigrationContext,
-  SavedObjectMigrationParams,
-  SavedObjectUnsanitizedDoc,
-} from '@kbn/core-saved-objects-server';
+import { unary } from 'lodash';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { transformMigrationVersion } from './transform_migration_version';
 
-const transform = (document: SavedObjectUnsanitizedDoc) =>
-  (transformMigrationVersion as SavedObjectMigrationParams).transform(
-    document,
-    {} as SavedObjectMigrationContext
-  );
+const transform = unary(SavedObjectsUtils.getMigrationFunction(transformMigrationVersion));
 
 describe('transformMigrationVersion', () => {
   it('should extract the correct version from the `migrationVersion` property', () => {
