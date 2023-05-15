@@ -55,7 +55,10 @@ describe('ESSearchSource', () => {
         const mockSearchSource = {
           setField: jest.fn(),
           getSearchRequestBody() {
-            return { scripted_fields: 'shouldNotGetAddedToTileUrl', fields: this.setField.mock.calls };
+            return {
+              scripted_fields: 'shouldNotGetAddedToTileUrl',
+              fields: this.setField.mock.calls,
+            };
           },
           setParent() {},
         };
@@ -129,7 +132,7 @@ describe('ESSearchSource', () => {
           index: 'foobar-title-*',
           requestBody:
             "(fields:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(_id)),'7':('0':source,'1':!f),'8':('0':fields,'1':!(tooltipField,styleField))))",
-            token: '1234',
+          token: '1234',
         });
       });
 

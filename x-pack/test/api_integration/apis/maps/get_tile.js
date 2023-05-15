@@ -28,51 +28,50 @@ export default function ({ getService }) {
       hasLabels: false,
       index: 'logstash-*',
       requestBody: {
-       "fields": [
-        "bytes",
-        "machine.os.raw",
-        {
-         "field": "@timestamp",
-         "format": "epoch_millis"
-        }
-       ],
-       "query": {
-        "bool": {
-         "filter": [
+        fields: [
+          'bytes',
+          'machine.os.raw',
           {
-           "match_all": {}
+            field: '@timestamp',
+            format: 'epoch_millis',
           },
-          {
-           "range": {
-            "@timestamp": {
-             "format": "strict_date_optional_time",
-             "gte": "2015-09-20T00:00:00.000Z",
-             "lte": "2015-09-20T01:00:00.000Z"
-            }
-           }
-          }
-         ],
-         "must": [],
-         "must_not": [],
-         "should": []
-        }
-       },
-       runtime_mappings: {
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'strict_date_optional_time',
+                    gte: '2015-09-20T00:00:00.000Z',
+                    lte: '2015-09-20T01:00:00.000Z',
+                  },
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+        },
+        runtime_mappings: {
           hour_of_day: {
             script: {
-              source: "// !@#$%^&*()_+ %%%\nemit(doc['timestamp'].value.getHour());"
+              source: "// !@#$%^&*()_+ %%%\nemit(doc['timestamp'].value.getHour());",
             },
-            type: "long"
-          }
+            type: 'long',
+          },
         },
-       size: 10000
+        size: 10000,
       },
     };
 
     it('should return ES vector tile containing documents and metadata', async () => {
       const resp = await supertest
-        .get(
-          `/api/maps/mvt/getTile/2/1/1.pbf?${getTileUrlParams(defaultParams)}`)
+        .get(`/api/maps/mvt/getTile/2/1/1.pbf?${getTileUrlParams(defaultParams)}`)
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
