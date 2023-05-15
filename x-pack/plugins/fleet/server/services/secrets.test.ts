@@ -100,6 +100,25 @@ describe('getPolicySecretPaths', () => {
         },
       ]);
     });
+    it('policy with package level secret vars and only one set', () => {
+      const packagePolicy = {
+        vars: {
+          'pkg-secret-1': {
+            value: 'pkg-secret-1-val',
+          },
+        },
+        inputs: [],
+      } as unknown as NewPackagePolicy;
+
+      expect(getPolicySecretPaths(packagePolicy, mockIntegrationPackage)).toEqual([
+        {
+          path: 'vars.pkg-secret-1',
+          value: {
+            value: 'pkg-secret-1-val',
+          },
+        },
+      ]);
+    });
     it('policy with input level secret vars', () => {
       const packagePolicy = {
         inputs: [
@@ -744,6 +763,39 @@ describe('diffSecretPaths', () => {
         },
       ],
       noChange: [],
+    });
+  });
+
+  it('single secret added', () => {
+    const paths1 = [
+      {
+        path: 'somepath1',
+        value: {
+          value: {
+            isSecretRef: true,
+            id: 'secret-1',
+          },
+        },
+      },
+    ];
+
+    const paths2 = [
+      paths1[0],
+      {
+        path: 'somepath2',
+        value: { value: 'newvalue' },
+      },
+    ];
+
+    expect(diffSecretPaths(paths1, paths2)).toEqual({
+      toCreate: [
+        {
+          path: 'somepath2',
+          value: { value: 'newvalue' },
+        },
+      ],
+      toDelete: [],
+      noChange: [paths1[0]],
     });
   });
 });
