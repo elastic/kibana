@@ -66,7 +66,7 @@ export const ALL_QUERIES_CONVERSATION: Record<string, Conversation> = {
       {
         role: 'assistant',
         content:
-          'Certainly! Here\'s an Elasticsearch QueryDSL for filtering events where `event.action` is `logon_attempt`:\n\n```json\n{\n  "query": {\n    "bool": {\n      "filter": [\n        {\n          "term": {\n            "event.action": "logon_attempt"\n          }\n        }\n      ]\n    }\n  }\n}\n```\n\nThis QueryDSL will return all documents where the `event.action` field has a value of "logon_attempt". You can use this query in Elasticsearch to filter the data based on this condition.',
+          'Certainly! Here\'s an Elasticsearch QueryDSL for filtering events where `file.name` is `fake_behavior.exe`:\n\n```json\n{\n  "match_phrase": {\n    "file.name": {\n      "query": "fake_behavior.exe"\n    }\n  }\n}\n```\n\nThis QueryDSL is searching for documents where the file.name field matches the exact phrase "fake_behavior.exe". It is useful for finding documents that have a specific file name in an Elasticsearch index.',
         timestamp: '5/12/2023, 12:30:49 AM',
       },
     ],

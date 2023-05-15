@@ -24,7 +24,7 @@ export const ALERT_SUMMARIZATION_PROMPT = i18n.translate(
 export const RULE_CREATION_TITLE = i18n.translate(
   'xpack.securitySolution.securityAssistant.quickPrompts.ruleCreationTitle',
   {
-    defaultMessage: 'Rule Creation',
+    defaultMessage: 'Similar Rules',
   }
 );
 
@@ -32,7 +32,7 @@ export const RULE_CREATION_PROMPT = i18n.translate(
   'xpack.securitySolution.securityAssistant.quickPrompts.ruleCreationPrompt',
   {
     defaultMessage:
-      'You are a genius genius, create me a Detection Rule with the gumption of an elite detector!',
+      'The above detection rules provided as context are extremely useful in my security environment. Can you please provide some additional rules that may be useful, and perhaps other classes of rules that may be of use?',
   }
 );
 

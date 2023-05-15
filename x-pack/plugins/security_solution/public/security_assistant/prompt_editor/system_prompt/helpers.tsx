@@ -10,6 +10,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
+import { css } from '@emotion/react';
 import type { Prompt } from '../../types';
 
 const Strong = styled.strong`
@@ -22,7 +23,16 @@ export const getOptionFromPrompt = ({
   name,
 }: Prompt): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: <EuiText color="subdued">{content}</EuiText>,
+  inputDisplay: (
+    <EuiText
+      css={css`
+        overflow: hidden;
+      `}
+      color="subdued"
+    >
+      {content}
+    </EuiText>
+  ),
   dropdownDisplay: (
     <>
       <Strong>{name}</Strong>

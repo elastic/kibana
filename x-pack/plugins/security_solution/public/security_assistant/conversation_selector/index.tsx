@@ -18,6 +18,7 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 interface Props {
   conversationId?: string;
   onSelectionChange?: (value: string) => void;
+  shouldDisableKeyboardShortcut?: () => boolean;
 }
 
 const getPreviousConversationId = (conversationIds: string[], selectedConversationId: string) => {
@@ -33,7 +34,11 @@ function getNextConversationId(conversationIds: string[], selectedConversationId
 }
 
 export const ConversationSelector: React.FC<Props> = React.memo(
-  ({ conversationId = 'default', onSelectionChange }) => {
+  ({
+    conversationId = 'default',
+    onSelectionChange,
+    shouldDisableKeyboardShortcut = () => false,
+  }) => {
     const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
 
     const { conversations } = useSecurityAssistantContext();
@@ -58,17 +63,25 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         if (conversationIds.length <= 1) {
           return;
         }
-        // TODO: Pick better keyboard shortcuts that don't interfere with text navigation
-        if (event.key === 'ArrowLeft' && (isMac ? event.metaKey : event.ctrlKey)) {
+
+        if (
+          event.key === 'ArrowLeft' &&
+          (isMac ? event.metaKey : event.ctrlKey) &&
+          !shouldDisableKeyboardShortcut()
+        ) {
           event.preventDefault();
           onLeftArrowClick();
         }
-        if (event.key === 'ArrowRight' && (isMac ? event.metaKey : event.ctrlKey)) {
+        if (
+          event.key === 'ArrowRight' &&
+          (isMac ? event.metaKey : event.ctrlKey) &&
+          !shouldDisableKeyboardShortcut()
+        ) {
           event.preventDefault();
           onRightArrowClick();
         }
       },
-      [conversationIds.length, onLeftArrowClick, onRightArrowClick]
+      [conversationIds.length, onLeftArrowClick, onRightArrowClick, shouldDisableKeyboardShortcut]
     );
     useEvent('keydown', onKeyDown);
 

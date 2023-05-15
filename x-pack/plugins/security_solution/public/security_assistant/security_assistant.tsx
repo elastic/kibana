@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -256,12 +256,24 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
         ]
       );
 
+      const handleButtonSendMessage = useCallback(() => {
+        handleSendMessage(promptTextAreaRef.current?.value?.trim() ?? '');
+      }, [handleSendMessage, promptTextAreaRef]);
+
+      const shouldDisableConversationSelectorHotkeys = useCallback(() => {
+        const promptTextAreaHasFocus = document.activeElement === promptTextAreaRef.current;
+        return promptTextAreaHasFocus;
+      }, [promptTextAreaRef]);
+
       // Drill in `Add To Timeline` action
       // First let's find
-      const messageCodeBlocks = useMemo(() => {
-        return augmentMessageCodeBlocks(currentConversation);
-      }, [currentConversation.messages]); // TODO: get buttons working on last render, lastCommentRef.current]);
-      // //
+      const [messageCodeBlocks, setMessageCodeBlocks] = useState(
+        augmentMessageCodeBlocks(currentConversation)
+      );
+      useLayoutEffect(() => {
+        setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
+      }, [currentConversation, lastCommentRef.current]);
+      //
 
       // Add min-height to all codeblocks so timeline icon doesn't overflow
       const codeBlockContainers = [...document.getElementsByClassName('euiCodeBlock')];
@@ -319,6 +331,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
                     <ConversationSelector
                       conversationId={selectedConversationId}
                       onSelectionChange={(id) => setSelectedConversationId(id)}
+                      shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
                     />,
                   ]}
                   iconType="logoSecurity"
@@ -469,9 +482,9 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
                       <EuiButtonIcon
                         display="base"
                         iconType="returnKey"
-                        aria-label="Delete"
+                        aria-label="submit-message"
                         color="primary"
-                        onClick={handleSendMessage}
+                        onClick={handleButtonSendMessage}
                         isLoading={isLoading}
                       />
                     </EuiToolTip>

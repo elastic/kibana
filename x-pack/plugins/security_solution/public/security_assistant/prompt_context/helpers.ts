@@ -6,6 +6,7 @@
  */
 
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
+import type { Rule } from '../../detection_engine/rule_management/logic';
 
 export interface QueryField {
   field: string;
@@ -24,4 +25,10 @@ export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetails
   const allFields = getAllFields(data);
 
   return getFieldsAsCsv(allFields);
+};
+
+export const getPromptContextFromDetectionRules = (rules: Rule[]): string => {
+  const data = rules.map((rule) => `Rule Name:${rule.name}\nRule Description:${rule.description}`);
+
+  return data.join('\n\n');
 };

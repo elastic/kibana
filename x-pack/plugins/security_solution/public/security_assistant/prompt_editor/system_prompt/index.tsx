@@ -99,7 +99,9 @@ const SystemPromptComponent: React.FC<Props> = ({
   return (
     <EuiFlexGroup alignItems="flexStart" gutterSize="none">
       <EuiFlexItem grow>
-        <SystemPromptText color="subdued">{selectedPrompt?.content ?? ''}</SystemPromptText>
+        <SystemPromptText onClick={onShowSelectSystemPrompt} color="subdued">
+          {selectedPrompt?.content ?? ''}
+        </SystemPromptText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="none">

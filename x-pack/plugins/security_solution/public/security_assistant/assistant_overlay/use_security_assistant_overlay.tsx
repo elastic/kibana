@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useSecurityAssistantContext } from '../security_assistant_context';
 
 interface UserSecurityAssistantOverlayProps {
@@ -14,6 +16,7 @@ interface UserSecurityAssistantOverlayProps {
 }
 interface UserSecurityAssistantOverlay {
   showSecurityAssistantOverlay: (showOverlay: boolean) => void;
+  MagicButton: JSX.Element;
 }
 
 export const useSecurityAssistantOverlay = ({
@@ -29,5 +32,24 @@ export const useSecurityAssistantOverlay = ({
     [conversationId, promptContextId, showAssistantOverlay]
   );
 
-  return { showSecurityAssistantOverlay };
+  // Button state
+  const showOverlay = useCallback(() => {
+    showSecurityAssistantOverlay(true);
+  }, [showSecurityAssistantOverlay]);
+
+  const MagicButton = useMemo(
+    () => (
+      <EuiButtonEmpty
+        onClick={showOverlay}
+        css={css`
+          font-size: 24px;
+        `}
+      >
+        {'🪄✨'}
+      </EuiButtonEmpty>
+    ),
+    [showOverlay]
+  );
+
+  return { MagicButton, showSecurityAssistantOverlay };
 };
