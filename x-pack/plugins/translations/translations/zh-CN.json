@@ -11115,7 +11115,6 @@
     "xpack.enterpriseSearch.actionsHeader": "操作",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.headingTitle": "您可能已删除此分析集合",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.subHeading": "分析集合为您正在构建的任何给定搜索应用程序提供了一个用于存储分析事件的位置。创建新集合以开始。",
-    "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.description": "调用 createTracker 后，可以使用跟踪器方法（如 trackPageView）将事件发送到行为分析。",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionThree": "还可以通过调用 trackEvent 方法来向行为分析分派定制事件。",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionTwo": "完成初始化后，您将能够跟踪您应用程序中的页面视图。",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.title": "分派页面视图和行为事件",
