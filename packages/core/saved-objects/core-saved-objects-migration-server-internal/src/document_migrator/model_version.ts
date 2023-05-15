@@ -16,11 +16,10 @@ import type {
 import {
   modelVersionToVirtualVersion,
   assertValidModelVersion,
+  buildModelVersionTransformFn,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { TransformSavedObjectDocumentError } from '../core';
 import { type Transform, type TransformFn, TransformType } from './types';
-
-const noopTransform: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
 
 export const getModelVersionTransforms = ({
   typeDefinition,
@@ -44,14 +43,6 @@ export const getModelVersionTransforms = ({
         modelVersion,
         virtualVersion,
         definition,
-        type: 'up',
-      }),
-      transformDown: convertModelVersionTransformFn({
-        log,
-        modelVersion,
-        virtualVersion,
-        definition,
-        type: 'down',
       }),
       transformType: TransformType.Migrate,
     };
@@ -62,26 +53,18 @@ export const convertModelVersionTransformFn = ({
   virtualVersion,
   modelVersion,
   definition,
-  type,
   log,
 }: {
   virtualVersion: string;
   modelVersion: number;
   definition: SavedObjectsModelVersion;
-  type: 'up' | 'down';
   log: Logger;
 }): TransformFn => {
-  if (!definition.modelChange.transformation) {
-    return noopTransform;
-  }
   const context: SavedObjectModelTransformationContext = {
     log,
     modelVersion,
   };
-  const modelTransformFn =
-    type === 'up'
-      ? definition.modelChange.transformation.up
-      : definition.modelChange.transformation.down;
+  const modelTransformFn = buildModelVersionTransformFn(definition.changes);
 
   return function convertedTransform(doc: SavedObjectUnsanitizedDoc) {
     try {
