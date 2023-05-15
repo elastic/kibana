@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { DataStream } from '../../common/data_streams';
 import { DataStreamSelector } from '../components/data_stream_selector';
