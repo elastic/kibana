@@ -60,7 +60,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { FilesClient, FilesStart } from '@kbn/files-plugin/public';
+import { FilesStart } from '@kbn/files-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
