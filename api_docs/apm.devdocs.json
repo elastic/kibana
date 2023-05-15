@@ -469,6 +469,20 @@
           },
           {
             "parentPluginId": "apm",
+            "id": "def-server.APMRouteHandlerResources.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [],
+            "signature": [
+              "{ agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; spacesAvailable: boolean; }"
+            ],
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "apm",
             "id": "def-server.APMRouteHandlerResources.logger",
             "type": "Object",
             "tags": [],
