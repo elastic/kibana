@@ -55,7 +55,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       fieldName: SERVICE_NAME,
       val: (
         <ServiceLink
-          agentName={transaction.agent.name}
+          agentName={transaction?.agent?.name}
           query={{
             kuery: query.kuery,
             latencyAggregationType,

@@ -139,7 +139,7 @@ function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
     }
     case 'transaction': {
       // icon for RUM agent transactions
-      if (isRumAgentName(item.doc.agent.name)) {
+      if (isRumAgentName(item.doc?.agent?.name)) {
         return <EuiIcon type="globe" />;
       }
 
