@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
+import { badRequest, forbidden, failedDependency } from '@hapi/boom';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -277,7 +277,15 @@ const getDiagnosisRoute = createObservabilityServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const licensing = await context.licensing;
 
-    return getGlobalDiagnosis(esClient, licensing);
+    try {
+      const response = await getGlobalDiagnosis(esClient, licensing);
+      return response;
+    } catch (error) {
+      if (error.cause.statusCode === 403) {
+        throw forbidden('Insufficient Elasticsearch cluster permissions to access feature.');
+      }
+      throw failedDependency(error);
+    }
   },
 });
 

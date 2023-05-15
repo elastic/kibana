@@ -11,7 +11,7 @@ We currently support the following SLI:
 - Custom KQL
 - Custom Metric
 
-For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, a list of good status codes needs to be provided to discriminate the good and bad responses (events). The API supports an optional kql filter to further filter the apm data.
+For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, we use the `event.outcome` as a way to discriminate the good and the bad responses(events). The API supports an optional kql filter to further filter the apm data.
 
 The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom 'timestampField' can be provided to override the default @timestamp field.
 
@@ -72,7 +72,6 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"],
 			"index": "metrics-apm*"
 		}
 	},
@@ -108,7 +107,6 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"],
 			"index": "metrics-apm*"
 		}
 	},
@@ -146,7 +144,6 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"],
 			"index": "metrics-apm*"
 		}
 	},
