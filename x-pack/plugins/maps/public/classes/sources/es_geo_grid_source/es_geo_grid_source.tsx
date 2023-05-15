@@ -7,6 +7,7 @@
 
 import React, { ReactElement } from 'react';
 
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -558,7 +559,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       gridPrecision: this._getGeoGridPrecisionResolutionDelta().toString(),
       hasLabels: hasLabels.toString(),
       buffer: buffer.toString(),
-      requestBody: searchSource.getSearchRequestBody(),
+      requestBody: _.pick(searchSource.getSearchRequestBody(), ['aggs', 'fields', 'query', 'runtime_mappings']),
       renderAs: this._descriptor.requestType,
       token: refreshToken,
       executionContextId: getExecutionContextId(requestMeta.executionContext),

@@ -30,7 +30,7 @@ export class MockSearchSource {
   setField = jest.fn();
   setParent() {}
   getSearchRequestBody() {
-    return { foobar: 'ES_DSL_PLACEHOLDER', params: this.setField.mock.calls };
+    return { scripted_fields: 'shouldNotGetAddedToTileUrl', fields: this.setField.mock.calls };
   }
 }
 
@@ -323,7 +323,7 @@ describe('ESGeoGridSource', () => {
         index: 'foo-*',
         renderAs: 'heatmap',
         requestBody:
-          "(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))",
+          "(fields:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))",
         token: '1234',
       });
     });

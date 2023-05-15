@@ -884,17 +884,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const requestBody = searchSource.getSearchRequestBody();
-    // Remove keys not supported by elasticsearch vector tile search API
-    delete requestBody.script_fields;
-    delete requestBody.stored_fields;
-
     const tileUrlParams = getTileUrlParams({
       geometryFieldName: this._descriptor.geoField,
       index: dataView.getIndexPattern(),
       hasLabels: hasLabels.toString(),
       buffer: buffer.toString(),
-      requestBody,
+      requestBody: _.pick(searchSource.getSearchRequestBody(), ['fields', 'query', 'runtime_mappings', 'size', 'sort']),
       token: refreshToken,
       executionContextId: getExecutionContextId(requestMeta.executionContext),
     });
