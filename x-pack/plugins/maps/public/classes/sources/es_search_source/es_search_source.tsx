@@ -9,7 +9,6 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import rison from '@kbn/rison';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
@@ -887,8 +886,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const tileUrlParams = getTileUrlParams({
       geometryFieldName: this._descriptor.geoField,
       index: dataView.getIndexPattern(),
-      hasLabels: hasLabels.toString(),
-      buffer: buffer.toString(),
+      hasLabels,
+      buffer,
       requestBody: _.pick(searchSource.getSearchRequestBody(), ['fields', 'query', 'runtime_mappings', 'size', 'sort']),
       token: refreshToken,
       executionContextId: getExecutionContextId(requestMeta.executionContext),

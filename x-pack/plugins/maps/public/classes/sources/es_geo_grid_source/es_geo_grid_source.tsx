@@ -556,9 +556,9 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const tileUrlParams = getTileUrlParams({
       geometryFieldName: this._descriptor.geoField,
       index: dataView.getIndexPattern(),
-      gridPrecision: this._getGeoGridPrecisionResolutionDelta().toString(),
-      hasLabels: hasLabels.toString(),
-      buffer: buffer.toString(),
+      gridPrecision: this._getGeoGridPrecisionResolutionDelta(),
+      hasLabels,
+      buffer,
       requestBody: _.pick(searchSource.getSearchRequestBody(), ['aggs', 'fields', 'query', 'runtime_mappings']),
       renderAs: this._descriptor.requestType,
       token: refreshToken,

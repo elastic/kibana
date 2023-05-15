@@ -7,7 +7,7 @@
 
 import rison from '@kbn/rison';
 
-export function getTileUrlParams(params: Record<string, unknown>) {
+export function getTileUrlParams(params: Record<string, boolean | number | object | string | null | undefined>) {
   const urlSearchParams = new URLSearchParams();
   Object.keys(params).forEach(key => {
     const value = params[key];
@@ -20,7 +20,11 @@ export function getTileUrlParams(params: Record<string, unknown>) {
       return;
     }
 
-    urlSearchParams.set(key, value);
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      urlSearchParams.set(key, value.toString());
+    }
+
+    urlSearchParams.set(key, value as string);
   });
 
   return urlSearchParams.toString();
