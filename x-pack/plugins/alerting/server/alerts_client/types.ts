@@ -50,5 +50,4 @@ export interface InitializeExecutionOpts {
   ruleLabel: string;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
-  maintenanceWindowIds: string[];
 }

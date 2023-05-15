@@ -82,7 +82,6 @@ export class LegacyAlertsClient<
     ruleLabel,
     activeAlertsFromState,
     recoveredAlertsFromState,
-    maintenanceWindowIds,
   }: InitializeExecutionOpts) {
     this.maxAlerts = maxAlerts;
     this.ruleLogPrefix = ruleLabel;
@@ -113,7 +112,6 @@ export class LegacyAlertsClient<
       maxAlerts: this.maxAlerts,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
-      maintenanceWindowIds,
     });
   }
 
