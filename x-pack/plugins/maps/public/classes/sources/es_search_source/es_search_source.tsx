@@ -16,6 +16,7 @@ import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
+import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -888,19 +889,16 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     delete requestBody.script_fields;
     delete requestBody.stored_fields;
 
-    const params = new URLSearchParams();
-    params.set('geometryFieldName', this._descriptor.geoField);
-    params.set('index', dataView.getIndexPattern());
-    params.set('hasLabels', hasLabels.toString());
-    params.set('buffer', buffer.toString());
-    params.set('requestBody', rison.encode(requestBody));
-    params.set('token', refreshToken);
-    const executionContextId = getExecutionContextId(requestMeta.executionContext);
-    if (executionContextId) {
-      params.set('executionContextId', executionContextId);
-    }
-
-    return `${mvtUrlServicePath}?${params.toString()}`;
+    const tileUrlParams = getTileUrlParams({
+      geometryFieldName: this._descriptor.geoField,
+      index: dataView.getIndexPattern(),
+      hasLabels: hasLabels.toString(),
+      buffer: buffer.toString(),
+      requestBody,
+      token: refreshToken,
+      executionContextId: getExecutionContextId(requestMeta.executionContext),
+    });
+    return `${mvtUrlServicePath}?${tileUrlParams}`;
   }
 
   async getTimesliceMaskFieldName(): Promise<string | null> {

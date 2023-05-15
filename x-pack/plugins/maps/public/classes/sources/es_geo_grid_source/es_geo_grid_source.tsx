@@ -9,13 +9,13 @@ import React, { ReactElement } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
-import rison from '@kbn/rison';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import { DataView } from '@kbn/data-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -552,21 +552,18 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const params = new URLSearchParams();
-    params.set('geometryFieldName', this._descriptor.geoField);
-    params.set('index', dataView.getIndexPattern());
-    params.set('gridPrecision', this._getGeoGridPrecisionResolutionDelta().toString());
-    params.set('hasLabels', hasLabels.toString());
-    params.set('buffer', buffer.toString());
-    params.set('requestBody', rison.encode(searchSource.getSearchRequestBody()));
-    params.set('renderAs', this._descriptor.requestType);
-    params.set('token', refreshToken);
-    const executionContextId = getExecutionContextId(requestMeta.executionContext);
-    if (executionContextId) {
-      params.set('executionContextId', executionContextId);
-    }
-
-    return `${mvtUrlServicePath}?${params.toString()}`;
+    const tileUrlParams = getTileUrlParams({
+      geometryFieldName: this._descriptor.geoField,
+      index: dataView.getIndexPattern(),
+      gridPrecision: this._getGeoGridPrecisionResolutionDelta().toString(),
+      hasLabels: hasLabels.toString(),
+      buffer: buffer.toString(),
+      requestBody: searchSource.getSearchRequestBody(),
+      renderAs: this._descriptor.requestType,
+      token: refreshToken,
+      executionContextId: getExecutionContextId(requestMeta.executionContext),
+    });
+    return `${mvtUrlServicePath}?${tileUrlParams}`;
   }
 
   isFilterByMapBounds(): boolean {
