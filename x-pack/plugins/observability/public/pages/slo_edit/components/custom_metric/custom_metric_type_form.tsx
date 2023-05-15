@@ -168,7 +168,7 @@ export function CustomMetricIndicatorTypeForm() {
                 'xpack.observability.slo.sloEdit.sliType.customMetric.goodEquation.tooltip',
                 {
                   defaultMessage:
-                    'This supports bacic math (A + B / C) and boolean logic (A < B ? A : B).',
+                    'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
                 }
               )}
               position="top"
@@ -207,7 +207,7 @@ export function CustomMetricIndicatorTypeForm() {
                 'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
                 {
                   defaultMessage:
-                    'This supports bacic math (A + B / C) and boolean logic (A < B ? A : B).',
+                    'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
                 }
               )}
               position="top"
