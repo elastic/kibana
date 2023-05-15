@@ -43,16 +43,17 @@ import { getPopoverButtonStyles } from './data_stream_selector.utils';
 
 import { useBoolean } from '../../hooks/use_boolean';
 
-import type { DataStream, Integration } from '../../../common/integrations';
+import type { DataStream, Integration } from '../../../common/data_streams';
+import { SearchIntegrations } from '../../hooks/use_integrations';
 export interface DataStreamSelectorProps {
   title: string;
-  integrations: any[];
+  integrations: Integration[] | null;
   uncategorizedStreams: any[];
   isSearching: boolean;
   isLoadingIntegrations: boolean;
   isLoadingUncategorizedStreams: boolean;
   /* Triggered when a search or sorting is performed */
-  onSearch: () => void;
+  onSearch: SearchIntegrations;
   /* Triggered when the uncategorized streams entry is selected */
   onUncategorizedClick: () => void;
   /* Triggered when a data stream entry is selected */
@@ -91,17 +92,24 @@ export function DataStreamSelector({
   );
 
   const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
-    const { items, panels } = buildIntegrationsTree({
-      list: integrations,
-      onItemClick: setCurrentPanel,
-      onStreamSelected: handleStreamSelection,
-    });
-
     const uncategorizedStreamsItem = {
       name: uncategorizedLabel,
       onClick: onUncategorizedClick,
       panel: UNCATEGORIZED_STREAMS_PANEL_ID,
     };
+
+    if (!integrations) {
+      return {
+        items: [uncategorizedStreamsItem],
+        panels: [],
+      };
+    }
+
+    const { items, panels } = buildIntegrationsTree({
+      list: integrations,
+      onItemClick: setCurrentPanel,
+      onStreamSelected: handleStreamSelection,
+    });
 
     return {
       items: [uncategorizedStreamsItem, ...items],

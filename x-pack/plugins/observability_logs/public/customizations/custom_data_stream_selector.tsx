@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { DataStream } from '../../common/integrations';
+import { DataStream } from '../../common/data_streams';
 import { DataStreamSelector } from '../components/data_stream_selector';
 import { InternalStateProvider, useDataView } from '../utils/internal_state_container_context';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
@@ -23,27 +23,21 @@ interface CustomDataStreamSelectorProps {
 export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
-  const { integrations } = useIntegrationsContext();
-  console.log({ integrations });
+  const { integrations, isLoading, search } = useIntegrationsContext();
 
   const handleStreamSelection = (dataStream: DataStream) => {
     return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream);
   };
 
-  const [flag, setFlag] = useState(true);
-
-  React.useEffect(() => {
-    setTimeout(() => setFlag(false), 5000);
-  }, []);
-
   return (
     <DataStreamSelector
       title={dataView.getName()}
-      integrations={mockIntegrations}
+      integrations={integrations}
       uncategorizedStreams={mockUncategorized}
       isSearching={false}
-      isLoadingIntegrations={flag}
-      isLoadingUncategorizedStreams
+      isLoadingIntegrations={isLoading}
+      isLoadingUncategorizedStreams={false}
+      onSearch={search}
       onStreamSelected={handleStreamSelection}
       onUncategorizedClick={() => console.log('fetch uncategorized streams')}
     />

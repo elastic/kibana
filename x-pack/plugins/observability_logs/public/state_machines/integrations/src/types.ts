@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { PageAfter } from '../../../../common/latest';
-import { Integration } from '../../../../common/integrations';
+import { Integration } from '../../../../common/data_streams';
 
 export interface DefaultIntegrationsContext {
-  integrations: Integration[];
+  integrations: Integration[] | null;
   error: Error | null;
   page: PageAfter;
 }
@@ -54,6 +54,7 @@ export type IntegrationsEvent =
     }
   | {
       type: 'RELOAD_INTEGRATIONS';
+      search: IntegrationsSearchParams;
     }
   | {
       type: 'LOAD_MORE_INTEGRATIONS';

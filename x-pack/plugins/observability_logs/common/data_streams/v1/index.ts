@@ -6,4 +6,5 @@
  */
 
 export * from './common';
+export * from './find_data_streams';
 export * from './find_integrations';

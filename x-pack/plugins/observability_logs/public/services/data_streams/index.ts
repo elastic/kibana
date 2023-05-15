@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './integrations_client';
-export * from './integrations_service';
+export * from './data_streams_client';
+export * from './data_streams_service';
 export * from './types';
