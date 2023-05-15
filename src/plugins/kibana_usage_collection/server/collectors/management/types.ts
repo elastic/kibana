@@ -141,6 +141,7 @@ export interface UsageStats {
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
   'metrics:allowCheckingForFailedShards': boolean;
+  'observability:syntheticsThrottlingEnabled': boolean;
   'observability:apmLabsButton': boolean;
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
