@@ -9,6 +9,7 @@ import React, { ReactElement } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
+import rison from '@kbn/rison';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
@@ -32,7 +33,6 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
 import { AbstractESAggSource } from '../es_agg_source';
@@ -558,7 +558,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     params.set('gridPrecision', this._getGeoGridPrecisionResolutionDelta().toString());
     params.set('hasLabels', hasLabels.toString());
     params.set('buffer', buffer.toString());
-    params.set('requestBody', encodeMvtResponseBody(searchSource.getSearchRequestBody()));
+    params.set('requestBody', rison.encode(searchSource.getSearchRequestBody()));
     params.set('renderAs', this._descriptor.requestType);
     params.set('token', refreshToken);
     const executionContextId = getExecutionContextId(requestMeta.executionContext);

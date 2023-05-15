@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import rison from '@kbn/rison';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
@@ -30,7 +31,6 @@ import {
   PreIndexedShape,
   TotalHits,
 } from '../../../../common/elasticsearch_util';
-import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -893,14 +893,16 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     params.set('index', dataView.getIndexPattern());
     params.set('hasLabels', hasLabels.toString());
     params.set('buffer', buffer.toString());
-    params.set('requestBody', encodeMvtResponseBody(requestBody));
+    params.set('requestBody', rison.encode(requestBody));
     params.set('token', refreshToken);
     const executionContextId = getExecutionContextId(requestMeta.executionContext);
     if (executionContextId) {
       params.set('executionContextId', executionContextId);
     }
 
-    return `${mvtUrlServicePath}?${params.toString()}`;
+    const url = `${mvtUrlServicePath}?${params.toString()}`;
+    console.log(url);
+    return url;
   }
 
   async getTimesliceMaskFieldName(): Promise<string | null> {
