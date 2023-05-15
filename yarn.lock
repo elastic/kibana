@@ -2814,10 +2814,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts@link:packages/kbn-alerts":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ambient-common-types@link:packages/kbn-ambient-common-types":
   version "0.0.0"
   uid ""
