@@ -149,7 +149,7 @@ export default function (providerContext: FtrProviderContext) {
             dynamic: 'false',
             properties: {
               '@timestamp': {
-                ignore_malformed: `false`,
+                ignore_malformed: false,
                 type: 'date',
               },
               data_stream: {
