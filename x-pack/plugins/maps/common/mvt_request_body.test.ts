@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import rison from '@kbn/rison';
-import {
-  getAggsTileRequest,
-  getHitsTileRequest,
-} from './mvt_request_body';
+import { getAggsTileRequest, getHitsTileRequest } from './mvt_request_body';
 import { RENDER_AS } from './constants';
 
 describe('getAggsTileRequest', () => {
