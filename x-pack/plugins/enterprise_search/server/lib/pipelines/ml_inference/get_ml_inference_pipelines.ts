@@ -46,11 +46,12 @@ export const getMlInferencePipelines = async (
   const inferencePipelinesResult = Object.entries(fetchedInferencePipelines).reduce<
     Record<string, IngestPipeline>
   >((currentPipelines, [name, inferencePipeline]) => {
-    currentPipelines[name] = Object.assign(inferencePipeline, {
+    currentPipelines[name] = {
+      ...inferencePipeline,
       processors: inferencePipeline.processors?.map((processor) =>
         redactModelIdIfInaccessible(processor, accessibleModelIds)
       ),
-    });
+    };
     return currentPipelines;
   }, {});
 
