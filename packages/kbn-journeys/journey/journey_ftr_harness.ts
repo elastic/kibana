@@ -118,10 +118,11 @@ export class JourneyFtrHarness {
 
   private async setupBrowserAndPage() {
     const browser = await this.getBrowserInstance();
-    this.context = await browser.newContext({ bypassCSP: true });
+    const browserContextArgs = this.auth.isCloud() ? {} : { bypassCSP: true };
+    this.context = await browser.newContext(browserContextArgs);
 
     if (this.journeyConfig.shouldAutoLogin()) {
-      const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
+      const cookie = await this.auth.login();
       await this.context.addCookies([cookie]);
     }
 
@@ -400,6 +401,7 @@ export class JourneyFtrHarness {
       kibanaServer: this.kibanaServer,
       es: this.es,
       retry: this.retry,
+      auth: this.auth,
     });
 
     return this.#_ctx;

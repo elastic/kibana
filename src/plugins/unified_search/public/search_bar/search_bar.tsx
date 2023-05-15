@@ -81,6 +81,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  // Autorefresh
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   indicateNoData?: boolean;
 
   placeholder?: string;
