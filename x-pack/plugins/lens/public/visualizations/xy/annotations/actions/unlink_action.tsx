@@ -32,8 +32,6 @@ export const getUnlinkLayerAction = ({
         layerType: layer.layerType,
         indexPatternId: layer.indexPatternId,
         ignoreGlobalFilters: layer.ignoreGlobalFilters,
-        hide: layer.hide,
-        simpleView: layer.simpleView,
         annotations: layer.annotations,
       };
 

@@ -23,8 +23,6 @@ describe('annotation group unlink actions', () => {
     layerType: 'annotations',
     indexPatternId: 'some-index-pattern',
     ignoreGlobalFilters: false,
-    hide: false,
-    simpleView: false,
     annotations: [
       {
         id: 'some-annotation-id',

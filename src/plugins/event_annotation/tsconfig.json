@@ -29,7 +29,8 @@
     "@kbn/data-views-plugin",
     "@kbn/visualization-ui-components",
     "@kbn/chart-icons",
-    "@kbn/unified-field-list-plugin"
+    "@kbn/unified-field-list-plugin",
+    "@kbn/dom-drag-drop"
   ],
   "exclude": [
     "target/**/*",

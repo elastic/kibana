@@ -321,9 +321,6 @@ const newLayerFn = {
         layerId,
         layerType: layerTypes.ANNOTATIONS,
         annotationGroupId,
-        // TODO - persist these?
-        hide: false,
-        simpleView: false,
 
         annotations: cloneDeep(libraryGroupConfig.annotations),
         indexPatternId: libraryGroupConfig.indexPatternId,
@@ -340,8 +337,6 @@ const newLayerFn = {
       annotations: [],
       indexPatternId,
       ignoreGlobalFilters: true,
-      hide: false,
-      simpleView: false,
     };
 
     return newLayer;

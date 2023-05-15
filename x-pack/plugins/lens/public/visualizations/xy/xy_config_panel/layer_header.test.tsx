@@ -29,8 +29,6 @@ describe('layer header', () => {
         annotations: [],
         indexPatternId: '',
         ignoreGlobalFilters: false,
-        hide: false,
-        simpleView: false,
         __lastSaved: {
           title: byRefGroupTitle,
           description: '',
@@ -47,8 +45,6 @@ describe('layer header', () => {
         annotations: [],
         indexPatternId: '',
         ignoreGlobalFilters: false,
-        hide: false,
-        simpleView: false,
       };
 
       const getStateWithLayers = (layers: XYLayerConfig[]): XYState => ({

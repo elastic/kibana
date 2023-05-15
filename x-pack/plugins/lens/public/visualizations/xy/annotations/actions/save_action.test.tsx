@@ -118,8 +118,6 @@ describe('annotation group save action', () => {
       layerType: 'annotations',
       indexPatternId: 'some-index-pattern',
       ignoreGlobalFilters: false,
-      hide: false,
-      simpleView: false,
       annotations: [
         {
           id: 'some-annotation-id',
@@ -167,7 +165,7 @@ describe('annotation group save action', () => {
           onTitleDuplicate: () => {},
         },
         dataViews,
-        goToAnnotationLibrary: () => {},
+        goToAnnotationLibrary: () => Promise.resolve(),
       };
     };
 

@@ -187,8 +187,6 @@ export function getPersistableState(state: XYState) {
             layerId: layer.layerId,
             layerType: layer.layerType,
             annotationGroupRef: referenceName,
-            hide: layer.hide,
-            simpleView: layer.simpleView,
           };
 
           persistableLayers.push(persistableLayer);
@@ -198,8 +196,6 @@ export function getPersistableState(state: XYState) {
             layerId: layer.layerId,
             layerType: layer.layerType,
             annotationGroupRef: referenceName,
-            hide: layer.hide,
-            simpleView: layer.simpleView,
             annotations: layer.annotations,
             ignoreGlobalFilters: layer.ignoreGlobalFilters,
           };
@@ -258,8 +254,6 @@ export function injectReferences(
         if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
           injectedLayer = {
             ...persistedLayer,
-            hide: Boolean(persistedLayer.hide),
-            simpleView: Boolean(persistedLayer.simpleView),
             indexPatternId:
               // getIndexPatternIdFromInitialContext(persistedLayer, initialContext) || TODO - was this doing anything?
               indexPatternIdFromReferences,
@@ -280,13 +274,11 @@ export function injectReferences(
           // declared as a separate variable for type checking
           const commonProps: Pick<
             XYByReferenceAnnotationLayerConfig,
-            'layerId' | 'layerType' | 'annotationGroupId' | 'hide' | 'simpleView' | '__lastSaved'
+            'layerId' | 'layerType' | 'annotationGroupId' | '__lastSaved'
           > = {
             layerId: persistedLayer.layerId,
             layerType: persistedLayer.layerType,
             annotationGroupId,
-            hide: persistedLayer.hide,
-            simpleView: persistedLayer.simpleView,
             __lastSaved: annotationGroup,
           };
 
