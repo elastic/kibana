@@ -594,7 +594,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient();
       await expect(
         outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
-          config_yaml: '',
+          config_yaml: 'test: 123',
         })
       ).rejects.toThrow(
         'Preconfigured output existing-preconfigured-default-output config_yaml cannot be updated outside of kibana config file.'
