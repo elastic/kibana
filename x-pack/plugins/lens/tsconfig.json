@@ -71,6 +71,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/object-versioning",
     "@kbn/config-schema",
+    "@kbn/expression-reveal-image-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -6,13 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GaugeShape } from '@kbn/expression-gauge-plugin/common';
-import {
-  GaugeShapes,
-  GaugeTicksPositions,
-  GaugeLabelMajorModes,
-} from '@kbn/expression-gauge-plugin/common';
-import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import { Origin } from '@kbn/expression-reveal-image-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization } from '../../types';
