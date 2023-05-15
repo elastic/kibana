@@ -35,7 +35,7 @@ export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName
         deleteEngine({ engineName });
         sendEnterpriseSearchTelemetry({
           action: 'clicked',
-          metric: 'entSearchContent-engines-engineView-deleteEngineConfirm',
+          metric: 'entSearchApplications-engineView-deleteEngineConfirm',
         });
       }}
       cancelButtonText={CANCEL_BUTTON_LABEL}
