@@ -5,11 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { DiscoverMainRoute } from '../../../../../../../../src/plugins/discover/public/application/main/index';
+import { css } from '@emotion/react';
+import { DiscoverMainRoute } from '../../../../../../../../src/plugins/discover/public/application/main';
 
 const DiscoverTabContent = () => {
   return (
-    <div>
+    <div
+      css={css`
+        width: 100%;
+        overflow: scroll;
+      `}
+    >
       <DiscoverMainRoute isDev={false} />
     </div>
   );
