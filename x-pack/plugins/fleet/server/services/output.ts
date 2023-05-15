@@ -7,6 +7,7 @@
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
+import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type {
@@ -554,11 +555,25 @@ class OutputService {
     }
   ) {
     const originalOutput = await this.get(soClient, id);
+    if (originalOutput.is_preconfigured) {
+      if (!fromPreconfiguration) {
+        const allowEditFields = originalOutput.allow_edit ?? [];
 
-    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
-      throw new OutputUnauthorizedError(
-        `Preconfigured output ${id} cannot be updated outside of kibana config file.`
-      );
+        const allKeys = Array.from(new Set([...Object.keys(data)])) as Array<keyof Output>;
+        const isNotNullOrUndefinedOrEmpty = (o: any) => o !== null && o !== undefined && o !== '';
+        for (const key of allKeys) {
+          if (
+            (isNotNullOrUndefinedOrEmpty(originalOutput[key]) ||
+              isNotNullOrUndefinedOrEmpty(data[key])) &&
+            !allowEditFields.includes(key) &&
+            !deepEqual(originalOutput[key], data[key])
+          ) {
+            throw new OutputUnauthorizedError(
+              `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
+            );
+          }
+        }
+      }
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
