@@ -20,7 +20,7 @@ export const NumberFromString = new rt.Type<number, string, unknown>(
   String
 );
 
-const ReferenceRt = rt.type({ id: rt.string, type: rt.string });
+const ReferenceRt = rt.strict({ id: rt.string, type: rt.string });
 
 export const SavedObjectFindOptionsRt = rt.exact(
   rt.partial({

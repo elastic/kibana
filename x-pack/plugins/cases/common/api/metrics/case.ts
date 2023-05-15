@@ -15,7 +15,7 @@ export type AlertHostsMetrics = rt.TypeOf<typeof AlertHostsMetricsRt>;
 export type AlertUsersMetrics = rt.TypeOf<typeof AlertUsersMetricsRt>;
 export type StatusInfo = rt.TypeOf<typeof StatusInfoRt>;
 
-const StatusInfoRt = rt.type({
+const StatusInfoRt = rt.strict({
   /**
    * Duration the case was in the open status in milliseconds
    */
@@ -30,13 +30,13 @@ const StatusInfoRt = rt.type({
   reopenDates: rt.array(rt.string),
 });
 
-const AlertHostsMetricsRt = rt.type({
+const AlertHostsMetricsRt = rt.strict({
   /**
    * Total unique hosts represented in the alerts
    */
   total: rt.number,
   values: rt.array(
-    rt.type({
+    rt.strict({
       /**
        * Host name
        */
@@ -53,13 +53,13 @@ const AlertHostsMetricsRt = rt.type({
   ),
 });
 
-const AlertUsersMetricsRt = rt.type({
+const AlertUsersMetricsRt = rt.strict({
   /**
    * Total unique users represented in the alerts
    */
   total: rt.number,
   values: rt.array(
-    rt.type({
+    rt.strict({
       /**
        * Username
        */
@@ -72,7 +72,7 @@ const AlertUsersMetricsRt = rt.type({
   ),
 });
 
-export const SingleCaseMetricsRequestRt = rt.type({
+export const SingleCaseMetricsRequestRt = rt.strict({
   /**
    * The ID of the case.
    */
@@ -84,109 +84,117 @@ export const SingleCaseMetricsRequestRt = rt.type({
 });
 
 export const CasesMetricsRequestRt = rt.intersection([
-  rt.type({
+  rt.strict({
     /**
      * The metrics to retrieve.
      */
     features: rt.array(rt.string),
   }),
-  rt.partial({
-    /**
-     * A KQL date. If used all cases created after (gte) the from date will be returned
-     */
-    from: rt.string,
-    /**
-     * A KQL date. If used all cases created before (lte) the to date will be returned.
-     */
-    to: rt.string,
-    /**
-     * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
-     * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
-     * that the user has access to.
-     */
-    owner: rt.union([rt.array(rt.string), rt.string]),
-  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * A KQL date. If used all cases created after (gte) the from date will be returned
+       */
+      from: rt.string,
+      /**
+       * A KQL date. If used all cases created before (lte) the to date will be returned.
+       */
+      to: rt.string,
+      /**
+       * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
+       * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
+       * that the user has access to.
+       */
+      owner: rt.union([rt.array(rt.string), rt.string]),
+    })
+  ),
 ]);
 
-export const SingleCaseMetricsResponseRt = rt.partial(
-  rt.type({
-    alerts: rt.partial(
-      rt.type({
-        /**
-         * Number of alerts attached to the case
-         */
-        count: rt.number,
-        /**
-         * Host information represented from the alerts attached to this case
-         */
-        hosts: AlertHostsMetricsRt,
-        /**
-         * User information represented from the alerts attached to this case
-         */
-        users: AlertUsersMetricsRt,
-      }).props
-    ),
-    /**
-     * External connectors associated with the case
-     */
-    connectors: rt.type({
-      /**
-       * Total number of connectors in the case
-       */
-      total: rt.number,
-    }),
-    /**
-     * Actions taken within the case
-     */
-    actions: rt.partial(
-      rt.type({
-        isolateHost: rt.type({
-          /**
-           * Isolate host action information
-           */
-          isolate: rt.type({
+export const SingleCaseMetricsResponseRt = rt.exact(
+  rt.partial(
+    rt.strict({
+      alerts: rt.exact(
+        rt.partial(
+          rt.strict({
             /**
-             * Total times the isolate host action has been performed
+             * Number of alerts attached to the case
              */
-            total: rt.number,
-          }),
-          /**
-           * Unisolate host action information
-           */
-          unisolate: rt.type({
+            count: rt.number,
             /**
-             * Total times the unisolate host action has been performed
+             * Host information represented from the alerts attached to this case
              */
-            total: rt.number,
+            hosts: AlertHostsMetricsRt,
+            /**
+             * User information represented from the alerts attached to this case
+             */
+            users: AlertUsersMetricsRt,
+          }).type.props
+        )
+      ),
+      /**
+       * External connectors associated with the case
+       */
+      connectors: rt.strict({
+        /**
+         * Total number of connectors in the case
+         */
+        total: rt.number,
+      }),
+      /**
+       * Actions taken within the case
+       */
+      actions: rt.partial(
+        rt.strict({
+          isolateHost: rt.strict({
+            /**
+             * Isolate host action information
+             */
+            isolate: rt.strict({
+              /**
+               * Total times the isolate host action has been performed
+               */
+              total: rt.number,
+            }),
+            /**
+             * Unisolate host action information
+             */
+            unisolate: rt.strict({
+              /**
+               * Total times the unisolate host action has been performed
+               */
+              total: rt.number,
+            }),
           }),
-        }),
-      }).props
-    ),
-    /**
-     * The case's open,close,in-progress details
-     */
-    lifespan: rt.type({
+        }).type.props
+      ),
       /**
-       * Date the case was created, in ISO format
+       * The case's open,close,in-progress details
        */
-      creationDate: rt.string,
-      /**
-       * Date the case was closed, in ISO format. Will be null if the case is not currently closed
-       */
-      closeDate: rt.union([rt.string, rt.null]),
-      /**
-       * The case's status information regarding durations in a specific status
-       */
-      statusInfo: StatusInfoRt,
-    }),
-  }).props
+      lifespan: rt.strict({
+        /**
+         * Date the case was created, in ISO format
+         */
+        creationDate: rt.string,
+        /**
+         * Date the case was closed, in ISO format. Will be null if the case is not currently closed
+         */
+        closeDate: rt.union([rt.string, rt.null]),
+        /**
+         * The case's status information regarding durations in a specific status
+         */
+        statusInfo: StatusInfoRt,
+      }),
+    }).type.props
+  )
 );
 
-export const CasesMetricsResponseRt = rt.partial(
-  rt.type({
-    /**
-     * The average resolve time of all cases in seconds
-     */
-    mttr: rt.union([rt.number, rt.null]),
-  }).props
+export const CasesMetricsResponseRt = rt.exact(
+  rt.partial(
+    rt.strict({
+      /**
+       * The average resolve time of all cases in seconds
+       */
+      mttr: rt.union([rt.number, rt.null]),
+    }).type.props
+  )
 );

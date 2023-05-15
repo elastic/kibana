@@ -10,9 +10,9 @@ import { CaseStatusRt } from '../status';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const StatusUserActionPayloadRt = rt.type({ status: CaseStatusRt });
+export const StatusUserActionPayloadRt = rt.strict({ status: CaseStatusRt });
 
-export const StatusUserActionRt = rt.type({
+export const StatusUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.status),
   payload: StatusUserActionPayloadRt,
 });

@@ -73,7 +73,7 @@ const UserActionAttributes = rt.intersection([CaseUserActionBasicRt, CaseUserAct
 
 const UserActionRt = rt.intersection([
   UserActionAttributes,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),

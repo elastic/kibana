@@ -9,9 +9,9 @@ import * as rt from 'io-ts';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const DeleteCaseUserActionRt = rt.type({
+export const DeleteCaseUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.delete_case),
-  payload: rt.type({}),
+  payload: rt.strict({}),
 });
 
 export type DeleteCaseUserAction = UserActionWithAttributes<

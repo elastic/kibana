@@ -40,7 +40,7 @@ export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
 
 const FieldTypeRT = rt.union([rt.literal('text'), rt.literal('textarea')]);
 
-const ConnectorFieldRt = rt.type({
+const ConnectorFieldRt = rt.strict({
   id: rt.string,
   name: rt.string,
   required: rt.boolean,

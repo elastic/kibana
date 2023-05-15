@@ -10,9 +10,9 @@ import { CommentRequestRt } from '../comment';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const CommentUserActionPayloadRt = rt.type({ comment: CommentRequestRt });
+export const CommentUserActionPayloadRt = rt.strict({ comment: CommentRequestRt });
 
-export const CommentUserActionRt = rt.type({
+export const CommentUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.comment),
   payload: CommentUserActionPayloadRt,
 });
