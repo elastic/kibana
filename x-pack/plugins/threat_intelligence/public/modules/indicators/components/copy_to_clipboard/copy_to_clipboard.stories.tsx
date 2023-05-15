@@ -12,7 +12,7 @@ import {
   CopyToClipboardButtonEmpty,
   CopyToClipboardButtonIcon,
   CopyToClipboardContextMenu,
-} from '.';
+} from './copy_to_clipboard';
 
 export default {
   title: 'CopyToClipboard',
