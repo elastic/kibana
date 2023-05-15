@@ -1172,7 +1172,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           link: (
             <EuiLink
               data-test-subj="syntheticsFIELDNoticeLink"
-              href={'https://github.com/elastic/synthetics/blob/main/THROTTLING.md'}
+              href={'https://github.com/elastic/synthetics/blob/main/docs/throttling.md'}
               target="_blank"
             >
               {i18n.translate('xpack.synthetics.monitorConfig.throttlingDisabled.link', {
