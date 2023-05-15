@@ -49,6 +49,7 @@ export const CTI_ROW_RENDERER_FIELDS = [
 export const TIMELINE_EVENTS_FIELDS = [
   ALERT_RULE_CONSUMER,
   '@timestamp',
+  'tags',
   'kibana.alert.ancestors.index',
   'kibana.alert.workflow_status',
   'kibana.alert.group.id',

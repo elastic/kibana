@@ -12,6 +12,7 @@ import {
   Alerts,
   AlertsTableConfigurationRegistry,
   BulkActionsConfig,
+  BulkActionsPanelConfig,
   BulkActionsState,
   BulkActionsVerbs,
   UseBulkActionsRegistry,
@@ -42,7 +43,7 @@ export interface UseBulkActions {
   isBulkActionsColumnActive: boolean;
   getBulkActionsLeadingControlColumn: GetLeadingControlColumn;
   bulkActionsState: BulkActionsState;
-  bulkActions: BulkActionsConfig[];
+  bulkActions: BulkActionsPanelConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
 }
@@ -69,6 +70,20 @@ const getCaseAttachments = ({
 }) => {
   const filteredAlerts = filterAlertsAlreadyAttachedToCase(alerts ?? [], caseId);
   return groupAlertsByRule?.(filteredAlerts) ?? [];
+};
+
+const addItemsToInitalPanel = ({
+  panels,
+  items,
+}: {
+  panels: BulkActionsPanelConfig[];
+  items: BulkActionsConfig[];
+}) => {
+  if (panels[0].items) {
+    panels[0].items.push(...items);
+    return panels;
+  }
+  return panels;
 };
 
 export const useBulkAddToCaseActions = ({
@@ -157,14 +172,17 @@ export function useBulkActions({
   useBulkActionsConfig = () => [],
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const configBulkActions = useBulkActionsConfig(query);
+  const configBulkActionPanels = useBulkActionsConfig(query);
 
   const clearSelection = () => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
   };
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
 
-  const bulkActions = [...configBulkActions, ...caseBulkActions];
+  const bulkActions = addItemsToInitalPanel({
+    panels: configBulkActionPanels,
+    items: caseBulkActions,
+  });
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 

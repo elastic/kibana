@@ -122,6 +122,7 @@ export interface EcsSecurityExtension {
   suricata?: SuricataEcs;
   system?: SystemEcs;
   timestamp?: string;
+  tags?: string[];
   winlog?: WinlogEcs;
   zeek?: ZeekEcs;
 }

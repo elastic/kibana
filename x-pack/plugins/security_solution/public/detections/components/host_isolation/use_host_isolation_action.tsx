@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
+import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
@@ -14,6 +13,7 @@ import { useHostIsolationStatus } from '../../containers/detection_engine/alerts
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { getFieldValue } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import type { AlertTableContextMenuItem } from '../alerts_table/types';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;
@@ -79,7 +79,7 @@ export const useHostIsolationAction = ({
 
   const isolateHostTitle = isolationStatus === false ? ISOLATE_HOST : UNISOLATE_HOST;
 
-  const hostIsolationAction = useMemo(
+  const hostIsolationAction: AlertTableContextMenuItem[] = useMemo(
     () =>
       isIsolationAllowed &&
       isEndpointAlert &&
@@ -87,14 +87,13 @@ export const useHostIsolationAction = ({
       isHostIsolationPanelOpen === false &&
       loadingHostIsolationStatus === false
         ? [
-            <EuiContextMenuItem
-              key="isolate-host-action-item"
-              data-test-subj="isolate-host-action-item"
-              disabled={agentStatus === HostStatus.UNENROLLED}
-              onClick={isolateHostHandler}
-            >
-              {isolateHostTitle}
-            </EuiContextMenuItem>,
+            {
+              key: 'isolate-host-action-item',
+              'data-test-subj': 'isolate-host-action-item',
+              disabled: agentStatus === HostStatus.UNENROLLED,
+              onClick: isolateHostHandler,
+              name: isolateHostTitle,
+            },
           ]
         : [],
     [

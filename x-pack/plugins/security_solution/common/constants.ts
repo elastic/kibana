@@ -359,6 +359,7 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/migration_status` as const;
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
+export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
@@ -535,3 +536,10 @@ export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
   RULE_DETAILS: `${APP_ID}-rule-details`,
   CASE: `${APP_ID}-case`,
 } as const;
+
+export const DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
+export const DEFAULT_ALERT_TAGS_VALUE = [
+  'False positive',
+  'Duplicate',
+  'Further investigation required',
+] as const;

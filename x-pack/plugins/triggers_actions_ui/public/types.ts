@@ -566,18 +566,46 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (
+  onClick?: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,
     setIsBulkActionsLoading: (isLoading: boolean) => void,
     clearSelection: () => void,
     refresh: () => void
   ) => void;
+  panel?: number;
 }
+
+interface PanelConfig {
+  id: number;
+  title?: string;
+  'data-test-subj'?: string;
+}
+
+export interface RenderContentPanelProps {
+  selectedIds: TimelineItem[];
+  setIsBulkActionsLoading: (isLoading: boolean) => void;
+  isAllSelected?: boolean;
+  clearSelection?: () => void;
+  refresh?: () => void;
+  closePopoverMenu: () => void;
+}
+
+interface ContentPanelConfig extends PanelConfig {
+  renderContent: (args: RenderContentPanelProps) => JSX.Element;
+  items?: never;
+}
+
+interface ItemsPanelConfig extends PanelConfig {
+  content?: never;
+  items: BulkActionsConfig[];
+}
+
+export type BulkActionsPanelConfig = ItemsPanelConfig | ContentPanelConfig;
 
 export type UseBulkActionsRegistry = (
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>
-) => BulkActionsConfig[];
+) => BulkActionsPanelConfig[];
 
 export type UseCellActions = (props: {
   columns: EuiDataGridColumn[];
