@@ -7,6 +7,7 @@
 
 /* eslint-disable import/no-default-export */
 
+import _ from 'lodash';
 import yargs from 'yargs';
 import cypress from 'cypress';
 import deepMerge from 'deepmerge';
@@ -87,6 +88,13 @@ export default async (
           `--elasticsearch.hosts=http://localhost:${esPort}`,
         ],
       },
+    },
+    (vars) => {
+      vars.kbnTestServer.serverArgs = _.without(
+        vars.kbnTestServer.serverArgs,
+        '--elasticsearch.hosts=http://localhost:9220'
+      );
+      return vars;
     }
   );
 
