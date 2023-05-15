@@ -336,9 +336,9 @@ curl --request POST \
       "good": {
         "metrics": [
           {
-            "id": "A",
+            "name": "A",
             "aggregation": "sum",
-            "processor.processed"
+            "field": "processor.processed"
           }
         ],
         equation: 'A'
