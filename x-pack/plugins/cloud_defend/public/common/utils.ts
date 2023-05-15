@@ -190,7 +190,7 @@ export function validateStringValuesForCondition(condition: SelectorCondition, v
       errors.push(
         i18n.translate('xpack.cloudDefend.errorGenericEmptyValue', {
           defaultMessage: '"{condition}" values cannot be empty',
-          values: { condition, pattern },
+          values: { condition },
         })
       );
     } else if (pattern && !new RegExp(pattern).test(value)) {
