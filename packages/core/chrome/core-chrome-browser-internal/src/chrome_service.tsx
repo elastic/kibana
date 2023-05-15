@@ -49,6 +49,7 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+  initContext: PluginInitializerContext;
 }
 
 export interface StartDeps {
@@ -73,7 +74,7 @@ export class ChromeService {
   private readonly projectNavigation = new ProjectNavigationService();
   private analytics: IAnalyticsClient | undefined;
 
-  constructor(private params) {
+  constructor(private params: ConstructorParams) {
     this.analytics = new AnalyticsClient(params);
   }
 
