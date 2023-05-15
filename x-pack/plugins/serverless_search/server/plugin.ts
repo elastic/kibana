@@ -9,6 +9,7 @@ import { IRouter, Logger, PluginInitializerContext, Plugin, CoreSetup } from '@k
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
 
+import { ServerlessSearchConfig } from './config';
 import { ServerlessSearchPluginSetup, ServerlessSearchPluginStart } from './types';
 
 interface StartDependencies {
@@ -23,12 +24,12 @@ export interface RouteDependencies {
 export class ServerlessSearchPlugin
   implements Plugin<ServerlessSearchPluginSetup, ServerlessSearchPluginStart>
 {
-  private readonly config: {};
+  private readonly config: ServerlessSearchConfig;
   private readonly logger: Logger;
   private security?: SecurityPluginStart;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<{}>();
+    this.config = initializerContext.config.get<ServerlessSearchConfig>();
     this.logger = initializerContext.logger.get();
   }
 
