@@ -15,12 +15,24 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 export type EnterpriseSearchEnginesPageTemplateProps = PageTemplateProps & {
   engineName?: string;
+  hasSchemaConflicts?: boolean;
 };
 
 export const EnterpriseSearchEnginesPageTemplate: React.FC<
   EnterpriseSearchEnginesPageTemplateProps
-> = ({ children, pageChrome, pageViewTelemetry, engineName, ...pageTemplateProps }) => {
-  const navItems = useEnterpriseSearchEngineNav(engineName, pageTemplateProps.isEmptyState);
+> = ({
+  children,
+  pageChrome,
+  pageViewTelemetry,
+  engineName,
+  hasSchemaConflicts,
+  ...pageTemplateProps
+}) => {
+  const navItems = useEnterpriseSearchEngineNav(
+    engineName,
+    pageTemplateProps.isEmptyState,
+    hasSchemaConflicts
+  );
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}

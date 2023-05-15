@@ -150,6 +150,7 @@ const configSchema = schema.object(
         },
       }
     ),
+    restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
   },
   {
     validate: (rawConfig) => {
@@ -223,6 +224,7 @@ export class HttpConfig implements IHttpConfig {
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public shutdownTimeout: Duration;
+  public restrictInternalApis: boolean;
 
   /**
    * @internal
@@ -263,6 +265,7 @@ export class HttpConfig implements IHttpConfig {
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
   }
 }
 

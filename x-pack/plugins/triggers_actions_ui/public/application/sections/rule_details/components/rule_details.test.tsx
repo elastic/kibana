@@ -61,7 +61,7 @@ const mockRuleApis = {
   muteRule: jest.fn(),
   unmuteRule: jest.fn(),
   requestRefresh: jest.fn(),
-  refreshToken: Date.now(),
+  refreshToken: { resolve: jest.fn(), reject: jest.fn() },
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
   bulkEnableRules: jest.fn(),
