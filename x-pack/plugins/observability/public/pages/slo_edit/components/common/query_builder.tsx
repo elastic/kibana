@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { Control, Controller, FieldPath } from 'react-hook-form';
+import { Control, Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
@@ -37,6 +37,8 @@ export function QueryBuilder({
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
 
+  const { getFieldState } = useFormContext();
+
   const { dataView } = useCreateDataView({ indexPatternString });
 
   return (
@@ -50,6 +52,7 @@ export function QueryBuilder({
           label
         )
       }
+      isInvalid={getFieldState(name).invalid}
       fullWidth
     >
       <Controller
