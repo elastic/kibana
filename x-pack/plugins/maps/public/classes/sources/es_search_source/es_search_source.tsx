@@ -900,9 +900,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       params.set('executionContextId', executionContextId);
     }
 
-    const url = `${mvtUrlServicePath}?${params.toString()}`;
-    console.log(url);
-    return url;
+    return `${mvtUrlServicePath}?${params.toString()}`;
   }
 
   async getTimesliceMaskFieldName(): Promise<string | null> {
