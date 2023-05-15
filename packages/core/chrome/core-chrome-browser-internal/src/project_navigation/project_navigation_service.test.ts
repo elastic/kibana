@@ -8,14 +8,14 @@
 
 import { firstValueFrom } from 'rxjs';
 import { ProjectNavigationService } from './project_navigation_service';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
 
 const setup = () => {
   const projectNavigationService = new ProjectNavigationService();
   const projectNavigation = projectNavigationService.start({
     application: applicationServiceMock.createInternalStartContract(),
-    navLinks: chromeServiceMock.createStartContract().navLinks,
+    navLinks: {} as unknown as ChromeNavLinks,
   });
 
   return { projectNavigation };
