@@ -41,6 +41,12 @@ import {
 import { defaultLoadingRenderer, defaultNoDataRenderer } from '../../components/cloud_posture_page';
 import { getFilters } from './utils/get_filters';
 import { FILTER_IN, FILTER_OUT, SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from './translations';
+import {
+  severitySchemaConfig,
+  severitySortScript,
+  VULNERABILITY_SEVERITY_FIELD,
+} from './utils/custom_sort_script';
+import { usePageSlice } from '../../common/hooks/use_page_slice';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -90,9 +96,15 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   const { euiTheme } = useEuiTheme();
 
   const multiFieldsSort = useMemo(() => {
-    return sort.map(({ id, direction }: { id: string; direction: string }) => ({
-      [id]: direction,
-    }));
+    return sort.map(({ id, direction }: { id: string; direction: string }) => {
+      if (VULNERABILITY_SEVERITY_FIELD === id) {
+        return severitySortScript(direction);
+      }
+
+      return {
+        [id]: direction,
+      };
+    });
   }, [sort]);
 
   const { data, isLoading, isFetching } = useLatestVulnerabilities({
@@ -100,6 +112,8 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     sort: multiFieldsSort,
     enabled: !queryError,
   });
+
+  const slicedPage = usePageSlice(data?.page, pageIndex, pageSize);
 
   const invalidIndex = -1;
   const selectedVulnerability = data?.page[urlQuery.vulnerabilityIndex];
@@ -111,12 +125,21 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   };
 
   const onOpenFlyout = useCallback(
-    (rowIndex: number) => {
+    (vulnerabilityRow: VulnerabilityRecord) => {
+      const vulnerabilityIndex = slicedPage.findIndex(
+        (vulnerabilityRecord: VulnerabilityRecord) =>
+          vulnerabilityRecord.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
+          vulnerabilityRecord.resource?.id === vulnerabilityRow.resource?.id &&
+          vulnerabilityRecord.vulnerability.package.name ===
+            vulnerabilityRow.vulnerability.package.name &&
+          vulnerabilityRecord.vulnerability.package.version ===
+            vulnerabilityRow.vulnerability.package.version
+      );
       setUrlQuery({
-        vulnerabilityIndex: rowIndex,
+        vulnerabilityIndex,
       });
     },
-    [setUrlQuery]
+    [setUrlQuery, slicedPage]
   );
 
   const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
@@ -221,7 +244,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             iconType="expand"
             aria-label="View"
             onClick={() => {
-              onOpenFlyout(rowIndex);
+              onOpenFlyout(vulnerabilityRow);
             }}
           />
         );
@@ -288,7 +311,6 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   );
 
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
-
   const error = queryError || null;
 
   if (error) {
@@ -357,6 +379,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               visibleColumns: columns.map(({ id }) => id),
               setVisibleColumns: () => {},
             }}
+            schemaDetectors={[severitySchemaConfig]}
             rowCount={limitedTotalItemCount}
             toolbarVisibility={{
               showColumnSelector: false,
@@ -397,9 +420,9 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
           {isLastLimitedPage && <LimitedResultsBar />}
           {showVulnerabilityFlyout && (
             <VulnerabilityFindingFlyout
-              flyoutIndex={flyoutVulnerabilityIndex + urlQuery.pageIndex * pageSize}
+              flyoutIndex={flyoutVulnerabilityIndex + pageIndex * pageSize}
               vulnerabilityRecord={selectedVulnerability}
-              totalVulnerabilitiesCount={data?.total}
+              totalVulnerabilitiesCount={limitedTotalItemCount}
               onPaginate={onPaginateFlyout}
               closeFlyout={onCloseFlyout}
             />

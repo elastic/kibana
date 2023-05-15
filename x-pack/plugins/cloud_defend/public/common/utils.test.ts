@@ -57,6 +57,7 @@ describe('getSelectorConditions', () => {
     expect(options.includes('targetFilePath')).toBeTruthy();
 
     // check that process specific conditions are not included
+    expect(options.includes('processName')).toBeFalsy();
     expect(options.includes('processExecutable')).toBeFalsy();
     expect(options.includes('sessionLeaderInteractive')).toBeFalsy();
   });
@@ -73,6 +74,7 @@ describe('getSelectorConditions', () => {
     expect(options.includes('targetFilePath')).toBeFalsy();
 
     // check that process specific conditions are not included
+    expect(options.includes('processName')).toBeTruthy();
     expect(options.includes('processExecutable')).toBeTruthy();
     expect(options.includes('sessionLeaderInteractive')).toBeTruthy();
   });
@@ -109,6 +111,33 @@ describe('getRestrictedValuesForCondition', () => {
 });
 
 describe('validateBlockRestrictions', () => {
+  it('reports an error when some of the FIM selectors (no operation) arent using targetFilePath', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1', // no operation means all operations
+      },
+      {
+        type: 'file',
+        name: 'sel2',
+        operation: ['modifyFile'],
+        targetFilePath: ['/**'],
+      },
+    ];
+
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: ['sel1', 'sel2'],
+        actions: ['block', 'alert'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(1);
+  });
+
   it('reports an error when some of the FIM selectors arent using targetFilePath', () => {
     const selectors: Selector[] = [
       {
@@ -268,6 +297,20 @@ describe('validateBlockRestrictions', () => {
     ];
 
     const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(0);
+  });
+
+  it('passes validation if block is used, but no selectors in match', () => {
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: [],
+        actions: ['alert', 'block'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions([], responses);
 
     expect(errors).toHaveLength(0);
   });

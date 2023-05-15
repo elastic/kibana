@@ -6,9 +6,8 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { get, isEmpty } from 'lodash';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { CombinedSummarizedAlerts } from '../types';
+import { isEmpty } from 'lodash';
+import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -293,8 +292,8 @@ export class Alert<
     // Related issue: https://github.com/elastic/kibana/issues/144862
 
     return !summarizedAlerts.all.data.some(
-      (alert) =>
-        get(alert, ALERT_UUID) === this.getId() || get(alert, ALERT_UUID) === this.getUuid()
+      (alert: AlertHit) =>
+        alert?.kibana?.alert?.uuid === this.getId() || alert?.kibana?.alert?.uuid === this.getUuid()
     );
   }
 
