@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('alert and action creation', () => {
       before(async () => {
-        infraDataIndex = await generate({ esClient, loopback: 'now-15m', logger });
+        infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
         actionId = await createIndexConnector({
           supertest,
           name: 'Index Connector: Metric threshold API test',

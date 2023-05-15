@@ -37,14 +37,14 @@ const createEvents = (size: number, timestamp: Moment) =>
     })
     .flat();
 
-function indexHistory(loopback: string, queue: any, logger: ToolingLog, nextTimestamp?: Moment) {
+function indexHistory(lookback: string, queue: any, logger: ToolingLog, nextTimestamp?: Moment) {
   const now = moment();
-  const startTs = datemath.parse(loopback, { momentInstance: moment });
+  const startTs = datemath.parse(lookback, { momentInstance: moment });
   const timestamp = nextTimestamp || moment(startTs);
   createEvents(EVENTS_PER_CYCLE, timestamp).forEach((event) => queue.push(event));
   return queue.drain().then(() => {
     if (timestamp.isBefore(now)) {
-      return indexHistory(loopback, queue, logger, timestamp.add(INDEX_INTERVAL, 'ms'));
+      return indexHistory(lookback, queue, logger, timestamp.add(INDEX_INTERVAL, 'ms'));
     }
     return Promise.resolve();
   });
@@ -52,17 +52,17 @@ function indexHistory(loopback: string, queue: any, logger: ToolingLog, nextTime
 
 export const generate = async ({
   esClient,
-  loopback,
+  lookback,
   logger,
 }: {
   esClient: Client;
-  loopback: string;
+  lookback: string;
   logger: ToolingLog;
 }) => {
   const queue = createQueue(esClient, DATASET, PAYLOAD_SIZE, CONCURRENCY, logger);
   const template = templates[DATASET];
   await installTemplate(esClient, template, DATASET, logger).then(() =>
-    indexHistory(loopback, queue, logger)
+    indexHistory(lookback, queue, logger)
   );
   return getIndexName(DATASET);
 };
