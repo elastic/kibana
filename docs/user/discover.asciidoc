@@ -273,6 +273,10 @@ If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 
 . In the sidebar, find and then click `day_of_week`.
++
+[role="screenshot"]
+image:images/discover-day-of-week.png[Top values for the day_of_week field, plus Visualize button, width=50%]
+
 
 . In the popup, click **Visualize**.
 +
