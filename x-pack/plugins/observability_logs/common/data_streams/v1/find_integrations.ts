@@ -7,10 +7,9 @@
 
 import * as rt from 'io-ts';
 import { integrationRT } from '../types';
+import { sortDirectionRT } from './common';
 
 const pageAfterRT = rt.array(rt.union([rt.number, rt.string]));
-
-const sortDirectionRT = rt.union([rt.literal('asc'), rt.literal('desc')]);
 
 export const findIntegrationsResponseRT = rt.exact(
   rt.intersection([

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './integrations/v1';
+export * from './data_streams/v1';

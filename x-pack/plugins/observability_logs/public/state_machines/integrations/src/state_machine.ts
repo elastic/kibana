@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { catchError, from, map, of, throwError } from 'rxjs';
+import { catchError, from, map, of } from 'rxjs';
 import { actions, createMachine } from 'xstate';
 import { IIntegrationsClient } from '../../../services/integrations';
 import {
@@ -16,7 +16,7 @@ import {
 } from './types';
 
 const defaultContext = {
-  integrations: [],
+  integrations: null,
   error: null,
   page: [],
 };
@@ -72,7 +72,6 @@ export const createPureIntegrationsStateMachine = (
         loaded: {
           entry: 'notifyLoadingSucceeded',
           on: {
-            RELOAD_INTEGRATIONS: 'loading',
             LOAD_MORE_INTEGRATIONS: 'loadingMore',
             SEARCH_INTEGRATIONS: 'loading',
           },
@@ -112,7 +111,7 @@ export const createIntegrationStateMachine = ({
         from(
           'search' in event
             ? integrationsClient.findIntegrations(event.search)
-            : throwError(() => new Error('Failed to load integrations'))
+            : integrationsClient.findIntegrations()
         ).pipe(
           map(
             (data): IntegrationsEvent => ({

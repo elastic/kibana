@@ -8,10 +8,16 @@
 import { indexPatternRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
-export const dataStreamRT = rt.type({
-  name: rt.string,
-  title: indexPatternRt,
-});
+export const dataStreamRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      name: rt.string,
+    }),
+    rt.partial({
+      title: indexPatternRt,
+    }),
+  ])
+);
 
 const integrationStatusRT = rt.union([
   rt.literal('installed'),

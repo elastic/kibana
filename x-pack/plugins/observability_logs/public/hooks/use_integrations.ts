@@ -18,6 +18,8 @@ interface IntegrationsContextDeps {
   integrationsClient: IIntegrationsClient;
 }
 
+export type SearchIntegrations = (params: IntegrationsSearchParams) => void;
+
 const useIntegrations = ({ integrationsClient }: IntegrationsContextDeps) => {
   const integrationsStateService = useInterpret(() =>
     createIntegrationStateMachine({
@@ -25,9 +27,7 @@ const useIntegrations = ({ integrationsClient }: IntegrationsContextDeps) => {
     })
   );
 
-  const integrations = useSelector(integrationsStateService, (state) =>
-    state.matches('loaded') ? state.context.integrations : undefined
-  );
+  const integrations = useSelector(integrationsStateService, (state) => state.context.integrations);
 
   const isUninitialized = useSelector(integrationsStateService, (state) =>
     state.matches('uninitialized')
@@ -39,8 +39,8 @@ const useIntegrations = ({ integrationsClient }: IntegrationsContextDeps) => {
     state.matches('loadingFailed')
   );
 
-  const search = useCallback(
-    (searchParams: IntegrationsSearchParams) =>
+  const search: SearchIntegrations = useCallback(
+    (searchParams) =>
       integrationsStateService.send({
         type: 'SEARCH_INTEGRATIONS',
         search: searchParams,

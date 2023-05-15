@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export const PLUGIN_ID = 'observabilityLogs';
 export const PLUGIN_NAME = 'observabilityLogs';
 
@@ -12,10 +14,5 @@ export const PLUGIN_NAME = 'observabilityLogs';
  * Exporting versioned APIs types
  */
 export type { FindIntegrationsRequestQuery, FindIntegrationsResponse } from './latest';
-export {
-  INTEGRATIONS_URL,
-  getIntegrationsUrl,
-  findIntegrationsResponseRT,
-  findIntegrationsRequestQueryRT,
-} from './latest';
-export * as integrationsV1 from './integrations/v1';
+export * from './latest';
+export * as dataStreamsV1 from './data_streams/v1';

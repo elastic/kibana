@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { IIntegrationsClient } from './types';
+import { IDataStreamsClient } from './types';
 
-export const createIntegrationsClientMock = (): jest.Mocked<IIntegrationsClient> => ({
+export const createDataStreamsClientMock = (): jest.Mocked<IDataStreamsClient> => ({
+  findDataStreams: jest.fn(),
   findIntegrations: jest.fn(),
 });
