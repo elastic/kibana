@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type {
-  SuggestionRequest,
-  TableSuggestionColumn,
-  VisualizationSuggestion,
-} from '../../types';
+import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
 
 export function suggestions({
@@ -20,9 +15,7 @@ export function suggestions({
   keptLayerIds,
   mainPalette,
   subVisualizationId,
-}: SuggestionRequest<TagcloudState>): Array<
-  VisualizationSuggestion<TagcloudState>
-> {
+}: SuggestionRequest<TagcloudState>): Array<VisualizationSuggestion<TagcloudState>> {
   const isUnchanged = state && table.changeType === 'unchanged';
   if (
     isUnchanged ||
@@ -32,14 +25,18 @@ export function suggestions({
     return [];
   }
 
-  const groups = table.columns.filter((col) => col.operation.isBucketed && col.operation.dataType === 'string');
-  const metrics = table.columns.filter((col) => !col.operation.isBucketed && col.operation.dataType === 'number');
+  const groups = table.columns.filter(
+    (col) => col.operation.isBucketed && col.operation.dataType === 'string'
+  );
+  const metrics = table.columns.filter(
+    (col) => !col.operation.isBucketed && col.operation.dataType === 'number'
+  );
 
   if (groups.length === 0 || metrics.length === 0) {
     return [];
   }
 
-  return groups.map(group => {
+  return groups.map((group) => {
     return {
       title: i18n.translate('xpack.maps.lens.choroplethChart.suggestionLabel', {
         defaultMessage: '{groupLabel} tag cloud',
@@ -55,6 +52,6 @@ export function suggestions({
         maxFontSize: 72,
         minFontSize: 18,
       },
-    }
+    };
   });
 }

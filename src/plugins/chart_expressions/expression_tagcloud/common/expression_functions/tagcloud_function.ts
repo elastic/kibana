@@ -142,7 +142,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         help: 'Set isPreview to true to avoid showing out of room warnings',
         default: false,
         required: false,
-      }
+      },
     },
     fn(input, args, handlers) {
       validateAccessor(args.metric, input.columns);

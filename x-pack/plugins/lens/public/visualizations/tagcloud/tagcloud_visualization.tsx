@@ -12,7 +12,7 @@ import { render } from 'react-dom';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
+import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
 import { suggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
@@ -162,9 +162,10 @@ export const getTagcloudVisualization = ({
 
     // shrink font size to fit in preview window
     const PREVIEW_WINDOW_MAX_FONT_SIZE = 24;
-    const fontSizeRatio = state.maxFontSize > PREVIEW_WINDOW_MAX_FONT_SIZE
-      ? state.maxFontSize / PREVIEW_WINDOW_MAX_FONT_SIZE
-      : 1;
+    const fontSizeRatio =
+      state.maxFontSize > PREVIEW_WINDOW_MAX_FONT_SIZE
+        ? state.maxFontSize / PREVIEW_WINDOW_MAX_FONT_SIZE
+        : 1;
 
     const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
     return {
