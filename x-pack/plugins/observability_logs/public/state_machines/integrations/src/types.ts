@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PageAfter } from '../../../../common/latest';
+import { PageAfter, FindIntegrationsResponse } from '../../../../common/latest';
 import { Integration } from '../../../../common/data_streams';
 
 export interface DefaultIntegrationsContext {
@@ -45,8 +45,7 @@ export type IntegrationsContext = IntegrationTypestate['context'];
 export type IntegrationsEvent =
   | {
       type: 'LOADING_SUCCEEDED';
-      integrations: Integration[];
-      page?: PageAfter;
+      data: FindIntegrationsResponse;
     }
   | {
       type: 'LOADING_FAILED';

@@ -12,22 +12,24 @@ import {
   createIntegrationStateMachine,
   IntegrationsSearchParams,
 } from '../state_machines/integrations';
-import { IIntegrationsClient } from '../services/integrations';
+import { IDataStreamsClient } from '../services/data_streams';
 
 interface IntegrationsContextDeps {
-  integrationsClient: IIntegrationsClient;
+  dataStreamsClient: IDataStreamsClient;
 }
 
 export type SearchIntegrations = (params: IntegrationsSearchParams) => void;
 
-const useIntegrations = ({ integrationsClient }: IntegrationsContextDeps) => {
+const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   const integrationsStateService = useInterpret(() =>
     createIntegrationStateMachine({
-      integrationsClient,
+      dataStreamsClient,
     })
   );
 
   const integrations = useSelector(integrationsStateService, (state) => state.context.integrations);
+
+  const error = useSelector(integrationsStateService, (state) => state.context.error);
 
   const isUninitialized = useSelector(integrationsStateService, (state) =>
     state.matches('uninitialized')
@@ -58,6 +60,7 @@ const useIntegrations = ({ integrationsClient }: IntegrationsContextDeps) => {
     integrationsStateService,
 
     // Failure states
+    error,
     hasFailedLoading,
 
     // Loading states

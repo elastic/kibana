@@ -26,7 +26,6 @@ export interface ObservabilityLogsPluginProviderProps {
   core: CoreStart;
   plugins: ObservabilityLogsStartDeps;
   pluginStart: ObservabilityLogsPluginStart;
-  children: React.ReactNode;
 }
 
 export const ObservabilityLogsPluginProvider = ({

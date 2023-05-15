@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { DataStream } from '../../common/data_streams';
 import { DataStreamSelector } from '../components/data_stream_selector';
@@ -49,46 +49,6 @@ export default CustomDataStreamSelector;
 
 const mockUncategorized = [{ name: 'metrics-*' }, { name: 'logs-*' }];
 
-const mockIntegrations = [
-  {
-    name: 'atlassian_jira',
-    version: '1.8.0',
-    status: 'installed',
-    dataStreams: [
-      {
-        name: 'Atlassian metrics stream',
-        title: 'metrics-*',
-      },
-      {
-        name: 'Atlassian secondary',
-        title: 'metrics-*',
-      },
-    ],
-  },
-  {
-    name: 'docker',
-    version: '2.4.3',
-    status: 'installed',
-    dataStreams: [
-      {
-        name: 'Docker stream',
-        title: 'metrics-*',
-      },
-    ],
-  },
-  {
-    name: 'system',
-    version: '1.27.1',
-    status: 'installed',
-    dataStreams: [
-      {
-        name: 'System metrics logs',
-        title: 'metrics-*',
-      },
-    ],
-  },
-];
-
 export type CustomDataStreamSelectorBuilderProps = ObservabilityLogsPluginProviderProps &
   CustomDataStreamSelectorProps;
 
@@ -102,7 +62,7 @@ function withProviders(Component: React.FunctionComponent<CustomDataStreamSelect
     return (
       <ObservabilityLogsPluginProvider core={core} plugins={plugins} pluginStart={pluginStart}>
         <InternalStateProvider value={stateContainer.internalState}>
-          <IntegrationsProvider integrationsClient={pluginStart.integrationsService.client}>
+          <IntegrationsProvider dataStreamsClient={pluginStart.dataStreamsService.client}>
             <Component stateContainer={stateContainer} />
           </IntegrationsProvider>
         </InternalStateProvider>
