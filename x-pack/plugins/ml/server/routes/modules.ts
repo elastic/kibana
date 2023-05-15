@@ -144,7 +144,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Modules
    *
-   * @api {get} /api/ml/modules/recognize/:indexPatternTitle Recognize index pattern
+   * @api {get} /internal/ml/modules/recognize/:indexPatternTitle Recognize index pattern
    * @apiName RecognizeIndex
    * @apiDescription By supplying an index pattern, discover if any of the modules are a match for data in that index.
    * @apiSchema (params) modulesIndexPatternTitleSchema
@@ -169,52 +169,59 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    *   }
    * }]
    */
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/{indexPatternTitle}`,
-      validate: {
-        params: modulesIndexPatternTitleSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(
-      async ({
-        client,
-        mlClient,
-        request,
-        response,
-        context,
-        mlSavedObjectService,
-        getDataViewsService,
-      }) => {
-        try {
-          const { indexPatternTitle } = request.params;
-          const soClient = (await context.core).savedObjects.client;
-          const dataViewService = await getDataViewsService();
-          const results = await recognize(
-            client,
-            mlClient,
-            soClient,
-            dataViewService,
-            mlSavedObjectService,
-            request,
-            indexPatternTitle
-          );
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: modulesIndexPatternTitleSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({
+          client,
+          mlClient,
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          getDataViewsService,
+        }) => {
+          try {
+            const { indexPatternTitle } = request.params;
+            const soClient = (await context.core).savedObjects.client;
+            const dataViewService = await getDataViewsService();
+            const results = await recognize(
+              client,
+              mlClient,
+              soClient,
+              dataViewService,
+              mlSavedObjectService,
+              request,
+              indexPatternTitle
+            );
 
-          return response.ok({ body: results });
-        } catch (e) {
-          return response.customError(wrapError(e));
+            return response.ok({ body: results });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      }
-    )
-  );
+      )
+    );
 
   /**
    * @apiGroup Modules
    *
-   * @api {get} /api/ml/modules/get_module/:moduleId Get module
+   * @api {get} /internal/ml/modules/get_module/:moduleId Get module
    * @apiName GetModule
    * @apiDescription Retrieve a whole ML module, containing jobs, datafeeds and saved objects. If
    *    no module ID is supplied, returns all modules.
@@ -319,57 +326,64 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    *   "kibana":{}
    * }
    */
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/{moduleId?}`,
-      validate: {
-        params: optionalModuleIdParamSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetJobs'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(
-      async ({
-        client,
-        mlClient,
-        request,
-        response,
-        context,
-        mlSavedObjectService,
-        getDataViewsService,
-      }) => {
-        try {
-          let { moduleId } = request.params;
-          if (moduleId === '') {
-            // if the endpoint is called with a trailing /
-            // the moduleId will be an empty string.
-            moduleId = undefined;
-          }
-          const soClient = (await context.core).savedObjects.client;
-          const dataViewService = await getDataViewsService();
-          const results = await getModule(
-            client,
-            mlClient,
-            soClient,
-            dataViewService,
-            mlSavedObjectService,
-            request,
-            moduleId
-          );
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: optionalModuleIdParamSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({
+          client,
+          mlClient,
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          getDataViewsService,
+        }) => {
+          try {
+            let { moduleId } = request.params;
+            if (moduleId === '') {
+              // if the endpoint is called with a trailing /
+              // the moduleId will be an empty string.
+              moduleId = undefined;
+            }
+            const soClient = (await context.core).savedObjects.client;
+            const dataViewService = await getDataViewsService();
+            const results = await getModule(
+              client,
+              mlClient,
+              soClient,
+              dataViewService,
+              mlSavedObjectService,
+              request,
+              moduleId
+            );
 
-          return response.ok({ body: results });
-        } catch (e) {
-          return response.customError(wrapError(e));
+            return response.ok({ body: results });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      }
-    )
-  );
+      )
+    );
 
   /**
    * @apiGroup Modules
    *
-   * @api {post} /api/ml/modules/setup/:moduleId Set up module
+   * @api {post} /internal/ml/modules/setup/:moduleId Set up module
    * @apiName SetupModule
    * @apiDescription Runs the module setup process.
    *      This creates jobs, datafeeds and kibana saved objects. It allows for customization of the module,
@@ -506,81 +520,88 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    *   }]
    * }
    */
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/modules/setup/{moduleId}`,
-      validate: {
-        params: moduleIdParamSchema,
-        body: setupModuleBodySchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(
-      async ({
-        client,
-        mlClient,
-        request,
-        response,
-        context,
-        mlSavedObjectService,
-        getDataViewsService,
-      }) => {
-        try {
-          const { moduleId } = request.params;
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: moduleIdParamSchema,
+            body: setupModuleBodySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({
+          client,
+          mlClient,
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          getDataViewsService,
+        }) => {
+          try {
+            const { moduleId } = request.params;
 
-          const {
-            prefix,
-            groups,
-            indexPatternName,
-            query,
-            useDedicatedIndex,
-            startDatafeed,
-            start,
-            end,
-            jobOverrides,
-            datafeedOverrides,
-            estimateModelMemory,
-            applyToAllSpaces,
-          } = request.body as TypeOf<typeof setupModuleBodySchema>;
-          const soClient = (await context.core).savedObjects.client;
-          const dataViewService = await getDataViewsService();
+            const {
+              prefix,
+              groups,
+              indexPatternName,
+              query,
+              useDedicatedIndex,
+              startDatafeed,
+              start,
+              end,
+              jobOverrides,
+              datafeedOverrides,
+              estimateModelMemory,
+              applyToAllSpaces,
+            } = request.body as TypeOf<typeof setupModuleBodySchema>;
+            const soClient = (await context.core).savedObjects.client;
+            const dataViewService = await getDataViewsService();
 
-          const result = await setup(
-            client,
-            mlClient,
-            soClient,
-            dataViewService,
-            mlSavedObjectService,
-            request,
-            moduleId,
-            prefix,
-            groups,
-            indexPatternName,
-            query,
-            useDedicatedIndex,
-            startDatafeed,
-            start,
-            end,
-            jobOverrides,
-            datafeedOverrides,
-            estimateModelMemory,
-            applyToAllSpaces
-          );
+            const result = await setup(
+              client,
+              mlClient,
+              soClient,
+              dataViewService,
+              mlSavedObjectService,
+              request,
+              moduleId,
+              prefix,
+              groups,
+              indexPatternName,
+              query,
+              useDedicatedIndex,
+              startDatafeed,
+              start,
+              end,
+              jobOverrides,
+              datafeedOverrides,
+              estimateModelMemory,
+              applyToAllSpaces
+            );
 
-          return response.ok({ body: result });
-        } catch (e) {
-          return response.customError(wrapError(e));
+            return response.ok({ body: result });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      }
-    )
-  );
+      )
+    );
 
   /**
    * @apiGroup Modules
    *
-   * @api {get} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
+   * @api {get} /internal/ml/modules/jobs_exist/:moduleId Check if module jobs exist
    * @apiName CheckExistingModuleJobs
    * @apiDescription Check whether the jobs in the module with the specified ID exist in the
    *      current list of jobs. The check runs a test to see if any of the jobs in existence
@@ -629,45 +650,52 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    *     ]
    *  }
    */
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/jobs_exist/{moduleId}`,
-      validate: {
-        params: moduleIdParamSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetJobs'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(
-      async ({
-        client,
-        mlClient,
-        request,
-        response,
-        context,
-        mlSavedObjectService,
-        getDataViewsService,
-      }) => {
-        try {
-          const { moduleId } = request.params;
-          const soClient = (await context.core).savedObjects.client;
-          const dataViewService = await getDataViewsService();
-          const result = await dataRecognizerJobsExist(
-            client,
-            mlClient,
-            soClient,
-            dataViewService,
-            mlSavedObjectService,
-            request,
-            moduleId
-          );
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: moduleIdParamSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({
+          client,
+          mlClient,
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          getDataViewsService,
+        }) => {
+          try {
+            const { moduleId } = request.params;
+            const soClient = (await context.core).savedObjects.client;
+            const dataViewService = await getDataViewsService();
+            const result = await dataRecognizerJobsExist(
+              client,
+              mlClient,
+              soClient,
+              dataViewService,
+              mlSavedObjectService,
+              request,
+              moduleId
+            );
 
-          return response.ok({ body: result });
-        } catch (e) {
-          return response.customError(wrapError(e));
+            return response.ok({ body: result });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      }
-    )
-  );
+      )
+    );
 }

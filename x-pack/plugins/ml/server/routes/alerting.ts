@@ -18,7 +18,7 @@ export function alertingRoutes(
   /**
    * @apiGroup Alerting
    *
-   * @api {post} /api/ml/alerting/preview Preview alerting condition
+   * @api {post} /internal/ml/alerting/preview Preview alerting condition
    * @apiName PreviewAlert
    * @apiDescription Returns a preview of the alerting condition
    *

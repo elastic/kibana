@@ -66,52 +66,58 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
   /**
    * @apiGroup JobValidation
    *
-   * @api {post} /api/ml/validate/estimate_bucket_span Estimate bucket span
+   * @api {post} /internal/ml/validate/estimate_bucket_span Estimate bucket span
    * @apiName EstimateBucketSpan
    * @apiDescription  Estimates minimum viable bucket span based on the characteristics of a pre-viewed subset of the data
    *
    * @apiSchema (body) estimateBucketSpanSchema
    */
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/estimate_bucket_span`,
-      validate: {
-        body: estimateBucketSpanSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        let errorResp;
-        const resp = await estimateBucketSpanFactory(client)(request.body)
-          // this catch gets triggered when the estimation code runs without error
-          // but isn't able to come up with a bucket span estimation.
-          // this doesn't return a HTTP error but an object with an error message a HTTP error would be
-          // too severe for this case.
-          .catch((error: any) => {
-            errorResp = {
-              error: true,
-              message: error,
-            };
-          });
-
-        return response.ok({
-          body: errorResp !== undefined ? errorResp : resp,
-        });
-      } catch (e) {
-        // this catch gets triggered when an actual error gets thrown when running
-        // the estimation code, for example when the request payload is malformed
-        throw Boom.badRequest(e);
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: estimateBucketSpanSchema },
+        },
+      },
+
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          let errorResp;
+          const resp = await estimateBucketSpanFactory(client)(request.body)
+            // this catch gets triggered when the estimation code runs without error
+            // but isn't able to come up with a bucket span estimation.
+            // this doesn't return a HTTP error but an object with an error message a HTTP error would be
+            // too severe for this case.
+            .catch((error: any) => {
+              errorResp = {
+                error: true,
+                message: error,
+              };
+            });
+
+          return response.ok({
+            body: errorResp !== undefined ? errorResp : resp,
+          });
+        } catch (e) {
+          // this catch gets triggered when an actual error gets thrown when running
+          // the estimation code, for example when the request payload is malformed
+          throw Boom.badRequest(e);
+        }
+      })
+    );
 
   /**
    * @apiGroup JobValidation
    *
-   * @api {post} /api/ml/validate/calculate_model_memory_limit Calculates model memory limit
+   * @api {post} /internal/ml/validate/calculate_model_memory_limit Calculates model memory limit
    * @apiName CalculateModelMemoryLimit
    * @apiDescription Calls _estimate_model_memory endpoint to retrieve model memory estimation.
    *
@@ -119,139 +125,167 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
    *
    * @apiSuccess {String} modelMemoryLimit
    */
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/calculate_model_memory_limit`,
-      validate: {
-        body: modelMemoryLimitSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-      try {
-        const resp = await calculateModelMemoryLimit(client, mlClient, request.body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: modelMemoryLimitSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+        try {
+          const resp = await calculateModelMemoryLimit(client, mlClient, request.body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup JobValidation
    *
-   * @api {post} /api/ml/validate/cardinality Validate cardinality
+   * @api {post} /internal/ml/validate/cardinality Validate cardinality
    * @apiName ValidateCardinality
    * @apiDescription Validates cardinality for the given job configuration
    *
    * @apiSchema (body) validateCardinalitySchema
    */
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/cardinality`,
-      validate: {
-        body: validateCardinalitySchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        // @ts-expect-error datafeed config is incorrect
-        const resp = await validateCardinality(client, request.body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: validateCardinalitySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          // @ts-expect-error datafeed config is incorrect
+          const resp = await validateCardinality(client, request.body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup JobValidation
    *
-   * @api {post} /api/ml/validate/job Validates job
+   * @api {post} /internal/ml/validate/job Validates job
    * @apiName ValidateJob
    * @apiDescription Validates the given job configuration
    *
    * @apiSchema (body) validateJobSchema
    */
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/job`,
-      validate: {
-        body: validateJobSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-      try {
-        const resp = await validateJob(
-          client,
-          mlClient,
-          request.body,
-          getAuthorizationHeader(request),
-          mlLicense.isSecurityEnabled() === false
-        );
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: validateJobSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+        try {
+          const resp = await validateJob(
+            client,
+            mlClient,
+            request.body,
+            getAuthorizationHeader(request),
+            mlLicense.isSecurityEnabled() === false
+          );
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup DataFeedPreviewValidation
    *
-   * @api {post} /api/ml/validate/datafeed_preview Validates datafeed preview
+   * @api {post} /internal/ml/validate/datafeed_preview Validates datafeed preview
    * @apiName ValidateDataFeedPreview
    * @apiDescription Validates that the datafeed preview runs successfully and produces results
    *
    * @apiSchema (body) validateDatafeedPreviewSchema
    */
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/datafeed_preview`,
-      validate: {
-        body: validateDatafeedPreviewSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-      try {
-        const {
-          body: { job, start, end },
-        } = request;
-
-        const resp = await validateDatafeedPreview(
-          mlClient,
-          getAuthorizationHeader(request),
-          job as CombinedJob,
-          start,
-          end
-        );
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: validateDatafeedPreviewSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+        try {
+          const {
+            body: { job, start, end },
+          } = request;
+
+          const resp = await validateDatafeedPreview(
+            mlClient,
+            getAuthorizationHeader(request),
+            job as CombinedJob,
+            start,
+            end
+          );
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }

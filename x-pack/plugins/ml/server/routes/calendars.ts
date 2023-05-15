@@ -46,171 +46,204 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Calendars
    *
-   * @api {get} /api/ml/calendars Gets calendars
+   * @api {get} /internal/ml/calendars Gets calendars
    * @apiName GetCalendars
    * @apiDescription Gets calendars - size limit has been explicitly set to 1000
    */
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/calendars`,
-      validate: false,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetCalendars'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
-      try {
-        const resp = await getAllCalendars(mlClient);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+        try {
+          const resp = await getAllCalendars(mlClient);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup Calendars
    *
-   * @api {get} /api/ml/calendars/:calendarIds Gets a calendar
+   * @api {get} /internal/ml/calendars/:calendarIds Gets a calendar
    * @apiName GetCalendarById
    * @apiDescription Gets calendar by id
    *
    * @apiSchema (params) calendarIdsSchema
    */
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarIds}`,
-      validate: {
-        params: calendarIdsSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetCalendars'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      let returnValue;
-      try {
-        const calendarIds = request.params.calendarIds.split(',');
-
-        if (calendarIds.length === 1) {
-          returnValue = await getCalendar(mlClient, calendarIds[0]);
-        } else {
-          returnValue = await getCalendarsByIds(mlClient, calendarIds);
-        }
-
-        return response.ok({
-          body: returnValue,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: calendarIdsSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        let returnValue;
+        try {
+          const calendarIds = request.params.calendarIds.split(',');
+
+          if (calendarIds.length === 1) {
+            returnValue = await getCalendar(mlClient, calendarIds[0]);
+          } else {
+            returnValue = await getCalendarsByIds(mlClient, calendarIds);
+          }
+
+          return response.ok({
+            body: returnValue,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup Calendars
    *
-   * @api {put} /api/ml/calendars Creates a calendar
+   * @api {put} /internal/ml/calendars Creates a calendar
    * @apiName PutCalendars
    * @apiDescription Creates a calendar
    *
    * @apiSchema (body) calendarSchema
    */
-  router.put(
-    {
+  router.versioned
+    .put({
       path: `${ML_INTERNAL_BASE_PATH}/calendars`,
-      validate: {
-        body: calendarSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateCalendar'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const body = request.body;
-        // @ts-expect-error event interface incorrect
-        const resp = await newCalendar(mlClient, body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: calendarSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const body = request.body;
+          // @ts-expect-error event interface incorrect
+          const resp = await newCalendar(mlClient, body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup Calendars
    *
-   * @api {put} /api/ml/calendars/:calendarId Updates a calendar
+   * @api {put} /internal/ml/calendars/:calendarId Updates a calendar
    * @apiName UpdateCalendarById
    * @apiDescription Updates a calendar
    *
    * @apiSchema (params) calendarIdSchema
    * @apiSchema (body) calendarSchema
    */
-  router.put(
-    {
+  router.versioned
+    .put({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
-      validate: {
-        params: calendarIdSchema,
-        body: calendarSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateCalendar'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const { calendarId } = request.params;
-        const body = request.body;
-        // @ts-expect-error event interface incorrect
-        const resp = await updateCalendar(mlClient, calendarId, body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: calendarIdSchema,
+            body: calendarSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const { calendarId } = request.params;
+          const body = request.body;
+          // @ts-expect-error event interface incorrect
+          const resp = await updateCalendar(mlClient, calendarId, body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup Calendars
    *
-   * @api {delete} /api/ml/calendars/:calendarId Deletes a calendar
+   * @api {delete} /internal/ml/calendars/:calendarId Deletes a calendar
    * @apiName DeleteCalendarById
    * @apiDescription Deletes a calendar
    *
    * @apiSchema (params) calendarIdSchema
    */
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
-      validate: {
-        params: calendarIdSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canDeleteCalendar'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const { calendarId } = request.params;
-        const resp = await deleteCalendar(mlClient, calendarId);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: calendarIdSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const { calendarId } = request.params;
+          const resp = await deleteCalendar(mlClient, calendarId);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }

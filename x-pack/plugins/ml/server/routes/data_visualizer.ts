@@ -36,7 +36,7 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup DataVisualizer
    *
-   * @api {post} /api/ml/data_visualizer/get_field_histograms/:indexPattern Get histograms for fields
+   * @api {post} /internal/ml/data_visualizer/get_field_histograms/:indexPattern Get histograms for fields
    * @apiName GetHistogramsForFields
    * @apiDescription Returns the histograms on a list fields in the specified index pattern.
    *
@@ -45,39 +45,46 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
    *
    * @apiSuccess {Object} fieldName histograms by field, keyed on the name of the field.
    */
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_visualizer/get_field_histograms/{indexPattern}`,
-      validate: {
-        params: indexPatternSchema,
-        body: dataVisualizerFieldHistogramsSchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetFieldInfo'],
       },
-    },
-    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const {
-          params: { indexPattern },
-          body: { query, fields, samplerShardSize, runtimeMappings },
-        } = request;
-
-        const results = await getHistogramsForFields(
-          client,
-          indexPattern,
-          query,
-          fields,
-          samplerShardSize,
-          runtimeMappings
-        );
-
-        return response.ok({
-          body: results,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: indexPatternSchema,
+            body: dataVisualizerFieldHistogramsSchema,
+          },
+        },
+      },
+      routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          const {
+            params: { indexPattern },
+            body: { query, fields, samplerShardSize, runtimeMappings },
+          } = request;
+
+          const results = await getHistogramsForFields(
+            client,
+            indexPattern,
+            query,
+            fields,
+            samplerShardSize,
+            runtimeMappings
+          );
+
+          return response.ok({
+            body: results,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }

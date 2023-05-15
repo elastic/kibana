@@ -15,35 +15,42 @@ export function jsonSchemaRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JsonSchema
    *
-   * @api {get} /api/ml/json_schema Get requested JSON schema
+   * @api {get} /internal/ml/json_schema Get requested JSON schema
    * @apiName GetJsonSchema
    * @apiDescription Retrieves the JSON schema
    */
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/json_schema`,
-      validate: {
-        query: getJsonSchemaQuerySchema,
-      },
+      access: 'internal',
       options: {
         tags: ['access:ml:canAccessML'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ request, response }) => {
-      try {
-        const jsonSchemaService = new JsonSchemaService();
-
-        const result = await jsonSchemaService.extractSchema(
-          request.query.path,
-          request.query.method
-        );
-
-        return response.ok({
-          body: result,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: getJsonSchemaQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ request, response }) => {
+        try {
+          const jsonSchemaService = new JsonSchemaService();
+
+          const result = await jsonSchemaService.extractSchema(
+            request.query.path,
+            request.query.method
+          );
+
+          return response.ok({
+            body: result,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }
