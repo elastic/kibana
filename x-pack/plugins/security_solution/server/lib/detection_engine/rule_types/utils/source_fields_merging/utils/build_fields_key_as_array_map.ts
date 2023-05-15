@@ -18,6 +18,10 @@ function traverseSource(
   result: Record<string, string[]> = {},
   prefix: string[] = []
 ): Record<string, string[]> {
+  if (prefix.length) {
+    result[prefix.join('.')] = prefix;
+  }
+
   if (isObjectTypeGuard(document)) {
     for (const [key, value] of Object.entries(document)) {
       const path = [...prefix, key];
@@ -28,17 +32,21 @@ function traverseSource(
     document.forEach((doc) => {
       traverseSource(doc, result, prefix);
     });
-  } else {
-    result[prefix.join('.')] = prefix;
   }
 
   return result;
 }
 
 /**
- * Flattens a deeply nested object to a map of dot-separated paths, including nested arrays
- * NOTE: it transforms primitive value to array, i.e. {a: b} == {a: [b]}, similarly to how fields works in ES _search query
- */
+ * takes object document and creates map of string field keys to array field keys
+ * source  `{ 'a.b': { c: { d: 1 } } }`
+ * will result in map: `{
+ *     'a.b': ['a.b'],
+ *     'a.b.c': ['a.b', 'c'],
+ *     'a.b.c.d': ['a.b', 'c', 'd'],
+ *   }`
+ * @param document - Record<string, SearchTypes>
+ **/
 export function buildFieldsKeyAsArrayMap(
   document: Record<string, SearchTypes>
 ): Record<string, string[]> {

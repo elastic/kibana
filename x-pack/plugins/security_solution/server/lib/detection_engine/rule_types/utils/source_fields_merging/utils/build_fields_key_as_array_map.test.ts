@@ -34,9 +34,15 @@ describe('buildFieldsKeyAsArrayMap()', () => {
   it('builds map for nested source', () => {
     expect(buildFieldsKeyAsArrayMap({ a: 'b' })).toEqual({ a: ['a'] });
     expect(buildFieldsKeyAsArrayMap({ a: ['b'] })).toEqual({ a: ['a'] });
-    expect(buildFieldsKeyAsArrayMap({ a: { b: { c: 1 } } })).toEqual({ 'a.b.c': ['a', 'b', 'c'] });
-    expect(buildFieldsKeyAsArrayMap({ a: { b: 'c' }, d: { e: 'f' } })).toEqual({
+    expect(buildFieldsKeyAsArrayMap({ a: { b: { c: 1 } } })).toEqual({
+      a: ['a'],
       'a.b': ['a', 'b'],
+      'a.b.c': ['a', 'b', 'c'],
+    });
+    expect(buildFieldsKeyAsArrayMap({ a: { b: 'c' }, d: { e: 'f' } })).toEqual({
+      a: ['a'],
+      'a.b': ['a', 'b'],
+      d: ['d'],
       'd.e': ['d', 'e'],
     });
   });
@@ -52,6 +58,8 @@ describe('buildFieldsKeyAsArrayMap()', () => {
 
   it('builds map for arrays in a path', () => {
     expect(buildFieldsKeyAsArrayMap({ a: { b: [{ c: 1 }, { c: 2 }] } })).toEqual({
+      a: ['a'],
+      'a.b': ['a', 'b'],
       'a.b.c': ['a', 'b', 'c'],
     });
   });
@@ -61,6 +69,10 @@ describe('buildFieldsKeyAsArrayMap()', () => {
       buildFieldsKeyAsArrayMap({
         'a.b': { c: { d: 1 } },
       })
-    ).toEqual({ 'a.b.c.d': ['a.b', 'c', 'd'] });
+    ).toEqual({
+      'a.b': ['a.b'],
+      'a.b.c': ['a.b', 'c'],
+      'a.b.c.d': ['a.b', 'c', 'd'],
+    });
   });
 });

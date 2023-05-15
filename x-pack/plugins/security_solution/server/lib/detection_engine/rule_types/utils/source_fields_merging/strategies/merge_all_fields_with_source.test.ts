@@ -1603,7 +1603,7 @@ describe('merge_all_fields_with_source', () => {
       });
     });
 
-    test('does not merge fields into source if source has nested fields', () => {
+    test('does not merge fields into source if only source has nested fields', () => {
       const _source: SignalSourceHit['_source'] = {
         'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
       };
@@ -1626,7 +1626,9 @@ describe('merge_all_fields_with_source', () => {
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
       const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
-      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        'a.b': { c: [{ d: '3 ' }, { d: '4' }] },
+      });
     });
   });
 

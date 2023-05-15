@@ -34,18 +34,3 @@ export const isPathValid = (path: string[] | string, source: SignalSource): bool
     return valueToCheck === undefined || isPlainObject(valueToCheck);
   });
 };
-
-export const isPathValidAsString = (path: string, source: SignalSource): boolean => {
-  if (!path) {
-    return false;
-  }
-  const splitPath = path.split('.');
-
-  return splitPath.every((_, index, array) => {
-    const newPath = [...array].splice(0, index + 1).join('.');
-    const valueToCheck = get(newPath, source);
-    //   console.log('.....isPathValidAsString', 'newPath', newPath, 'valueToCheck', valueToCheck);
-
-    return valueToCheck === undefined || isPlainObject(valueToCheck);
-  });
-};
