@@ -6,54 +6,58 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 
-import { INTERNAL_TAGS_URL, SECURITY_TAG_NAME } from '../../../../common/constants';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-import { getOrCreateSecurityTag } from '../helpers';
+import { createTag } from '../saved_objects';
 
-export const getSecuritySolutionTagsRoute = (
+const createTagBodySchema = schema.object({
+  name: schema.string(),
+  description: schema.string(),
+  color: schema.maybe(schema.string()),
+});
+
+export const createTagRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
   security: SetupPlugins['security']
 ) => {
-  router.get(
+  router.put(
     {
       path: INTERNAL_TAGS_URL,
-      validate: false,
+      validate: { body: createTagBodySchema },
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-
       const frameworkRequest = await buildFrameworkRequest(context, security, request);
       const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
-
-      const { response: tags, error } = await getOrCreateSecurityTag({
-        logger,
-        savedObjectsClient,
-      });
-
-      if (tags && !error) {
-        return response.ok({
-          body: tags.map(({ id, attributes: { name, description, color } }) => ({
-            id,
-            name,
-            description,
-            color,
-          })),
+      const { name: tagName, description, color } = request.body;
+      try {
+        const tag = await createTag({
+          savedObjectsClient,
+          tagName,
+          description,
+          color,
         });
-      } else {
+        return response.ok({ body: tag });
+      } catch (err) {
+        const error = transformError(err);
+        logger.error(`Failed to create ${tagName} tag - ${JSON.stringify(error.message)}`);
+
+        const siemResponse = buildSiemResponse(response);
         return siemResponse.error({
-          statusCode: error?.statusCode ?? 500,
+          statusCode: error.statusCode ?? 500,
           body: i18n.translate(
-            'xpack.securitySolution.dashboards.getSecuritySolutionTagsErrorTitle',
+            'xpack.securitySolution.dashboards.createSecuritySolutionTagErrorTitle',
             {
-              values: { tagName: SECURITY_TAG_NAME, message: error?.message },
+              values: { tagName, message: error.message },
               defaultMessage: `Failed to create {tagName} tag - {message}`,
             }
           ),

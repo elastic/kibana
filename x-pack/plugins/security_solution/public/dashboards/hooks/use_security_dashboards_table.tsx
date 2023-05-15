@@ -5,46 +5,32 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { MouseEventHandler } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { getSecurityDashboards } from './utils';
-import { LinkAnchor } from '../../components/links';
-import { useKibana, useNavigateTo } from '../../lib/kibana';
+import { LinkAnchor } from '../../common/components/links';
+import { useKibana, useNavigateTo } from '../../common/lib/kibana';
 import * as i18n from './translations';
-import { useFetch, REQUEST_NAMES } from '../../hooks/use_fetch';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
-import { SecurityPageName } from '../../../../common/constants';
-import { useGetSecuritySolutionUrl } from '../../components/link_to';
-
-import type { DashboardTableItem } from './types';
-
-const EMPTY_DESCRIPTION = '-' as const;
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
+import { SecurityPageName } from '../../../common/constants';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { useFetchSecurityDashboards } from '../containers/use_fetch_security_dashboards';
+import { getEmptyValue } from '../../common/components/empty_value';
+import type { DashboardTableItem } from '../types';
 
 export const useSecurityDashboardsTableItems = () => {
-  const { http } = useKibana().services;
-
-  const { fetch, data, isLoading, error } = useFetch(
-    REQUEST_NAMES.SECURITY_DASHBOARDS,
-    getSecurityDashboards
-  );
-
-  useEffect(() => {
-    if (http) {
-      fetch(http);
-    }
-  }, [fetch, http]);
+  const { dashboards, isLoading, error } = useFetchSecurityDashboards();
 
   const items = useMemo(() => {
-    if (!data) {
+    if (!dashboards) {
       return [];
     }
-    return data.map((securityDashboard) => ({
+    return dashboards.map((securityDashboard) => ({
       ...securityDashboard,
       title: securityDashboard.attributes.title?.toString() ?? undefined,
       description: securityDashboard.attributes.description?.toString() ?? undefined,
     }));
-  }, [data]);
+  }, [dashboards]);
 
   return { items, isLoading, error };
 };
@@ -91,7 +77,7 @@ export const useSecurityDashboardsTableColumns = (): Array<
         field: 'description',
         name: i18n.DASHBOARDS_DESCRIPTION,
         sortable: true,
-        render: (description: string) => description || EMPTY_DESCRIPTION,
+        render: (description: string) => description || getEmptyValue(),
         'data-test-subj': 'dashboardTableDescriptionCell',
       },
       // adds the tags table column based on the saved object items

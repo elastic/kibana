@@ -5,19 +5,6 @@
  * 2.0.
  */
 
-import { SECURITY_TAG_NAME, SECURITY_TAG_DESCRIPTION } from '../../../../../../common/constants';
-
-export const MOCK_TAG_ID = 'securityTagId';
-
-export const DEFAULT_TAGS_RESPONSE = [
-  {
-    id: MOCK_TAG_ID,
-    name: SECURITY_TAG_NAME,
-    description: SECURITY_TAG_DESCRIPTION,
-    color: '#2c7b82',
-  },
-];
-
 export const DEFAULT_DASHBOARDS_RESPONSE = [
   {
     type: 'dashboard',
@@ -44,10 +31,6 @@ export const DEFAULT_DASHBOARDS_RESPONSE = [
   },
 ];
 
-export const getSecuritySolutionTags = jest
-  .fn()
-  .mockImplementation(() => Promise.resolve(DEFAULT_TAGS_RESPONSE));
-
-export const getSecuritySolutionDashboards = jest
+export const getDashboardsByTagIds = jest
   .fn()
   .mockImplementation(() => Promise.resolve(DEFAULT_DASHBOARDS_RESPONSE));
