@@ -45,7 +45,8 @@ paths:
                 - $ref: '#/components/schemas/create_connector_request_servicenow'
                 - $ref: '#/components/schemas/create_connector_request_servicenow_itom'
                 - $ref: '#/components/schemas/create_connector_request_servicenow_sir'
-                - $ref: '#/components/schemas/create_connector_request_slack'
+                - $ref: '#/components/schemas/create_connector_request_slack_api'
+                - $ref: '#/components/schemas/create_connector_request_slack_webhook'
                 - $ref: '#/components/schemas/create_connector_request_swimlane'
                 - $ref: '#/components/schemas/create_connector_request_teams'
                 - $ref: '#/components/schemas/create_connector_request_tines'
@@ -147,6 +148,68 @@ paths:
                     example: 404
       servers:
         - url: https://localhost:5601
+    post:
+      summary: Creates a connector.
+      operationId: createConnectorId
+      description: |
+        You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+      tags:
+        - connectors
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - in: path
+          name: connectorId
+          description: A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated.
+          required: true
+          schema:
+            type: string
+            example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Create connector request body properties
+              description: The properties vary depending on the connector type.
+              oneOf:
+                - $ref: '#/components/schemas/create_connector_request_cases_webhook'
+                - $ref: '#/components/schemas/create_connector_request_email'
+                - $ref: '#/components/schemas/create_connector_request_index'
+                - $ref: '#/components/schemas/create_connector_request_jira'
+                - $ref: '#/components/schemas/create_connector_request_opsgenie'
+                - $ref: '#/components/schemas/create_connector_request_pagerduty'
+                - $ref: '#/components/schemas/create_connector_request_resilient'
+                - $ref: '#/components/schemas/create_connector_request_serverlog'
+                - $ref: '#/components/schemas/create_connector_request_servicenow'
+                - $ref: '#/components/schemas/create_connector_request_servicenow_itom'
+                - $ref: '#/components/schemas/create_connector_request_servicenow_sir'
+                - $ref: '#/components/schemas/create_connector_request_slack_api'
+                - $ref: '#/components/schemas/create_connector_request_slack_webhook'
+                - $ref: '#/components/schemas/create_connector_request_swimlane'
+                - $ref: '#/components/schemas/create_connector_request_teams'
+                - $ref: '#/components/schemas/create_connector_request_tines'
+                - $ref: '#/components/schemas/create_connector_request_webhook'
+                - $ref: '#/components/schemas/create_connector_request_xmatters'
+              discriminator:
+                propertyName: connector_type_id
+            examples:
+              createIndexConnectorRequest:
+                $ref: '#/components/examples/create_index_connector_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connector_response_properties'
+              examples:
+                createIndexConnectorResponse:
+                  $ref: '#/components/examples/create_index_connector_response'
+        '401':
+          $ref: '#/components/responses/401'
+      servers:
+        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: updateConnector
@@ -174,7 +237,8 @@ paths:
                 - $ref: '#/components/schemas/update_connector_request_serverlog'
                 - $ref: '#/components/schemas/update_connector_request_servicenow'
                 - $ref: '#/components/schemas/update_connector_request_servicenow_itom'
-                - $ref: '#/components/schemas/update_connector_request_slack'
+                - $ref: '#/components/schemas/update_connector_request_slack_api'
+                - $ref: '#/components/schemas/update_connector_request_slack_webhook'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
             examples:
               updateIndexConnectorRequest:
@@ -1298,25 +1362,48 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
-    secrets_properties_slack:
-      title: Connector secrets properties for a Slack connector
+    secrets_properties_slack_api:
+      title: Connector secrets properties for a Web API Slack connector
       description: Defines secrets for connectors when type is `.slack`.
-      oneOf:
-        - type: object
-          required:
-            - token
-          properties:
-            token:
-              type: string
-              description: The Slack bot user OAuth token.
-        - type: object
-          required:
-            - webhookUrl
-          properties:
-            webhookUrl:
-              type: string
-              description: The Slack webhook url.
-    create_connector_request_slack:
+      required:
+        - token
+      type: object
+      properties:
+        token:
+          type: string
+          description: Slack bot user OAuth token.
+    create_connector_request_slack_api:
+      title: Create Slack connector request
+      description: The Slack connector uses Slack Incoming Webhooks.
+      type: object
+      required:
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .slack_api
+          example: .slack_api
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_slack_api'
+    secrets_properties_slack_webhook:
+      title: Connector secrets properties for a Webhook Slack connector
+      description: Defines secrets for connectors when type is `.slack`.
+      required:
+        - webhookUrl
+      type: object
+      properties:
+        webhookUrl:
+          type: string
+          description: Slack webhook url.
+    create_connector_request_slack_webhook:
       title: Create Slack connector request
       description: The Slack connector uses Slack Incoming Webhooks.
       type: object
@@ -1336,7 +1423,7 @@ components:
           description: The display name for the connector.
           example: my-connector
         secrets:
-          $ref: '#/components/schemas/secrets_properties_slack'
+          $ref: '#/components/schemas/secrets_properties_slack_webhook'
     config_properties_swimlane:
       title: Connector request properties for a Swimlane connector
       required:
@@ -2024,33 +2111,6 @@ components:
         name:
           type: string
           description: The display name for the connector.
-    connector_response_properties_slack_webhook:
-      title: Connector response properties for a Slack connector
-      type: object
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-      properties:
-        connector_type_id:
-          type: string
-          description: The type of connector.
-          enum:
-            - .slack
-        id:
-          type: string
-          description: The identifier for the connector.
-        is_deprecated:
-          $ref: '#/components/schemas/is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/is_preconfigured'
-        name:
-          type: string
-          description: The display name for the connector.
     connector_response_properties_slack_api:
       title: Connector response properties for a Slack connector
       type: object
@@ -2066,6 +2126,33 @@ components:
           description: The type of connector.
           enum:
             - .slack_api
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
+    connector_response_properties_slack_webhook:
+      title: Connector response properties for a Slack connector
+      type: object
+      required:
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .slack
         id:
           type: string
           description: The identifier for the connector.
@@ -2240,7 +2327,8 @@ components:
         - $ref: '#/components/schemas/connector_response_properties_servicenow'
         - $ref: '#/components/schemas/connector_response_properties_servicenow_itom'
         - $ref: '#/components/schemas/connector_response_properties_servicenow_sir'
-        - $ref: '#/components/schemas/connector_response_properties_slack'
+        - $ref: '#/components/schemas/connector_response_properties_slack_api'
+        - $ref: '#/components/schemas/connector_response_properties_slack_webhook'
         - $ref: '#/components/schemas/connector_response_properties_swimlane'
         - $ref: '#/components/schemas/connector_response_properties_teams'
         - $ref: '#/components/schemas/connector_response_properties_tines'
@@ -2359,7 +2447,7 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
-    update_connector_request_slack:
+    update_connector_request_slack_api:
       title: Update Slack connector request
       type: object
       required:
@@ -2369,13 +2457,24 @@ components:
         name:
           type: string
           description: The display name for the connector.
-        config:
-          type: string
-          enum:
-            - web_api
-            - webhook
         secrets:
-          $ref: '#/components/schemas/secrets_properties_slack'
+          type: object
+          description: The secrets object containing the necessary fields for authentication.
+          $ref: '#/components/schemas/secrets_properties_slack_api'
+    update_connector_request_slack_webhook:
+      title: Update Slack connector request
+      type: object
+      required:
+        - name
+        - secrets
+      properties:
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          type: object
+          description: The secrets object containing the necessary fields for authentication.
+          $ref: '#/components/schemas/secrets_properties_slack_webhook'
     update_connector_request_swimlane:
       title: Update Swimlane connector request
       type: object

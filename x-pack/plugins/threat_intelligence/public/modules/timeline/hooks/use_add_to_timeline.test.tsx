@@ -13,7 +13,7 @@ import {
   Indicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
-import { useAddToTimeline, UseAddToTimelineValue } from '.';
+import { useAddToTimeline, UseAddToTimelineValue } from './use_add_to_timeline';
 
 describe('useInvestigateInTimeline()', () => {
   let hookResult: RenderHookResult<{}, UseAddToTimelineValue, Renderer<unknown>>;
