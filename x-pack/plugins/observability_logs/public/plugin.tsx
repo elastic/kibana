@@ -6,15 +6,15 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import React from 'react';
-import { IntegrationsService } from './services/integrations';
+import { createLazyCustomDataStreamSelector } from './customizations';
+import { DataStreamsService } from './services/data_streams';
 import { ObservabilityLogsClientPluginClass, ObservabilityLogsStartDeps } from './types';
 
 export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginClass {
-  private integrationsService: IntegrationsService;
+  private dataStreamsService: DataStreamsService;
 
   constructor() {
-    this.integrationsService = new IntegrationsService();
+    this.dataStreamsService = new DataStreamsService();
   }
 
   public setup() {}
@@ -24,29 +24,24 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
 
     const getStartServices = () => ({ core, plugins, pluginStart });
 
-    const integrationsService = this.integrationsService.start({
+    const dataStreamsService = this.dataStreamsService.start({
       http: core.http,
     });
 
     const pluginStart = {
-      integrationsService,
+      dataStreamsService,
     };
 
     /**
      * Replace the DataViewPicker with a custom DataStreamSelector to access only integrations streams
      */
     discover.customize('observability-logs', async ({ customizations, stateContainer }) => {
-      const { CustomDataStreamSelector } = await import(
-        './customizations/custom_data_stream_selector'
-      );
-
       customizations.set({
         id: 'search_bar',
-        CustomDataViewPicker: () => {
-          return (
-            <CustomDataStreamSelector {...getStartServices()} stateContainer={stateContainer} />
-          );
-        },
+        CustomDataViewPicker: createLazyCustomDataStreamSelector({
+          ...getStartServices(),
+          stateContainer,
+        }),
       });
 
       /**

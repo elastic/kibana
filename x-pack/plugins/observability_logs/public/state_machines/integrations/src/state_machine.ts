@@ -6,8 +6,8 @@
  */
 
 import { catchError, from, map, of } from 'rxjs';
-import { actions, createMachine } from 'xstate';
-import { IIntegrationsClient } from '../../../services/integrations';
+import { actions, assign, createMachine } from 'xstate';
+import { IDataStreamsClient } from '../../../services/data_streams';
 import {
   DefaultIntegrationsContext,
   IntegrationsContext,
@@ -91,18 +91,34 @@ export const createPureIntegrationsStateMachine = (
         notifyLoadingStarted: actions.pure(() => undefined),
         notifyLoadingSucceeded: actions.pure(() => undefined),
         notifyLoadingFailed: actions.pure(() => undefined),
+        storeIntegrations: assign((context, event) =>
+          'data' in event
+            ? {
+                integrations: event.data.items,
+                total: event.data.total,
+                pageAfter: event.data.pageAfter,
+              }
+            : {}
+        ),
+        storeError: assign((_context, event) =>
+          'error' in event
+            ? {
+                error: event.error,
+              }
+            : {}
+        ),
       },
     }
   );
 
 export interface IntegrationsStateMachineDependencies {
   initialContext?: IntegrationsContext;
-  integrationsClient: IIntegrationsClient;
+  dataStreamsClient: IDataStreamsClient;
 }
 
 export const createIntegrationStateMachine = ({
   initialContext,
-  integrationsClient,
+  dataStreamsClient,
 }: IntegrationsStateMachineDependencies) =>
   createPureIntegrationsStateMachine(initialContext).withConfig({
     actions: {},
@@ -110,14 +126,13 @@ export const createIntegrationStateMachine = ({
       loadIntegrations: (_context, event) =>
         from(
           'search' in event
-            ? integrationsClient.findIntegrations(event.search)
-            : integrationsClient.findIntegrations()
+            ? dataStreamsClient.findIntegrations(event.search)
+            : dataStreamsClient.findIntegrations()
         ).pipe(
           map(
             (data): IntegrationsEvent => ({
               type: 'LOADING_SUCCEEDED',
-              integrations: data.items,
-              page: data.pageAfter,
+              data,
             })
           ),
           catchError((error) =>

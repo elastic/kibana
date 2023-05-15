@@ -10,22 +10,10 @@ import type { CustomDataStreamSelectorBuilderProps } from './custom_data_stream_
 
 const LazyCustomDataStreamSelector = lazy(() => import('./custom_data_stream_selector'));
 
-export function createLazyCustomDataStreamSelector({
-  core,
-  plugins,
-  pluginStart,
-  stateContainer,
-}: CustomDataStreamSelectorBuilderProps) {
-  return () => {
-    return (
-      <Suspense fallback={null}>
-        <LazyCustomDataStreamSelector
-          core={core}
-          plugins={plugins}
-          pluginStart={pluginStart}
-          stateContainer={stateContainer}
-        />
-      </Suspense>
-    );
-  };
+export function createLazyCustomDataStreamSelector(props: CustomDataStreamSelectorBuilderProps) {
+  return () => (
+    <Suspense fallback={null}>
+      <LazyCustomDataStreamSelector {...props} />
+    </Suspense>
+  );
 }

@@ -6,11 +6,11 @@
  */
 import type { Plugin } from '@kbn/core/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import { IntegrationsServiceStart } from './services/integrations';
+import { DataStreamsServiceStart } from './services/data_streams';
 
 export type ObservabilityLogsPluginSetup = void;
 export interface ObservabilityLogsPluginStart {
-  integrationsService: IntegrationsServiceStart;
+  dataStreamsService: DataStreamsServiceStart;
 }
 
 export interface ObservabilityLogsStartDeps {
