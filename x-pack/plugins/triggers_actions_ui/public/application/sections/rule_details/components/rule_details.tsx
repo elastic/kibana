@@ -375,8 +375,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                             content={i18n.translate(
                               'xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey',
                               {
-                                defaultMessage:
-                                  'This rule is associated with an API key.  Modifying this rule with either remove or switch the API key owner.',
+                                defaultMessage: 'This rule is associated with an API key.',
                               }
                             )}
                           />
