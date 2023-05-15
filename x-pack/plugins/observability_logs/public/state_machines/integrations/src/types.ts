@@ -10,7 +10,9 @@ import { Integration } from '../../../../common/data_streams';
 export interface DefaultIntegrationsContext {
   integrations: Integration[] | null;
   error: Error | null;
-  page: PageAfter;
+  search?: {
+    pageAfter?: PageAfter;
+  };
 }
 
 export interface IntegrationsSearchParams {

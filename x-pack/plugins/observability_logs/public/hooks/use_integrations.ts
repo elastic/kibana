@@ -19,6 +19,7 @@ interface IntegrationsContextDeps {
 }
 
 export type SearchIntegrations = (params: IntegrationsSearchParams) => void;
+export type LoadMoreIntegrations = () => void;
 
 const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   const integrationsStateService = useInterpret(() =>
@@ -36,6 +37,9 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   );
 
   const isLoading = useSelector(integrationsStateService, (state) => state.matches('loading'));
+  const isLoadingMore = useSelector(integrationsStateService, (state) =>
+    state.matches('loadingMore')
+  );
 
   const hasFailedLoading = useSelector(integrationsStateService, (state) =>
     state.matches('loadingFailed')
@@ -66,6 +70,7 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
     // Loading states
     isUninitialized,
     isLoading,
+    isLoadingMore,
 
     // Data
     integrations,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { RefCallback, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
   EuiSkeletonLoading,
@@ -28,6 +29,7 @@ import {
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 
+import useIntersection from 'react-use/lib/useIntersection';
 import {
   contextMenuStyles,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -44,16 +46,19 @@ import { getPopoverButtonStyles } from './data_stream_selector.utils';
 import { useBoolean } from '../../hooks/use_boolean';
 
 import type { DataStream, Integration } from '../../../common/data_streams';
-import { SearchIntegrations } from '../../hooks/use_integrations';
+import { LoadMoreIntegrations, SearchIntegrations } from '../../hooks/use_integrations';
 export interface DataStreamSelectorProps {
   title: string;
   integrations: Integration[] | null;
   uncategorizedStreams: any[];
   isSearching: boolean;
   isLoadingIntegrations: boolean;
+  isLoadingMoreIntegrations: boolean;
   isLoadingUncategorizedStreams: boolean;
   /* Triggered when a search or sorting is performed */
   onSearch: SearchIntegrations;
+  /* Triggered when we reach the bottom of the integration list and want to load more */
+  onLoadMore: LoadMoreIntegrations;
   /* Triggered when the uncategorized streams entry is selected */
   onUncategorizedClick: () => void;
   /* Triggered when a data stream entry is selected */
@@ -73,15 +78,34 @@ export function DataStreamSelector({
   uncategorizedStreams,
   isSearching,
   isLoadingIntegrations,
+  isLoadingMoreIntegrations,
   isLoadingUncategorizedStreams,
   onSearch,
+  onLoadMore,
   onStreamSelected,
   onUncategorizedClick,
 }: DataStreamSelectorProps) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
+  const [loadMoreSpyRef, setRef] = useState<HTMLButtonElement | null>(null);
+
+  const loadMoreSpyIntersection = useIntersection(
+    { current: loadMoreSpyRef },
+    { root: null, threshold: 0.5 }
+  );
+
+  useEffect(() => {
+    if (loadMoreSpyIntersection?.isIntersecting) {
+      onLoadMore();
+    }
+  }, [loadMoreSpyIntersection, onLoadMore]);
+
   const [currentPanel, setCurrentPanel] = useState<CurrentPanelId>(INTEGRATION_PANEL_ID);
+
+  const handlePanelChange = ({ panelId }: { panelId: CurrentPanelId }) => {
+    setCurrentPanel(panelId);
+  };
 
   const handleStreamSelection = useCallback<StreamSelectionHandler>(
     (dataStream) => {
@@ -107,8 +131,8 @@ export function DataStreamSelector({
 
     const { items, panels } = buildIntegrationsTree({
       list: integrations,
-      onItemClick: setCurrentPanel,
       onStreamSelected: handleStreamSelection,
+      spyRef: setRef,
     });
 
     return {
@@ -161,6 +185,7 @@ export function DataStreamSelector({
           <EuiContextMenu
             initialPanelId={currentPanel}
             panels={panels}
+            // onPanelChange={handlePanelChange}
             className="eui-yScroll"
             css={contextMenuStyles}
           />
@@ -262,20 +287,20 @@ interface IntegrationsTree {
 
 interface IntegrationsTreeParams {
   list: Integration[];
-  onItemClick: (id: CurrentPanelId) => void;
   onStreamSelected: StreamSelectionHandler;
+  spyRef: RefCallback<HTMLButtonElement>;
 }
 
-const buildIntegrationsTree = ({ list, onItemClick, onStreamSelected }: IntegrationsTreeParams) => {
+const buildIntegrationsTree = ({ list, onStreamSelected, spyRef }: IntegrationsTreeParams) => {
   return list.reduce(
-    (res: IntegrationsTree, entry) => {
+    (res: IntegrationsTree, entry, pos) => {
       const entryId: CurrentPanelId = `integration-${entry.name}`;
 
       res.items.push({
         name: entry.name,
-        onClick: () => onItemClick(entryId),
         icon: <PackageIcon packageName={entry.name} version={entry.version} size="m" tryApi />,
         panel: entryId,
+        buttonRef: pos === list.length - 1 ? spyRef : undefined,
       });
 
       res.panels.push({
