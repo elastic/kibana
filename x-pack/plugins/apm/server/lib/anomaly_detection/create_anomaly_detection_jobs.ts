@@ -106,7 +106,7 @@ async function createAnomalyDetectionJob({
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuidv4().substr(-4);
 
-    const anomalyDetectionJob = mlClient.modules.setup({
+    const anomalyDetectionJob = await mlClient.modules.setup({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
@@ -135,6 +135,15 @@ async function createAnomalyDetectionJob({
         },
       ],
     });
+
+    const hasErrors = anomalyDetectionJob.jobs.some((job) => !job.success);
+    if (hasErrors) {
+      throw new Error(
+        `An error occurred while creating ML jobs for environment ${environment}: ${JSON.stringify(
+          anomalyDetectionJob.jobs
+        )}`
+      );
+    }
 
     await waitForIndexStatus({
       client: esClient,
