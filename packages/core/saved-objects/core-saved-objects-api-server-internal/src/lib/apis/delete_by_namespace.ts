@@ -14,8 +14,8 @@ import {
   getRootPropertiesObjects,
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
-import { getSearchDsl } from '../search_dsl';
 
 export interface PerformDeleteByNamespaceParams<T = unknown> {
   namespace: string;
