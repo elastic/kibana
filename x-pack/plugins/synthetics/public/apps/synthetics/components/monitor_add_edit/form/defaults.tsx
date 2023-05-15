@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { formatKibanaNamespace } from '../../../../../../common/formatters';
+import { INVALID_NAMESPACE_CHARACTERS } from '@kbn/fleet-plugin/common';
 import { DEFAULT_FIELDS } from '../constants';
+
+/* Formats kibana space id into a valid Fleet-compliant data-stream namespace */
+export const formatKibanaNamespace = (spaceId: string) => {
+  const namespaceRegExp = new RegExp(INVALID_NAMESPACE_CHARACTERS, 'g');
+  return spaceId.replace(namespaceRegExp, '_');
+};
+
 import {
   ConfigKey,
   DataStream,

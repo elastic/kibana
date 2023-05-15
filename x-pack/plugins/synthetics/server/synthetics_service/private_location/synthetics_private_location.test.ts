@@ -7,7 +7,6 @@
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
-import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import {
   DataStream,
   MonitorFields,
@@ -18,6 +17,7 @@ import {
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocation = {
