@@ -426,7 +426,7 @@ We can’t use the temporary index as our target index because one instance can 
 
 ## OUTDATED_DOCUMENTS_SEARCH
 ### Next action
-`searchForOutdatedDocuments`
+`readWithPit(outdatedDocumentsQuery)`
 
 Search for outdated saved object documents. Will return one batch of
 documents.
