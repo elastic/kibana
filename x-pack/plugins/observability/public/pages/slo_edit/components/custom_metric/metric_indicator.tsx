@@ -210,6 +210,7 @@ export function MetricIndicator({
                 defaultMessage="Add metric"
               />
             </EuiButtonEmpty>
+            <EuiSpacer size="m" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
