@@ -62,9 +62,6 @@ import {
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
-// BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
-// so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
-
 const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
 describe('SavedObjectsRepository Spaces Extension', () => {

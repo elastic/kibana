@@ -10,15 +10,17 @@ import React from 'react';
 import { generateMockFileIndicator, Indicator } from '../../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { TakeAction } from './take_action';
+import { TAKE_ACTION_BUTTON_TEST_ID } from './test_ids';
 
 describe('TakeAction', () => {
   it('should render an EuiContextMenuPanel', () => {
     const indicator: Indicator = generateMockFileIndicator();
-    const component = render(
+    const { getByTestId, getAllByText } = render(
       <TestProvidersComponent>
         <TakeAction indicator={indicator} />
       </TestProvidersComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TAKE_ACTION_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getAllByText('Take action')).toHaveLength(1);
   });
 });
