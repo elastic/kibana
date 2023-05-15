@@ -101,9 +101,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const { isK8s, isCSP } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
 
-  console.log('isK8S: ', isK8s);
-  console.log('isCSP: ', isCSP);
-
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">

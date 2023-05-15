@@ -60,4 +60,5 @@ export interface InstructionProps extends BaseProps {
   setSelectedAPIKeyId: (key?: string) => void;
   fleetServerHosts: string[];
   fleetProxy?: FleetProxy;
+  cloudFormationTemplateUrl?: string;
 }

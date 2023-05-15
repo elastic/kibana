@@ -14,11 +14,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 
-import {
-  fullAgentPolicyToYaml,
-  agentPolicyRouteService,
-  getCloudFormationTemplateUrlFromPackagePolicy,
-} from '../../../services';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
@@ -40,6 +36,7 @@ import {
   ConfigureStandaloneAgentStep,
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
+  InstallCloudFormationManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
@@ -203,6 +200,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   isCSP,
   installedPackagePolicy,
+  cloudFormationTemplateUrl,
 }) => {
   const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
@@ -224,8 +222,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   });
 
   const instructionsSteps = useMemo(() => {
-    const cloudFormationTemplateUrl = getCloudFormationTemplateUrlFromPackagePolicy(selectedPolicy);
-
     const steps: EuiContainedStepProps[] = !agentPolicy
       ? [
           AgentPolicySelectionStep({
@@ -251,17 +247,28 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       );
     }
 
-    steps.push(
-      InstallManagedAgentStep({
-        installCommand: installManagedCommands,
-        apiKeyData,
-        selectedApiKeyId,
-        isK8s,
-        isCSP,
-        enrollToken,
-        cloudFormationTemplateUrl,
-      })
-    );
+    if (cloudFormationTemplateUrl) {
+      steps.push(
+        InstallCloudFormationManagedAgentStep({
+          apiKeyData,
+          selectedApiKeyId,
+          enrollToken,
+          cloudFormationTemplateUrl,
+        })
+      );
+    } else {
+      steps.push(
+        InstallManagedAgentStep({
+          installCommand: installManagedCommands,
+          apiKeyData,
+          selectedApiKeyId,
+          isK8s,
+          isCSP,
+          enrollToken,
+        })
+      );
+    }
+
     if (selectedApiKeyId && apiKeyData) {
       steps.push(
         AgentEnrollmentConfirmationStep({
@@ -306,6 +313,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     link,
     agentDataConfirmed,
     installedPackagePolicy,
+    cloudFormationTemplateUrl,
   ]);
 
   return <EuiSteps steps={instructionsSteps} />;
