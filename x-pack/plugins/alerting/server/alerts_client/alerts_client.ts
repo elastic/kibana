@@ -17,9 +17,10 @@ import {
   RuleAlertData,
   RulesSettingsFlappingProperties,
 } from '../types';
-import { IAlertsClient, LegacyAlertsClient, ProcessAndLogAlertsOpts } from './legacy_alerts_client';
+import { LegacyAlertsClient } from './legacy_alerts_client';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import { IAlertsClient, InitializeExecutionOpts, ProcessAndLogAlertsOpts } from './types';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -67,21 +68,12 @@ export class AlertsClient<
       LegacyContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >({
-      logger: this.options.logger,
-      maxAlerts: this.options.maxAlerts,
-      ruleType: this.options.ruleType,
-      ruleLabel: this.options.ruleLabel,
-      ruleTypeState: this.options.ruleTypeState,
-    });
+    >({ logger: this.options.logger, ruleType: this.options.ruleType });
     this.fetchedAlerts = { indices: {}, data: {} };
   }
 
-  public async initialize(
-    activeAlertsFromState: Record<string, RawAlertInstance>,
-    recoveredAlertsFromState: Record<string, RawAlertInstance>
-  ) {
-    await this.legacyAlertsClient.initialize(activeAlertsFromState, recoveredAlertsFromState);
+  public async initializeExecution(opts: InitializeExecutionOpts) {
+    await this.legacyAlertsClient.initializeExecution(opts);
 
     // Get tracked alert UUIDs to query for
     // TODO - we can consider refactoring to store the previous execution UUID and query
@@ -141,7 +133,7 @@ export class AlertsClient<
     }
   }
 
-  public async search(queryBody: SearchRequest) {
+  public async search(queryBody: SearchRequest['body']) {
     const context = this.options.ruleType.alerts?.context;
     const esClient = await this.options.elasticsearchClientPromise;
 

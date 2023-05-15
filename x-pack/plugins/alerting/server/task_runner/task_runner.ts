@@ -287,39 +287,6 @@ export class TaskRunner<
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
-    const alertsClientParams = {
-      logger: this.logger,
-      maxAlerts: this.maxAlerts,
-      ruleType: this.ruleType as UntypedNormalizedRuleType,
-      ruleLabel,
-      activeAlertsFromState: alertRawInstances,
-      recoveredAlertsFromState: alertRecoveredRawInstances,
-      ruleTypeState,
-    };
-
-    // Create AlertsClient if rule type has registered an alerts context
-    // with the framework. The AlertsClient will handle reading and
-    // writing from alerts-as-data indices and eventually
-    // we will want to migrate all the processing of alerts out
-    // of the LegacyAlertsClient and into the AlertsClient.
-    const alertsClient =
-      (await this.context.alertsService?.createAlertsClient<
-        AlertData,
-        State,
-        Context,
-        ActionGroupIds,
-        RecoveryActionGroupId
-      >({
-        ...alertsClientParams,
-        namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
-        rule: this.getAADRuleData(rule, spaceId),
-      })) ??
-      new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-        alertsClientParams
-      );
-
-    await alertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
-
     const wrappedClientOptions = {
       rule: {
         name: rule.name,
@@ -359,6 +326,40 @@ export class TaskRunner<
     if (maintenanceWindowIds.length) {
       this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
     }
+
+    const alertsClientParams = {
+      logger: this.logger,
+      ruleType: this.ruleType as UntypedNormalizedRuleType,
+    };
+
+    // Create AlertsClient if rule type has registered an alerts context
+    // with the framework. The AlertsClient will handle reading and
+    // writing from alerts-as-data indices and eventually
+    // we will want to migrate all the processing of alerts out
+    // of the LegacyAlertsClient and into the AlertsClient.
+    const alertsClient =
+      (await this.context.alertsService?.createAlertsClient<
+        AlertData,
+        State,
+        Context,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >({
+        ...alertsClientParams,
+        namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
+        rule: this.getAADRuleData(rule, spaceId),
+      })) ??
+      new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+        alertsClientParams
+      );
+
+    await alertsClient.initializeExecution({
+      maxAlerts: this.maxAlerts,
+      ruleLabel,
+      activeAlertsFromState: alertRawInstances,
+      recoveredAlertsFromState: alertRecoveredRawInstances,
+      maintenanceWindowIds,
+    });
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,

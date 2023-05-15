@@ -18,59 +18,17 @@ import {
   setFlapping,
   getAlertsForNotification,
 } from '../lib';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { logAlerts } from '../task_runner/log_alerts';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RawAlertInstance,
-  WithoutReservedActionGroups,
-  RuleNotifyWhenType,
-  RuleTypeState,
-} from '../types';
+import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
-
-export interface ProcessAndLogAlertsOpts {
-  eventLogger: AlertingEventLogger;
-  shouldLogAlerts: boolean;
-  ruleRunMetricsStore: RuleRunMetricsStore;
-  flappingSettings: RulesSettingsFlappingProperties;
-  notifyWhen: RuleNotifyWhenType | null;
-  maintenanceWindowIds?: string[];
-}
-
-export interface IAlertsClient<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  initialize(
-    activeAlertsFromState: Record<string, RawAlertInstance>,
-    recoveredAlertsFromState: Record<string, RawAlertInstance>
-  ): Promise<void>;
-  hasReachedAlertLimit(): boolean;
-  checkLimitUsage(): void;
-  processAndLogAlerts(opts: ProcessAndLogAlertsOpts): void;
-  getProcessedAlerts(
-    type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
-  ): Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
-  getAlertsToSerialize(): Promise<{
-    alertsToReturn: Record<string, RawAlertInstance>;
-    recoveredAlertsToReturn: Record<string, RawAlertInstance>;
-  }>;
-  setFlapping(flappingSettings: RulesSettingsFlappingProperties): void;
-}
+import { IAlertsClient, InitializeExecutionOpts, ProcessAndLogAlertsOpts } from './types';
+import { DEFAULT_MAX_ALERTS } from '../config';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 export interface LegacyAlertsClientParams {
   logger: Logger;
-  maxAlerts: number;
   ruleType: UntypedNormalizedRuleType;
-  ruleLabel: string;
-  ruleTypeState: RuleTypeState;
 }
 
 export class LegacyAlertsClient<
@@ -80,7 +38,8 @@ export class LegacyAlertsClient<
   RecoveryActionGroupId extends string
 > implements IAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
-  private ruleLogPrefix: string;
+  private maxAlerts: number = DEFAULT_MAX_ALERTS;
+  private ruleLogPrefix: string = '';
 
   // Alerts from the previous execution that are deserialized from the task state
   private trackedAlerts: {
@@ -109,7 +68,6 @@ export class LegacyAlertsClient<
   >;
 
   constructor(private readonly options: LegacyAlertsClientParams) {
-    this.ruleLogPrefix = options.ruleLabel;
     this.processedAlerts = {
       new: {},
       active: {},
@@ -119,11 +77,16 @@ export class LegacyAlertsClient<
     };
   }
 
-  public async initialize(
-    activeAlertsFromState: Record<string, RawAlertInstance>,
-    recoveredAlertsFromState: Record<string, RawAlertInstance>,
-    maintenanceWindowIds: string[]
-  ) {
+  public async initializeExecution({
+    maxAlerts,
+    ruleLabel,
+    activeAlertsFromState,
+    recoveredAlertsFromState,
+    maintenanceWindowIds,
+  }: InitializeExecutionOpts) {
+    this.maxAlerts = maxAlerts;
+    this.ruleLogPrefix = ruleLabel;
+
     for (const id of keys(activeAlertsFromState)) {
       this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
     }
@@ -147,7 +110,7 @@ export class LegacyAlertsClient<
     >({
       alerts: this.reportedAlerts,
       logger: this.options.logger,
-      maxAlerts: this.options.maxAlerts,
+      maxAlerts: this.maxAlerts,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       maintenanceWindowIds,
@@ -176,11 +139,8 @@ export class LegacyAlertsClient<
       existingAlerts: this.trackedAlerts.active,
       previouslyRecoveredAlerts: this.trackedAlerts.recovered,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
-      alertLimit: this.options.maxAlerts,
-      autoRecoverAlerts:
-        this.options.ruleType.autoRecoverAlerts !== undefined
-          ? this.options.ruleType.autoRecoverAlerts
-          : true,
+      alertLimit: this.maxAlerts,
+      autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       flappingSettings,
       maintenanceWindowIds,
     });
@@ -188,7 +148,7 @@ export class LegacyAlertsClient<
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
       this.options.logger,
       processedAlertsRecovered,
-      this.options.maxAlerts
+      this.maxAlerts
     );
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
@@ -218,7 +178,6 @@ export class LegacyAlertsClient<
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
-      maintenanceWindowIds,
     });
   }
 

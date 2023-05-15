@@ -134,7 +134,7 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
   AlertInstanceContext,
   string,
   string,
-  AlertData
+  RuleAlertData
 >;
 
 export class RuleTypeRegistry {

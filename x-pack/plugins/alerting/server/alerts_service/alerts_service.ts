@@ -170,9 +170,6 @@ export class AlertsService implements IAlertsService {
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       ruleType: opts.ruleType,
-      maxAlerts: opts.maxAlerts,
-      ruleLabel: opts.ruleLabel,
-      ruleTypeState: opts.ruleTypeState,
       namespace: opts.namespace,
       rule: opts.rule,
     });
