@@ -87,6 +87,7 @@
     "serverlessPackages": "packages/serverless",
     "coloring": "packages/kbn-coloring/src",
     "languageDocumentationPopover": "packages/kbn-language-documentation-popover/src",
+    "textBasedEditor": "src/plugins/text_based_editor",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
     "timelion": ["src/plugins/vis_types/timelion"],

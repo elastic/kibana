@@ -15,7 +15,6 @@ import {
   type LanguageDocumentationSections,
   LanguageDocumentationPopover,
 } from '@kbn/language-documentation-popover';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -49,7 +48,6 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
-import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -59,6 +57,7 @@ export interface TextBasedLanguagesEditorProps {
   isCodeEditorExpanded: boolean;
   errors?: Error[];
   isDisabled?: boolean;
+  isDarkMode?: boolean;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -90,6 +89,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isCodeEditorExpanded,
   errors,
   isDisabled,
+  isDarkMode,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -107,8 +107,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { uiSettings } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -118,7 +116,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(errors?.length),
     isCodeEditorExpandedFocused
   );
-  const isDark = uiSettings.get('theme:darkMode');
+  const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);

@@ -39,6 +39,7 @@
     "@kbn/react-field",
     "@kbn/ui-theme",
     "@kbn/saved-objects-management-plugin",
+    "@kbn/text-based-editor",
   ],
   "exclude": [
     "target/**/*",

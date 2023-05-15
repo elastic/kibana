@@ -46,7 +46,7 @@ import {
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { TextBasedLanguagesEditor } from './text_based_languages_editor';
+import { getTextBasedEditor } from '../services';
 import './query_bar.scss';
 
 export const strings = {
@@ -213,6 +213,7 @@ export const QueryBarTopRow = React.memo(
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
+    const textBasedEditor = getTextBasedEditor();
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -581,7 +582,7 @@ export const QueryBarTopRow = React.memo(
         isQueryLangSelected &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
-          <TextBasedLanguagesEditor
+          <textBasedEditor.TextBasedLanguagesEditor
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}

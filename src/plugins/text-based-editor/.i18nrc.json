@@ -1,0 +1,6 @@
+{
+  "prefix": "textBasedEditor",
+  "paths": {
+    "textBasedEditor": "."
+  }
+}

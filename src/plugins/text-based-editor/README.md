@@ -1,4 +1,7 @@
-# Unified search text based languages editor
+# @kbn/text-based-editor
+
+Contains the ESQL editor with the autocomplete and the autosuggest functionality (based on atlr). 
+The antlr code can be found in packages/kbn-monaco/src/esql
 
 A **monaco** based editor that is part of the unified search experience. It is rendered for all the applications that support text-based languages.
 In order to enable text based languages on your unified search bar add `textBasedLanguages: ['SQL', 'ESQL', '...']` to the dataViewPicker properties. 
@@ -6,6 +9,7 @@ In order to enable text based languages on your unified search bar add `textBase
 
 ## Languages supported
 - SQL: based on the Elasticsearch sql api
+- ESQL: based on the Elastisearch esql api
 
 
 ## Features
@@ -36,6 +40,8 @@ The editor is imported to the query_bar_top_row.tsx file. Accepts the following 
   expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
   isCodeEditorExpanded={codeEditorIsExpanded}
   errors={props.textBasedLanguageModeErrors}
+  isDisabled={false}
+  isDarkMode={false}
   onTextLangQuerySubmit={() =>
     onSubmit({
       query: queryRef.current,

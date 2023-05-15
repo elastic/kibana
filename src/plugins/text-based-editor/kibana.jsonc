@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/text-based-editor",
+  "owner": "@elastic/kibana-visualizations",
+  "plugin": {
+    "id": "textBasedEditor",
+    "server": false,
+    "browser": true,
+    "requiredBundles": [
+      "kibanaReact",
+    ]
+  }
+}
