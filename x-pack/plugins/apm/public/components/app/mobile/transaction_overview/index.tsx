@@ -16,11 +16,11 @@ import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileTransactionCharts } from './transaction_charts';
 import { MobileTreemap } from '../charts/mobile_treemap';
+import { TransactionOverviewTabs } from './transaction_overview_tabs';
 
 export function MobileTransactionOverview() {
   const {
@@ -37,6 +37,7 @@ export function MobileTransactionOverview() {
       kuery,
       offset,
       comparisonEnabled,
+      mobileSelectedTab,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
 
@@ -88,15 +89,14 @@ export function MobileTransactionOverview() {
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
-        <TransactionsTable
-          hideViewTransactionsLink
-          numberOfTransactionsPerPage={25}
-          showMaxTransactionGroupsExceededWarning
+        <TransactionOverviewTabs
           environment={environment}
           kuery={kueryWithMobileFilters}
           start={start}
           end={end}
-          saveTableOptionsToUrl
+          comparisonEnabled={comparisonEnabled}
+          offset={offset}
+          mobileSelectedTab={mobileSelectedTab}
         />
       </EuiPanel>
     </>

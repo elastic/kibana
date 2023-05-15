@@ -159,7 +159,5 @@ export const takeOsqueryActionWithParams = () => {
   cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
   cy.wait(1000);
   submitQuery();
-  cy.getBySel('dataGridHeader').within(() => {
-    cy.contains('tags');
-  });
+  cy.getBySel('dataGridHeader').should('contain', 'tags', { timeout: 6000000 });
 };

@@ -221,6 +221,8 @@ Updates an inventory view.
 
 Any attribute can be updated except for `isDefault` and `isStatic`, which are derived by the source configuration preference set by the user.
 
+Any attempt to update the static view with id `0` will return a `400 The inventory view with id 0 is not configurable.`
+
 ### Request
 
 - **Method**: PUT
@@ -323,6 +325,8 @@ Status code: 409
 ## Delete one: `DELETE /api/infra/inventory_views/{inventoryViewId}`
 
 Deletes an inventory view.
+
+Any attempt to delete the static view with id `0` will return a `400 The inventory view with id 0 is not configurable.`
 
 ### Request
 

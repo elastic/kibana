@@ -7,6 +7,6 @@
 
 export const MANAGED_USER_INDEX = ['logs-entityanalytics_azure.users-*'];
 export const MANAGED_USER_PACKAGE_NAME = 'entityanalytics_azure';
-export const INSTALL_INTEGRATION_HREF = `/app/fleet/integrations/${MANAGED_USER_PACKAGE_NAME}/add-integration`;
+export const INSTALL_INTEGRATION_HREF = `/detail/${MANAGED_USER_PACKAGE_NAME}/overview`;
 export const ONE_WEEK_IN_HOURS = 24 * 7;
 export const MANAGED_USER_QUERY_ID = 'managedUserDetailsQuery';

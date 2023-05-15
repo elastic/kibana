@@ -13,7 +13,7 @@ import { useCaseViewNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
 import { ACTIVITY_TAB, ALERTS_TAB, FILES_TAB } from './translations';
-import type { Case } from '../../../common';
+import type { CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 
 const ExperimentalBadge = styled(EuiBetaBadge)`
@@ -49,7 +49,7 @@ const FilesTab = ({
 FilesTab.displayName = 'FilesTab';
 
 export interface CaseViewTabsProps {
-  caseData: Case;
+  caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
 }
 

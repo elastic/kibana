@@ -234,6 +234,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     runtimeMappings,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
+
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
     detailName: string;
@@ -330,21 +331,24 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   useEffect(() => {
-    const fetchDataViews = async () => {
+    const fetchDV = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
-      if (dataViewsRefs.length > 0) {
-        const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
-          (acc, item) => ({
-            ...acc,
-            [item.id]: item,
-          }),
-          {}
-        );
-        setDataViewOptions(dataViewIdIndexPatternMap);
-      }
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
     };
-    fetchDataViews();
-  }, [data.dataViews]);
+    fetchDV();
+    // if this array is not empty the data.dataViews dependency
+    // causes the jest tests for this file to re-render the
+    // step_define_rule component infinitely for some reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 

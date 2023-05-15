@@ -547,7 +547,7 @@
             "tags": [],
             "label": "asScopedToClient",
             "description": [
-              "\nCreates a {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside of the scope of a {@link RequestHandler}.\n"
+              "\nCreates a {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a {@link RequestHandler}.\n"
             ],
             "signature": [
               "(savedObjectsClient: ",
@@ -602,7 +602,7 @@
             "tags": [],
             "label": "globalAsScopedToClient",
             "description": [
-              "\nCreates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside of the scope of a {@link RequestHandler}.\n"
+              "\nCreates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a {@link RequestHandler}.\n"
             ],
             "signature": [
               "(savedObjectsClient: ",

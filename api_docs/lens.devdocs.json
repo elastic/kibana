@@ -7577,7 +7577,9 @@
             "label": "getVisualizationInfo",
             "description": [],
             "signature": [
-              "((state: T) => ",
+              "((state: T, frame?: ",
+              "FramePublicAPI",
+              " | undefined) => ",
               "VisualizationInfo",
               ") | undefined"
             ],
@@ -7599,6 +7601,22 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getVisualizationInfo.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "frame",
+                "description": [],
+                "signature": [
+                  "FramePublicAPI",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

@@ -174,6 +174,7 @@ paths:
                 - $ref: '#/components/schemas/update_connector_request_serverlog'
                 - $ref: '#/components/schemas/update_connector_request_servicenow'
                 - $ref: '#/components/schemas/update_connector_request_servicenow_itom'
+                - $ref: '#/components/schemas/update_connector_request_slack'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
             examples:
               updateIndexConnectorRequest:
@@ -1300,8 +1301,21 @@ components:
     secrets_properties_slack:
       title: Connector secrets properties for a Slack connector
       description: Defines secrets for connectors when type is `.slack`.
-      type: object
-      additionalProperties: true
+      oneOf:
+        - type: object
+          required:
+            - token
+          properties:
+            token:
+              type: string
+              description: The Slack bot user OAuth token.
+        - type: object
+          required:
+            - webhookUrl
+          properties:
+            webhookUrl:
+              type: string
+              description: The Slack webhook url.
     create_connector_request_slack:
       title: Create Slack connector request
       description: The Slack connector uses Slack Incoming Webhooks.
@@ -2010,7 +2024,7 @@ components:
         name:
           type: string
           description: The display name for the connector.
-    connector_response_properties_slack:
+    connector_response_properties_slack_webhook:
       title: Connector response properties for a Slack connector
       type: object
       required:
@@ -2025,6 +2039,33 @@ components:
           description: The type of connector.
           enum:
             - .slack
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
+    connector_response_properties_slack_api:
+      title: Connector response properties for a Slack connector
+      type: object
+      required:
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .slack_api
         id:
           type: string
           description: The identifier for the connector.
@@ -2318,6 +2359,23 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
+    update_connector_request_slack:
+      title: Update Slack connector request
+      type: object
+      required:
+        - name
+        - secrets
+      properties:
+        name:
+          type: string
+          description: The display name for the connector.
+        config:
+          type: string
+          enum:
+            - web_api
+            - webhook
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_slack'
     update_connector_request_swimlane:
       title: Update Swimlane connector request
       type: object

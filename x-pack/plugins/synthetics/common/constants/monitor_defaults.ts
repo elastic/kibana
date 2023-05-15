@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import {
+  CodeEditorMode,
   BrowserAdvancedFields,
   BrowserSimpleFields,
   CommonFields,
@@ -198,19 +199,25 @@ export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
 export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.PASSWORD]: '',
   [ConfigKey.PROXY_URL]: '',
+  [ConfigKey.PROXY_HEADERS]: {},
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: [],
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: [],
+  [ConfigKey.RESPONSE_JSON_CHECK]: [],
   [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
   [ConfigKey.RESPONSE_HEADERS_CHECK]: {},
   [ConfigKey.RESPONSE_HEADERS_INDEX]: true,
   [ConfigKey.RESPONSE_STATUS_CHECK]: [],
   [ConfigKey.REQUEST_BODY_CHECK]: {
     value: '',
-    type: Mode.PLAINTEXT,
+    type: CodeEditorMode.PLAINTEXT,
   },
   [ConfigKey.REQUEST_HEADERS_CHECK]: {},
   [ConfigKey.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
   [ConfigKey.USERNAME]: '',
+  [ConfigKey.MODE]: Mode.ANY,
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: '1024',
+  [ConfigKey.IPV4]: true,
+  [ConfigKey.IPV6]: true,
 };
 
 export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {
@@ -238,6 +245,15 @@ export const DEFAULT_TCP_ADVANCED_FIELDS: TCPAdvancedFields = {
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: false,
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: '',
   [ConfigKey.REQUEST_SEND_CHECK]: '',
+  [ConfigKey.MODE]: Mode.ANY,
+  [ConfigKey.IPV4]: true,
+  [ConfigKey.IPV6]: true,
+};
+
+export const DEFAULT_ICMP_ADVANCED_FIELDS = {
+  [ConfigKey.MODE]: Mode.ANY,
+  [ConfigKey.IPV4]: true,
+  [ConfigKey.IPV6]: true,
 };
 
 export const DEFAULT_TLS_FIELDS: TLSFields = {
@@ -262,6 +278,7 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
   },
   [DataStream.ICMP]: {
     ...DEFAULT_ICMP_SIMPLE_FIELDS,
+    ...DEFAULT_ICMP_ADVANCED_FIELDS,
   },
   [DataStream.BROWSER]: {
     ...DEFAULT_BROWSER_SIMPLE_FIELDS,

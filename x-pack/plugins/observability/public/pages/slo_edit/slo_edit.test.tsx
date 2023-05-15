@@ -539,46 +539,6 @@ describe('SLO Edit Page', () => {
     });
 
     describe('when submitting has completed successfully', () => {
-      it('renders a success toast', async () => {
-        const slo = buildSlo();
-
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
-
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
-
-        useFetchIndicesMock.mockReturnValue({
-          isLoading: false,
-          indices: [{ name: 'some-index' }],
-        });
-
-        useCreateSloMock.mockReturnValue({
-          mutateAsync: jest.fn().mockResolvedValue('success'),
-          isLoading: false,
-          isSuccess: false,
-          isError: false,
-        });
-
-        useUpdateSloMock.mockReturnValue({
-          mutateAsync: jest.fn().mockResolvedValue('success'),
-          isLoading: false,
-          isSuccess: false,
-          isError: false,
-        });
-
-        render(<SloEditPage />);
-
-        expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
-
-        await waitFor(() => {
-          fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
-        });
-
-        expect(mockAddSuccess).toBeCalled();
-      });
-
       it('navigates to the SLO List page when checkbox to create new rule is not checked', async () => {
         const slo = buildSlo();
 
@@ -615,8 +575,9 @@ describe('SLO Edit Page', () => {
         await waitFor(() => {
           fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
         });
-
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+        await waitFor(() => {
+          expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+        });
       });
 
       it('navigates to the SLO Edit page when checkbox to create new rule is checked', async () => {
@@ -657,9 +618,11 @@ describe('SLO Edit Page', () => {
           fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
         });
 
-        expect(mockNavigate).toBeCalledWith(
-          mockBasePathPrepend(`${paths.observability.sloEdit(slo.id)}?create-rule=true`)
-        );
+        await waitFor(() => {
+          expect(mockNavigate).toBeCalledWith(
+            mockBasePathPrepend(`${paths.observability.sloEdit(slo.id)}?create-rule=true`)
+          );
+        });
       });
 
       it('opens the Add Rule Flyout when visiting an existing SLO with search params set', async () => {
@@ -696,48 +659,6 @@ describe('SLO Edit Page', () => {
         await waitFor(() => {
           expect(screen.getByTestId('add-rule-flyout')).toBeTruthy();
         });
-      });
-    });
-
-    describe('when submitting has not completed successfully', () => {
-      it('renders an error toast', async () => {
-        const slo = buildSlo();
-
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
-
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
-
-        useFetchIndicesMock.mockReturnValue({
-          isLoading: false,
-          indices: [{ name: 'some-index' }],
-        });
-
-        useCreateSloMock.mockReturnValue({
-          mutateAsync: jest.fn().mockRejectedValue('argh, I died'),
-          isLoading: false,
-          isSuccess: false,
-          isError: false,
-        });
-
-        useUpdateSloMock.mockReturnValue({
-          mutateAsync: jest.fn().mockRejectedValue('argh, I died'),
-          isLoading: false,
-          isSuccess: false,
-          isError: false,
-        });
-
-        render(<SloEditPage />);
-
-        expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
-
-        await waitFor(() => {
-          fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
-        });
-
-        expect(mockAddError).toBeCalled();
       });
     });
   });

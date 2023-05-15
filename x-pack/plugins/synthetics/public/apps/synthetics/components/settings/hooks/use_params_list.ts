@@ -8,13 +8,13 @@
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { useMemo } from 'react';
-import { SyntheticsParam } from '../../../../../../common/runtime_types';
+import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
 import { apiService } from '../../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 
 export const useParamsList = (lastRefresh: number) => {
   const { data, loading } = useFetcher<
-    Promise<{ data: Array<SavedObject<SyntheticsParam>> }>
+    Promise<{ data: Array<SavedObject<SyntheticsParamSO>> }>
   >(() => {
     return apiService.get(SYNTHETICS_API_URLS.PARAMS);
   }, [lastRefresh]);

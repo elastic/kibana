@@ -70,6 +70,18 @@ describe('Expand Dotted', () => {
     });
   });
 
+  it('overwrites earlier fields when later fields conflict', () => {
+    const simpleDottedObj = {
+      'kibana.test.1': 'the spice must flow',
+      'kibana.test': 2,
+    };
+    expect(expandDottedObject(simpleDottedObj)).toEqual({
+      kibana: {
+        test: 2,
+      },
+    });
+  });
+
   it('expands non dotted field without changing it other than reference', () => {
     const simpleDottedObj = {
       test: { value: '123' },

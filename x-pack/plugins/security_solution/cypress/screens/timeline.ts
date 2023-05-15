@@ -92,6 +92,8 @@ export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
+export const DELETE_NOTE = '[data-test-subj="delete-note"]';
+
 export const MARKDOWN_INVESTIGATE_BUTTON =
   '[data-test-subj="insight-investigate-in-timeline-button"]';
 
@@ -207,7 +209,7 @@ export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 export const TIMELINE_FILTER_VALUE =
   '[data-test-subj="filterParamsComboBox phraseParamsComboxBox"]';
 
-export const TIMELINE_FLYOUT = '[data-test-subj="eui-flyout"]';
+export const TIMELINE_FLYOUT = '[data-test-subj="timeline-flyout"]';
 
 export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 

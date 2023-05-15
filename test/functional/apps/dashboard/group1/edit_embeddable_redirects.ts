@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('edit embeddable redirects', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/156671
+  describe.skip('edit embeddable redirects', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(

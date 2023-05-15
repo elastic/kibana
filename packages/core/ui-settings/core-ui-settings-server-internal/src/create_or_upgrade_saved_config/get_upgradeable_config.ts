@@ -34,7 +34,7 @@ export async function getUpgradeableConfig({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   version: string;
-  type: 'config' | 'config-global';
+  type: 'config' | 'config-global' | 'config-user';
 }) {
   // attempt to find a config we can upgrade
   const { saved_objects: savedConfigs } =

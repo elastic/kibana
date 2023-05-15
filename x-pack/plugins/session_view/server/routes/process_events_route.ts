@@ -17,8 +17,8 @@ import {
   ALERTS_PER_PROCESS_EVENTS_PAGE,
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
-  PROCESS_EVENTS_INDEX,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  TIMESTAMP_PROPERTY,
 } from '../../common/constants';
 import { ProcessEvent } from '../../common/types/process_tree';
 import { searchAlerts } from './alerts_route';
@@ -33,7 +33,9 @@ export const registerProcessEventsRoute = (
       path: PROCESS_EVENTS_ROUTE,
       validate: {
         query: schema.object({
+          index: schema.string(),
           sessionEntityId: schema.string(),
+          sessionStartTime: schema.string(),
           cursor: schema.maybe(schema.string()),
           forward: schema.maybe(schema.boolean()),
           pageSize: schema.maybe(schema.number()),
@@ -43,13 +45,15 @@ export const registerProcessEventsRoute = (
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-      const { sessionEntityId, cursor, forward, pageSize } = request.query;
+      const { index, sessionEntityId, sessionStartTime, cursor, forward, pageSize } = request.query;
 
       try {
         const body = await fetchEventsAndScopedAlerts(
           client,
           alertsClient,
+          index,
           sessionEntityId,
+          sessionStartTime,
           cursor,
           forward,
           pageSize
@@ -71,7 +75,9 @@ export const registerProcessEventsRoute = (
 export const fetchEventsAndScopedAlerts = async (
   client: ElasticsearchClient,
   alertsClient: AlertsClient,
+  index: string,
   sessionEntityId: string,
+  sessionStartTime: string,
   cursor?: string,
   forward = true,
   pageSize = PROCESS_EVENTS_PER_PAGE
@@ -79,7 +85,7 @@ export const fetchEventsAndScopedAlerts = async (
   const cursorMillis = cursor && new Date(cursor).getTime() + (forward ? -1 : 1);
 
   const search = await client.search({
-    index: [PROCESS_EVENTS_INDEX],
+    index: [index],
     body: {
       query: {
         bool: {
@@ -92,6 +98,14 @@ export const fetchEventsAndScopedAlerts = async (
                   { term: { [EVENT_ACTION]: 'exec' } },
                   { term: { [EVENT_ACTION]: 'end' } },
                 ],
+              },
+            },
+            {
+              range: {
+                // optimization to prevent data before this session from being hit.
+                [TIMESTAMP_PROPERTY]: {
+                  gte: sessionStartTime,
+                },
               },
             },
           ],
@@ -131,7 +145,12 @@ export const fetchEventsAndScopedAlerts = async (
       range
     );
 
-    const processesWithIOEvents = await searchProcessWithIOEvents(client, sessionEntityId, range);
+    const processesWithIOEvents = await searchProcessWithIOEvents(
+      client,
+      index,
+      sessionEntityId,
+      range
+    );
 
     events = [...events, ...alertsBody.events, ...processesWithIOEvents];
   }

@@ -23,6 +23,7 @@ import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
@@ -139,6 +140,8 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     ? GroupByOptions.PerTimePeriod
     : GroupByOptions.PerRuleExecution,
   groupByDuration: rule.alert_suppression?.duration ?? { value: 5, unit: 'm' },
+  suppressionMissingFields:
+    rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 });
 
 const convertHistoryStartToSize = (relativeTime: string) => {

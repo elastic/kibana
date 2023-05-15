@@ -9,7 +9,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { getKibanaPageTemplateKibanaDependenciesMock as getPageTemplateServices } from '@kbn/shared-ux-page-kibana-template-mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
@@ -56,6 +56,7 @@ describe('Page template', () => {
       navigationSections$: navigationRegistry.sections$,
       getPageTemplateServices,
       guidedOnboardingApi: guidedOnboardingMock.createStart().guidedOnboardingApi,
+      isSidebarEnabled$: new BehaviorSubject<boolean>(true),
     });
 
     const component = shallow(

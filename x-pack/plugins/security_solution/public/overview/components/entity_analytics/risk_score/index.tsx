@@ -172,7 +172,12 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           id={entity.tableQueryId}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
-          tooltip={commonI18n.HOST_RISK_TABLE_TOOLTIP}
+          tooltip={
+            riskEntity === RiskScoreEntity.host
+              ? commonI18n.HOST_RISK_TABLE_TOOLTIP
+              : commonI18n.USER_RISK_TABLE_TOOLTIP
+          }
+          tooltipTitle={commonI18n.RISK_TABLE_TOOLTIP_TITLE}
         >
           <RiskScoreHeaderContent
             entityDocLink={entity.docLink}

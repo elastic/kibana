@@ -59,5 +59,6 @@
     "@kbn/field-types",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/shared-ux-link-redirect-app",
+    "@kbn/global-search-plugin",
   ]
 }

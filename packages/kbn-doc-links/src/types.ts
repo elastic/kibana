@@ -111,6 +111,7 @@ export interface DocLinks {
     readonly apiKeys: string;
     readonly behavioralAnalytics: string;
     readonly behavioralAnalyticsEvents: string;
+    readonly buildConnector: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
@@ -301,6 +302,7 @@ export interface DocLinks {
       value_lists: string;
     };
     readonly privileges: string;
+    readonly manageDetectionRules: string;
   };
   readonly query: {
     readonly eql: string;

@@ -46,6 +46,7 @@ export async function queryMonitorStatus(
     | 'allMonitorsCount'
     | 'disabledMonitorsCount'
     | 'projectMonitorsCount'
+    | 'disabledMonitorQueryIds'
     | 'allIds'
   >
 > {

@@ -30,6 +30,11 @@ import { StartPlugins } from '../../types';
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
 
+/**
+ * @deprecated use kibana data view api or EcsFlat for index fields
+ * @param getStartServices
+ * @returns
+ */
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
 ): ISearchStrategy<

@@ -167,10 +167,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:showLegacyFieldTopValues': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'discover:sampleSize': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

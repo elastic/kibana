@@ -109,6 +109,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "endpoint:user-artifact",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "file-upload-telemetry",
                 },
               },

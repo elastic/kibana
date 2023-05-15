@@ -14,21 +14,24 @@ import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
 import { DataDocuments$, RecordRawType } from '../services/discover_data_state_container';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DataTableRecord } from '../../../types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
-  dataViewsService?: DataViewsContract
+  dataViewsService?: DataViewsContract,
+  appState?: Partial<DiscoverAppState>
 ) {
   const replaceUrlState = jest.fn();
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.replaceUrlState = replaceUrlState;
-  stateContainer.appState.update({ columns: [] });
+  stateContainer.appState.update({ columns: [], ...appState });
   stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
 
   const msgLoading = {
@@ -81,6 +84,20 @@ describe('useTextBasedQueryLanguage', () => {
         index: 'the-data-view-id',
         columns: ['field1', 'field2'],
       });
+    });
+  });
+  test('should change viewMode to DOCUMENT_LEVEL if it was AGGREGATED_LEVEL', async () => {
+    const props = getHookProps(query, undefined, {
+      viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+    });
+    const { replaceUrlState } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      index: 'the-data-view-id',
+      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     });
   });
   test('changing a text based query with different result columns should change state when loading and finished', async () => {

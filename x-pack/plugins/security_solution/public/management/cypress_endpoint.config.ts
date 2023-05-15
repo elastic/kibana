@@ -7,7 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { dataLoaders } from './cypress/support/data_loaders';
+import { dataLoaders, dataLoadersForRealEndpoints } from './cypress/support/data_loaders';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -40,7 +40,9 @@ export default defineCypressConfig({
     specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',
     experimentalRunAllSpecs: true,
     setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
-      return dataLoaders(on, config);
+      dataLoaders(on, config);
+      // Data loaders specific to "real" Endpoint testing
+      dataLoadersForRealEndpoints(on, config);
     },
   },
 });

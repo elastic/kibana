@@ -9,8 +9,10 @@
 import { Entity } from '../entity';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import { ApmFields, SpanParams, GeoLocation } from './apm_fields';
+import { ApmFields, SpanParams, GeoLocation, ApmApplicationMetricFields } from './apm_fields';
 import { generateLongId } from '../utils/generate_id';
+import { Metricset } from './metricset';
+import { ApmError } from './apm_error';
 
 export interface DeviceInfo {
   manufacturer: string;
@@ -115,6 +117,7 @@ export class MobileDevice extends Entity<ApmFields> {
     return this;
   }
 
+  // FIXME  synthtrace shouldn't have side-effects like this. We should use an API like .session() which returns a session
   startNewSession() {
     this.fields['session.id'] = generateLongId();
     return this;
@@ -237,5 +240,22 @@ export class MobileDevice extends Entity<ApmFields> {
     }
 
     return this.span(spanParameters);
+  }
+
+  appMetrics(metrics: ApmApplicationMetricFields) {
+    return new Metricset<ApmFields>({
+      ...this.fields,
+      'metricset.name': 'app',
+      ...metrics,
+    });
+  }
+
+  crash({ message, groupingName }: { message: string; groupingName?: string }) {
+    return new ApmError({
+      ...this.fields,
+      'error.type': 'crash',
+      'error.exception': [{ message, ...{ type: 'crash' } }],
+      'error.grouping_name': groupingName || message,
+    });
   }
 }

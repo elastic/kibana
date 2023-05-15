@@ -136,6 +136,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                   fullWidth
                 >
                   <EuiFieldText
+                    data-test-subj={`entSearchContent-${type}-newIndex-editName`}
                     data-telemetry-id={`entSearchContent-${type}-newIndex-editName`}
                     placeholder={i18n.translate(
                       'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputPlaceholder',
@@ -253,6 +254,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj={`entSearchContent-${type}-newIndex-createIndex`}
               data-telemetry-id={`entSearchContent-${type}-newIndex-createIndex`}
               fill
               isDisabled={!rawName || buttonLoading || formInvalid || disabled}

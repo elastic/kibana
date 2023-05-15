@@ -90,11 +90,7 @@ export type PersistenceAlertType<
 export type CreatePersistenceRuleTypeWrapper = (options: {
   ruleDataClient: IRuleDataClient;
   logger: Logger;
-}) => <
-  TParams extends RuleTypeParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
->(
-  type: PersistenceAlertType<TParams, TState, TInstanceContext, TActionGroupIds>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;
+  formatAlert?: (alert: unknown) => unknown;
+}) => <TParams extends RuleTypeParams, TState extends RuleTypeState>(
+  type: PersistenceAlertType<TParams, TState, AlertInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;

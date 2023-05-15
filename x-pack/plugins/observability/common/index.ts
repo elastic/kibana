@@ -64,6 +64,7 @@ export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCAT
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
+export const rulesLocatorID = 'RULES_LOCATOR';
 
 export {
   NETWORK_TIMINGS_FIELDS,

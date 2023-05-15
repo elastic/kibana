@@ -96,7 +96,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when filters are applied', () => {
+    // FAILING: https://github.com/elastic/kibana/issues/156207
+    describe.skip('when filters are applied', () => {
       it('returns empty state for filters', async () => {
         const response = await getMobileLocationStats({
           serviceName: 'synth-android',

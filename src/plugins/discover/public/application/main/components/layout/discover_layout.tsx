@@ -14,7 +14,7 @@ import {
   EuiHideFor,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -374,19 +374,17 @@ export function DiscoverLayout({
                 data-test-subj="discoverNoResultsError"
               />
             ) : (
-              <EuiPageContent
+              <EuiPanel
+                role="main"
                 panelRef={resizeRef}
-                verticalPosition={contentCentered ? 'center' : undefined}
-                horizontalPosition={contentCentered ? 'center' : undefined}
                 paddingSize="none"
                 hasShadow={false}
                 className={classNames('dscPageContent', {
                   'dscPageContent--centered': contentCentered,
-                  'dscPageContent--emptyPrompt': resultState === 'none',
                 })}
               >
                 {mainDisplay}
-              </EuiPageContent>
+              </EuiPanel>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

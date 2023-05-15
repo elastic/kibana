@@ -1163,10 +1163,6 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
-              },
-              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
               },
@@ -1844,21 +1840,6 @@
         "description": [],
         "signature": [
           "\"discover:showFieldStatistics\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SHOW_LEGACY_FIELD_TOP_VALUES",
-        "type": "string",
-        "tags": [],
-        "label": "SHOW_LEGACY_FIELD_TOP_VALUES",
-        "description": [],
-        "signature": [
-          "\"discover:showLegacyFieldTopValues\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

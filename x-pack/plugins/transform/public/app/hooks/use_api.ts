@@ -7,8 +7,6 @@
 
 import { useMemo } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -240,13 +238,6 @@ export const useApi = () => {
               sortDirection,
             },
           });
-        } catch (e) {
-          return e;
-        }
-      },
-      async esSearch(payload: any): Promise<estypes.SearchResponse | IHttpFetchError> {
-        try {
-          return await http.post(`${API_BASE_PATH}es_search`, { body: JSON.stringify(payload) });
         } catch (e) {
           return e;
         }
