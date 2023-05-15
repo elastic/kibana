@@ -319,7 +319,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('#Page Content', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157721
+    describe.skip('#Page Content', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await loginWithReadOnlyUser();
