@@ -15,9 +15,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { isEmpty } from 'lodash';
 import {
   ElasticApmAgentLatestVersion,
   OtelAgentLatestVersion,
@@ -243,7 +243,7 @@ export function AgentExplorer() {
         <EuiCallOut
           size="s"
           title={i18n.translate('xpack.apm.agentExplorer.callout.24hoursData', {
-            defaultMessage: 'Information based on the lastest 24h',
+            defaultMessage: 'Information based on the last 24h',
           })}
           iconType="clock"
         />
