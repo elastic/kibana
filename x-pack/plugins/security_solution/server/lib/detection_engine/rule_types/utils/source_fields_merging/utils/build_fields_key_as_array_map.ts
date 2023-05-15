@@ -29,9 +29,14 @@ function traverseSource(
       traverseSource(value, result, path);
     }
   } else if (isArray(document)) {
-    document.forEach((doc) => {
-      traverseSource(doc, result, prefix);
-    });
+    // for array of primitive values we can call traverseSource once
+    if (isPlainObject(document[0])) {
+      traverseSource(document[0], result, prefix);
+    } else {
+      document.forEach((doc) => {
+        traverseSource(doc, result, prefix);
+      });
+    }
   }
 
   return result;

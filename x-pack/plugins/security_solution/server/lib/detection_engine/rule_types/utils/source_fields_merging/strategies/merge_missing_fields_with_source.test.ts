@@ -1466,13 +1466,26 @@ describe('merge_missing_fields_with_source', () => {
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
-      test('does not merge fields into source if source has nested fields', () => {
+      test('does not merge fields into source if only source has nested fields', () => {
         const _source: SignalSourceHit['_source'] = {
           'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
         };
 
         const fields: SignalSourceHit['fields'] = {
           'a.b.c.d': ['1', '2'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not merge nested fields into source if source has nested fields', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'a.b.c': [{ d: '3 ' }, { d: '4' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
