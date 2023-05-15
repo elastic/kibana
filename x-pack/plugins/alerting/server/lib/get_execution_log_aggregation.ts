@@ -634,17 +634,17 @@ export function getNumExecutions(dateStart: Date, dateEnd: Date, ruleSchedule: s
 export function formatSortForBucketSort(sort: estypes.Sort) {
   return (sort as estypes.SortCombinations[]).map((s) =>
     Object.keys(s).reduce((acc, curr) => {
-      acc[ExecutionLogSortFields[curr]] = get(s, curr);
+      (acc as Record<string, unknown>)[ExecutionLogSortFields[curr]] = get(s, curr);
       return acc;
-    }, {} as Record<string, unknown>)
+    }, {})
   );
 }
 
 export function formatSortForTermSort(sort: estypes.Sort) {
   return (sort as estypes.SortCombinations[]).map((s) =>
     Object.keys(s).reduce((acc, curr) => {
-      acc[ExecutionLogSortFields[curr]] = get(s, `${curr}.order`);
+      (acc as Record<string, unknown>)[ExecutionLogSortFields[curr]] = get(s, `${curr}.order`);
       return acc;
-    }, {} as Record<string, unknown>)
+    }, {})
   );
 }
