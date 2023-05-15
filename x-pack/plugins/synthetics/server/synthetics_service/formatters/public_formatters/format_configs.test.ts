@@ -128,10 +128,10 @@ describe('formatMonitorConfig', () => {
         schedule: '@every 3m',
         timeout: '16s',
         type: 'http',
-        urls: '"https://www.google.com"',
+        urls: 'https://www.google.com',
         proxy_url: 'https://www.google.com',
         username: 'test-username',
-        'url.port': '900',
+        'url.port': 900,
       });
     });
 
@@ -171,8 +171,8 @@ describe('formatMonitorConfig', () => {
           schedule: '@every 3m',
           timeout: '16s',
           type: 'http',
-          'url.port': '900',
-          urls: '"https://www.google.com"',
+          'url.port': 900,
+          urls: 'https://www.google.com',
           ...(isTLSEnabled ? { 'ssl.verification_mode': 'none' } : {}),
         });
       }
