@@ -379,11 +379,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     this.searchSessionId = searchSessionId;
 
+    this.updateInput(newInput);
     batch(() => {
       this.dispatch.setLastSavedInput(loadDashboardReturn?.dashboardInput);
       this.dispatch.setLastSavedId(newSavedObjectId);
     });
-    this.updateInput(newInput);
     dashboardContainerReady$.next(this);
   };
 

@@ -181,7 +181,7 @@ export function DashboardApp({
       dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, kbnUrlStateStorage]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
   return (
     <div className="dshAppWrapper">

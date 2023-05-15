@@ -174,8 +174,6 @@ export async function runClone(this: DashboardContainer) {
         saveOptions: { saveAsCopy: true },
         currentState: { ...currentState, title: newTitle },
       });
-
-      this.dispatch.setTitle(newTitle);
       resolve(saveResult);
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
