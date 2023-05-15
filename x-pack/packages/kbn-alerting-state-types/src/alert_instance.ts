@@ -36,6 +36,7 @@ const metaSchema = t.partial({
   flappingHistory: t.array(t.boolean),
   // flapping flag that indicates whether the alert is flapping
   flapping: t.boolean,
+  maintenanceWindowIds: t.array(t.string),
   pendingRecoveredCount: t.number,
   uuid: t.string,
 });

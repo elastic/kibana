@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { chroma } from '@kbn/visualization-ui-components/public';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
-import { isColorDark } from '@elastic/eui';
 
 import {
   DataBounds,
@@ -18,6 +16,7 @@ import {
   reversePalette,
   getPaletteStops,
   CUSTOM_PALETTE,
+  enforceColorContrast,
 } from '@kbn/coloring';
 import { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -35,9 +34,7 @@ export function getContrastColor(
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;
-  const finalColor =
-    chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
-  return isColorDark(...finalColor.rgb()) ? lightColor : darkColor;
+  return enforceColorContrast(color, backgroundColor) ? lightColor : darkColor;
 }
 
 export function getNumericValue(rowValue: number | number[] | undefined) {

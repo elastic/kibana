@@ -53,8 +53,8 @@ export function getSavedSearchObjectType(
         columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
         sort: schema.oneOf(
           [
-            schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 })),
-            schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 }),
+            schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 })),
+            schema.arrayOf(schema.string(), { maxSize: 2 }),
           ],
           { defaultValue: [] }
         ),

@@ -19,29 +19,36 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
-import { EuiSwitchEvent } from '@elastic/eui';
+import { NonEmptyString } from '@kbn/io-ts-utils';
 
 interface Props {
-  isInvalid: boolean;
   onClose(): void;
-  onSave(name: string, shouldIncludeTime: boolean): void;
+  onSave(name: NonEmptyString, shouldIncludeTime: boolean): void;
+  isSaving: boolean;
   initialName?: string;
   initialIncludeTime?: boolean;
   title: React.ReactNode;
 }
 
+const nameLabel = i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
+  defaultMessage: 'Name',
+});
+
 export const UpsertViewModal = ({
   onClose,
   onSave,
-  isInvalid,
+  isSaving,
   initialName = '',
   initialIncludeTime = false,
   title,
 }: Props) => {
   const [viewName, setViewName] = useState(initialName);
-  const [includeTime, setIncludeTime] = useState(initialIncludeTime);
+  const [shouldIncludeTime, setIncludeTime] = useState(initialIncludeTime);
+
+  const trimmedName = viewName.trim() as NonEmptyString;
 
   const handleNameChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     setViewName(e.target.value);
@@ -52,7 +59,7 @@ export const UpsertViewModal = ({
   };
 
   const saveView = () => {
-    onSave(viewName, includeTime);
+    onSave(trimmedName, shouldIncludeTime);
   };
 
   return (
@@ -62,16 +69,11 @@ export const UpsertViewModal = ({
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFieldText
-          isInvalid={isInvalid}
-          placeholder={i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
-            defaultMessage: 'Name',
-          })}
+          placeholder={nameLabel}
           data-test-subj="savedViewName"
           value={viewName}
           onChange={handleNameChange}
-          aria-label={i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
-            defaultMessage: 'Name',
-          })}
+          aria-label={nameLabel}
         />
         <EuiSpacer size="xl" />
         <EuiSwitch
@@ -82,7 +84,7 @@ export const UpsertViewModal = ({
               id="xpack.infra.waffle.savedViews.includeTimeFilterLabel"
             />
           }
-          checked={includeTime}
+          checked={shouldIncludeTime}
           onChange={handleTimeCheckChange}
         />
         <EuiSpacer size="s" />
@@ -101,9 +103,9 @@ export const UpsertViewModal = ({
           />
         </EuiButtonEmpty>
         <EuiButton
-          color="primary"
-          disabled={viewName.length === 0}
+          disabled={trimmedName.length === 0}
           fill
+          isLoading={isSaving}
           onClick={saveView}
           data-test-subj="createSavedViewButton"
         >

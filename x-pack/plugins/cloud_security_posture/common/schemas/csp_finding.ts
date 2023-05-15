@@ -27,6 +27,7 @@ export interface CspFinding {
 
 interface CspFindingOrchestrator {
   cluster?: {
+    id?: string;
     name?: string;
   };
 }

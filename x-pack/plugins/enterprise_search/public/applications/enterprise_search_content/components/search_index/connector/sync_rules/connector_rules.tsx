@@ -23,6 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { BetaBadge } from '../../../../../shared/beta/beta_badge';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { FilteringRulesTable } from '../../../shared/filtering_rules_table/filtering_rules_table';
@@ -67,13 +69,20 @@ export const ConnectorSyncRules: React.FC = () => {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiTitle size="s">
-                <h3>
-                  {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.title', {
-                    defaultMessage: 'Sync rules ',
-                  })}
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>
+                      {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.title', {
+                        defaultMessage: 'Sync rules ',
+                      })}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <BetaBadge />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer />
               <EuiText size="s">
                 <p>

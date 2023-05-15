@@ -19,7 +19,7 @@ interface AlertsGroupingQueryParams {
   pageSize: number;
   runtimeMappings: MappingRuntimeFields;
   selectedGroup: string;
-  selectedGroupEsTypes: string[];
+  uniqueValue: string;
   to: string;
 }
 
@@ -30,7 +30,7 @@ export const getAlertsGroupingQuery = ({
   pageSize,
   runtimeMappings,
   selectedGroup,
-  selectedGroupEsTypes,
+  uniqueValue,
   to,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
@@ -41,16 +41,8 @@ export const getAlertsGroupingQuery = ({
       ? getAggregationsByGroupField(selectedGroup)
       : [],
     pageNumber: pageIndex * pageSize,
-    rootAggregations: [
-      {
-        unitsCount: { value_count: { field: selectedGroup } },
-      },
-      ...(!isNoneGroup([selectedGroup])
-        ? [{ groupsCount: { cardinality: { field: selectedGroup } } }]
-        : []),
-    ],
     runtimeMappings,
-    selectedGroupEsTypes,
+    uniqueValue,
     size: pageSize,
     sort: [{ unitsCount: { order: 'desc' } }],
     to,
@@ -175,16 +167,9 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
-              },
-            },
-          },
-          {
-            usersCountAggregation: {
-              cardinality: {
-                field: 'user.name',
               },
             },
           },
@@ -216,7 +201,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
               },

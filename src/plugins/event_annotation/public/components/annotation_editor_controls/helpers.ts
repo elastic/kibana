@@ -7,10 +7,10 @@
  */
 
 import { transparentize } from '@elastic/eui';
-import Color from 'color';
 import { pick } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import chroma from 'chroma-js';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import type {
   EventAnnotationConfig,
@@ -35,11 +35,11 @@ export const defaultRangeAnnotationLabel = i18n.translate(
 );
 
 export const toRangeAnnotationColor = (color = defaultAnnotationColor) => {
-  return new Color(transparentize(color, 0.1)).hexa();
+  return chroma(transparentize(color, 0.1)).hex().toUpperCase();
 };
 
 export const toLineAnnotationColor = (color = defaultAnnotationRangeColor) => {
-  return new Color(transparentize(color, 1)).hex();
+  return chroma(transparentize(color, 1)).hex().toUpperCase();
 };
 
 export const sanitizeProperties = (annotation: EventAnnotationConfig) => {

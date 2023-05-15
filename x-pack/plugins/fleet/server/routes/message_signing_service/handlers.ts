@@ -40,7 +40,7 @@ export const rotateKeyPairHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
-    logger.error(error.meta);
-    return defaultFleetErrorHandler({ error, response });
+    logger.error(error);
+    return defaultFleetErrorHandler({ error: new Error('Failed to rotate key pair!'), response });
   }
 };

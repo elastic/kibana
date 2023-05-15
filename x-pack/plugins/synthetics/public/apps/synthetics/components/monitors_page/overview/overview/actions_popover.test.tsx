@@ -140,7 +140,7 @@ describe('ActionsPopover', () => {
         locationId={testMonitor.location.id}
       />
     );
-    const enableButton = getByText('Disable monitor');
+    const enableButton = getByText('Disable monitor (all locations)');
     fireEvent.click(enableButton);
     expect(updateMonitorEnabledState).toHaveBeenCalledTimes(1);
     expect(updateMonitorEnabledState.mock.calls[0]).toEqual([false]);
@@ -162,7 +162,7 @@ describe('ActionsPopover', () => {
         locationId={testMonitor.location.id}
       />
     );
-    const enableButton = getByText('Enable monitor');
+    const enableButton = getByText('Enable monitor (all locations)');
     fireEvent.click(enableButton);
     expect(updateMonitorEnabledState).toHaveBeenCalledTimes(1);
     expect(updateMonitorEnabledState.mock.calls[0]).toEqual([true]);

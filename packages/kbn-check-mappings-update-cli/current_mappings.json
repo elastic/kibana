@@ -511,6 +511,10 @@
       },
       "FileKind": {
         "type": "keyword"
+      },
+      "hash": {
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -933,14 +937,14 @@
       "description": {
         "type": "text"
       },
-      "kibanaSavedObjectMeta": {
-        "properties": {}
-      },
       "title": {
         "type": "text"
       },
       "version": {
         "type": "integer"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {}
       }
     }
   },
@@ -1551,6 +1555,9 @@
             "type": "boolean"
           }
         }
+      },
+      "is_protected": {
+        "type": "boolean"
       }
     }
   },
@@ -1648,6 +1655,13 @@
       "inputs": {
         "dynamic": false,
         "properties": {}
+      },
+      "secret_references": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
       },
       "revision": {
         "type": "integer"
@@ -1859,6 +1873,20 @@
   "fleet-message-signing-keys": {
     "dynamic": false,
     "properties": {}
+  },
+  "fleet-uninstall-tokens": {
+    "dynamic": false,
+    "properties": {
+      "created_at": {
+        "type": "date"
+      },
+      "policy_id": {
+        "type": "keyword"
+      },
+      "token_plain": {
+        "type": "keyword"
+      }
+    }
   },
   "osquery-manager-usage-metric": {
     "properties": {
@@ -2728,10 +2756,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "metrics-explorer-view": {
-    "dynamic": false,
-    "properties": {}
-  },
   "inventory-view": {
     "dynamic": false,
     "properties": {}
@@ -2743,6 +2767,10 @@
         "type": "text"
       }
     }
+  },
+  "metrics-explorer-view": {
+    "dynamic": false,
+    "properties": {}
   },
   "upgrade-assistant-reindex-operation": {
     "dynamic": false,

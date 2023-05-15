@@ -24,7 +24,7 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   TableList,
@@ -134,13 +134,12 @@ const useTableListViewProps = (
         references,
         referencesToExclude,
       }: {
-        references?: SavedObjectsFindOptionsReference[];
-        referencesToExclude?: SavedObjectsFindOptionsReference[];
+        references?: SavedObjectReference[];
+        referencesToExclude?: SavedObjectReference[];
       } = {}
     ) => {
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return findListItems(
-        savedObjects.client,
         getTypes(),
         searchTerm,
         listingLimit,
@@ -159,7 +158,7 @@ const useTableListViewProps = (
         };
       });
     },
-    [listingLimit, uiSettings, savedObjects.client]
+    [listingLimit, uiSettings]
   );
 
   const onContentEditorSave = useCallback(
@@ -175,11 +174,11 @@ const useTableListViewProps = (
             description: args.description ?? '',
             tags: args.tags,
           },
-          { savedObjectsClient: savedObjects.client, overlays, savedObjectsTagging }
+          { overlays, savedObjectsTagging }
         );
       }
     },
-    [overlays, savedObjects.client, savedObjectsTagging]
+    [overlays, savedObjectsTagging]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -202,7 +201,7 @@ const useTableListViewProps = (
                     false,
                     false,
                     () => {},
-                    { savedObjectsClient: savedObjects.client, overlays }
+                    { overlays }
                   );
                 } catch (e) {
                   return i18n.translate(
@@ -221,7 +220,7 @@ const useTableListViewProps = (
         },
       ],
     }),
-    [overlays, savedObjects.client]
+    [overlays]
   );
 
   const deleteItems = useCallback(

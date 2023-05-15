@@ -12,21 +12,27 @@ describe('fetchIndicesStats lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
+        exists: jest.fn(),
         stats: jest.fn(),
       },
     },
     asInternalUser: {},
   };
   const indices = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
-  const indicesStats = {
+  const indexStats = {
     indices: {
       'test-index-name-1': {
         health: 'GREEN',
-        primaries: { docs: [{}] },
+        primaries: {
+          docs: {
+            count: 200,
+            deleted: 0,
+          },
+        },
         status: 'open',
         total: {
           docs: {
-            count: 200,
+            count: 400,
             deleted: 0,
           },
         },
@@ -34,7 +40,12 @@ describe('fetchIndicesStats lib function', () => {
       },
       'test-index-name-2': {
         health: 'YELLOW',
-        primaries: { docs: [{}] },
+        primaries: {
+          docs: {
+            count: 0,
+            deleted: 0,
+          },
+        },
         status: 'closed',
         total: {
           docs: {
@@ -46,11 +57,16 @@ describe('fetchIndicesStats lib function', () => {
       },
       'test-index-name-3': {
         health: 'RED',
-        primaries: { docs: [{}] },
+        primaries: {
+          docs: {
+            count: 150,
+            deleted: 0,
+          },
+        },
         status: 'open',
         total: {
           docs: {
-            count: 150,
+            count: 300,
             deleted: 0,
           },
         },
@@ -81,15 +97,11 @@ describe('fetchIndicesStats lib function', () => {
   });
 
   it('should return hydrated indices', async () => {
-    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indicesStats);
+    mockClient.asCurrentUser.indices.exists.mockImplementationOnce(() => true);
+    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
 
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indices)
     ).resolves.toEqual(fetchIndicesStatsResponse);
-
-    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      index: indices,
-      metric: ['docs'],
-    });
   });
 });

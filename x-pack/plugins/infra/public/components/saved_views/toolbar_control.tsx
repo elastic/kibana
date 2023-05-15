@@ -5,132 +5,105 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedViewManageViewsFlyout } from './manage_views_flyout';
-import { useSavedViewContext } from '../../containers/saved_view/saved_view';
-import { SavedViewListModal } from './view_list_modal';
+import { NonEmptyString } from '@kbn/io-ts-utils';
+import { ManageViewsFlyout } from './manage_views_flyout';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
+import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
+import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
 
-interface Props<ViewState> {
-  viewState: ViewState;
+type UseViewProps =
+  | 'currentView'
+  | 'views'
+  | 'isFetchingViews'
+  | 'isFetchingCurrentView'
+  | 'isCreatingView'
+  | 'isUpdatingView';
+
+type UseViewResult = UseInventoryViewsResult | UseMetricsExplorerViewsResult;
+type InventoryViewsResult = Pick<UseInventoryViewsResult, UseViewProps>;
+type MetricsExplorerViewsResult = Pick<UseMetricsExplorerViewsResult, UseViewProps>;
+
+interface Props<ViewState> extends InventoryViewsResult, MetricsExplorerViewsResult {
+  viewState: ViewState & { time?: number };
+  onCreateView: UseViewResult['createView'];
+  onDeleteView: UseViewResult['deleteViewById'];
+  onUpdateView: UseViewResult['updateViewById'];
+  onLoadViews: UseViewResult['fetchViews'];
+  onSetDefaultView: UseViewResult['setDefaultViewById'];
+  onSwitchView: UseViewResult['switchViewById'];
 }
 
 export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
-  const kibana = useKibana();
   const {
-    views,
-    saveView,
-    loading,
-    updateView,
-    deletedId,
-    deleteView,
-    makeDefault,
-    sourceIsLoading,
-    find,
-    errorOnFind,
-    errorOnCreate,
-    createdView,
-    updatedView,
     currentView,
-    setCurrentView,
-  } = useSavedViewContext();
+    views,
+    isFetchingViews,
+    isFetchingCurrentView,
+    isCreatingView,
+    isUpdatingView,
+    onCreateView,
+    onDeleteView,
+    onUpdateView,
+    onLoadViews,
+    onSetDefaultView,
+    onSwitchView,
+    viewState,
+  } = props;
 
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const [isManageFlyoutOpen, { on: openManageFlyout, off: closeManageFlyout }] = useBoolean(false);
-  const [isUpdateModalOpen, { on: openUpdateModal, off: closeUpdateModal }] = useBoolean(false);
-  const [isLoadModalOpen, { on: openLoadModal, off: closeLoadModal }] = useBoolean(false);
   const [isCreateModalOpen, { on: openCreateModal, off: closeCreateModal }] = useBoolean(false);
+  const [isUpdateModalOpen, { on: openUpdateModal, off: closeUpdateModal }] = useBoolean(false);
 
-  const [isInvalid, setIsInvalid] = useState(false);
+  const togglePopoverAndLoad = () => {
+    if (!isPopoverOpen) {
+      onLoadViews();
+    }
+    togglePopover();
+  };
 
   const goToManageViews = () => {
     closePopover();
-    find();
     openManageFlyout();
-  };
-
-  const goToLoadView = () => {
-    closePopover();
-    find();
-    openLoadModal();
   };
 
   const goToCreateView = () => {
     closePopover();
-    setIsInvalid(false);
     openCreateModal();
   };
 
   const goToUpdateView = () => {
     closePopover();
-    setIsInvalid(false);
     openUpdateModal();
   };
 
-  const save = useCallback(
-    (name: string, hasTime: boolean = false) => {
-      const currentState = {
-        ...props.viewState,
-        ...(!hasTime ? { time: undefined } : {}),
-      };
-      saveView({ ...currentState, name });
-    },
-    [props.viewState, saveView]
-  );
+  const handleCreateView = (name: NonEmptyString, shouldIncludeTime: boolean = false) => {
+    const attributes = { ...viewState, name };
 
-  const update = useCallback(
-    (name: string, hasTime: boolean = false) => {
-      const currentState = {
-        ...props.viewState,
-        ...(!hasTime ? { time: undefined } : {}),
-      };
-      updateView(currentView.id, { ...currentState, name });
-    },
-    [props.viewState, updateView, currentView]
-  );
-
-  useEffect(() => {
-    if (errorOnCreate) {
-      setIsInvalid(true);
+    if (!shouldIncludeTime) {
+      delete attributes.time;
     }
-  }, [errorOnCreate]);
 
-  useEffect(() => {
-    if (updatedView !== undefined) {
-      setCurrentView(updatedView);
-      // INFO: Close the modal after the view is created.
-      closeUpdateModal();
-    }
-  }, [updatedView, setCurrentView, closeUpdateModal]);
+    onCreateView(attributes).then(closeCreateModal);
+  };
 
-  useEffect(() => {
-    if (createdView !== undefined) {
-      // INFO: Close the modal after the view is created.
-      setCurrentView(createdView);
-      closeCreateModal();
-    }
-  }, [createdView, setCurrentView, closeCreateModal]);
+  const handleUpdateView = (name: NonEmptyString, shouldIncludeTime: boolean = false) => {
+    if (!currentView) return;
 
-  useEffect(() => {
-    if (deletedId !== undefined) {
-      // INFO: Refresh view list after an item is deleted
-      find();
-    }
-  }, [deletedId, find]);
+    const attributes = { ...viewState, name };
 
-  useEffect(() => {
-    if (errorOnCreate) {
-      kibana.notifications.toasts.warning(getErrorToast('create', errorOnCreate)!);
-    } else if (errorOnFind) {
-      kibana.notifications.toasts.warning(getErrorToast('find', errorOnFind)!);
+    if (!shouldIncludeTime) {
+      delete attributes.time;
     }
-  }, [errorOnCreate, errorOnFind, kibana]);
+
+    onUpdateView({ id: currentView.id, attributes }).then(closeUpdateModal);
+  };
 
   return (
     <>
@@ -138,14 +111,15 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         data-test-subj="savedViews-popover"
         button={
           <EuiButton
-            onClick={togglePopover}
+            onClick={togglePopoverAndLoad}
             data-test-subj="savedViews-openPopover"
             iconType="arrowDown"
             iconSide="right"
             color="text"
+            isLoading={isFetchingCurrentView}
           >
             {currentView
-              ? currentView.name
+              ? currentView.attributes.name
               : i18n.translate('xpack.infra.savedView.unknownView', {
                   defaultMessage: 'No view selected',
                 })}
@@ -168,17 +142,9 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             data-test-subj="savedViews-updateView"
             iconType="refresh"
             onClick={goToUpdateView}
-            isDisabled={!currentView || currentView.id === '0'}
+            isDisabled={!currentView || currentView.attributes.isStatic}
             label={i18n.translate('xpack.infra.savedView.updateView', {
               defaultMessage: 'Update view',
-            })}
-          />
-          <EuiListGroupItem
-            data-test-subj="savedViews-loadView"
-            iconType="importAction"
-            onClick={goToLoadView}
-            label={i18n.translate('xpack.infra.savedView.loadView', {
-              defaultMessage: 'Load view',
             })}
           />
           <EuiListGroupItem
@@ -193,9 +159,9 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       </EuiPopover>
       {isCreateModalOpen && (
         <UpsertViewModal
-          isInvalid={isInvalid}
+          isSaving={isCreatingView}
           onClose={closeCreateModal}
-          onSave={save}
+          onSave={handleCreateView}
           title={
             <FormattedMessage
               defaultMessage="Save View"
@@ -206,11 +172,11 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       )}
       {isUpdateModalOpen && (
         <UpsertViewModal
-          isInvalid={isInvalid}
+          isSaving={isUpdatingView}
           onClose={closeUpdateModal}
-          onSave={update}
-          initialName={currentView.name}
-          initialIncludeTime={Boolean(currentView.time)}
+          onSave={handleUpdateView}
+          initialName={currentView?.attributes.name}
+          initialIncludeTime={Boolean(currentView?.attributes.time)}
           title={
             <FormattedMessage
               defaultMessage="Update View"
@@ -219,47 +185,16 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
           }
         />
       )}
-      {isLoadModalOpen && (
-        <SavedViewListModal<any>
-          currentView={currentView}
-          views={views}
-          onClose={closeLoadModal}
-          setView={setCurrentView}
-        />
-      )}
       {isManageFlyoutOpen && (
-        <SavedViewManageViewsFlyout<ViewState>
-          sourceIsLoading={sourceIsLoading}
-          loading={loading}
+        <ManageViewsFlyout
+          loading={isFetchingViews}
           views={views}
-          onMakeDefaultView={makeDefault}
-          onDeleteView={deleteView}
+          onMakeDefaultView={onSetDefaultView}
+          onDeleteView={onDeleteView}
           onClose={closeManageFlyout}
-          setView={setCurrentView}
+          onSwitchView={onSwitchView}
         />
       )}
     </>
   );
 }
-
-const getErrorToast = (type: 'create' | 'find', msg?: string) => {
-  if (type === 'create') {
-    return {
-      toastLifeTimeMs: 3000,
-      title:
-        msg ||
-        i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
-          defaultMessage: `An error occured saving view.`,
-        }),
-    };
-  } else if (type === 'find') {
-    return {
-      toastLifeTimeMs: 3000,
-      title:
-        msg ||
-        i18n.translate('xpack.infra.savedView.findError.title', {
-          defaultMessage: `An error occurred while loading views.`,
-        }),
-    };
-  }
-};

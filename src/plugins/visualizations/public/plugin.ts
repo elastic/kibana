@@ -58,6 +58,10 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -100,10 +104,12 @@ import {
   setSavedObjectTagging,
   setUsageCollection,
   setSavedObjectsManagement,
+  setContentManagement,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry } from './types';
+import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -128,6 +134,7 @@ export interface VisualizationsSetupDeps {
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   share?: SharePluginSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface VisualizationsStartDeps {
@@ -153,6 +160,7 @@ export interface VisualizationsStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 /**
@@ -190,6 +198,7 @@ export class VisualizationsPlugin
       urlForwarding,
       share,
       uiActions,
+      contentManagement,
     }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     const {
@@ -369,6 +378,14 @@ export class VisualizationsPlugin
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
+    contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: 'Visualize Library',
+    });
+
     return {
       ...this.types.setup(),
       visEditorsRegistry,
@@ -389,6 +406,7 @@ export class VisualizationsPlugin
       fieldFormats,
       usageCollection,
       savedObjectsManagement,
+      contentManagement,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -410,6 +428,7 @@ export class VisualizationsPlugin
     setFieldFormats(fieldFormats);
     setUsageCollection(usageCollection);
     setSavedObjectsManagement(savedObjectsManagement);
+    setContentManagement(contentManagement);
 
     if (spaces) {
       setSpaces(spaces);
