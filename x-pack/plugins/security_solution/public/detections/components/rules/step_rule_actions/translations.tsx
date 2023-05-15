@@ -11,20 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 
-export const COMPLETE_WITHOUT_ENABLING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithoutEnablingTitle',
-  {
-    defaultMessage: 'Create rule without enabling it',
-  }
-);
-
-export const COMPLETE_WITH_ENABLING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithEnablingTitle',
-  {
-    defaultMessage: 'Create & enable rule',
-  }
-);
-
 export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noReadActionsPrivileges',
   {

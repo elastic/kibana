@@ -90,14 +90,10 @@ export type RuleStepsFormHooks = {
 };
 
 export interface RuleStepProps {
-  addPadding?: boolean;
-  descriptionColumns?: 'multi' | 'single' | 'singleSplit';
-  isReadOnlyView: boolean;
   isUpdateView?: boolean;
   isLoading: boolean;
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
-  setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
   kibanaDataViews?: { [x: string]: DataViewListItem };
 }
 
@@ -178,6 +174,18 @@ export interface DefineStepRule {
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
   suppressionMissingFields?: AlertSuppressionMissingFields;
+}
+
+export interface QueryDefineStep {
+  ruleType: 'query' | 'saved_query';
+  index: string[];
+  indexPattern?: DataViewBase;
+  queryBar: FieldValueQueryBar;
+  dataViewId?: string;
+  dataViewTitle?: string;
+  timeline: FieldValueTimeline;
+  dataSourceType: DataSourceType;
+  shouldLoadQueryDynamically: boolean;
 }
 
 export interface Duration {
