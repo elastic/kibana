@@ -103,11 +103,14 @@ export default async (
   console.error('esArchiver.archives', ftrConfig.get('esArchiver.archives'));
 
   const lifecycle = new Lifecycle(log);
+  const dockerServers = new DockerServersService(ftrConfig.get('dockerServers'), log, lifecycle);
+
   const providers = new ProviderCollection(log, [
     ...readProviderSpec('Service', {
       lifecycle: () => lifecycle,
       log: () => log,
       config: () => ftrConfig,
+      dockerServers: () => dockerServers,
     }),
     ...readProviderSpec('Service', ftrConfig.get('services')),
   ]);
@@ -136,7 +139,7 @@ export default async (
     config: ftrConfig,
     installDir: options?.installDir,
     extraKbnOpts: options?.installDir
-      ? []
+      ? [`--server.port=${kibanaPort}`, `--elasticsearch.hosts=http://localhost:${esPort}`]
       : [
           '--dev',
           '--no-dev-config',
