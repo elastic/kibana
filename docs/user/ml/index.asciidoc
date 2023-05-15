@@ -191,19 +191,22 @@ image::user/ml/images/ml-change-point-detection.png[Change point detection UI]
 Select a function and a metric field, then pick a date range to start detecting 
 change points in the defined range. Optionally, you can split the data by a 
 field. If the cardinality of the split field exceeds 10,000, then only the first 
-10,000, sorted by document count, are analyzed. You can select multiple metric 
-fields and split fields to identify change points.
+10,000, sorted by document count, are analyzed. You can configure a maximum of 6  
+combinations of a function applied to a metric field, partitioned by a split 
+field to identify change points.
 
 When a change point is detected, a row displays basic information including the 
-time, a preview chart, the type of change point, p-value, field name, and value. 
-You can further examine the selected change point in a detailed view. A chart 
+timestamp of the change point, a preview chart, the type of change point, its 
+p-value, the name and value of the split field or the name of the partition. You 
+can further examine the selected change point in a detailed view. A chart 
 visualizes the identified change point within the analyzed time window, making 
 the interpretation easier. If the analysis is split by a field, a separate chart 
 is shown for every partition that has a detected change point. The chart 
-displays the type of change point, its value, and the time of occurrence. The 
-corresponding `p-value` indicates the magnitude of the change; lower values 
-indicate more significant changes. You can use the change point type selector to 
-filter the results by specific types of change points.
+displays the type of change point, its value, and the timestamp of the bucket 
+where the change point has been detected. The corresponding `p-value` indicates 
+the magnitude of the change; lower values indicate more significant changes. You 
+can use the change point type selector to filter the results by specific types 
+of change points.
 
 [role="screenshot"]
 image::user/ml/images/ml-change-point-detection-selected.png[Selected change points]
