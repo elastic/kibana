@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { TestProviders } from '../../mock';
 import { DashboardsTable } from './dashboards_table';
+import { TestProviders } from '../../common/mock';
 
 // mock lodash debounce to speed up the test
 jest.mock('lodash', () => ({ ...jest.requireActual('lodash'), debounce: (fn: () => void) => fn }));
@@ -35,8 +35,8 @@ const mockUseSecurityDashboardsTableItems = jest.fn(() => ({
   items: DASHBOARD_TABLE_ITEMS,
   isLoading: false,
 }));
-jest.mock('../../containers/dashboards/use_security_dashboards_table', () => {
-  const actual = jest.requireActual('../../containers/dashboards/use_security_dashboards_table');
+jest.mock('../hooks/use_security_dashboards_table', () => {
+  const actual = jest.requireActual('../hooks/use_security_dashboards_table');
   return {
     ...actual,
     useSecurityDashboardsTableItems: () => mockUseSecurityDashboardsTableItems(),

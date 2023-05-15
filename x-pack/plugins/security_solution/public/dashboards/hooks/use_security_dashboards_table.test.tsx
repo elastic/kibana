@@ -10,52 +10,32 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { render } from '@testing-library/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
-import { useKibana } from '../../lib/kibana';
-import { TestProviders } from '../../mock/test_providers';
+import { useKibana } from '../../common/lib/kibana';
+import { TestProviders } from '../../common/mock/test_providers';
 import {
   useSecurityDashboardsTableColumns,
   useSecurityDashboardsTableItems,
 } from './use_security_dashboards_table';
-import * as telemetry from '../../lib/telemetry';
-import { SecurityPageName } from '../../../../common/constants';
-import * as linkTo from '../../components/link_to';
-import type { DashboardTableItem } from './types';
+import * as telemetry from '../../common/lib/telemetry';
+import { SecurityPageName } from '../../../common/constants';
+import * as linkTo from '../../common/components/link_to';
+import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
+import { DEFAULT_DASHBOARDS_RESPONSE } from '../../common/containers/dashboards/__mocks__/api';
+import { DashboardContextProvider } from '../context/dashboard_context';
+import type { HttpStart } from '@kbn/core/public';
 
-jest.mock('../../lib/kibana');
-
+jest.mock('../../common/lib/kibana');
+jest.mock('../../common/containers/tags/api');
+jest.mock('../../common/containers/dashboards/api');
 const spyUseGetSecuritySolutionUrl = jest.spyOn(linkTo, 'useGetSecuritySolutionUrl');
 const spyTrack = jest.spyOn(telemetry, 'track');
-
-const TAG_ID = 'securityTagId';
-const DASHBOARDS_RESPONSE: DashboardTableItem[] = [
-  {
-    id: 'dashboardId1',
-    type: 'dashboard',
-    attributes: {
-      title: 'title1',
-      description: 'description1',
-    },
-    references: [{ type: 'tag', id: TAG_ID, name: 'tagName' }],
-  },
-  {
-    id: 'dashboardId2',
-    type: 'dashboard',
-    attributes: {
-      title: 'title2',
-      description: 'description2',
-    },
-    references: [{ type: 'tag', id: TAG_ID, name: 'tagName' }],
-  },
-];
-
-const mockGetSecurityDashboards = jest.fn(() => DASHBOARDS_RESPONSE);
-jest.mock('./utils', () => ({
-  getSecurityDashboards: () => mockGetSecurityDashboards(),
-}));
-
+const {
+  id: mockReturnDashboardId,
+  attributes: { title: mockReturnDashboardTitle, description: mockReturnDashboardDescription },
+} = DEFAULT_DASHBOARDS_RESPONSE[0];
 const renderUseSecurityDashboardsTableItems = async () => {
   const renderedHook = renderHook(() => useSecurityDashboardsTableItems(), {
-    wrapper: TestProviders,
+    wrapper: DashboardContextProvider,
   });
   await act(async () => {
     // needed to let dashboard items to be updated from saved objects response
@@ -74,6 +54,7 @@ describe('Security Dashboards Table hooks', () => {
   useKibana().services.dashboard = {
     locator: { getRedirectUrl: mockGetRedirectUrl },
   } as unknown as DashboardStart;
+  useKibana().services.http = {} as unknown as HttpStart;
 
   const mockTaggingGetTableColumnDefinition = useKibana().services.savedObjectsTagging?.ui
     .getTableColumnDefinition as jest.Mock;
@@ -91,15 +72,15 @@ describe('Security Dashboards Table hooks', () => {
   describe('useSecurityDashboardsTableItems', () => {
     it('should request when renders', async () => {
       await renderUseSecurityDashboardsTableItems();
-      expect(mockGetSecurityDashboards).toHaveBeenCalledTimes(1);
+      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
     });
 
     it('should not request again when rerendered', async () => {
       const { rerender } = await renderUseSecurityDashboardsTableItems();
 
-      expect(mockGetSecurityDashboards).toHaveBeenCalledTimes(1);
+      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
       act(() => rerender());
-      expect(mockGetSecurityDashboards).toHaveBeenCalledTimes(1);
+      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
     });
 
     it('should return a memoized value when rerendered', async () => {
@@ -115,17 +96,12 @@ describe('Security Dashboards Table hooks', () => {
     it('should return dashboard items', async () => {
       const { result } = await renderUseSecurityDashboardsTableItems();
 
-      const [dashboard1, dashboard2] = DASHBOARDS_RESPONSE;
+      const [dashboard1] = DEFAULT_DASHBOARDS_RESPONSE;
       expect(result.current.items).toStrictEqual([
         {
           ...dashboard1,
           title: dashboard1.attributes.title,
           description: dashboard1.attributes.description,
-        },
-        {
-          ...dashboard2,
-          title: dashboard2.attributes.title,
-          description: dashboard2.attributes.description,
         },
       ]);
     });
@@ -179,14 +155,12 @@ describe('Security Dashboards Table hooks', () => {
     expect(result.getAllByText('Description').length).toBeGreaterThan(0);
     expect(result.getAllByText('Tags').length).toBeGreaterThan(0);
 
-    expect(result.getByText('title1')).toBeInTheDocument();
-    expect(result.getByText('description1')).toBeInTheDocument();
-    expect(result.getByText('title2')).toBeInTheDocument();
-    expect(result.getByText('description2')).toBeInTheDocument();
+    expect(result.getByText(mockReturnDashboardTitle)).toBeInTheDocument();
+    expect(result.getByText(mockReturnDashboardDescription)).toBeInTheDocument();
 
-    expect(result.queryAllByTestId('dashboardTableTitleCell')).toHaveLength(2);
-    expect(result.queryAllByTestId('dashboardTableDescriptionCell')).toHaveLength(2);
-    expect(result.queryAllByTestId('dashboardTableTagsCell')).toHaveLength(2);
+    expect(result.queryAllByTestId('dashboardTableTitleCell')).toHaveLength(1);
+    expect(result.queryAllByTestId('dashboardTableDescriptionCell')).toHaveLength(1);
+    expect(result.queryAllByTestId('dashboardTableTagsCell')).toHaveLength(1);
   });
 
   it('should send telemetry when dashboard title clicked', async () => {
@@ -200,7 +174,7 @@ describe('Security Dashboards Table hooks', () => {
       }
     );
 
-    result.getByText('title1').click();
+    result.getByText(mockReturnDashboardTitle).click();
     expect(spyTrack).toHaveBeenCalledWith(
       telemetry.METRIC_TYPE.CLICK,
       telemetry.TELEMETRY_EVENT.DASHBOARD
@@ -219,7 +193,7 @@ describe('Security Dashboards Table hooks', () => {
 
     expect(mockGetSecuritySolutionUrl).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.dashboards,
-      path: 'dashboardId1',
+      path: mockReturnDashboardId,
     });
   });
 });

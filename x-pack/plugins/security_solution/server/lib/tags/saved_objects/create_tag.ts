@@ -11,21 +11,21 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
-import type { OutputError } from '@kbn/securitysolution-es-utils';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
 interface CreateTagParams {
   savedObjectsClient: SavedObjectsClientContract;
   tagName: string;
   description: string;
-  color: string;
+  color?: string;
   references?: SavedObjectReference[];
 }
 
-interface CreateTagResponse {
-  error?: OutputError;
-  response: SavedObject<TagAttributes> | null;
-}
+/**
+ * Returns the hex representation of a random color (e.g `#F1B7E2`)
+ */
+const getRandomColor = (): string => {
+  return `#${String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0')}`;
+};
 
 export const createTag = async ({
   savedObjectsClient,
@@ -33,26 +33,16 @@ export const createTag = async ({
   description,
   color,
   references,
-}: CreateTagParams): Promise<CreateTagResponse> => {
-  const TYPE = 'tag';
-  try {
-    const createdTag = await savedObjectsClient.create<TagAttributes>(
-      TYPE,
-      {
-        name: tagName,
-        description,
-        color,
-      },
-      { references }
-    );
+}: CreateTagParams): Promise<SavedObject<TagAttributes>> => {
+  const createdTag = await savedObjectsClient.create<TagAttributes>(
+    'tag',
+    {
+      name: tagName,
+      description,
+      color: color ?? getRandomColor(),
+    },
+    { references }
+  );
 
-    return {
-      response: createdTag,
-    };
-  } catch (e) {
-    return {
-      error: transformError(e),
-      response: null,
-    };
-  }
+  return createdTag;
 };
