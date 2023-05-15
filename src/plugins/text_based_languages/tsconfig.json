@@ -13,10 +13,10 @@
     "@kbn/i18n",
     "@kbn/monaco",
     "@kbn/es-query",
-    "@kbn/data-plugin",
     "@kbn/core",
     "@kbn/kibana-react-plugin",
     "@kbn/language-documentation-popover",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",
