@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { css } from '@emotion/react';
-import { DiscoverMainRoute } from '../../../../../../../../src/plugins/discover/public/application/main';
+import { DiscoverMainRoute } from '@kbn/discover-plugin/public/application/main';
 
 const DiscoverTabContent = () => {
   return (
