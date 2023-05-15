@@ -159,7 +159,7 @@ and an example document that matches the category.
 
 You can find log pattern analysis under **{ml-app}** > **AIOps Labs** where you 
 can select the {data-source} or saved search that you want to analyze, or in 
-**Discover** as an available actionfor any text field.
+**Discover** as an available action for any text field.
 
 [role="screenshot"]
 image::user/ml/images/ml-log-pattern-analysis.png[Log pattern analysis UI]
