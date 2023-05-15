@@ -12,6 +12,7 @@ import {
   FilterField,
   FilterViewInstance,
   FlattenFilterViewInstance,
+  FormattedFilterViewInstance,
 } from '../../types/filters';
 
 const SELECT_FILTER = 'selectFilter';
@@ -30,11 +31,11 @@ export const formatFilterView =
     return filterViewKeys.reduce((acc, key) => {
       acc[key] = {
         label: filterView[key].label,
-        formattedValue: (filterView[key].formatter ?? defaultFormatter)(filterValue[key]),
+        formattedValue: (filterView[key].formatter ?? defaultFormatter)(filterValue[key])!,
         component: filterView[key].component,
       };
       return acc;
-    }, {} as Record<string, unknown>);
+    }, {} as FormattedFilterViewInstance);
   };
 
 export const flattenFilterView = (filterValue: FilterType) => (filterView: FilterViewInstance) => {
