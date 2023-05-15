@@ -7,7 +7,7 @@
 
 import { isPathValid } from './is_path_valid';
 
-describe('isPathValid as array', () => {
+describe('isPathValid', () => {
   test('not valid when empty array is key', () => {
     expect(isPathValid([], {})).toEqual(false);
   });
