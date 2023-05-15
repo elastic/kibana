@@ -118,9 +118,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   const invalidIndex = -1;
 
   const selectedVulnerability = useMemo(() => {
-    return slicedPage?.find(
-      (_vulnerabilityRecord: VulnerabilityRecord, i) => i === urlQuery.vulnerabilityIndex
-    );
+    return slicedPage[urlQuery.vulnerabilityIndex];
   }, [slicedPage, urlQuery.vulnerabilityIndex]);
 
   const onCloseFlyout = () => {
