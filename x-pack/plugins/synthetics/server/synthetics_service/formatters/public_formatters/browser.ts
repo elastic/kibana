@@ -38,6 +38,8 @@ const throttlingFormatter: Formatter = (fields) => {
 };
 
 export const browserFormatters: BrowserFormatMap = {
+  ...commonFormatters,
+  ...tlsFormatters,
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
@@ -51,8 +53,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
-  ...commonFormatters,
-  ...tlsFormatters,
   [ConfigKey.METADATA]: objectFormatter,
   [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
@@ -60,6 +60,4 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: stringToObjectFormatter,
-  ...commonFormatters,
-  ...tlsFormatters,
 };
