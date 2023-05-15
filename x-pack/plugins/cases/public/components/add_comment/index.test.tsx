@@ -41,7 +41,7 @@ const addCommentProps: AddCommentProps = {
 const defaultResponse = {
   isLoading: false,
   isError: false,
-  createAttachments,
+  mutate: createAttachments,
 };
 
 const sampleData: CaseAttachmentWithoutOwner = {
@@ -79,12 +79,21 @@ describe('AddComment ', () => {
     wrapper.find(`button[data-test-subj="submit-comment"]`).first().simulate('click');
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(createAttachments).toBeCalledWith({
-        caseId: addCommentProps.caseId,
-        caseOwner: SECURITY_SOLUTION_OWNER,
-        data: [sampleData],
-        updateCase: onCommentPosted,
-      });
+      expect(createAttachments).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          caseOwner: SECURITY_SOLUTION_OWNER,
+          attachments: [sampleData],
+        },
+        { onSuccess: expect.anything() }
+      );
+    });
+
+    act(() => {
+      createAttachments.mock.calls[0][1].onSuccess();
+    });
+
+    await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
     });
   });
@@ -256,12 +265,21 @@ describe('draft comment ', () => {
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(createAttachments).toBeCalledWith({
-        caseId: addCommentProps.caseId,
-        caseOwner: SECURITY_SOLUTION_OWNER,
-        data: [sampleData],
-        updateCase: onCommentPosted,
-      });
+      expect(createAttachments).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          caseOwner: SECURITY_SOLUTION_OWNER,
+          attachments: [sampleData],
+        },
+        { onSuccess: expect.anything() }
+      );
+    });
+
+    act(() => {
+      createAttachments.mock.calls[0][1].onSuccess();
+    });
+
+    await waitFor(() => {
       expect(result.getByLabelText('caseComment').textContent).toBe('');
       expect(sessionStorage.getItem(draftKey)).toBe('');
     });
