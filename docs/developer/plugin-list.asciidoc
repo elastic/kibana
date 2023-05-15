@@ -300,6 +300,11 @@ generating deep links to other apps using locators, and creating short URLs.
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
+|{kib-repo}blob/{branch}/src/plugins/text_based_languages/README.md[textBasedLanguages]
+|Contains the ESQL editor with the autocomplete and the autosuggest functionality (based on atlr).
+The antlr code can be found in packages/kbn-monaco/src/esql
+
+
 |<<uiactions-plugin>>
 |UI Actions plugins provides API to manage *triggers* and *actions*.
 
