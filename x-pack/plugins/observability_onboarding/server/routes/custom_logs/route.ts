@@ -58,7 +58,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     });
 
     return {
-      apiKeyId, //key the status off this
+      apiKeyId, // key the status off this
       apiKeyEncoded,
       statusApiEndpoint,
       scriptDownloadUrl,
