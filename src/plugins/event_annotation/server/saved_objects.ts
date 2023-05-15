@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   CoreSetup,
   mergeSavedObjectMigrationMaps,
@@ -19,6 +20,7 @@ import { EventAnnotationGroupAttributes } from '../common/types';
 export function setupSavedObjects(coreSetup: CoreSetup) {
   coreSetup.savedObjects.registerType({
     name: EVENT_ANNOTATION_GROUP_TYPE,
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple', // TODO double-check type
     management: {
