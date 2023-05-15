@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   type WorkspaceEdge,
   type WorkspaceNode,
   GraphRenderer,
   GraphRendererProvider,
-  useViewport,
 } from '@kbn/graph-renderer';
 import { Workspace, TermIntersect, ControlType } from '../../types';
 
@@ -38,7 +37,7 @@ export function InnerGraphVisualization({
   onSetControl,
   onSetMergeCandidates,
 }: GraphVisualizationProps) {
-  const { setCenter } = useViewport();
+  // const { setCenter } = useViewport();
   const nodeClick = (n: WorkspaceNode, event: React.MouseEvent) => {
     // Selection logic - shift key+click helps selects multiple nodes
     // Without the shift key we deselect all prior selections (perhaps not

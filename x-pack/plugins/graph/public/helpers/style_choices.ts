@@ -428,8 +428,11 @@ urlTemplateIconChoices.forEach((icon) => {
 
 export const colorChoices = euiPaletteColorBlind();
 
-export function isNewIcon(icon: FontawesomeIcon4 | NodeIconType): icon is NodeIconType {
-  return icon != null && 'version' in icon;
+export function isNewIcon(icon: FontawesomeIcon4 | NodeIconType | string): icon is NodeIconType {
+  return (
+    icon != null &&
+    (typeof icon !== 'string' ? 'version' in icon : iconChoices.some(({ name }) => name === icon))
+  );
 }
 
 function ensureNewNames(iconName: string): IconName {

@@ -7,15 +7,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, {
-  CSSProperties,
-  memo,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { CSSProperties, memo, ReactNode, useContext, useEffect, useMemo } from 'react';
 import cytoscape from 'cytoscape';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getCytoscapeOptions } from './cy_styles';
@@ -23,6 +15,23 @@ import { useCytoscapeEventHandlers } from './cy_events';
 import { CytoscapeContext, useCytoscape } from './use_cytoscape';
 import { GraphContext } from '../shared/context';
 // import { CollapseExpandAPI } from './cy_types';
+
+function createWrapperAPI(cy: cytoscape.Core) {
+  return {
+    getView: () => {
+      return {
+        zoom: cy.zoom(),
+        center: cy.pan(),
+      };
+    },
+    setView: (center: { x: number; y: number }, zoom: number, options?: { animate: boolean }) => {
+      if (options?.animate) {
+        return cy.animate({ zoom: { level: zoom, position: center } });
+      }
+      return cy.viewport(zoom, center);
+    },
+  };
+}
 
 export interface CytoscapeProps {
   children?: ReactNode;
@@ -101,16 +110,12 @@ export function CytoscapeComponent({
   }, [cy, setCy]);
 
   const context = useContext(GraphContext);
-  const [animating, setAnimation] = useState(false);
 
   useEffect(() => {
-    if (context && cy && !animating) {
-      const { x, y, zoom } = context?.state.view;
-      // @ts-expect-error
-      cy.viewport({ zoom, pan: { x, y } });
-      //   setView(svgRoot.current, x, y, { zoom }, () => setAnimation(!animating));
+    if (context && cy && !context.instance) {
+      context.setInstance(createWrapperAPI(cy));
     }
-  }, [animating, context, cy]);
+  }, [context, cy]);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.

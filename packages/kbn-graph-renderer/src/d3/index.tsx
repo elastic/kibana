@@ -36,14 +36,12 @@ function setView(
   element: SVGSVGElement,
   x: number,
   y: number,
-  { zoom, duration }: { zoom: number; duration?: number },
-  toggleAnimationFlag: () => void
+  { zoom, duration }: { zoom: number; duration?: number }
 ) {
   if (!shouldChangeView(x, y, zoom)) {
     return;
   }
   if (duration != null) {
-    toggleAnimationFlag();
     return d3
       .select(element)
       .transition()
@@ -52,14 +50,24 @@ function setView(
         const interpolatedTranslationFn = d3.interpolate(d3.behavior.zoom().translate(), [x, y]);
         const interpolatedScaleFn = d3.interpolate(d3.behavior.zoom().scale(), zoom);
         return function (t) {
-          if (t === 1) {
-            toggleAnimationFlag();
-          }
           return changeViewport(element, interpolatedTranslationFn(t), interpolatedScaleFn(t));
         };
       });
   }
   return changeViewport(element, [x, y], zoom);
+}
+
+function createWrapperAPI(element: SVGSVGElement) {
+  return {
+    getView: () => {
+      const zoom = d3.behavior.zoom();
+      const [x, y] = zoom.translate();
+      return { center: { x, y }, zoom: zoom.scale() };
+    },
+    setView: (center: { x: number; y: number }, zoom: number, options?: { animate: boolean }) => {
+      setView(element, center.x, center.y, { zoom, duration: options?.animate ? 1000 : undefined });
+    },
+  };
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -164,14 +172,6 @@ export function D3GraphRenderer({
   const svgRoot = useRef<SVGSVGElement | null>(null);
   const svgId = useRef<string>(generatedSvgId);
   const context = useContext(GraphContext);
-  const [animating, setAnimation] = useState(false);
-
-  useEffect(() => {
-    if (context && svgRoot.current && !animating) {
-      const { x, y, zoom } = context?.state.view;
-      setView(svgRoot.current, x, y, { zoom }, () => setAnimation(!animating));
-    }
-  }, [animating, context]);
 
   return (
     <svg
@@ -185,6 +185,10 @@ export function D3GraphRenderer({
         if (element && svgRoot.current !== element) {
           svgRoot.current = element;
           registerZooming(element);
+
+          if (context && !context.instance) {
+            context.setInstance(createWrapperAPI(svgRoot.current));
+          }
         }
       }}
     >
@@ -263,6 +267,9 @@ export function D3GraphRenderer({
             .filter((node) => !node.parent)
             .map((node) => {
               let iconComponent = null;
+              if (node.kx == null || node.ky == null) {
+                return iconComponent;
+              }
               if (node.icon != null) {
                 const backgroundColor = isColorDark(...chroma(node.color).rgb())
                   ? 'white'

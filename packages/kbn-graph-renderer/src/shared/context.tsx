@@ -6,59 +6,33 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useReducer, useContext, Dispatch } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
-interface Viewport {
-  x: number;
-  y: number;
-  zoom: number;
-  animated?: boolean;
-}
-
-interface ContextState {
-  view: Viewport;
+interface GraphAPIInstance {
+  setView: (
+    centerPoint: { x: number; y: number },
+    zoom: number,
+    options?: { animate: boolean }
+  ) => void;
+  getView: () => { center: { x: number; y: number }; zoom: number };
 }
 
 export interface GraphContext {
-  state: ContextState;
-  dispatch: Dispatch<GraphActionType>;
+  instance: GraphAPIInstance | null;
+  setInstance: (instance: GraphAPIInstance) => void;
 }
-
-type GraphActionType =
-  | {
-      type: 'viewportCenter';
-      payload: Partial<Viewport>;
-    }
-  | { type: 'viewportZoomIn' }
-  | { type: 'viewportZoomOut' };
-
-const initialValue: ContextState = { view: { x: 0, y: 0, zoom: 1 } };
 
 export const GraphContext = createContext<GraphContext | null>(null);
-
-function reducer(state: ContextState, action: GraphActionType): ContextState {
-  switch (action.type) {
-    case 'viewportCenter': {
-      return { view: { ...state.view, ...action.payload } };
-    }
-    case 'viewportZoomIn': {
-      return { view: { ...state.view, zoom: state.view.zoom * 1.1 } };
-    }
-    case 'viewportZoomIn': {
-      return { view: { ...state.view, zoom: state.view.zoom / 1.1 } };
-    }
-    default:
-      return state;
-  }
-}
 
 export function GraphRendererProvider({
   children,
 }: {
   children: React.ReactChildren | React.ReactChild;
 }) {
-  const [state, dispatch] = useReducer(reducer, initialValue);
-  return <GraphContext.Provider value={{ state, dispatch }}>{children}</GraphContext.Provider>;
+  const [instance, setInstance] = useState<GraphAPIInstance | null>(null);
+  return (
+    <GraphContext.Provider value={{ instance, setInstance }}>{children}</GraphContext.Provider>
+  );
 }
 
 export function useViewport() {
@@ -66,11 +40,24 @@ export function useViewport() {
   if (context == null) {
     throw Error('useViewport hook requires the GraphRendererProvider component');
   }
-  const { dispatch } = context;
+  const instance = context.instance;
   return {
-    setCenter: (x: number, y: number, zoom: number) =>
-      dispatch({ type: 'viewportCenter', payload: { x, y, zoom } }),
-    zoomIn: () => dispatch({ type: 'viewportZoomIn' }),
-    zoomOut: () => dispatch({ type: 'viewportZoomOut' }),
+    setCenter: (x: number, y: number, zoom: number) => {
+      instance?.setView({ x, y }, zoom);
+    },
+    zoomIn: () => {
+      if (!instance) {
+        return;
+      }
+      const { center, zoom } = instance.getView();
+      return instance.setView(center, zoom * 1.1);
+    },
+    zoomOut: () => {
+      if (!instance) {
+        return;
+      }
+      const { center, zoom } = instance.getView();
+      return instance.setView(center, zoom / 1.1);
+    },
   };
 }
