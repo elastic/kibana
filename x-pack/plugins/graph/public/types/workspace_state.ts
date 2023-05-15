@@ -7,41 +7,11 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import d3 from 'd3';
+import type { NodeIconType, WorkspaceEdge, WorkspaceNode } from '@kbn/graph-renderer';
 import { TargetOptions } from '../components/control_panel';
-import { FontawesomeIcon } from '../helpers/style_choices';
 import { WorkspaceField, AdvancedSettings } from './app_state';
 
-export interface WorkspaceNode {
-  id: string;
-  x: number;
-  y: number;
-  label: string;
-  icon: FontawesomeIcon;
-  data: {
-    field: string;
-    term: string;
-  };
-  scaledSize: number;
-  parent: WorkspaceNode | null;
-  color: string;
-  numChildren: number;
-  isSelected?: boolean;
-  kx: number;
-  ky: number;
-}
-
 export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky' | 'id'>;
-
-export interface WorkspaceEdge {
-  weight: number;
-  width: number;
-  label: string;
-  source: WorkspaceNode;
-  target: WorkspaceNode;
-  isSelected?: boolean;
-  topTarget: WorkspaceNode;
-  topSrc: WorkspaceNode;
-}
 
 export interface ServerResultNode {
   field: string;
@@ -49,7 +19,7 @@ export interface ServerResultNode {
   id: string;
   label: string;
   color: string;
-  icon: FontawesomeIcon;
+  icon: NodeIconType;
   data: {
     field: string;
     term: string;

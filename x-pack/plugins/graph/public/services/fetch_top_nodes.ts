@@ -6,6 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { isNewIcon, convertToNewIcon } from '../helpers/style_choices';
 import { WorkspaceField, ServerResultNode } from '../types';
 
 const DEFAULT_SHARD_SIZE = 5000;
@@ -76,7 +77,7 @@ export function createServerResultNode(
     term,
     id: '',
     color: field.color,
-    icon: field.icon,
+    icon: isNewIcon(field.icon) ? field.icon : convertToNewIcon(field.icon),
     data: {
       field: fieldName,
       term,

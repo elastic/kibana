@@ -6,10 +6,8 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/public';
+import type { WorkspaceEdge, WorkspaceNode } from '@kbn/graph-renderer';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
-import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
-
-type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 /**
  * Workspace fetched from server.

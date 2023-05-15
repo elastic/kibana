@@ -25,6 +25,8 @@ import {
   getSuitableIcon,
   colorChoices,
   iconChoicesByClass,
+  convertToNewIcon,
+  isNewIcon,
 } from '../../helpers/style_choices';
 
 const defaultAdvancedSettings: AdvancedSettings = {
@@ -140,7 +142,12 @@ function getFieldsWithWorkspaceSettings(indexPattern: DataView, selectedFields: 
     workspaceField.hopSize = serializedField.hopSize;
     workspaceField.lastValidHopSize = serializedField.lastValidHopSize;
     workspaceField.color = serializedField.color;
-    workspaceField.icon = iconChoicesByClass[serializedField.iconClass]!;
+    workspaceField.icon =
+      iconChoicesByClass[
+        isNewIcon(serializedField.iconClass)
+          ? serializedField.iconClass
+          : convertToNewIcon(serializedField.iconClass).name
+      ]!;
     workspaceField.selected = true;
   });
 
@@ -158,7 +165,7 @@ function getBlocklistedNodes(
       y: 0,
       label: serializedNode.label,
       color: serializedNode.color,
-      icon: currentField.icon,
+      icon: isNewIcon(currentField.icon) ? currentField.icon : convertToNewIcon(currentField.icon),
       parent: null,
       scaledSize: 0,
       data: {

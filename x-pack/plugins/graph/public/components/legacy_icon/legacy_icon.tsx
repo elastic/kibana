@@ -8,10 +8,10 @@
 import classNames from 'classnames';
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FontawesomeIcon } from '../../helpers/style_choices';
+import type { FontawesomeIcon5 } from '@kbn/graph-renderer';
 
 export interface LegacyIconProps {
-  icon: FontawesomeIcon;
+  icon: FontawesomeIcon5;
   selected?: boolean;
   onClick?: () => void;
   asListIcon?: boolean;
