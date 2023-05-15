@@ -108,7 +108,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
   );
 
-  const {activeTemplate} = useTemplates()
+  const { activeTemplate } = useTemplates();
 
   const isTableLoading = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading

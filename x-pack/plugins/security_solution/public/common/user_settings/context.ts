@@ -6,12 +6,8 @@
  */
 
 import { createContext } from 'react';
-import { NonUndefined } from 'utility-types';
-import type {
-  SecuritySolutionUserSetting,
-  SecuritySolutionUserSettings,
-  UserSettingScope,
-} from './types';
+import type { NonUndefined } from 'utility-types';
+import type { SecuritySolutionUserSettings, UserSettingScope } from './types';
 
 export interface SecuritySolutionUserSettingsContextType {
   settings?: SecuritySolutionUserSettings;
