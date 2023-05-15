@@ -13,45 +13,33 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
-import { InstallSection } from '../../enrollment_instructions/install_section';
-import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
+import { CloudFormationInstructions } from '../cloud_formation_instructions';
 
-import type { K8sMode } from '../types';
-
-export const InstallManagedAgentStep = ({
-  installCommand,
+export const InstallCloudFormationManagedAgentStep = ({
   selectedApiKeyId,
   apiKeyData,
-  isK8s,
   enrollToken,
   isComplete,
-  fullCopyButton,
-  onCopy,
+  cloudFormationTemplateUrl,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
-  isK8s?: K8sMode;
   enrollToken?: string;
-  installCommand: CommandsByPlatform;
   isComplete?: boolean;
-  fullCopyButton?: boolean;
-  onCopy?: () => void;
+  cloudFormationTemplateUrl: string;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
   return {
     status,
-    title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
-      defaultMessage: 'Install Elastic Agent on your host',
+    title: i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.stepEnrollAndRunAgentTitle', {
+      defaultMessage: 'Install Elastic Agent on your cloud',
     }),
     children:
       selectedApiKeyId && apiKeyData ? (
-        <InstallSection
-          installCommand={installCommand}
-          isK8s={isK8s}
-          enrollToken={enrollToken}
-          onCopy={onCopy}
-          fullCopyButton={fullCopyButton}
+        <CloudFormationInstructions
+          cloudFormationTemplateUrl={cloudFormationTemplateUrl}
+          enrollmentAPIKey={enrollToken}
         />
       ) : (
         <React.Fragment />
