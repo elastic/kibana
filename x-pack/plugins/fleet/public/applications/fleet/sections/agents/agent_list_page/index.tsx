@@ -25,7 +25,7 @@ import {
   sendGetAgentTags,
   useFleetServerStandalone,
 } from '../../../hooks';
-import { AgentEnrollmentFlyout } from '../../../components';
+import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
 import {
   AgentStatusKueryHelper,
   ExperimentalFeaturesService,
@@ -133,6 +133,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
   const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
+  const [agentToGetUninstallCommand, setAgentToGetUninstallCommand] = useState<Agent | undefined>(
+    undefined
+  );
   const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
   const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
@@ -207,6 +210,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           setAgentToAddRemoveTags(agent);
           setShowTagsAddRemove(!showTagsAddRemove);
         }}
+        onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
       />
     );
@@ -450,6 +454,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
             hasFleetServer={agentToUnenrollHasFleetServer}
+          />
+        </EuiPortal>
+      )}
+      {agentToGetUninstallCommand && (
+        <EuiPortal>
+          <UninstallCommandFlyout
+            target="agent"
+            policyId={agentToGetUninstallCommand.policy_id}
+            onClose={() => {
+              setAgentToGetUninstallCommand(undefined);
+              refreshAgents({ refreshTags: true });
+            }}
           />
         </EuiPortal>
       )}
