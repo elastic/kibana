@@ -42,15 +42,15 @@ export interface ControlGroupRendererProps {
   filters?: Filter[];
   getCreationOptions?: (
     initialInput: Partial<ControlGroupInput>,
-    builder: ControlGroupInputBuilder
+    builder: ControlGroupInputBuilder,
+    fieldFilterPredicate?: FieldFilterPredicate
   ) => Promise<ControlGroupCreationOptions>;
   timeRange?: TimeRange;
   query?: Query;
-  fieldFilterPredicate?: FieldFilterPredicate;
 }
 
 export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlGroupRendererProps>(
-  ({ getCreationOptions, filters, timeRange, query, fieldFilterPredicate }, ref) => {
+  ({ getCreationOptions, filters, timeRange, query }, ref) => {
     const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
     useImperativeHandle(
@@ -79,7 +79,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         > & {
           create: ControlGroupContainerFactory['create'];
         };
-        const { initialInput, settings } =
+        const { initialInput, settings, fieldFilterPredicate } =
           (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
           {};
         const newControlGroup = (await factory?.create(
@@ -89,7 +89,8 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
             ...initialInput,
           },
           undefined,
-          settings
+          settings,
+          fieldFilterPredicate
         )) as ControlGroupContainer;
 
         if (canceled) {
@@ -125,11 +126,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
           filters,
         });
       }
-
-      if (fieldFilterPredicate) {
-        controlGroup.setFieldFilterPredicate(fieldFilterPredicate);
-      }
-    }, [query, filters, controlGroup, timeRange, fieldFilterPredicate]);
+    }, [query, filters, controlGroup, timeRange]);
 
     return <div ref={controlGroupDomRef} />;
   }

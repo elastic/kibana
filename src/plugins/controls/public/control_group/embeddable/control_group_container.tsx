@@ -105,7 +105,8 @@ export class ControlGroupContainer extends Container<
     reduxToolsPackage: ReduxToolsPackage,
     initialInput: ControlGroupInput,
     parent?: Container,
-    settings?: ControlGroupSettings
+    settings?: ControlGroupSettings,
+    fieldFilterPredicate?: FieldFilterPredicate
   ) {
     super(
       initialInput,
@@ -144,6 +145,9 @@ export class ControlGroupContainer extends Container<
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
+    if (fieldFilterPredicate) {
+      this.setFieldFilterPredicate(fieldFilterPredicate);
+    }
   }
 
   private setupSubscriptions = () => {

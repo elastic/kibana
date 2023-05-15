@@ -301,6 +301,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     return resultControls;
   }, [initialUrlParam, initialControls, getStoredControlInput]);
 
+  const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
+
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
       defaultInput: Partial<ControlGroupInput>,
@@ -345,9 +347,18 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             hideAdditionalSettings: true,
           },
         },
+        fieldFilterPredicate,
       } as ControlGroupCreationOptions;
     },
-    [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
+    [
+      dataViewId,
+      timeRange,
+      filters,
+      chainingSystem,
+      query,
+      selectControlsWithPriority,
+      fieldFilterPredicate,
+    ]
   );
 
   useFilterUpdatesToUrlSync({
@@ -434,8 +445,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       controlInputTransform: newControlInputTranform,
     });
   }, [controlGroup]);
-
-  const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
 
   return (
     <FilterGroupContext.Provider

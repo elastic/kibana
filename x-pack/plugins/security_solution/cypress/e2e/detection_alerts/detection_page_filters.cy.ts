@@ -11,10 +11,12 @@ import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
   FILTER_GROUP_CHANGED_BANNER,
+  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
   FILTER_GROUP_SAVE_CHANGES_POPOVER,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
+  FILTER_GROUP_CONTROL_ACTION_EDIT,
 } from '../../screens/common/filter_group';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -37,6 +39,7 @@ import { navigateFromHeaderTo } from '../../tasks/security_header';
 import { ALERTS, CASES } from '../../screens/security_header';
 import {
   addNewFilterGroupControlValues,
+  cancelFieldEditing,
   deleteFilterGroupControl,
   discardFilterGroupControls,
   editFilterGroupControl,
@@ -305,5 +308,20 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
     visitAlertsPageWithCustomFilters(customFilters);
     resetFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
+  });
+
+  it('Number fields are not visible in field edit panel', () => {
+    const idx = 3;
+    const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
+    editFilterGroupControls();
+    cy.get(CONTROL_FRAME_TITLE).eq(idx).trigger('mouseover');
+    cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).trigger('click', { force: true });
+    cy.get(FILTER_FIELD_TYPE).should('be.visible').trigger('click');
+    cy.get(FIELD_TYPES.STRING).should('be.visible');
+    cy.get(FIELD_TYPES.BOOLEAN).should('be.visible');
+    cy.get(FIELD_TYPES.IP).should('be.visible');
+    cy.get(FIELD_TYPES.NUMBER).should('not.exist');
+    cancelFieldEditing();
+    discardFilterGroupControls();
   });
 });
