@@ -9,7 +9,8 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "../../packages/observability/alert_details/src/hooks/use_alerts_history.test.tsx"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -74,5 +75,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/exploratory-view-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
