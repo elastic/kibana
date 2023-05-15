@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import isEmpty from 'lodash/isEmpty';
 import { useMemo } from 'react';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 
@@ -20,7 +21,7 @@ export const useRuleIndices = (
     if (jobs.length > 0) {
       return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
     } else {
-      return defaultRuleDataViewId ?? defaultRuleIndices;
+      return !isEmpty(defaultRuleDataViewId) ? defaultRuleDataViewId : defaultRuleIndices;
     }
   }, [jobs, defaultRuleDataViewId, defaultRuleIndices]);
 

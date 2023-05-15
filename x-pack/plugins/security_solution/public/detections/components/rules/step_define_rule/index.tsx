@@ -292,7 +292,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
   const [isIndexPatternLoading, { browserFields, indexPatterns: indexPattern, dataView }] =
-    useFetchIndex(dataViewId ?? index);
+    // dataViewId is not empty, therefore not undefined
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    useFetchIndex(!isEmpty(dataViewId) ? dataViewId! : index);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -332,7 +334,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
-  ] = useFetchIndex(threatIndex);
+  ] = useFetchIndex(!isEmpty(threatIndex) ? threatIndex : []);
 
   // reset form when rule type changes
   useEffect(() => {
