@@ -96,8 +96,7 @@ export function usePackagePolicyWithRelatedData(
   const savePackagePolicy = async () => {
     setFormState('LOADING');
     const {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      policy: { elasticsearch, secret_references, ...restPackagePolicy },
+      policy: { elasticsearch, ...restPackagePolicy },
     } = await prepareInputPackagePolicyDataset(packagePolicy);
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
     setFormState('SUBMITTED');
@@ -236,6 +235,7 @@ export function usePackagePolicyWithRelatedData(
             created_at,
             updated_by,
             updated_at,
+            secret_references,
             /* eslint-enable @typescript-eslint/naming-convention */
             ...restOfPackagePolicy
           } = basePolicy;

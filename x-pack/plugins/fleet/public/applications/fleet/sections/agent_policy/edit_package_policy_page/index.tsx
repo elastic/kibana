@@ -373,7 +373,7 @@ export const EditPackagePolicyForm = memo<{
     () =>
       generateUpdatePackagePolicyDevToolsRequest(
         packagePolicyId,
-        omit(packagePolicy, ['elasticsearch', 'secret_references'])
+        omit(packagePolicy, 'elasticsearch')
       ),
     [packagePolicyId, packagePolicy]
   );
