@@ -20,10 +20,17 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { setStateToKbnUrl, Storage } from '@kbn/kibana-utils-plugin/public';
-import { DiscoverSingleDocLocator, DiscoverSingleDocLocatorDefinition } from '../../../../src/plugins/discover/public/application/doc/locator';
-import { DiscoverContextAppLocator, DiscoverContextAppLocatorDefinition } from '../../../../src/plugins/discover/public/application/context/services/locator';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../../../../src/plugins/discover/common/locator';
-import { setHeaderActionMenuMounter, setScopedHistory, syncHistoryLocations } from '../../../../src/plugins/discover/public/kibana_services';
+import { DiscoverSingleDocLocatorDefinition } from '@kbn/discover-plugin/public/application/doc/locator';
+import { DiscoverContextAppLocatorDefinition } from '@kbn/discover-plugin/public/application/context/services/locator';
+import { DiscoverAppLocatorDefinition } from '@kbn/discover-plugin/common/locator';
+import {
+  setHeaderActionMenuMounter,
+  setScopedHistory,
+  syncHistoryLocations,
+} from '@kbn/discover-plugin/public/kibana_services';
+import type { DiscoverSingleDocLocator } from '@kbn/discover-plugin/public/application/doc/locator';
+import type { DiscoverAppLocator } from '@kbn/discover-plugin/common/locator';
+import type { DiscoverContextAppLocator } from '@kbn/discover-plugin/public/application/context/services/locator';
 import type {
   PluginSetup,
   PluginStart,
