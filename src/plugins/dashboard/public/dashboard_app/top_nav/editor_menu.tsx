@@ -46,7 +46,6 @@ interface UnwrappedEmbeddableFactory {
 export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => {
   const {
     embeddable,
-    settings: { uiSettings },
     visualizations: {
       getAliases: getVisTypeAliases,
       getByGroup: getVisTypesByGroup,

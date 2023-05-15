@@ -6633,8 +6633,6 @@
     "visualizations.visualizeListingDashboardFlowDescription": "构建仪表板？从 {dashboardApp} 创建和添加您的可视化。",
     "visualizations.visualizeListingDeleteErrorTitle.duplicateWarning": "保存“{value}”会创建重复的标题。",
     "visualizations.actions.editInLens.displayName": "进行转换以便在 Lens 中使用",
-    "visualizations.advancedSettings.visualizeEnableLabsText": "如果启用，将允许您创建、查看和编辑处于技术预览状态的可视化。如果禁用，仅生产就绪可视化可供使用。",
-    "visualizations.advancedSettings.visualizeEnableLabsTitle": "启用技术预览可视化",
     "visualizations.badge.readOnly.text": "只读",
     "visualizations.badge.readOnly.tooltip": "无法将可视化保存到库",
     "visualizations.confirmModal.cancelButtonLabel": "取消",
