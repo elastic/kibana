@@ -17,6 +17,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/language-documentation-popover",
     "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",
