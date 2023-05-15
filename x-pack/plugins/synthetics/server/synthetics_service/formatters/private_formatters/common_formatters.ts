@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { CommonFields, ConfigKey, SourceType } from '../../../../../common/runtime_types';
-import { arrayToJsonFormatter, stringToJsonFormatter, FormatterFn } from '../formatting_utils';
+import { CommonFields, ConfigKey, SourceType } from '../../../../common/runtime_types';
+import {
+  arrayToJsonFormatter,
+  stringToJsonFormatter,
+  FormatterFn,
+  secondsToCronFormatter,
+} from '../formatting_utils';
 
 export type Formatter = null | FormatterFn;
 
@@ -36,9 +41,7 @@ export const commonFormatters: CommonFormatMap = {
       `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`
     ),
   [ConfigKey.TAGS]: arrayToJsonFormatter,
-  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
+  [ConfigKey.TIMEOUT]: secondsToCronFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
 };
-
-export const secondsToCronFormatter = (value: string = '') => (value ? `${value}s` : null);

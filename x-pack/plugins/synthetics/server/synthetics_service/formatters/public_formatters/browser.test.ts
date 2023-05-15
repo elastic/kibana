@@ -6,7 +6,7 @@
  */
 
 import { ConfigKey } from '../../../../common/runtime_types';
-import { throttlingFormatter } from '../private_formatters/browser/formatters';
+import { throttlingFormatter } from './browser';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {
@@ -26,7 +26,7 @@ describe('formatters', () => {
           },
           ConfigKey.THROTTLING_CONFIG
         )
-      ).toEqual('false');
+      ).toEqual(false);
     });
 
     it('formats for default throttling', () => {

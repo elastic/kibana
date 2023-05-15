@@ -36,6 +36,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   __ui: { is_tls_enabled: false },
   urls: 'https://www.google.com',
   max_redirects: '0',
+  'url.port': 900,
   password: '3z9SBOQWW5F0UrdqLVFqlF6z',
   proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
@@ -56,7 +57,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   'check.request.headers': {},
   'check.request.method': 'GET',
   'ssl.verification_mode': VerificationMode.NONE,
-  username: '',
+  username: 'test-username',
   params: '{"proxyUrl":"https://www.google.com"}',
 };
 
@@ -121,14 +122,16 @@ describe('formatMonitorConfig', () => {
         locations: [],
         max_redirects: '0',
         name: 'Test',
-        password: '"3z9SBOQWW5F0UrdqLVFqlF6z"',
+        password: '3z9SBOQWW5F0UrdqLVFqlF6z',
         'response.include_body': 'on_error',
         'response.include_headers': true,
         schedule: '@every 3m',
         timeout: '16s',
         type: 'http',
         urls: '"https://www.google.com"',
-        proxy_url: '"https://www.google.com"',
+        proxy_url: 'https://www.google.com',
+        username: 'test-username',
+        'url.port': '900',
       });
     });
 
@@ -160,13 +163,15 @@ describe('formatMonitorConfig', () => {
           locations: [],
           max_redirects: '0',
           name: 'Test',
-          password: '"3z9SBOQWW5F0UrdqLVFqlF6z"',
-          proxy_url: '"https://www.google.com"',
+          username: 'test-username',
+          password: '3z9SBOQWW5F0UrdqLVFqlF6z',
+          proxy_url: 'https://www.google.com',
           'response.include_body': 'on_error',
           'response.include_headers': true,
           schedule: '@every 3m',
           timeout: '16s',
           type: 'http',
+          'url.port': '900',
           urls: '"https://www.google.com"',
           ...(isTLSEnabled ? { 'ssl.verification_mode': 'none' } : {}),
         });

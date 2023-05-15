@@ -6,16 +6,13 @@
  */
 
 import { ConfigKey, ICMPFields } from '../../../../common/runtime_types';
-import {
-  secondsToCronFormatter,
-  stringToJsonFormatter,
-} from '../private_formatters/formatting_utils';
+import { secondsToCronFormatter } from '../formatting_utils';
 import { Formatter, commonFormatters } from './common';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 export const icmpFormatters: ICMPFormatMap = {
   ...commonFormatters,
-  [ConfigKey.HOSTS]: stringToJsonFormatter,
+  [ConfigKey.HOSTS]: null,
   [ConfigKey.WAIT]: secondsToCronFormatter,
   [ConfigKey.MODE]: null,
   [ConfigKey.IPV4]: null,

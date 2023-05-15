@@ -9,7 +9,7 @@ import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
-} from '../private_formatters/formatting_utils';
+} from '../formatting_utils';
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 import { Formatter, commonFormatters } from './common';
@@ -18,7 +18,7 @@ import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './form
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
-const throttlingFormatter: Formatter = (fields) => {
+export const throttlingFormatter: Formatter = (fields) => {
   const value = fields[ConfigKey.THROTTLING_CONFIG];
   const defaultThrottling = DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG].value;
 

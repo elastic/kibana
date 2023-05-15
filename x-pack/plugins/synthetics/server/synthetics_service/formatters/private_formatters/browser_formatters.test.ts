@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey } from '../../../../../common/runtime_types';
-import { throttlingFormatter } from './formatters';
+import { ConfigKey } from '../../../../common/runtime_types';
+import { throttlingFormatter } from './browser_formatters';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {

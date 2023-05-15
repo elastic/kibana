@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import {
   secondsToCronFormatter,
   arrayToJsonFormatter,

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { secondsToCronFormatter } from '../private_formatters/common/formatters';
-import { arrayToJsonFormatter } from '../private_formatters/formatting_utils';
+import { arrayToJsonFormatter, secondsToCronFormatter } from '../formatting_utils';
 import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
 import {
   CommonFields,
@@ -54,7 +53,7 @@ export const commonFormatters: CommonFormatMap = {
       `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`
     ),
   [ConfigKey.TAGS]: arrayToJsonFormatter,
-  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
+  [ConfigKey.TIMEOUT]: secondsToCronFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
   [ConfigKey.PARAMS]: stringToObjectFormatter,

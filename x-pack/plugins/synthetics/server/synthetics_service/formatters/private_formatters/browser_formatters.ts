@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { DEFAULT_THROTTLING_VALUE } from '../../../../../common/constants/monitor_defaults';
-import { Formatter, commonFormatters } from '../common/formatters';
+import { DEFAULT_THROTTLING_VALUE } from '../../../../common/constants/monitor_defaults';
+import { Formatter, commonFormatters } from './common_formatters';
 import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
 } from '../formatting_utils';
 
-import { tlsFormatters } from '../tls/formatters';
-import { BrowserFields, ConfigKey } from '../../../../../common/runtime_types';
+import { tlsFormatters } from './tls_formatters';
+import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
