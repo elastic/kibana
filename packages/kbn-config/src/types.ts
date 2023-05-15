@@ -14,6 +14,7 @@ export interface PackageInfo {
   branch: string;
   buildNum: number;
   buildSha: string;
+  buildDate: Date;
   dist: boolean;
 }
 

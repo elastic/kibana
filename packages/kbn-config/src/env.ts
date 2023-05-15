@@ -118,10 +118,14 @@ export class Env {
     const isKibanaDistributable = Boolean(pkg.build && pkg.build.distributable === true);
     this.packageInfo = Object.freeze({
       branch: pkg.branch,
-      buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
-      buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      // TODO: restore
+      // buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
+      buildNum: pkg.build.number,
+      // buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      buildSha: pkg.build.sha,
       version: pkg.version,
       dist: isKibanaDistributable,
+      buildDate: new Date(),
     });
   }
 }
