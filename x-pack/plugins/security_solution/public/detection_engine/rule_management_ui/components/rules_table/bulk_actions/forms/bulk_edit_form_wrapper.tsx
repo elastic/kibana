@@ -29,6 +29,7 @@ import * as i18n from '../../../../../../detections/pages/detection_engine/rules
 interface BulkEditFormWrapperProps {
   form: FormHook;
   title: string;
+  subTitle?: React.ReactNode;
   banner?: React.ReactNode;
   children: React.ReactNode;
   onClose: () => void;
@@ -39,6 +40,7 @@ interface BulkEditFormWrapperProps {
 const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
   form,
   title,
+  subTitle,
   banner,
   children,
   onClose,
@@ -53,9 +55,14 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby={simpleFlyoutTitleId} size={flyoutSize}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" data-test-subj="rulesBulkEditFormTitle">
-          <h2 id={simpleFlyoutTitleId}>{title}</h2>
-        </EuiTitle>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" data-test-subj="rulesBulkEditFormTitle">
+              <h2 id={simpleFlyoutTitleId}>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{subTitle}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody banner={banner}>
         <Form form={form}>{children}</Form>
