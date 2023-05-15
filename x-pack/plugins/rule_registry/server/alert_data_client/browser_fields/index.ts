@@ -39,6 +39,25 @@ const chunkFields = (fields: FieldDescriptor[]) => {
   return chunks;
 };
 
+export const mergerBrowserField = (AllBrowserFields: BrowserFields[]): BrowserFields => {
+  const results: BrowserFields = {};
+  for (const browserFields of AllBrowserFields) {
+    for (const [key, value] of Object.entries(browserFields)) {
+      if (results[key]) {
+        results[key] = {
+          fields: {
+            ...(results[key] && results[key].fields ? results[key].fields : {}),
+            ...value.fields,
+          },
+        };
+      } else {
+        results[key] = value;
+      }
+    }
+  }
+  return results;
+};
+
 export const fieldDescriptorToBrowserFieldMapper = async (
   fields: FieldDescriptor[]
 ): Promise<BrowserFields> => {
@@ -69,5 +88,5 @@ export const fieldDescriptorToBrowserFieldMapper = async (
       });
     })
   );
-  return Object.assign({}, ...mappedFields);
+  return mergerBrowserField(mappedFields);
 };
