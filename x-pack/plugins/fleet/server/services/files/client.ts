@@ -21,6 +21,8 @@ import type { BaseFileMetadata, FileCompression } from '@kbn/shared-ux-file-type
 
 import { v4 as uuidV4 } from 'uuid';
 
+import moment from 'moment';
+
 import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
 
 import { FleetFileNotFound, FleetFilesClientError } from '../../errors';
@@ -215,9 +217,9 @@ export class FleetFilesClient implements FleetFileClientInterface {
       const fleetFile = this.mapIndexedDocToFleetFile(docSearchHit);
       let fileHasChunks: boolean = true;
 
-      // if status is `READY`, then ensure that file has chunks - for the cases where the file
-      // data might have been cleaned up due to ILM
-      if (fleetFile.status === 'READY') {
+      // if status is `READY` and file is older than 5 minutes, then ensure that file has
+      // chunks - for the cases where the file data might have been cleaned up due to ILM.
+      if (fleetFile.status === 'READY' && moment().diff(fleetFile.created, 'minutes') >= 10) {
         fileHasChunks = await this.doesFileHaveData(fleetFile.id);
 
         if (!fileHasChunks) {
@@ -250,6 +252,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
       const {
         action_id: actionId,
         agent_id: agentId,
+        upload_start: created,
         file: { name, Status: status, mime_type: mimeType = '', size = 0, hash = {} },
       } = fileDoc._source;
 
@@ -257,6 +260,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
         id: fileDoc._id,
         agents: [agentId],
         sha256: hash?.sha256 ?? '',
+        created: new Date(created).toISOString(),
         actionId,
         name,
         status,
@@ -266,7 +270,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
 
       return file;
     } else {
-      const { name, meta, id, mimeType = '', size = 0, status, hash } = fileDoc.toJSON();
+      const { name, meta, id, mimeType = '', size = 0, status, hash, created } = fileDoc.toJSON();
 
       const file: FleetFile = {
         id,
@@ -277,6 +281,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
         status,
         mimeType,
         size,
+        created,
       };
 
       return file;

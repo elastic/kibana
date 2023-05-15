@@ -47,6 +47,7 @@ export interface FleetFile {
   mimeType: string;
   size: number;
   sha256: string;
+  created: string;
 }
 
 /**
