@@ -29,6 +29,7 @@ export type {
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
+  SummarizedAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
 } from './types';

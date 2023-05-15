@@ -147,13 +147,6 @@ paths:
             type: string
             default: OR
           example: OR
-        - name: fields
-          in: query
-          description: The fields in the entity to return in the response.
-          schema:
-            type: array
-            items:
-              type: string
         - name: from
           in: query
           description: |
@@ -196,10 +189,10 @@ paths:
           description: The fields to perform the simple_query_string parsed query against.
           schema:
             oneOf:
-              - type: string
+              - $ref: '#/components/schemas/search_fields'
               - type: array
                 items:
-                  type: string
+                  $ref: '#/components/schemas/search_fields'
         - $ref: '#/components/parameters/severity'
         - name: sortField
           in: query
@@ -2289,6 +2282,34 @@ components:
               version:
                 description: The current version of the case. To determine this value, use the get case or find cases APIs.
                 type: string
+    search_fields:
+      type: string
+      enum:
+        - closed_by.username
+        - closed_by.full_name
+        - closed_by.email
+        - closed_by.profile_uid
+        - created_by.username
+        - created_by.full_name
+        - created_by.email
+        - created_by.profile_uid
+        - description
+        - connector.name
+        - connector.type
+        - external_service.pushed_by.username
+        - external_service.pushed_by.full_name
+        - external_service.pushed_by.email
+        - external_service.pushed_by.profile_uid
+        - external_service.connector_name
+        - external_service.external_id
+        - external_service.external_title
+        - external_service.external_url
+        - title
+        - title.keyword
+        - updated_by.username
+        - updated_by.full_name
+        - updated_by.email
+        - updated_by.profile_uid
     closure_types:
       type: string
       description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).

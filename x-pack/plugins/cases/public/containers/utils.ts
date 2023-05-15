@@ -15,7 +15,7 @@ import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
   CasesConfigurationsResponse,
   CasesConfigureResponse,
-  CaseUserActionsResponse,
+  UserActions,
   CasePatchRequest,
   CaseResolveResponse,
   SingleCaseMetricsResponse,
@@ -30,7 +30,7 @@ import {
   throwErrors,
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
-  CaseUserActionsResponseRt,
+  UserActionsRt,
   CommentType,
   CaseResolveResponseRt,
   SingleCaseMetricsResponseRt,
@@ -80,11 +80,8 @@ export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsResponse) =>
-  pipe(
-    CaseUserActionsResponseRt.decode(respUserActions),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+export const decodeCaseUserActionsResponse = (respUserActions?: UserActions) =>
+  pipe(UserActionsRt.decode(respUserActions), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseUserActionStatsResponse = (
   caseUserActionsStats: CaseUserActionStatsResponse

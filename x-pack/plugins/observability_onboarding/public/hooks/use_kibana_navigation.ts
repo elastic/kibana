@@ -15,13 +15,17 @@ interface ObservabilityOnboardingAppServices {
 
 export function useKibanaNavigation() {
   const {
-    application: { navigateToUrl },
+    application: { navigateToUrl, navigateToApp },
     http: { basePath },
   } = useKibana<ObservabilityOnboardingAppServices>().services;
 
   const navigateToKibanaUrl = (kibanaPath: string) => {
-    navigateToUrl(basePath.prepend(kibanaPath));
+    navigateToUrl(basePath.prepend(kibanaPath), {});
   };
 
-  return navigateToKibanaUrl;
+  const navigateToAppUrl = (path: string) => {
+    navigateToApp('', { path, openInNewTab: true });
+  };
+
+  return { navigateToKibanaUrl, navigateToAppUrl };
 }

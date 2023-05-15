@@ -14,14 +14,14 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
-import type { IRouterWithVersion } from '@kbn/core-http-server';
+import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
 
 describe('Routing versioned requests', () => {
-  let router: IRouterWithVersion;
+  let router: IRouter;
   let supertest: Supertest.SuperTest<Supertest.Test>;
 
   async function setupServer(cliArgs: Partial<CliArgs> = {}) {

@@ -49,8 +49,8 @@ const APP_DASHBOARD_LINKS: NavLinkItem = {
 const URL = '/path/to/dashboards';
 
 const mockAppManageLink = jest.fn(() => APP_DASHBOARD_LINKS);
-jest.mock('../../../common/components/navigation/nav_links', () => ({
-  useAppRootNavLink: () => mockAppManageLink(),
+jest.mock('../../../common/links/nav_links', () => ({
+  useRootNavLink: () => mockAppManageLink(),
 }));
 
 const CREATE_DASHBOARD_LINK = { isLoading: false, url: URL };

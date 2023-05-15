@@ -150,7 +150,7 @@ describe('Response actions', () => {
       cleanupRule(ruleId);
     });
 
-    // flaky
+    // FLAKY: https://github.com/elastic/security-team/issues/6518
     it.skip('All response action controls are disabled', () => {
       visitRuleActions(ruleId);
       cy.getByTestSubj('response-actions-wrapper').within(() => {

@@ -459,6 +459,7 @@ x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
+x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
 x-pack/packages/ml/error_utils @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
@@ -504,6 +505,7 @@ examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/plugins/profiling @elastic/profiling-ui
+x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
 x-pack/plugins/remote_clusters @elastic/platform-deployment-management
 test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
@@ -574,8 +576,10 @@ packages/kbn-securitysolution-utils @elastic/security-solution-platform
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 x-pack/plugins/serverless @elastic/appex-sharedux
+x-pack/plugins/serverless_observability @elastic/appex-sharedux
 packages/serverless/project_switcher @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/appex-sharedux
+x-pack/plugins/serverless_security @elastic/security-solution
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
@@ -785,6 +789,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /src/plugins/home/server/services/ @elastic/appex-sharedux
 #CC# /src/plugins/home/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
+#CC# /x-pack/plugins/serverless_security/ @elastic/appex-sharedux
 
 ### Observability Plugins
 
@@ -917,6 +922,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
+/x-pack/dev-tools @elastic/kibana-operations
 
 # Appex QA
 /src/dev/code_coverage @elastic/appex-qa
@@ -1216,8 +1222,9 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
 
-# Design (at the bottom for specificity of SASS files)
-**/*.scss  @elastic/kibana-design
+# Kibana design
+# scss overrides should be below this line for specificity
+**/*.scss @elastic/kibana-design
 
 # Observability design
 /x-pack/plugins/apm/**/*.scss @elastic/observability-design
@@ -1248,13 +1255,3 @@ x-pack/plugins/translations/translations
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
-
-
-# Design (at the bottom for specificity of SASS files)
-**/*.scss  @elastic/kibana-design
-
-####
-## These rules are always last so they take ultimate priority over everything else
-####
-
-**/*.scss  @elastic/kibana-design

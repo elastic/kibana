@@ -10,7 +10,6 @@ import type {
   SavedObjectsClientContract,
   Logger,
   ISavedObjectsSerializer,
-  SavedObject,
   SavedObjectsRawDoc,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
@@ -25,18 +24,20 @@ import type {
   CaseSeverity,
   CaseStatuses,
   CaseUserActionAttributesWithoutConnectorId,
-  CaseUserActionInjectedAttributes,
   CommentRequest,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
   User,
-  UserAction,
+  ActionCategory,
   UserActionFindRequest,
   UserActionTypes,
 } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
+import type {
+  UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
+} from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
@@ -105,7 +106,16 @@ export interface CommonArguments {
   owner: string;
   attachmentId?: string;
   connectorId?: string;
-  action?: UserAction;
+  action?: ActionCategory;
+}
+
+export interface Attributes {
+  action: ActionCategory;
+  created_at: string;
+  created_by: User;
+  owner: string;
+  type: UserActionTypes;
+  payload: Record<string, unknown>;
 }
 
 export interface SavedObjectParameters {
@@ -115,7 +125,7 @@ export interface SavedObjectParameters {
 
 export interface EventDetails {
   getMessage: (storedUserActionId?: string) => string;
-  action: UserAction;
+  action: ActionCategory;
   descriptiveAction: string;
   savedObjectId: string;
   savedObjectType: string;
@@ -127,7 +137,7 @@ export interface UserActionEvent {
 }
 
 export type CommonBuilderArguments = CommonArguments & {
-  action: UserAction;
+  action: ActionCategory;
   type: UserActionTypes;
   value: unknown;
   valueKey: string;
@@ -146,17 +156,17 @@ export interface ServiceContext {
 }
 
 export interface PushTimeFrameInfo {
-  mostRecent: SavedObject<CaseUserActionInjectedAttributes>;
-  oldest: SavedObject<CaseUserActionInjectedAttributes>;
+  mostRecent: UserActionSavedObjectTransformed;
+  oldest: UserActionSavedObjectTransformed;
 }
 
 export interface CaseConnectorActivity {
   connectorId: string;
-  fields: SavedObject<CaseUserActionInjectedAttributes>;
+  fields: UserActionSavedObjectTransformed;
   push?: PushTimeFrameInfo;
 }
 
-export type CaseConnectorFields = Map<string, SavedObject<CaseUserActionInjectedAttributes>>;
+export type CaseConnectorFields = Map<string, UserActionSavedObjectTransformed>;
 
 export interface PushInfo {
   date: Date;

@@ -76,6 +76,7 @@ export const RuleEdit = ({
   onClose,
   reloadRules,
   onSave,
+  hideInterval,
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata: initialMetadata,
@@ -233,6 +234,7 @@ export const RuleEdit = ({
                 dispatch={dispatch}
                 errors={ruleErrors}
                 actionTypeRegistry={actionTypeRegistry}
+                hideInterval={hideInterval}
                 ruleTypeRegistry={ruleTypeRegistry}
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}

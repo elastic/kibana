@@ -1096,9 +1096,7 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringContaining(
-            '[timeout_exception] Timed out waiting for completion of task'
-          ),
+          message: expect.stringContaining('[timeout_exception]'),
           type: 'wait_for_task_completion_timeout',
         },
       });
@@ -1397,9 +1395,7 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringContaining(
-            '[timeout_exception] Timed out waiting for completion of task'
-          ),
+          message: expect.stringContaining('[timeout_exception]'),
           type: 'wait_for_task_completion_timeout',
         },
       });

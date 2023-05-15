@@ -24,6 +24,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
@@ -446,6 +447,39 @@ export function defineRoutes(
         });
       } catch (e) {
         return res.badRequest({ body: e });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/_test/event_log/{type}/{id}/_find',
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+          id: schema.string(),
+        }),
+        query: queryOptionsSchema,
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [, { eventLog }] = await core.getStartServices();
+      const eventLogClient = eventLog.getClient(req);
+      const {
+        params: { id, type },
+        query,
+      } = req;
+
+      try {
+        return res.ok({
+          body: await eventLogClient.findEventsBySavedObjectIds(type, [id], query),
+        });
+      } catch (err) {
+        return res.notFound();
       }
     }
   );

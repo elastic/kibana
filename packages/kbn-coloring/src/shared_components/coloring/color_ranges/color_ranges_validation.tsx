@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isValidColor } from '../utils';
+import { isValidColor } from '../../../color_manipulation';
 
 import type { ColorRange, ColorRangeAccessor } from './types';
 
