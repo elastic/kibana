@@ -8,7 +8,7 @@
 
 import { TextBasedLanguagesPlugin } from './plugin';
 
-export type { TextBasedLanguagesEditorProps } from './components';
+export type { TextBasedLanguagesEditorProps } from './components/text_based_languages_editor';
 
 export type { TextBasedLanguagesPluginStart } from './types';
 

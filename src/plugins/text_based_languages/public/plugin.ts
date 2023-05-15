@@ -7,7 +7,7 @@
  */
 
 import { Plugin } from '@kbn/core/public';
-import { TextBasedLanguagesEditor } from './components';
+import { Editor } from './components';
 import type { TextBasedLanguagesPluginStart } from './types';
 
 export class TextBasedLanguagesPlugin implements Plugin<{}, TextBasedLanguagesPluginStart> {
@@ -17,7 +17,7 @@ export class TextBasedLanguagesPlugin implements Plugin<{}, TextBasedLanguagesPl
 
   public start(): TextBasedLanguagesPluginStart {
     return {
-      Editor: TextBasedLanguagesEditor,
+      Editor,
     };
   }
 

@@ -213,7 +213,6 @@ export const QueryBarTopRow = React.memo(
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
-    // const textBasedLanguages = getTextBasedLanguages();
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
