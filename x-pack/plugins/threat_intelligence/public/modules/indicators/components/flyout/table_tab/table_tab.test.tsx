@@ -13,9 +13,9 @@ import {
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../../../common/types/indicator';
-import { IndicatorsFlyoutTable } from '.';
+import { IndicatorsFlyoutTable } from './table_tab';
 import { unwrapValue } from '../../../utils';
-import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
+import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt/empty_prompt';
 import { IndicatorsFlyoutContext } from '../context';
 import { FLYOUT_TABLE_TEST_ID } from './test_ids';
 

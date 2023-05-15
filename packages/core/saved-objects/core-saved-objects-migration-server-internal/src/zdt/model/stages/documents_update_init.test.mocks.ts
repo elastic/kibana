@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export const checkVersionCompatibilityMock = jest.fn();
 export const getOutdatedDocumentsQueryMock = jest.fn();
 export const createDocumentTransformFnMock = jest.fn();
 
@@ -13,6 +14,7 @@ jest.doMock('../../utils', () => {
   const realModule = jest.requireActual('../../utils');
   return {
     ...realModule,
+    checkVersionCompatibility: checkVersionCompatibilityMock,
     getOutdatedDocumentsQuery: getOutdatedDocumentsQueryMock,
     createDocumentTransformFn: createDocumentTransformFnMock,
   };

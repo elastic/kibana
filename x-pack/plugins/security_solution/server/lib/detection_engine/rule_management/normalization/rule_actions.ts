@@ -84,26 +84,22 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
 
 /**
  * Given a throttle from an "alerting" Saved Object (SO) this will transform it into a "security_solution"
- * throttle type. If given the "legacyRuleActions" but we detect that the rule for an unknown reason has actions
- * on it to which should not be typical but possible due to the split nature of the API's, this will prefer the
- * usage of the non-legacy version. Eventually the "legacyRuleActions" should be removed.
- * @param throttle The throttle from a  "alerting" Saved Object (SO)
+ * throttle type.
+ * @param throttle The throttle from an "alerting" Saved Object (SO)
  * @returns The "security_solution" throttle
  */
-export const transformFromAlertThrottle = (rule: RuleAlertType): string => {
-  if (rule.muteAll || rule.actions.length === 0) {
-    return NOTIFICATION_THROTTLE_NO_ACTIONS;
-  } else if (rule.notifyWhen == null) {
+export const transformFromAlertThrottle = (rule: RuleAlertType): string | undefined => {
+  if (rule.notifyWhen == null) {
     return transformFromFirstActionThrottle(rule);
   } else if (rule.notifyWhen === 'onActiveAlert') {
     return NOTIFICATION_THROTTLE_RULE;
   }
 
-  return rule.throttle ?? NOTIFICATION_THROTTLE_NO_ACTIONS;
+  return rule.throttle ?? undefined;
 };
 
 function transformFromFirstActionThrottle(rule: RuleAlertType) {
-  const frequency = rule.actions[0].frequency ?? null;
+  const frequency = rule.actions[0]?.frequency ?? null;
   if (!frequency || frequency.notifyWhen !== 'onThrottleInterval' || frequency.throttle == null)
     return NOTIFICATION_THROTTLE_RULE;
   return frequency.throttle;
