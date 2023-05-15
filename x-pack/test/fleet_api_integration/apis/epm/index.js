@@ -28,6 +28,7 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./install_remove_kbn_assets_in_space'));
     loadTestFile(require.resolve('./install_remove_multiple'));
     loadTestFile(require.resolve('./install_update'));
+    loadTestFile(require.resolve('./install_tsds_disable'));
     loadTestFile(require.resolve('./install_tag_assets'));
     loadTestFile(require.resolve('./bulk_upgrade'));
     loadTestFile(require.resolve('./update_assets'));
