@@ -1143,21 +1143,21 @@ export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
 
 // Prompt Context i18n
 export const RULE_MANAGEMENT_CONTEXT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagement.promptContextDescription',
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextDescription',
   {
     defaultMessage: 'Selected Detection Rules',
   }
 );
 
 export const EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagement.promptContextDescription',
+  'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetails',
   {
     defaultMessage: 'This is the prompt around the stuff',
   }
 );
 
 export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagement.promptContextDescription',
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip',
   {
     defaultMessage: 'Use this alert for context',
   }

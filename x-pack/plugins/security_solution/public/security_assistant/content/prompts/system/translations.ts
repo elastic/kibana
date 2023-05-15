@@ -36,13 +36,8 @@ export const SUPERHERO_PERSONALITY = i18n.translate(
   }
 );
 
-export const DEFAULT_SYSTEM_PROMPT = i18n.translate(
-  'xpack.securitySolution.securityAssistant.content.prompts.system.defaultSystemPrompt',
-  {
-    defaultMessage: `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
-${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`,
-  }
-);
+export const DEFAULT_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
+${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 
 export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.securitySolution.securityAssistant.content.prompts.system.defaultSystemPromptName',
@@ -51,14 +46,9 @@ export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
   }
 );
 
-export const SUPERHERO_SYSTEM_PROMPT = i18n.translate(
-  'xpack.securitySolution.securityAssistant.content.prompts.system.superheroSystemPrompt',
-  {
-    defaultMessage: `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
+export const SUPERHERO_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
 ${SUPERHERO_PERSONALITY}
-${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`,
-  }
-);
+${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 
 export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.securitySolution.securityAssistant.content.prompts.system.superheroSystemPromptName',
@@ -66,15 +56,6 @@ export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
     defaultMessage: 'superhero system prompt',
   }
 );
-
-export const SYSTEM_PROMPT_CONTEXT = (context: string) =>
-  i18n.translate(
-    'xpack.securitySolution.securityAssistant.content.prompts.system.systemPromptContext',
-    {
-      values: { context },
-      defaultMessage: `CONTEXT:\n"""\n${context}\n"""`,
-    }
-  );
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;

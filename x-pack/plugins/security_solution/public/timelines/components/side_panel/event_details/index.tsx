@@ -32,7 +32,7 @@ import {
   SUMMARY_VIEW,
   TIMELINE_VIEW,
 } from '../../../../common/components/event_details/translations';
-import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE } from '../../../../security_assistant/content/prompts/user/translations';
+import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '../../../../security_assistant/content/prompts/user/translations';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -106,7 +106,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),
       id: promptContextId,
       getPromptContext,
-      suggestedUserPrompt: EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE,
+      suggestedUserPrompt: EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
       tooltip: isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
     });
 
