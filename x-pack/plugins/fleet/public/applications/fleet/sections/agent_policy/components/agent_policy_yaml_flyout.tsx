@@ -21,6 +21,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
@@ -58,27 +59,6 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       </EuiCallOut>
     ) : (
       <>
-        {packagePoliciesContainSecrets && (
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.fleet.policyDetails.secretsTitle"
-                defaultMessage="This policy contains secret values"
-              />
-            }
-            size="m"
-            color="primary"
-            iconType="iInCircle"
-          >
-            <FormattedMessage
-              id="xpack.fleet.policyDetails.secretsDescription"
-              defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
-              values={{
-                envVarPrefix: <code>{'${SECRET_0}'}</code>,
-              }}
-            />
-          </EuiCallOut>
-        )}
         <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
           {fullAgentPolicyToYaml(yamlData!.item, safeDump)}
         </EuiCodeBlock>
@@ -108,6 +88,30 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
               )}
             </h2>
           </EuiTitle>
+          {packagePoliciesContainSecrets && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.fleet.policyDetails.secretsTitle"
+                    defaultMessage="This policy contains secret values"
+                  />
+                }
+                size="m"
+                color="primary"
+                iconType="iInCircle"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsDescription"
+                  defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
+                  values={{
+                    envVarPrefix: <code>{'${SECRET_0}'}</code>,
+                  }}
+                />
+              </EuiCallOut>
+            </>
+          )}
         </EuiFlyoutHeader>
         <FlyoutBody>{body}</FlyoutBody>
         <EuiFlyoutFooter>
