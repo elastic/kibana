@@ -37,8 +37,7 @@ function createdPolicyToUpdatePolicy(policy: any) {
   delete updatedPolicy.updated_by;
   delete updatedPolicy.inputs[0].compiled_input;
   delete updatedPolicy.inputs[0].streams[0].compiled_stream;
-  delete updatedPolicy.package.title;
-
+  delete updatedPolicy.name;
   return updatedPolicy;
 }
 
@@ -393,6 +392,40 @@ export default function (providerContext: FtrProviderContext) {
       expect(secretValuesById[updatedPackageVarId]).to.eql('new_package_secret_val');
       expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
       expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
+    });
+
+    it('should not delete used secrets on secret update', async () => {
+      // update a secret on duplicated agent policy and make sure the original secret is not deleted
+      const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
+      delete updatedPolicy.name;
+
+      updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val_2';
+
+      const updateRes = await supertest
+        .put(`/api/fleet/package_policies/${duplicatedPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send(updatedPolicy)
+        .expect(200);
+
+      const updatedPackagePolicy = updateRes.body.item;
+
+      const packageVarSecretIds = [
+        updatedPackagePolicy.vars.package_var_secret.value.id,
+        updatedPackageVarId,
+      ];
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            terms: {
+              _id: packageVarSecretIds,
+            },
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(2);
     });
 
     it('should not delete used secrets on package policy delete', async () => {
