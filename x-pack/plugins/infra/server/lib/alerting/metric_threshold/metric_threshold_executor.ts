@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_CONTEXT,
+  ALERT_EVALUATION_VALUES,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
@@ -78,7 +83,8 @@ type MetricThresholdAlertFactory = (
   id: string,
   reason: string,
   actionGroup: MetricThresholdActionGroup,
-  additionalContext?: AdditionalContext | null,
+  alertContext?: AdditionalContext | null,
+  rootLevelContext?: AdditionalContext | null,
   evaluationValues?: Array<number | null>
 ) => MetricThresholdAlert;
 
@@ -116,7 +122,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       id,
       reason,
       actionGroup,
-      additionalContext,
+      alertContext,
+      rootLevelContext,
       evaluationValues
     ) =>
       alertWithLifecycle({
@@ -125,7 +132,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
-          ...flattenAdditionalContext(additionalContext),
+          [ALERT_CONTEXT]: alertContext,
+          ...flattenAdditionalContext(rootLevelContext),
         },
       });
 
@@ -148,10 +156,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS_ID; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
-
-        alert.scheduleActions(actionGroupId, {
+        const alertContext = {
           alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
@@ -160,7 +166,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           timestamp,
           value: null,
           viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
-        });
+        };
+        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId, alertContext);
+
+        alert.scheduleActions(actionGroupId, alertContext);
 
         return {
           state: {
@@ -297,21 +306,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         );
 
         const evaluationValues = alertResults.reduce((acc: Array<number | null>, result) => {
-          acc.push(result[group].currentValue);
+          if (result[group]) {
+            acc.push(result[group].currentValue);
+          }
           return acc;
         }, []);
 
-        const alert = alertFactory(
-          `${group}`,
-          reason,
-          actionGroupId,
-          additionalContext,
-          evaluationValues
-        );
         const alertUuid = getAlertUuid(group);
-        scheduledActionsCount++;
-
-        alert.scheduleActions(actionGroupId, {
+        const alertContext = {
           alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[nextState],
           group,
@@ -342,7 +344,18 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           }),
           viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
           ...additionalContext,
-        });
+        };
+
+        const alert = alertFactory(
+          `${group}`,
+          reason,
+          actionGroupId,
+          alertContext,
+          additionalContext,
+          evaluationValues
+        );
+        scheduledActionsCount++;
+        alert.scheduleActions(actionGroupId, alertContext);
       }
     }
 

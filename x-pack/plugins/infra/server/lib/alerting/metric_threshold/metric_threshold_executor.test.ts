@@ -130,8 +130,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/155534
-describe.skip('The metric threshold alert type', () => {
+describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -296,8 +295,12 @@ describe.skip('The metric threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+      const recentActionA = mostRecentAction(instanceIdA);
+      const recentActionB = mostRecentAction(instanceIdB);
+      expect(recentActionA).toBeAlertAction();
+      expect(recentActionB).toBeAlertAction();
+      expect(recentActionA.action).toMatchSnapshot();
+      expect(recentActionB.action).toMatchSnapshot();
     });
     test('sends an alert when only some groups pass the threshold', async () => {
       setEvaluationResults([

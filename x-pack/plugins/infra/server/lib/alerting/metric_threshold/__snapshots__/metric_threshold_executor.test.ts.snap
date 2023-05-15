@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The metric threshold alert type querying with a groupBy parameter sends an alert when all groups pass the threshold 1`] = `
+Object {
+  "alertDetailsUrl": "http://localhost:5601/app/observability/alerts/mock-alert-uuid",
+  "alertState": "ALERT",
+  "group": "a",
+  "groupByKeys": Object {
+    "something": "a",
+  },
+  "metric": Object {
+    "condition0": "test.metric.1",
+  },
+  "reason": "test.metric.1 is 1 in the last 1 min for a. Alert when > 0.75.",
+  "tags": Array [],
+  "threshold": Object {
+    "condition0": Array [
+      "0.75",
+    ],
+  },
+  "timestamp": "2023-05-15T15:27:23.789Z",
+  "value": Object {
+    "condition0": "1",
+  },
+  "viewInAppUrl": "http://localhost:5601/app/metrics/explorer",
+}
+`;
+
+exports[`The metric threshold alert type querying with a groupBy parameter sends an alert when all groups pass the threshold 2`] = `
+Object {
+  "alertDetailsUrl": "http://localhost:5601/app/observability/alerts/mock-alert-uuid",
+  "alertState": "ALERT",
+  "group": "b",
+  "groupByKeys": Object {
+    "something": "b",
+  },
+  "metric": Object {
+    "condition0": "test.metric.1",
+  },
+  "reason": "test.metric.1 is 1 in the last 1 min for b. Alert when > 0.75.",
+  "tags": Array [],
+  "threshold": Object {
+    "condition0": Array [
+      "0.75",
+    ],
+  },
+  "timestamp": "2023-05-15T15:27:23.789Z",
+  "value": Object {
+    "condition0": "1",
+  },
+  "viewInAppUrl": "http://localhost:5601/app/metrics/explorer",
+}
+`;
