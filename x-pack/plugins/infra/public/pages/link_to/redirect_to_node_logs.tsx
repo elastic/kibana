@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { LinkDescriptor } from '@kbn/observability-plugin/public';
-import React from 'react';
+import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import useMount from 'react-use/lib/useMount';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { LoadingPage } from '../../components/loading_page';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { useLogView } from '../../hooks/use_log_view';
 import { DEFAULT_LOG_VIEW_ID } from '../../observability_logs/log_view_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
@@ -29,40 +25,25 @@ export const RedirectToNodeLogs = ({
   },
   location,
 }: RedirectToNodeLogsType) => {
-  const { services } = useKibanaContextForPlugin();
-  const { isLoading, load } = useLogView({
-    initialLogViewReference: { type: 'log-view-reference', logViewId },
-    logViews: services.logViews.client,
-  });
-
-  useMount(() => {
-    load();
-  });
-
-  if (isLoading) {
-    return (
-      <LoadingPage
-        data-test-subj={`nodeLoadingPage-${nodeType}`}
-        message={i18n.translate('xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage', {
-          defaultMessage: 'Loading {nodeType} logs',
-          values: {
-            nodeType,
-          },
-        })}
-      />
-    );
-  }
+  const {
+    services: { locators },
+  } = useKibanaContextForPlugin();
 
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
-  services.locators.nodeLogsLocator.navigate({
-    nodeId,
-    nodeType,
-    time,
-    filter,
-    logView: { type: 'log-view-reference', logViewId },
-  });
+  useEffect(() => {
+    locators.nodeLogsLocator.navigate(
+      {
+        nodeId,
+        nodeType,
+        time,
+        filter,
+        logView: { type: 'log-view-reference', logViewId },
+      },
+      { replace: true }
+    );
+  }, [filter, locators.nodeLogsLocator, logViewId, nodeId, nodeType, time]);
 
   return null;
 };

@@ -298,10 +298,10 @@ export class Plugin implements InfraClientPluginClass {
 
     // Register Locators
     const logsLocator = pluginsSetup.share.url.locators.create(
-      new LogsLocatorDefinition({ appTarget: this.appTarget, core })
+      new LogsLocatorDefinition({ config: { appTarget: this.appTarget }, core })
     );
     const nodeLogsLocator = pluginsSetup.share.url.locators.create(
-      new NodeLogsLocatorDefinition({ appTarget: this.appTarget, core })
+      new NodeLogsLocatorDefinition({ config: { appTarget: this.appTarget }, core })
     );
 
     this.locators = {

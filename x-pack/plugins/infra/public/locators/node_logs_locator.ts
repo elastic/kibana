@@ -7,8 +7,7 @@
 
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { InventoryItemType } from '../../common/inventory_models/types';
-import type { InfraClientCoreSetup } from '../types';
-import type { LogsLocatorParams } from './logs_locator';
+import type { LogsLocatorDependencies, LogsLocatorParams } from './logs_locator';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
 
 const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
@@ -20,10 +19,7 @@ export interface NodeLogsLocatorParams extends LogsLocatorParams {
 
 export type NodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
 
-export interface NodeLogsLocatorDependencies {
-  core: InfraClientCoreSetup;
-  appTarget: string;
-}
+export type NodeLogsLocatorDependencies = LogsLocatorDependencies;
 
 export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLocatorParams> {
   public readonly id = NODE_LOGS_LOCATOR_ID;
@@ -31,18 +27,18 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
   constructor(protected readonly deps: NodeLogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
-    const { parseSearchString, getLocationToDiscover } = await import('./helpers');
+    const { createSearchString, getLocationToDiscover } = await import('./helpers');
     const { findInventoryFields } = await import('../../common/inventory_models');
 
     const { nodeType, nodeId, filter, timeRange, logView } = params;
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
 
-    if (this.deps.appTarget === DISCOVER_APP_TARGET) {
+    if (this.deps.config.appTarget === DISCOVER_APP_TARGET) {
       return await getLocationToDiscover({ core: this.deps.core, timeRange, filter, logView });
     }
 
-    const searchString = parseSearchString({ ...params, filter: query });
+    const searchString = createSearchString({ ...params, filter: query });
 
     return {
       app: 'logs',

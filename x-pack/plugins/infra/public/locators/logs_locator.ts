@@ -27,9 +27,13 @@ export interface LogsLocatorParams extends SerializableRecord {
 
 export type LogsLocator = LocatorPublic<LogsLocatorParams>;
 
+interface LocatorConfig {
+  appTarget: string;
+}
+
 export interface LogsLocatorDependencies {
   core: InfraClientCoreSetup;
-  appTarget: string;
+  config: LocatorConfig;
 }
 
 export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
@@ -38,13 +42,13 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
   constructor(protected readonly deps: LogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
-    const { parseSearchString, getLocationToDiscover } = await import('./helpers');
+    const { createSearchString, getLocationToDiscover } = await import('./helpers');
 
-    if (this.deps.appTarget === DISCOVER_APP_TARGET) {
+    if (this.deps.config.appTarget === DISCOVER_APP_TARGET) {
       return await getLocationToDiscover({ core: this.deps.core, ...params });
     }
 
-    const searchString = parseSearchString(params);
+    const searchString = createSearchString(params);
 
     return {
       app: 'logs',

@@ -34,7 +34,7 @@ interface LocationToDiscoverParams {
   logView?: LogViewReference;
 }
 
-export const parseSearchString = ({
+export const createSearchString = ({
   time,
   timeRange,
   filter = '',
@@ -88,6 +88,8 @@ export const getLocationToDiscover = async ({
       state.matches('checkingStatusFailed')
   );
 
+  service.stop();
+
   if ('resolvedLogView' in doneState.context) {
     discoverLocation = await constructDiscoverLocation(
       discover,
@@ -97,8 +99,6 @@ export const getLocationToDiscover = async ({
   } else {
     discoverLocation = await constructDiscoverLocation(discover, discoverParams);
   }
-
-  service.stop();
 
   if (!discoverLocation) {
     throw new Error('Discover location not found');
@@ -112,16 +112,19 @@ const constructDiscoverLocation = async (
   discoverParams: DiscoverAppLocatorParams,
   resolvedLogView?: ResolvedLogView
 ) => {
-  const locationParams = !resolvedLogView
-    ? discoverParams
-    : {
-        ...discoverParams,
-        columns: parseColumns(resolvedLogView.columns),
-        dataViewId: resolvedLogView.dataViewReference.toSpec().id,
-        dataViewSpec: resolvedLogView.dataViewReference.toSpec(),
-      };
+  if (!resolvedLogView) {
+    return await discover.locator?.getLocation(discoverParams);
+  }
 
-  return await discover.locator?.getLocation(locationParams);
+  const columns = parseColumns(resolvedLogView.columns);
+  const dataViewSpec = resolvedLogView.dataViewReference.toSpec();
+
+  return await discover.locator?.getLocation({
+    ...discoverParams,
+    columns,
+    dataViewId: dataViewSpec.id,
+    dataViewSpec,
+  });
 };
 
 const parseColumns = (columns: ResolvedLogView['columns']) => {

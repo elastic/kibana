@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
@@ -21,11 +22,16 @@ export const RedirectToLogs = () => {
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
-  locators.logsLocator.navigate({
-    time,
-    filter,
-    logView: { ...DEFAULT_LOG_VIEW, logViewId: logViewId || DEFAULT_LOG_VIEW.logViewId },
-  });
+  useEffect(() => {
+    locators.logsLocator.navigate(
+      {
+        time,
+        filter,
+        logView: { ...DEFAULT_LOG_VIEW, logViewId: logViewId || DEFAULT_LOG_VIEW.logViewId },
+      },
+      { replace: true }
+    );
+  }, [filter, locators.logsLocator, logViewId, time]);
 
   return null;
 };

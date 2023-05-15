@@ -15,11 +15,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { findInventoryFields } from '../../common/inventory_models';
 import moment from 'moment';
 import { DEFAULT_LOG_VIEW } from '../observability_logs/log_view_state';
+import type { LogViewReference } from '../../common/log_views';
 
 const setupLogsLocator = async (appTarget: string = LOGS_APP_TARGET) => {
   const deps: LogsLocatorDependencies = {
     core: coreMock.createSetup(),
-    appTarget,
+    config: { appTarget },
   };
   const logsLocator = new LogsLocatorDefinition(deps);
   const nodeLogsLocator = new NodeLogsLocatorDefinition(deps);
@@ -167,7 +168,7 @@ describe('Infra Locators', () => {
         nodeId,
         nodeType,
         time,
-        logView: DEFAULT_LOG_VIEW,
+        logView: { ...DEFAULT_LOG_VIEW, logViewId: 'test' },
       };
       const { nodeLogsLocator } = await setupLogsLocator();
       const { path } = await nodeLogsLocator.getLocation(params);
@@ -217,15 +218,18 @@ describe('Infra Locators', () => {
  */
 
 export const constructUrlSearchString = (params: Partial<NodeLogsLocatorParams>) => {
-  const { time = 1550671089404 } = params;
+  const { time = 1550671089404, logView } = params;
 
-  return `/stream?logView=${constructLogView()}&logPosition=${constructLogPosition(
+  return `/stream?logView=${constructLogView(logView)}&logPosition=${constructLogPosition(
     time
   )}&logFilter=${constructLogFilter(params)}`;
 };
 
-const constructLogView = () => {
-  return `(logViewId:default,type:log-view-reference)`;
+const constructLogView = (logView?: LogViewReference) => {
+  const logViewId =
+    logView && 'logViewId' in logView ? logView.logViewId : DEFAULT_LOG_VIEW.logViewId;
+
+  return `(logViewId:${logViewId},type:log-view-reference)`;
 };
 
 const constructLogPosition = (time: number = 1550671089404) => {

@@ -23,16 +23,14 @@ export const LogsLinkToStream = ({ startTime, endTime, query }: LogsLinkToStream
   return (
     <RedirectAppLinks coreStart={services}>
       <EuiButtonEmpty
-        onClick={() =>
-          locators.logsLocator?.navigate({
-            time: endTime,
-            timeRange: {
-              startTime,
-              endTime,
-            },
-            filter: query,
-          })
-        }
+        href={locators.logsLocator?.getRedirectUrl({
+          time: endTime,
+          timeRange: {
+            startTime,
+            endTime,
+          },
+          filter: query,
+        })}
         data-test-subj="hostsView-logs-link-to-stream-button"
         iconType="popout"
         flush="both"
