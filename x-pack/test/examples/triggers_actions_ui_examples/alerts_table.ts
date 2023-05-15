@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await waitAndClickByTestId('show-field-browser');
       await waitAndClickByTestId('categories-filter-button');
       await waitAndClickByTestId('categories-selector-option-name-base');
-      await find.clickByCssSelector('#tags');
+      await find.clickByCssSelector('#_id');
       await waitAndClickByTestId('close');
 
       const headers = await find.allByCssSelector('.euiDataGridHeaderCell');
