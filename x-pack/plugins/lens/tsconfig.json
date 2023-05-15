@@ -72,6 +72,10 @@
     "@kbn/object-versioning",
     "@kbn/config-schema",
     "@kbn/expression-reveal-image-plugin",
+    "@kbn/files-plugin",
+    "@kbn/shared-ux-file-types",
+    "@kbn/shared-ux-file-upload",
+    "@kbn/shared-ux-file-context",
   ],
   "exclude": [
     "target/**/*",
