@@ -39,6 +39,7 @@ import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useStartServices, useConfig, useGetAgentPolicies, useLicense } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
+import { UninstallCommandFlyout } from '../../../../../../components';
 
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
