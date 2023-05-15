@@ -32,8 +32,6 @@
       "@kbn/alerting-plugin/*": ["x-pack/plugins/alerting/*"],
       "@kbn/alerting-state-types": ["x-pack/packages/kbn-alerting-state-types"],
       "@kbn/alerting-state-types/*": ["x-pack/packages/kbn-alerting-state-types/*"],
-      "@kbn/alerts": ["packages/kbn-alerts"],
-      "@kbn/alerts/*": ["packages/kbn-alerts/*"],
       "@kbn/alerts-as-data-utils": ["packages/kbn-alerts-as-data-utils"],
       "@kbn/alerts-as-data-utils/*": ["packages/kbn-alerts-as-data-utils/*"],
       "@kbn/alerts-restricted-fixtures-plugin": ["x-pack/test/alerting_api_integration/common/plugins/alerts_restricted"],
