@@ -8,8 +8,8 @@
 export class SpaceActions {
   private readonly prefix: string;
 
-  constructor(versionNumber: string) {
-    this.prefix = `space:${versionNumber}:`;
+  constructor() {
+    this.prefix = `space:`;
   }
 
   public get manage(): string {

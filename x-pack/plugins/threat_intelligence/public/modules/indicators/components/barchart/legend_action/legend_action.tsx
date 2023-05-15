@@ -14,9 +14,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment';
-import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
-import { FilterInContextMenu, FilterOutContextMenu } from '../../../../query_bar';
-import { AddToTimelineContextMenu } from '../../../../timeline';
+import { CopyToClipboardContextMenu } from '../../copy_to_clipboard/copy_to_clipboard';
+import { FilterInContextMenu } from '../../../../query_bar/components/filter_in/filter_in';
+import { FilterOutContextMenu } from '../../../../query_bar/components/filter_out/filter_out';
+import { AddToTimelineContextMenu } from '../../../../timeline/components/add_to_timeline/add_to_timeline';
 import {
   COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
   FILTER_IN_BUTTON_TEST_ID,
