@@ -8,7 +8,7 @@
 import React from 'react';
 import { type CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 import { CloudSecurityPolicyTemplate } from '../../../common/types';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
@@ -19,8 +19,6 @@ const SECURITY_APP_NAME = 'securitySolutionUI';
 
 export const CspCustomAssetsExtension = () => {
   const { application } = useKibana().services;
-  const { search } = useLocation();
-  const isCNVM = search.includes(VULN_MGMT_POLICY_TEMPLATE);
   const integration = useParams<{ integration: CloudSecurityPolicyTemplate | undefined }>()
     .integration;
 
