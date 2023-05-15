@@ -176,12 +176,14 @@ describe('DataTable', () => {
       );
       wrapper.update();
 
+      const values = data.map((row) => row.data.map((d) => d.value));
+
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
         triggerId: 'mockCellActionsTrigger',
+        values,
         fields: [
           {
             name: '@timestamp',
-            values: [data[0]?.data[0]?.value],
             type: 'date',
             aggregatable: true,
             searchable: true,

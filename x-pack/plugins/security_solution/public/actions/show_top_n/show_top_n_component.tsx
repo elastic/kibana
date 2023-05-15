@@ -29,7 +29,7 @@ export const TopNAction = ({
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   const userCasesPermissions = useGetUserCasesPermissions();
   const CasesContext = casesService.ui.getCasesContext();
-  const { field, nodeRef, metadata } = context;
+  const { field, value, nodeRef, metadata } = context;
 
   if (!nodeRef?.current) return null;
 
@@ -50,7 +50,7 @@ export const TopNAction = ({
           showLegend
           scopeId={metadata?.scopeId}
           toggleTopN={onClose}
-          value={field.value}
+          value={value}
           indexPattern={indexPattern}
           browserFields={browserFields}
         />

@@ -64,9 +64,10 @@ export const getNetworkTopCountriesColumns = (
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}
+            value={geo}
             field={{
               name: geoAttr,
-              value: geo,
+
               type: 'keyword',
               aggregatable: true,
               searchable: true,

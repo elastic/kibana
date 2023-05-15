@@ -76,10 +76,8 @@ export const getColumns = ({
 
             return (
               <SecurityCellActions
-                field={{
-                  value: values,
-                  ...browserFieldToFieldSpec(fieldFromBrowserField, data),
-                }}
+                value={values}
+                field={browserFieldToFieldSpec(fieldFromBrowserField, data)}
                 triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
                 mode={CellActionsMode.INLINE}
                 visibleCellActions={3}

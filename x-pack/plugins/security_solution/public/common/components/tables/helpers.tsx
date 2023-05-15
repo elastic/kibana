@@ -54,9 +54,10 @@ export const getRowItemsWithActions = ({
           visibleCellActions={5}
           showActionTooltips
           triggerId={SecurityCellActionsTrigger.DEFAULT}
+          value={value}
           field={{
             name: fieldName,
-            value,
+
             esTypes,
             type: fieldType,
             aggregatable,

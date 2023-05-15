@@ -12,25 +12,20 @@ import {
   EuiLoadingSpinner,
   type EuiDataGridColumnCellAction,
 } from '@elastic/eui';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import type {
   CellAction,
   CellActionCompatibilityContext,
   CellActionExecutionContext,
-  CellActionField,
+  CellActionFieldValue,
   CellActionsProps,
 } from '../types';
 import { useBulkLoadActions } from './use_load_actions';
 
-interface BulkField extends Omit<CellActionField, 'value'> {
-  /**
-   * Array containing all the values of the field in the visible page, indexed by rowIndex
-   */
-  values: Array<string | string[] | null | undefined>;
-}
-
 export interface UseDataGridColumnsCellActionsProps
   extends Pick<CellActionsProps, 'triggerId' | 'metadata' | 'disabledActionTypes'> {
-  fields?: BulkField[];
+  fields?: FieldSpec[];
+  values: CellActionFieldValue[][];
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
@@ -39,6 +34,7 @@ export type UseDataGridColumnsCellActions<
 
 export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   fields,
+  values,
   triggerId,
   metadata,
   dataGridRef,
@@ -46,7 +42,7 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
 }) => {
   const bulkContexts: CellActionCompatibilityContext[] = useMemo(
     () =>
-      fields?.map(({ values, ...field }) => ({
+      fields?.map((field) => ({
         field, // we are getting the actions for the whole column field, so the compatibility check will be done without the value
         trigger: { id: triggerId },
         metadata,
@@ -76,22 +72,25 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
           metadata,
           triggerId,
           field: fields[columnIndex],
+          values: values[columnIndex],
           dataGridRef,
         })
       )
     );
-  }, [columnsActions, fields, loading, metadata, triggerId, dataGridRef]);
+  }, [loading, columnsActions, fields, metadata, triggerId, values, dataGridRef]);
 
   return columnsCellActions;
 };
 
 interface CreateColumnCellActionParams
   extends Pick<UseDataGridColumnsCellActionsProps, 'triggerId' | 'metadata' | 'dataGridRef'> {
-  field: BulkField;
+  field: FieldSpec;
+  values: CellActionFieldValue[];
   action: CellAction;
 }
 const createColumnCellAction = ({
   field,
+  values,
   action,
   metadata,
   triggerId,
@@ -102,11 +101,11 @@ const createColumnCellAction = ({
     const buttonRef = useRef<HTMLAnchorElement | null>(null);
 
     const actionContext: CellActionExecutionContext = useMemo(() => {
-      const { values, ...rest } = field;
       // rowIndex refers to all pages, we need to use the row index relative to the page to get the value
       const value = values[rowIndex % values.length];
       return {
-        field: { ...rest, value },
+        value,
+        field,
         trigger: { id: triggerId },
         nodeRef,
         metadata,

@@ -31,17 +31,18 @@ const mockGetActions = jest.fn(async () => actions);
 jest.mock('../context/cell_actions_context', () => ({
   useCellActionsContext: () => ({ getActions: mockGetActions }),
 }));
-
+const values1 = ['0.0', '0.1', '0.2', '0.3'];
 const field1 = {
   name: 'column1',
-  values: ['0.0', '0.1', '0.2', '0.3'],
   type: 'string',
   searchable: true,
   aggregatable: true,
 };
+
+const values2 = ['1.0', '1.1', '1.2', '1.3'];
 const field2 = {
   name: 'column2',
-  values: ['1.0', '1.1', '1.2', '1.3'],
+
   type: 'string',
   searchable: true,
   aggregatable: true,
@@ -51,6 +52,7 @@ const columns = [{ id: field1.name }, { id: field2.name }];
 const mockCloseCellPopover = jest.fn();
 const useDataGridColumnsCellActionsProps: UseDataGridColumnsCellActionsProps = {
   fields: [field1, field2],
+  values: [values1, values2],
   triggerId: 'testTriggerId',
   metadata: { some: 'value' },
   dataGridRef: {
@@ -150,10 +152,10 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
+          value: values1[1],
           field: {
             name: field1.name,
             type: field1.type,
-            value: field1.values[1],
             aggregatable: true,
             searchable: true,
           },
@@ -169,10 +171,10 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action2.execute).toHaveBeenCalledWith(
         expect.objectContaining({
+          value: values2[2],
           field: {
             name: field2.name,
             type: field2.type,
-            value: field2.values[2],
             aggregatable: true,
             searchable: true,
           },
@@ -195,10 +197,10 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
+          value: values1[1],
           field: {
             name: field1.name,
             type: field1.type,
-            value: field1.values[1],
             aggregatable: true,
             searchable: true,
           },

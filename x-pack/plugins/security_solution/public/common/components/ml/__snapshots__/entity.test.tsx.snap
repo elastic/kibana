@@ -11,11 +11,11 @@ exports[`entity_draggable renders correctly against snapshot 1`] = `
       "name": "entity-name",
       "searchable": true,
       "type": "string",
-      "value": "entity-value",
     }
   }
   mode="hover-down"
   triggerId="security-default-cellActions"
+  value="entity-value"
   visibleCellActions={5}
 >
   entity-name: "entity-value"

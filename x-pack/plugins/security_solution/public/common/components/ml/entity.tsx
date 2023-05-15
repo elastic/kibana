@@ -17,9 +17,9 @@ interface Props {
 export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) => {
   return (
     <SecurityCellActions
+      value={entityValue}
       field={{
         name: entityName,
-        value: entityValue,
         type: KBN_FIELD_TYPES.STRING,
         esTypes: [ES_FIELD_TYPES.KEYWORD],
         aggregatable: true,

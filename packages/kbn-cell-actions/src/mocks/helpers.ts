@@ -30,10 +30,10 @@ export const makeActionContext = (
   field: {
     name: 'fieldName',
     type: 'keyword',
-    value: 'some value',
     searchable: true,
     aggregatable: true,
   },
+  value: 'some value',
   nodeRef: {} as MutableRefObject<HTMLElement>,
   metadata: undefined,
   ...override,

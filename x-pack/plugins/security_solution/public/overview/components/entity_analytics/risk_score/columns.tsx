@@ -54,9 +54,9 @@ export const getRiskScoreColumns = (
           <>
             <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
             <StyledCellActions
+              value={entityName}
               field={{
                 name: 'host.name',
-                value: entityName,
                 type: 'keyword',
                 searchable: true,
                 aggregatable: true,
@@ -77,9 +77,9 @@ export const getRiskScoreColumns = (
           <>
             <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
             <StyledCellActions
+              value={entityName}
               field={{
                 name: 'user.name',
-                value: entityName,
                 type: 'keyword',
                 aggregatable: true,
                 searchable: true,
@@ -159,9 +159,9 @@ export const getRiskScoreColumns = (
           <FormattedCount count={alertCount} />
         </EuiLink>
         <StyledCellActions
+          value={riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name}
           field={{
             name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
-            value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
             type: 'keyword',
             aggregatable: true,
             searchable: true,

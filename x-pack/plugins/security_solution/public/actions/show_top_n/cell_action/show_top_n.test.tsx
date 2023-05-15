@@ -40,9 +40,9 @@ describe('createShowTopNCellActionFactory', () => {
   const showTopNAction = showTopNActionFactory({ id: 'testAction' });
 
   const context = {
+    value: 'the-value',
     field: {
       name: 'user.name',
-      value: 'the-value',
       type: 'keyword',
       aggregatable: true,
       searchable: true,

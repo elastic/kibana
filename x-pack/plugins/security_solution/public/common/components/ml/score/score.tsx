@@ -28,9 +28,9 @@ export const ScoreComponent = ({
   return (
     <SecurityCellActions
       mode={CellActionsMode.HOVER_DOWN}
+      value={score.entityValue}
       field={{
         name: score.entityName,
-        value: score.entityValue,
         type: KBN_FIELD_TYPES.STRING,
         esTypes: [ES_FIELD_TYPES.KEYWORD],
         aggregatable: true,

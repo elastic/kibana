@@ -72,9 +72,9 @@ export const getNetworkTopNFlowColumns = (
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
+              value={ip}
               field={{
                 name: ipAttr,
-                value: ip,
                 type: 'keyword',
                 aggregatable: true,
                 searchable: true,
@@ -90,9 +90,9 @@ export const getNetworkTopNFlowColumns = (
                 visibleCellActions={5}
                 showActionTooltips
                 triggerId={SecurityCellActionsTrigger.DEFAULT}
+                value={geo}
                 field={{
                   name: geoAttrName,
-                  value: geo,
                   type: 'keyword',
                   aggregatable: true,
                   searchable: true,

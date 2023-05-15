@@ -70,17 +70,19 @@ export const getUseCellActionsHook = (tableId: TableId) => {
               return {
                 name: col.id,
                 type: fieldMeta?.type ?? 'keyword',
-                values: (finalData as TimelineNonEcsData[][]).map(
-                  (row) => row.find((rowData) => rowData.field === col.id)?.value ?? []
-                ),
                 aggregatable: fieldMeta?.aggregatable ?? false,
                 searchable: fieldMeta?.searchable ?? false,
               };
             });
 
+      const values = (finalData as TimelineNonEcsData[][]).map((row) =>
+        row.map((rowData) => rowData.value ?? [])
+      );
+
       return {
         triggerId: SecurityCellActionsTrigger.DEFAULT,
         fields,
+        values,
         metadata: {
           // cell actions scope
           scopeId: tableId,

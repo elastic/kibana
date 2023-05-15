@@ -21,17 +21,21 @@ export interface CellActionsProviderProps {
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
 }
 
-export interface CellActionField extends FieldSpec {
-  value: string | string[] | null | undefined;
-}
-
 type Metadata = Record<string, unknown>;
+
+export type CellActionFieldValue = string | string[] | null | undefined;
 
 export interface CellActionsProps {
   /**
+   * The field specification
+   */
+  field: FieldSpec;
+
+  /**
    * Common set of properties used by most actions.
    */
-  field: CellActionField;
+  value: CellActionFieldValue;
+
   /**
    * The trigger in which the actions are registered.
    */
@@ -68,7 +72,9 @@ export interface CellActionsProps {
 }
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
-  field: CellActionField;
+  field: FieldSpec;
+  value: CellActionFieldValue;
+
   /**
    * Ref to the node where the cell action are rendered.
    */
@@ -83,13 +89,14 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
  * Subset of `CellActionExecutionContext` used only for the compatibility check in the `isCompatible` function.
  * It omits the references and the `field.value`.
  */
+
 export interface CellActionCompatibilityContext<
-  C extends CellActionExecutionContext = CellActionExecutionContext
+  C extends Omit<CellActionExecutionContext, 'value'> = Omit<CellActionExecutionContext, 'value'>
 > extends ActionExecutionContext {
   /**
    * The object containing the field name and type, needed for the compatibility check
    */
-  field: Omit<C['field'], 'value'>;
+  field: C['field'];
   /**
    * Extra configurations for actions.
    */

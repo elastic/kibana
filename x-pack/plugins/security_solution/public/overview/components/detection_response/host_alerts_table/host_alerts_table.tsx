@@ -152,9 +152,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
       <SecurityCellActions
+        value={hostName}
         field={{
           name: 'host.name',
-          value: hostName,
           type: 'keyword',
           aggregatable: true,
           searchable: true,

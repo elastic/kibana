@@ -21,7 +21,8 @@ describe('Default createCopyToClipboardActionFactory', () => {
   });
   const copyToClipboardAction = copyToClipboardActionFactory({ id: 'testAction' });
   const context = {
-    field: { name: 'user.name', value: 'the value', type: 'text' },
+    field: { name: 'user.name', type: 'text' },
+    value: 'the value',
   } as CellActionExecutionContext;
 
   beforeEach(() => {

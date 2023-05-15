@@ -45,9 +45,9 @@ export const getUserRiskScoreColumns = ({
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}
+            value={userName}
             field={{
               name: 'user.name',
-              value: userName,
               type: 'keyword',
               aggregatable: true,
               searchable: true,

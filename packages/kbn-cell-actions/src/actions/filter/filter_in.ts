@@ -23,8 +23,8 @@ export const createFilterInActionFactory = createCellActionFactory(
     getDisplayName: () => FILTER_IN,
     getDisplayNameTooltip: () => FILTER_IN,
     isCompatible: async ({ field }) => !!field.name,
-    execute: async ({ field }) => {
-      addFilterIn({ filterManager, fieldName: field.name, value: field.value });
+    execute: async ({ field, value }) => {
+      addFilterIn({ filterManager, fieldName: field.name, value });
     },
   })
 );

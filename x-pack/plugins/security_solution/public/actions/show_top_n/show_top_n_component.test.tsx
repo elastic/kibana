@@ -31,9 +31,9 @@ const element = document.createElement('div');
 document.body.appendChild(element);
 
 const context = {
+  value: 'the-value',
   field: {
     name: 'user.name',
-    value: 'the-value',
     type: 'keyword',
     searchable: true,
     aggregatable: true,

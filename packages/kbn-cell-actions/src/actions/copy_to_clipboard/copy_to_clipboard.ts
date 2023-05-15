@@ -32,7 +32,7 @@ export const createCopyToClipboardActionFactory = createCellActionFactory(
     getDisplayName: () => COPY_TO_CLIPBOARD,
     getDisplayNameTooltip: () => COPY_TO_CLIPBOARD,
     isCompatible: async ({ field }) => field.name != null,
-    execute: async ({ field }) => {
+    execute: async ({ field, value }) => {
       let textValue: undefined | string;
       if (field.value != null) {
         textValue = Array.isArray(field.value)

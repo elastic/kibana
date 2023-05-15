@@ -333,17 +333,18 @@ export const DataTableComponent = React.memo<DataTableProps>(
         : columnHeaders.map((column) => ({
             name: column.id,
             type: column.type ?? 'keyword',
-            values: data.map(
-              ({ data: columnData }) =>
-                columnData.find((rowData) => rowData.field === column.id)?.value
-            ),
             aggregatable: column.aggregatable ?? false,
             searchable: column.searchable ?? false,
           }));
 
+      const values = data.map(({ data: columnData }) =>
+        columnData.map((rowData) => rowData.value ?? [])
+      );
+
       return {
         triggerId: cellActionsTriggerId || '',
         fields,
+        values,
         metadata: {
           scopeId: id,
         },

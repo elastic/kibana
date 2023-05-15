@@ -334,9 +334,9 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   visibleCellActions={5}
                   showActionTooltips
                   triggerId={SecurityCellActionsTrigger.DEFAULT}
+                  value={value}
                   field={{
                     name: fieldName,
-                    value,
                     type: fieldType,
                     esTypes,
                     aggregatable: isAggregatable,

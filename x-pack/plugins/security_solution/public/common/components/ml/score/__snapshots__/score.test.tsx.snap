@@ -11,11 +11,11 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
       "name": "process.name",
       "searchable": true,
       "type": "string",
-      "value": "du",
     }
   }
   mode="hover-down"
   triggerId="security-default-cellActions"
+  value="du"
   visibleCellActions={5}
 >
   17
@@ -33,11 +33,11 @@ exports[`draggable_score renders correctly against snapshot when the index is no
       "name": "process.name",
       "searchable": true,
       "type": "string",
-      "value": "du",
     }
   }
   mode="hover-down"
   triggerId="security-default-cellActions"
+  value="du"
   visibleCellActions={5}
 >
   17

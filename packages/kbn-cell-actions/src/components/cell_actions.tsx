@@ -15,6 +15,7 @@ import type { CellActionsProps, CellActionExecutionContext } from '../types';
 
 export const CellActions: React.FC<CellActionsProps> = ({
   field,
+  value,
   triggerId,
   children,
   mode,
@@ -29,11 +30,12 @@ export const CellActions: React.FC<CellActionsProps> = ({
   const actionContext: CellActionExecutionContext = useMemo(
     () => ({
       field,
+      value,
       trigger: { id: triggerId },
       nodeRef,
       metadata,
     }),
-    [field, triggerId, metadata]
+    [field, value, triggerId, metadata]
   );
 
   const anchorPosition = useMemo(

@@ -150,9 +150,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
       <SecurityCellActions
+        value={userName}
         field={{
           name: 'user.name',
-          value: userName,
           type: 'keyword',
           aggregatable: true,
           searchable: true,

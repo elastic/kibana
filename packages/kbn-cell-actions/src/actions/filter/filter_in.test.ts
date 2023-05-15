@@ -26,7 +26,8 @@ describe('createFilterInActionFactory', () => {
   });
   const filterInAction = filterInActionFactory({ id: 'testAction' });
   const context = makeActionContext({
-    field: { name: fieldName, value, type: 'text', searchable: true, aggregatable: true },
+    field: { name: fieldName, type: 'text', searchable: true, aggregatable: true },
+    value,
   });
 
   beforeEach(() => {
@@ -74,7 +75,8 @@ describe('createFilterInActionFactory', () => {
     it('should create filter query with array value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: [value] },
+        field: { ...context.field },
+        value: [value],
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({
         key: fieldName,
@@ -86,7 +88,8 @@ describe('createFilterInActionFactory', () => {
     it('should create negate filter query with null value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: null },
+        field: { ...context.field },
+        value: null,
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: null, negate: true });
     });
@@ -94,7 +97,8 @@ describe('createFilterInActionFactory', () => {
     it('should create negate filter query with undefined value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: undefined },
+        field: { ...context.field },
+        value: undefined,
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({
         key: fieldName,
@@ -106,7 +110,8 @@ describe('createFilterInActionFactory', () => {
     it('should create negate filter query with empty string value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: '' },
+        field: { ...context.field },
+        value: '',
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: '', negate: true });
     });
@@ -114,7 +119,8 @@ describe('createFilterInActionFactory', () => {
     it('should create negate filter query with empty array value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: [] },
+        field: { ...context.field },
+        value: [],
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: true });
     });

@@ -23,11 +23,11 @@ export const createFilterOutActionFactory = createCellActionFactory(
     getDisplayName: () => FILTER_OUT,
     getDisplayNameTooltip: () => FILTER_OUT,
     isCompatible: async ({ field }) => !!field.name,
-    execute: async ({ field }) => {
+    execute: async ({ field, value }) => {
       addFilterOut({
         filterManager,
         fieldName: field.name,
-        value: field.value,
+        value,
       });
     },
   })

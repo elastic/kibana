@@ -75,14 +75,8 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
 }) => {
   const metadata = useMemo(() => ({ scopeId }), [scopeId]);
   const field = useMemo(
-    () =>
-      !data
-        ? null
-        : {
-            value,
-            ...browserFieldToFieldSpec(browserField, data),
-          },
-    [browserField, data, value]
+    () => (data ? browserFieldToFieldSpec(browserField, data) : null),
+    [browserField, data]
   );
 
   if (!data || !value || !field) return null;
@@ -115,6 +109,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
         {value && !isReadOnly && (
           <SecurityCellActions
             field={field}
+            value={value}
             triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
             mode={CellActionsMode.INLINE}
             metadata={metadata}
