@@ -40,7 +40,7 @@ import type {
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
-import { getCapabilities, getTypes, getUISettings } from '../services';
+import { getCapabilities, getTypes } from '../services';
 import { showNewVisModal } from '../wizard';
 import {
   convertToSerializedVis,
@@ -55,7 +55,6 @@ import {
   injectControlsReferences,
 } from '../utils/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
@@ -106,13 +105,7 @@ export class VisualizeEmbeddableFactory
       try {
         const typeName: string = JSON.parse(savedObject.attributes.visState).type;
         const visType = getTypes().get(typeName);
-        if (!visType) {
-          return false;
-        }
-        if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
-          return true;
-        }
-        return visType.stage !== 'experimental';
+        return Boolean(visType);
       } catch {
         return false;
       }
