@@ -348,27 +348,32 @@ describe('<ControlGeneralViewSelector />', () => {
     }
 
     updatedSelector = onChange.mock.calls[1][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
     expect(findByText(errorStr)).toMatchObject({});
 
     userEvent.type(el, '/*{enter}');
     updatedSelector = onChange.mock.calls[2][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
     expect(findByText(errorStr)).toMatchObject({});
 
     userEvent.type(el, '/usr/bin/ls{enter}');
     updatedSelector = onChange.mock.calls[3][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
     expect(findByText(errorStr)).toMatchObject({});
 
     userEvent.type(el, 'badpath{enter}');
     updatedSelector = onChange.mock.calls[4][0];
-
+    expect(updatedSelector.hasErrors).toBeTruthy();
     rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(getByText(errorStr)).toBeTruthy();
 
+    userEvent.type(el, ' {enter}');
+    updatedSelector = onChange.mock.calls[4][0];
+    expect(updatedSelector.hasErrors).toBeTruthy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
     expect(getByText(errorStr)).toBeTruthy();
   });
 

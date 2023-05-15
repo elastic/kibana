@@ -186,7 +186,14 @@ export function validateStringValuesForCondition(condition: SelectorCondition, v
   const { pattern, patternError } = SelectorConditionsMap[condition];
 
   values?.forEach((value) => {
-    if (pattern && !new RegExp(pattern).test(value)) {
+    if (value.length === 0) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorGenericEmptyValue', {
+          defaultMessage: '"{condition}" values cannot be empty',
+          values: { condition, pattern },
+        })
+      );
+    } else if (pattern && !new RegExp(pattern).test(value)) {
       if (patternError) {
         errors.push(patternError);
       } else {
