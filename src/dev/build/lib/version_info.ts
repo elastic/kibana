@@ -36,6 +36,7 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
     ? (await execa('git', ['rev-parse', 'HEAD'], { cwd: REPO_ROOT })).stdout
     : process.env.GIT_COMMIT || process.env.BUILDKITE_COMMIT || '';
 
+  // TODO: git command for date of head commit
   const buildDate = gitExists ? new Date().toISOString() : new Date().toISOString();
 
   return {

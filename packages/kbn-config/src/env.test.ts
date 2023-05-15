@@ -20,6 +20,7 @@ const packageInfos: RawPackageInfo = {
   build: {
     number: 42,
     sha: 'one',
+    date: '2023-05-15T23:12:09+0000',
   },
 };
 
@@ -128,6 +129,7 @@ test('correctly creates environment with constructor.', () => {
         distributable: true,
         number: 100,
         sha: 'feature-v1-build-sha',
+        date: '2023-05-15T23:12:09+0000',
       },
     },
     getEnvOptions({
