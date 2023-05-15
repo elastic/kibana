@@ -416,11 +416,12 @@ export class KibanaTelemetryAdapter {
       });
 
     return Object.values(this.collector).reduce(
-      (acc, cum) => ({
-        overview_page: acc.overview_page + cum.overview_page,
-        monitor_page: acc.monitor_page + cum.monitor_page,
-        settings_page: acc.settings_page + cum.settings_page,
-      }),
+      (acc, cum) =>
+        Object.assign(cum, {
+          overview_page: acc.overview_page + cum.overview_page,
+          monitor_page: acc.monitor_page + cum.monitor_page,
+          settings_page: acc.settings_page + cum.settings_page,
+        }),
       { overview_page: 0, monitor_page: 0, settings_page: 0 }
     );
   }

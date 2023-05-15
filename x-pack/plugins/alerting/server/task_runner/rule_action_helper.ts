@@ -91,7 +91,7 @@ export const getSummaryActionsFromTaskState = ({
       newObj[actionExists.uuid!] = val;
     }
     return newObj;
-  }, {} as Record<string, unknown>);
+  }, {} as ThrottledActions);
 };
 
 export const getSummaryActionTimeBounds = (

@@ -20,7 +20,7 @@ export function groupConnectorsByConsumers(
     acc[consumer.key] = consumer.actions.connector_types.buckets.reduce((accBucket, bucket) => {
       accBucket[replaceDotSymbols(bucket.key)] = bucket.doc_count;
       return accBucket;
-    }, {} as Record<string, unknown>);
+    }, {} as Record<string, number>);
     return acc;
-  }, {} as Record<string, unknown>);
+  }, {} as Record<string, Record<string, number>>);
 }
