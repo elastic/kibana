@@ -283,6 +283,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
 
   it('Custom filters from URLS are populated & changed banner is displayed', () => {
     visitAlertsPageWithCustomFilters(customFilters);
+    waitForPageFilters();
 
     assertFilterControlsWithFilterObject(customFilters);
 
@@ -291,14 +292,14 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
 
   it('Changed banner should hide on saving changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
-
+    waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
     saveFilterGroupControls();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
   it('Changed banner should hide on discarding changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
-
+    waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
     discardFilterGroupControls();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
@@ -306,6 +307,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
 
   it('Changed banner should hide on Reset', () => {
     visitAlertsPageWithCustomFilters(customFilters);
+    waitForPageFilters();
     resetFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
