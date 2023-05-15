@@ -17,7 +17,6 @@ import {
   FindIntegrationsResponse,
   findIntegrationsResponseRT,
   getDataStreamsUrl,
-  getIntegrationsUrl,
 } from '../../../common';
 
 import { IDataStreamsClient } from './types';
