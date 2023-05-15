@@ -54,7 +54,7 @@ image::images/highlights-lens-visualization-loading.png[New visualization modifi
 image::images/highlights-lens-tooltip.png[Icon popover on icon in dashboard]
 
 [discrete]
-==== Metric chart improvments
+==== Metric chart improvements
 
 This release adds the following updates to the metric chart.
 
