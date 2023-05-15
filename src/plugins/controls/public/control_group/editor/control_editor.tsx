@@ -198,7 +198,7 @@ export const ControlEditor = ({
           <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
             <FieldPicker
               filterPredicate={(field: DataViewField) => {
-                const customPredicate = customFilterPredicate ? customFilterPredicate(field) : true;
+                const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
                 return Boolean(fieldRegistry?.[field.name]) && customPredicate;
               }}
               selectedFieldName={selectedField}

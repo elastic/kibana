@@ -99,7 +99,7 @@ export class ControlGroupContainer extends Container<
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
 
-  private fieldFilterPredicate: FieldFilterPredicate | undefined;
+  public fieldFilterPredicate: FieldFilterPredicate | undefined;
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
@@ -145,9 +145,8 @@ export class ControlGroupContainer extends Container<
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
-    if (fieldFilterPredicate) {
-      this.setFieldFilterPredicate(fieldFilterPredicate);
-    }
+
+    this.fieldFilterPredicate = fieldFilterPredicate;
   }
 
   private setupSubscriptions = () => {
@@ -384,10 +383,4 @@ export class ControlGroupContainer extends Container<
     this.cleanupStateTools();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
-
-  public setFieldFilterPredicate(fieldFilterPredicate: FieldFilterPredicate) {
-    this.fieldFilterPredicate = fieldFilterPredicate;
-  }
-
-  public getFieldFilterPredicate = () => this.fieldFilterPredicate;
 }
