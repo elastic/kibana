@@ -14,7 +14,7 @@ import { esHits } from '../../__mocks__/es_hits';
 import { buildDataViewMock, fields } from '../../__mocks__/data_view';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
-import { ServicesContextProvider } from '../../application/services_provider';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 import { getDocId } from '../../utils/get_doc_id';
@@ -63,9 +63,9 @@ function getProps() {
 
 async function getComponent(props: DiscoverGridProps = getProps()) {
   const Proxy = (innerProps: DiscoverGridProps) => (
-    <ServicesContextProvider services={discoverServiceMock}>
+    <KibanaContextProvider services={discoverServiceMock}>
       <DiscoverGrid {...innerProps} />
-    </ServicesContextProvider>
+    </KibanaContextProvider>
   );
 
   const component = mountWithIntl(<Proxy {...props} />);

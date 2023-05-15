@@ -22,7 +22,7 @@ import {
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ServicesContextProvider } from '../../../services_provider';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -109,13 +109,13 @@ const mountComponent = async ({
   const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
 
   const component = mountWithIntl(
-    <ServicesContextProvider services={services}>
+    <KibanaContextProvider services={services}>
       <KibanaThemeProvider theme$={coreTheme$}>
         <DiscoverMainProvider value={stateContainer}>
           <DiscoverMainContent {...props} />
         </DiscoverMainProvider>
       </KibanaThemeProvider>
-    </ServicesContextProvider>
+    </KibanaContextProvider>
   );
 
   await act(async () => {
