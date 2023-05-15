@@ -290,8 +290,6 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     showHostNames,
     totalItemCount,
   }) => {
-    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMapType>({});
-
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const { withOutputs: withOutputsFromUrl } = useActionHistoryUrlParams();
@@ -309,22 +307,53 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
         : [];
     }, [isFlyout, queryParams.withOutputs, withOutputsFromUrl]);
 
+    const actionIdsWithOpenTrays: string[] = useMemo(
+      () => getActionIdsWithDetails(),
+      [getActionIdsWithDetails]
+    );
+
+    const redoOpenTrays = useCallback(() => {
+      if (actionIdsWithOpenTrays.length && items.length) {
+        const openDetails = actionIdsWithOpenTrays.reduce<ExpandedRowMapType>(
+          (idToRowMap, actionId) => {
+            idToRowMap[actionId] = (
+              <ActionsLogExpandedTray
+                action={items.filter((item) => item.id === actionId)[0]}
+                data-test-subj={dataTestSubj}
+              />
+            );
+            return idToRowMap;
+          },
+          {}
+        );
+        setItemIdToExpandedRowMap(openDetails);
+      }
+    }, [actionIdsWithOpenTrays, dataTestSubj, items]);
+
+    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMapType>(
+      actionIdsWithOpenTrays.length && items.length
+        ? actionIdsWithOpenTrays.reduce<ExpandedRowMapType>(
+            (initialActionIdsToRowMap, actionId) => {
+              const actionItem = items.filter((item) => item.id === actionId)[0];
+              // if (!actionItem) return initialActionIdsToRowMap;
+              initialActionIdsToRowMap[actionId] = (
+                <ActionsLogExpandedTray action={actionItem} data-test-subj={dataTestSubj} />
+              );
+              return initialActionIdsToRowMap;
+            },
+            {}
+          )
+        : {}
+    );
+
+    const allActionIdsOnPage = useMemo(() => items.map((item) => item.id), [items]);
+
+    // open trays that were open using URL params/ query params
     useEffect(() => {
-      const actionIdsWithDetails = getActionIdsWithDetails();
-      const openDetails = actionIdsWithDetails.reduce<ExpandedRowMapType>(
-        (idToRowMap, actionId) => {
-          idToRowMap[actionId] = (
-            <ActionsLogExpandedTray
-              action={items.filter((item) => item.id === actionId)[0]}
-              data-test-subj={dataTestSubj}
-            />
-          );
-          return idToRowMap;
-        },
-        {}
-      );
-      setItemIdToExpandedRowMap(openDetails);
-    }, [dataTestSubj, getActionIdsWithDetails, items, queryParams.withOutputs, withOutputsFromUrl]);
+      if (actionIdsWithOpenTrays.every((actionId) => allActionIdsOnPage.includes(actionId))) {
+        redoOpenTrays();
+      }
+    }, [dataTestSubj, allActionIdsOnPage, actionIdsWithOpenTrays, items, redoOpenTrays]);
 
     const toggleDetails = useCallback(
       (action: ActionListApiResponse['data'][number]) => {
