@@ -680,7 +680,7 @@ describe('actions', () => {
 
   test('undoSavedSearchChanges with timeRestore', async () => {
     const { state } = await getState('/', {
-      ...savedSearchMock,
+      ...savedSearchMockWithTimeField,
       timeRestore: true,
       refreshInterval: { pause: false, value: 1000 },
       timeRange: { from: 'now-15d', to: 'now-10d' },

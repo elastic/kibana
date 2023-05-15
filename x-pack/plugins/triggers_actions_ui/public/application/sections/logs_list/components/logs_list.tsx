@@ -24,7 +24,14 @@ export const LogsList = ({
     'xl'
   )({
     ruleId: '*',
-    refreshToken: 0,
+    refreshToken: {
+      resolve: () => {
+        /* noop */
+      },
+      reject: () => {
+        /* noop */
+      },
+    },
     initialPageSize: 50,
     hasRuleNames: true,
     hasAllSpaceSwitch: true,

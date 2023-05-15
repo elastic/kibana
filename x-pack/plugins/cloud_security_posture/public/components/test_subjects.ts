@@ -23,8 +23,9 @@ export const NO_FINDINGS_STATUS_TEST_SUBJ = {
 export const EMPTY_STATE_TEST_SUBJ = 'csp:empty-state';
 export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   SCANNING_VULNERABILITIES: 'scanning-vulnerabilities-empty-prompt',
+  NOT_INSTALLED: 'cnvm-integration-not-installed',
+  NOT_DEPLOYED: 'agent-not-deployed-vuln-mgmt',
   UNPRIVILEGED: 'status-api-vuln-mgmt-unprivileged',
-  INDEX_TIMEOUT: 'status-api-vuln-mgmt-index-timeout',
   NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
 };
 

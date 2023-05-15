@@ -11,7 +11,7 @@ import {
 } from '../../../../../../common/mocks/test_providers';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { IndicatorsFieldBrowser } from '.';
+import { IndicatorsFieldBrowser } from './field_browser';
 
 const stub = jest.fn();
 

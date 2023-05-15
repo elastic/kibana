@@ -28,6 +28,7 @@ import {
   SavedObjectEditionProps,
   SavedObjectEditionState,
 } from './saved_object_view';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const resolvePromises = () => new Promise((resolve) => process.nextTick(resolve));
 
@@ -40,6 +41,7 @@ describe('SavedObjectEdition', () => {
   let history: ReturnType<typeof scopedHistoryMock.create>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let docLinks: ReturnType<typeof docLinksServiceMock.createStartContract>;
+  let settings: ReturnType<typeof settingsServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectEditionProps> = {}) => {
     return shallowWithI18nProvider(
@@ -56,6 +58,7 @@ describe('SavedObjectEdition', () => {
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
     uiSettings = uiSettingsServiceMock.createStartContract();
+    settings = settingsServiceMock.createStartContract();
     history = scopedHistoryMock.create();
     docLinks = docLinksServiceMock.createStartContract();
     applications = applicationServiceMock.createStartContract();
@@ -82,6 +85,7 @@ describe('SavedObjectEdition', () => {
       history,
       uiSettings,
       docLinks: docLinks.links,
+      settings,
     };
 
     bulkDeleteObjectsMock.mockResolvedValue([{}]);
