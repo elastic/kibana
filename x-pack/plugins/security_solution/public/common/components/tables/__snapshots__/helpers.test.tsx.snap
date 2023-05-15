@@ -10,8 +10,13 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
       size="xs"
     >
       <MoreContainer
+        esTypes={
+          Array [
+            "keyword",
+          ]
+        }
         fieldName="attrName"
-        fieldType="keyword"
+        fieldType="string"
         idPrefix="idPrefix"
         isAggregatable={false}
         isSearchable={false}

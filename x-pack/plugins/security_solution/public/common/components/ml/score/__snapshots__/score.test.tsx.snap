@@ -5,9 +5,12 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
   field={
     Object {
       "aggregatable": true,
+      "esTypes": Array [
+        "keyword",
+      ],
       "name": "process.name",
       "searchable": true,
-      "type": "keyword",
+      "type": "string",
       "value": "du",
     }
   }
@@ -24,9 +27,12 @@ exports[`draggable_score renders correctly against snapshot when the index is no
   field={
     Object {
       "aggregatable": true,
+      "esTypes": Array [
+        "keyword",
+      ],
       "name": "process.name",
       "searchable": true,
-      "type": "keyword",
+      "type": "string",
       "value": "du",
     }
   }
