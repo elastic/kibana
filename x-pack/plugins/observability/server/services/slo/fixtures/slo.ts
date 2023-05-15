@@ -23,7 +23,7 @@ import {
   StoredSLO,
 } from '../../../domain/models';
 import { Paginated } from '../slo_repository';
-import { sevenDays, twoMinute } from './duration';
+import { oneWeek, twoMinute } from './duration';
 import { sevenDaysRolling } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
@@ -161,8 +161,8 @@ export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
     timeWindow: {
-      duration: sevenDays(),
-      calendar: { startTime: new Date('2022-10-01T00:00:00.000Z') },
+      duration: oneWeek(),
+      isCalendar: true,
     },
     ...params,
   });
