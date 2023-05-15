@@ -66,6 +66,7 @@ const createStartContractMock = () => {
     project: {
       setNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
+      setBreadcrumbs: jest.fn(),
     },
   };
   startContract.navLinks.getAll.mockReturnValue([]);

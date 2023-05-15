@@ -241,9 +241,11 @@ export class ChromeService {
         // }
 
         const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
+        const projectNavigation$ = projectNavigation.getProjectNavigation$();
 
         const ProjectHeaderWithNavigation = () => {
           const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
+          const projectNavigationConfig = useObservable(projectNavigation$, undefined);
 
           let SideNavComponent: ISideNavComponent = () => null;
 
@@ -255,6 +257,12 @@ export class ChromeService {
                 : ProjectSideNavigation;
           }
 
+          // if projectNavigation wasn't set fallback to the default breadcrumbs
+          // TODO: remove it when every solution uses the project navigation config
+          const projectBreadcrumbs$ = projectNavigationConfig
+            ? projectNavigation.getProjectBreadcrumbs$()
+            : breadcrumbs$;
+
           return (
             <ProjectHeader
               {...{
@@ -262,7 +270,7 @@ export class ChromeService {
                 globalHelpExtensionMenuLinks$,
               }}
               actionMenu$={application.currentActionMenu$}
-              breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
+              breadcrumbs$={projectBreadcrumbs$.pipe(takeUntil(this.stop$))}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
               helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
               navControlsRight$={navControls.getRight$()}

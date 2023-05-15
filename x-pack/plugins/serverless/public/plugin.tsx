@@ -65,6 +65,8 @@ export class ServerlessPlugin
     return {
       setSideNavComponent: (sideNavigationComponent) =>
         core.chrome.project.setSideNavComponent(sideNavigationComponent),
+      setBreadcrumbs: (breadcrumbs, params) =>
+        core.chrome.project.setBreadcrumbs(breadcrumbs, params),
     };
   }
 

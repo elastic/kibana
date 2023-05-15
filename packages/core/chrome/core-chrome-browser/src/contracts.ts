@@ -195,7 +195,7 @@ export interface ChromeStart {
      * @param breadcrumbs
      * @param params.absolute If true, the breadcrumbs will be set as absolute, otherwise they will be appended to the default ones. false by default.
      *
-     * @remarks Has no effect if the chrome style is not `project`.
+     * @remarks Has no effect if the chrome style is not `project` or if setNavigation was not called
      */
     setBreadcrumbs(
       breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,

@@ -70,6 +70,7 @@ export class ProjectNavigationService {
             // 3. the current projectBreadcrumbs
 
             return [
+              /* TODO: point home breadcrumb to the correct place */
               createHomeBreadcrumb({ homeHref: '/' }),
               /* TODO: insert nav breadcrumbs */
               ...breadcrumbs.breadcrumbs,
