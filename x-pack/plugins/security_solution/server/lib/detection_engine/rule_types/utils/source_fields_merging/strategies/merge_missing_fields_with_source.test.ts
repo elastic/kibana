@@ -1455,7 +1455,7 @@ describe('merge_missing_fields_with_source', () => {
 
       test('does not merge fields into source if source value is array', () => {
         const _source: SignalSourceHit['_source'] = {
-          'email.headers': { 'x-test': 'a' },
+          'email.headers': { 'x-test': ['a'] },
         };
 
         const fields: SignalSourceHit['fields'] = {
