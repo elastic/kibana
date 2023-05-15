@@ -17,6 +17,9 @@ import type { SignalSource } from '../../../types';
  * @returns boolean
  */
 export const isPathValid = (path: string[] | string, source: SignalSource): boolean => {
+  if (path == null) {
+    return false;
+  }
   const pathAsArray = typeof path === 'string' ? path.split('.') : path;
 
   if (pathAsArray.length === 0) {
