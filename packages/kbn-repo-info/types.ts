@@ -14,6 +14,7 @@ export interface KibanaPackageJson {
     number: number;
     sha: string;
     distributable?: boolean;
+    date: string;
   };
   dependencies: {
     [dep: string]: string;
