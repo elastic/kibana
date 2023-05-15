@@ -149,7 +149,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const enableHostView = () => pageObjects.infraHostsView.clickEnableHostViewButton();
 
   // Tests
-  describe('Hosts View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/157718
+  describe.skip('Hosts View', function () {
     this.tags('includeFirefox');
 
     before(async () => {
