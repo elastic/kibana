@@ -20,7 +20,6 @@ Object {
         "indexPatternId": "other index pattern",
         "layerId": "some-id",
         "layerType": "annotations",
-        "simpleView": false,
         "tags": Array [],
         "title": "My library group",
       },
@@ -39,7 +38,6 @@ Object {
       "indexPatternId": "other index pattern",
       "layerId": "some-id",
       "layerType": "annotations",
-      "simpleView": false,
     },
   ],
 }

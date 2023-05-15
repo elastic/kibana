@@ -25,7 +25,9 @@ export interface EventAnnotationServiceType {
   toExpression: (props: EventAnnotationConfig[]) => ExpressionAstExpression[];
   toFetchExpression: (props: {
     interval: string;
-    groups: EventAnnotationGroupConfig[];
+    groups: Array<
+      Pick<EventAnnotationGroupConfig, 'annotations' | 'ignoreGlobalFilters' | 'indexPatternId'>
+    >;
   }) => ExpressionAstExpression[];
   renderEventAnnotationGroupSavedObjectFinder: (props: {
     fixedPageSize: number;

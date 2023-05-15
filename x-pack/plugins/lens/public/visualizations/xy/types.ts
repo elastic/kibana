@@ -120,7 +120,6 @@ export interface XYByValueAnnotationLayerConfig {
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
   indexPatternId: string;
-  simpleView: boolean;
   ignoreGlobalFilters: boolean;
 }
 
@@ -136,7 +135,7 @@ export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig 
 
 export type XYPersistedByReferenceAnnotationLayerConfig = Pick<
   XYByValueAnnotationLayerConfig,
-  'layerId' | 'layerType' | 'simpleView'
+  'layerId' | 'layerType'
 > & {
   persistanceType: 'byReference';
   annotationGroupRef: string;

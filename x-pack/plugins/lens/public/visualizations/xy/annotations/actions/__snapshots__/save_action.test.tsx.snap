@@ -41,7 +41,6 @@ Array [
           "indexPatternId": "some-index-pattern",
           "layerId": "mylayerid",
           "layerType": "annotations",
-          "simpleView": false,
         },
       ],
       "legend": Object {
@@ -95,7 +94,6 @@ Array [
           "indexPatternId": "some-index-pattern",
           "layerId": "mylayerid",
           "layerType": "annotations",
-          "simpleView": false,
         },
       ],
       "legend": Object {
@@ -151,7 +149,6 @@ Array [
           "indexPatternId": "some-index-pattern",
           "layerId": "mylayerid",
           "layerType": "annotations",
-          "simpleView": false,
         },
       ],
       "legend": Object {
@@ -205,7 +202,6 @@ Array [
           "indexPatternId": "some-index-pattern",
           "layerId": "mylayerid",
           "layerType": "annotations",
-          "simpleView": false,
         },
       ],
       "legend": Object {

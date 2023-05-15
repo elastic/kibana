@@ -740,7 +740,6 @@ export const getXyVisualization = ({
       state,
       layers,
       paletteService,
-      attributes,
       datasourceExpressionsByLayers,
       eventAnnotationService
     ),

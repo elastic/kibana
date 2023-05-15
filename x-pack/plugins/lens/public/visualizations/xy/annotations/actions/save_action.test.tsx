@@ -118,7 +118,6 @@ describe('annotation group save action', () => {
       layerType: 'annotations',
       indexPatternId: 'some-index-pattern',
       ignoreGlobalFilters: false,
-      simpleView: false,
       annotations: [
         {
           id: 'some-annotation-id',

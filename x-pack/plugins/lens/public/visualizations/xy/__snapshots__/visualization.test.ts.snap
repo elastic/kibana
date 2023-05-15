@@ -38,7 +38,6 @@ Object {
   "indexPatternId": "indexPattern1",
   "layerId": "",
   "layerType": "annotations",
-  "simpleView": false,
 }
 `;
 
@@ -49,7 +48,6 @@ Object {
   "indexPatternId": "indexPattern1",
   "layerId": "",
   "layerType": "annotations",
-  "simpleView": false,
 }
 `;
 
@@ -92,7 +90,6 @@ Array [
     "indexPatternId": "data-view-123",
     "layerId": "annotation",
     "layerType": "annotations",
-    "simpleView": undefined,
   },
   Object {
     "__lastSaved": Object {
@@ -131,7 +128,6 @@ Array [
     "indexPatternId": "data-view-773203",
     "layerId": "annotation",
     "layerType": "annotations",
-    "simpleView": undefined,
   },
 ]
 `;

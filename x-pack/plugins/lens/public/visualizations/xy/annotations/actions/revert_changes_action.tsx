@@ -89,7 +89,6 @@ export const revert = ({
     layerId: layer.layerId,
     layerType: layer.layerType,
     annotationGroupId: layer.annotationGroupId,
-    simpleView: layer.simpleView,
 
     indexPatternId: layer.__lastSaved.indexPatternId,
     ignoreGlobalFilters: layer.__lastSaved.ignoreGlobalFilters,
