@@ -66,6 +66,7 @@ export interface Props {
   };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  indexTemplate?: string;
   openCreateCaseFlyout: ({
     comments,
     headerContent,
@@ -89,6 +90,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
+  indexTemplate,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
@@ -160,6 +162,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         getGroupByFieldsOnClick,
         ilmPhase,
         indexName,
+        indexTemplate,
         onAddToNewCase,
         partitionedFieldMetadata: partitionedFieldMetadata ?? EMPTY_METADATA,
         pattern,
@@ -178,6 +181,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       getGroupByFieldsOnClick,
       ilmPhase,
       indexName,
+      indexTemplate,
       onAddToNewCase,
       partitionedFieldMetadata,
       pattern,

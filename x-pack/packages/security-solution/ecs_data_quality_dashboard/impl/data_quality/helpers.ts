@@ -276,6 +276,14 @@ export const getDataStream = ({
   stats: IndicesStatsWithDataStream | null;
 }): string | null => (stats && stats[indexName]?.data_stream) ?? null;
 
+export const getIndexTemplate = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: IndicesStatsWithDataStream | null;
+}): string | null => (stats && stats[indexName]?.index_template) ?? null;
+
 export const getTotalDocsCount = ({
   indexNames,
   stats,

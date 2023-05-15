@@ -16,6 +16,7 @@ interface DataQualityProviderProps {
     path?: string;
     absolute?: boolean;
   }) => string;
+  toasts: IToasts;
 }
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);
@@ -24,13 +25,15 @@ export const DataQualityProvider: React.FC<DataQualityProviderProps> = ({
   children,
   httpFetch,
   getAppUrl,
+  toasts,
 }) => {
   const value = useMemo(
     () => ({
       httpFetch,
       getAppUrl,
+      toasts,
     }),
-    [httpFetch, getAppUrl]
+    [httpFetch, getAppUrl, toasts]
   );
 
   return <DataQualityContext.Provider value={value}>{children}</DataQualityContext.Provider>;

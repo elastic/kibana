@@ -7,40 +7,42 @@
 
 import { useCallback, useState } from 'react';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
-import { updateUnallowedValues } from './helpers';
+import { fixIndicesMappings } from './helpers';
 
-export const useUpdateUnallowedValues = () => {
+export const useFixIndicesMappings = () => {
   const { httpFetch } = useDataQualityContext();
   const [result, setResult] = useState<unknown[] | null>(null);
   const [error, setError] = useState<boolean | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const updateData = useCallback(
+  const fixMappings = useCallback(
     async ({
       abortController,
-      requestItems,
+      body,
+      toasts,
     }: {
       abortController?: AbortController;
-      requestItems: Array<{
-        id: string;
-        indexFieldName: string;
+      body: {
         indexName: string;
-        value: string;
-      }>;
+        indexTemplate: string;
+        expectedMappings: Record<string, string>;
+      };
+      toasts?: IToasts;
     }) => {
       try {
-        if (requestItems.length === 0) {
-          return;
-        }
         setLoading(true);
-        const { errors, items } = await updateUnallowedValues({
+        const { errors, result } = await fixIndicesMappings({
           abortController,
           httpFetch,
-          body: requestItems,
+          body,
         });
 
-        if (!abortController?.signal.aborted && errors) {
+        if (!abortController?.signal.aborted && !errors) {
           setError(errors);
-          setResult(items);
+          setResult(result);
+          toasts?.addSuccess({
+            title: `Fixing`,
+            text: `Task id: ${result.taskId}, target index: ${result.targetIndex}`,
+          });
         }
       } catch (e) {
         if (!abortController?.signal.aborted) {
@@ -55,5 +57,5 @@ export const useUpdateUnallowedValues = () => {
     [httpFetch]
   );
 
-  return { error, result, loading, updateUnallowedValue: updateData };
+  return { error, result, loading, fixIndicesMapping: fixMappings };
 };

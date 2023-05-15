@@ -34,7 +34,12 @@ import {
   INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
 } from './translations';
 import { COPIED_RESULTS_TOAST_TITLE } from '../../../translations';
-import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
+import type {
+  IlmPhase,
+  OnInValidValueUpdateCallback,
+  PartitionedFieldMetadata,
+} from '../../../types';
+import { useFixIndicesMappings } from '../../../use_fix_indices_mappings';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -44,6 +49,7 @@ interface Props {
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  indexTemplate?: string;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
@@ -59,6 +65,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
   formatNumber,
   ilmPhase,
   indexName,
+  indexTemplate,
   onAddToNewCase,
   partitionedFieldMetadata,
   patternDocsCount,
@@ -99,6 +106,8 @@ const IncompatibleTabComponent: React.FC<Props> = ({
       sizeInBytes,
     ]
   );
+
+  const { fixIndicesMapping, result: fixedResult, loading: fixing } = useFixIndicesMappings();
   const onClickAddToCase = useCallback(
     () => onAddToNewCase([markdownComments.join('\n')]),
     [markdownComments, onAddToNewCase]
@@ -144,6 +153,12 @@ const IncompatibleTabComponent: React.FC<Props> = ({
                   enrichedFieldMetadata={incompatibleMappings}
                   getTableColumns={getIncompatibleMappingsTableColumns}
                   title={INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE(indexName)}
+                  indexName={indexName}
+                  indexTemplate={indexTemplate}
+                  onInValidValueUpdateCallback={onInValidValueUpdateCallback}
+                  bulkFix={fixIndicesMapping}
+                  disableBulkFixButton={fixing}
+                  bulkFixResult={fixedResult}
                 />
               </>
             )}
@@ -159,6 +174,8 @@ const IncompatibleTabComponent: React.FC<Props> = ({
                   getTableColumns={getIncompatibleValuesTableColumns}
                   title={INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE(indexName)}
                   onInValidValueUpdateCallback={onInValidValueUpdateCallback}
+                  indexName={indexName}
+                  indexTemplate={indexTemplate}
                 />
               </>
             )}

@@ -242,6 +242,7 @@ const DataQualityComponent: React.FC = () => {
             patterns={alertsAndSelectedPatterns}
             setLastChecked={setLastChecked}
             theme={theme}
+            toasts={toasts}
           />
         </SecuritySolutionPageWrapper>
       ) : (

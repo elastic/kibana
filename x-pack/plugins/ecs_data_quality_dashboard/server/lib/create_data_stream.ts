@@ -9,6 +9,7 @@ import {
   IndicesPutIndexTemplateRequest,
   MappingTypeMapping,
   IndicesIndexSettings,
+  IndicesCreateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
@@ -30,6 +31,17 @@ const getIndexSettings = (settings: IndicesIndexSettings | null | undefined) => 
   return requestSettings;
 };
 
+const getMappings = (
+  existingIndexMappings: MappingTypeMapping | undefined,
+  newMappings: MappingTypeMapping
+) => {
+  const properties = { ...(existingIndexMappings?.properties ?? {}), ...newMappings.properties };
+  return {
+    ...(existingIndexMappings ?? {}),
+    properties,
+  };
+};
+
 export const createDataStream = async (
   client: IScopedClusterClient,
   {
@@ -42,68 +54,64 @@ export const createDataStream = async (
     newMappings: MappingTypeMapping;
   }
 ) => {
-  const newIndexTemplateName = `${indexName}-fixup-${new Date().getTime()}`;
-  // const isNewIndexTemplateNameOccupied = true;
-  let request: IndicesPutIndexTemplateRequest | null = null;
-  // while (isNewIndexTemplateNameOccupied) {
-  //   isNewIndexTemplateNameOccupied = await client.asCurrentUser.indices.existsIndexTemplate({
-  //     name: newIndexTemplateName,
-  //   });
-  //   if (isNewIndexTemplateNameOccupied) {
-  //     newIndexTemplateName += `-fixup-${new Date().toISOString()}`;
-  //   }
-  // }
-  if (indexTemplate) {
+  const newName = `${indexName}-fixup-${new Date().getTime()}`;
+
+  let sourceIndices = null;
+
+  const isDataStream = indexTemplate != null;
+
+  if (isDataStream) {
     const {
       index_templates: [{ index_template: existingIndexTemplate }],
     } = await client.asCurrentUser.indices.getIndexTemplate({
       name: indexTemplate,
     });
-    request = {
+
+    sourceIndices = existingIndexTemplate.index_patterns;
+    const request: IndicesPutIndexTemplateRequest = {
       ...(existingIndexTemplate ?? {}),
       template: {
-        mappings: { ...existingIndexTemplate.template?.mappings, ...newMappings },
+        mappings: getMappings(existingIndexTemplate.template?.mappings, newMappings),
         aliases: existingIndexTemplate.template?.aliases,
         settings: getIndexSettings(existingIndexTemplate.template?.settings),
       },
-      name: newIndexTemplateName,
-      index_patterns: newIndexTemplateName,
+      name: newName,
+      index_patterns: newName,
     };
+
+    await client.asCurrentUser.indices.putIndexTemplate(request);
+
+    await client.asCurrentUser.indices.createDataStream({
+      name: newName,
+    });
   } else {
     const { [indexName]: existingIndex } = await client.asCurrentUser.indices.get({
       index: indexName,
     });
-    request = {
-      name: newIndexTemplateName,
-      data_stream: {},
-      index_patterns: newIndexTemplateName,
-      template: {
-        aliases: existingIndex.aliases,
-        mappings: { ...existingIndex.mappings, ...newMappings },
-        settings: getIndexSettings(existingIndex.settings),
-      },
+    sourceIndices = indexName;
+    const request: IndicesCreateRequest = {
+      index: newName,
+      aliases: existingIndex.aliases,
+      mappings: getMappings(existingIndex.mappings, newMappings),
+      settings: getIndexSettings(existingIndex.settings),
     };
-  }
-  await client.asCurrentUser.indices.putIndexTemplate(request);
 
-  await client.asCurrentUser.indices.createDataStream({
-    name: newIndexTemplateName,
-  });
+    await client.asCurrentUser.indices.create(request);
+  }
 
   const { task: taskId } = await client.asCurrentUser.reindex({
     wait_for_completion: false,
     refresh: true,
-    source: { index: indexName },
+    source: { index: sourceIndices },
     conflicts: 'proceed',
-    dest: { index: newIndexTemplateName, op_type: 'create' },
+    dest: { index: newName, op_type: isDataStream ? 'create' : undefined },
   });
 
   if (taskId) {
     const taskIdResp = await client.asCurrentUser.tasks.get({ task_id: `${taskId}` });
 
     return {
-      taskId,
-      result: taskIdResp,
+      result: { taskId, taskResult: taskIdResp, targetIndex: newName },
     };
   } else {
     return null;

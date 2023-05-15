@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { EuiTableFieldDataColumnType, Search } from '@elastic/eui';
-import { EuiInMemoryTable, EuiTitle, EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import {
+  EuiButtonIcon,
+  EuiTableFieldDataColumnType,
+  Search,
+  EuiInMemoryTable,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
 import * as i18n from './translations';
 import type { EnrichedFieldMetadata, OnInValidValueUpdateCallback } from '../types';
+import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 
 const search: Search = {
   box: {
@@ -27,6 +34,10 @@ interface Props {
   ) => Array<EuiTableFieldDataColumnType<EnrichedFieldMetadata>>;
   title: string;
   onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
+  indexName: string;
+  indexTemplate?: string;
+  bulkFix?: (params: unknown) => void;
+  disableBulkFixButton?: boolean;
 }
 
 const CompareFieldsTableComponent: React.FC<Props> = ({
@@ -34,17 +45,48 @@ const CompareFieldsTableComponent: React.FC<Props> = ({
   getTableColumns,
   title,
   onInValidValueUpdateCallback,
+  bulkFix,
+  indexName,
+  indexTemplate,
+  disableBulkFixButton,
+  bulkFixResult,
 }) => {
   const columns = useMemo(
     () => getTableColumns(onInValidValueUpdateCallback),
     [getTableColumns, onInValidValueUpdateCallback]
   );
-
+  const { toasts } = useDataQualityContext();
+  const handleButtonFix = useCallback(async () => {
+    const expectedMappings = enrichedFieldMetadata.reduce<Record<string, string>>((acc, data) => {
+      if (data.indexFieldName && data.type) {
+        acc[data.indexFieldName] = data.type;
+      }
+      return acc;
+    }, {});
+    await bulkFix?.({ body: { indexName, indexTemplate, expectedMappings }, toasts });
+    onInValidValueUpdateCallback?.();
+  }, [
+    bulkFix,
+    enrichedFieldMetadata,
+    indexName,
+    indexTemplate,
+    onInValidValueUpdateCallback,
+    toasts,
+  ]);
   return (
     <>
       <EuiTitle size="xs">
         <span data-test-subj="title">{title}</span>
       </EuiTitle>
+      {bulkFix && (
+        <EuiButtonIcon
+          iconType="wrench"
+          onClick={handleButtonFix}
+          disabled={disableBulkFixButton}
+          aria-label={'Fix it'}
+        />
+      )}
+
       <EuiSpacer size="s" />
       <EuiInMemoryTable
         columns={columns}
@@ -57,7 +99,5 @@ const CompareFieldsTableComponent: React.FC<Props> = ({
     </>
   );
 };
-
-CompareFieldsTableComponent.displayName = 'CompareFieldsTableComponent';
 
 export const CompareFieldsTable = React.memo(CompareFieldsTableComponent);

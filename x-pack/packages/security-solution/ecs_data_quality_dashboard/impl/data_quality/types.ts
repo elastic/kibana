@@ -201,6 +201,7 @@ export interface IndexInfo {
 
 export interface DataStream {
   data_stream?: string;
+  index_template?: string;
 }
 
 export type IndicesStatsWithDataStream = Record<string, IndicesStatsIndicesStats & DataStream>;

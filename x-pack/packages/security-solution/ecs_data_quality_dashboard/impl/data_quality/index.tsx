@@ -59,6 +59,7 @@ interface Props {
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
   theme: Theme;
+  toasts: IToasts;
 }
 
 /** Renders the `Data Quality` dashboard content */
@@ -76,6 +77,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   patterns,
   setLastChecked,
   theme,
+  toasts,
 }) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
@@ -90,7 +92,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   );
 
   return (
-    <DataQualityProvider httpFetch={httpFetch} getAppUrl={getAppUrl}>
+    <DataQualityProvider httpFetch={httpFetch} getAppUrl={getAppUrl} toasts={toasts}>
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
