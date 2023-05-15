@@ -89,7 +89,7 @@ export class ReportingStore {
     const config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
-    this.indexInterval = config.get('queue', 'indexInterval');
+    this.indexInterval = config.queue.indexInterval;
     this.logger = logger.get('store');
   }
 
