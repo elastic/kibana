@@ -6,7 +6,6 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
 import {
   Filter,
   fromKueryExpression,
@@ -192,7 +191,10 @@ export function UnifiedSearchBar({
     clearCache();
     incrementTimeRangeId();
   };
-  const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
+  const handleSubmit = (
+    payload: { dateRange: TimeRange; query?: Query },
+    isUpdate?: boolean
+  ) => {
     if (dataView == null) {
       return;
     }
@@ -221,15 +223,13 @@ export function UnifiedSearchBar({
         kuery: query?.query,
       };
 
-      const isRefresh = isEqual(existingQueryParams, newSearchParams);
-
-      if (isRefresh) {
-        onRefresh();
-      } else {
+      if (isUpdate) {
         history.push({
           ...location,
           search: fromQuery(newSearchParams),
         });
+      } else {
+        onRefresh();
       }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
