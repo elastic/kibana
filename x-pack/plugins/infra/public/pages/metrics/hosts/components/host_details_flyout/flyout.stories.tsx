@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/telemetry/event_generating_elements_should_be_instrumented */
+
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react/types-6-0';
@@ -62,9 +64,7 @@ const Template: Story<FlyoutProps> = (args) => {
   const closeFlyout = () => setIsOpen(false);
   return (
     <div>
-      <EuiButton data-test-subj="infraTemplateOpenFlyoutButton" onClick={() => setIsOpen(true)}>
-        Open flyout
-      </EuiButton>
+      <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>
       {isOpen && <Flyout {...args} closeFlyout={closeFlyout} />}
     </div>
   );
