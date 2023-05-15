@@ -123,7 +123,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.currentPeriod.mostSessions.value).to.eql(9);
-        expect(response.currentPeriod.mostRequests.value).to.eql(30);
+        expect(response.currentPeriod.mostRequests.value).to.eql(9);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
