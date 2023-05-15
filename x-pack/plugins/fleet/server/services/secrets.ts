@@ -134,11 +134,14 @@ export async function deleteSecretsIfNotReferenced(opts: {
   if (!secretsToDelete.length) {
     return;
   }
-
-  await _deleteSecrets({
-    esClient,
-    ids: secretsToDelete,
-  });
+  try {
+    await _deleteSecrets({
+      esClient,
+      ids: secretsToDelete,
+    });
+  } catch (e) {
+    logger.warn(`Error cleaning up secrets ${ids.join(', ')}: ${e}`);
+  }
 }
 
 export async function findPackagePoliciesUsingSecrets(opts: {
