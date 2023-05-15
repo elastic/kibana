@@ -8,12 +8,13 @@
 import { isPathValid } from './is_path_valid';
 
 describe('isPathValid as array', () => {
-  test('not valid when empty array and empty object', () => {
+  test('not valid when empty array is key', () => {
     expect(isPathValid([], {})).toEqual(false);
   });
 
-  test('not valid when empty string and empty object', () => {
-    expect(isPathValid('', {})).toEqual(false);
+  test('valid when empty string is key', () => {
+    expect(isPathValid('', {})).toEqual(true);
+    expect(isPathValid([''], {})).toEqual(true);
   });
 
   test('valid when a path and empty object', () => {
