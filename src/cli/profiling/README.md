@@ -96,6 +96,10 @@ two second wait for migration before `start()`, so in the end,
 background tasks still end up finishing `start()` after a normal
 Kibana start.  More work required ...
 
+I copied two CPU profiles up to a team drive; contact me for more
+details; one is for loading all plugins, the other just for the
+background plugins.
+
 I generated some graphs of the 
 [dependencies of all plugins together](./plugin-deps-graphviz.md)
 and
@@ -186,6 +190,3 @@ functions in terms of poor performance:
 It's not clear to me how much savings we really get here, or at least how
 to measure it.  If you look at the profiling data, it's basically time
 readings, but since async calls "overlap"
-
-## green field
-

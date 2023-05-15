@@ -335,7 +335,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
     if (isBackgroundTaskOnly) {
       const backgroundPlugins = getBackgroundPlugins(plugins);
-      this.log.info(`starting ${backgroundPlugins.size} background plugin out of ${plugins.length}`);
+      this.log.info(
+        `starting ${backgroundPlugins.size} background plugin out of ${plugins.length}`
+      );
       for (const plugin of plugins) {
         if (backgroundPlugins.has(plugin.name)) continue;
         pluginEnableStatuses.set(plugin.name, { plugin, isEnabled: false });
