@@ -136,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
         resPackage.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         test_logs2: {
