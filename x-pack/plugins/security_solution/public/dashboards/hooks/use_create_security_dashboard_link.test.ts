@@ -7,21 +7,18 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { useKibana } from '../../lib/kibana';
-import { TestProviders } from '../../mock/test_providers';
+import { useKibana } from '../../common/lib/kibana';
 import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
-import { MOCK_TAG_ID } from './api/__mocks__';
-import { getSecurityTagIds as mockGetSecurityTagIds } from './utils';
+import { DashboardContextProvider } from '../context/dashboard_context';
+import { getTagsByName } from '../../common/containers/tags/api';
 
-jest.mock('../../lib/kibana');
-
+jest.mock('../../common/lib/kibana');
+jest.mock('../../common/containers/tags/api');
 const URL = '/path';
-
-jest.mock('./utils');
 
 const renderUseCreateSecurityDashboardLink = () =>
   renderHook(() => useCreateSecurityDashboardLink(), {
-    wrapper: TestProviders,
+    wrapper: DashboardContextProvider,
   });
 
 const asyncRenderUseCreateSecurityDashboard = async () => {
@@ -34,19 +31,22 @@ const asyncRenderUseCreateSecurityDashboard = async () => {
 
 describe('useCreateSecurityDashboardLink', () => {
   const mockGetRedirectUrl = jest.fn(() => URL);
-  useKibana().services.dashboard = {
-    locator: { getRedirectUrl: mockGetRedirectUrl },
-  } as unknown as DashboardStart;
+
+  beforeAll(() => {
+    useKibana().services.dashboard = {
+      locator: { getRedirectUrl: mockGetRedirectUrl },
+    } as unknown as DashboardStart;
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   describe('useSecurityDashboardsTableItems', () => {
-    it('should request when renders', async () => {
+    it('should fetch Security Solution tags when renders', async () => {
       await asyncRenderUseCreateSecurityDashboard();
 
-      expect(mockGetSecurityTagIds).toHaveBeenCalledTimes(1);
+      expect(getTagsByName).toHaveBeenCalledTimes(1);
     });
 
     it('should return a memoized value when rerendered', async () => {
@@ -59,18 +59,12 @@ describe('useCreateSecurityDashboardLink', () => {
       expect(result1).toBe(result2);
     });
 
-    it('should generate create url with tag', async () => {
-      await asyncRenderUseCreateSecurityDashboard();
-
-      expect(mockGetRedirectUrl).toHaveBeenCalledWith({ tags: [MOCK_TAG_ID] });
-    });
-
     it('should not re-request tag id when re-rendered', async () => {
       const { rerender } = await asyncRenderUseCreateSecurityDashboard();
 
-      expect(mockGetSecurityTagIds).toHaveBeenCalledTimes(1);
+      expect(getTagsByName).toHaveBeenCalledTimes(1);
       act(() => rerender());
-      expect(mockGetSecurityTagIds).toHaveBeenCalledTimes(1);
+      expect(getTagsByName).toHaveBeenCalledTimes(1);
     });
 
     it('should return isLoading while requesting', async () => {

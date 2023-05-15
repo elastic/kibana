@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import {
   useSecurityDashboardsTableItems,
   useSecurityDashboardsTableColumns,
-} from '../../containers/dashboards/use_security_dashboards_table';
-import { useAppToasts } from '../../hooks/use_app_toasts';
+} from '../hooks/use_security_dashboards_table';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
 export const DASHBOARDS_QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.dashboards.queryError',
