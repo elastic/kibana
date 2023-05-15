@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: any) {
   const log = getService('log');
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
-  describe('Ingest Pipelines Accessibility', async () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/157512
+  describe.skip('Ingest Pipelines Accessibility', async () => {
     before(async () => {
       await putSamplePipeline(esClient);
       await common.navigateToApp('ingestPipelines');

@@ -76,8 +76,14 @@ const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   showInvestigationTimeEnrichments: boolean;
   loading: boolean;
+  /**
+   * Slot to render something before the beforeHeader.
+   * NOTE: this was introduced to avoid alterting existing flyout and will be removed after
+   * new flyout implementation is ready (Expandable Flyout owned by the Investigations Team)
+   */
+  before?: React.ReactNode;
   children?: React.ReactNode;
-}> = ({ enrichments, showInvestigationTimeEnrichments, loading, children }) => {
+}> = ({ enrichments, before = null, showInvestigationTimeEnrichments, loading, children }) => {
   const {
     [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
     [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
@@ -86,7 +92,7 @@ const ThreatDetailsViewComponent: React.FC<{
 
   return (
     <>
-      <EuiSpacer size="m" />
+      {before}
       <EnrichmentSection
         dataTestSubj="threat-match-detected"
         enrichments={indicatorMatches}

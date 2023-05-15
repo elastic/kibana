@@ -75,12 +75,10 @@ export const getActionFileUploadHandler = (
     const { file: _, parameters: userParams, ...actionPayload } = req.body;
     const uploadParameters: ResponseActionUploadParameters = {
       ...userParams,
-      file: {
-        file_id: '',
-        file_name: '',
-        sha256: '',
-        size: 0,
-      },
+      file_id: '',
+      file_name: '',
+      file_sha256: '',
+      file_size: 0,
     };
 
     try {
@@ -92,10 +90,10 @@ export const getActionFileUploadHandler = (
         maxFileBytes,
       });
 
-      uploadParameters.file.file_id = createdFile.file.id;
-      uploadParameters.file.file_name = createdFile.file.name;
-      uploadParameters.file.sha256 = createdFile.file.hash?.sha256;
-      uploadParameters.file.size = createdFile.file.size;
+      uploadParameters.file_id = createdFile.file.id;
+      uploadParameters.file_name = createdFile.file.name;
+      uploadParameters.file_sha256 = createdFile.file.hash?.sha256;
+      uploadParameters.file_size = createdFile.file.size;
     } catch (err) {
       return errorHandler(logger, res, err);
     }
@@ -131,10 +129,10 @@ export const getActionFileUploadHandler = (
         },
       });
     } catch (err) {
-      if (uploadParameters.file.file_id) {
+      if (uploadParameters.file_id) {
         // Try to delete the created file since creating the action threw an error
         try {
-          await deleteFile(esClient, logger, uploadParameters.file.file_id);
+          await deleteFile(esClient, logger, uploadParameters.file_id);
         } catch (e) {
           logger.error(
             `Attempt to clean up file (after action creation was unsuccessful) failed; ${e.message}`,
