@@ -22,7 +22,7 @@ import {
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ServicesContextProvider } from '../../../services_provider';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -129,13 +129,13 @@ const mountComponent = async ({
   const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
 
   const component = mountWithIntl(
-    <ServicesContextProvider services={services}>
+    <KibanaContextProvider services={services}>
       <KibanaThemeProvider theme$={coreTheme$}>
         <DiscoverMainProvider value={stateContainer}>
           <DiscoverHistogramLayout {...props} />
         </DiscoverMainProvider>
       </KibanaThemeProvider>
-    </ServicesContextProvider>
+    </KibanaContextProvider>
   );
 
   // wait for lazy modules

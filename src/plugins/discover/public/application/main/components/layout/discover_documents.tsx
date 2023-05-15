@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -85,7 +86,7 @@ function DiscoverDocumentsComponent({
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings } = services;
+  const { dataViews, capabilities, uiSettings, uiActions } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
     (state) => {
       return [
@@ -227,38 +228,42 @@ function DiscoverDocumentsComponent({
             </DiscoverTourProvider>
           )}
           <div className="dscDiscoverGrid">
-            <DataGridMemoized
-              ariaLabelledBy="documentsAriaLabel"
-              columns={currentColumns}
-              expandedDoc={expandedDoc}
-              dataView={dataView}
-              isLoading={isDataLoading}
-              rows={rows}
-              sort={(sort as SortOrder[]) || []}
-              sampleSize={sampleSize}
-              searchDescription={savedSearch.description}
-              searchTitle={savedSearch.title}
-              setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
-              showTimeCol={showTimeCol}
-              settings={grid}
-              onAddColumn={onAddColumn}
-              onFilter={onAddFilter as DocViewFilterFn}
-              onRemoveColumn={onRemoveColumn}
-              onSetColumns={onSetColumns}
-              onSort={!isPlainRecord ? onSort : undefined}
-              onResize={onResizeDataGrid}
-              useNewFieldsApi={useNewFieldsApi}
-              rowHeightState={rowHeight}
-              onUpdateRowHeight={onUpdateRowHeight}
-              isSortEnabled={!isPlainRecord}
-              isPlainRecord={isPlainRecord}
-              rowsPerPageState={rowsPerPage}
-              onUpdateRowsPerPage={onUpdateRowsPerPage}
-              onFieldEdited={onFieldEdited}
-              savedSearchId={savedSearch.id}
-              DocumentView={DiscoverGridFlyout}
-              services={services}
-            />
+            <CellActionsProvider
+              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+            >
+              <DataGridMemoized
+                ariaLabelledBy="documentsAriaLabel"
+                columns={currentColumns}
+                expandedDoc={expandedDoc}
+                dataView={dataView}
+                isLoading={isDataLoading}
+                rows={rows}
+                sort={(sort as SortOrder[]) || []}
+                sampleSize={sampleSize}
+                searchDescription={savedSearch.description}
+                searchTitle={savedSearch.title}
+                setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
+                showTimeCol={showTimeCol}
+                settings={grid}
+                onAddColumn={onAddColumn}
+                onFilter={onAddFilter as DocViewFilterFn}
+                onRemoveColumn={onRemoveColumn}
+                onSetColumns={onSetColumns}
+                onSort={!isPlainRecord ? onSort : undefined}
+                onResize={onResizeDataGrid}
+                useNewFieldsApi={useNewFieldsApi}
+                rowHeightState={rowHeight}
+                onUpdateRowHeight={onUpdateRowHeight}
+                isSortEnabled={!isPlainRecord}
+                isPlainRecord={isPlainRecord}
+                rowsPerPageState={rowsPerPage}
+                onUpdateRowsPerPage={onUpdateRowsPerPage}
+                onFieldEdited={onFieldEdited}
+                savedSearchId={savedSearch.id}
+                DocumentView={DiscoverGridFlyout}
+                services={services}
+              />
+            </CellActionsProvider>
           </div>
         </>
       )}

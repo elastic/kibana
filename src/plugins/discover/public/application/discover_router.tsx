@@ -11,16 +11,16 @@ import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import { ServicesContextProvider } from './services_provider';
 
 export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (
-  <ServicesContextProvider services={services}>
+  <KibanaContextProvider services={services}>
     <EuiErrorBoundary>
       <Router history={history} data-test-subj="discover-react-router">
         <Switch>
@@ -49,5 +49,5 @@ export const discoverRouter = (services: DiscoverServices, history: History, isD
         </Switch>
       </Router>
     </EuiErrorBoundary>
-  </ServicesContextProvider>
+  </KibanaContextProvider>
 );
