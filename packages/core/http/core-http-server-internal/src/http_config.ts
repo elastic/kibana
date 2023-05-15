@@ -143,9 +143,9 @@ const configSchema = schema.object(
       logging: schema.object({
         enabled: schema.conditional(
           schema.contextRef('dist'),
-          schema.literal(false),
-          schema.boolean({ defaultValue: true }),
-          schema.boolean({ defaultValue: false })
+          true,
+          schema.boolean({ defaultValue: false }),
+          schema.boolean({ defaultValue: true })
         ),
         threshold: schema.object({
           elu: schema.number({ defaultValue: 0.15, min: 0, max: 1 }),
