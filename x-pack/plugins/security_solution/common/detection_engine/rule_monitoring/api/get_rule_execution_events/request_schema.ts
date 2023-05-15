@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
+import { DefaultPage, DefaultPerPage } from '@kbn/securitysolution-io-ts-alerting-types';
 import { defaultCsvArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
-
-import { DefaultSortOrderDesc } from '../../../schemas/common';
+import type { Either } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
+import { capitalize } from 'lodash';
 import { TRuleExecutionEventType } from '../../model/execution_event';
 import { TLogLevel } from '../../model/log_level';
+
+
 
 /**
  * URL path parameters of the API route.
@@ -41,3 +42,30 @@ export const GetRuleExecutionEventsRequestQuery = t.exact(
     per_page: DefaultPerPage, // defaults to 20
   })
 );
+
+type SortOrder = t.TypeOf<typeof SortOrder>;
+const SortOrder = t.keyof({ asc: null, desc: null });
+
+const defaultSortOrder = (order: SortOrder): t.Type<SortOrder, SortOrder, unknown> => {
+  return new t.Type<SortOrder, SortOrder, unknown>(
+    `DefaultSortOrder${capitalize(order)}`,
+    SortOrder.is,
+    (input, context): Either<t.Errors, SortOrder> =>
+      input == null ? t.success(order) : SortOrder.validate(input, context),
+    t.identity
+  );
+};
+
+/**
+ * Types the DefaultSortOrderAsc as:
+ *   - If undefined, then a default sort order of 'asc' will be set
+ *   - If a string is sent in, then the string will be validated to ensure it's a valid SortOrder
+ */
+export const DefaultSortOrderAsc = defaultSortOrder('asc');
+
+/**
+ * Types the DefaultSortOrderDesc as:
+ *   - If undefined, then a default sort order of 'desc' will be set
+ *   - If a string is sent in, then the string will be validated to ensure it's a valid SortOrder
+ */
+export const DefaultSortOrderDesc = defaultSortOrder('desc');
