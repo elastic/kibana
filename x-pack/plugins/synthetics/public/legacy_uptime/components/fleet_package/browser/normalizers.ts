@@ -77,7 +77,6 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: getBrowserNormalizer(ConfigKey.SOURCE_PROJECT_CONTENT),
   [ConfigKey.SOURCE_INLINE]: getBrowserJsonToJavascriptNormalizer(ConfigKey.SOURCE_INLINE),
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_PROXY_URL),
-  [ConfigKey.PARAMS]: getBrowserNormalizer(ConfigKey.PARAMS),
   [ConfigKey.SCREENSHOTS]: getBrowserNormalizer(ConfigKey.SCREENSHOTS),
   [ConfigKey.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKey.SYNTHETICS_ARGS),
   [ConfigKey.IS_THROTTLING_ENABLED]: isThrottlingEnabledNormalizer,

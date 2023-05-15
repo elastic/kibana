@@ -12,7 +12,7 @@ import {
   ConfigKey,
   LegacyProjectMonitorsRequest,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.11.5')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -91,6 +91,16 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'testGlobalParam', value: 'testGlobalParamValue' })
+        .expect(200);
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'testGlobalParam2', value: 'testGlobalParamValue2' })
+        .expect(200);
     });
 
     beforeEach(() => {
@@ -261,7 +271,9 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.response.body.negative': [],
-            'check.response.body.positive': ['Saved', 'saved'],
+            'check.response.body.positive': ['${testLocal1}', 'saved'],
+            params:
+              '{"testLocal1":"testLocalParamsValue","testGlobalParam2":"testGlobalParamOverwrite"}',
             'check.response.headers': {},
             'check.request.body': {
               type: 'text',
@@ -297,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
             project_id: 'test-suite',
             username: '',
             password: '',
-            proxy_url: '',
+            proxy_url: '${testGlobalParam2}',
             'response.include_body': 'always',
             'response.include_headers': false,
             revision: 1,
@@ -397,6 +409,7 @@ export default function ({ getService }: FtrProviderContext) {
                 label: 'Local Synthetics Service',
               },
             ],
+            params: '',
             name: monitor.name,
             namespace: 'default',
             origin: 'project',
@@ -505,6 +518,7 @@ export default function ({ getService }: FtrProviderContext) {
                 label: 'Test private location 0',
               },
             ],
+            params: '',
             name: monitor.name,
             namespace: 'default',
             origin: 'project',
@@ -1807,7 +1821,7 @@ export default function ({ getService }: FtrProviderContext) {
                 'service.name': { value: '', type: 'text' },
                 timeout: { value: '80s', type: 'text' },
                 max_redirects: { value: '0', type: 'integer' },
-                proxy_url: { value: '', type: 'text' },
+                proxy_url: { value: '${testGlobalParam2}', type: 'text' },
                 tags: { value: '["tag2","tag2"]', type: 'yaml' },
                 username: { value: '', type: 'text' },
                 password: { value: '', type: 'password' },
@@ -1821,7 +1835,10 @@ export default function ({ getService }: FtrProviderContext) {
                 'check.request.body': { value: null, type: 'yaml' },
                 'check.response.status': { value: '["200"]', type: 'yaml' },
                 'check.response.headers': { value: null, type: 'yaml' },
-                'check.response.body.positive': { value: '["Saved","saved"]', type: 'yaml' },
+                'check.response.body.positive': {
+                  value: '["${testLocal1}","saved"]',
+                  type: 'yaml',
+                },
                 'check.response.body.negative': { value: null, type: 'yaml' },
                 'ssl.certificate_authorities': { value: null, type: 'yaml' },
                 'ssl.certificate': { value: null, type: 'yaml' },
@@ -1867,7 +1884,8 @@ export default function ({ getService }: FtrProviderContext) {
                 'check.request.method': 'POST',
                 'check.request.headers': { 'Content-Type': 'application/x-www-form-urlencoded' },
                 'check.response.status': ['200'],
-                'check.response.body.positive': ['Saved', 'saved'],
+                'check.response.body.positive': ['${testLocal1}', 'saved'],
+                proxy_url: '${testGlobalParam2}',
                 'ssl.verification_mode': 'strict',
                 'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
                 'run_from.geo.name': 'Test private location 0',
