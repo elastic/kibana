@@ -160,6 +160,7 @@ export function UXAppRoot({
             value={{
               appMountParameters,
               exploratoryView,
+              observabilityShared,
             }}
           >
             <i18nCore.Context>
