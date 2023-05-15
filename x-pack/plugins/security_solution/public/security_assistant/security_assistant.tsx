@@ -115,6 +115,34 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
       const [suggestedUserPrompt, setSuggestedUserPrompt] = useState<string | null>(null);
 
+      // Drill in `Add To Timeline` action
+      // First let's find
+      const [messageCodeBlocks, setMessageCodeBlocks] = useState(
+        augmentMessageCodeBlocks(currentConversation)
+      );
+      const [codeBlockControlsVisible, setCodeBlockControlsVisible] = useState(false);
+      useLayoutEffect(() => {
+        setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
+      }, [currentConversation, currentConversation.messages, codeBlockControlsVisible]);
+
+      // Fixes initial render not showing buttons as code block controls are added to the DOM really late
+      useEffect(() => {
+        const updateElements = () => {
+          const elements = document.querySelectorAll('.euiCodeBlock__controls');
+          setCodeBlockControlsVisible(elements.length > 0);
+        };
+
+        updateElements(); // Initial update
+
+        const observer = new MutationObserver(updateElements);
+        observer.observe(document.body, { subtree: true, childList: true });
+
+        return () => {
+          observer.disconnect(); // Clean up the observer if component unmounts
+        };
+      }, []);
+      // End drill in `Add To Timeline` action
+
       // For auto-focusing prompt within timeline
       const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
       useEffect(() => {
@@ -264,16 +292,6 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
         const promptTextAreaHasFocus = document.activeElement === promptTextAreaRef.current;
         return promptTextAreaHasFocus;
       }, [promptTextAreaRef]);
-
-      // Drill in `Add To Timeline` action
-      // First let's find
-      const [messageCodeBlocks, setMessageCodeBlocks] = useState(
-        augmentMessageCodeBlocks(currentConversation)
-      );
-      useLayoutEffect(() => {
-        setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
-      }, [currentConversation, lastCommentRef.current]);
-      //
 
       // Add min-height to all codeblocks so timeline icon doesn't overflow
       const codeBlockContainers = [...document.getElementsByClassName('euiCodeBlock')];

@@ -69,9 +69,6 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
     return null;
   }
 
-  console.log('accordianContent[id]', accordianContent);
-  console.log('selectedPromptContexts', selectedPromptContexts);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       {selectedPromptContexts.map(({ description, id }) => (
