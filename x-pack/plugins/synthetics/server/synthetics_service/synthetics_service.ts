@@ -159,6 +159,7 @@ export class SyntheticsService {
 
   public registerSyncTask(taskManager: TaskManagerSetupContract) {
     const service = this;
+    const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     taskManager.registerTaskDefinitions({
       [SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE]: {
@@ -195,7 +196,7 @@ export class SyntheticsService {
                 service.logger.error(e);
               }
 
-              return { state };
+              return { state, schedule: { interval } };
             },
             async cancel() {
               service.logger?.warn(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} timed out`);
@@ -212,7 +213,6 @@ export class SyntheticsService {
     const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     try {
-      await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
       const taskInstance = await taskManager.ensureScheduled({
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
