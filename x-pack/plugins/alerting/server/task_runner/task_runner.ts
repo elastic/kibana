@@ -71,7 +71,7 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
+import { LegacyAlertsClient } from '../alerts_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';

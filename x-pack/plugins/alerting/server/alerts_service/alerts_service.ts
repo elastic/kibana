@@ -35,8 +35,7 @@ import {
   createConcreteWriteIndex,
   installWithTimeout,
 } from './lib';
-import { LegacyAlertsClientParams } from '../alerts_client/legacy_alerts_client';
-import { AADRuleData, AlertsClient } from '../alerts_client/alerts_client';
+import { type LegacyAlertsClientParams, type AADRuleData, AlertsClient } from '../alerts_client';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -157,6 +156,9 @@ export class AlertsService implements IAlertsService {
     }
 
     if (!opts.ruleType.alerts.shouldWrite) {
+      this.options.logger.debug(
+        `Resources registered and installed for ${opts.ruleType.alerts.context} context but "shouldWrite" is set to false.`
+      );
       return null;
     }
 
