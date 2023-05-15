@@ -33,7 +33,7 @@ function removeEmpty(apmIndices: Partial<ApmIndicesConfig>) {
     .map(([key, value]) => [key, value?.trim()])
     .filter(([_, value]) => !!value)
     .reduce((obj, [key, value]) => {
-      obj[key as string] = value;
+      obj[key] = value;
       return obj;
-    }, {});
+    }, {} as Record<string, unknown>);
 }
