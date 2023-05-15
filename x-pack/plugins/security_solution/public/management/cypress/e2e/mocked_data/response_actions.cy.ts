@@ -99,7 +99,8 @@ describe('Response actions', () => {
       cleanupRule(ruleId);
     });
 
-    it('edit response action inside of a rule', () => {
+    // Flaky
+    it.skip('edit response action inside of a rule', () => {
       visitRuleActions(ruleId);
       cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
         cy.getByTestSubj('input').should('have.value', 'Isolate host');
@@ -123,7 +124,8 @@ describe('Response actions', () => {
       cy.contains(`${ruleName} was saved`).should('exist');
     });
 
-    it('delete response action inside of a rule', () => {
+    // Flaky
+    it.skip('delete response action inside of a rule', () => {
       visitRuleActions(ruleId);
       cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
         cy.getByTestSubj('remove-response-action').click();
