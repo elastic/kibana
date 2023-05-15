@@ -47,9 +47,12 @@ export const comparisonOperators = {
   ),
   items: [
     {
-      label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.documentation.equality', {
-        defaultMessage: 'Equality',
-      }),
+      label: i18n.translate(
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.equality',
+        {
+          defaultMessage: 'Equality',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -154,9 +157,12 @@ WHERE emp_no < 10003 ORDER BY emp_no LIMIT 5
       ),
     },
     {
-      label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.documentation.between', {
-        defaultMessage: 'Between',
-      }),
+      label: i18n.translate(
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.between',
+        {
+          defaultMessage: 'Between',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(

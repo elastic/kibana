@@ -489,10 +489,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         css={styles.linesBadge}
                         data-test-subj="unifiedTextLangEditor-inline-lines-badge"
                       >
-                        {i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.lineCount', {
-                          defaultMessage: '{count} {count, plural, one {line} other {lines}}',
-                          values: { count: lines },
-                        })}
+                        {i18n.translate(
+                          'textBasedLanguages.query.textBasedLanguagesEditor.lineCount',
+                          {
+                            defaultMessage: '{count} {count, plural, one {line} other {lines}}',
+                            values: { count: lines },
+                          }
+                        )}
                       </EuiBadge>
                     )}
                     {!isCompactFocused && errors && errors.length > 0 && (
