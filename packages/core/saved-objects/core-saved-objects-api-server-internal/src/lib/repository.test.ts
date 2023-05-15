@@ -3792,7 +3792,6 @@ describe('SavedObjectsRepository', () => {
                 'updated_at',
                 'created_at',
                 'originId',
-                'title',
               ],
             }),
           }),

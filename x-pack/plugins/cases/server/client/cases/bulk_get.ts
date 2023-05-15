@@ -14,36 +14,32 @@ import { pick, partition } from 'lodash';
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
 import type {
   CasesBulkGetResponse,
-  CasesBulkGetResponseCertainFields,
-  CasesBulkGetRequestCertainFields,
-  Case,
+  CasesBulkGetRequest,
   CaseAttributes,
 } from '../../../common/api';
 import {
   CasesBulkGetRequestRt,
-  CasesRt,
+  CasesBulkGetResponseFieldsRt,
   excess,
   throwErrors,
-  getTypeForCertainFieldsFromArray,
-  CaseRt,
+  CasesBulkGetResponseRt,
 } from '../../../common/api';
-import { getTypeProps } from '../../../common/api/runtime_types';
 import { createCaseError } from '../../common/error';
-import { asArray, flattenCaseSavedObject } from '../../common/utils';
+import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs, SOWithErrors } from '../types';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
+type BulkGetCase = CasesBulkGetResponse['cases'][number];
 
 /**
  * Retrieves multiple cases by ids.
  */
-export const bulkGet = async <Field extends keyof Case = keyof Case>(
-  params: CasesBulkGetRequestCertainFields<Field>,
+export const bulkGet = async (
+  params: CasesBulkGetRequest,
   clientArgs: CasesClientArgs
-): Promise<CasesBulkGetResponseCertainFields<Field>> => {
+): Promise<CasesBulkGetResponse> => {
   const {
     services: { caseService, attachmentService },
     logger,
@@ -51,15 +47,16 @@ export const bulkGet = async <Field extends keyof Case = keyof Case>(
   } = clientArgs;
 
   try {
-    const fields = includeFieldsRequiredForAuthentication(asArray(params.fields));
+    const fields = Object.keys(CasesBulkGetResponseFieldsRt.props).filter(
+      (field) => !['totalComments', 'id', 'version'].includes(field)
+    );
 
     const request = pipe(
-      excess(CasesBulkGetRequestRt).decode({ ...params, fields }),
+      excess(CasesBulkGetRequestRt).decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
     throwErrorIfCaseIdsReachTheLimit(request.ids);
-    throwErrorIfFieldsAreInvalid(fields);
 
     const cases = await caseService.getCases({ caseIds: request.ids, fields });
 
@@ -74,18 +71,12 @@ export const bulkGet = async <Field extends keyof Case = keyof Case>(
         operation: Operations.bulkGetCases,
       });
 
-    const requestForTotals = ['totalComment', 'totalAlerts'].some(
-      (totalKey) => !fields || fields.includes(totalKey)
-    );
-
-    const commentTotals = requestForTotals
-      ? await attachmentService.getter.getCaseCommentStats({
-          caseIds: authorizedCases.map((theCase) => theCase.id),
-        })
-      : new Map();
+    const commentTotals = await attachmentService.getter.getCaseCommentStats({
+      caseIds: authorizedCases.map((theCase) => theCase.id),
+    });
 
     const flattenedCases = authorizedCases.map((theCase) => {
-      const { alerts, userComments } = commentTotals.get(theCase.id) ?? {
+      const { userComments } = commentTotals.get(theCase.id) ?? {
         alerts: 0,
         userComments: 0,
       };
@@ -93,22 +84,17 @@ export const bulkGet = async <Field extends keyof Case = keyof Case>(
       const flattenedCase = flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
-        totalAlerts: alerts,
       });
 
-      if (!fields?.length) {
-        return flattenedCase;
-      }
-
-      return pick(flattenedCase, [...fields, 'id', 'version']);
+      return {
+        ...(pick(flattenedCase, [...fields, 'id', 'version']) as BulkGetCase),
+        totalComments: flattenedCase.totalComment,
+      };
     });
-
-    const typeToEncode = getTypeForCertainFieldsFromArray(CasesRt, fields);
-    const casesToReturn = typeToEncode.encode(flattenedCases);
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
 
-    return { cases: casesToReturn, errors };
+    return CasesBulkGetResponseRt.encode({ cases: flattenedCases, errors });
   } catch (error) {
     const ids = params.ids ?? [];
     throw createCaseError({
@@ -116,21 +102,6 @@ export const bulkGet = async <Field extends keyof Case = keyof Case>(
       error,
       logger,
     });
-  }
-};
-
-const throwErrorIfFieldsAreInvalid = (fields?: string[]) => {
-  if (!fields || fields.length === 0) {
-    return;
-  }
-
-  const typeProps = getTypeProps(CaseRt) ?? {};
-  const validFields = Object.keys(typeProps);
-
-  for (const field of fields) {
-    if (!validFields.includes(field)) {
-      throw Boom.badRequest(`Field: ${field} is not supported`);
-    }
   }
 };
 
