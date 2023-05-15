@@ -75,3 +75,7 @@ export const SYSTEM_PROMPT_CONTEXT = (context: string) =>
       defaultMessage: `CONTEXT:\n"""\n${context}\n"""`,
     }
   );
+
+export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
+  return `CONTEXT:\n"""\n${context}\n"""`;
+};

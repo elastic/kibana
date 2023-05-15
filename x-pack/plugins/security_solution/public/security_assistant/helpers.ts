@@ -9,7 +9,7 @@
 import crypto from 'crypto';
 
 import { fetchOpenAlerts, fetchVirusTotalAnalysis, sendFileToVirusTotal } from './api';
-import { SYSTEM_PROMPT_CONTEXT } from './content/prompts/system/translations';
+import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from './content/prompts/system/translations';
 import type { PromptContext } from './prompt_context/types';
 import type { Message } from './security_assistant_context/types';
 import type { Prompt } from './types';
@@ -372,7 +372,7 @@ export async function getCombinedMessage({
     selectedPromptContexts.map(async ({ getPromptContext, id }) => {
       const promptContext = await getPromptContext();
 
-      return `\n\n${SYSTEM_PROMPT_CONTEXT(promptContext)}\n\n`;
+      return `\n\n${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}\n\n`;
     })
   );
 

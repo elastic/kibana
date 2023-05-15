@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { SYSTEM_PROMPT_CONTEXT } from '../../content/prompts/system/translations';
+import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
 import type { PromptContext } from '../../prompt_context/types';
 
 const PromptContextText = styled(EuiText)`
@@ -69,6 +69,9 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
     return null;
   }
 
+  console.log('accordianContent[id]', accordianContent);
+  console.log('selectedPromptContexts', selectedPromptContexts);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       {selectedPromptContexts.map(({ description, id }) => (
@@ -83,7 +86,9 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
             paddingSize="s"
           >
             <PromptContextText color="subdued">
-              {SYSTEM_PROMPT_CONTEXT(accordianContent[id])}
+              {id != null && accordianContent[id] != null
+                ? SYSTEM_PROMPT_CONTEXT_NON_I18N(accordianContent[id])
+                : ''}
             </PromptContextText>
           </EuiAccordion>
         </EuiFlexItem>
