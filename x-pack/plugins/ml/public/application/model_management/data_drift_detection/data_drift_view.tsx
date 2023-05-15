@@ -17,6 +17,9 @@ import {
 } from '@elastic/charts';
 import {
   Comparators,
+  EuiSuperDatePicker,
+  EuiCallOut,
+  OnTimeChangeProps,
   EuiTableSortingType,
   Criteria,
   EuiButtonIcon,
@@ -36,7 +39,14 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 import { getDataDriftType, useFetchDataDriftResult } from './use_data_drift_result';
 import { NUMERIC_TYPE_LABEL } from './constants';
-import { Histogram, ComparisionHistogram, Feature, FETCH_STATUS, DataDriftField } from './types';
+import {
+  Histogram,
+  ComparisionHistogram,
+  Feature,
+  FETCH_STATUS,
+  DataDriftField,
+  TimeRange,
+} from './types';
 
 const formatSignificanceLevel = (significanceLevel: number) => {
   if (significanceLevel < 1e-6) {
@@ -146,10 +156,20 @@ export const DataDriftView = () => {
     },
   } = useMlKibana();
 
+  const [tempTimeRanges, setTempTimeRanges] = useState({
+    reference: { start: 'now-30m', end: 'now' },
+    production: { start: 'now-30m', end: 'now' },
+  });
+
   const [referenceDataView, setReferenceDataView] = useState<DataView | undefined>();
   const [productionDataView, setProductionDataView] = useState<DataView | undefined>();
-  const [fetchInfo, setFields] = useState<
-    | { fields: DataDriftField[]; referenceDataView: DataView; productionDataView: DataView }
+  const [fetchInfo, setFetchIno] = useState<
+    | {
+        fields: DataDriftField[];
+        referenceDataView: DataView;
+        productionDataView: DataView;
+        timeRanges: { reference: TimeRange; production: TimeRange };
+      }
     | undefined
   >();
 
@@ -160,7 +180,7 @@ export const DataDriftView = () => {
     if (type === 'production') setProductionDataView(dataView);
   };
 
-  const updateFields = () => {
+  const updateFieldsAndTime = () => {
     const mergedFields: DataDriftField[] = [];
 
     [referenceDataView, productionDataView].forEach((dv) => {
@@ -184,10 +204,23 @@ export const DataDriftView = () => {
       }
     });
     if (referenceDataView && productionDataView) {
-      setFields({ fields: mergedFields, productionDataView, referenceDataView });
+      setFetchIno({
+        fields: mergedFields,
+        productionDataView,
+        referenceDataView,
+        timeRanges: tempTimeRanges,
+      });
     }
   };
 
+  const onTimeChange = (type: 'reference' | 'production', e: OnTimeChangeProps) => {
+    const { start, end } = e;
+    if (type === 'reference') {
+      setTempTimeRanges({ ...tempTimeRanges, reference: { start, end } });
+    } else {
+      setTempTimeRanges({ ...tempTimeRanges, production: { start, end } });
+    }
+  };
   const result = useFetchDataDriftResult(fetchInfo);
   const dataFromResult = result.data;
 
@@ -200,6 +233,15 @@ export const DataDriftView = () => {
             onChangeDataView={(newDataViewId) => updateDataView('reference', newDataViewId)}
             dataView={referenceDataView}
           />
+          <EuiSpacer size="m" />
+
+          <EuiSuperDatePicker
+            width="restricted"
+            onTimeChange={(ts) => onTimeChange('reference', ts)}
+            start={tempTimeRanges.reference.start}
+            end={tempTimeRanges.reference.end}
+            showUpdateButton={false}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <DataViewSelector
@@ -207,10 +249,21 @@ export const DataDriftView = () => {
             onChangeDataView={(newDataViewId) => updateDataView('production', newDataViewId)}
             dataView={productionDataView}
           />
+          <EuiSpacer size="m" />
+          <EuiSuperDatePicker
+            width="restricted"
+            onTimeChange={(ts) => onTimeChange('production', ts)}
+            start={tempTimeRanges.production.start}
+            end={tempTimeRanges.production.end}
+            showUpdateButton={false}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiButton disabled={!referenceDataView || !productionDataView} onClick={updateFields}>
+            <EuiButton
+              disabled={!referenceDataView || !productionDataView}
+              onClick={updateFieldsAndTime}
+            >
               Analyze
             </EuiButton>
           </EuiFormRow>
@@ -218,12 +271,10 @@ export const DataDriftView = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <div css={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
-        {result.status === FETCH_STATUS.NOT_INITIATED
-          ? 'Pick a reference data view and production data view to detect drift'
-          : null}
-        {result.status === FETCH_STATUS.LOADING ? 'Loading' : null}
-      </div>
+      {result.status === FETCH_STATUS.NOT_INITIATED ? (
+        <EuiCallOut>Pick a reference data view and production data view to detect drift</EuiCallOut>
+      ) : null}
+      {result.status === FETCH_STATUS.LOADING ? 'Loading' : null}
       {dataFromResult ? <DataDriftOverviewTable data={dataFromResult} /> : null}
     </div>
   );

@@ -46,6 +46,11 @@ export interface Result<T extends unknown> {
   error?: string;
 }
 
+export interface TimeRange {
+  start: string;
+  end: string;
+}
+
 export interface Range {
   min: number;
   max: number;

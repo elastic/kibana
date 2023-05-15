@@ -32,6 +32,7 @@ import {
   isNumericDriftData,
   Feature,
   DataDriftField,
+  TimeRange,
 } from './types';
 
 export const getDataDriftType = (kibanaType: string): 'numeric' | 'categoric' | 'unsupported' => {
@@ -272,10 +273,12 @@ export const useFetchDataDriftResult = ({
   fields,
   referenceDataView,
   productionDataView,
+  timeRanges,
 }: {
   fields?: DataDriftField[];
   referenceDataView?: DataView;
   productionDataView?: DataView;
+  timeRanges?: { reference: TimeRange; production: TimeRange };
 } = {}) => {
   const dataSearch = useDataSearch();
   const [result, setResult] = useState<Result<Feature[]>>({
@@ -301,14 +304,33 @@ export const useFetchDataDriftResult = ({
       const referenceIndex = referenceDataView?.getIndexPattern();
       const productionIndex = productionDataView?.getIndexPattern();
 
+      const referenceDatetimeField = referenceDataView?.timeFieldName;
+      const productionDatetimeField = productionDataView?.timeFieldName;
+
+      let refRangeFilter;
+      if (referenceDatetimeField !== undefined && timeRanges?.reference) {
+        refRangeFilter = {
+          range: {
+            [referenceDatetimeField]: {
+              gte: timeRanges?.reference.start,
+              lte: timeRanges.reference.end,
+            },
+          },
+        };
+      }
+
       try {
         const baselineRequest = {
           index: referenceIndex,
           body: {
             size: 0,
+            ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
             aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
           },
         };
+
+        console.log(`--@@baselineRequest`, baselineRequest);
+
         // for each field with type "numeric", add a percentiles agg to the request
         for (const { field, type } of fields) {
           // if the field is numeric, add a percentiles and stats aggregations to the request
@@ -351,13 +373,28 @@ export const useFetchDataDriftResult = ({
           return;
         }
 
+        let prodRangeFilter;
+        if (productionDatetimeField !== undefined && timeRanges?.production) {
+          prodRangeFilter = {
+            range: {
+              [productionDatetimeField]: {
+                gte: timeRanges?.production.start,
+                lte: timeRanges.production.end,
+              },
+            },
+          };
+        }
+
         const driftedRequest = {
           index: productionIndex,
           body: {
             size: 0,
+            ...(prodRangeFilter ? { query: { bool: { filter: [prodRangeFilter] } } } : {}),
             aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
           },
         };
+
+        console.log(`--@@driftedRequest`, driftedRequest);
 
         // retrieve p-values for each numeric field
         for (const { field, type } of fields) {
@@ -557,6 +594,11 @@ export const useFetchDataDriftResult = ({
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataSearch, JSON.stringify(fields), referenceDataView?.id, productionDataView?.id]);
+  }, [
+    dataSearch,
+    JSON.stringify(fields, timeRanges),
+    referenceDataView?.id,
+    productionDataView?.id,
+  ]);
   return result;
 };
