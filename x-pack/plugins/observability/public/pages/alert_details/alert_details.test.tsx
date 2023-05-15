@@ -74,7 +74,7 @@ jest.mock('../../hooks/use_fetch_rule', () => {
     }),
   };
 });
-jest.mock('../../hooks/use_breadcrumbs');
+jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_get_user_cases_permissions', () => ({
   useGetUserCasesPermissions: () => ({
     all: true,

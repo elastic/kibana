@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import * as fetcherHook from '@kbn/observability-shared-plugin/public';
+import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { render, data as dataMock } from '../../../../../utils/test_helper';
 import { CoreStart } from '@kbn/core/public';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
