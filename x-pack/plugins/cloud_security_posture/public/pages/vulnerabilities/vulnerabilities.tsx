@@ -116,7 +116,12 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   const slicedPage = usePageSlice(data?.page, pageIndex, pageSize);
 
   const invalidIndex = -1;
-  const selectedVulnerability = data?.page[urlQuery.vulnerabilityIndex];
+
+  const selectedVulnerability = useMemo(() => {
+    return slicedPage?.find(
+      (_vulnerabilityRecord: VulnerabilityRecord, i) => i === urlQuery.vulnerabilityIndex
+    );
+  }, [slicedPage, urlQuery.vulnerabilityIndex]);
 
   const onCloseFlyout = () => {
     setUrlQuery({
