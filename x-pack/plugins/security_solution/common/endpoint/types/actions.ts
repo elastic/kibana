@@ -477,12 +477,10 @@ export interface ActionFileInfoApiResponse {
  * the action's parameters via the API route handler
  */
 export type ResponseActionUploadParameters = UploadActionApiRequestBody['parameters'] & {
-  file: {
-    sha256: string;
-    size: number;
-    file_name: string;
-    file_id: string;
-  };
+  file_sha256: string;
+  file_size: number;
+  file_name: string;
+  file_id: string;
 };
 
 export interface ResponseActionUploadOutputContent {
