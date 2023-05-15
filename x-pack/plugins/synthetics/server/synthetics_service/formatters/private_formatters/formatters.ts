@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { INVALID_NAMESPACE_CHARACTERS } from '@kbn/fleet-plugin/common';
 import { HTTPFormatMap, httpFormatters } from './http/formatters';
 import { TCPFormatMap, tcpFormatters } from './tcp/formatters';
 import { ICMPFormatMap, icmpFormatters } from './icmp/formatters';
@@ -19,10 +18,4 @@ export const syntheticsPolicyFormatters: Formatters = {
   ...tcpFormatters,
   ...browserFormatters,
   ...commonFormatters,
-};
-
-/* Formats kibana space id into a valid Fleet-compliant datastream namespace */
-export const formatKibanaNamespace = (spaceId: string) => {
-  const namespaceRegExp = new RegExp(INVALID_NAMESPACE_CHARACTERS, 'g');
-  return spaceId.replace(namespaceRegExp, '_');
 };
