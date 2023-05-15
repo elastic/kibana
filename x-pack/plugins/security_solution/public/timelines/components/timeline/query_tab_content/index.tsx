@@ -25,7 +25,6 @@ import { InPortal } from 'react-reverse-portal';
 import { FilterManager, flattenHit } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-plugin/public/types';
-import type { estypes } from '@elastic/elasticsearch';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
@@ -35,10 +34,7 @@ import type { Direction, TimelineItem } from '../../../../../common/search_strat
 import { useTimelineEvents } from '../../../containers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { StatefulBody } from '../body';
-import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
-import { calculateTotalPages } from '../helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
 import type {
