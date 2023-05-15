@@ -104,3 +104,5 @@ export const CONNECTORS = CONNECTOR_DEFINITIONS.map((connector) => ({
 export const CUSTOM_CONNECTORS = CONNECTORS.filter(({ isNative }) => !isNative);
 
 export const NATIVE_CONNECTORS = CONNECTORS.filter(({ isNative }) => isNative);
+
+export const BETA_CONNECTORS = CONNECTORS.filter(({ isBeta }) => isBeta);
