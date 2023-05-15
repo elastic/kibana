@@ -32,38 +32,38 @@ export default function ({ getService }) {
         aggs: {
           avg_of_bytes: {
             avg: {
-              field: "bytes"
-            }
-          }
+              field: 'bytes',
+            },
+          },
         },
         query: {
           bool: {
             filter: [
               {
-               match_all: {}
+                match_all: {},
               },
               {
-               range: {
-                '@timestamp': {
-                 format: "strict_date_optional_time",
-                 gte: "2015-09-20T00:00:00.000Z",
-                 lte: "2015-09-20T01:00:00.000Z"
-                }
-               }
-              }
-             ],
+                range: {
+                  '@timestamp': {
+                    format: 'strict_date_optional_time',
+                    gte: '2015-09-20T00:00:00.000Z',
+                    lte: '2015-09-20T01:00:00.000Z',
+                  },
+                },
+              },
+            ],
             must: [],
-         must_not: [],
-         should: []
-        }
-       },
-       runtime_mappings: {
+            must_not: [],
+            should: [],
+          },
+        },
+        runtime_mappings: {
           hour_of_day: {
             script: {
-              source: "// !@#$%^&*()_+ %%%\nemit(doc['timestamp'].value.getHour());"
+              source: "// !@#$%^&*()_+ %%%\nemit(doc['timestamp'].value.getHour());",
             },
-            type: "long"
-          }
+            type: 'long',
+          },
         },
       },
       renderAs: 'point',
