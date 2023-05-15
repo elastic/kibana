@@ -32,8 +32,8 @@ import {
   right,
 } from './utils';
 import type { ApiExecutionContext } from './types';
-import { deleteLegacyUrlAliases } from '../legacy_url_aliases';
-import {
+import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
+import type {
   BulkDeleteExpectedBulkGetResult,
   BulkDeleteItemErrorResult,
   BulkDeleteParams,
@@ -41,7 +41,7 @@ import {
   ExpectedBulkDeleteResult,
   NewBulkItemResponse,
   ObjectToDeleteAliasesFor,
-} from '../repository_bulk_delete_internal_types';
+} from './internals/repository_bulk_delete_internal_types';
 
 export interface PerformBulkDeleteParams<T = unknown> {
   objects: SavedObjectsBulkDeleteObject[];

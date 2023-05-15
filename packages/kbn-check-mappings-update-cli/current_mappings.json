@@ -1660,6 +1660,13 @@
         "dynamic": false,
         "properties": {}
       },
+      "secret_references": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
       "revision": {
         "type": "integer"
       },
