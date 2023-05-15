@@ -25,7 +25,7 @@ import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useShowSections } from '../hooks/use_show_sections';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
-import { useSectionFormValidation } from '../helpers/use_section_form_validation';
+import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
