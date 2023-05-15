@@ -473,7 +473,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
               <ControlGroupRenderer
                 ref={onControlGroupLoadHandler}
                 getCreationOptions={getCreationOptions}
-                fieldFilterPredicate={fieldFilterPredicate}
               />
               {!controlGroup ? <FilterGroupLoading /> : null}
             </EuiFlexItem>
