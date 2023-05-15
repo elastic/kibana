@@ -181,7 +181,6 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   return res;
 }
 
-// use deleteSecretsIfNotReferenced
 export async function _deleteSecrets(opts: {
   esClient: ElasticsearchClient;
   ids: string[];
