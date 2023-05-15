@@ -16,6 +16,7 @@ import { createEsQuery } from '../../../../../common/utils/es_search';
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
 }
+
 // seconds in an hour
 const BUCKET_SIZE = 3600;
 // take buckets in the last day
@@ -416,7 +417,6 @@ export class KibanaTelemetryAdapter {
 
     return Object.values(this.collector).reduce(
       (acc, cum) => ({
-        ...cum,
         overview_page: acc.overview_page + cum.overview_page,
         monitor_page: acc.monitor_page + cum.monitor_page,
         settings_page: acc.settings_page + cum.settings_page,
