@@ -1002,7 +1002,6 @@ x-pack/test/observability_functional @elastic/actionable-observability
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
 # Security Solution
-/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
