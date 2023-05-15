@@ -33,12 +33,12 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { BetaBadge } from '../../../shared/beta_badge';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { UnifiedSearchBar } from '../../../shared/unified_search_bar';
 
 import * as urlHelpers from '../../../shared/links/url_helpers';
 import { SuggestionsSelect } from '../../../shared/suggestions_select';
-import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { AgentList } from './agent_list';
 
 const getOtelLatestAgentVersion = (
@@ -153,7 +153,7 @@ export function AgentExplorer() {
               </h2>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TechnicalPreviewBadge icon="beaker" />
+              <BetaBadge icon="beta" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>
