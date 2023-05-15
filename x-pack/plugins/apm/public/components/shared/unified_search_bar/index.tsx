@@ -20,7 +20,6 @@ import { EuiSkeletonRectangle } from '@elastic/eui';
 import qs from 'query-string';
 import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isEqual } from 'lodash';
 import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import { useEffectOnce } from 'react-use/lib';
 import { UIProcessorEvent } from '../../../../common/processor_event';
@@ -246,7 +245,10 @@ export function UnifiedSearchBar({
       search: fromQuery(updatedQueryParams),
     });
   };
-  const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
+  const handleSubmit = (
+    payload: { dateRange: TimeRange; query?: Query },
+    isUpdate?: boolean
+  ) => {
     if (dataView == null) {
       return;
     }
@@ -274,15 +276,13 @@ export function UnifiedSearchBar({
         kuery: query?.query,
       };
 
-      const isRefresh = isEqual(existingQueryParams, newSearchParams);
-
-      if (isRefresh) {
-        onRefresh();
-      } else {
+      if (isUpdate) {
         history.push({
           ...location,
           search: fromQuery(newSearchParams),
         });
+      } else {
+        onRefresh();
       }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
