@@ -22,7 +22,10 @@ type FilterItemSetProps = Omit<
   'initialControls' | 'dataViewId'
 >;
 
-const DATA_VIEW_NAME = 'SECURITY_SOLUTION_AD_HOC_ALERTS_DATA_VIEW';
+const SECURITY_ALERT_DATA_VIEW = {
+  id: 'security_solution_alerts_dv',
+  name: 'Security Solution Alerts DataView',
+};
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
   const { onFilterChange, ...restFilterItemGroupProps } = props;
@@ -38,34 +41,18 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
   } = useKibana();
 
   useEffect(() => {
-    // this makes sure, that if fields are not present in existing copy of the
-    // dataView, clear the cache before filter group is loaded. This is only
-    // applicable to `alert` page as new alert mappings are added when first alert
-    // is encountered
     (async () => {
-      const localDataViewId = title;
-      let dataView;
-      try {
-        dataView = await dataViewService.get(localDataViewId ?? '');
-      } catch (error) {
-        // creates an adhoc dataview if it does not already exists just for alert index
-        dataView = await dataViewService.create({
-          id: DATA_VIEW_NAME,
-          name: DATA_VIEW_NAME,
-          title: localDataViewId,
-          allowNoIndex: true,
-        });
-      }
-      for (const filter of DEFAULT_DETECTION_PAGE_FILTERS) {
-        const fieldExists = dataView.getFieldByName(filter.fieldName);
-        if (!fieldExists) {
-          dataViewService.clearInstanceCache(localDataViewId ?? '');
-          setLoadingPageFilters(false);
-          return;
-        }
-      }
+      // creates an adhoc dataview if it does not already exists just for alert index
+      await dataViewService.create({
+        id: SECURITY_ALERT_DATA_VIEW.id,
+        name: SECURITY_ALERT_DATA_VIEW.name,
+        title,
+        allowNoIndex: true,
+      });
       setLoadingPageFilters(false);
     })();
+
+    return () => dataViewService.clearInstanceCache();
   }, [title, dataViewService]);
 
   const [initialFilterControls] = useState(DEFAULT_DETECTION_PAGE_FILTERS);
@@ -100,7 +87,7 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
 
   return (
     <FilterGroup
-      dataViewId={DATA_VIEW_NAME}
+      dataViewId={SECURITY_ALERT_DATA_VIEW.id}
       onFilterChange={filterChangesHandler}
       initialControls={initialFilterControls}
       {...restFilterItemGroupProps}
