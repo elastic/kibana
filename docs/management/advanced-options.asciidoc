@@ -575,16 +575,16 @@ Change the settings that apply only to {kib} spaces.
 
 [horizontal]
 [[custom-logo]]`xpackCustomBranding:logo`::
-A custom image that appears in the header of all {kib} pages.
+A custom image that appears in the header of all {kib} pages. Images must have a transparent background, and 128 x 128 pixels or smaller.
 
 [[organization-name]]`xpackCustomBranding:customizedLogo`::
-The custom text that appears in the header of all {kib} pages.
+The custom text that appears in the header of all {kib} pages. Images must have a transparent background, and 200 x 84 pixels or smaller.
 
 [[page-title]]`xpackCustomBranding:pageTitle`::
 The custom text that appears on {kib} browser tabs.
 
 [[favicon-svg]]`xpackCustomBranding:faviconSVG`::
-The URL of a custom SVG image that appears on {kib} browser tabs.
+The URL of a custom SVG image that appears on {kib} browser tabs. Images must be 16 x 16 pixels.
 
 [[favicon-png]]`xpackCustomBranding:faviconPNG`::
 The URL of a custom PNG image that appears on {kib} browser tabs.
