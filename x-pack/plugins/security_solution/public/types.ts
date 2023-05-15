@@ -6,17 +6,34 @@
  */
 
 import type { BehaviorSubject, Observable } from 'rxjs';
+import type { History } from 'history';
 
-import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
+import type {
+  AppLeaveHandler,
+  ApplicationStart,
+  Capabilities,
+  ChromeStart,
+  CoreStart,
+  DocLinksStart,
+  PluginInitializerContext,
+  HttpStart,
+  IUiSettingsClient,
+  NotificationsStart,
+  ToastsStart,
+} from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
+  DataPublicPluginStart,
+  FilterManager,
+  TimefilterContract,
+} from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { PluginStart as ListsPluginStart } from '@kbn/lists-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -49,6 +66,21 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
+import type { UiCounterMetricType } from '@kbn/analytics';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DiscoverAppLocator } from '@kbn/discover-plugin/common';
+import type { DiscoverContextAppLocator } from '@kbn/discover-plugin/public/application/context/services/locator';
+import type { DiscoverSingleDocLocator } from '@kbn/discover-plugin/public/application/doc/locator';
+import type { HistoryLocationState } from '@kbn/discover-plugin/public/build_services';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { memoize, once } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -75,45 +107,79 @@ export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
+  share: SharePluginStart;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
 }
 
 export interface StartPlugins {
+  addBasePath: (path: string) => string;
+  application: ApplicationStart;
+  capabilities: Capabilities;
+  charts: ChartsPluginStart;
+  chrome: ChromeStart;
+  contextLocator: DiscoverContextAppLocator;
+  core: CoreStart;
+  dataViewEditor: DataViewEditorStart;
+  docLinks: DocLinksStart;
+  expressions: ExpressionsStart;
+  fieldFormats: FieldFormatsStart;
+  filterManager: FilterManager;
+  history: () => History<HistoryLocationState>;
+  http: HttpStart;
+  locator: DiscoverAppLocator;
+  metadata: { branch: string };
+  navigation: NavigationPublicPluginStart;
+  notifications: NotificationsStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
+  settings: SettingsStart;
+  share?: SharePluginStart;
+  singleDocLocator: DiscoverSingleDocLocator;
+  storage: Storage;
+  theme: ChartsPluginStart['theme'];
+  timefilter: TimefilterContract;
+  toastNotifications: ToastsStart;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  uiSettings: IUiSettingsClient;
+  urlForwarding: UrlForwardingStart;
+
+  // Previous Existing
   cases: CasesUiStart;
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  dashboard?: DashboardStart;
-  embeddable: EmbeddableStart;
-  inspector: InspectorStart;
-  fleet?: FleetStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
-  kubernetesSecurity: KubernetesSecurityStart;
-  lens: LensPublicStart;
-  lists?: ListsPluginStart;
-  licensing: LicensingPluginStart;
-  newsfeed?: NewsfeedPublicPluginStart;
-  triggersActionsUi: TriggersActionsStart;
-  timelines: TimelinesUIStart;
-  sessionView: SessionViewStart;
-  uiActions: UiActionsStart;
-  ml?: MlPluginStart;
-  spaces?: SpacesPluginStart;
-  dataViewFieldEditor: IndexPatternFieldEditorStart;
-  osquery: OsqueryPluginStart;
-  security: SecurityPluginStart;
   cloud?: CloudStart;
   cloudDefend: CloudDefendPluginStart;
-  cloudSecurityPosture: CspClientPluginStart;
-  threatIntelligence: ThreatIntelligencePluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
+  cloudSecurityPosture: CspClientPluginStart;
+  dashboard?: DashboardStart;
+  data: DataPublicPluginStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViews: DataViewsServicePublic;
+  embeddable: EmbeddableStart;
+  fleet?: FleetStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
+  inspector: InspectorStart;
+  kubernetesSecurity: KubernetesSecurityStart;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  lists?: ListsPluginStart;
+  ml?: MlPluginStart;
+  newsfeed?: NewsfeedPublicPluginStart;
+  osquery: OsqueryPluginStart;
+  savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
+  security: SecurityPluginStart;
+  sessionView: SessionViewStart;
+  spaces?: SpacesPluginStart;
+  threatIntelligence: ThreatIntelligencePluginStart;
+  timelines: TimelinesUIStart;
+  triggersActionsUi: TriggersActionsStart;
+  uiActions: UiActionsStart;
+  usageCollection: UsageCollectionSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
 export type StartServices = CoreStart &
@@ -186,3 +252,67 @@ export interface StartedSubPlugins {
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;
 }
+
+export const useGetHistory = once(() => {
+  const history = useHistory();
+  history.listen(() => {
+    // keep at least one listener so that `history.location` always in sync
+  });
+  return history;
+});
+
+export const buildDiscoverServices = memoize(function (
+  core: CoreStart,
+  plugins: StartPlugins,
+  context: PluginInitializerContext,
+  locator: DiscoverAppLocator,
+  contextLocator: DiscoverContextAppLocator,
+  singleDocLocator: DiscoverSingleDocLocator
+) {
+  const { usageCollection } = plugins;
+  const storage = new Storage(localStorage);
+
+  return {
+    application: core.application,
+    addBasePath: core.http.basePath.prepend,
+    capabilities: core.application.capabilities,
+    chrome: core.chrome,
+    core,
+    data: plugins.data,
+    docLinks: core.docLinks,
+    embeddable: plugins.embeddable,
+    theme: plugins.charts.theme,
+    fieldFormats: plugins.fieldFormats,
+    filterManager: plugins.data.query.filterManager,
+    history: useGetHistory,
+    dataViews: plugins.data.dataViews,
+    inspector: plugins.inspector,
+    metadata: {
+      branch: context.env.packageInfo.branch,
+    },
+    navigation: plugins.navigation,
+    share: plugins.share,
+    urlForwarding: plugins.urlForwarding,
+    timefilter: plugins.data.query.timefilter.timefilter,
+    toastNotifications: core.notifications.toasts,
+    notifications: core.notifications,
+    uiSettings: core.uiSettings,
+    settings: core.settings,
+    storage,
+    trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
+    dataViewFieldEditor: plugins.dataViewFieldEditor,
+    http: core.http,
+    spaces: plugins.spaces,
+    dataViewEditor: plugins.dataViewEditor,
+    triggersActionsUi: plugins.triggersActionsUi,
+    locator,
+    contextLocator,
+    singleDocLocator,
+    expressions: plugins.expressions,
+    charts: plugins.charts,
+    savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+    savedObjectsManagement: plugins.savedObjectsManagement,
+    unifiedSearch: plugins.unifiedSearch,
+    lens: plugins.lens,
+  };
+});

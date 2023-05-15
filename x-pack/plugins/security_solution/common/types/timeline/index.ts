@@ -438,6 +438,7 @@ export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimeli
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom' | 'eql';
 
 export enum TimelineTabs {
+  discover = 'discover',
   query = 'query',
   graph = 'graph',
   notes = 'notes',

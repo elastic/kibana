@@ -13,6 +13,7 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "charts",
       "cases",
       "cloud",
       "cloudDefend",
@@ -20,6 +21,9 @@
       "dashboard",
       "data",
       "ecsDataQualityDashboard",
+      "fieldFormats",
+      "urlForwarding",
+      "navigation",
       "dataViews",
       "embeddable",
       "eventLog",
@@ -38,11 +42,17 @@
       "timelines",
       "triggersActionsUi",
       "uiActions",
+      "savedObjects",
+      "savedObjectsFinder",
       "unifiedSearch",
+      "dataViewEditor",
+      "expressions",
+      "unifiedFieldList",
       "files",
       "controls",
       "dataViews",
       "savedObjectsManagement",
+      "unifiedHistogram",
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -51,6 +61,7 @@
       "ml",
       "newsfeed",
       "security",
+      "share",
       "usageCollection",
       "lists",
       "home",
@@ -67,7 +78,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "savedSearch",
     ],
     "extraPublicDirs": [
       "common"

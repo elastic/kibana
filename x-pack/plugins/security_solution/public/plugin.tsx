@@ -19,7 +19,11 @@ import type {
   Plugin as IPlugin,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { setStateToKbnUrl, Storage } from '@kbn/kibana-utils-plugin/public';
+import { DiscoverSingleDocLocator, DiscoverSingleDocLocatorDefinition } from '../../../../src/plugins/discover/public/application/doc/locator';
+import { DiscoverContextAppLocator, DiscoverContextAppLocatorDefinition } from '../../../../src/plugins/discover/public/application/context/services/locator';
+import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../../../../src/plugins/discover/common/locator';
+import { setHeaderActionMenuMounter, setScopedHistory, syncHistoryLocations } from '../../../../src/plugins/discover/public/kibana_services';
 import type {
   PluginSetup,
   PluginStart,
@@ -30,6 +34,7 @@ import type {
   StartedSubPlugins,
   StartPluginsDependencies,
 } from './types';
+import { buildDiscoverServices } from './types';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
@@ -116,6 +121,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _store?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
 
+  private locator?: DiscoverAppLocator;
+  private contextLocator?: DiscoverContextAppLocator;
+  private singleDocLocator?: DiscoverSingleDocLocator;
+
   public setup(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
     plugins: SetupPlugins
@@ -145,6 +154,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
+    if (plugins.share) {
+      const useHash = core.uiSettings.get('state:storeInSessionStorage');
+      this.locator = plugins.share.url.locators.create(
+        new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
+      );
+
+      this.contextLocator = plugins.share.url.locators.create(
+        new DiscoverContextAppLocatorDefinition({ useHash })
+      );
+      this.singleDocLocator = plugins.share.url.locators.create(
+        new DiscoverSingleDocLocatorDefinition()
+      );
+    }
+
     /**
      * `StartServices` which are needed by the `renderApp` function when mounting any of the subPlugin applications.
      * This is a promise because these aren't available until the `start` lifecycle phase but they are referenced
@@ -172,6 +195,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
         telemetry: this.telemetry.start(),
+        ...buildDiscoverServices(
+          coreStart,
+          startPluginsDeps,
+          this.initializerContext,
+          this.locator!,
+          this.contextLocator!,
+          this.singleDocLocator!
+        ),
       };
       return services;
     };
@@ -189,6 +220,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
         const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
+        setScopedHistory(params.history);
+        setHeaderActionMenuMounter(params.setHeaderActionMenu);
+        syncHistoryLocations();
         const { registerAlertsTableConfiguration } =
           await this.lazyRegisterAlertsTableConfiguration();
         registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
