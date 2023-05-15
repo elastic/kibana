@@ -21,7 +21,6 @@ import qs from 'query-string';
 import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
-import { useEffectOnce } from 'react-use/lib';
 import { UIProcessorEvent } from '../../../../common/processor_event';
 import { TimePickerTimeDefaults } from '../date_picker/typings';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -172,23 +171,22 @@ export function UnifiedSearchBar({
     }
     // Sync Time Range with Search Bar
     timeFilterService.timefilter.setTime(urlTimeRange as TimeRange);
-  }, [kuery, queryStringService, timeFilterService.timefilter, urlTimeRange]);
 
-  useEffectOnce(() => {
-    // Sync Refresh Interval with Search Bar
+    // Sync Auto refresh interval with Search Bar
     const refreshInterval = {
       pause: toBoolean(refreshPausedFromUrl),
       value: refreshIntervalFromUrl,
     };
-    if (
-      !deepEqual(
-        timeFilterService.timefilter.getRefreshInterval(),
-        refreshInterval
-      )
-    ) {
-      timeFilterService.timefilter.setRefreshInterval(refreshInterval);
-    }
-  });
+    timeFilterService.timefilter.setRefreshInterval(refreshInterval);
+  }, [
+    kuery,
+    queryStringService,
+    refreshIntervalFromUrl,
+    refreshPausedFromUrl,
+    timeFilterService.timefilter,
+    urlTimeRange,
+  ]);
+
   useEffect(() => {
     syncSearchBarWithUrl();
   }, [syncSearchBarWithUrl]);

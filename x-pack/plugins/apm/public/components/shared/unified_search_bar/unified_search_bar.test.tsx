@@ -41,7 +41,6 @@ function setup({
   const getQuerySpy = jest.fn();
   const clearQuerySpy = jest.fn();
   const setTimeSpy = jest.fn();
-  const getRefreshIntervalSpy = jest.fn();
   const setRefreshIntervalSpy = jest.fn();
 
   const KibanaReactContext = createKibanaReactContext({
@@ -61,7 +60,6 @@ function setup({
         timefilter: {
           timefilter: {
             setTime: setTimeSpy,
-            getRefreshInterval: getRefreshIntervalSpy,
             setRefreshInterval: setRefreshIntervalSpy,
           },
         },
@@ -92,7 +90,6 @@ function setup({
     getQuerySpy,
     clearQuerySpy,
     setTimeSpy,
-    getRefreshIntervalSpy,
     setRefreshIntervalSpy,
   };
 }
@@ -146,19 +143,13 @@ describe('when kuery is already present in the url, the search bar must reflect 
       .spyOn(useApmParamsHook, 'useApmParams')
       .mockReturnValue({ query: urlParams, path: {} });
 
-    const {
-      setQuerySpy,
-      setTimeSpy,
-      getRefreshIntervalSpy,
-      setRefreshIntervalSpy,
-    } = setup({
+    const { setQuerySpy, setTimeSpy, setRefreshIntervalSpy } = setup({
       history,
       urlParams,
     });
 
     expect(setQuerySpy).toBeCalledWith(expectedQuery);
     expect(setTimeSpy).toBeCalledWith(expectedTimeRange);
-    expect(getRefreshIntervalSpy).toBeCalled();
     expect(setRefreshIntervalSpy).toBeCalledWith(refreshInterval);
   });
 });
