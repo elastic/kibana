@@ -81,6 +81,12 @@ export default async (
           port: kibanaPort,
         },
       },
+      kbnTestServer: {
+        serverArgs: [
+          `--server.port=${kibanaPort}`,
+          `--elasticsearch.hosts=http://localhost:${esPort}`,
+        ],
+      },
     }
   );
 
@@ -106,7 +112,7 @@ export default async (
     installDir: process.env.KIBANA_INSTALL_DIR,
   };
 
-  console.error('options', options);
+  console.error('options', options, kibanaPort);
 
   const shutdownEs = await runElasticsearch({
     config: ftrConfig,
