@@ -657,9 +657,7 @@ describe('CasesService', () => {
 
     describe('post', () => {
       it('creates a null external_service field when the attribute was null in the creation parameters', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await service.postNewCase({
           attributes: createCasePostParams({ connector: createJiraConnector() }),
@@ -672,9 +670,7 @@ describe('CasesService', () => {
       });
 
       it('includes the creation attributes excluding the connector.id and connector_id', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await service.postNewCase({
           attributes: createCasePostParams({
@@ -772,9 +768,7 @@ describe('CasesService', () => {
       });
 
       it('includes default values for total_alerts and total_comments', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await service.postNewCase({
           attributes: createCasePostParams({
@@ -791,9 +785,7 @@ describe('CasesService', () => {
       });
 
       it('moves the connector.id and connector_id to the references', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await service.postNewCase({
           attributes: createCasePostParams({
@@ -822,9 +814,7 @@ describe('CasesService', () => {
       });
 
       it('sets fields to an empty array when it is not included with the connector', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await service.postNewCase({
           attributes: createCasePostParams({
@@ -840,9 +830,7 @@ describe('CasesService', () => {
       });
 
       it('does not create a reference for a none connector', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await service.postNewCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
@@ -855,9 +843,7 @@ describe('CasesService', () => {
       });
 
       it('does not create a reference for an external_service field that is null', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await service.postNewCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
@@ -877,9 +863,7 @@ describe('CasesService', () => {
       ])(
         'properly converts "%s" severity to corresponding ES value on creating SO',
         async (postParamsSeverity, expectedSeverity) => {
-          unsecuredSavedObjectsClient.create.mockResolvedValue(
-            {} as SavedObject<CasePersistedAttributes>
-          );
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
           await service.postNewCase({
             attributes: createCasePostParams({
@@ -902,9 +886,7 @@ describe('CasesService', () => {
       ])(
         'properly converts "%s" status to corresponding ES value on creating SO',
         async (postParamsStatus, expectedStatus) => {
-          unsecuredSavedObjectsClient.create.mockResolvedValue(
-            {} as SavedObject<CasePersistedAttributes>
-          );
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
           await service.postNewCase({
             attributes: createCasePostParams({
@@ -1670,6 +1652,12 @@ describe('CasesService', () => {
 
       it('defaults to the none connector and null external_services when attributes is undefined', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue({
+          ...createCaseSavedObjectResponse(),
+          attributes: {
+            ...createCaseSavedObjectResponse().attributes,
+            external_service: undefined,
+            connector: undefined,
+          },
           references: [
             {
               id: '1',
@@ -1694,8 +1682,9 @@ describe('CasesService', () => {
 
       it('returns a null external_services when it is already null', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue({
-          attributes: { external_service: null },
-        } as SavedObject<CasePersistedAttributes>);
+          ...createCaseSavedObjectResponse(),
+          attributes: { ...createCaseSavedObjectResponse().attributes, external_service: null },
+        });
         const res = await service.getCase({ id: 'a' });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -1719,7 +1708,11 @@ describe('CasesService', () => {
         'includes the properly converted "%s" severity field in the result',
         async (internalSeverityValue, expectedSeverity) => {
           unsecuredSavedObjectsClient.get.mockResolvedValue({
-            attributes: { severity: internalSeverityValue },
+            ...createCaseSavedObjectResponse(),
+            attributes: {
+              ...createCaseSavedObjectResponse().attributes,
+              severity: internalSeverityValue,
+            },
           } as SavedObject<CasePersistedAttributes>);
 
           const res = await service.getCase({ id: 'a' });
@@ -1736,7 +1729,11 @@ describe('CasesService', () => {
         'includes the properly converted "%s" status field in the result',
         async (internalStatusValue, expectedStatus) => {
           unsecuredSavedObjectsClient.get.mockResolvedValue({
-            attributes: { status: internalStatusValue },
+            ...createCaseSavedObjectResponse(),
+            attributes: {
+              ...createCaseSavedObjectResponse().attributes,
+              status: internalStatusValue,
+            },
           } as SavedObject<CasePersistedAttributes>);
 
           const res = await service.getCase({ id: 'a' });
@@ -1747,7 +1744,9 @@ describe('CasesService', () => {
 
       it('does not include total_alerts and total_comments fields in the response', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue({
+          ...createCaseSavedObjectResponse(),
           attributes: {
+            ...createCaseSavedObjectResponse().attributes,
             total_alerts: -1,
             total_comments: -1,
           },
@@ -1824,6 +1823,21 @@ describe('CasesService', () => {
       await expect(service.executeAggregations({ aggregationBuilders })).rejects.toThrow(
         'Failed to execute aggregations [avg-test-builder,min-test-builder]: Error: Aggregation error'
       );
+    });
+  });
+
+  describe.only('Encoding responses', () => {
+    describe('post', () => {
+      it('encodes correctly', async () => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+        await expect(
+          service.postNewCase({
+            attributes: createCasePostParams({ connector: createJiraConnector() }),
+            id: '1',
+          })
+        ).resolves.not.toThrow();
+      });
     });
   });
 });
