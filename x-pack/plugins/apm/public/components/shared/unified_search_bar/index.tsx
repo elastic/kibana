@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import {
   Filter,
   fromKueryExpression,
@@ -30,6 +31,8 @@ import { fromQuery, toQuery } from '../links/url_helpers';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { getBoolFilter } from '../get_bool_filter';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+import { clearCache } from '../../../services/rest/call_api';
+import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
 
 function useSearchBarParams(defaultKuery?: string) {
   const { path, query } = useApmParams('/*');
@@ -159,6 +162,7 @@ export function UnifiedSearchBar({
   const { dataView } = useApmDataView();
   const { urlParams } = useLegacyUrlParams();
   const processorEvent = useProcessorEvent();
+  const { incrementTimeRangeId } = useTimeRangeId();
   const searchbarPlaceholder = getSearchBarPlaceholder(
     placeholder,
     processorEvent
@@ -183,6 +187,11 @@ export function UnifiedSearchBar({
       query: filter,
     } as Filter;
   });
+
+  const onRefresh = () => {
+    clearCache();
+    incrementTimeRangeId();
+  };
   const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
     if (dataView == null) {
       return;
@@ -206,13 +215,22 @@ export function UnifiedSearchBar({
         rangeFrom,
         rangeTo,
       };
-      history.push({
-        ...location,
-        search: fromQuery({
-          ...updatedQueryWithTime,
-          kuery: query?.query,
-        }),
-      });
+
+      const newSearchParams = {
+        ...updatedQueryWithTime,
+        kuery: query?.query,
+      };
+
+      const isRefresh = isEqual(existingQueryParams, newSearchParams);
+
+      if (isRefresh) {
+        onRefresh();
+      } else {
+        history.push({
+          ...location,
+          search: fromQuery(newSearchParams),
+        });
+      }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
