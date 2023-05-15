@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
+import { Router, Switch, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
@@ -30,19 +30,23 @@ import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rul
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
 
 function App() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
-    <>
-      <Switch>
-        {Object.keys(routes).map((key) => {
-          const path = key as keyof typeof routes;
-          const { handler, exact } = routes[path];
-          const Wrapper = () => {
-            return handler();
-          };
-          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
-        })}
-      </Switch>
-    </>
+    <Switch>
+      {Object.keys(routes).map((key) => {
+        const path = key as keyof typeof routes;
+        const { handler, exact } = routes[path];
+        const Wrapper = () => {
+          return handler();
+        };
+        return <Route key={path} path={path} exact={exact} component={Wrapper} />;
+      })}
+    </Switch>
   );
 }
 
