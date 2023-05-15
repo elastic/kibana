@@ -9,6 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
+import { differenceWith, isEqual } from 'lodash';
 import {
   RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
@@ -26,7 +27,7 @@ import type { RuleParams, RuleAlertType, UnifiedQueryRuleParams } from '../../ru
 import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
-import { findDifferenceInArrays, transform } from './utils';
+import { transform } from './utils';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 import type {
   ResponseAction,
@@ -85,30 +86,50 @@ export const validateResponseActionsPermissions = async (
   const payload = ruleUpdate as QueryRule;
   const existingPayload = existingRule as Rule<UnifiedQueryRuleParams>;
 
-  if (payload.response_actions?.length || existingPayload?.params?.responseActions?.length) {
-    const endpointAuthz = await securitySolution.getEndpointAuthz();
-
-    const difference = findDifferenceInArrays<ResponseAction, RuleResponseAction>(
-      payload.response_actions,
-      existingPayload?.params?.responseActions
-    );
-
-    difference.forEach((action) => {
-      if ('command' in action?.params) {
-        const authzPropName =
-          RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
-            RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP[action.params.command]
-          ];
-
-        const isValid = endpointAuthz[authzPropName];
-
-        if (!isValid) {
-          throw new CustomHttpRequestError(
-            `User is not authorized to change ${action.params.command} response actions`,
-            401
-          );
-        }
-      }
-    });
+  if (!isQueryRulePayload(payload) && (!existingPayload || !isQueryRuleObject(existingPayload))) {
+    return;
   }
+
+  if (
+    payload.response_actions?.length === 0 &&
+    existingPayload?.params?.responseActions?.length === 0
+  ) {
+    return;
+  }
+
+  const endpointAuthz = await securitySolution.getEndpointAuthz();
+
+  const differences = differenceWith<ResponseAction, RuleResponseAction>(
+    payload.response_actions,
+    existingPayload?.params?.responseActions ?? [],
+    isEqual
+  );
+
+  differences.forEach((action) => {
+    if (!('command' in action?.params)) {
+      return;
+    }
+
+    const authzPropName =
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
+        RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP[action.params.command]
+      ];
+
+    const isValid = endpointAuthz[authzPropName];
+
+    if (!isValid) {
+      throw new CustomHttpRequestError(
+        `User is not authorized to change ${action.params.command} response actions`,
+        401
+      );
+    }
+  });
 };
+
+function isQueryRulePayload(rule: RuleCreateProps | RuleUpdateProps): rule is QueryRule {
+  return 'response_actions' in rule;
+}
+
+function isQueryRuleObject(rule: RuleAlertType): rule is Rule<UnifiedQueryRuleParams> {
+  return 'responseActions' in rule.params;
+}

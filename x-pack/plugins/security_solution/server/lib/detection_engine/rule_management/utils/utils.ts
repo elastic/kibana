@@ -14,7 +14,6 @@ import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 
-import { differenceWith, isEqual } from 'lodash';
 import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
 import type {
   AlertSuppression,
@@ -385,17 +384,3 @@ export const convertAlertSuppressionToSnake = (
         missing_fields_strategy: input.missingFieldsStrategy,
       }
     : undefined;
-
-export const findDifferenceInArrays = <T1, T2>(
-  arr1: T1[] = [],
-  arr2: T2[] = []
-): Array<T1 | T2> => {
-  if (arr1.length === 0) {
-    return arr2;
-  }
-
-  if (arr2.length === 0) {
-    return arr1;
-  }
-  return differenceWith(arr1, arr2, isEqual);
-};
