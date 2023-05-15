@@ -10,7 +10,6 @@
     "server/**/*",
     "typings/**/*",
     "../../../typings/**/*",
-    "../../packages/observability/alert_details/src/hooks/use_alerts_history.test.tsx"
   ],
   "kbn_references": [
     "@kbn/core",
