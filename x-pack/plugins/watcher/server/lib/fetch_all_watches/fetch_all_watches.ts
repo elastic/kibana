@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { WatcherQueryWatchesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  WatcherQueryWatch,
+  WatcherQueryWatchesResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { ES_SEARCH_AFTER_SETTINGS } from '../../../common/constants/es_search_after_settings';
@@ -13,8 +16,8 @@ import { ES_SEARCH_AFTER_SETTINGS } from '../../../common/constants/es_search_af
 export const fetchAllWatches = async (
   dataClient: IScopedClusterClient,
   previousResponse: WatcherQueryWatchesResponse,
-  accumulatedHits: any[] = []
-): Promise<any> => {
+  accumulatedHits: WatcherQueryWatch[] = []
+): Promise<WatcherQueryWatch[]> => {
   const previousWatches = get(previousResponse, 'watches', []);
   accumulatedHits.push(...previousWatches);
   if (previousWatches.length < ES_SEARCH_AFTER_SETTINGS.PAGE_SIZE) {
