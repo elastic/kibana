@@ -49,6 +49,7 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
       renderedTabsSet={renderedTabsSet}
       currentTimeRange={currentTimeRange}
       hostFlyoutOpen={hostFlyoutOpen}
+      setHostFlyoutOpen={setHostFlyoutOpen}
     />
   );
 };

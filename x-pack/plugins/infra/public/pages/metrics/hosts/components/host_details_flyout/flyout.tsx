@@ -19,13 +19,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import Metadata from '../../../../../components/asset_details/metadata/metadata';
 import { LinkToUptime } from './links/link_to_uptime';
 import { LinkToApmServices } from './links/link_to_apm_services';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import { Metadata } from './metadata/metadata';
 import { Processes } from './processes/processes';
-import { FlyoutTabIds } from '../../hooks/use_host_flyout_open_url_state';
+import { FlyoutTabIds, SetNewHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
 import type { Tab } from './flyout_wrapper';
 import { metadataTab } from './metadata';
 import { processesTab } from './processes';
@@ -46,6 +46,7 @@ export interface FlyoutProps {
     searchFilter: string;
     metadataSearch: string;
   };
+  setHostFlyoutOpen: SetNewHostFlyoutOpen;
   onTabClick: (tab: Tab) => void;
 }
 
@@ -59,6 +60,7 @@ export const Flyout = ({
   renderedTabsSet,
   currentTimeRange,
   hostFlyoutOpen,
+  setHostFlyoutOpen,
 }: FlyoutProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -102,7 +104,15 @@ export const Flyout = ({
       <EuiFlyoutBody>
         {renderedTabsSet.current.has(FlyoutTabIds.METADATA) && (
           <div hidden={hostFlyoutOpen.selectedTabId !== FlyoutTabIds.METADATA}>
-            <Metadata currentTimeRange={currentTimeRange} node={node} nodeType={NODE_TYPE} />
+            <Metadata
+              currentTimeRange={currentTimeRange}
+              node={node}
+              nodeType={NODE_TYPE}
+              persistMetadataSearchToUrlState={{
+                metadataSearchUrlState: hostFlyoutOpen.metadataSearch,
+                setMetadataSearchUrlState: setHostFlyoutOpen,
+              }}
+            />
           </div>
         )}
         {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
