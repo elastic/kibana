@@ -1,14 +1,40 @@
 {
-  "id": "@kbn/reporting-export-type-PDF",
-  "version": "1.0.0",
-  "kibanaVersion": "kibana",
-  "owner": {
-    "name": "@elastic/appex-sharedux",
-    "githubTeam": ""
-  },
-  "description": "",
-  "server": true,
-  "ui": false,
-  "requiredPlugins": ["navigation"],
-  "optionalPlugins": []
+  "type": "plugin",
+  "id": "@kbn/reporting-export-type-pdf-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Reporting export type pdf",
+  "plugin": {
+    "id": "reporting",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "reporting"
+    ],
+    "requiredPlugins": [
+      "data",
+      "discover",
+      "fieldFormats",
+      "esUiShared",
+      "home",
+      "management",
+      "licensing",
+      "uiActions",
+      "taskManager",
+      "embeddable",
+      "screenshotting",
+      "screenshotMode",
+      "share",
+      "features"
+    ],
+    "optionalPlugins": [
+      "security",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "discover"
+    ]
+  }
 }

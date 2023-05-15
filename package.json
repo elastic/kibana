@@ -968,7 +968,8 @@
     "xstate": "^4.37.2",
     "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
-    "yazl": "^2.5.1"
+    "yazl": "^2.5.1",
+    "@kbn/reporting-export-type-pdf-plugin": "link:x-pack/plugins/reporting_export_type_pdf"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
