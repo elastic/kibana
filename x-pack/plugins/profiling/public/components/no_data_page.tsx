@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
@@ -39,6 +41,7 @@ export function NoDataPage({ subTitle }: { subTitle: string }) {
 
   const secretToken = data?.variables.secretToken;
   const collectionAgentHostPort = data?.variables.apmServerUrl.replace('https://', '');
+  const symbolUrl = data?.variables.apmServerUrl.replace(/\.apm\./, '.symbols.');
   const hostAgentVersion = 'v3';
 
   const tabs = [
@@ -265,43 +268,81 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       steps: [
         {
           title: i18n.translate('xpack.profiling.tabs.symbols.step1', {
-            defaultMessage: 'Download the symbtool binary from the URL below:',
+            defaultMessage: 'Download and extract symbtool',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://ela.st/symbtool-linux-amd64`}>
-              https://ela.st/symbtool-linux-amd64
-            </EuiLink>
+            <EuiText>
+              <b>For x86_64:</b>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`wget -O symbtool-amd64.tgz "https://ela.st/symbtool-linux-amd64" && tar xzf symbtool-amd64.tgz && cd symbtool-*-linux-x86_64`}
+              </EuiCodeBlock>
+              <EuiSpacer size="m" />
+              <b>For ARM64:</b>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`wget -O symbtool-arm64.tgz "https://ela.st/symbtool-linux-arm64" && tar xzf symbtool-arm64.tgz && cd symbtool-*-linux-arm64`}
+              </EuiCodeBlock>
+            </EuiText>
           ),
         },
         {
           title: i18n.translate('xpack.profiling.tabs.symbols.step2', {
-            defaultMessage: 'Generate an Elasticsearch token:',
+            defaultMessage: 'Generate an Elasticsearch token',
           }),
           content: (
-            <EuiLink
-              target="_blank"
-              href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
-            >
-              {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
-                defaultMessage: 'Instructions here',
-              })}
-            </EuiLink>
+            <EuiText>
+              <EuiLink
+                target="_blank"
+                href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
+              >
+                {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
+                  defaultMessage: 'Instructions here',
+                })}
+              </EuiLink>
+            </EuiText>
           ),
         },
         {
           title: i18n.translate('xpack.profiling.tabs.symbols.step3', {
-            defaultMessage:
-              'Fetch the symbols endpoint from the Cloud console, navigating in the Integrations Server section',
-          }),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.symbols.step4', {
-            defaultMessage: 'Run the following command, replacing the placeholders between <>:',
+            defaultMessage: 'Upload symbols',
           }),
           content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`./symbtool push-symbols executable --url <symbols endpoint> --api-key <api key> --help`}
-            </EuiCodeBlock>
+            <div>
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`./symbtool push-symbols executable -u "${symbolUrl}" -t <ES token> -e <my executable>`}
+              </EuiCodeBlock>
+              <EuiSpacer size="m" />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.profiling.tabs.symbols.step3.replace"
+                  defaultMessage="Replace {es_token} etc. with the actual values. You can pass {help} to obtain a list of other arguments."
+                  values={{
+                    es_token: <EuiCode>{`<ES token>`}</EuiCode>,
+                    help: <EuiCode>--help</EuiCode>,
+                  }}
+                />
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.profiling.tabs.symbols.step3.doc-ref"
+                  defaultMessage="Documentation for more advanced uses cases is available in {link}."
+                  values={{
+                    link: (
+                      <EuiLink
+                        target="_blank"
+                        href={`https://www.elastic.co/guide/en/observability/current/profiling-add-symbols.html`}
+                      >
+                        {i18n.translate('xpack.profiling.tabs.symbols.step3.doc-ref.link', {
+                          defaultMessage: 'the corresponding documentation page',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </div>
           ),
         },
       ],
