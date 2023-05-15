@@ -42,9 +42,7 @@ describe('ZDT upgrades - basic downgrade', () => {
     switchToModelVersionAt: '8.0.0',
     modelVersions: {
       1: {
-        modelChange: {
-          type: 'expansion',
-        },
+        changes: [],
       },
     },
   });
@@ -61,17 +59,17 @@ describe('ZDT upgrades - basic downgrade', () => {
     switchToModelVersionAt: '8.0.0',
     modelVersions: {
       1: {
-        modelChange: {
-          type: 'expansion',
-        },
+        changes: [],
       },
       2: {
-        modelChange: {
-          type: 'expansion',
-          addedMappings: {
-            newField1: { type: 'text' },
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              newField1: { type: 'text' },
+            },
           },
-        },
+        ],
       },
     },
   });
