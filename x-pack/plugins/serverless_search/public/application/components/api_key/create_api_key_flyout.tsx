@@ -25,6 +25,7 @@ import React, { useState } from 'react';
 import { BACK_LABEL, CANCEL_LABEL, NEXT_LABEL } from '../../../../common/i18n_string';
 import { CreateAPIKeyArgs } from '../../../../common/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
+import { CREATE_API_KEY_PATH } from '../../routes';
 import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';
 import { SecurityPrivilegesForm } from './security_privileges_form';
@@ -62,6 +63,19 @@ function getPreviousStep(currentStep: Steps): Steps {
       return Steps.PRIVILEGES;
   }
 }
+
+const parseCreateError = (error: unknown): string | undefined => {
+  if (!error) return undefined;
+  if (typeof error === 'object') {
+    if ('body' in error && typeof (error as { body: unknown }).body === 'object') {
+      const errorWBody = error as { body: object };
+      if ('message' in errorWBody.body) {
+        return (errorWBody as { body: { message: string } }).body.message;
+      }
+    }
+  }
+  return JSON.stringify(error);
+};
 
 export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   onClose,
@@ -104,16 +118,17 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
 
   const { isLoading, isError, error, mutate } = useMutation({
     mutationFn: async (input: CreateAPIKeyArgs) => {
-      const result = await http.post<{ apiKey: ApiKey }>('/internal/serverless_search/api_keys', {
+      const result = await http.post<ApiKey>(CREATE_API_KEY_PATH, {
         body: JSON.stringify(input),
       });
       return result;
     },
-    onSuccess: ({ apiKey }) => {
+    onSuccess: (apiKey) => {
       setApiKey(apiKey);
       onClose();
     },
   });
+  const createError = parseCreateError(error);
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder={true}>
@@ -126,7 +141,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {isError && (
+        {isError && createError && (
           <EuiCallOut
             color="danger"
             iconType="warning"
@@ -134,9 +149,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
               defaultMessage: 'Error creating API key',
             })}
           >
-            {
-              JSON.stringify(error) // TODO: parse error from backend
-            }
+            {createError}
           </EuiCallOut>
         )}
         <EuiStepsHorizontal

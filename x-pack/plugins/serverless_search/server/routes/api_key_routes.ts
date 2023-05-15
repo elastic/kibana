@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { CreateAPIKeyArgs } from '../../common/types';
 import { RouteDependencies } from '../plugin';
 
 export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependencies) => {
@@ -26,25 +24,6 @@ export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependen
         statusCode: 502,
         body: 'Could not retrieve current user, security plugin is not ready',
       });
-    }
-  );
-  router.post(
-    {
-      path: '/internal/serverless_search/api_keys',
-      validate: {
-        body: schema.object({
-          expiration: schema.maybe(schema.string()),
-          metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          name: schema.string(),
-          role_descriptors: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      const createApiArgs: CreateAPIKeyArgs = request.body;
-      const apiKey = await client.asCurrentUser.security.createApiKey(createApiArgs);
-      return response.ok({ body: { apiKey } });
     }
   );
 };
