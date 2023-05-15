@@ -45,6 +45,7 @@ export interface RawPackageInfo {
     distributable?: boolean;
     number: number;
     sha: string;
+    date: string;
   };
 }
 
@@ -118,14 +119,11 @@ export class Env {
     const isKibanaDistributable = Boolean(pkg.build && pkg.build.distributable === true);
     this.packageInfo = Object.freeze({
       branch: pkg.branch,
-      // TODO: restore
-      // buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
-      buildNum: pkg.build.number,
-      // buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-      buildSha: pkg.build.sha,
+      buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
+      buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
       dist: isKibanaDistributable,
-      buildDate: new Date(),
+      buildDate: isKibanaDistributable ? new Date(pkg.build.date) : new Date(),
     });
   }
 }

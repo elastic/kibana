@@ -171,6 +171,7 @@ interface StatusResponse {
     build_hash: string;
     build_number: number;
     build_snapshot: boolean;
+    build_date: string;
   };
   /** Similar format to existing API, but slightly different shape */
   status: {
