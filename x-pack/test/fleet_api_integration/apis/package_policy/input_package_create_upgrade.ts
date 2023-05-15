@@ -225,7 +225,7 @@ export default function (providerContext: FtrProviderContext) {
                 default_pipeline: 'logs-dataset1-1.0.0',
                 mapping: {
                   total_fields: { limit: '10000' },
-                  ignore_malformed: true,
+                  ignore_malformed: 'true',
                 },
               },
             },
