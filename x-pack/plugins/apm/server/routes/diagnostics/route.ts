@@ -18,7 +18,6 @@ import {
   getUniqueApmIndices,
 } from './index_templates/get_matching_index_templates';
 import { getExpectedIndexTemplateStates } from './index_templates/get_expected_index_templates_states';
-import { getNonDataStreamIndices } from './datastreams/get_non_data_stream_indices';
 
 const fieldMappingsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics/invalid_field_mappings',
@@ -95,13 +94,17 @@ const dataStreamRoute = createApmServerRoute({
       }
     );
 
-    // fetch APM data streams
+    // fetch non-data stream indices
     const indicesRes = await apmEventClient.getIndices('get_indices', {
       index: apmIndices,
       filter_path: ['*.data_stream', '*.settings.index.uuid'],
     });
 
-    const nonDataStreamIndices = getNonDataStreamIndices(indicesRes);
+    const nonDataStreamIndices = Object.entries(indicesRes)
+      .filter(
+        ([indexName, { data_stream: dataStream }]): boolean => !dataStream
+      )
+      .map(([indexName]): string => indexName);
 
     return { dataStreams: datastreamRes.data_streams, nonDataStreamIndices };
   },

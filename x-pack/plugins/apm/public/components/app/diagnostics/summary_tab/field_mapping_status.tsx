@@ -35,7 +35,7 @@ export function FieldMappingStatus() {
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
         {isOk
-          ? 'All fields mapped correctly'
+          ? 'Field mappings: Looking good!'
           : i18n.translate('xpack.apm.diagnostics.invalid_mapping.title', {
               defaultMessage:
                 '{invalidCount} {invalidCount, plural, one {field is} other {fields are}} mapped incorrectly',

@@ -12,6 +12,7 @@ import {
   EuiBasicTableColumn,
   EuiCallOut,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -29,6 +30,11 @@ export function DiagnosticsDataStreams() {
   return (
     <>
       <NonDataStreamIndicesCallout data={data} />
+
+      <EuiText>
+        This section shows the data streams that match the APM Indices, and
+        their backing index template
+      </EuiText>
       <EuiSpacer />
       <DataStreamsTable data={data} />
     </>
@@ -41,10 +47,17 @@ function NonDataStreamIndicesCallout({ data }: { data?: APIResponseType }) {
   }
 
   return (
-    <EuiCallOut title="Non-data stream indices" color="warning" iconType="help">
-      The following indices are not backed by a data stream:{' '}
-      {data?.nonDataStreamIndices.join(', ')}
-    </EuiCallOut>
+    <>
+      <EuiCallOut
+        title="Non-data stream indices"
+        color="warning"
+        iconType="help"
+      >
+        The following indices are not backed by a data stream:{' '}
+        {data?.nonDataStreamIndices.join(', ')}
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
   );
 }
 
@@ -56,18 +69,17 @@ function DataStreamsTable({ data }: { data?: APIResponseType }) {
     },
     {
       field: 'template',
-      name: 'Template name',
+      name: 'Index template name',
       render: (templateName: string) => {
         const isValid = getIsValidIndexTemplateName(templateName);
         return isValid ? (
           <>
-            <EuiBadge color="green">OK</EuiBadge>&nbsp;{templateName}
+            {templateName}&nbsp;<EuiBadge color="green">OK</EuiBadge>
           </>
         ) : (
           <>
-            <EuiBadge color="warning">Non-standard template name!</EuiBadge>
-            &nbsp;
-            {templateName}
+            {templateName}&nbsp;
+            <EuiBadge color="warning">Non-standard template name</EuiBadge>
           </>
         );
       },

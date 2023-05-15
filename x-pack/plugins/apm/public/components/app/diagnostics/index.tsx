@@ -68,14 +68,14 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
           {
             href: router.link('/diagnostics/data_streams'),
             label: i18n.translate('xpack.apm.diagnostics.tab.datastreams', {
-              defaultMessage: 'Datastreams',
+              defaultMessage: 'Data streams',
             }),
             isSelected: routePath === '/diagnostics/data_streams',
           },
           {
             href: router.link('/diagnostics/invalid-field-mappings'),
             label: i18n.translate('xpack.apm.diagnostics.tab.field_mappings', {
-              defaultMessage: 'Invalid field mappings',
+              defaultMessage: 'Field mappings',
             }),
             isSelected: routePath === '/diagnostics/invalid-field-mappings',
           },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLink, EuiLoadingElastic } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
@@ -45,6 +46,7 @@ function MatchingIndexTemplates({
 }: {
   data: APIResponseType | undefined;
 }) {
+  const router = useApmRouter();
   const indexTemplatesByIndexPattern = getIndexTemplatesByIndexPattern(data);
 
   if (
@@ -103,9 +105,15 @@ function MatchingIndexTemplates({
       </EuiTitle>
 
       <EuiText>
-        This section shows which index templates are matched by the index
-        patterns specified in APM Index Settings. The priority and index pattern
-        of the index template can be seen by hovering over the item.
+        This section lists the index patterns specified in{' '}
+        <EuiLink
+          data-test-subj="apmMatchingIndexTemplatesSeeDetailsLink"
+          href={router.link('/settings/apm-indices')}
+        >
+          APM Index Settings
+        </EuiLink>{' '}
+        and which index templates they match. The priority and index pattern of
+        each index template can be seen by hovering over the item.
       </EuiText>
       <EuiSpacer />
       {elms}
