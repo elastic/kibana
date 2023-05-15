@@ -14,24 +14,60 @@ describe('transformResponse', () => {
       indexTemplateResponse
     );
     expect(expectedIndexTemplateStates).toEqual({
-      'logs-apm.app': true,
-      'logs-apm.error': true,
-      'metrics-apm.app': true,
-      'metrics-apm.internal': true,
-      'metrics-apm.service_destination.10m': true,
-      'metrics-apm.service_destination.1m': true,
-      'metrics-apm.service_destination.60m': true,
-      'metrics-apm.service_summary.10m': true,
-      'metrics-apm.service_summary.1m': true,
-      'metrics-apm.service_summary.60m': true,
-      'metrics-apm.service_transaction.10m': true,
-      'metrics-apm.service_transaction.1m': true,
-      'metrics-apm.service_transaction.60m': true,
-      'metrics-apm.transaction.10m': true,
-      'metrics-apm.transaction.1m': true,
-      'metrics-apm.transaction.60m': true,
-      'traces-apm': true,
-      'traces-apm.sampled': true,
+      'logs-apm.app': { exists: true, name: 'logs-apm.app' },
+      'logs-apm.error': { exists: true, name: 'logs-apm.error' },
+      'metrics-apm.app': { exists: true, name: 'metrics-apm.app' },
+      'metrics-apm.internal': { exists: true, name: 'metrics-apm.internal' },
+      'metrics-apm.service_destination.10m': {
+        exists: true,
+        name: 'metrics-apm.service_destination.10m',
+      },
+      'metrics-apm.service_destination.1m': {
+        exists: true,
+        name: 'metrics-apm.service_destination.1m',
+      },
+      'metrics-apm.service_destination.60m': {
+        exists: true,
+        name: 'metrics-apm.service_destination.60m',
+      },
+      'metrics-apm.service_summary.10m': {
+        exists: true,
+        name: 'metrics-apm.service_summary.10m',
+      },
+      'metrics-apm.service_summary.1m': {
+        exists: true,
+        name: 'metrics-apm.service_summary.1m',
+      },
+      'metrics-apm.service_summary.60m': {
+        exists: true,
+        name: 'metrics-apm.service_summary.60m',
+      },
+      'metrics-apm.service_transaction.10m': {
+        exists: true,
+        name: 'metrics-apm.service_transaction.10m',
+      },
+      'metrics-apm.service_transaction.1m': {
+        exists: true,
+        name: 'metrics-apm.service_transaction.1m',
+      },
+      'metrics-apm.service_transaction.60m': {
+        exists: true,
+        name: 'metrics-apm.service_transaction.60m',
+      },
+      'metrics-apm.transaction.10m': {
+        exists: true,
+        name: 'metrics-apm.transaction.10m',
+      },
+      'metrics-apm.transaction.1m': {
+        exists: true,
+        name: 'metrics-apm.transaction.1m',
+      },
+      'metrics-apm.transaction.60m': {
+        exists: true,
+        name: 'metrics-apm.transaction.60m',
+      },
+      'traces-apm': { exists: true, name: 'traces-apm' },
+      'traces-apm.sampled': { exists: true, name: 'traces-apm.sampled' },
     });
   });
 
@@ -40,24 +76,24 @@ describe('transformResponse', () => {
       index_templates: [],
     });
     expect(expectedIndexTemplateStates).toEqual({
-      'logs-apm.app': false,
-      'logs-apm.error': false,
-      'metrics-apm.app': false,
-      'metrics-apm.internal': false,
-      'metrics-apm.service_destination.10m': false,
-      'metrics-apm.service_destination.1m': false,
-      'metrics-apm.service_destination.60m': false,
-      'metrics-apm.service_summary.10m': false,
-      'metrics-apm.service_summary.1m': false,
-      'metrics-apm.service_summary.60m': false,
-      'metrics-apm.service_transaction.10m': false,
-      'metrics-apm.service_transaction.1m': false,
-      'metrics-apm.service_transaction.60m': false,
-      'metrics-apm.transaction.10m': false,
-      'metrics-apm.transaction.1m': false,
-      'metrics-apm.transaction.60m': false,
-      'traces-apm': false,
-      'traces-apm.sampled': false,
+      'logs-apm.app': { exists: false },
+      'logs-apm.error': { exists: false },
+      'metrics-apm.app': { exists: false },
+      'metrics-apm.internal': { exists: false },
+      'metrics-apm.service_destination.10m': { exists: false },
+      'metrics-apm.service_destination.1m': { exists: false },
+      'metrics-apm.service_destination.60m': { exists: false },
+      'metrics-apm.service_summary.10m': { exists: false },
+      'metrics-apm.service_summary.1m': { exists: false },
+      'metrics-apm.service_summary.60m': { exists: false },
+      'metrics-apm.service_transaction.10m': { exists: false },
+      'metrics-apm.service_transaction.1m': { exists: false },
+      'metrics-apm.service_transaction.60m': { exists: false },
+      'metrics-apm.transaction.10m': { exists: false },
+      'metrics-apm.transaction.1m': { exists: false },
+      'metrics-apm.transaction.60m': { exists: false },
+      'traces-apm': { exists: false },
+      'traces-apm.sampled': { exists: false },
     });
   });
 
@@ -65,6 +101,9 @@ describe('transformResponse', () => {
     const expectedIndexTemplateStates = transformResponse({
       index_templates: [{ name: 'logs-apm.app-my-namespace' }] as any,
     });
-    expect(expectedIndexTemplateStates['logs-apm.app']).toEqual(true);
+    expect(expectedIndexTemplateStates['logs-apm.app']).toEqual({
+      exists: true,
+      name: 'logs-apm.app-my-namespace',
+    });
   });
 });
