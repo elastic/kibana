@@ -32,7 +32,6 @@ import type {
   FramePublicAPI,
   OperationMetadata,
   Suggestion,
-  UserMessage,
   Visualization,
 } from '../../types';
 import { getSuggestions } from './suggestions';
@@ -44,80 +43,6 @@ export type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
 export const revealImageIcon = 'image';
 export const revealImageId = 'revealImage';
-
-function getNiceNumber(localRange: number) {
-  const exponent = Math.floor(Math.log10(localRange));
-  const fraction = localRange / Math.pow(10, exponent);
-  let niceFraction = 10;
-
-  if (fraction <= 1) niceFraction = 1;
-  else if (fraction <= 2) niceFraction = 2;
-  else if (fraction <= 5) niceFraction = 5;
-
-  return niceFraction * Math.pow(10, exponent);
-}
-
-// returns nice rounded numbers similar to d3 nice() function
-function getNiceRange(min: number, max: number) {
-  const maxTicks = 5;
-  const offsetMax = max + 0.0000001; // added to avoid max value equal to metric value
-  const range = getNiceNumber(offsetMax - min);
-  const tickSpacing = getNiceNumber(range / (maxTicks - 1));
-  return {
-    min: Math.floor(min / tickSpacing) * tickSpacing,
-    max: Math.ceil(Math.ceil(offsetMax / tickSpacing) * tickSpacing),
-  };
-}
-
-export const getMaxValue = (
-  row?: DatatableRow,
-  accessors?: Accessors,
-  isRespectRanges?: boolean
-): number => {
-  const FALLBACK_VALUE = 100;
-  const currentValue = accessors?.max ? getValueFromAccessor(accessors.max, row) : undefined;
-  if (currentValue !== undefined && currentValue !== null) {
-    return currentValue;
-  }
-
-  if (isRespectRanges) {
-    const metricValue = accessors?.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
-    return metricValue;
-  }
-
-  if (row && accessors) {
-    const { metric, goal } = accessors;
-    const metricValue = metric && row[metric];
-    const goalValue = goal && row[goal];
-    const minValue = 0;
-    if (metricValue != null) {
-      const numberValues = [minValue, goalValue, metricValue].filter((v) => typeof v === 'number');
-      const maxValue = Math.max(...numberValues);
-      return getNiceRange(minValue, maxValue).max;
-    }
-  }
-  return FALLBACK_VALUE;
-};
-
-export const getValueFromAccessor = (
-  accessor: string,
-  row?: DatatableRow
-): DatatableRow[string] | number | undefined => {
-  if (!row || !accessor) return;
-
-  const value = accessor && row[accessor];
-  if (value === null || (Array.isArray(value) && !value.length)) {
-    return;
-  }
-
-  if (typeof value === 'number') {
-    return value;
-  }
-
-  if (Array.isArray(value) && typeof value[value.length - 1] === 'number') {
-    return value[value.length - 1];
-  }
-};
 
 const groupLabelForRevealImage = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
@@ -140,57 +65,6 @@ const CHART_NAMES = {
     }),
     groupLabel: groupLabelForRevealImage,
   },
-};
-
-const getErrorMessages = (
-  row?: DatatableRow,
-  state?: RevealImageVisualizationState
-): UserMessage[] => {
-  if (!row || !state) {
-    return [];
-  }
-
-  const errors: UserMessage[] = [];
-
-  // const imageAccessor = state?.imageAccessor;
-  // const emptyImageAccessor = state?.emptyImageAccessor;
-  // const minValue = imageAccessor ? getValueFromAccessor(imageAccessor, row) : undefined;
-  // const maxValue = emptyImageAccessor ? getValueFromAccessor(emptyImageAccessor, row) : undefined;
-  // if (maxValue !== null && maxValue !== undefined && minValue != null && minValue !== undefined) {
-  //   if (maxValue < minValue) {
-  //     errors.push({
-  //       severity: 'error',
-  //       displayLocations: [
-  //         { id: 'dimensionButton', dimensionId: imageAccessor! },
-  //         { id: 'dimensionButton', dimensionId: emptyImageAccessor! },
-  //       ],
-  //       fixableInEditor: true,
-  //       shortMessage: i18n.translate(
-  //         'xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax',
-  //         {
-  //           defaultMessage: 'Minimum value may not be greater than maximum value',
-  //         }
-  //       ),
-  //       longMessage: '',
-  //     });
-  //   }
-  //   if (maxValue === minValue) {
-  //     errors.push({
-  //       severity: 'error',
-  //       displayLocations: [
-  //         { id: 'dimensionButton', dimensionId: imageAccessor! },
-  //         { id: 'dimensionButton', dimensionId: emptyImageAccessor! },
-  //       ],
-  //       fixableInEditor: true,
-  //       shortMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
-  //         defaultMessage: 'Minimum and maximum values may not be equal',
-  //       }),
-  //       longMessage: '',
-  //     });
-  //   }
-  // }
-
-  return errors;
 };
 
 const toExpression = (
@@ -274,8 +148,8 @@ export const getRevealImageVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
-        image: null,
-        emptyImage: null,
+        imageId: null,
+        emptyImageId: null,
         origin: Origin.BOTTOM,
       }
     );
@@ -436,29 +310,6 @@ export const getRevealImageVisualization = ({
   toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers = {}) =>
     toExpression(state, datasourceLayers, undefined, datasourceExpressionsByLayers),
 
-  getUserMessages(state, { frame }) {
-    const { metricAccessor } = state;
-    if (!metricAccessor) {
-      return [];
-    }
-
-    const row = frame.activeData?.[state.layerId]?.rows?.[0];
-    if (!row) {
-      return [];
-    }
-
-    const errors = getErrorMessages(row, state);
-    if (errors.length) {
-      return errors;
-    }
-
-    const metricValue = row[metricAccessor];
-
-    const warnings: UserMessage[] = [];
-
-    return warnings;
-  },
-
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
     const allSuggestions = suggestions as Array<
       Suggestion<RevealImageVisualizationState, FormBasedPersistedState>
@@ -528,4 +379,10 @@ function getConfigurationAccessorsAndPalette(
   const accessors = getAccessorsFromState(state);
 
   return { metricAccessor, accessors };
+}
+function getMaxValue(
+  row: DatatableRow | undefined,
+  accessors: Accessors | undefined
+): number | undefined {
+  throw new Error('Function not implemented.');
 }
