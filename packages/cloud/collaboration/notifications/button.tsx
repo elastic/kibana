@@ -12,7 +12,7 @@ import { notification } from '@cord-sdk/react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { NotificationFlyout } from './flyout';
 
-export const NotificationButton = () => {
+export const NotificationButton = ({ token }: { token?: string | null }) => {
   const notifications = notification.useSummary();
   const [isOpen, setIsOpen] = useState(false);
   const [hasNew, setHasNew] = useState(false);
@@ -21,6 +21,10 @@ export const NotificationButton = () => {
     const unread = notifications?.unread || 0;
     setHasNew(unread > 0);
   }, [notifications]);
+
+  if (!token) {
+    return null;
+  }
 
   const onButtonClick = () => setIsOpen((open) => !open);
   const onClose = () => setIsOpen(false);
@@ -35,7 +39,7 @@ export const NotificationButton = () => {
       >
         <EuiIcon type="bell" size="m" />
       </EuiHeaderSectionItemButton>
-      {isOpen ? <NotificationFlyout {...{ onClose }} /> : null}
+      {isOpen ? <NotificationFlyout {...{ onClose, token }} /> : null}
     </>
   );
 };

@@ -21,6 +21,7 @@ import { ScopedHistory } from '@kbn/core/public';
 import { CordProvider } from '@cord-sdk/react';
 import { ThreadButton } from '@kbn/cloud-collaboration-threads';
 
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
@@ -290,6 +291,7 @@ export function getTopNavConfig({
               application="maps"
               savedObjectId={savedObjectId}
               savedObjectName={savedMap.getTitle()}
+              kbnStateStorage={createKbnUrlStateStorage()}
             />
           </CordProvider>
         ),

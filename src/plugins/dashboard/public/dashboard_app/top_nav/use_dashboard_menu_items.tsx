@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { batch } from 'react-redux';
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
@@ -14,6 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 import { ThreadButton } from '@kbn/cloud-collaboration-threads';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DashboardRedirect } from '../types';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardAPI } from '../dashboard_app';
@@ -33,6 +34,7 @@ export const useDashboardMenuItems = ({
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const stateStorage = useRef(createKbnUrlStateStorage());
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   /**
@@ -177,6 +179,7 @@ export const useDashboardMenuItems = ({
                 application="dashboard"
                 savedObjectId={lastSavedId}
                 savedObjectName={dashboardTitle}
+                kbnStateStorage={stateStorage.current}
               />
             </CollaborationContextProvider>
           ) : null;

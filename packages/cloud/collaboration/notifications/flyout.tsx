@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Inbox, NotificationList } from '@cord-sdk/react';
+import { CordProvider, Inbox, NotificationList } from '@cord-sdk/react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -22,11 +22,12 @@ import { css } from '@emotion/react';
 
 export interface Props {
   onClose: () => void;
+  token: string;
 }
 
 type Section = 'notifications' | 'inbox';
 
-export const NotificationFlyout = ({ onClose }: Props) => {
+export const NotificationFlyout = ({ onClose, token }: Props) => {
   const [currentSection, setCurrentSection] = React.useState<Section>('inbox');
 
   const hideCSS = css`
@@ -66,34 +67,36 @@ export const NotificationFlyout = ({ onClose }: Props) => {
       css={flyoutCSS}
       maskProps={{ headerZindexLocation: 'above' }}
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2>Notification Center</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="s">
-          <p>Respond to notifications from your team and Kibana.</p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiTabs bottomBorder={false} style={{ marginBottom: '-24px' }}>
-          <EuiTab
-            onClick={() => setCurrentSection('inbox')}
-            isSelected={currentSection === 'inbox'}
-          >
-            Inbox
-          </EuiTab>
-          <EuiTab
-            onClick={() => setCurrentSection('notifications')}
-            isSelected={currentSection === 'notifications'}
-          >
-            Notifications
-          </EuiTab>
-        </EuiTabs>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody css={bodyCSS}>
-        <Inbox css={inboxCSS} showCloseButton={false} showSettings={false} />
-        <NotificationList css={notificationCSS} />
-      </EuiFlyoutBody>
+      <CordProvider clientAuthToken={token}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2>Notification Center</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            <p>Respond to notifications from your team and Kibana.</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiTabs bottomBorder={false} style={{ marginBottom: '-24px' }}>
+            <EuiTab
+              onClick={() => setCurrentSection('inbox')}
+              isSelected={currentSection === 'inbox'}
+            >
+              Inbox
+            </EuiTab>
+            <EuiTab
+              onClick={() => setCurrentSection('notifications')}
+              isSelected={currentSection === 'notifications'}
+            >
+              Notifications
+            </EuiTab>
+          </EuiTabs>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody css={bodyCSS}>
+          <Inbox css={inboxCSS} showCloseButton={false} showSettings={false} />
+          <NotificationList css={notificationCSS} />
+        </EuiFlyoutBody>
+      </CordProvider>
     </EuiFlyout>
   );
 };

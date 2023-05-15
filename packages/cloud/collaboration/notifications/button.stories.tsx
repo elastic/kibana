@@ -37,7 +37,7 @@ interface Params {
 export const NotificationButton = ({ clientAuthToken }: Params) => {
   return (
     <CordProvider clientAuthToken={clientAuthToken}>
-      <Component />
+      <Component token={clientAuthToken} />
     </CordProvider>
   );
 };

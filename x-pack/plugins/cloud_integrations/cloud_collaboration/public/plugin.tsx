@@ -105,7 +105,7 @@ export class CloudCollaborationPlugin
       const token = useObservable(this.token$);
       return (
         <CordProvider clientAuthToken={token}>
-          <NotificationButton />
+          <NotificationButton {...{ token }} />
         </CordProvider>
       );
     };

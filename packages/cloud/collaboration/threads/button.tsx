@@ -10,12 +10,14 @@ import React, { useState } from 'react';
 import { thread } from '@cord-sdk/react';
 
 import { EuiButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
-import { ThreadFlyout, Props as ThreadFlyoutProps } from './flyout';
+
+import { ThreadFlyout, Props as ThreadFlyoutProps, STATE_STORAGE_KEY } from './flyout';
 
 export type Props = Omit<ThreadFlyoutProps, 'onClose'>;
 
-export const ThreadButton = ({ application, savedObjectId, ...props }: Props) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const ThreadButton = ({ application, savedObjectId, kbnStateStorage, ...props }: Props) => {
+  const state = kbnStateStorage.get(STATE_STORAGE_KEY);
+  const [isOpen, setIsOpen] = useState(!!state);
   const summary = thread.useLocationSummary({ page: `${application}-${savedObjectId}` });
 
   const onButtonClick = () => setIsOpen((open) => !open);
@@ -31,7 +33,9 @@ export const ThreadButton = ({ application, savedObjectId, ...props }: Props) =>
           </EuiNotificationBadge>
         ) : null}
       </EuiButton>
-      {isOpen ? <ThreadFlyout {...{ onClose, application, savedObjectId, ...props }} /> : null}
+      {isOpen ? (
+        <ThreadFlyout {...{ onClose, application, savedObjectId, kbnStateStorage, ...props }} />
+      ) : null}
     </>
   );
 };
