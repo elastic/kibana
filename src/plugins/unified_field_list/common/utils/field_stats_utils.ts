@@ -127,6 +127,10 @@ export async function fetchAndCalculateFieldStats({
     return await getNumberHistogram(searchHandler, field, false);
   }
 
+  if (canProvideNumberSummaryForField(field)) {
+    return await getNumberSummary(searchHandler, field);
+  }
+
   if (field.type === 'number') {
     return await getNumberHistogram(searchHandler, field);
   }
@@ -145,8 +149,7 @@ function canProvideAggregatedStatsForField(field: DataViewField): boolean {
     field.type === 'geo_point' ||
     field.type === 'geo_shape' ||
     field.type === 'murmur3' ||
-    field.type === 'attachment' ||
-    field.timeSeriesMetric === 'counter'
+    field.type === 'attachment'
   );
 }
 
@@ -154,6 +157,53 @@ export function canProvideStatsForField(field: DataViewField): boolean {
   return (
     (field.aggregatable && canProvideAggregatedStatsForField(field)) || showExamplesForField(field)
   );
+}
+
+export function canProvideNumberSummaryForField(field: DataViewField): boolean {
+  return field.timeSeriesMetric === 'counter';
+}
+
+export async function getNumberSummary(
+  aggSearchWithBody: SearchHandler,
+  field: DataViewField
+): Promise<FieldStatsResponse<string | number>> {
+  // similar to `getNumericFieldsStatsRequest` from Data Visualizer
+  const searchWithAggs = {
+    sample: {
+      sampler: { shard_size: SHARD_SIZE },
+      aggs: {
+        min_max_summary: {
+          filter: { exists: { field: field.name } },
+          aggs: {
+            min: {
+              min: { field: field.name },
+            },
+            max: {
+              max: { field: field.name },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const summaryResult = (await aggSearchWithBody({
+    aggs: searchWithAggs,
+  })) as ESSearchResponse<unknown, { body: { aggs: typeof searchWithAggs } }>;
+
+  const minValue = summaryResult.aggregations!.sample.min_max_summary.min.value;
+  const maxValue = summaryResult.aggregations!.sample.min_max_summary.max.value;
+  const sampledDocuments = summaryResult.aggregations!.sample.doc_count;
+
+  return {
+    totalDocuments: getHitsTotal(summaryResult),
+    sampledDocuments,
+    sampledValues: sampledDocuments,
+    numberSummary: {
+      minValue,
+      maxValue,
+    },
+  };
 }
 
 export async function getNumberHistogram(
