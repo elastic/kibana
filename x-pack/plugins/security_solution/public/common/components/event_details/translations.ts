@@ -147,16 +147,36 @@ export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetai
   defaultMessage: 'View all fields in table',
 });
 
-export const ALERT_SUMMARY_VIEW_CONTEXT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertSummaryView.contextDescription',
+export const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summaryView', {
+  defaultMessage: 'summary',
+});
+
+export const TIMELINE_VIEW = i18n.translate('xpack.securitySolution.eventDetails.timelineView', {
+  defaultMessage: 'Timeline',
+});
+
+export const ALERT_SUMMARY_CONTEXT_DESCRIPTION = (view: string) =>
+  i18n.translate('xpack.securitySolution.alertSummaryView.alertSummaryViewContextDescription', {
+    defaultMessage: 'Alert (from {view})',
+    values: { view },
+  });
+
+export const ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.alertSummaryViewContextTooltip',
   {
-    defaultMessage: 'Alert (summary view)',
+    defaultMessage: 'Use this alert for context',
   }
 );
 
-export const ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.alertSummaryView.contextTooltip',
+export const EVENT_SUMMARY_CONTEXT_DESCRIPTION = (view: string) =>
+  i18n.translate('xpack.securitySolution.alertSummaryView.eventSummaryViewContextDescription', {
+    defaultMessage: 'Event (from {view})',
+    values: { view },
+  });
+
+export const EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.eventSummaryViewContextTooltip',
   {
-    defaultMessage: 'Use this alert for context',
+    defaultMessage: 'Use this event for context',
   }
 );

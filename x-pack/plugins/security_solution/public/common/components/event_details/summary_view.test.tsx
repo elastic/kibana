@@ -53,7 +53,6 @@ const enrichedHostIpData: AlertSummaryRow['description'] = {
 };
 
 const mockCount = 90019001;
-const promptContextId = 'abcd';
 
 jest.mock('../../containers/alerts/use_alert_prevalence', () => ({
   useAlertPrevalence: () => ({
@@ -68,12 +67,7 @@ describe('Summary View', () => {
     test('should show an empty table', () => {
       render(
         <TestProviders>
-          <SummaryView
-            goToTable={jest.fn()}
-            title="Test Summary View"
-            promptContextId={promptContextId}
-            rows={[]}
-          />
+          <SummaryView goToTable={jest.fn()} title="Test Summary View" rows={[]} />
         </TestProviders>
       );
       expect(screen.getByText('No items found')).toBeInTheDocument();
@@ -91,12 +85,7 @@ describe('Summary View', () => {
 
       render(
         <TestProviders>
-          <SummaryView
-            goToTable={jest.fn()}
-            title="Test Summary View"
-            promptContextId={promptContextId}
-            rows={sampleRows}
-          />
+          <SummaryView goToTable={jest.fn()} title="Test Summary View" rows={sampleRows} />
         </TestProviders>
       );
       // Shows the field name
@@ -127,7 +116,6 @@ describe('Summary View', () => {
           <SummaryView
             goToTable={jest.fn()}
             title="Test Summary View"
-            promptContextId={promptContextId}
             rows={sampleRows}
             isReadOnly={true}
           />

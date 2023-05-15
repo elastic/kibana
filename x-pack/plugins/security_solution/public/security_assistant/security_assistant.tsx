@@ -26,9 +26,10 @@ import { CommentType } from '@kbn/cases-plugin/common';
 import styled from 'styled-components';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
+import { useDispatch } from 'react-redux';
 import * as i18n from './translations';
 
-import { useKibana } from '../common/lib/kibana';
+import { useKibana, useToasts } from '../common/lib/kibana';
 import { getCombinedMessage, getMessageFromRawResponse, isFileHash } from './helpers';
 
 import { SettingsPopover } from './settings_popover';
@@ -46,6 +47,11 @@ import type { Prompt } from './types';
 import { getPromptById } from './prompt_editor/helpers';
 import { augmentMessageCodeBlocks } from './use_conversation/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
+import { updateAndAssociateNode } from '../timelines/components/notes/helpers';
+import { timelineActions } from '../timelines/store/timeline';
+import { appActions } from '../common/store/actions';
+import { TimelineId } from '../../common/types';
+import type { Note } from '../common/lib/note';
 
 const CommentsContainer = styled.div`
   max-height: 600px;
@@ -148,6 +154,34 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       );
       ////
 
+      const dispatch = useDispatch();
+      const toasts = useToasts();
+
+      const associateNote = useCallback(
+        (noteId: string) => dispatch(timelineActions.addNote({ id: TimelineId.active, noteId })),
+        [dispatch]
+      );
+
+      const updateNote = useCallback(
+        (note: Note) => dispatch(appActions.updateNote({ note })),
+        [dispatch]
+      );
+
+      const handleAddNoteToTimelineClick = useCallback(
+        (messageContents: string) => {
+          updateAndAssociateNode({
+            associateNote,
+            newNote: messageContents,
+            updateNewNote: () => {},
+            updateNote,
+            user: '', // TODO: attribute assistant messages
+          });
+
+          toasts.addSuccess(i18n.ADDED_NOTE_TO_TIMELINE);
+        },
+        [associateNote, toasts, updateNote]
+      );
+
       // Handles sending latest user prompt to API
       const handleSendMessage = useCallback(
         async (promptText) => {
@@ -200,11 +234,14 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
               conversationId: selectedConversationId,
               message,
             });
+
+            // Reset prompt context selection and preview before sending:
+            setSelectedPromptContextIds([]);
+            setPromptTextPreview('');
+
             const rawResponse = await sendMessages(updatedMessages);
             const responseMessage: Message = getMessageFromRawResponse(rawResponse);
             appendMessage({ conversationId: selectedConversationId, message: responseMessage });
-            setSelectedPromptContextIds([]);
-            setPromptTextPreview('');
           }
         },
         [
@@ -319,7 +356,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
                       <>
                         <EuiToolTip position="top" content={'Add to timeline note'}>
                           <EuiButtonIcon
-                            onClick={() => handleAddToExistingCaseClick(message.content)}
+                            onClick={() => handleAddNoteToTimelineClick(message.content)}
                             iconType="editorComment"
                             color="primary"
                             aria-label="Add message content as a timeline note"

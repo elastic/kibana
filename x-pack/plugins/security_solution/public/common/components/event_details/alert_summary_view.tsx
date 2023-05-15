@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { getSummaryRows } from './get_alert_summary_rows';
-import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE } from '../../../security_assistant/content/prompts/user/translations';
-import { useSecurityAssistantContext } from '../../../security_assistant/security_assistant_context';
 import { SummaryView } from './summary_view';
-import * as i18n from './translations';
-import { getPromptContextFromEventDetailsItem } from '../../../security_assistant/prompt_context/helpers';
-import { getUniquePromptContextId } from '../../../security_assistant/security_assistant_context/helpers';
 
 const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
@@ -32,35 +27,8 @@ const AlertSummaryViewComponent: React.FC<{
     [browserFields, data, eventId, isDraggable, scopeId, isReadOnly]
   );
 
-  const { registerPromptContext, unRegisterPromptContext } = useSecurityAssistantContext();
-  const promptContextId = useMemo(() => getUniquePromptContextId(), []);
-
-  const getPromptContext = useCallback(
-    async () => getPromptContextFromEventDetailsItem(data),
-    [data]
-  );
-
-  useEffect(() => {
-    registerPromptContext({
-      category: 'alert',
-      description: i18n.ALERT_SUMMARY_VIEW_CONTEXT_DESCRIPTION,
-      id: promptContextId,
-      getPromptContext,
-      suggestedUserPrompt: EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE,
-      tooltip: i18n.ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-    });
-
-    return () => unRegisterPromptContext(promptContextId);
-  }, [getPromptContext, promptContextId, registerPromptContext, unRegisterPromptContext]);
-
   return (
-    <SummaryView
-      goToTable={goToTable}
-      isReadOnly={isReadOnly}
-      promptContextId={promptContextId}
-      rows={summaryRows}
-      title={title}
-    />
+    <SummaryView goToTable={goToTable} isReadOnly={isReadOnly} rows={summaryRows} title={title} />
   );
 };
 

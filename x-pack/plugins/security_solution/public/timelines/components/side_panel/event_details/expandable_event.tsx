@@ -35,6 +35,7 @@ import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
+import { NewChat } from '../../../../security_assistant/new_chat';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -58,6 +59,7 @@ interface ExpandableEventTitleProps {
   eventIndex: string;
   isAlert: boolean;
   loading: boolean;
+  promptContextId?: string;
   ruleName?: string;
   timestamp: string;
   handleOnEventClosed?: HandleOnEventClosed;
@@ -80,7 +82,16 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ eventId, eventIndex, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
+  ({
+    eventId,
+    eventIndex,
+    isAlert,
+    loading,
+    handleOnEventClosed,
+    promptContextId,
+    ruleName,
+    timestamp,
+  }) => {
     const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
     const { onClick } = useGetSecuritySolutionLinkProps()({
       deepLinkId: SecurityPageName.alerts,
@@ -134,19 +145,30 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                 />
               </EuiFlexItem>
             )}
-            {isAlert && alertDetailsLink && (
-              <EuiCopy textToCopy={alertDetailsLink}>
-                {(copy) => (
-                  <EuiButtonEmpty
-                    onClick={copy}
-                    iconType="share"
-                    data-test-subj="copy-alert-flyout-link"
-                  >
-                    {i18n.SHARE_ALERT}
-                  </EuiButtonEmpty>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
+                {promptContextId != null && (
+                  <EuiFlexItem grow={false}>
+                    <NewChat promptContextId={promptContextId} />
+                  </EuiFlexItem>
                 )}
-              </EuiCopy>
-            )}
+                {isAlert && alertDetailsLink && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCopy textToCopy={alertDetailsLink}>
+                      {(copy) => (
+                        <EuiButtonEmpty
+                          onClick={copy}
+                          iconType="share"
+                          data-test-subj="copy-alert-flyout-link"
+                        >
+                          {i18n.SHARE_ALERT}
+                        </EuiButtonEmpty>
+                      )}
+                    </EuiCopy>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </StyledEuiFlexGroup>

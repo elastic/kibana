@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import deepEqual from 'fast-deep-equal';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -21,6 +21,18 @@ import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import { useSecurityAssistantContext } from '../../../../security_assistant/security_assistant_context';
+import { getUniquePromptContextId } from '../../../../security_assistant/security_assistant_context/helpers';
+import { getPromptContextFromEventDetailsItem } from '../../../../security_assistant/prompt_context/helpers';
+import {
+  ALERT_SUMMARY_CONTEXT_DESCRIPTION,
+  ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+  EVENT_SUMMARY_CONTEXT_DESCRIPTION,
+  EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+  SUMMARY_VIEW,
+  TIMELINE_VIEW,
+} from '../../../../common/components/event_details/translations';
+import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE } from '../../../../security_assistant/content/prompts/user/translations';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -76,6 +88,38 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
 
+  const { registerPromptContext, unRegisterPromptContext } = useSecurityAssistantContext();
+  const promptContextId = useMemo(() => getUniquePromptContextId(), []);
+
+  const getPromptContext = useCallback(
+    async () => getPromptContextFromEventDetailsItem(detailsData ?? []),
+    [detailsData]
+  );
+
+  useEffect(() => {
+    const view = isFlyoutView ? SUMMARY_VIEW : TIMELINE_VIEW;
+
+    registerPromptContext({
+      category: isAlert ? 'alert' : 'event',
+      description: isAlert
+        ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(view)
+        : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),
+      id: promptContextId,
+      getPromptContext,
+      suggestedUserPrompt: EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE,
+      tooltip: isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+    });
+
+    return () => unRegisterPromptContext(promptContextId);
+  }, [
+    getPromptContext,
+    isAlert,
+    isFlyoutView,
+    promptContextId,
+    registerPromptContext,
+    unRegisterPromptContext,
+  ]);
+
   const header = useMemo(
     () =>
       isFlyoutView || isHostIsolationPanelOpen ? (
@@ -89,6 +133,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           ruleName={ruleName}
           showAlertDetails={showAlertDetails}
           timestamp={timestamp}
+          promptContextId={promptContextId}
         />
       ) : (
         <ExpandableEventTitle
@@ -99,20 +144,22 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           ruleName={ruleName}
           timestamp={timestamp}
           handleOnEventClosed={handleOnEventClosed}
+          promptContextId={promptContextId}
         />
       ),
     [
-      expandedEvent.eventId,
-      eventIndex,
-      handleOnEventClosed,
-      isAlert,
       isFlyoutView,
       isHostIsolationPanelOpen,
+      expandedEvent.eventId,
+      eventIndex,
+      isAlert,
       isolateAction,
       loading,
       ruleName,
       showAlertDetails,
       timestamp,
+      handleOnEventClosed,
+      promptContextId,
     ]
   );
 

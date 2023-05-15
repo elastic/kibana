@@ -7,12 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADDED_NOTE_TO_TIMELINE = i18n.translate(
+  'xpack.securitySolution.securityAssistant.addedNoteToTimeline',
+  {
+    defaultMessage: 'Added note to timeline',
+  }
+);
+
 export const SECURITY_ASSISTANT_TITLE = i18n.translate(
   'xpack.securitySolution.securityAssistant.title',
   {
     defaultMessage: 'Elastic Security Assistant',
   }
 );
+
 export const PROMPT_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.securityAssistant.promptPlaceholder',
   {

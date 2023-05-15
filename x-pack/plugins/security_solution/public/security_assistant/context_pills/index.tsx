@@ -6,11 +6,16 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
 
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
 import type { PromptContext } from '../prompt_context/types';
+
+const PillButton = styled(EuiButton)`
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+`;
 
 interface Props {
   promptContexts: Record<string, PromptContext>;
@@ -42,14 +47,14 @@ const ContextPillsComponent: React.FC<Props> = ({
       {sortedPromptContexts.map(({ description, id, getPromptContext, tooltip }) => (
         <EuiFlexItem grow={false} key={id}>
           <EuiToolTip content={tooltip}>
-            <EuiButton
+            <PillButton
               disabled={selectedPromptContextIds.includes(id)}
               iconSide="left"
               iconType="plus"
               onClick={() => selectPromptContext(id)}
             >
               {description}
-            </EuiButton>
+            </PillButton>
           </EuiToolTip>
         </EuiFlexItem>
       ))}

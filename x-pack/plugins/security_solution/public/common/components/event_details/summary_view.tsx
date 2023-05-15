@@ -18,7 +18,6 @@ import {
 import React from 'react';
 
 import type { AlertSummaryRow } from './helpers';
-import { NewChat } from '../../../security_assistant/new_chat';
 import * as i18n from './translations';
 import { VIEW_ALL_FIELDS } from './translations';
 import { SummaryTable } from './table/summary_table';
@@ -70,15 +69,13 @@ const rowProps = {
 const SummaryViewComponent: React.FC<{
   goToTable: () => void;
   title: string;
-  promptContextId: string;
   rows: AlertSummaryRow[];
   isReadOnly?: boolean;
-}> = ({ goToTable, promptContextId, rows, title, isReadOnly }) => {
+}> = ({ goToTable, rows, title, isReadOnly }) => {
   const columns = isReadOnly ? baseColumns : allColumns;
 
   return (
     <div>
-      <NewChat promptContextId={promptContextId} />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xxxs">

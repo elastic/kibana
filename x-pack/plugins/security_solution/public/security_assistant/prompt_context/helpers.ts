@@ -12,38 +12,16 @@ export interface QueryField {
   values: string;
 }
 
-export const getQueryFields = (data: TimelineEventsDetailsItem[]): QueryField[] => [
-  ...data
-    ?.filter((x) => x.field === 'kibana.alert.rule.description')
-    ?.map((x) => ({
-      field: 'kibana.alert.rule.description',
-      values: x.values?.join(',\n') ?? '',
-    })),
-  ...data
-    ?.filter((x) => x.field === 'event.category')
-    ?.map((x) => ({ field: 'event.category', values: x.values?.join(',\n') ?? '' })),
-  ...data
-    ?.filter((x) => x.field === 'event.action')
-    ?.map((x) => ({ field: 'event.action', values: x.values?.join(',\n') ?? '' })),
-  ...data
-    ?.filter((x) => x.field === 'host.name')
-    ?.map((x) => ({ field: 'host.name', values: x.values?.join(',\n') ?? '' })),
-  ...data
-    ?.filter((x) => x.field === 'kibana.alert.reason')
-    ?.map((x) => ({ field: 'kibana.alert.reason', values: x.values?.join(',\n') ?? '' })),
-  ...data
-    ?.filter((x) => x.field === 'destination.ip')
-    ?.map((x) => ({ field: 'destination.ip', values: x.values?.join(',\n') ?? '' })),
-  ...data
-    ?.filter((x) => x.field === 'user.name')
-    ?.map((x) => ({ field: 'user.name', values: x.values?.join(',\n') ?? '' })),
-];
+export const getAllFields = (data: TimelineEventsDetailsItem[]): QueryField[] =>
+  data
+    .filter(({ field }) => !field.startsWith('signal.'))
+    .map(({ field, values }) => ({ field, values: values?.join(',') ?? '' }));
 
 export const getFieldsAsCsv = (queryFields: QueryField[]): string =>
   queryFields.map(({ field, values }) => `${field},${values}`).join('\n');
 
 export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetailsItem[]): string => {
-  const queryFields = getQueryFields(data);
+  const allFields = getAllFields(data);
 
-  return getFieldsAsCsv(queryFields);
+  return getFieldsAsCsv(allFields);
 };

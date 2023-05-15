@@ -441,7 +441,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             isSelected={activeTab === TimelineTabs.securityAssistant}
             key={TimelineTabs.securityAssistant}
           >
-            <span>{'Security Assistant++'}</span>
+            <span>{i18n.SECURITY_ASSISTANT}</span>
           </StyledEuiTab>
         </EuiTabs>
       )}

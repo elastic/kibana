@@ -39,6 +39,13 @@ export const PINNED_TAB = i18n.translate(
   }
 );
 
+export const SECURITY_ASSISTANT = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.securityAssistantTimelineTitle',
+  {
+    defaultMessage: 'Security Assistant',
+  }
+);
+
 export const SESSION_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.sessionTabTimelineTitle',
   {
