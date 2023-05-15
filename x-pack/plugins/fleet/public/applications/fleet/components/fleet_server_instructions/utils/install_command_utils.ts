@@ -52,9 +52,6 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
     kubernetes: {
       downloadCommand: '',
     },
-    cloudFormation: {
-      downloadCommand: '',
-    },
   };
 
   return artifactMap[platform];

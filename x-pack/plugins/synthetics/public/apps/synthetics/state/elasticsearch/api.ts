@@ -13,7 +13,7 @@ import {
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/es-types';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import { getInspectResponse } from '@kbn/observability-plugin/common';
+import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { apiService } from '../../../../utils/api_service';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import {
   EuiBadge,
@@ -44,8 +44,6 @@ import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-
-import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
 
@@ -147,6 +145,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
           css={{ '& .euiTable': { backgroundColor: 'transparent' } }}
           columns={columns}
           items={schemaField.indices}
+          responsive={false}
         />
       </EuiFlexGroup>
     </EuiPanel>
@@ -154,10 +153,8 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
 };
 
 export const EngineSchema: React.FC = () => {
-  const { engineName } = useValues(EngineIndicesLogic);
   const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
-  const { isLoadingEngineSchema, schemaFields } = useValues(EngineViewLogic);
-  const { fetchEngineSchema } = useActions(EngineViewLogic);
+  const { isLoadingEngineSchema, schemaFields, hasSchemaConflicts } = useValues(EngineViewLogic);
 
   const [isFilterByPopoverOpen, setIsFilterByPopoverOpen] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
@@ -201,10 +198,6 @@ export const EngineSchema: React.FC = () => {
     ? schemaFieldsMaybeWithConflicts.length - filteredSchemaFields.length
     : 0;
 
-  useEffect(() => {
-    fetchEngineSchema({ engineName });
-  }, [engineName]);
-
   const toggleDetails = (schemaField: SchemaField) => {
     const newItemIdToExpandedRowMap = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[schemaField.name]) {
@@ -224,7 +217,7 @@ export const EngineSchema: React.FC = () => {
         if (type !== 'conflict') return null;
         return <EuiIcon type="error" color="danger" />;
       },
-      width: '2%',
+      width: '24px',
     },
     {
       name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.field_name.columnTitle', {
@@ -238,7 +231,6 @@ export const EngineSchema: React.FC = () => {
           </EuiText>
         </EuiFlexGroup>
       ),
-      width: '43%',
     },
     {
       name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.field_type.columnTitle', {
@@ -267,7 +259,7 @@ export const EngineSchema: React.FC = () => {
           </EuiFlexGroup>
         );
       },
-      width: '30%',
+      width: '180px',
     },
     {
       name: i18n.translate(
@@ -296,15 +288,16 @@ export const EngineSchema: React.FC = () => {
           </EuiBadge>
         );
       },
-      width: '15%',
+      width: '110px',
     },
     {
+      isExpander: true,
       render: (schemaField: SchemaField) => {
         const { name, type, indices } = schemaField;
         if (type === 'conflict' || indices.some((i) => i.type === 'unmapped')) {
           const icon = itemIdToExpandedRowMap[name] ? 'arrowUp' : 'arrowDown';
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
               <EuiButtonEmpty
                 size="s"
                 color="primary"
@@ -324,7 +317,7 @@ export const EngineSchema: React.FC = () => {
         }
         return null;
       },
-      width: '10%',
+      width: '115px',
     },
   ];
   const filterButton = (
@@ -346,7 +339,32 @@ export const EngineSchema: React.FC = () => {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexGroup>
+        {hasSchemaConflicts && (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.title',
+              { defaultMessage: 'Potential field mapping issues found' }
+            )}
+            iconType="error"
+            color="danger"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.description"
+                defaultMessage="Schema field type conflicts can be resolved by navigating to the source index directly and updating the field type of the conflicting field(s) to match that of the other source indices."
+              />
+            </p>
+            {!onlyShowConflicts && (
+              <EuiButton color="danger" fill onClick={toggleOnlyShowConflicts}>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.button"
+                  defaultMessage="View conflicts"
+                />
+              </EuiButton>
+            )}
+          </EuiCallOut>
+        )}
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiSwitch
             label={i18n.translate(
               'xpack.enterpriseSearch.content.engine.schema.onlyShowConflicts',
@@ -420,6 +438,7 @@ export const EngineSchema: React.FC = () => {
           itemId="name"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable
+          responsive={false}
         />
         {totalConflictsHiddenByTypeFilters > 0 && (
           <EuiCallOut
