@@ -172,6 +172,7 @@ jest.mock('./epm/packages', () => {
   return {
     getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
     getInstallation: mockedGetInstallation,
+    ensureInstalledPackage: jest.fn(),
   };
 });
 
@@ -256,6 +257,11 @@ describe('Package policy service', () => {
           enabled: true,
           policy_id: 'test',
           inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
         },
         // Skipping unique name verification just means we have to less mocking/setup
         { id: 'test-package-policy', skipUniqueNameVerification: true }

@@ -88,6 +88,7 @@ export class SyntheticsPrivateLocation {
           ...(config as Partial<MonitorFields>),
           config_id: config.fields?.config_id,
           location_name: stringifyString(privateLocation.label),
+          location_id: privateLocation.id,
           'monitor.project.id': stringifyString(config.fields?.['monitor.project.name']),
           'monitor.project.name': stringifyString(config.fields?.['monitor.project.name']),
         },
