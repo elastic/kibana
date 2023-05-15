@@ -40,9 +40,11 @@ const createFileHashTransformMock = _createFileHashTransform as jest.Mock;
 describe('When using FleetFilesClient', () => {
   let esClientMock: ElasticsearchClientMock;
   let esFileClientMock: ReturnType<typeof createFileClientMock>;
+  let esFile: DeeplyMockedKeys<File>;
+
   let loggerMock: ReturnType<typeof loggingSystemMock.createLogger>;
-  let esFleetFilesIndexSearchResponse: estypes.SearchResponse<HostUploadedFileMetadata>;
-  let esFleetFileDataIndexSearchResponse: estypes.SearchResponse;
+  let fleetFilesIndexSearchResponse: estypes.SearchResponse<HostUploadedFileMetadata>;
+  let fleetFileDataIndexSearchResponse: estypes.SearchResponse;
 
   const getFleetFilesInstance = (type: FleetFileType = 'from-host'): FleetFilesClient => {
     loggerMock = loggingSystemMock.createLogger();
@@ -50,7 +52,7 @@ describe('When using FleetFilesClient', () => {
     return new FleetFilesClient(esClientMock, loggerMock, 'foo', type, 12345);
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     esFileClientMock = createFileClientMock<FileCustomMeta>({
       hash: {
@@ -62,9 +64,10 @@ describe('When using FleetFilesClient', () => {
       },
     });
     createEsFileClientMock.mockReturnValue(esFileClientMock);
+    esFile = (await esFileClientMock.get({ id: '1' })) as DeeplyMockedKeys<File>;
 
-    esFleetFilesIndexSearchResponse = createFromHostEsSearchResponseMock();
-    esFleetFileDataIndexSearchResponse = {
+    fleetFilesIndexSearchResponse = createFromHostEsSearchResponseMock();
+    fleetFileDataIndexSearchResponse = {
       took: 3,
       timed_out: false,
       _shards: {
@@ -86,11 +89,11 @@ describe('When using FleetFilesClient', () => {
     esClientMock.search.mockImplementation(async (searchRequest = {}) => {
       // File metadata
       if ((searchRequest.index as string).startsWith('.fleet-files-')) {
-        return esFleetFilesIndexSearchResponse;
+        return fleetFilesIndexSearchResponse;
       }
 
       if ((searchRequest.index as string).startsWith('.fleet-file-data-')) {
-        return esFleetFileDataIndexSearchResponse;
+        return fleetFileDataIndexSearchResponse;
       }
 
       return {
@@ -171,8 +174,8 @@ describe('When using FleetFilesClient', () => {
     });
 
     it('should adjust `status` if no data exists for file', async () => {
-      (esFleetFileDataIndexSearchResponse.hits.total as estypes.SearchTotalHits).value = 0;
-      esFleetFileDataIndexSearchResponse.hits.hits = [];
+      (fleetFileDataIndexSearchResponse.hits.total as estypes.SearchTotalHits).value = 0;
+      fleetFileDataIndexSearchResponse.hits.hits = [];
 
       await expect(getFleetFilesInstance('from-host').get('123')).resolves.toHaveProperty(
         'status',
@@ -229,7 +232,6 @@ describe('When using FleetFilesClient', () => {
     });
 
     it('should upload a file and use transform to create hash', async () => {
-      const esFile = (await esFileClientMock.get({ id: '1' })) as DeeplyMockedKeys<File>;
       const hashTransform = jest
         .requireActual('@kbn/files-plugin/server')
         .createFileHashTransform();
@@ -243,7 +245,6 @@ describe('When using FleetFilesClient', () => {
     });
 
     it('should error if hash was not created', async () => {
-      const esFile = (await esFileClientMock.get({ id: '1' })) as DeeplyMockedKeys<File>;
       esFile.data.hash = undefined;
 
       await expect(getFleetFilesInstance('to-host').create(fileReadable, ['123'])).rejects.toThrow(
@@ -253,11 +254,37 @@ describe('When using FleetFilesClient', () => {
   });
 
   describe('#update() method', () => {
-    it.todo('should error if `type` is not `to-host`');
+    it('should update file with updates provided', async () => {
+      const file = await getFleetFilesInstance('to-host').update('123', {
+        agents: ['bbb', 'ccc'],
+        actionId: 'aaaaaa',
+      });
 
-    it.todo('should update file with updates provided');
+      expect(esFile.update).toHaveBeenCalledWith({
+        meta: {
+          action_id: 'aaaaaa',
+          target_agents: ['bbb', 'ccc'],
+        },
+      });
 
-    it.todo('should return a FleetFile on success');
+      expect(file).toEqual({
+        actionId: '123',
+        agents: ['abc'],
+        created: '2022-10-10T14:57:30.682Z',
+        id: '123',
+        mimeType: 'text/plain',
+        name: 'test.txt',
+        sha256: 'e5441eb2bb8a774783d4ff4690153832688bd546c878e953acc3da089ac05d06',
+        size: 1234,
+        status: 'READY',
+      });
+    });
+
+    it('should error if `type` is not `to-host`', async () => {
+      await expect(getFleetFilesInstance('from-host').update('1', {})).rejects.toThrow(
+        'Method is only supported when `type` is `to-host`'
+      );
+    });
   });
 
   describe('#delete() method', () => {
