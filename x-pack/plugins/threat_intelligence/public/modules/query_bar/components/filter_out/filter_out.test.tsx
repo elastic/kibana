@@ -8,7 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { render } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { useIndicatorsFiltersContext } from '../../../indicators';
+import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_filters_context';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
 import {
@@ -16,15 +16,14 @@ import {
   FilterOutButtonIcon,
   FilterOutCellAction,
   FilterOutContextMenu,
-} from '.';
+} from './filter_out';
 
 jest.mock('../../../indicators/hooks/use_filters_context');
 
 const mockIndicator: Indicator = generateMockIndicator();
-
 const mockField: string = 'threat.feed.name';
-
-const mockTestId: string = 'abc';
+const TEST_ID: string = 'test';
+const CHILD_COMPONENT_TEST_ID: string = 'component-test';
 
 describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu /> <FilterOutDataGrid />', () => {
   beforeEach(() => {
@@ -34,48 +33,60 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
   });
 
   it('should render an empty component (wrong data input)', () => {
-    const component = render(<FilterOutButtonIcon data={''} field={mockField} />);
+    const { container } = render(<FilterOutButtonIcon data={''} field={mockField} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render an empty component (wrong field input)', () => {
-    const component = render(<FilterOutButtonIcon data={mockIndicator} field={''} />);
+    const { container } = render(<FilterOutButtonIcon data={mockIndicator} field={''} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render one EuiButtonIcon', () => {
-    const component = render(
-      <FilterOutButtonIcon data={mockIndicator} field={mockField} data-test-subj={mockTestId} />
+    const { getByTestId } = render(
+      <FilterOutButtonIcon data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
     );
 
-    expect(component.getByTestId(mockTestId)).toBeInTheDocument();
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toHaveClass('euiButtonIcon');
   });
 
   it('should render one EuiButtonEmpty', () => {
-    const component = render(
-      <FilterOutButtonEmpty data={mockIndicator} field={mockField} data-test-subj={mockTestId} />
+    const { getByTestId } = render(
+      <FilterOutButtonEmpty data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
     );
 
-    expect(component.getByTestId(mockTestId)).toBeInTheDocument();
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toHaveClass('euiButtonEmpty');
   });
 
   it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
-    const component = render(<FilterOutContextMenu data={mockIndicator} field={mockField} />);
+    const { getByTestId } = render(
+      <FilterOutContextMenu data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toHaveClass('euiContextMenuItem');
   });
 
   it('should render one Component (for EuiDataGrid use)', () => {
-    const mockComponent: FunctionComponent = () => <EuiButtonIcon iconType="plusInCircle" />;
-
-    const component = render(
-      <FilterOutCellAction data={mockIndicator} field={mockField} Component={mockComponent} />
+    const mockComponent: FunctionComponent = () => (
+      <EuiButtonIcon
+        aria-label={'test'}
+        iconType="plusInCircle"
+        data-test-subj={CHILD_COMPONENT_TEST_ID}
+      />
     );
 
-    expect(component).toMatchSnapshot();
+    const { getByTestId } = render(
+      <FilterOutCellAction
+        data={mockIndicator}
+        field={mockField}
+        Component={mockComponent}
+        data-test-subj={TEST_ID}
+      />
+    );
+
+    expect(getByTestId(TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CHILD_COMPONENT_TEST_ID)).toBeInTheDocument();
   });
 });

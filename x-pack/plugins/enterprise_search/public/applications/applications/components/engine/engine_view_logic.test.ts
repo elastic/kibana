@@ -19,13 +19,14 @@ import { EngineViewLogic, EngineViewValues } from './engine_view_logic';
 const DEFAULT_VALUES: EngineViewValues = {
   engineData: undefined,
   engineName: 'my-test-engine',
+  engineSchemaData: undefined,
   fetchEngineApiError: undefined,
   fetchEngineApiStatus: Status.IDLE,
-  isDeleteModalVisible: false,
-  isLoadingEngine: true,
-  engineSchemaData: undefined,
   fetchEngineSchemaApiError: undefined,
   fetchEngineSchemaApiStatus: Status.IDLE,
+  hasSchemaConflicts: false,
+  isDeleteModalVisible: false,
+  isLoadingEngine: true,
   isLoadingEngineSchema: true,
   schemaFields: [],
 };

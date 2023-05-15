@@ -20,9 +20,9 @@ import { useIndicatorsFlyoutContext } from '../use_context';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { unwrapValue } from '../../../utils';
-import { IndicatorEmptyPrompt } from '../empty_prompt';
-import { IndicatorBlock } from './block';
-import { HighlightedValuesTable } from './highlighted_values_table';
+import { IndicatorEmptyPrompt } from '../empty_prompt/empty_prompt';
+import { IndicatorBlock } from './block/block';
+import { HighlightedValuesTable } from './highlighted_values_table/highlighted_values_table';
 import {
   INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
   INDICATORS_FLYOUT_OVERVIEW_TABLE,
