@@ -68,11 +68,10 @@ export default function ({ getService }) {
       },
       renderAs: 'point',
     };
-    const urlBase = `/api/maps/mvt/getGridTile/3/2/3.pbf`;
 
     it('should return vector tile with expected headers', async () => {
       const resp = await supertest
-        .get(`${urlBase}?${getTileUrlParams(defaultParams)}`)
+        .get('/api/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -85,7 +84,7 @@ export default function ({ getService }) {
 
     it('should return vector tile containing clusters when renderAs is "point"', async () => {
       const resp = await supertest
-        .get(`${urlBase}?${getTileUrlParams(defaultParams)}`)
+        .get('/api/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -115,7 +114,7 @@ export default function ({ getService }) {
         renderAs: 'heatmap',
       });
       const resp = await supertest
-        .get(`${urlBase}?${tileUrlParams}`)
+        .get('/api/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -145,7 +144,7 @@ export default function ({ getService }) {
         renderAs: 'grid',
       });
       const resp = await supertest
-        .get(`${urlBase}?${tileUrlParams}`)
+        .get('/api/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -182,7 +181,7 @@ export default function ({ getService }) {
         renderAs: 'hex',
       });
       const resp = await supertest
-        .get(`${urlBase}?${tileUrlParams}`)
+        .get('/api/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -222,7 +221,7 @@ export default function ({ getService }) {
         renderAs: 'hex',
       });
       const resp = await supertest
-        .get(`${urlBase}?${tileUrlParams}`)
+        .get('/api/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -249,7 +248,7 @@ export default function ({ getService }) {
 
     it('should return vector tile with meta layer', async () => {
       const resp = await supertest
-        .get(`${urlBase}?${getTileUrlParams(defaultParams)}`)
+        .get('/api/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -294,7 +293,7 @@ export default function ({ getService }) {
         index: 'notRealIndex',
       });
       await supertest
-        .get(`${urlBase}?${tileUrlParams}`)
+        .get('/api/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(404);
