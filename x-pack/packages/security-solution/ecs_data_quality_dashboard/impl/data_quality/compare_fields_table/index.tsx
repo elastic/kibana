@@ -12,6 +12,7 @@ import {
   EuiInMemoryTable,
   EuiTitle,
   EuiSpacer,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
@@ -86,7 +87,11 @@ const CompareFieldsTableComponent: React.FC<Props> = ({
           aria-label={'Fix it'}
         />
       )}
-
+      {bulkFixResult && (
+        <EuiCodeBlock fontSize="m" paddingSize="m" lineNumbers>
+          {JSON.stringify(bulkFixResult)}
+        </EuiCodeBlock>
+      )}
       <EuiSpacer size="s" />
       <EuiInMemoryTable
         columns={columns}
