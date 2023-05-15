@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
         maxAnnotations: 500,
       };
       const { body, status } = await supertest
-        .post('/api/ml/annotations')
+        .post('/internal/ml/annotations')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
         maxAnnotations: 500,
       };
       const { body, status } = await supertest
-        .post('/api/ml/annotations')
+        .post('/internal/ml/annotations')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
         maxAnnotations: 500,
       };
       const { body, status } = await supertest
-        .post('/api/ml/annotations')
+        .post('/internal/ml/annotations')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
         maxAnnotations: 500,
       };
       const { body, status } = await supertest
-        .post('/api/ml/annotations')
+        .post('/internal/ml/annotations')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);

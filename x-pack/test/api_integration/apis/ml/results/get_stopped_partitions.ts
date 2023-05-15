@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should fetch all the stopped partitions correctly', async () => {
       const { jobId } = testSetUps[0];
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS);
@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should not return jobId in response if stopped_on_warn is false', async () => {
       const { jobId } = testSetUps[1];
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS);
@@ -130,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should fetch stopped partitions for user with view permission', async () => {
       const { jobId } = testSetUps[2];
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS);
@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { jobId } = testSetUps[3];
 
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS);
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch stopped partitions for multiple job ids', async () => {
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: testJobIds })
         .set(COMMON_REQUEST_HEADERS);
@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return array of jobIds with stopped_partitions for multiple job ids when bucketed by job_id', async () => {
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: testJobIds, fieldToBucket: 'job_id' })
         .set(COMMON_REQUEST_HEADERS);

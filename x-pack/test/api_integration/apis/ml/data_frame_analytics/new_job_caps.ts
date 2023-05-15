@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const testIndexPattern = 'ft_bank_marketing';
 
   async function runRequest(indexPattern: string, expectedStatusCode: number, rollup?: boolean) {
-    let url = `/api/ml/data_frame/analytics/new_job_caps/${indexPattern}`;
+    let url = `/internal/ml/data_frame/analytics/new_job_caps/${indexPattern}`;
     if (rollup !== undefined) {
       url += `?rollup=${rollup}`;
     }

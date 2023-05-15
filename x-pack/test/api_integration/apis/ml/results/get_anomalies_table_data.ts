@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post(`/api/ml/results/anomalies_table_data`)
+        .post(`/internal/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post(`/api/ml/results/anomalies_table_data`)
+        .post(`/internal/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);
@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
         maxRecords: 500,
       };
       const { body, status } = await supertest
-        .post(`/api/ml/results/anomalies_table_data`)
+        .post(`/internal/ml/results/anomalies_table_data`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);

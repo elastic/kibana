@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
         const { body, status } = await supertest
-          .put(`/api/ml/anomaly_detectors/${testData.jobId}`)
+          .put(`/internal/ml/anomaly_detectors/${testData.jobId}`)
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody);

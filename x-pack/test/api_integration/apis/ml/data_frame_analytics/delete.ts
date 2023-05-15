@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should delete analytics jobs by id', async () => {
         const analyticsId = `${jobId}_1`;
         const { body, status } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+          .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not allow to retrieve analytics jobs for unauthorized user', async () => {
         const analyticsId = `${jobId}_2`;
         const { body, status } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+          .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not allow to retrieve analytics jobs for the user with only view permission', async () => {
         const analyticsId = `${jobId}_2`;
         const { body, status } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+          .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -116,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should show 404 error if job does not exist or has already been deleted', async () => {
         const id = `${jobId}_invalid`;
         const { body, status } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${id}`)
+          .delete(`/internal/ml/data_frame/analytics/${id}`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(404, status, body);
@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should delete job and destination index by id', async () => {
           const { body, status } = await supertest
-            .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+            .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
             .query({ deleteDestIndex: true })
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_REQUEST_HEADERS);
@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should delete job and index pattern by id', async () => {
           const { body, status } = await supertest
-            .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+            .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
             .query({ deleteDestIndexPattern: true })
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_REQUEST_HEADERS);
@@ -201,7 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should delete job, target index, and index pattern by id', async () => {
           const { body, status } = await supertest
-            .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+            .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
             .query({ deleteDestIndex: true, deleteDestIndexPattern: true })
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_REQUEST_HEADERS);

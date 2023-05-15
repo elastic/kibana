@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/api/ml/saved_objects/update_trained_models_spaces`)
+      .post(`/internal/ml/saved_objects/update_trained_models_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody);

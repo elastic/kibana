@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function getDFAJob(id: string) {
     const { body } = await supertest
-      .get(`/api/ml/data_frame/analytics/${id}`)
+      .get(`/internal/ml/data_frame/analytics/${id}`)
       .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
       .set(COMMON_REQUEST_HEADERS);
 
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);
@@ -172,7 +172,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);
@@ -196,7 +196,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);
@@ -219,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);
@@ -240,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);
@@ -262,7 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
         const message = `No known job with id '${id}'`;
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${id}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${id}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);

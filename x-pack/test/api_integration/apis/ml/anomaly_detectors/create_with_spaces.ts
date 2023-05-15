@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await ml.testExecution.logTestStep('should create job');
       const { body, status } = await supertest
-        .put(`/s/${idSpace1}/api/ml/anomaly_detectors/${jobIdSpace1}`)
+        .put(`/s/${idSpace1}/internal/ml/anomaly_detectors/${jobIdSpace1}`)
         .auth(
           USER.ML_POWERUSER_ALL_SPACES,
           ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)

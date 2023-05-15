@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('it should fetch datafeed chart data', async () => {
       const { body, status } = await supertest
-        .post(`/api/ml/results/datafeed_results_chart`)
+        .post(`/internal/ml/results/datafeed_results_chart`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post(`/api/ml/results/datafeed_results_chart`)
+        .post(`/internal/ml/results/datafeed_results_chart`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(incompleteRequestBody);
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('it should not allow fetching of datafeed chart data without required permissions', async () => {
       const { body, status } = await supertest
-        .post(`/api/ml/results/datafeed_results_chart`)
+        .post(`/internal/ml/results/datafeed_results_chart`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);

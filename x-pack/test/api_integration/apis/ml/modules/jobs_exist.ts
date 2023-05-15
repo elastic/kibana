@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(moduleId: string, expectedStatusCode: number, user: USER) {
     const { body, status } = await supertest
-      .get(`/api/ml/modules/jobs_exist/${moduleId}`)
+      .get(`/internal/ml/modules/jobs_exist/${moduleId}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS);
 

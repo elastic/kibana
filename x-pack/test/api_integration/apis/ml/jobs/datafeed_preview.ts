@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/jobs/datafeed_preview')
+        .post('/internal/ml/jobs/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send({ job, datafeed });
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/jobs/datafeed_preview')
+        .post('/internal/ml/jobs/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send({ job, datafeed });
@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/jobs/datafeed_preview')
+        .post('/internal/ml/jobs/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send({ job, datafeed });
@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/jobs/datafeed_preview')
+        .post('/internal/ml/jobs/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send({ job, datafeed });
@@ -225,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/jobs/datafeed_preview')
+        .post('/internal/ml/jobs/datafeed_preview')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send({ job, datafeed });
@@ -250,7 +250,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/jobs/datafeed_preview')
+        .post('/internal/ml/jobs/datafeed_preview')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send({ job, datafeed });

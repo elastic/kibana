@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(requestBody: object) {
     const { body, status } = await supertest
-      .post(`/api/ml/results/max_anomaly_score`)
+      .post(`/internal/ml/results/max_anomaly_score`)
       .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody);

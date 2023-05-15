@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number
   ) {
     const { body, status } = await supertest
-      .post(`/s/${idSpace1}/api/ml/saved_objects/sync_check`)
+      .post(`/s/${idSpace1}/internal/ml/saved_objects/sync_check`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send({ mlSavedObjectType });

@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(user: USER, expectedStatusCode: number) {
     const { body, status } = await supertest
-      .get(`/api/ml/saved_objects/initialize`)
+      .get(`/internal/ml/saved_objects/initialize`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);

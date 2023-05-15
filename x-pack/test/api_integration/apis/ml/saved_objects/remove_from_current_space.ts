@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/saved_objects/remove_item_from_current_space`)
+      .post(`/s/${space}/internal/ml/saved_objects/remove_item_from_current_space`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody);

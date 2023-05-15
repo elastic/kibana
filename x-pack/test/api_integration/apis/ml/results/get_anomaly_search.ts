@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/results/anomaly_search`)
+      .post(`/s/${space}/internal/ml/results/anomaly_search`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody);

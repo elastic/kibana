@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('GetDataFrameAnalytics', () => {
       it('should fetch all analytics jobs', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics`)
+          .get(`/internal/ml/data_frame/analytics`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve analytics jobs for the user without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics`)
+          .get(`/internal/ml/data_frame/analytics`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('GetDataFrameAnalyticsById', () => {
       it('should fetch single analytics job by id', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}_1`)
+          .get(`/internal/ml/data_frame/analytics/${jobId}_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch analytics jobs based on provided ids', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}_1,${jobId}_2`)
+          .get(`/internal/ml/data_frame/analytics/${jobId}_1,${jobId}_2`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve a job for the user without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}_1`)
+          .get(`/internal/ml/data_frame/analytics/${jobId}_1`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('GetDataFrameAnalyticsStats', () => {
       it('should fetch analytics jobs stats', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/_stats`)
+          .get(`/internal/ml/data_frame/analytics/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -180,7 +180,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve jobs stats for the user without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/_stats`)
+          .get(`/internal/ml/data_frame/analytics/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('GetDataFrameAnalyticsStatsById', () => {
       it('should fetch single analytics job stats by id', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
+          .get(`/internal/ml/data_frame/analytics/${jobId}_1/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch multiple analytics jobs stats based on provided ids', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}_1,${jobId}_2/_stats`)
+          .get(`/internal/ml/data_frame/analytics/${jobId}_1,${jobId}_2/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve a job stats for the user without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
+          .get(`/internal/ml/data_frame/analytics/${jobId}_1/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('GetDataFrameAnalyticsIdMap', () => {
       it('should return a map of objects leading up to analytics job id', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/map/${jobId}_1`)
+          .get(`/internal/ml/data_frame/analytics/map/${jobId}_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -266,7 +266,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return empty results and an error message if the job does not exist', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/map/${jobId}_fake`)
+          .get(`/internal/ml/data_frame/analytics/map/${jobId}_fake`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -283,7 +283,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should fetch single analytics job messages by id', async () => {
         await retry.tryForTime(5000, async () => {
           const { body, status } = await supertest
-            .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
+            .get(`/internal/ml/data_frame/analytics/${jobId}_1/messages`)
             .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
             .set(COMMON_REQUEST_HEADERS);
           ml.api.assertResponseStatusCode(200, status, body);
@@ -303,7 +303,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve job messages without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
+          .get(`/internal/ml/data_frame/analytics/${jobId}_1/messages`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);

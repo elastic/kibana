@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(space: string, expectedStatusCode: number, jobIds?: string[]) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/jobs/delete_jobs`)
+      .post(`/s/${space}/internal/ml/jobs/delete_jobs`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)

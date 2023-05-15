@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('deletes trained model by id', async () => {
       const { body: deleteResponseBody, status: deleteResponseStatus } = await supertest
-        .delete(`/api/ml/trained_models/dfa_regression_model_n_0`)
+        .delete(`/internal/ml/trained_models/dfa_regression_model_n_0`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, deleteResponseStatus, deleteResponseBody);
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // verify that model is actually deleted
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models/dfa_regression_model_n_0`)
+        .get(`/internal/ml/trained_models/dfa_regression_model_n_0`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(404, status, body);
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns 404 if requested trained model does not exist', async () => {
       const { body, status } = await supertest
-        .delete(`/api/ml/trained_models/not_existing_model`)
+        .delete(`/internal/ml/trained_models/not_existing_model`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(404, status, body);
@@ -53,14 +53,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('does not allow to delete trained model if the user does not have required permissions', async () => {
       const { body: deleteResponseBody, status: deleteResponseStatus } = await supertest
-        .delete(`/api/ml/trained_models/dfa_regression_model_n_1`)
+        .delete(`/internal/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, deleteResponseStatus, deleteResponseBody);
 
       // verify that model has not been deleted
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models/dfa_regression_model_n_1`)
+        .get(`/internal/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);

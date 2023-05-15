@@ -18,7 +18,7 @@ describe('MLModelsApiLogic', () => {
     it('calls the ml api', async () => {
       http.get.mockResolvedValue(mlModels);
       const result = await getMLModels();
-      expect(http.get).toHaveBeenCalledWith('/api/ml/trained_models', {
+      expect(http.get).toHaveBeenCalledWith('/internal/ml/trained_models', {
         query: { size: 1000, with_pipelines: true },
       });
       expect(result).toEqual(mlModels);

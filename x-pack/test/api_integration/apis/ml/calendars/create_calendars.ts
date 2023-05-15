@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should successfully create calendar by id', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars`)
+        .put(`/internal/ml/calendars`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not create new calendar for user without required permission', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars`)
+        .put(`/internal/ml/calendars`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not create new calendar for unauthorized user', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars`)
+        .put(`/internal/ml/calendars`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody);

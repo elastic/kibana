@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
     allSpaces?: boolean
   ) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/data_frame/analytics/jobs_exist`)
+      .post(`/s/${space}/internal/ml/data_frame/analytics/jobs_exist`)
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)

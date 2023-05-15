@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
       .post(
         `${
           space ? `/s/${space}` : ''
-        }/api/ml/saved_objects/can_delete_ml_space_aware_item/${jobType}`
+        }/internal/ml/saved_objects/can_delete_ml_space_aware_item/${jobType}`
       )
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)

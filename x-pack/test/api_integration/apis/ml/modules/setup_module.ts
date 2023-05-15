@@ -681,7 +681,7 @@ export default ({ getService }: FtrProviderContext) => {
     rspCode: number
   ) {
     const { body, status } = await supertest
-      .post(`/api/ml/modules/setup/${module}`)
+      .post(`/internal/ml/modules/setup/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(rqBody);

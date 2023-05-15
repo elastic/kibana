@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   ) {
     const datafeedId = datafeedConfig.datafeed_id;
     const { body, status } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/api/ml/datafeeds/${datafeedId}/_update`)
+      .post(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}/_update`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(datafeedConfig.body);

@@ -21,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
     fields?: string[]
   ): Promise<{ indices: string[]; fields: any }> {
     const { body, status } = await supertest
-      .post(`/api/ml/indices/field_caps`)
+      .post(`/internal/ml/indices/field_caps`)
       .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
       .set(COMMON_REQUEST_HEADERS)
       .send({ index, fields });

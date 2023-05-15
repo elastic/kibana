@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch all calendars', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars`)
+          .get(`/internal/ml/calendars`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch all calendars for user with view permission', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars`)
+          .get(`/internal/ml/calendars`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not fetch calendars for unauthorized user', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars`)
+          .get(`/internal/ml/calendars`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch calendar & associated events by id', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars/${calendarId}`)
+          .get(`/internal/ml/calendars/${calendarId}`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch calendar & associated events by id for user with view permission', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars/${calendarId}`)
+          .get(`/internal/ml/calendars/${calendarId}`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not fetch calendars for unauthorized user', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars/${calendarId}`)
+          .get(`/internal/ml/calendars/${calendarId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return 404 if invalid calendar id', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/calendars/calendar_id_dne`)
+        .get(`/internal/ml/calendars/calendar_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(404, status, body);

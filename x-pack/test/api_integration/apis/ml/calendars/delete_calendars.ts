@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should delete calendar by id', async () => {
       const { body, status } = await supertest
-        .delete(`/api/ml/calendars/${calendarId}`)
+        .delete(`/internal/ml/calendars/${calendarId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not delete calendar for user without required permission', async () => {
       const { body, status } = await supertest
-        .delete(`/api/ml/calendars/${calendarId}`)
+        .delete(`/internal/ml/calendars/${calendarId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, status, body);
@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not delete calendar for unauthorized user', async () => {
       const { body, status } = await supertest
-        .delete(`/api/ml/calendars/${calendarId}`)
+        .delete(`/internal/ml/calendars/${calendarId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, status, body);
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return 404 if invalid calendarId', async () => {
       const { body, status } = await supertest
-        .delete(`/api/ml/calendars/calendar_id_dne`)
+        .delete(`/internal/ml/calendars/calendar_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(404, status, body);

@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns trained model stats by id', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models/dfa_regression_model_n_0/_stats`)
+        .get(`/internal/ml/trained_models/dfa_regression_model_n_0/_stats`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns 404 if requested trained model does not exist', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models/not_existing_model/_stats`)
+        .get(`/internal/ml/trained_models/not_existing_model/_stats`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(404, status, body);
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns an error for unauthorized user', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models/dfa_regression_model_n_0/_stats`)
+        .get(`/internal/ml/trained_models/dfa_regression_model_n_0/_stats`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, status, body);

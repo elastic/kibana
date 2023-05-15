@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
         const { body, status } = await supertest
-          .post('/api/ml/fields_service/time_field_range')
+          .post('/internal/ml/fields_service/time_field_range')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody);

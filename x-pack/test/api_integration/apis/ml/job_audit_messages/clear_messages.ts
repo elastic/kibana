@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
       }
 
       const { body, status } = await supertest
-        .get(`/api/ml/job_audit_messages/messages`)
+        .get(`/internal/ml/job_audit_messages/messages`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
       const timestamp = Date.now();
 
       const { body, status } = await supertest
-        .put(`/api/ml/job_audit_messages/clear_messages`)
+        .put(`/internal/ml/job_audit_messages/clear_messages`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send({
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.tryForTime(5000, async () => {
         const { body: getBody, status: getStatus } = await supertest
-          .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
+          .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, getStatus, getBody);
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not mark audit messages as cleared for the user with ML read permissions', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/job_audit_messages/clear_messages`)
+        .put(`/internal/ml/job_audit_messages/clear_messages`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send({
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.message).to.eql('Forbidden');
 
       const { body: getBody, status: getStatus } = await supertest
-        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
+        .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, getStatus, getBody);
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not mark audit messages as cleared for unauthorized user', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/job_audit_messages/clear_messages`)
+        .put(`/internal/ml/job_audit_messages/clear_messages`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send({
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.message).to.eql('Forbidden');
 
       const { body: getBody, status: getStatus } = await supertest
-        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
+        .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, getStatus, getBody);

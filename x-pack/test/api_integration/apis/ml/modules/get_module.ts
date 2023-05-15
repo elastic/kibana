@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function executeGetModuleRequest(module: string, user: USER, rspCode: number) {
     const { body, status } = await supertest
-      .get(`/api/ml/modules/get_module/${module}`)
+      .get(`/internal/ml/modules/get_module/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS);
     ml.api.assertResponseStatusCode(rspCode, status, body);

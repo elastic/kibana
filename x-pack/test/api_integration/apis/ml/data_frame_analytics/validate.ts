@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
           const requestBody = testConfig.config;
 
           const { body, status } = await supertest
-            .post('/api/ml/data_frame/analytics/validate')
+            .post('/internal/ml/data_frame/analytics/validate')
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_REQUEST_HEADERS)
             .send(requestBody);
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
         const requestBody = testJobConfigs[0].config;
 
         const { body, status } = await supertest
-          .post('/api/ml/data_frame/analytics/validate')
+          .post('/internal/ml/data_frame/analytics/validate')
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
         const requestBody = testJobConfigs[0].config;
 
         const { body, status } = await supertest
-          .post('/api/ml/data_frame/analytics/validate')
+          .post('/internal/ml/data_frame/analytics/validate')
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody);

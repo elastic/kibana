@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
     it(`should delete filter by id`, async () => {
       const { filterId } = validFilters[0];
       const { body, status } = await supertest
-        .delete(`/api/ml/filters/${filterId}`)
+        .delete(`/internal/ml/filters/${filterId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
     it(`should not delete filter for user without required permission`, async () => {
       const { filterId } = validFilters[1];
       const { body, status } = await supertest
-        .delete(`/api/ml/filters/${filterId}`)
+        .delete(`/internal/ml/filters/${filterId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, status, body);
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
     it(`should not delete filter for unauthorized user`, async () => {
       const { filterId } = validFilters[2];
       const { body, status } = await supertest
-        .delete(`/api/ml/filters/${filterId}`)
+        .delete(`/internal/ml/filters/${filterId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, status, body);
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should not allow user to delete filter if invalid filterId`, async () => {
       const { body, status } = await supertest
-        .delete(`/api/ml/filters/filter_id_dne`)
+        .delete(`/internal/ml/filters/filter_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(404, status, body);

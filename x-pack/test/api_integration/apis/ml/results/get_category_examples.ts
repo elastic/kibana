@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
     space?: string
   ) {
     const { body, status } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/api/ml/results/category_examples`)
+      .post(`${space ? `/s/${space}` : ''}/internal/ml/results/category_examples`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send({ jobId, categoryIds, maxExamples });

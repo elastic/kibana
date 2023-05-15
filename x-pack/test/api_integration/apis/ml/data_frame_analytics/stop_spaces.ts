@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number
   ) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/${action}`)
+      .post(`/s/${space}/internal/ml/data_frame/analytics/${jobId}/${action}`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)

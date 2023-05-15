@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(requestBody: object): Promise<PartitionFieldValueResponse> {
     const { body, status } = await supertest
-      .post(`/api/ml/results/partition_fields_values`)
+      .post(`/internal/ml/results/partition_fields_values`)
       .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody);

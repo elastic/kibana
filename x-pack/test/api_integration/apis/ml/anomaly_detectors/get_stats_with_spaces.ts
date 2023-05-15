@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   ) {
     const { body, status } = await supertest
       .get(
-        `${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors${
+        `${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors${
           jobOrGroup ? `/${jobOrGroup}` : ''
         }/_stats`
       )

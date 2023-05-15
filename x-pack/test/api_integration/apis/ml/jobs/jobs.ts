@@ -49,7 +49,8 @@ export default ({ getService }: FtrProviderContext) => {
     expectedResponsecode: number,
     space?: string
   ): Promise<CombinedJobWithStats[]> {
-    const path = space === undefined ? '/api/ml/jobs/jobs' : `/s/${space}/api/ml/jobs/jobs`;
+    const path =
+      space === undefined ? '/internal/ml/jobs/jobs' : `/s/${space}/internal/ml/jobs/jobs`;
     const { body, status } = await supertest
       .post(path)
       .auth(user, ml.securityCommon.getPasswordForUser(user))

@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
     end: number
   ): Promise<Record<string, { started: boolean; error?: string }>> {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/jobs/force_start_datafeeds`)
+      .post(`/s/${space}/internal/ml/jobs/force_start_datafeeds`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)

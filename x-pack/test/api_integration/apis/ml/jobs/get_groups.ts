@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runGetGroupsRequest(user: USER, expectedResponsecode: number): Promise<Group[]> {
     const { body, status } = await supertest
-      .get('/api/ml/jobs/groups')
+      .get('/internal/ml/jobs/groups')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS);
     ml.api.assertResponseStatusCode(expectedResponsecode, status, body);

@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
         const analyticsId = `${jobId}_0`;
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_start`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_start`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(200, status, body);
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         const message = `No known job with id '${id}'`;
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${id}/_start`)
+          .post(`/internal/ml/data_frame/analytics/${id}/_start`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(404, status, body);
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         const analyticsId = `${jobId}_0`;
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_start`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_start`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);
@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
         const analyticsId = `${jobId}_0`;
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_start`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_start`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS);
         ml.api.assertResponseStatusCode(403, status, body);

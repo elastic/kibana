@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(expectedStatusCode: number, user: USER) {
     const { body, status } = await supertest
-      .get(`/api/ml/saved_objects/trained_models_spaces`)
+      .get(`/internal/ml/saved_objects/trained_models_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS);
 

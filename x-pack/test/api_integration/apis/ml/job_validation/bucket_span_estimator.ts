@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
       for (const testData of testDataList) {
         it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
           const { body, status } = await supertest
-            .post('/api/ml/validate/estimate_bucket_span')
+            .post('/internal/ml/validate/estimate_bucket_span')
             .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
             .set(COMMON_REQUEST_HEADERS)
             .send(testData.requestBody);
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`estimates the bucket span`, async () => {
         const { body, status } = await supertest
-          .post('/api/ml/validate/estimate_bucket_span')
+          .post('/internal/ml/validate/estimate_bucket_span')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody);
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`estimates the bucket span`, async () => {
         const { body, status } = await supertest
-          .post('/api/ml/validate/estimate_bucket_span')
+          .post('/internal/ml/validate/estimate_bucket_span')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody);

@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       it(`calculates the model memory limit ${testData.testTitleSuffix}`, async () => {
         const { body, status } = await supertest
-          .post('/api/ml/validate/calculate_model_memory_limit')
+          .post('/internal/ml/validate/calculate_model_memory_limit')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody);

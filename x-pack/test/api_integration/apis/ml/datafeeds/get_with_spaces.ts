@@ -27,7 +27,9 @@ export default ({ getService }: FtrProviderContext) => {
     space?: string
   ) {
     const { body, status } = await supertest
-      .get(`${space ? `/s/${space}` : ''}/api/ml/datafeeds${datafeedId ? `/${datafeedId}` : ''}`)
+      .get(
+        `${space ? `/s/${space}` : ''}/internal/ml/datafeeds${datafeedId ? `/${datafeedId}` : ''}`
+      )
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)

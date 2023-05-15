@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should update calendar by id with new settings', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars/${calendarId}`)
+        .put(`/internal/ml/calendars/${calendarId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateCalendarRequestBody);
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not allow to update calendar for user without required permission', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars/${calendarId}`)
+        .put(`/internal/ml/calendars/${calendarId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateCalendarRequestBody);
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not allow to update calendar for unauthorized user', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars/${calendarId}`)
+        .put(`/internal/ml/calendars/${calendarId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateCalendarRequestBody);
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return error if invalid calendarId', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars/calendar_id_dne`)
+        .put(`/internal/ml/calendars/calendar_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateCalendarRequestBody);

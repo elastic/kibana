@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(user: USER, requestBody: object, expectedStatusCode: number) {
     const { body, status } = await supertest
-      .post('/api/ml/index_exists')
+      .post('/internal/ml/index_exists')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody);

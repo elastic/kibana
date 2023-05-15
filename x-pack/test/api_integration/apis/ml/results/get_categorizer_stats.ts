@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch all the categorizer stats for job id', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/results/${jobId}/categorizer_stats`)
+        .get(`/internal/ml/results/${jobId}/categorizer_stats`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch categorizer stats for job id for user with view permission', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/results/${jobId}/categorizer_stats`)
+        .get(`/internal/ml/results/${jobId}/categorizer_stats`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not fetch categorizer stats for job id for unauthorized user', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/results/${jobId}/categorizer_stats`)
+        .get(`/internal/ml/results/${jobId}/categorizer_stats`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, status, body);
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch all the categorizer stats with per-partition value for job id', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/results/${jobId}/categorizer_stats`)
+        .get(`/internal/ml/results/${jobId}/categorizer_stats`)
         .query({ partitionByValue: 'sample_web_logs' })
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch categorizer stats with per-partition value for user with view permission', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/results/${jobId}/categorizer_stats`)
+        .get(`/internal/ml/results/${jobId}/categorizer_stats`)
         .query({ partitionByValue: 'sample_web_logs' })
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS);
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not fetch categorizer stats with per-partition value for unauthorized user', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/results/${jobId}/categorizer_stats`)
+        .get(`/internal/ml/results/${jobId}/categorizer_stats`)
         .query({ partitionByValue: 'sample_web_logs' })
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS);

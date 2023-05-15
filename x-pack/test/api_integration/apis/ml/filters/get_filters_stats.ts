@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should fetch all filters stats`, async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/filters/_stats`)
+        .get(`/internal/ml/filters/_stats`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should not allow retrieving filters stats for user without required permission`, async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/filters/_stats`)
+        .get(`/internal/ml/filters/_stats`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, status, body);
@@ -217,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should not allow retrieving filters stats for unauthorized user`, async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/filters/_stats`)
+        .get(`/internal/ml/filters/_stats`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(403, status, body);

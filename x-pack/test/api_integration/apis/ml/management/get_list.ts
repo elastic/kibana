@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(listType: MlSavedObjectType, space?: string) {
     const { body, status } = await supertest
-      .get(`${space ? `/s/${space}` : ''}/api/ml/management/list/${listType}`)
+      .get(`${space ? `/s/${space}` : ''}/internal/ml/management/list/${listType}`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
