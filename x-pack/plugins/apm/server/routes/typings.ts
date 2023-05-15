@@ -22,6 +22,7 @@ import {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from '../types';
+import { ApmFeatureFlags } from '../../common/apm_feature_flags';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
@@ -63,6 +64,7 @@ export interface APMRouteHandlerResources {
     };
   };
   config: APMConfig;
+  featureFlags: ApmFeatureFlags;
   logger: Logger;
   core: APMCore;
   plugins: {

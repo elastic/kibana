@@ -201,6 +201,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false,
           properties: {},
         },
+        secret_references: { properties: { id: { type: 'keyword' } } },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
@@ -398,6 +399,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: {
     name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
     management: {

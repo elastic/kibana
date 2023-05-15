@@ -43,8 +43,7 @@ describe('useUserActionsHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useUpdateCommentMock.mockReturnValue({
-      isLoadingIds: [],
-      patchComment,
+      mutate: patchComment,
     });
 
     useLensDraftCommentMock.mockReturnValue({
@@ -60,13 +59,19 @@ describe('useUserActionsHandler', () => {
       wrapper,
     });
 
-    result.current.handleSaveComment({ id: 'test-id', version: 'test-version' }, 'a comment');
-    expect(patchComment).toHaveBeenCalledWith({
-      caseId: 'basic-case-id',
-      commentId: 'test-id',
-      commentUpdate: 'a comment',
-      version: 'test-version',
+    act(() => {
+      result.current.handleSaveComment({ id: 'test-id', version: 'test-version' }, 'a comment');
     });
+
+    expect(patchComment).toHaveBeenCalledWith(
+      {
+        caseId: 'basic-case-id',
+        commentId: 'test-id',
+        commentUpdate: 'a comment',
+        version: 'test-version',
+      },
+      { onSuccess: expect.anything(), onError: expect.anything() }
+    );
   });
 
   it('should refresh the case case after updating', async () => {
@@ -74,7 +79,10 @@ describe('useUserActionsHandler', () => {
       wrapper,
     });
 
-    result.current.handleUpdate(basicCase);
+    act(() => {
+      result.current.handleUpdate(basicCase);
+    });
+
     expect(useRefreshCaseViewPage()).toHaveBeenCalled();
   });
 
@@ -144,5 +152,63 @@ describe('useUserActionsHandler', () => {
 
     expect(addQuote).toHaveBeenCalledWith('my quote');
     expect(result.current.selectedOutlineCommentId).toBe('add-comment');
+  });
+
+  describe('loading comment ids', () => {
+    it('should return an empty loadingCommentIds array on init', async () => {
+      const { result } = renderHook(() => useUserActionsHandler(), {
+        wrapper,
+      });
+
+      expect(result.current.loadingCommentIds).toEqual([]);
+    });
+
+    it('should update the loadingCommentIds when updating a comment', async () => {
+      const { result } = renderHook(() => useUserActionsHandler(), {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.handleSaveComment({ id: 'test-id', version: 'test-version' }, 'a comment');
+      });
+
+      expect(result.current.loadingCommentIds).toEqual(['test-id']);
+    });
+
+    it('should remove the comment id from the loadingCommentIds array on success', async () => {
+      const { result } = renderHook(() => useUserActionsHandler(), {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.handleSaveComment({ id: 'test-id', version: 'test-version' }, 'a comment');
+      });
+
+      expect(result.current.loadingCommentIds).toEqual(['test-id']);
+
+      act(() => {
+        patchComment.mock.calls[0][1].onSuccess();
+      });
+
+      expect(result.current.loadingCommentIds).toEqual([]);
+    });
+
+    it('should remove the comment id from the loadingCommentIds array on error', async () => {
+      const { result } = renderHook(() => useUserActionsHandler(), {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.handleSaveComment({ id: 'test-id', version: 'test-version' }, 'a comment');
+      });
+
+      expect(result.current.loadingCommentIds).toEqual(['test-id']);
+
+      act(() => {
+        patchComment.mock.calls[0][1].onError();
+      });
+
+      expect(result.current.loadingCommentIds).toEqual([]);
+    });
   });
 });

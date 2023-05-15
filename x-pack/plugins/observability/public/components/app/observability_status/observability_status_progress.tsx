@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiTracker } from '../../../hooks/use_track_metric';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useGuidedSetupProgress } from '../../../hooks/use_guided_setup_progress';
 
 interface ObservabilityStatusProgressProps {
