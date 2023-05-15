@@ -57,8 +57,10 @@ export function QueryBuilder({
         defaultValue=""
         name={name}
         control={control}
-        rules={{ required }}
-        render={({ field }) => (
+        rules={{
+          required: Boolean(required),
+        }}
+        render={({ field, fieldState }) => (
           <QueryStringInput
             appName="Observability"
             bubbleSubmitEvent={false}
@@ -77,6 +79,7 @@ export function QueryBuilder({
             disableLanguageSwitcher
             indexPatterns={dataView ? [dataView] : []}
             isDisabled={!indexPatternString}
+            isInvalid={fieldState.invalid}
             languageSwitcherPopoverAnchorPosition="rightDown"
             placeholder={placeholder}
             query={{ query: String(field.value), language: 'kuery' }}
