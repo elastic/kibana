@@ -187,7 +187,7 @@ include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
-include::{kib-repo-dir}/management/maintenance-windows/index.asciidoc[]
+include::{kib-repo-dir}/management/maintenance-windows/maintenance-windows.asciidoc[]
 
 include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
 
