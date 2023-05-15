@@ -1,4 +1,4 @@
-# Query Debugging (AKA Inspector)
+# Elasticsearch query debugging (AKA Inspector)
 
 When debugging an issue within APM UI it can be very helpful to see the exact Elasticsearch queries and responses that was made for a specific page. This can be achieved by enabling the Inspector:
 
