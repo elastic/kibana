@@ -12,24 +12,6 @@ import variableParser from './variable_parser';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
 
-export const arrayToJsonFormatter: FormatterFn = (fields, key) => {
-  const value = (fields[key] as string[]) ?? [];
-  return value.length ? JSON.stringify(value) : null;
-};
-
-export const objectToJsonFormatter: FormatterFn = (fields, fieldKey) => {
-  const value = (fields[fieldKey] as Record<string, any>) ?? {};
-  if (Object.keys(value).length === 0) return null;
-
-  return JSON.stringify(value);
-};
-
-export const stringToJsonFormatter: FormatterFn = (fields, key) => {
-  const value = (fields[key] as string) ?? '';
-
-  return value ? JSON.stringify(value) : null;
-};
-
 export const replaceStringWithParams = (
   value: string | boolean | {} | [],
   params: Record<string, string>,

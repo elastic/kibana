@@ -6,7 +6,6 @@
  */
 
 import { ConfigKey, TCPFields } from '../../../../common/runtime_types';
-import { objectToJsonFormatter } from '../formatting_utils';
 import { Formatter, commonFormatters } from './common';
 import { tlsFormatters } from './tls';
 
@@ -14,7 +13,6 @@ export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 export const tcpFormatters: TCPFormatMap = {
   ...tlsFormatters,
   ...commonFormatters,
-  [ConfigKey.METADATA]: objectToJsonFormatter,
   [ConfigKey.HOSTS]: null,
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: null,
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: null,

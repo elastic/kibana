@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import {
-  arrayToJsonFormatter,
-  objectToJsonFormatter,
-  stringToJsonFormatter,
-} from '../formatting_utils';
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 import { Formatter, commonFormatters } from './common';
@@ -43,21 +38,16 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
-  [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: null,
   [ConfigKey.PORT]: null,
   [ConfigKey.URLS]: null,
-  [ConfigKey.METADATA]: objectToJsonFormatter,
-  [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
-  [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
-  [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
-  [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
-  [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.METADATA]: objectFormatter,
   [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: stringToObjectFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: stringToObjectFormatter,
 };
