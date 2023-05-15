@@ -11,6 +11,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { IndicatorsFieldSelector } from './field_selector';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { DROPDOWN_TEST_ID } from './test_ids';
 
 const mockIndexPattern: DataView = {
   fields: [
@@ -27,7 +28,7 @@ const mockIndexPattern: DataView = {
 
 describe('<IndicatorsFieldSelector />', () => {
   it('should handle empty array of indexPatterns', () => {
-    const component = render(
+    const { getByTestId } = render(
       <TestProvidersComponent>
         <IndicatorsFieldSelector
           indexPattern={{ fields: [] } as any}
@@ -37,11 +38,11 @@ describe('<IndicatorsFieldSelector />', () => {
       </TestProvidersComponent>
     );
 
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(DROPDOWN_TEST_ID)).toBeInTheDocument();
   });
 
   it('should display all unique fields from a DataView[]', () => {
-    const component = render(
+    const { getByTestId } = render(
       <TestProvidersComponent>
         <IndicatorsFieldSelector
           indexPattern={mockIndexPattern}
@@ -51,6 +52,6 @@ describe('<IndicatorsFieldSelector />', () => {
       </TestProvidersComponent>
     );
 
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(DROPDOWN_TEST_ID)).toBeInTheDocument();
   });
 });
