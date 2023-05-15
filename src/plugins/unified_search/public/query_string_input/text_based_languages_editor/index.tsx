@@ -323,9 +323,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const sections = await getDocumentationSections(language);
       setDocumentationSections(sections);
     }
-
-    getDocumentation();
-  }, [language]);
+    if (!documentationSections) {
+      getDocumentation();
+    }
+  }, [language, documentationSections]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
