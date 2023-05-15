@@ -11,7 +11,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import { ConfigSchema } from '../config';
-import { setIndexPatterns, setTheme, setOverlays, setTextBasedLanguages } from './services';
+import { setIndexPatterns, setTheme, setOverlays } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -77,7 +77,6 @@ export class UnifiedSearchPublicPlugin
     setTheme(core.theme);
     setOverlays(core.overlays);
     setIndexPatterns(dataViews);
-    setTextBasedLanguages(textBasedLanguages);
     const autocompleteStart = this.autocomplete.start();
 
     const SearchBar = createSearchBar({
@@ -89,6 +88,7 @@ export class UnifiedSearchPublicPlugin
       unifiedSearch: {
         autocomplete: autocompleteStart,
       },
+      textBasedLanguages,
     });
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);

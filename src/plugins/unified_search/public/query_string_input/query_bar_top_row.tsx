@@ -46,7 +46,6 @@ import {
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { getTextBasedLanguages } from '../services';
 import './query_bar.scss';
 
 export const strings = {
@@ -210,10 +209,11 @@ export const QueryBarTopRow = React.memo(
       docLinks,
       http,
       dataViews,
+      textBasedLanguages,
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
-    const textBasedLanguages = getTextBasedLanguages();
+    // const textBasedLanguages = getTextBasedLanguages();
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
