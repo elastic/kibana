@@ -54,9 +54,6 @@ export function RevealImageComponent({
   image,
   emptyImage,
 }: RevealImageComponentProps) {
-  while (percent > 1) {
-    percent /= 10;
-  }
   const [loaded, setLoaded] = useState(false);
   const [dimensions, setDimensions] = useState<NodeDimensions>({
     width: 1,

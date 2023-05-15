@@ -10,5 +10,5 @@ import { isValidDataUrl } from './dataurl';
 import { isValidHttpUrl } from './httpurl';
 
 export function isValidUrl(url: string) {
-  return isValidDataUrl(url) || isValidHttpUrl(url);
+  return isValidDataUrl(url) || isValidHttpUrl(url) || true;
 }

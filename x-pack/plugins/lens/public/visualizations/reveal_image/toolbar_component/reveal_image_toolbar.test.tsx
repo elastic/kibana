@@ -10,8 +10,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
-import { GaugeToolbar } from '.';
-import type { GaugeVisualizationState } from '../constants';
+import { RevealImageToolbar } from '.';
+import type { RevealImageVisualizationState } from '../constants';
+import { Origin } from '@kbn/expression-reveal-image-plugin/common';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -61,9 +62,9 @@ class Harness {
   }
 }
 
-describe('gauge toolbar', () => {
+describe('reveal image toolbar', () => {
   let harness: Harness;
-  let defaultProps: VisualizationToolbarProps<GaugeVisualizationState>;
+  let defaultProps: VisualizationToolbarProps<RevealImageVisualizationState>;
 
   beforeEach(() => {
     defaultProps = {
@@ -73,19 +74,14 @@ describe('gauge toolbar', () => {
         layerId: 'layerId',
         layerType: 'data',
         metricAccessor: 'metric-accessor',
-        minAccessor: '',
         maxAccessor: '',
-        goalAccessor: '',
-        shape: 'verticalBullet',
-        colorMode: 'none',
-        ticksPosition: 'auto',
-        labelMajorMode: 'auto',
+        origin: Origin.BOTTOM,
       },
     };
   });
 
   it('should reflect state in the UI for default props', async () => {
-    harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
+    harness = new Harness(mountWithIntl(<RevealImageToolbar {...defaultProps} />));
     harness.togglePopover();
 
     expect(harness.titleLabel.prop('value')).toBe('');
@@ -105,7 +101,7 @@ describe('gauge toolbar', () => {
       },
     };
 
-    harness = new Harness(mountWithIntl(<GaugeToolbar {...props} />));
+    harness = new Harness(mountWithIntl(<RevealImageToolbar {...props} />));
     harness.togglePopover();
 
     expect(harness.titleLabel.prop('value')).toBe('new labelMajor');
@@ -118,7 +114,7 @@ describe('gauge toolbar', () => {
     it('labelMajor label is disabled if labelMajor is selected to be none', () => {
       defaultProps.state.labelMajorMode = 'none' as const;
 
-      harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
+      harness = new Harness(mountWithIntl(<RevealImageToolbar {...defaultProps} />));
       harness.togglePopover();
 
       expect(harness.titleSelect.prop('value')).toBe('none');
@@ -128,7 +124,7 @@ describe('gauge toolbar', () => {
     it('labelMajor mode switches to custom when user starts typing', () => {
       defaultProps.state.labelMajorMode = 'auto' as const;
 
-      harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
+      harness = new Harness(mountWithIntl(<RevealImageToolbar {...defaultProps} />));
       harness.togglePopover();
 
       expect(harness.titleSelect.prop('value')).toBe('auto');
@@ -149,7 +145,7 @@ describe('gauge toolbar', () => {
     it('labelMinor label is enabled if labelMinor is string', () => {
       defaultProps.state.labelMinor = 'labelMinor label';
 
-      harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
+      harness = new Harness(mountWithIntl(<RevealImageToolbar {...defaultProps} />));
       harness.togglePopover();
 
       expect(harness.subtitleSelect.prop('value')).toBe('custom');
@@ -159,7 +155,7 @@ describe('gauge toolbar', () => {
     it('labelMajor mode can switch to custom', () => {
       defaultProps.state.labelMinor = '';
 
-      harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
+      harness = new Harness(mountWithIntl(<RevealImageToolbar {...defaultProps} />));
       harness.togglePopover();
 
       expect(harness.subtitleSelect.prop('value')).toBe('none');

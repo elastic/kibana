@@ -24,6 +24,8 @@ type RevealImageState = Pick<
 > & {
   maxAccessor?: string;
   metricAccessor?: string;
+  imageId: string | null;
+  emptyImageId: string | null;
 };
 
 export type RevealImageVisualizationState = RevealImageState & {

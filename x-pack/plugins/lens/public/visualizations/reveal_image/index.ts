@@ -6,19 +6,20 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { FilesClient } from '@kbn/files-plugin/public';
+import { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import type { EditorFrameSetup } from '../../types';
 
 export interface RevealImageVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
-  charts: ChartsPluginSetup;
+  files: FilesClient<FileImageMetadata>;
 }
 
 export class RevealImageVisualization {
-  setup(core: CoreSetup, { editorFrame, charts }: RevealImageVisualizationPluginSetupPlugins) {
+  setup(core: CoreSetup, { editorFrame, files }: RevealImageVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
       const { getRevealImageVisualization } = await import('../../async_services');
-      return getRevealImageVisualization({ theme: core.theme });
+      return getRevealImageVisualization({ files, theme: core.theme });
     });
   }
 }
