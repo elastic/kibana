@@ -39,6 +39,7 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
     name: 'Policy',
     updated_at: '2020-01-01',
     updated_by: 'qwerty',
+    is_protected: false,
     ...data,
   });
 }

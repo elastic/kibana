@@ -38,6 +38,9 @@ describe('TextBasedLanguagesEditor', () => {
 
   const services = {
     uiSettings,
+    settings: {
+      client: uiSettings,
+    },
   };
 
   function renderTextBasedLanguagesEditorComponent(testProps: TextBasedLanguagesEditorProps) {
