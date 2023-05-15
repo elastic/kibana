@@ -1,0 +1,15 @@
+[[maintenance-windows]]
+== Maintenance windows
+
+preview::[]
+
+[discrete]
+[[setup-maintenance-windows]]
+== Configure access to maintenance windows
+
+To access maintenance windows in *{stack-manage-app}*, you must have the appropriate {kib} privileges:
+
+- To have full access to maintenance windows, you must have `All` privileges for the *Maintenance Windows* feature under *Management*.
+- To have view-only access to maintenance windows, you must have `Read` privileges for the *Maintenance Windows* feature under *Management*.
+
+For more details, refer to <<kibana-privileges>>.
