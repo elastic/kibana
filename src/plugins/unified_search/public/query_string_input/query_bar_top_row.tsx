@@ -595,6 +595,7 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
+            isDarkMode={uiSettings.get('theme:darkMode')}
           />
         )
       );
