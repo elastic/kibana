@@ -12,15 +12,22 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { createFileClientMock } from '@kbn/files-plugin/server/mocks';
 
-import { createEsFileClient as _createEsFileClient } from '@kbn/files-plugin/server';
+import {
+  createEsFileClient as _createEsFileClient,
+  createFileHashTransform as _createFileHashTransform,
+} from '@kbn/files-plugin/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { FleetFileType } from '../..';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
+import type { File } from '@kbn/files-plugin/common';
+
+import type { FleetFileType, HapiReadableStream } from '../..';
 
 import type { FileCustomMeta } from './types';
 
-import { createFromHostEsSearchResponseMock } from './mocks';
+import { createFromHostEsSearchResponseMock, createHapiReadableStreamMock } from './mocks';
 
 import { FleetFilesClient } from './client';
 import type { HostUploadedFileMetadata } from './types';
@@ -28,6 +35,7 @@ import type { HostUploadedFileMetadata } from './types';
 jest.mock('@kbn/files-plugin/server');
 
 const createEsFileClientMock = _createEsFileClient as jest.Mock;
+const createFileHashTransformMock = _createFileHashTransform as jest.Mock;
 
 describe('When using FleetFilesClient', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -174,17 +182,74 @@ describe('When using FleetFilesClient', () => {
   });
 
   describe('#create() method', () => {
-    it.todo('should return a FleetFile on success');
+    let fileReadable: HapiReadableStream;
 
-    it.todo('should error is `type` is not `to-host`');
+    beforeEach(() => {
+      fileReadable = createHapiReadableStreamMock();
+    });
 
-    it.todo('should error if `agentIds` is empty');
+    it('should create a new file with expected metadata', async () => {
+      const createdFile = await getFleetFilesInstance('to-host').create(fileReadable, ['123']);
 
-    it.todo('should create a new file with expected metadata');
+      expect(esFileClientMock.create).toHaveBeenCalledWith({
+        id: expect.any(String),
+        metadata: {
+          meta: {
+            action_id: '',
+            target_agents: ['123'],
+          },
+          mime: 'application/text',
+          name: 'foo.txt',
+        },
+      });
 
-    it.todo('should upload a file and use transform to create hash');
+      expect(createdFile).toEqual({
+        actionId: '123',
+        agents: ['abc'],
+        created: '2022-10-10T14:57:30.682Z',
+        id: '123',
+        mimeType: 'text/plain',
+        name: 'test.txt',
+        sha256: 'e5441eb2bb8a774783d4ff4690153832688bd546c878e953acc3da089ac05d06',
+        size: 1234,
+        status: 'READY',
+      });
+    });
 
-    it.todo('should error if hash was not created');
+    it('should error is `type` is not `to-host`', async () => {
+      await expect(
+        getFleetFilesInstance('from-host').create(fileReadable, ['123'])
+      ).rejects.toThrow('Method is only supported when `type` is `to-host`');
+    });
+
+    it('should error if `agentIds` is empty', async () => {
+      await expect(getFleetFilesInstance('to-host').create(fileReadable, [])).rejects.toThrow(
+        'FleetFilesClientError: Missing agentIds!'
+      );
+    });
+
+    it('should upload a file and use transform to create hash', async () => {
+      const esFile = (await esFileClientMock.get({ id: '1' })) as DeeplyMockedKeys<File>;
+      const hashTransform = jest
+        .requireActual('@kbn/files-plugin/server')
+        .createFileHashTransform();
+
+      createFileHashTransformMock.mockReturnValue(hashTransform);
+      await getFleetFilesInstance('to-host').create(fileReadable, ['123']);
+
+      expect(esFile.uploadContent).toHaveBeenCalledWith(fileReadable, undefined, {
+        transforms: [hashTransform],
+      });
+    });
+
+    it('should error if hash was not created', async () => {
+      const esFile = (await esFileClientMock.get({ id: '1' })) as DeeplyMockedKeys<File>;
+      esFile.data.hash = undefined;
+
+      await expect(getFleetFilesInstance('to-host').create(fileReadable, ['123'])).rejects.toThrow(
+        'FleetFilesClientError: File hash was not generated!'
+      );
+    });
   });
 
   describe('#update() method', () => {

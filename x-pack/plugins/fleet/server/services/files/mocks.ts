@@ -9,6 +9,8 @@ import { Readable } from 'stream';
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { HapiReadableStream } from '@kbn/security-solution-plugin/server/types';
+
 import type { FleetFileClientInterface } from './types';
 import type { FleetFile } from './types';
 import type { HostUploadedFileMetadata } from './types';
@@ -118,3 +120,15 @@ export const createFromHostEsSearchResponseMock =
       },
     };
   };
+
+export const createHapiReadableStreamMock = (): HapiReadableStream => {
+  const readable = Readable.from(['test']) as HapiReadableStream;
+  readable.hapi = {
+    filename: 'foo.txt',
+    headers: {
+      'content-type': 'application/text',
+    },
+  };
+
+  return readable;
+};
