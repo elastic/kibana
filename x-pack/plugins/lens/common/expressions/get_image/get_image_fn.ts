@@ -14,7 +14,6 @@ export const getImageFn =
   (files: () => FilesClient<FileImageMetadata>): GetImageExpressionFunction['fn'] =>
   async (input, { id }, context) => {
     const savedImage = await files().getDownloadHref({ id, fileKind: DefaultFileKind.kind.id });
-    console.log({ savedImage });
     if (savedImage !== undefined) {
       return savedImage;
     }

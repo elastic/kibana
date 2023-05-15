@@ -30,8 +30,6 @@ export const RevealImageToolbar = memo(
       value: state,
     });
 
-    console.log({ imageId });
-
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
