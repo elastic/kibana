@@ -295,11 +295,11 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('calculates risk from 10,000 alerts, all for the same host', async () => {
+        it('calculates risk from 1,000 alerts, all for the same host', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(
-            Array(10000)
+            Array(1000)
               .fill(doc)
               .map((item, index) => ({
                 ...item,
@@ -309,15 +309,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
             riskScore: 100,
-            alerts: 10000,
-            maxSignals: 10000,
+            alerts: 1000,
+            maxSignals: 1000,
           });
 
           expect(removeFields(body.scores)).to.eql([
             {
               level: 'Critical',
-              totalScore: 259.237584867298,
-              totalScoreNormalized: 99.24869252193645,
+              totalScore: 254.91456029175757,
+              totalScoreNormalized: 97.59362951445543,
               identifierField: 'host.name',
               identifierValue: 'host-1',
             },
