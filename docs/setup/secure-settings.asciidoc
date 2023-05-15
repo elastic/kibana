@@ -86,7 +86,7 @@ bin/kibana-keystore remove the.setting.name.to.remove
 [[read-settings]]
 === Read settings
 
-To display currently configured setting values, use the `show` command:
+To display the configured setting values, use the `show` command:
 
 [source, sh]
 ----------------------------------------------------------------
