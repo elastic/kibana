@@ -157,6 +157,13 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
-    "@kbn/shared-ux-file-types"
+    "@kbn/shared-ux-file-types",
+    "@kbn/discover-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/url-forwarding-plugin"
   ]
 }
