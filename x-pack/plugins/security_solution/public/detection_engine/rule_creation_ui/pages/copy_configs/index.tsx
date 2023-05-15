@@ -20,7 +20,7 @@ import * as i18n from './translations';
 import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import type { Rule } from '../../../rule_management/logic/types';
 
-const TAGS_POPOVER_WIDTH = 274;
+const TAGS_POPOVER_WIDTH = 374;
 
 interface Props {
   ruleId?: string;
