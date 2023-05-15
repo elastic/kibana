@@ -39,6 +39,8 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-common",
+    "@kbn/core-analytics-browser",
+    "@kbn/analytics-client",
   ],
   "exclude": [
     "target/**/*",
