@@ -13,8 +13,6 @@ import { capitalize } from 'lodash';
 import { TRuleExecutionEventType } from '../../model/execution_event';
 import { TLogLevel } from '../../model/log_level';
 
-
-
 /**
  * URL path parameters of the API route.
  */
