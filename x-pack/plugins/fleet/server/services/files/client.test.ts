@@ -29,7 +29,7 @@ describe('When using FleetFilesClient', () => {
 
     it.todo('should create a new file with expected metadata');
 
-    it.todo('should uplaod a file and use transform to create hash');
+    it.todo('should upload a file and use transform to create hash');
 
     it.todo('should error if hash was not created');
 

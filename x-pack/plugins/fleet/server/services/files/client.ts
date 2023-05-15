@@ -190,8 +190,11 @@ export class FleetFilesClient implements FleetFileClientInterface {
   }
 
   protected async getFileCreatedByKibana(fileId: string): Promise<FleetFile> {
-    const file = await this.esFileClient.get<FileCustomMeta>({ id: fileId });
-    return this.mapIndexedDocToFleetFile(file);
+    const esFile = await this.esFileClient.get<FileCustomMeta>({ id: fileId });
+    const file = this.mapIndexedDocToFleetFile(esFile);
+    await this.adjustFileStatusIfNeeded(file);
+
+    return file;
   }
 
   protected async getFileCreatedByHost(fileId: string): Promise<FleetFile> {
@@ -215,21 +218,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
       }
 
       const fleetFile = this.mapIndexedDocToFleetFile(docSearchHit);
-      let fileHasChunks: boolean = true;
-
-      // if status is `READY` and file is older than 5 minutes, then ensure that file has
-      // chunks - for the cases where the file data might have been cleaned up due to ILM.
-      if (fleetFile.status === 'READY' && moment().diff(fleetFile.created, 'minutes') >= 10) {
-        fileHasChunks = await this.doesFileHaveData(fleetFile.id);
-
-        if (!fileHasChunks) {
-          this.logger.warn(
-            `File with id [${fileId}] has no data chunks in index [${this.fileMetaIndex}]. File status will be adjusted to DELETED`
-          );
-
-          fleetFile.status = 'DELETED';
-        }
-      }
+      await this.adjustFileStatusIfNeeded(fleetFile);
 
       return fleetFile;
     } catch (error) {
@@ -238,6 +227,30 @@ export class FleetFilesClient implements FleetFileClientInterface {
       }
 
       throw new FleetFilesClientError(error.message, error);
+    }
+  }
+
+  /**
+   * Will check if the file actually has data (chunks) if the `status` is `READY`, and if not, it
+   * will set (mutate) the `status` to `DELETED`.
+   * Covers edge case where ILM could have deleted the file data, but the background task has not
+   * yet adjusted the file's meta to reflect that state.
+   * @param file
+   * @protected
+   */
+  protected async adjustFileStatusIfNeeded(file: FleetFile): Promise<void> {
+    // if status is `READY` and file is older than 5 minutes, then ensure that file has
+    // chunks
+    if (file.status === 'READY' && moment().diff(file.created, 'minutes') >= 10) {
+      const fileHasChunks: boolean = await this.doesFileHaveData(file.id);
+
+      if (!fileHasChunks) {
+        this.logger.warn(
+          `File with id [${file.id}] has no data chunks in index [${this.fileDataIndex}]. File status will be adjusted to DELETED`
+        );
+
+        file.status = 'DELETED';
+      }
     }
   }
 
