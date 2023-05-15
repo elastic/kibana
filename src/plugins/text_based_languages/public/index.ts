@@ -5,8 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { TextBasedLanguagesEditorProps } from './components';
 
-export interface TextBasedEditorPluginStart {
-  TextBasedLanguagesEditor: React.ComponentType<TextBasedLanguagesEditorProps>;
+import { TextBasedLanguagesPlugin } from './plugin';
+
+export type { TextBasedLanguagesEditorProps } from './components';
+
+export type { TextBasedLanguagesPluginStart } from './types';
+
+export function plugin() {
+  return new TextBasedLanguagesPlugin();
 }

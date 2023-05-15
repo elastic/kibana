@@ -1,4 +1,4 @@
-# @kbn/text-based-editor
+# @kbn/text-based-languages
 
 Contains the ESQL editor with the autocomplete and the autosuggest functionality (based on atlr). 
 The antlr code can be found in packages/kbn-monaco/src/esql

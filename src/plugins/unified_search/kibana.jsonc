@@ -19,7 +19,7 @@
       "uiActions",
       "screenshotMode",
       "savedObjectsManagement",
-      "textBasedEditor"
+      "textBasedLanguages"
     ],
     "optionalPlugins": [
       "usageCollection"

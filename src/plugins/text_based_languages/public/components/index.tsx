@@ -376,13 +376,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               content={
                 isWordWrapped
                   ? i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                      'textBasedLanguages.query.textBasedLanguagesEditor.disableWordWrapLabel',
                       {
                         defaultMessage: 'Disable word wrap',
                       }
                     )
                   : i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                      'textBasedLanguages.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                       {
                         defaultMessage: 'Enable word wrap',
                       }
@@ -396,13 +396,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 aria-label={
                   isWordWrapped
                     ? i18n.translate(
-                        'unifiedSearch.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                        'textBasedLanguages.query.textBasedLanguagesEditor.disableWordWrapLabel',
                         {
                           defaultMessage: 'Disable word wrap',
                         }
                       )
                     : i18n.translate(
-                        'unifiedSearch.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                        'textBasedLanguages.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                         {
                           defaultMessage: 'Enable word wrap',
                         }
@@ -424,7 +424,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(
-                    'unifiedSearch.query.textBasedLanguagesEditor.minimizeTooltip',
+                    'textBasedLanguages.query.textBasedLanguagesEditor.minimizeTooltip',
                     {
                       defaultMessage: 'Compact query editor',
                     }
@@ -434,7 +434,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     iconType="minimize"
                     color="text"
                     aria-label={i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.MinimizeEditor',
+                      'textBasedLanguages.query.textBasedLanguagesEditor.MinimizeEditor',
                       {
                         defaultMessage: 'Minimize editor',
                       }
@@ -455,7 +455,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     color: 'text',
                     'data-test-subj': 'unifiedTextLangEditor-documentation',
                     'aria-label': i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                      'textBasedLanguages.query.textBasedLanguagesEditor.documentationLabel',
                       {
                         defaultMessage: 'Documentation',
                       }
@@ -489,7 +489,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         css={styles.linesBadge}
                         data-test-subj="unifiedTextLangEditor-inline-lines-badge"
                       >
-                        {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
+                        {i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.lineCount', {
                           defaultMessage: '{count} {count, plural, one {line} other {lines}}',
                           values: { count: lines },
                         })}
@@ -545,7 +545,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(
-                    'unifiedSearch.query.textBasedLanguagesEditor.expandTooltip',
+                    'textBasedLanguages.query.textBasedLanguagesEditor.expandTooltip',
                     {
                       defaultMessage: 'Expand query editor',
                     }
@@ -574,7 +574,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     display: 'empty',
                     'data-test-subj': 'unifiedTextLangEditor-inline-documentation',
                     'aria-label': i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                      'textBasedLanguages.query.textBasedLanguagesEditor.documentationLabel',
                       {
                         defaultMessage: 'Documentation',
                       }

@@ -12,7 +12,7 @@ import { Markdown } from '@kbn/kibana-react-plugin/public';
 export const initialSection = (
   <Markdown
     markdown={i18n.translate(
-      'unifiedSearch.query.textBasedLanguagesEditor.documentation.markdown',
+      'textBasedLanguages.query.textBasedLanguagesEditor.documentation.markdown',
       {
         defaultMessage: `## About Elasticsearch SQL
 
@@ -36,24 +36,24 @@ Elasticsearch SQL:
 );
 
 export const comparisonOperators = {
-  label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.comparisonOperators', {
+  label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.comparisonOperators', {
     defaultMessage: 'Comparison operators',
   }),
   description: i18n.translate(
-    'unifiedSearch.query.textBasedLanguagesEditor.comparisonOperatorsDocumentationDescription',
+    'textBasedLanguages.query.textBasedLanguagesEditor.comparisonOperatorsDocumentationDescription',
     {
       defaultMessage: `Boolean operator for comparing against one or multiple expressions.`,
     }
   ),
   items: [
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.equality', {
+      label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.documentation.equality', {
         defaultMessage: 'Equality',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.equality.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.equality.markdown',
             {
               defaultMessage: `### Equality (=)
 \`\`\`
@@ -70,7 +70,7 @@ WHERE emp_no = 10000 LIMIT 5
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.nullSafeEquality',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.nullSafeEquality',
         {
           defaultMessage: 'Null safe equality (<=>)',
         }
@@ -78,7 +78,7 @@ WHERE emp_no = 10000 LIMIT 5
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.nullSafeEquality.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.nullSafeEquality.markdown',
             {
               defaultMessage: `### Null safe equality:
 \`\`\`
@@ -105,7 +105,7 @@ true
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.inequality',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.inequality',
         {
           defaultMessage: 'Inequality',
         }
@@ -113,7 +113,7 @@ true
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.inequality.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.inequality.markdown',
             {
               defaultMessage: `### Inequality (<> or !=)
 \`\`\`
@@ -130,7 +130,7 @@ WHERE emp_no <> 10000 ORDER BY emp_no LIMIT 5
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.comparison',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.comparison',
         {
           defaultMessage: 'Comparison',
         }
@@ -138,7 +138,7 @@ WHERE emp_no <> 10000 ORDER BY emp_no LIMIT 5
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.comparison.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.comparison.markdown',
             {
               defaultMessage: `### Comparison (<, <=, >, >=)
 \`\`\`
@@ -154,13 +154,13 @@ WHERE emp_no < 10003 ORDER BY emp_no LIMIT 5
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.between', {
+      label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.documentation.between', {
         defaultMessage: 'Between',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.between.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.between.markdown',
             {
               defaultMessage: `### Between
 \`\`\`
@@ -177,7 +177,7 @@ WHERE emp_no BETWEEN 9990 AND 10003 ORDER BY emp_no
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.nullNotNull',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.nullNotNull',
         {
           defaultMessage: 'IS NULL and IS NOT NULL',
         }
@@ -185,7 +185,7 @@ WHERE emp_no BETWEEN 9990 AND 10003 ORDER BY emp_no
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.nullNotNull.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.nullNotNull.markdown',
             {
               defaultMessage: `### IS NULL/IS NOT NULL
 \`\`\`
@@ -202,7 +202,7 @@ WHERE emp_no IS NOT NULL AND gender IS NULL
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.inOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.inOperator',
         {
           defaultMessage: 'IN',
         }
@@ -210,7 +210,7 @@ WHERE emp_no IS NOT NULL AND gender IS NULL
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.inOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.inOperator.markdown',
             {
               defaultMessage: `### IN (<value1>, <value2>, ...)
 \`\`\`
@@ -229,11 +229,11 @@ WHERE emp_no IN (10000, 10001, 10002, 999) ORDER BY emp_no LIMIT 5
 };
 
 export const logicalOperators = {
-  label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.logicalOperators', {
+  label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.logicalOperators', {
     defaultMessage: 'Logical operators',
   }),
   description: i18n.translate(
-    'unifiedSearch.query.textBasedLanguagesEditor.logicalOperatorsDocumentationDescription',
+    'textBasedLanguages.query.textBasedLanguagesEditor.logicalOperatorsDocumentationDescription',
     {
       defaultMessage: `Boolean operator for evaluating one or two expressions.`,
     }
@@ -241,7 +241,7 @@ export const logicalOperators = {
   items: [
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.AndOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.AndOperator',
         {
           defaultMessage: 'AND',
         }
@@ -249,7 +249,7 @@ export const logicalOperators = {
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.andOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.andOperator.markdown',
             {
               defaultMessage: `### AND
 \`\`\`
@@ -266,7 +266,7 @@ WHERE emp_no > 10000 AND emp_no < 10005 ORDER BY emp_no LIMIT 5
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.OrOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.OrOperator',
         {
           defaultMessage: 'OR',
         }
@@ -274,7 +274,7 @@ WHERE emp_no > 10000 AND emp_no < 10005 ORDER BY emp_no LIMIT 5
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.orOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.orOperator.markdown',
             {
               defaultMessage: `### OR
 \`\`\`
@@ -291,7 +291,7 @@ WHERE emp_no < 10003 OR emp_no = 10005 ORDER BY emp_no LIMIT 5
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.NotOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.NotOperator',
         {
           defaultMessage: 'NOT',
         }
@@ -299,7 +299,7 @@ WHERE emp_no < 10003 OR emp_no = 10005 ORDER BY emp_no LIMIT 5
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.notOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.notOperator.markdown',
             {
               defaultMessage: `### NOT
 \`\`\`
@@ -318,11 +318,11 @@ WHERE NOT emp_no = 10000 LIMIT 5
 };
 
 export const mathOperators = {
-  label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.mathOperators', {
+  label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.mathOperators', {
     defaultMessage: 'Math operators',
   }),
   description: i18n.translate(
-    'unifiedSearch.query.textBasedLanguagesEditor.mathOperatorsDocumentationDescription',
+    'textBasedLanguages.query.textBasedLanguagesEditor.mathOperatorsDocumentationDescription',
     {
       defaultMessage: `Perform mathematical operations affecting one or two values. The result is a value of numeric type..`,
     }
@@ -330,7 +330,7 @@ export const mathOperators = {
   items: [
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.AddOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.AddOperator',
         {
           defaultMessage: 'Add',
         }
@@ -338,7 +338,7 @@ export const mathOperators = {
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.addOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.addOperator.markdown',
             {
               defaultMessage: `### Add (+)
 \`\`\`
@@ -354,7 +354,7 @@ SELECT 1 + 1 AS x
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.SubtractOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.SubtractOperator',
         {
           defaultMessage: 'Subtract',
         }
@@ -362,7 +362,7 @@ SELECT 1 + 1 AS x
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.subtractOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.subtractOperator.markdown',
             {
               defaultMessage: `### Subtract (infix -)
 \`\`\`
@@ -378,7 +378,7 @@ SELECT 1 - 1 AS x
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.negateOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.negateOperator',
         {
           defaultMessage: 'Negate',
         }
@@ -386,7 +386,7 @@ SELECT 1 - 1 AS x
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.negateOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.negateOperator.markdown',
             {
               defaultMessage: `### Negate (unary -)
 \`\`\`
@@ -402,7 +402,7 @@ SELECT - 1 AS x
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.multiplyOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.multiplyOperator',
         {
           defaultMessage: 'Multiply',
         }
@@ -410,7 +410,7 @@ SELECT - 1 AS x
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.multiplyOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.multiplyOperator.markdown',
             {
               defaultMessage: `### Multiply (*)
 \`\`\`
@@ -426,7 +426,7 @@ SELECT 2 * 3 AS x
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.divideOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.divideOperator',
         {
           defaultMessage: 'Divide',
         }
@@ -434,7 +434,7 @@ SELECT 2 * 3 AS x
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.divideOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.divideOperator.markdown',
             {
               defaultMessage: `### Divide (/)
 \`\`\`
@@ -450,7 +450,7 @@ SELECT 6 / 3 AS x
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.moduloOperator',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.moduloOperator',
         {
           defaultMessage: 'Modulo or remainder',
         }
@@ -458,7 +458,7 @@ SELECT 6 / 3 AS x
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.moduloOperator.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.moduloOperator.markdown',
             {
               defaultMessage: `### Modulo or remainder(%)
 \`\`\`
@@ -476,11 +476,11 @@ SELECT 5 % 2 AS x
 };
 
 export const aggregateFunctions = {
-  label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.aggregateFunctions', {
+  label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.aggregateFunctions', {
     defaultMessage: 'Aggregate functions',
   }),
   description: i18n.translate(
-    'unifiedSearch.query.textBasedLanguagesEditor.aggregateFunctionsDocumentationDescription',
+    'textBasedLanguages.query.textBasedLanguagesEditor.aggregateFunctionsDocumentationDescription',
     {
       defaultMessage: `Functions for computing a single result from a set of input values. Elasticsearch SQL supports aggregate functions only alongside grouping (implicit or explicit).`,
     }
@@ -488,7 +488,7 @@ export const aggregateFunctions = {
   items: [
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.averageFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.averageFunction',
         {
           defaultMessage: 'Average',
         }
@@ -496,7 +496,7 @@ export const aggregateFunctions = {
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.averageFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.averageFunction.markdown',
             {
               defaultMessage: `### AVG
 Returns the Average (arithmetic mean) of input values.
@@ -517,7 +517,7 @@ SELECT AVG(salary) AS avg FROM emp
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.countFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.countFunction',
         {
           defaultMessage: 'Count',
         }
@@ -525,7 +525,7 @@ SELECT AVG(salary) AS avg FROM emp
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.countFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.countFunction.markdown',
             {
               defaultMessage: `### Count
 Returns the total number (count) of input values.
@@ -548,7 +548,7 @@ SELECT COUNT(*) AS count FROM emp
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.countAllFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.countAllFunction',
         {
           defaultMessage: 'Count (All)',
         }
@@ -556,7 +556,7 @@ SELECT COUNT(*) AS count FROM emp
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.countAllFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.countAllFunction.markdown',
             {
               defaultMessage: `### Count (All)
 Returns the total number (count) of all non-null input values. COUNT(<field_name>) and COUNT(ALL <field_name>) are equivalent.
@@ -578,7 +578,7 @@ SELECT COUNT(ALL last_name) AS count_all, COUNT(DISTINCT last_name) count_distin
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.countDistinctFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.countDistinctFunction',
         {
           defaultMessage: 'Count (Distinct)',
         }
@@ -586,7 +586,7 @@ SELECT COUNT(ALL last_name) AS count_all, COUNT(DISTINCT last_name) count_distin
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.countDistinctFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.countDistinctFunction.markdown',
             {
               defaultMessage: `### Count (Distinct)
 Returns the total number of distinct non-null values in input values.
@@ -610,7 +610,7 @@ SELECT COUNT(DISTINCT hire_date) unique_hires, COUNT(hire_date) AS hires FROM em
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.firstFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.firstFunction',
         {
           defaultMessage: 'First / First_value',
         }
@@ -618,7 +618,7 @@ SELECT COUNT(DISTINCT hire_date) unique_hires, COUNT(hire_date) AS hires FROM em
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.firstFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.firstFunction.markdown',
             {
               defaultMessage: `### FIRST / FIRST_VALUE
 Returns the first non-null value (if such exists) of the field_name input column sorted by the ordering_field_name column. If ordering_field_name is not provided, only the field_name column is used for the sorting. 
@@ -647,7 +647,7 @@ SELECT gender, FIRST(first_name, birth_date) FROM emp GROUP BY gender ORDER BY g
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.lastFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.lastFunction',
         {
           defaultMessage: 'Last / Last_value',
         }
@@ -655,7 +655,7 @@ SELECT gender, FIRST(first_name, birth_date) FROM emp GROUP BY gender ORDER BY g
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.lastFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.lastFunction.markdown',
             {
               defaultMessage: `### LAST / LAST_VALUE
 It is the inverse of FIRST/FIRST_VALUE. Returns the last non-null value (if such exists) of the field_name input column sorted descending by the ordering_field_name column. If ordering_field_name is not provided, only the field_name column is used for the sorting.  
@@ -682,7 +682,7 @@ SELECT gender, LAST(first_name) FROM emp GROUP BY gender ORDER BY gender
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.maxFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.maxFunction',
         {
           defaultMessage: 'Max',
         }
@@ -690,7 +690,7 @@ SELECT gender, LAST(first_name) FROM emp GROUP BY gender ORDER BY gender
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.maxFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.maxFunction.markdown',
             {
               defaultMessage: `### MAX
 Returns the maximum value across input values in the field field_name.
@@ -716,7 +716,7 @@ SELECT MAX(salary) AS max FROM emp
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.minFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.minFunction',
         {
           defaultMessage: 'Min',
         }
@@ -724,7 +724,7 @@ SELECT MAX(salary) AS max FROM emp
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.minFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.minFunction.markdown',
             {
               defaultMessage: `### MIN
 Returns the minimum value across input values in the field field_name.
@@ -749,7 +749,7 @@ SELECT MIN(salary) AS min FROM emp
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.sumFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.sumFunction',
         {
           defaultMessage: 'Sum',
         }
@@ -757,7 +757,7 @@ SELECT MIN(salary) AS min FROM emp
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.sumFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.sumFunction.markdown',
             {
               defaultMessage: `### SUM
 Returns the sum of input values in the field field_name.
@@ -780,7 +780,7 @@ SELECT SUM(salary) AS sum FROM emp
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.kurtosisFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.kurtosisFunction',
         {
           defaultMessage: 'Kurtosis',
         }
@@ -788,7 +788,7 @@ SELECT SUM(salary) AS sum FROM emp
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.kurtosisFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.kurtosisFunction.markdown',
             {
               defaultMessage: `### KURTOSIS
 Quantify the shape of the distribution of input values in the field field_name.
@@ -813,7 +813,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, KURTOSIS(salary) AS k FROM emp
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.madFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.madFunction',
         {
           defaultMessage: 'Mad',
         }
@@ -821,7 +821,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, KURTOSIS(salary) AS k FROM emp
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.madFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.madFunction.markdown',
             {
               defaultMessage: `### MAD
 Measure the variability of the input values in the field field_name.
@@ -844,7 +844,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, AVG(salary) AS avg, MAD(salary) A
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.percentileFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.percentileFunction',
         {
           defaultMessage: 'Percentile',
         }
@@ -852,7 +852,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, AVG(salary) AS avg, MAD(salary) A
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.percentileFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.percentileFunction.markdown',
             {
               defaultMessage: `### PERCENTILE
 Returns the nth percentile (represented by numeric_exp parameter) of input values in the field field_name.
@@ -887,7 +887,7 @@ GROUP BY languages
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.percentileRankFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.percentileRankFunction',
         {
           defaultMessage: 'Percentile rank',
         }
@@ -895,7 +895,7 @@ GROUP BY languages
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.percentileRankFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.percentileRankFunction.markdown',
             {
               defaultMessage: `### PERCENTILE_RANK
 Returns the nth percentile rank (represented by numeric_exp parameter) of input values in the field field_name.
@@ -930,7 +930,7 @@ GROUP BY languages
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.skewnessFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.skewnessFunction',
         {
           defaultMessage: 'Skewness',
         }
@@ -938,7 +938,7 @@ GROUP BY languages
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.skewnessFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.skewnessFunction.markdown',
             {
               defaultMessage: `### SKEWNESS
 Quantify the asymmetric distribution of input values in the field field_name.
@@ -961,7 +961,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, SKEWNESS(salary) AS s FROM emp
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.stsdevpopFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.stsdevpopFunction',
         {
           defaultMessage: 'STDDEV_POP',
         }
@@ -969,7 +969,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, SKEWNESS(salary) AS s FROM emp
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.stsdevpopFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.stsdevpopFunction.markdown',
             {
               defaultMessage: `### STDDEV_POP
 Returns the population standard deviation of input values in the field field_name.
@@ -992,7 +992,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_POP(salary) AS stddev FROM
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.stsdevsampFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.stsdevsampFunction',
         {
           defaultMessage: 'STDDEV_SAMP',
         }
@@ -1000,7 +1000,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_POP(salary) AS stddev FROM
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.stsdevsampFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.stsdevsampFunction.markdown',
             {
               defaultMessage: `### STDDEV_SAMP
 Returns the sample standard deviation of input values in the field field_name.
@@ -1023,7 +1023,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_SAMP(salary) AS stddev FRO
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.sumofsquaresFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.sumofsquaresFunction',
         {
           defaultMessage: 'Sum of squares',
         }
@@ -1031,7 +1031,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_SAMP(salary) AS stddev FRO
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.sumofsquaresFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.sumofsquaresFunction.markdown',
             {
               defaultMessage: `### SUM_OF_SQUARES
 Returns the sum of squares of input values in the field field_name.
@@ -1055,7 +1055,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, SUM_OF_SQUARES(salary) AS sumsq
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.varpopFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.varpopFunction',
         {
           defaultMessage: 'VAR_POP',
         }
@@ -1063,7 +1063,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, SUM_OF_SQUARES(salary) AS sumsq
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.varpopFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.varpopFunction.markdown',
             {
               defaultMessage: `### VAR_POP
 Returns the population variance of input values in the field field_name.
@@ -1086,7 +1086,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, VAR_POP(salary) AS varpop FROM em
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.varsampFunction',
+        'textBasedLanguages.query.textBasedLanguagesEditor.documentation.varsampFunction',
         {
           defaultMessage: 'VAR_SAMP',
         }
@@ -1094,7 +1094,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, VAR_POP(salary) AS varpop FROM em
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.varsampFunction.markdown',
+            'textBasedLanguages.query.textBasedLanguagesEditor.documentation.varsampFunction.markdown',
             {
               defaultMessage: `### VAR_SAMP
 Returns the sample variance of input values in the field field_name.

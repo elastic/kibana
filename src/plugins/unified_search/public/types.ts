@@ -11,7 +11,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { TextBasedEditorPluginStart } from '@kbn/text-based-editor/public';
+import type { TextBasedLanguagesPluginStart } from '@kbn/text-based-languages/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Query, AggregateQuery } from '@kbn/es-query';
@@ -38,7 +38,7 @@ export interface UnifiedSearchStartDependencies {
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   screenshotMode?: ScreenshotModePluginStart;
-  textBasedEditor: TextBasedEditorPluginStart;
+  textBasedLanguages: TextBasedLanguagesPluginStart;
 }
 
 /**

@@ -9,7 +9,7 @@
 import { ThemeServiceStart, OverlayStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { TextBasedEditorPluginStart } from '@kbn/text-based-editor/public';
+import type { TextBasedLanguagesPluginStart } from '@kbn/text-based-languages/public';
 
 export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('IndexPatterns');
@@ -18,5 +18,5 @@ export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme
 
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 
-export const [getTextBasedEditor, setTextBasedEditor] =
-  createGetterSetter<TextBasedEditorPluginStart>('TextBasedEditor');
+export const [getTextBasedLanguages, setTextBasedLanguages] =
+  createGetterSetter<TextBasedLanguagesPluginStart>('TextBasedLanguages');

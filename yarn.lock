@@ -5402,7 +5402,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/text-based-editor@link:src/plugins/text-based-editor":
+"@kbn/text-based-languages@link:src/plugins/text_based_languages":
   version "0.0.0"
   uid ""
 
