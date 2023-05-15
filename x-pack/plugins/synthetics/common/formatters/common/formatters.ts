@@ -6,30 +6,31 @@
  */
 
 import { CommonFields, ConfigKey, SourceType } from '../../runtime_types/monitor_management';
-import { arrayToJsonFormatter, stringToJsonFormatter, FormatterFn } from '../formatting_utils';
+import { arrayToJsonFormatter, FormatterFn } from '../formatting_utils';
 
 export type Formatter = null | FormatterFn;
 
 export type CommonFormatMap = Record<keyof CommonFields | ConfigKey.NAME, Formatter>;
 
 export const commonFormatters: CommonFormatMap = {
-  [ConfigKey.APM_SERVICE_NAME]: stringToJsonFormatter,
-  [ConfigKey.NAME]: stringToJsonFormatter,
+  [ConfigKey.APM_SERVICE_NAME]: null,
+  [ConfigKey.NAME]: null,
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.ENABLED]: null,
   [ConfigKey.ALERT_CONFIG]: null,
   [ConfigKey.CONFIG_ID]: null,
-  [ConfigKey.NAMESPACE]: stringToJsonFormatter,
+  [ConfigKey.NAMESPACE]: null,
   [ConfigKey.REVISION]: null,
   [ConfigKey.MONITOR_SOURCE_TYPE]: null,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
-  [ConfigKey.JOURNEY_ID]: stringToJsonFormatter,
-  [ConfigKey.PROJECT_ID]: stringToJsonFormatter,
-  [ConfigKey.CUSTOM_HEARTBEAT_ID]: stringToJsonFormatter,
-  [ConfigKey.ORIGINAL_SPACE]: stringToJsonFormatter,
+  [ConfigKey.JOURNEY_ID]: null,
+  [ConfigKey.PROJECT_ID]: null,
+  [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
+  [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.CONFIG_HASH]: null,
-  [ConfigKey.MONITOR_QUERY_ID]: stringToJsonFormatter,
+  [ConfigKey.MONITOR_QUERY_ID]: null,
+  [ConfigKey.PARAMS]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
       `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`

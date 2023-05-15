@@ -72,11 +72,12 @@ export const getFieldEditorOpener =
     apiService,
   }: Dependencies) =>
   (options: OpenFieldEditorOptions): CloseEditor => {
-    const { uiSettings, overlays, docLinks, notifications } = core;
+    const { uiSettings, overlays, docLinks, notifications, settings } = core;
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
       docLinks,
       http: core.http,
+      settings,
     });
 
     let overlayRef: OverlayRef | null = null;
