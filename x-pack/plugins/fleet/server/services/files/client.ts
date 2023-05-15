@@ -14,10 +14,8 @@ import type { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { FileClient } from '@kbn/files-plugin/server';
-import { createFileHashTransform, createEsFileClient } from '@kbn/files-plugin/server';
+import { createEsFileClient, createFileHashTransform } from '@kbn/files-plugin/server';
 import type { File } from '@kbn/files-plugin/common';
-
-import type { BaseFileMetadata, FileCompression } from '@kbn/shared-ux-file-types';
 
 import { v4 as uuidV4 } from 'uuid';
 
@@ -28,11 +26,13 @@ import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common'
 import { FleetFileNotFound, FleetFilesClientError } from '../../errors';
 
 import type {
+  FileCustomMeta,
   FleetFile,
   FleetFileClientInterface,
   FleetFileType,
-  HapiReadableStream,
   FleetFileUpdatableFields,
+  HapiReadableStream,
+  HostUploadedFileMetadata,
 } from './types';
 
 /**
@@ -318,55 +318,3 @@ const isSearchHit = (data: unknown): data is estypes.SearchHit<HostUploadedFileM
     '_index' in data
   );
 };
-
-interface FileCustomMeta {
-  target_agents: string[];
-  action_id: string;
-}
-
-/**
- * File upload metadata information. Stored by endpoint/fleet-server when a file is uploaded to ES in connection with
- * a response action
- */
-export interface HostUploadedFileMetadata {
-  action_id: string;
-  agent_id: string;
-  src: string; // The agent name. `endpoint` for security solution files
-  upload_id: string;
-  upload_start: number;
-  contents: Array<
-    Partial<{
-      accessed: string; // ISO date
-      created: string; // ISO date
-      directory: string;
-      file_extension: string;
-      file_name: string;
-      gid: number;
-      inode: number;
-      mode: string;
-      mountpoint: string;
-      mtime: string;
-      path: string;
-      sha256: string;
-      size: number;
-      target_path: string;
-      type: string;
-      uid: number;
-    }>
-  >;
-  file: Pick<
-    Required<BaseFileMetadata>,
-    'name' | 'size' | 'Status' | 'ChunkSize' | 'mime_type' | 'extension'
-  > &
-    Omit<BaseFileMetadata, 'name' | 'size' | 'Status' | 'ChunkSize' | 'mime_type' | 'extension'> & {
-      compression: FileCompression;
-      attributes: string[];
-      type: string;
-    };
-  host: {
-    hostname: string;
-  };
-  transithash: {
-    sha256: string;
-  };
-}

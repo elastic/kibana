@@ -7,7 +7,7 @@
 
 import type { Readable } from 'stream';
 
-import type { FileStatus } from '@kbn/shared-ux-file-types';
+import type { BaseFileMetadata, FileCompression, FileStatus } from '@kbn/shared-ux-file-types';
 
 /**
  * The type of file.
@@ -63,4 +63,60 @@ export interface HapiReadableStream extends Readable {
 export interface FleetFileUpdatableFields {
   agents: string[];
   actionId: string;
+}
+
+/**
+ * File upload metadata information. Stored by endpoint/fleet-server when a file is uploaded to ES in connection with
+ * a response action
+ */
+export interface HostUploadedFileMetadata {
+  action_id: string;
+  agent_id: string;
+  src: string; // The agent name. `endpoint` for security solution files
+  upload_id: string;
+  upload_start: number;
+  contents: Array<
+    Partial<{
+      accessed: string; // ISO date
+      created: string; // ISO date
+      directory: string;
+      file_extension: string;
+      file_name: string;
+      gid: number;
+      inode: number;
+      mode: string;
+      mountpoint: string;
+      mtime: string;
+      path: string;
+      sha256: string;
+      size: number;
+      target_path: string;
+      type: string;
+      uid: number;
+    }>
+  >;
+  file: Pick<
+    Required<BaseFileMetadata>,
+    'name' | 'size' | 'Status' | 'ChunkSize' | 'mime_type' | 'extension'
+  > &
+    Omit<BaseFileMetadata, 'name' | 'size' | 'Status' | 'ChunkSize' | 'mime_type' | 'extension'> & {
+      compression: FileCompression;
+      attributes: string[];
+      type: string;
+    };
+  host: {
+    hostname: string;
+  };
+  transithash: {
+    sha256: string;
+  };
+}
+
+/**
+ * The File metadata that is stored along with files uploaded to kibana (via the Files plugin)
+ * @private
+ */
+export interface FileCustomMeta {
+  target_agents: string[];
+  action_id: string;
 }
