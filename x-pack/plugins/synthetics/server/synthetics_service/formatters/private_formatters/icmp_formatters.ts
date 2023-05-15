@@ -6,10 +6,10 @@
  */
 
 import { ConfigKey, ICMPFields } from '../../../../common/runtime_types';
-import { secondsToCronFormatter } from '../formatting_utils';
+import { secondsToCronFormatter } from './formatting_utils';
 
 import { Formatter, commonFormatters } from './common_formatters';
-import { stringToJsonFormatter } from '../formatting_utils';
+import { stringToJsonFormatter } from './formatting_utils';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 

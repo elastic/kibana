@@ -18,7 +18,7 @@ import {
   SourceType,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
-import { stringifyString } from '../formatters/formatting_utils';
+import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;

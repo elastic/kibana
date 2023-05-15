@@ -6,9 +6,9 @@
  */
 
 import { ConfigKey, TCPFields } from '../../../../common/runtime_types';
-import { objectToJsonFormatter } from '../formatting_utils';
+import { objectToJsonFormatter } from './formatting_utils';
 import { tlsFormatters } from './tls_formatters';
-import { stringToJsonFormatter } from '../formatting_utils';
+import { stringToJsonFormatter } from './formatting_utils';
 import { commonFormatters, Formatter } from './common_formatters';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;

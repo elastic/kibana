@@ -11,7 +11,7 @@ import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
-} from '../formatting_utils';
+} from './formatting_utils';
 
 describe('formatters', () => {
   describe('cronToSecondsNormalizer', () => {

@@ -9,7 +9,7 @@ import {
   tlsArrayToYamlFormatter,
   tlsValueToStringFormatter,
   tlsValueToYamlFormatter,
-} from '../formatting_utils';
+} from './formatting_utils';
 import { Formatter } from './common_formatters';
 
 type TLSFormatMap = Record<keyof TLSFields, Formatter>;

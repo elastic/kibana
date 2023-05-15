@@ -11,7 +11,7 @@ import {
   stringToJsonFormatter,
   FormatterFn,
   secondsToCronFormatter,
-} from '../formatting_utils';
+} from './formatting_utils';
 
 export type Formatter = null | FormatterFn;
 

@@ -11,7 +11,7 @@ import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
-} from '../formatting_utils';
+} from './formatting_utils';
 
 import { tlsFormatters } from './tls_formatters';
 import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';

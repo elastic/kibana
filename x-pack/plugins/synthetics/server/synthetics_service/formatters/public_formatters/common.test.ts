@@ -12,7 +12,7 @@ import {
   objectToJsonFormatter,
   secondsToCronFormatter,
   stringToJsonFormatter,
-} from '../private_formatters/formatting_utils';
+} from '../formatting_utils';
 
 describe('common formatters', () => {
   it.each([

@@ -6,8 +6,8 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
@@ -24,50 +24,10 @@ export const objectToJsonFormatter: FormatterFn = (fields, fieldKey) => {
   return JSON.stringify(value);
 };
 
-// only add tls settings if they are enabled by the user and isEnabled is true
-export const tlsValueToYamlFormatter: FormatterFn = (fields, key) => {
-  if (fields[ConfigKey.METADATA]?.is_tls_enabled) {
-    const tlsValue = (fields[key] as string) ?? '';
-
-    return tlsValue ? JSON.stringify(tlsValue) : null;
-  } else {
-    return null;
-  }
-};
-
-export const tlsValueToStringFormatter: FormatterFn = (fields, key) => {
-  if (fields[ConfigKey.METADATA]?.is_tls_enabled) {
-    const tlsValue = (fields[key] as string) ?? '';
-
-    return tlsValue || null;
-  } else {
-    return null;
-  }
-};
-
-export const tlsArrayToYamlFormatter: FormatterFn = (fields, key) => {
-  if (fields[ConfigKey.METADATA]?.is_tls_enabled) {
-    const tlsValue = (fields[key] as string[]) ?? [];
-
-    return tlsValue.length ? JSON.stringify(tlsValue) : null;
-  } else {
-    return null;
-  }
-};
-
 export const stringToJsonFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
   return value ? JSON.stringify(value) : null;
-};
-
-export const stringifyString = (value?: string) => {
-  if (!value) return value;
-  try {
-    return JSON.stringify(value);
-  } catch (e) {
-    return value;
-  }
 };
 
 export const replaceStringWithParams = (

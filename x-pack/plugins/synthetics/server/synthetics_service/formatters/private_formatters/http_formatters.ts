@@ -13,7 +13,7 @@ import {
   stringToJsonFormatter,
   arrayToJsonFormatter,
   objectToJsonFormatter,
-} from '../formatting_utils';
+} from './formatting_utils';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
