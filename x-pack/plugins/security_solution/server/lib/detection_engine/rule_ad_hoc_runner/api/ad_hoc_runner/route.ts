@@ -20,9 +20,11 @@ import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
 import * as t from 'io-ts';
+import { RuleMonitoringService } from '@kbn/alerting-plugin/server/monitoring/rule_monitoring_service';
+import { RuleResultService } from '@kbn/alerting-plugin/server/monitoring/rule_result_service';
 import { DETECTION_ENGINE_RULES_AD_HOC_RUNNER } from '../../../../../../common/constants';
 
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
+// import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
 import type { RulePreviewLogs } from '../../../../../../common/detection_engine/rule_schema';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
@@ -44,7 +46,7 @@ import { buildRouteValidation } from '../../../../../utils/build_validation/rout
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
+// import type { IRuleExecutionLogService, RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
 
 import type { ConfigType } from '../../../../../config';
 
@@ -64,11 +66,12 @@ import { createSecurityRuleTypeWrapper } from '../../../rule_types/create_securi
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 /* Helpers imported from rule_preview */
-import { createPreviewRuleExecutionLogger } from '../../../rule_preview/api/preview_rules/preview_rule_execution_logger';
+// import { createPreviewRuleExecutionLogger } from '../../../rule_preview/api/preview_rules/preview_rule_execution_logger';
 import { wrapScopedClusterClient } from '../../../rule_preview/api/preview_rules/wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from '../../../rule_preview/api/preview_rules/wrap_search_source_client';
 import { alertInstanceFactoryStub } from '../../../rule_preview/api/preview_rules/alert_instance_factory_stub';
 import { getInvocationCountFromTimeRange } from '../logic/get_invocation_count_from_time_range';
+import type { IRuleExecutionLogService } from '../../../rule_monitoring';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
@@ -81,6 +84,7 @@ export const adHocRunnerRoute = async (
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   adHocRunnerDataClient: IRuleDataClient,
+  ruleExecutionLogService: IRuleExecutionLogService,
   getStartServices: StartServicesAccessor<StartPlugins>,
   logger: Logger
 ) => {
@@ -142,17 +146,20 @@ export const adHocRunnerRoute = async (
         const spaceId = siemClient.getSpaceId();
         const adHocRunId = uuidv4();
         const username = security?.authc.getCurrentUser(request)?.username;
-        const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
-        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
+        // const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
+        // const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
         let isAborted = false;
         const uniqueExecutionId = uuidv4();
 
+        const ruleMonitoringService = new RuleMonitoringService().getLastRunMetricsSetters();
+        const ruleResultService = new RuleResultService().getLastRunSetters();
+
         const adHocRunnerRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
           ruleDataClient: adHocRunnerDataClient,
-          ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
+          ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
           isPreview: false,
         });
 
@@ -211,7 +218,7 @@ export const adHocRunnerRoute = async (
           // TODO: Review all of these
           const ruleToExecute = {
             ...rule,
-            id: rule.params.ruleId ?? uuidv4(),
+            id: rule.id ?? uuidv4(),
             createdBy: username ?? 'ad-hoc-runner-created-by',
             producer: 'ad-hoc-runner-producer',
             revision: 0,
@@ -223,7 +230,7 @@ export const adHocRunnerRoute = async (
             snoozeSchedule: [],
           };
 
-          let invocationStartTime;
+          // let invocationStartTime;
 
           const dataViewsService = await dataViews.dataViewsServiceFactory(
             savedObjectsClient,
@@ -231,7 +238,7 @@ export const adHocRunnerRoute = async (
           );
 
           while (invocationCount > 0 && !isAborted) {
-            invocationStartTime = moment();
+            // invocationStartTime = moment();
 
             ({ state: statePreview } = (await executor({
               executionId: uniqueExecutionId,
@@ -251,6 +258,8 @@ export const adHocRunnerRoute = async (
                   abortController,
                   searchSourceClient,
                 }),
+                ruleMonitoringService,
+                ruleResultService,
                 uiSettingsClient: coreContext.uiSettings.client,
                 dataViews: dataViewsService,
                 share,
@@ -262,26 +271,26 @@ export const adHocRunnerRoute = async (
               flappingSettings: DISABLE_FLAPPING_SETTINGS,
             })) as { state: TState });
 
-            const errors = loggedStatusChanges
-              .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-              .map((item) => item.message ?? 'Unknown Error');
+            // const errors = loggedStatusChanges
+            //   .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+            //   .map((item) => item.message ?? 'Unknown Error');
 
-            const warnings = loggedStatusChanges
-              .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
-              .map((item) => item.message ?? 'Unknown Warning');
+            // const warnings = loggedStatusChanges
+            //   .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
+            //   .map((item) => item.message ?? 'Unknown Warning');
 
-            logs.push({
-              errors,
-              warnings,
-              startedAt: startedAt.toDate().toISOString(),
-              duration: moment().diff(invocationStartTime, 'milliseconds'),
-            });
+            // logs.push({
+            //   errors,
+            //   warnings,
+            //   startedAt: startedAt.toDate().toISOString(),
+            //   duration: moment().diff(invocationStartTime, 'milliseconds'),
+            // });
 
-            loggedStatusChanges.length = 0;
+            // loggedStatusChanges.length = 0;
 
-            if (errors.length) {
-              break;
-            }
+            // if (errors.length) {
+            //   break;
+            // }
 
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(rule.schedule.interval));
@@ -291,7 +300,8 @@ export const adHocRunnerRoute = async (
 
         const ruleParamsForExecutors: RuleParams = {
           ...rule.params,
-          // Need to override the timestamp otherwise the alerts get created when the execution gets run
+          // Need to override the timestamp otherwise the alerts
+          // get created when the execution gets run
           // instead of when the event happened
           timestampOverride: 'event.start',
           timestampOverrideFallbackDisabled: true,
@@ -459,7 +469,7 @@ export const adHocRunnerRoute = async (
             adHocRunId,
             initialInvocationCount,
             executionId: uniqueExecutionId,
-            logs,
+            logs: [],
             isAborted,
           },
         });

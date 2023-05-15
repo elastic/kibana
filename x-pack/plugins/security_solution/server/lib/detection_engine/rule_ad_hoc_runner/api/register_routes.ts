@@ -11,6 +11,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { ConfigType } from '../../../../config';
 import type { SetupPlugins, StartPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import type { IRuleExecutionLogService } from '../../rule_monitoring';
 import type { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
 
 import { adHocRunnerRoute } from './ad_hoc_runner/route';
@@ -23,6 +24,7 @@ export const registerAdHocRunnerRoutes = (
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   adHocRunnerDataClient: IRuleDataClient,
+  ruleExecutionLogService: IRuleExecutionLogService,
   getStartServices: StartServicesAccessor<StartPlugins>,
   logger: Logger
 ) => {
@@ -34,6 +36,7 @@ export const registerAdHocRunnerRoutes = (
     ruleOptions,
     securityRuleTypeOptions,
     adHocRunnerDataClient,
+    ruleExecutionLogService,
     getStartServices,
     logger
   );

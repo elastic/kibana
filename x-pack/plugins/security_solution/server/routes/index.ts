@@ -16,6 +16,7 @@ import { registerPrebuiltRulesRoutes } from '../lib/detection_engine/prebuilt_ru
 import { registerLegacyRuleActionsRoutes } from '../lib/detection_engine/rule_actions_legacy';
 import { registerRuleExceptionsRoutes } from '../lib/detection_engine/rule_exceptions';
 import { registerRuleManagementRoutes } from '../lib/detection_engine/rule_management';
+import type { IRuleExecutionLogService } from '../lib/detection_engine/rule_monitoring';
 import { registerRuleMonitoringRoutes } from '../lib/detection_engine/rule_monitoring';
 import { registerRulePreviewRoutes } from '../lib/detection_engine/rule_preview';
 import { registerAdHocRunnerRoutes } from '../lib/detection_engine/rule_ad_hoc_runner';
@@ -89,7 +90,7 @@ export const initRoutes = (
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  adHocRunnerDataClient: IRuleDataClient,
+  ruleExecutionLogService: IRuleExecutionLogService,
   previewTelemetryReceiver: ITelemetryReceiver
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
@@ -120,6 +121,7 @@ export const initRoutes = (
       ruleOptions,
       securityRuleTypeOptions,
       ruleDataClient,
+      ruleExecutionLogService,
       getStartServices,
       logger
     );

@@ -311,7 +311,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
-      adHocRunnerDataClient,
+      ruleExecutionLogService,
       this.telemetryReceiver
     );
 
