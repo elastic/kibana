@@ -7,12 +7,28 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
+import {
+  MaintenanceWindowStatus,
+  MAINTENANCE_WINDOW_FEATURE_ID,
+} from '@kbn/alerting-plugin/common';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 import * as i18n from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export function MaintenanceWindowCallout(): JSX.Element | null {
-  const { data } = useFetchActiveMaintenanceWindows();
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+
+  const isMaintenanceWindowDisabled =
+    !capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show &&
+    !capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
+  const { data } = useFetchActiveMaintenanceWindows({ enabled: !isMaintenanceWindowDisabled });
+
+  if (isMaintenanceWindowDisabled) {
+    return null;
+  }
+
   const activeMaintenanceWindows = data || [];
 
   if (activeMaintenanceWindows.some(({ status }) => status === MaintenanceWindowStatus.Running)) {

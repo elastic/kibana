@@ -6,7 +6,7 @@
  */
 
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
-import { SEVERITY_COLOR_RAMP } from '../../../../common';
+import { ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
 import { AnomaliesTableData } from '../explorer_utils';
 
 const FEATURE = 'Feature';
@@ -115,7 +115,7 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
         fillColor: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
-            customColorRamp: SEVERITY_COLOR_RAMP,
+            customColorRamp: ML_SEVERITY_COLOR_RAMP,
             field: {
               name: 'record_score',
               origin: FIELD_ORIGIN.SOURCE,

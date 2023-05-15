@@ -113,6 +113,9 @@ export const mockApmPluginContextValue = {
   corePlugins: mockCorePlugins,
   deps: {},
   unifiedSearch: mockUnifiedSearch,
+  uiActions: {
+    getTriggerCompatibleActions: () => Promise.resolve([]),
+  },
 };
 
 export function MockApmPluginContextWrapper({

@@ -18,7 +18,6 @@ import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from '.';
 import type { FormBasedLayer } from '../../types';
-import type { IndexPattern } from '../../../../types';
 import { TermsIndexPatternColumn } from './terms';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
@@ -35,10 +34,9 @@ const defaultProps = {
   dataViews: dataViewPluginMocks.createStartContract(),
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
-  indexPattern: {
-    ...createMockedIndexPattern(),
+  indexPattern: createMockedIndexPattern({
     hasRestrictions: false,
-  } as IndexPattern,
+  }),
   operationDefinitionMap: {},
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
@@ -87,7 +85,7 @@ describe('last_value', () => {
       const esAggsFn = lastValueOperation.toEsAggsFn(
         { ...lastValueColumn, params: { ...lastValueColumn.params } },
         'col1',
-        {} as IndexPattern,
+        createMockedIndexPattern(),
         layer,
         uiSettingsMock,
         []
@@ -110,7 +108,7 @@ describe('last_value', () => {
       const esAggsFn = lastValueOperation.toEsAggsFn(
         { ...lastValueColumn, params: { ...lastValueColumn.params, showArrayValues: true } },
         'col1',
-        {} as IndexPattern,
+        createMockedIndexPattern(),
         layer,
         uiSettingsMock,
         []
@@ -397,6 +395,23 @@ describe('last_value', () => {
           type: 'string',
         })
       ).toEqual({ dataType: 'string', isBucketed: false, scale: 'ordinal' });
+    });
+
+    it('should return operation with the right type also for tsdb counter types', () => {
+      expect(
+        lastValueOperation.getPossibleOperationForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          displayName: 'test',
+          type: 'number',
+          timeSeriesMetric: 'counter',
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      });
     });
   });
 
@@ -882,10 +897,8 @@ describe('last_value', () => {
   });
 
   describe('getErrorMessage', () => {
-    let indexPattern: IndexPattern;
     let errorLayer: FormBasedLayer;
     beforeEach(() => {
-      indexPattern = createMockedIndexPattern();
       errorLayer = {
         columns: {
           col1: {
@@ -903,9 +916,9 @@ describe('last_value', () => {
       };
     });
     it('returns undefined if sourceField exists and sortField is of type date ', () => {
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual(
-        undefined
-      );
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+      ).toEqual(undefined);
     });
     it('shows error message if the sourceField does not exist in index pattern', () => {
       errorLayer = {
@@ -917,7 +930,7 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern))
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern()))
         .toMatchInlineSnapshot(`
         Array [
           Object {
@@ -968,7 +981,7 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern))
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern()))
         .toMatchInlineSnapshot(`
         Array [
           Object {
@@ -1014,10 +1027,13 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toHaveLength(2);
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+      ).toHaveLength(2);
     });
 
     it('shows error message if the sourceField is of unsupported type', () => {
+      const indexPattern = createMockedIndexPattern();
       indexPattern.getFieldByName('start_date')!.type = 'unsupported_type';
       errorLayer = {
         ...errorLayer,
@@ -1045,9 +1061,9 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field bytes is not a date field and cannot be used for sorting',
-      ]);
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+      ).toEqual(['Field bytes is not a date field and cannot be used for sorting']);
     });
   });
 

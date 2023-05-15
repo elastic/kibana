@@ -10966,22 +10966,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
@@ -11090,16 +11074,32 @@
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/actions.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/actions.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/index.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/index.ts"
           },
           {
             "plugin": "synthetics",
@@ -11128,14 +11128,6 @@
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
           },
           {
             "plugin": "cases",
@@ -13526,6 +13518,10 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
+                "plugin": "visualizationUiComponents",
+                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -13552,6 +13548,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13754,10 +13754,6 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -13772,6 +13768,10 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
               {
                 "plugin": "lens",
@@ -18167,9 +18167,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; helpers: ",
-                  "default",
-                  "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params?: ",
                   "SearchRequest",
@@ -18201,7 +18199,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+                  "<TDocument, TAggregations>>; }; helpers: ",
+                  "default",
+                  "; name: string | symbol; security: ",
                   "default",
                   "; monitoring: ",
                   "default",
@@ -18231,27 +18231,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "CountResponse",
-                  ">; }; exists: { (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<boolean>; (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<boolean, unknown>>; (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -18429,7 +18409,27 @@
                   "default",
                   "; eql: ",
                   "default",
-                  "; existsSource: { (this: That, params: ",
+                  "; exists: { (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<boolean>; (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<boolean, unknown>>; (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
                   "ExistsSourceRequest",
                   " | ",
                   "ExistsSourceRequest",
@@ -21124,6 +21124,10 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
+                "plugin": "visualizationUiComponents",
+                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -21150,6 +21154,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21352,10 +21360,6 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -21370,6 +21374,10 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
               {
                 "plugin": "lens",
@@ -26144,7 +26152,7 @@
           "\nCreate a function that will escape CSV values like \"=\", \"@\" and \"+\" with a\n\"'\". This will also place CSV values in \"\" if contain non-alphanumeric chars.\n\nFor example:\n\nGiven: =1+1\nReturns: \"'=1+1\"\n\nSee OWASP: https://www.owasp.org/index.php/CSV_Injection."
         ],
         "signature": [
-          "(quoteValues: boolean, escapeFormulas: boolean) => (val: RawValue) => string"
+          "({\n  separator,\n  quoteValues,\n  escapeFormulaValues,\n}: { separator: string; quoteValues: boolean; escapeFormulaValues: boolean; }) => (val: RawValue) => string"
         ],
         "path": "src/plugins/data/common/exports/escape_value.ts",
         "deprecated": false,
@@ -26153,32 +26161,48 @@
           {
             "parentPluginId": "data",
             "id": "def-common.createEscapeValue.$1",
-            "type": "boolean",
+            "type": "Object",
             "tags": [],
-            "label": "quoteValues",
+            "label": "{\n  separator,\n  quoteValues,\n  escapeFormulaValues,\n}",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
             "path": "src/plugins/data/common/exports/escape_value.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.createEscapeValue.$2",
-            "type": "boolean",
-            "tags": [],
-            "label": "escapeFormulas",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "src/plugins/data/common/exports/escape_value.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.separator",
+                "type": "string",
+                "tags": [],
+                "label": "separator",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.quoteValues",
+                "type": "boolean",
+                "tags": [],
+                "label": "quoteValues",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.escapeFormulaValues",
+                "type": "boolean",
+                "tags": [],
+                "label": "escapeFormulaValues",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -28727,22 +28751,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
@@ -28851,16 +28859,32 @@
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/actions.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/actions.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/index.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/index.ts"
           },
           {
             "plugin": "synthetics",
@@ -28889,14 +28913,6 @@
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
           },
           {
             "plugin": "cases",

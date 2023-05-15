@@ -68,5 +68,3 @@ export const SavedObjectFindOptionsRt = rt.partial({
    */
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 });
-
-export type SavedObjectFindOptions = rt.TypeOf<typeof SavedObjectFindOptionsRt>;

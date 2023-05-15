@@ -9,7 +9,7 @@ import type SuperTest from 'supertest';
 import {
   ExternalReferenceStorageType,
   CommentType,
-  CaseResponse,
+  Case,
   CommentRequest,
 } from '@kbn/cases-plugin/common/api';
 import { expect } from 'expect';
@@ -84,7 +84,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
    */
   describe('Attachment framework', () => {
     describe('External reference attachments', () => {
-      let caseWithAttachment: CaseResponse;
+      let caseWithAttachment: Case;
 
       before(async () => {
         caseWithAttachment = await createAttachmentAndNavigate({
@@ -180,7 +180,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         },
       });
 
-      let caseWithAttachment: CaseResponse;
+      let caseWithAttachment: Case;
       let dataViewId = '';
 
       before(async () => {

@@ -64,6 +64,7 @@ const previouslyRegisteredTypes = [
   'fleet-message-signing-keys',
   'fleet-preconfiguration-deletion-record',
   'fleet-proxy',
+  'fleet-uninstall-tokens',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',

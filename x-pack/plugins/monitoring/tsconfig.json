@@ -40,6 +40,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/fleet-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/observability-shared-plugin",
   ],
   "exclude": [
     "target/**/*",

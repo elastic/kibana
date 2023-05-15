@@ -10,7 +10,7 @@ import { shareReplay } from 'rxjs/operators';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
-import type { IContextProvider, IRouterWithVersion } from '@kbn/core-http-server';
+import type { IContextProvider, IRouter } from '@kbn/core-http-server';
 import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
 import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
@@ -220,7 +220,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
         provider: IContextProvider<Context, ContextName>
       ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
       createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
-        router as IRouterWithVersion<Context>,
+        router as IRouter<Context>,
       resources: deps.httpResources.createRegistrar(router),
       registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,

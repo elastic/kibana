@@ -784,6 +784,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 incompleteColumn={
                   layer.incompleteColumns ? layer.incompleteColumns[referenceId] : undefined
                 }
+                onResetIncomplete={() => {
+                  updateLayer({
+                    ...layer,
+                    // clean up the incomplete column data for the referenced id
+                    incompleteColumns: { ...layer.incompleteColumns, [referenceId]: null },
+                  });
+                }}
                 onDeleteColumn={() => {
                   updateLayer(
                     deleteColumn({

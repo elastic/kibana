@@ -221,7 +221,6 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'kspm',
     }));
-    policy.name = 'cloud_security_posture-1';
 
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
@@ -242,16 +241,6 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyK8s(),
-        name: 'cloud_security_posture-1',
-      },
-    });
-
-    // 2nd call happens to set integration name
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: {
-        ...policy,
-        name: 'kspm-2',
       },
     });
   });
@@ -263,7 +252,6 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'cspm',
     }));
-    policy.name = 'cloud_security_posture-1';
 
     (useParams as jest.Mock).mockReturnValue({
       integration: 'cspm',
@@ -284,16 +272,6 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyAWS(),
-        name: 'cloud_security_posture-1',
-      },
-    });
-
-    // 2nd call happens to set integration name
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: {
-        ...policy,
-        name: 'cspm-2',
       },
     });
   });
@@ -305,7 +283,6 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'cspm',
     }));
-    policy.name = 'cloud_security_posture-1';
 
     (useParams as jest.Mock).mockReturnValue({
       integration: 'vuln_mgmt',
@@ -326,16 +303,6 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyAWS(),
-        name: 'cloud_security_posture-1',
-      },
-    });
-
-    // 2nd call happens to set integration name
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: {
-        ...policy,
-        name: 'vuln_mgmt-2',
       },
     });
   });

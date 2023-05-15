@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseResponse } from '@kbn/cases-plugin/common';
+import { Case } from '@kbn/cases-plugin/common';
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import { Owner } from '@kbn/cases-plugin/common/constants/types';
 import { CASES_TEST_FIXTURE_FILE_KIND_ID } from '@kbn/cases-api-integration-test-plugin/server/files';
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('failures', () => {
-      let postedCase: CaseResponse;
+      let postedCase: Case;
 
       before(async () => {
         postedCase = await createCase(supertest, getPostCaseRequest());

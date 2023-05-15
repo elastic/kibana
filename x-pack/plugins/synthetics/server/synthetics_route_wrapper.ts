@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { isTestUser, UptimeEsClient } from './legacy_uptime/lib/lib';
@@ -39,6 +40,8 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
     server.uptimeEsClient = uptimeEsClient;
 
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
     const res = await (uptimeRoute.handler as SyntheticsStreamingRouteHandler)({
       uptimeEsClient,
       savedObjectsClient,
@@ -47,6 +50,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       server,
       syntheticsMonitorClient,
       subject,
+      spaceId,
     });
 
     return res;
@@ -71,6 +75,8 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
     server.uptimeEsClient = uptimeEsClient;
 
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
     try {
       const res = await uptimeRoute.handler({
         uptimeEsClient,
@@ -79,6 +85,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         request,
         response,
         server,
+        spaceId,
         syntheticsMonitorClient,
       });
       if (res instanceof KibanaResponse) {
