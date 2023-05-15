@@ -11,7 +11,8 @@ import type { ContentManagementServicesDefinition as ServicesDefinition } from '
 import {
   savedObjectSchema,
   objectTypeToGetResultSchema,
-  createOptionsSchema,
+  createOptionsSchemas,
+  updateOptionsSchema,
   createResultSchema,
   searchOptionsSchema,
 } from '@kbn/content-management-utils';
@@ -72,7 +73,8 @@ export const serviceDefinition: ServicesDefinition = {
   create: {
     in: {
       options: {
-        schema: createOptionsSchema,
+        // todo
+        schema: schema.object(createOptionsSchemas),
       },
       data: {
         schema: dataViewAttributesSchema,
@@ -87,7 +89,14 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same schema as "create"
+        // todo
+        schema: schema.object({
+          references: updateOptionsSchema.references,
+          version: updateOptionsSchema.version,
+          refresh: updateOptionsSchema.refresh,
+          upsert: updateOptionsSchema.upsert(dataViewAttributesSchema),
+          retryOnConflict: updateOptionsSchema.retryOnConflict,
+        }),
       },
       data: {
         schema: dataViewAttributesSchema,

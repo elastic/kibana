@@ -47,13 +47,14 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
-import type {
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-  SavedObjectUnsanitizedDoc,
-  SavedObject,
-  SavedObjectReference,
-  BulkResolveError,
+import {
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type SavedObjectUnsanitizedDoc,
+  type SavedObject,
+  type SavedObjectReference,
+  type BulkResolveError,
+  MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -3791,7 +3792,6 @@ describe('SavedObjectsRepository', () => {
                 'updated_at',
                 'created_at',
                 'originId',
-                'title',
               ],
             }),
           }),
@@ -4364,7 +4364,7 @@ describe('SavedObjectsRepository', () => {
           body: {
             _id: params.id,
             ...mockVersionProps,
-            _index: '.kibana',
+            _index: MAIN_SAVED_OBJECT_INDEX,
             get: {
               found: true,
               _source: {
@@ -4668,7 +4668,7 @@ describe('SavedObjectsRepository', () => {
             body: {
               _id: params.id,
               ...mockVersionProps,
-              _index: '.kibana',
+              _index: MAIN_SAVED_OBJECT_INDEX,
               get: {
                 found: true,
                 _source: {

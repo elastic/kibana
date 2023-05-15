@@ -6,7 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  type Query,
+  type TimeRange,
+  type Filter,
+} from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
@@ -16,12 +22,10 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { METRICS_APP_DATA_TEST_SUBJ } from '../../../../../apps/metrics_app';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
-import { HostsSearchPayload } from '../../hooks/use_unified_search_url_state';
 import { LimitOptions } from './limit_options';
 import { HostLimitOptions } from '../../types';
 
@@ -44,7 +48,7 @@ export const UnifiedSearchBar = () => {
     }
   };
 
-  const handleRefresh = (payload: HostsSearchPayload, isUpdate?: boolean) => {
+  const handleRefresh = (payload: { query?: Query; dateRange: TimeRange }, isUpdate?: boolean) => {
     // This makes sure `onQueryChange` is only called when the submit button is clicked
     if (isUpdate === false) {
       onSubmit(payload);
@@ -101,7 +105,7 @@ const StickyContainer = (props: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
 
   const top = useMemo(() => {
-    const wrapper = document.querySelector(`[data-test-subj="${METRICS_APP_DATA_TEST_SUBJ}"]`);
+    const wrapper = document.querySelector(`[data-test-subj="kibanaChrome"]`);
     if (!wrapper) {
       return `calc(${euiTheme.size.xxxl} * 2)`;
     }

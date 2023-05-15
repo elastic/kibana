@@ -290,11 +290,14 @@ export interface SavedObjectsClientCommon {
   ) => Promise<SavedObject>;
   /**
    * Create a saved object
-   * @param type - type of saved object
    * @param attributes - attributes to set
    * @param options - client options
    */
-  create: (attributes: DataViewAttributes, options: { id?: string }) => Promise<SavedObject>;
+  create: (
+    attributes: DataViewAttributes,
+    // SavedObjectsCreateOptions
+    options: { id?: string; initialNamespaces?: string[] }
+  ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
    * @param type - type of saved object

@@ -13,7 +13,8 @@ type AnyApmDocumentType =
   | ApmDocumentType.TransactionMetric
   | ApmDocumentType.TransactionEvent
   | ApmDocumentType.ServiceDestinationMetric
-  | ApmDocumentType.ServiceSummaryMetric;
+  | ApmDocumentType.ServiceSummaryMetric
+  | ApmDocumentType.ErrorEvent;
 
 export interface ApmDataSource<
   TDocumentType extends AnyApmDocumentType = AnyApmDocumentType
@@ -21,3 +22,10 @@ export interface ApmDataSource<
   rollupInterval: RollupInterval;
   documentType: TDocumentType;
 }
+
+export type ApmDataSourceWithSummary<
+  T extends AnyApmDocumentType = AnyApmDocumentType
+> = ApmDataSource<T> & {
+  hasDurationSummaryField: boolean;
+  hasDocs: boolean;
+};

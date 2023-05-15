@@ -37,7 +37,7 @@
           },
           ") => JSX.Element"
         ],
-        "path": "packages/security-solution/side_nav/src/index.tsx",
+        "path": "x-pack/packages/security-solution/side_nav/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
                 "text": "SolutionSideNavProps"
               }
             ],
-            "path": "packages/security-solution/side_nav/src/index.tsx",
+            "path": "x-pack/packages/security-solution/side_nav/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,7 +85,7 @@
           },
           "<T>"
         ],
-        "path": "packages/security-solution/side_nav/src/types.ts",
+        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +96,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +110,7 @@
             "signature": [
               "readonly T[]"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -134,7 +134,7 @@
           },
           "<T>"
         ],
-        "path": "packages/security-solution/side_nav/src/types.ts",
+        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +148,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -159,7 +159,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,7 +170,7 @@
             "tags": [],
             "label": "href",
             "description": [],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -184,7 +184,7 @@
             "signature": [
               "React.MouseEventHandler<Element> | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -198,7 +198,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -219,7 +219,7 @@
               },
               "<T>[] | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -241,7 +241,7 @@
               },
               "<T>[] | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -256,7 +256,7 @@
               "IconType",
               " | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,7 +270,7 @@
             "signature": [
               "\"m\" | \"s\" | \"xs\" | \"l\" | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,7 +284,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -298,7 +298,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -312,7 +312,7 @@
             "signature": [
               "{ text: string; } | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -326,7 +326,7 @@
         "tags": [],
         "label": "SolutionSideNavProps",
         "description": [],
-        "path": "packages/security-solution/side_nav/src/solution_side_nav.tsx",
+        "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -347,7 +347,7 @@
               },
               "<string>[]"
             ],
-            "path": "packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,7 +358,7 @@
             "tags": [],
             "label": "selectedId",
             "description": [],
-            "path": "packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,7 +379,7 @@
               },
               "<string>[] | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -393,7 +393,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -407,7 +407,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -428,7 +428,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -456,7 +456,7 @@
           },
           "<T>[]"
         ],
-        "path": "packages/security-solution/side_nav/src/types.ts",
+        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -471,7 +471,7 @@
         "signature": [
           "(type: string, event: string | string[], count?: number | undefined) => void"
         ],
-        "path": "packages/security-solution/side_nav/src/types.ts",
+        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -483,7 +483,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -497,7 +497,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -511,7 +511,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/security-solution/side_nav/src/types.ts",
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

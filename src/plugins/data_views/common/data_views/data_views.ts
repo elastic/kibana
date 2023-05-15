@@ -996,8 +996,10 @@ export class DataViewsService {
     }
 
     const body = dataView.getAsSavedObjectBody();
+
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
       id: dataView.id,
+      initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
     })) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);

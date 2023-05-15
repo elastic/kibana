@@ -52,12 +52,11 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
+import { MAIN_SAVED_OBJECT_INDEX, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-
-const kibanaIndex = '.kibana';
 
 /**
  * @internal
@@ -125,7 +124,7 @@ export class SavedObjectsService
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
-        kibanaIndex,
+        kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
         savedObjectsConfig: this.config,
         kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
@@ -140,7 +139,7 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: firstValueFrom(this.migrator$),
-      kibanaIndex,
+      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
     });
 
@@ -198,7 +197,8 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
-      getKibanaIndex: () => kibanaIndex,
+      getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
     };
   }
 
@@ -221,7 +221,8 @@ export class SavedObjectsService
       this.config.migration,
       elasticsearch.client.asInternalUser,
       docLinks,
-      waitForMigrationCompletion
+      waitForMigrationCompletion,
+      node
     );
 
     this.migrator$.next(migrator);
@@ -280,7 +281,7 @@ export class SavedObjectsService
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
-        kibanaIndex,
+        MAIN_SAVED_OBJECT_INDEX,
         esClient,
         this.logger.get('repository'),
         includedHiddenTypes,
@@ -341,6 +342,21 @@ export class SavedObjectsService
           importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
         }),
       getTypeRegistry: () => this.typeRegistry,
+      getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      getIndexForType: (type: string) => {
+        const definition = this.typeRegistry.getType(type);
+        return definition?.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
+      },
+      getIndicesForTypes: (types: string[]) => {
+        const indices = new Set<string>();
+        types.forEach((type) => {
+          const definition = this.typeRegistry.getType(type);
+          const index = definition?.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
+          indices.add(index);
+        });
+        return [...indices];
+      },
+      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
     };
   }
 
@@ -350,17 +366,19 @@ export class SavedObjectsService
     soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     docLinks: DocLinksServiceStart,
-    waitForMigrationCompletion: boolean
+    waitForMigrationCompletion: boolean,
+    nodeInfo: NodeInfo
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
-      kibanaIndex,
+      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       client,
       docLinks,
       waitForMigrationCompletion,
+      nodeRoles: nodeInfo.roles,
     });
   }
 

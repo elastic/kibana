@@ -27,19 +27,29 @@ import { createStore } from '../../../common/store';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
-import { groupingSearchResponse } from './grouping_settings/mock';
+import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/utils/normalize_time_range');
-jest.mock('../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({
-    from: '2020-07-07T08:20:18.966Z',
-    isInitializing: false,
-    to: '2020-07-08T08:20:18.966Z',
-    setQuery: jest.fn(),
-  }),
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('test-uuid'),
 }));
+
+const mockDate = {
+  from: '2020-07-07T08:20:18.966Z',
+  to: '2020-07-08T08:20:18.966Z',
+};
+
+const mockUseGlobalTime = jest
+  .fn()
+  .mockReturnValue({ ...mockDate, setQuery: jest.fn(), deleteQuery: jest.fn() });
+
+jest.mock('../../../common/containers/use_global_time', () => {
+  return {
+    useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
+  };
+});
 
 const mockOptions = [
   { label: 'ruleName', key: 'kibana.alert.rule.name' },
@@ -105,8 +115,8 @@ const sourcererDataView = {
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
 const testProps: AlertsTableComponentProps = {
+  ...mockDate,
   defaultFilters: [],
-  from: '2020-07-07T08:20:18.966Z',
   globalFilters: [],
   globalQuery: {
     query: 'query',
@@ -119,7 +129,6 @@ const testProps: AlertsTableComponentProps = {
   runtimeMappings: {},
   signalIndexName: 'test',
   tableId: TableId.test,
-  to: '2020-07-08T08:20:18.966Z',
 };
 
 const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
@@ -155,15 +164,9 @@ describe('GroupedAlertsTable', () => {
       if (i.skip) {
         return mockQueryResponse;
       }
-      if (i.query.aggs.groupByFields.multi_terms != null) {
-        return {
-          ...mockQueryResponse,
-          data: groupingSearchResponse.ruleName,
-        };
-      }
       return {
         ...mockQueryResponse,
-        data: i.query.aggs.groupByFields.terms.field != null ? groupingSearchResponse.hostName : {},
+        data: groupingSearchResponse,
       };
     });
   });
@@ -212,6 +215,24 @@ describe('GroupedAlertsTable', () => {
 
     const level0 = getAllByTestId('grouping-accordion-content')[0];
     expect(within(level0).getByTestId('alerts-table')).toBeInTheDocument();
+  });
+
+  it('Query gets passed correctly', () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+
+    render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+    expect(mockUseQueryAlerts).toHaveBeenLastCalledWith({
+      indexName: 'test',
+      query: getQuery('kibana.alert.rule.name', 'SuperUniqueValue-test-uuid', mockDate),
+      queryName: 'securitySolutionUI fetchAlerts grouping',
+      skip: false,
+    });
   });
 
   it('renders grouping table in second accordion level when 2 groups are selected', async () => {

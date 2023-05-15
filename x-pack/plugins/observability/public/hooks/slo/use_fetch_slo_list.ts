@@ -13,6 +13,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
@@ -28,6 +29,7 @@ interface SLOListParams {
 export interface UseFetchSloListResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
+  isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
   sloList: FindSLOResponse | undefined;
@@ -46,10 +48,15 @@ export function useFetchSloList({
   indicatorTypes = [],
   shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const [stateRefetchInterval, setStateRefetchInterval] = useState(SHORT_REFETCH_INTERVAL);
+  const [stateRefetchInterval, setStateRefetchInterval] = useState<number | undefined>(
+    SHORT_REFETCH_INTERVAL
+  );
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
@@ -71,19 +78,25 @@ export function useFetchSloList({
 
           return response;
         } catch (error) {
-          // ignore error
+          throw error;
         }
       },
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       refetchInterval: shouldRefetch ? stateRefetchInterval : undefined,
       staleTime: 1000,
+      retry: (failureCount, error) => {
+        if (String(error) === 'Error: Forbidden') {
+          return false;
+        }
+        return failureCount < 4;
+      },
       onSuccess: ({ results }: FindSLOResponse) => {
         if (!shouldRefetch) {
           return;
         }
 
-        if (results.find((slo) => slo.summary.status === 'NO_DATA')) {
+        if (results.find((slo) => slo.summary.status === 'NO_DATA' || !slo.summary)) {
           setStateRefetchInterval(SHORT_REFETCH_INTERVAL);
         } else {
           setStateRefetchInterval(LONG_REFETCH_INTERVAL);
@@ -96,14 +109,26 @@ export function useFetchSloList({
         queryClient.invalidateQueries(['fetchActiveAlerts'], {
           exact: false,
         });
+
+        queryClient.invalidateQueries(['fetchRulesForSlo'], {
+          exact: false,
+        });
+      },
+      onError: (error: Error) => {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.observability.slo.list.errorNotification', {
+            defaultMessage: 'Something went wrong while fetching SLOs',
+          }),
+        });
       },
     }
   );
 
   return {
     sloList: data,
-    isLoading: isLoading || isRefetching,
     isInitialLoading,
+    isLoading,
+    isRefetching,
     isSuccess,
     isError,
     refetch,

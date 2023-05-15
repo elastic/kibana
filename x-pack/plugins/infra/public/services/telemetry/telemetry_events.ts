@@ -43,6 +43,13 @@ const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
         optional: false,
       },
     },
+    limit: {
+      type: 'integer',
+      _meta: {
+        description: 'Selected host limit',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -66,4 +73,49 @@ const hostsEntryClickedEvent: InfraTelemetryEvent = {
   },
 };
 
-export const infraTelemetryEvents = [hostsViewQuerySubmittedEvent, hostsEntryClickedEvent];
+const hostFlyoutRemoveFilter: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_REMOVED,
+  schema: {
+    field_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'Removed filter field name for the selected host.',
+        optional: false,
+      },
+    },
+  },
+};
+
+const hostFlyoutAddFilter: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED,
+  schema: {
+    field_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'Added filter field name for the selected host.',
+        optional: false,
+      },
+    },
+  },
+};
+
+const hostViewTotalHostCountRetrieved: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED,
+  schema: {
+    total: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of hosts retrieved.',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const infraTelemetryEvents = [
+  hostsViewQuerySubmittedEvent,
+  hostsEntryClickedEvent,
+  hostFlyoutRemoveFilter,
+  hostFlyoutAddFilter,
+  hostViewTotalHostCountRetrieved,
+];

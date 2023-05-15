@@ -17,9 +17,9 @@ import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type {
   RequestHandlerContextBase,
-  IRouter,
   IContextContainer,
   IContextProvider,
+  IRouter,
 } from '@kbn/core-http-server';
 import type {
   InternalContextSetup,

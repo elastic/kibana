@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
+
 import type { MapCrudTypes } from '../../common/content_management';
 import { CONTENT_ID as contentTypeId } from '../../common/content_management';
 import { getContentManagement } from '../kibana_services';

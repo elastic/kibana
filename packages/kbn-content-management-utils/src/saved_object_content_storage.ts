@@ -170,7 +170,6 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       updateArgsToSoUpdateOptions || updateArgsToSoUpdateOptionsDefault;
     this.searchArgsToSOFindOptions = searchArgsToSOFindOptions || searchArgsToSOFindOptionsDefault;
 
-    // todo - talk to anton about a better way to implement this
     if (enableMSearch) {
       this.mSearch = {
         savedObjectType: this.savedObjectType,
@@ -200,10 +199,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   private searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;
   mSearch?: {
     savedObjectType: string;
-    toItemResult: (
-      ctx: StorageContext,
-      savedObject: SavedObjectsFindResult // <Types['Attributes']>
-    ) => Types['Item'];
+    toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult) => Types['Item'];
   };
 
   async get(ctx: StorageContext, id: string): Promise<Types['GetOut']> {

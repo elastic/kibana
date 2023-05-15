@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
 import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import type {
   HostPolicyResponse,
@@ -55,6 +56,20 @@ declare global {
       findByTestSubj<E extends Node = HTMLElement>(
         ...args: Parameters<Cypress.Chainable<E>['find']>
       ): Chainable<JQuery<E>>;
+
+      /**
+       * Continuously call provided callback function until it either return `true`
+       * or fail if `timeout` is reached.
+       * @param fn
+       * @param options
+       */
+      waitUntil(
+        fn: (subject?: any) => boolean | Promise<boolean> | Chainable<boolean>,
+        options?: Partial<{
+          interval: number;
+          timeout: number;
+        }>
+      ): Chainable<Subject>;
 
       task(
         name: 'indexFleetEndpointPolicy',
@@ -124,6 +139,12 @@ declare global {
         arg: HostActionResponse,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<LogsEndpointActionResponse>;
+
+      task(
+        name: 'deleteAllEndpointData',
+        arg: { endpointAgentIds: string[] },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<DeleteAllEndpointDataResponse>;
     }
   }
 }

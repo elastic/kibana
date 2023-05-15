@@ -26,6 +26,7 @@ interface FleetTransformMetadata {
   managed_by?: string;
   installed_by?: string;
   last_authorized_by?: string;
+  run_as_kibana_system?: boolean;
   transformId: string;
 }
 
@@ -114,10 +115,14 @@ export async function handleTransformReauthorizeAndStart({
       )
     )
   );
-  const transformsMetadata: FleetTransformMetadata[] = transformInfos.flat().map((t) => {
-    const transform = t.transforms?.[0];
-    return { ...transform._meta, transformId: transform?.id };
-  });
+
+  const transformsMetadata: FleetTransformMetadata[] = transformInfos
+    .flat()
+    .map<FleetTransformMetadata>((t) => {
+      const transform = t.transforms?.[0];
+      return { ...transform._meta, transformId: transform?.id };
+    })
+    .filter((t) => t?.run_as_kibana_system === false);
 
   const shouldInstallSequentially =
     uniqBy(transformsMetadata, 'order').length === transforms.length;

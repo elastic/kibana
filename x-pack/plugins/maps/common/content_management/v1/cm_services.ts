@@ -9,7 +9,7 @@ import type { ContentManagementServicesDefinition as ServicesDefinition } from '
 import {
   savedObjectSchema,
   objectTypeToGetResultSchema,
-  createOptionsSchema,
+  createOptionsSchemas,
   createResultSchema,
 } from '@kbn/content-management-utils';
 
@@ -34,6 +34,10 @@ const searchOptionsSchema = schema.maybe(
     { unknowns: 'forbid' }
   )
 );
+
+const createOptionsSchema = schema.object({
+  references: schema.maybe(createOptionsSchemas.references),
+});
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content

@@ -18,6 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
+import { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -34,7 +35,12 @@ import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
   | RenderingSetupDeps
-  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never; customBranding?: never });
+  | (RenderingPrebootDeps & {
+      status?: never;
+      elasticsearch?: never;
+      customBranding?: never;
+      userSettings?: never;
+    });
 
 /** @internal */
 export class RenderingService {
@@ -67,6 +73,7 @@ export class RenderingService {
     status,
     uiPlugins,
     customBranding,
+    userSettings,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -75,11 +82,19 @@ export class RenderingService {
         serverBasePath: http.basePath.serverBasePath,
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
+        userSettingsService: userSettings,
       }),
     });
 
     return {
-      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status, customBranding }),
+      render: this.render.bind(this, {
+        elasticsearch,
+        http,
+        uiPlugins,
+        status,
+        customBranding,
+        userSettings,
+      }),
     };
   }
 
@@ -92,7 +107,7 @@ export class RenderingService {
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding } = renderOptions;
+    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings } = renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
@@ -101,14 +116,29 @@ export class RenderingService {
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
+
+    let settingsUserValues: Record<string, UserProvidedValues> = {};
+    let globalSettingsUserValues: Record<string, UserProvidedValues> = {};
+
+    if (!isAnonymousPage) {
+      const userValues = await Promise.all([
+        uiSettings.client?.getUserProvided(),
+        uiSettings.globalClient?.getUserProvided(),
+      ]);
+
+      settingsUserValues = userValues[0];
+      globalSettingsUserValues = userValues[1];
+    }
+
     const settings = {
       defaults: uiSettings.client?.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
+      user: settingsUserValues,
     };
     const globalSettings = {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
+      user: globalSettingsUserValues,
     };
+
     let clusterInfo = {};
     let branding: CustomBranding = {};
     try {
@@ -129,7 +159,20 @@ export class RenderingService {
       // swallow error
     }
 
-    const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    let userSettingDarkMode: boolean | undefined;
+
+    if (!isAnonymousPage) {
+      userSettingDarkMode = await userSettings?.getUserSettingDarkMode(request);
+    }
+
+    let darkMode: boolean;
+
+    if (userSettingDarkMode) {
+      darkMode = userSettingDarkMode;
+    } else {
+      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    }
+
     const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({

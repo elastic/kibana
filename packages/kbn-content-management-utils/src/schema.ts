@@ -68,16 +68,50 @@ export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
   );
 
 // its recommended to create a subset of this schema for stricter validation
-export const createOptionsSchema = schema.object({
+export const createOptionsSchemas = {
   id: schema.maybe(schema.string()),
   references: schema.maybe(referencesSchema),
   overwrite: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.boolean()),
   initialNamespaces: schema.maybe(schema.arrayOf(schema.string())),
-});
+};
 
 export const schemaAndOr = schema.oneOf([schema.literal('AND'), schema.literal('OR')]);
+
+// its recommended to create a subset of this schema for stricter validation
+export const searchOptionsSchemas = {
+  page: schema.maybe(schema.number()),
+  perPage: schema.maybe(schema.number()),
+  sortField: schema.maybe(schema.string()),
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+  fields: schema.maybe(schema.arrayOf(schema.string())),
+  search: schema.maybe(schema.string()),
+  searchFields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  rootSearchFields: schema.maybe(schema.arrayOf(schema.string())),
+
+  hasReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
+  hasReferenceOperator: schema.maybe(schemaAndOr),
+  hasNoReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
+  hasNoReferenceOperator: schema.maybe(schemaAndOr),
+  defaultSearchOperator: schema.maybe(schemaAndOr),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  type: schema.maybe(schema.string()),
+
+  filter: schema.maybe(schema.string()),
+  pit: schema.maybe(
+    schema.object({ id: schema.string(), keepAlive: schema.maybe(schema.string()) })
+  ),
+};
+
+// its recommended to create a subset of this schema for stricter validation
+export const updateOptionsSchema = {
+  references: schema.maybe(referencesSchema),
+  version: schema.maybe(schema.string()),
+  refresh: schema.maybe(schema.oneOf([schema.boolean(), schema.literal('wait_for')])),
+  upsert: (attributesSchema: ObjectType<any>) => schema.maybe(savedObjectSchema(attributesSchema)),
+  retryOnConflict: schema.maybe(schema.number()),
+};
 
 // its recommended to create a subset of this schema for stricter validation
 export const searchOptionsSchema = schema.object({
@@ -103,16 +137,6 @@ export const searchOptionsSchema = schema.object({
     schema.object({ id: schema.string(), keepAlive: schema.maybe(schema.string()) })
   ),
 });
-
-// its recommended to create a subset of this schema for stricter validation
-export const updateOptionsSchema = (attributesSchema: ObjectType<any>) =>
-  schema.object({
-    references: schema.maybe(referencesSchema),
-    version: schema.maybe(schema.string()),
-    refresh: schema.maybe(schema.oneOf([schema.boolean(), schema.literal('wait_for')])),
-    upsert: schema.maybe(savedObjectSchema(attributesSchema)),
-    retryOnConflict: schema.maybe(schema.number()),
-  });
 
 export const createResultSchema = (soSchema: ObjectType<any>) =>
   schema.object(

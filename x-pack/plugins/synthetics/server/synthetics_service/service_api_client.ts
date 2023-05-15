@@ -236,6 +236,8 @@ export class ServiceAPIClient {
           is_edit: isEdit,
           license_level: license.type,
           license_issued_to: license.issued_to,
+          deployment_id: this.server.cloud?.deploymentId,
+          cloud_id: this.server.cloud?.cloudId,
         },
         headers: authHeader,
         httpsAgent: this.getHttpsAgent(baseUrl),

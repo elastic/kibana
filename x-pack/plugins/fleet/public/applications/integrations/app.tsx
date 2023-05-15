@@ -26,6 +26,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import {
   ConfigContext,
   FleetStatusProvider,
+  type FleetStatusProviderProps,
   KibanaVersionContext,
   useFleetStatus,
 } from '../../hooks';
@@ -61,6 +62,7 @@ export const IntegrationsAppContext: React.FC<{
   theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
+  fleetStatus?: FleetStatusProviderProps;
 }> = memo(
   ({
     children,
@@ -71,6 +73,7 @@ export const IntegrationsAppContext: React.FC<{
     extensions,
     setHeaderActionMenu,
     theme$,
+    fleetStatus,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
@@ -87,7 +90,7 @@ export const IntegrationsAppContext: React.FC<{
                       <QueryClientProvider client={queryClient}>
                         <ReactQueryDevtools initialIsOpen={false} />
                         <UIExtensionsContext.Provider value={extensions}>
-                          <FleetStatusProvider>
+                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
                             <startServices.customIntegrations.ContextProvider>
                               <CloudContext>
                                 <Router history={history}>

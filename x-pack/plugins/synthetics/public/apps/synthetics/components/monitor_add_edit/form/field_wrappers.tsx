@@ -25,6 +25,8 @@ import {
   EuiButtonGroupProps,
   EuiComboBox,
   EuiComboBoxProps,
+  EuiTextArea,
+  EuiTextAreaProps,
 } from '@elastic/eui';
 import {
   ThrottlingConfigField,
@@ -47,6 +49,10 @@ import {
   HeaderField as DefaultHeaderField,
   HeaderFieldProps as DefaultHeaderFieldProps,
 } from '../fields/header_field';
+import {
+  KeyValuePairsField as DefaultKeyValuePairsField,
+  KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps,
+} from '../fields/key_value_field';
 import {
   RequestBodyField as DefaultRequestBodyField,
   RequestBodyFieldProps as DefaultRequestBodyFieldProps,
@@ -80,6 +86,10 @@ export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
     />
   )
 );
+
+export const TextArea = React.forwardRef<HTMLTextAreaElement, EuiTextAreaProps>((props, ref) => (
+  <EuiTextArea data-test-subj="syntheticsTextAreaTextArea" {...props} inputRef={ref} />
+));
 
 export const FieldNumber = React.forwardRef<HTMLInputElement, EuiFieldNumberProps>((props, ref) => (
   <EuiFieldNumber data-test-subj="syntheticsFieldNumberFieldNumber" {...props} inputRef={ref} />
@@ -128,6 +138,10 @@ export const MonitorTypeRadioGroup = React.forwardRef<unknown, MonitorTypeRadioG
 export const HeaderField = React.forwardRef<unknown, DefaultHeaderFieldProps>((props, _ref) => (
   <DefaultHeaderField {...props} />
 ));
+
+export const KeyValuePairsField = React.forwardRef<unknown, DefaultKeyValuePairsFieldProps>(
+  (props, _ref) => <DefaultKeyValuePairsField {...props} />
+);
 
 export const RequestBodyField = React.forwardRef<unknown, DefaultRequestBodyFieldProps>(
   (props, _ref) => <DefaultRequestBodyField {...props} />

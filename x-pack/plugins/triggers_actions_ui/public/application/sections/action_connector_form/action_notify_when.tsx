@@ -328,9 +328,9 @@ export const ActionNotifyWhen = ({
                       name="throttle"
                       data-test-subj="throttleInput"
                       prepend={i18n.translate(
-                        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.label',
+                        'xpack.triggersActionsUI.sections.ruleForm.frequencyNotifyWhen.label',
                         {
-                          defaultMessage: 'Every',
+                          defaultMessage: 'Run action every',
                         }
                       )}
                       onChange={(e) => {

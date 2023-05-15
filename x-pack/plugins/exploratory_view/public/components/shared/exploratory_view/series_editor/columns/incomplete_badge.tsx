@@ -29,7 +29,7 @@ export function IncompleteBadge({ seriesConfig, series }: Props) {
     (!dataType || isEmpty(reportDefinitions) || !selectedMetricField) && !loading;
 
   const incompleteDefinition = isEmpty(reportDefinitions)
-    ? i18n.translate('xpack.exploratoryView.overview.exploratoryView.missingReportDefinition', {
+    ? i18n.translate('xpack.exploratoryView.missingReportDefinition', {
         defaultMessage: 'Missing {reportDefinition}',
         values: {
           reportDefinition:
@@ -55,16 +55,10 @@ export function IncompleteBadge({ seriesConfig, series }: Props) {
   return <EuiBadge color="warning">{incompleteMessage}</EuiBadge>;
 }
 
-const MISSING_REPORT_METRIC_LABEL = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.missingReportMetric',
-  {
-    defaultMessage: 'Missing report metric',
-  }
-);
+const MISSING_REPORT_METRIC_LABEL = i18n.translate('xpack.exploratoryView.missingReportMetric', {
+  defaultMessage: 'Missing report metric',
+});
 
-const MISSING_DATA_TYPE_LABEL = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.missingDataType',
-  {
-    defaultMessage: 'Missing data type',
-  }
-);
+const MISSING_DATA_TYPE_LABEL = i18n.translate('xpack.exploratoryView.missingDataType', {
+  defaultMessage: 'Missing data type',
+});

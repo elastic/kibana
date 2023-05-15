@@ -7,7 +7,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
@@ -20,7 +20,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { comparePolicies } from './sample_data/test_policy';
-import { getTestProjectSyntheticsPolicy } from './sample_data/test_project_monitor_policy';
+import {
+  getTestProjectSyntheticsPolicy,
+  getTestProjectSyntheticsPolicyLightweight,
+} from './sample_data/test_project_monitor_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddProjectMonitors', function () {
@@ -77,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.12.0')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -86,6 +89,16 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'testGlobalParam', value: 'testGlobalParamValue' })
+        .expect(200);
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'testGlobalParam2', value: 'testGlobalParamValue2' })
+        .expect(200);
     });
 
     beforeEach(() => {
@@ -320,12 +333,18 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             'check.response.body.negative': [],
-            'check.response.body.positive': ['Saved', 'saved'],
+            'check.response.body.positive': ['${testLocal1}', 'saved'],
+            'check.response.json': [
+              { description: 'check status', expression: 'foo.bar == "myValue"' },
+            ],
             'check.response.headers': {},
+            proxy_url: '${testGlobalParam2}',
             'check.request.body': {
               type: 'text',
               value: '',
             },
+            params:
+              '{"testLocal1":"testLocalParamsValue","testGlobalParam2":"testGlobalParamOverwrite"}',
             'check.request.headers': {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
@@ -356,9 +375,10 @@ export default function ({ getService }: FtrProviderContext) {
             project_id: project,
             username: '',
             password: '',
-            proxy_url: '',
+            proxy_headers: {},
             'response.include_body': 'always',
             'response.include_headers': false,
+            'response.include_body_max_bytes': '900',
             revision: 1,
             schedule: {
               number: '60',
@@ -378,6 +398,9 @@ export default function ({ getService }: FtrProviderContext) {
             'url.port': null,
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv6: true,
+            ipv4: true,
           });
         }
       } finally {
@@ -486,6 +509,10 @@ export default function ({ getService }: FtrProviderContext) {
             urls: '',
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv6: true,
+            ipv4: true,
+            params: '',
           });
         }
       } finally {
@@ -590,6 +617,10 @@ export default function ({ getService }: FtrProviderContext) {
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv4: true,
+            ipv6: true,
+            params: '',
           });
         }
       } finally {
@@ -1428,6 +1459,73 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    it('creates integration policies for project monitors with private locations - lightweight', async () => {
+      const project = `test-project-${uuidv4()}`;
+
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...httpProjectMonitors,
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                'check.request.body': '${testGlobalParam}',
+                privateLocations: ['Test private location 0'],
+              },
+            ],
+          })
+          .expect(200);
+
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
+        );
+        expect(packagePolicy.name).eql(
+          `${httpProjectMonitors.monitors[1].id}-${project}-default-Test private location 0`
+        );
+        expect(packagePolicy.policy_id).eql(testPolicyId);
+
+        const configId = monitorsResponse.body.monitors[0].id;
+        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+
+        comparePolicies(
+          packagePolicy,
+          getTestProjectSyntheticsPolicyLightweight({
+            inputs: {},
+            name: 'My Monitor 3',
+            id,
+            configId,
+            projectId: project,
+            locationName: 'Test private location 0',
+          })
+        );
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
+
+        const packagesResponse = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(packagesResponse.body.items.length).eql(0);
+      }
+    });
+
     it('deletes integration policies for project monitors when private location is removed from the monitor - lightweight', async () => {
       const project = `test-project-${uuidv4()}`;
 
@@ -1744,9 +1842,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(message).to.eql(REQUEST_TOO_LARGE);
       } finally {
         await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY)
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false, project });
+          .send({ ...projectMonitors, project });
       }
     });
 
@@ -1781,9 +1879,10 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 'check.response': {
                   body: {
-                    positive: ['Saved', 'saved'],
+                    positive: ['${testLocal1}', 'saved'],
                   },
                   status: [200],
+                  json: [{ description: 'check status', expression: 'foo.bar == "myValue"' }],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1792,6 +1891,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -1800,6 +1900,11 @@ export default function ({ getService }: FtrProviderContext) {
                 tags: 'tag2,tag2',
                 urls: ['http://localhost:9200'],
                 'ssl.verification_mode': 'strict',
+                params: {
+                  testGlobalParam2: 'testGlobalParamOverwrite',
+                  testLocal1: 'testLocalParamsValue',
+                },
+                proxy_url: '${testGlobalParam2}',
               },
               reason: 'Cannot update monitor to different type.',
             },
@@ -1882,9 +1987,15 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 'check.response': {
                   body: {
-                    positive: ['Saved', 'saved'],
+                    positive: ['${testLocal1}', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1893,6 +2004,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -1901,6 +2013,11 @@ export default function ({ getService }: FtrProviderContext) {
                 timeout: '80s',
                 type: 'http',
                 urls: ['http://localhost:9200'],
+                params: {
+                  testGlobalParam2: 'testGlobalParamOverwrite',
+                  testLocal1: 'testLocalParamsValue',
+                },
+                proxy_url: '${testGlobalParam2}',
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
@@ -1943,9 +2060,15 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 'check.response': {
                   body: {
-                    positive: ['Saved', 'saved'],
+                    positive: ['${testLocal1}', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1954,6 +2077,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -1963,6 +2087,11 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'http',
                 urls: ['http://localhost:9200'],
                 locations: ['localhost'],
+                params: {
+                  testGlobalParam2: 'testGlobalParamOverwrite',
+                  testLocal1: 'testLocalParamsValue',
+                },
+                proxy_url: '${testGlobalParam2}',
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
@@ -2005,9 +2134,15 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 'check.response': {
                   body: {
-                    positive: ['Saved', 'saved'],
+                    positive: ['${testLocal1}', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -2016,6 +2151,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -2025,6 +2161,11 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'http',
                 urls: ['http://localhost:9200'],
                 locations: [],
+                params: {
+                  testGlobalParam2: 'testGlobalParamOverwrite',
+                  testLocal1: 'testLocalParamsValue',
+                },
+                proxy_url: '${testGlobalParam2}',
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },

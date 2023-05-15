@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../utils';
+import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../utils/filter_integrations';
 
 const createWrapper = () => {
   const queryClient = new QueryClient();

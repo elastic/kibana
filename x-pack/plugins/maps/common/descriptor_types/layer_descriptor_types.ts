@@ -16,7 +16,7 @@ import {
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
+import { AbstractSourceDescriptor, JoinSourceDescriptor } from './source_descriptor_types';
 import { LAYER_TYPE } from '../constants';
 
 export type Attribution = {
@@ -26,7 +26,7 @@ export type Attribution = {
 
 export type JoinDescriptor = {
   leftField?: string;
-  right: TermJoinSourceDescriptor;
+  right: JoinSourceDescriptor;
 };
 
 export type TileMetaFeature = Feature & {

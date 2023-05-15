@@ -89,7 +89,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able to execute and get 10 signals', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
@@ -98,7 +101,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be have set the signals in an open state initially', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
@@ -110,7 +116,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able to get a count of 10 closed signals when closing 10', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
@@ -136,7 +145,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able close signals immediately and they all should be closed', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);

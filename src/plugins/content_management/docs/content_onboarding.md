@@ -239,7 +239,7 @@ import { cmServicesDefinition } from '../../common/content_management/cm_service
  * that we won't leak any additional fields in our Response, even when the SO client adds new fields to its responses.
  */
 function savedObjectToMapItem(
-  savedObject: SavedObject<MapSavedObjectAttributes>
+  savedObject: SavedObject<MapAttributes>
 ): MapItem {
   const {
     id,
@@ -293,7 +293,7 @@ export class MapsStorage implements ContentStorage<MapSavedObject, PartialMapSav
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<MapSavedObjectAttributes>(SO_TYPE, id);
+    } = await soClient.resolve<MapAttributes>(SO_TYPE, id);
 
     const response: MapGetOut = {
       item: savedObjectToMapItem(savedObject),
@@ -327,8 +327,8 @@ export class MapsStorage implements ContentStorage<MapSavedObject, PartialMapSav
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
-      MapSavedObjectAttributes,
-      MapSavedObjectAttributes
+      MapAttributes,
+      MapAttributes
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid payload. ${dataError.message}`);
@@ -345,7 +345,7 @@ export class MapsStorage implements ContentStorage<MapSavedObject, PartialMapSav
     //   - both are on the latest version
 
     // Save data in DB
-    const savedObject = await soClient.create<MapSavedObjectAttributes>(
+    const savedObject = await soClient.create<MapAttributes>(
       SO_TYPE,
       dataToLatest,
       optionsToLatest

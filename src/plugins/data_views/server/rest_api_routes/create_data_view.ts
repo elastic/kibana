@@ -74,6 +74,7 @@ const dataViewSpecSchema = schema.object({
   allowNoIndex: schema.maybe(schema.boolean()),
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
   name: schema.maybe(schema.string()),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const registerCreateDataViewRouteFactory =
@@ -128,7 +129,10 @@ const registerCreateDataViewRouteFactory =
               'content-type': 'application/json',
             },
             body: {
-              [serviceKey]: dataView.toSpec(),
+              [serviceKey]: {
+                ...dataView.toSpec(),
+                namespaces: dataView.namespaces,
+              },
             },
           });
         })

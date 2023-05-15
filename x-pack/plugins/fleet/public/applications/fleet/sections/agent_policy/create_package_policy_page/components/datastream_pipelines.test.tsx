@@ -17,10 +17,6 @@ const mockedUseGetPipeline = useGetPipeline as jest.MockedFunction<typeof useGet
 jest.mock('../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../hooks'),
-    FleetStatusProvider: (props: any) => {
-      return props.children;
-    },
-    useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
     useGetPipeline: jest.fn(),
   };
 });
