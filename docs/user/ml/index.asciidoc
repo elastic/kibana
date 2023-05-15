@@ -197,16 +197,15 @@ field to identify change points.
 
 When a change point is detected, a row displays basic information including the 
 timestamp of the change point, a preview chart, the type of change point, its 
-p-value, the name and value of the split field. You 
-can further examine the selected change point in a detailed view. A chart 
-visualizes the identified change point within the analyzed time window, making 
-the interpretation easier. If the analysis is split by a field, a separate chart 
-is shown for every partition that has a detected change point. The chart 
-displays the type of change point, its value, and the timestamp of the bucket 
-where the change point has been detected. The corresponding `p-value` indicates 
-the magnitude of the change; lower values indicate more significant changes. You 
-can use the change point type selector to filter the results by specific types 
-of change points.
+p-value, the name and value of the split field. You can further examine the 
+selected change point in a detailed view. A chart visualizes the identified 
+change point within the analyzed time window, making the interpretation easier. 
+If the analysis is split by a field, a separate chart is shown for every 
+partition that has a detected change point. The chart displays the type of 
+change point, its value, and the timestamp of the bucket where the change point 
+has been detected. The corresponding `p-value` indicates the magnitude of the 
+change; lower values indicate more significant changes. You can use the change 
+point type selector to filter the results by specific types of change points.
 
 [role="screenshot"]
 image::user/ml/images/ml-change-point-detection-selected.png[Selected change points]
