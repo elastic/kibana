@@ -63,7 +63,7 @@ export class ServerlessPlugin
 
     return {
       setSideNavComponent: (sideNavigationComponent) =>
-        // Casting the "chrome.projects" service to an "internal" type: it's intentional to call the service only from here.
+        // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
         (core.chrome as InternalChromeStart).project.setSideNavComponent(sideNavigationComponent),
     };
   }
