@@ -179,6 +179,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       },
     },
     pid: true,
+    session_leader: true,
     start: true,
     user: true,
     tty: true,
