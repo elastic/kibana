@@ -152,22 +152,23 @@ export async function getPackages(
 
 export async function getInstalledPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  type?: PackageDataStreamTypes;
+  dataStreamType?: PackageDataStreamTypes;
   nameQuery?: string;
-  pageAfter?: SortResults;
-  pageSize: number;
-  sortDirection: 'asc' | 'desc';
+  searchAfter?: SortResults;
+  perPage: number;
+  sortOrder: 'asc' | 'desc';
 }) {
-  const { savedObjectsClient, pageAfter, pageSize, nameQuery, sortDirection, type } = options;
+  const { savedObjectsClient, searchAfter, perPage, nameQuery, sortOrder, dataStreamType } =
+    options;
 
   const packageSavedObjects = await savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
     // Pagination
-    perPage: pageSize,
-    ...(pageAfter && { searchAfter: pageAfter }),
+    perPage,
+    ...(searchAfter && { searchAfter }),
     // Sort
     sortField: 'name',
-    sortOrder: sortDirection,
+    sortOrder,
     // Name filter
     ...(nameQuery && { searchFields: ['name'] }),
     ...(nameQuery && { search: `${nameQuery}* | ${nameQuery}` }),
@@ -184,12 +185,12 @@ export async function getInstalledPackages(options: {
         nodeBuilder.is('type', 'index_template')
       ),
       // "Type" filter
-      ...(type
+      ...(dataStreamType
         ? [
             buildFunctionNode(
               'nested',
               `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
-              nodeBuilder.is('id', buildWildcardNode(`${type}-*`))
+              nodeBuilder.is('id', buildWildcardNode(`${dataStreamType}-*`))
             ),
           ]
         : []),
@@ -212,10 +213,10 @@ export async function getInstalledPackages(options: {
         };
       })
       .filter((stream) => {
-        if (!type) {
+        if (!dataStreamType) {
           return true;
         } else {
-          return stream.title.startsWith(`${type}-`);
+          return stream.title.startsWith(`${dataStreamType}-`);
         }
       });
 
@@ -230,7 +231,7 @@ export async function getInstalledPackages(options: {
   return {
     items: integrations,
     total: packageSavedObjects.total,
-    pageAfter: packageSavedObjects.saved_objects.at(-1)?.sort, // Enable ability to use searchAfter in subsequent queries
+    searchAfter: packageSavedObjects.saved_objects.at(-1)?.sort, // Enable ability to use searchAfter in subsequent queries
   };
 }
 

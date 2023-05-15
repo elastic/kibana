@@ -26,7 +26,7 @@ export const GetPackagesRequestSchema = {
 
 export const GetInstalledPackagesRequestSchema = {
   query: schema.object({
-    type: schema.maybe(
+    dataStreamType: schema.maybe(
       schema.oneOf([
         schema.literal('logs'),
         schema.literal('metrics'),
@@ -36,9 +36,9 @@ export const GetInstalledPackagesRequestSchema = {
       ])
     ),
     nameQuery: schema.maybe(schema.string()),
-    pageAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-    pageSize: schema.number({ defaultValue: 30 }),
-    sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+    searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
+    perPage: schema.number({ defaultValue: 30 }),
+    sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
     }),
   }),
@@ -56,7 +56,7 @@ export const GetDataStreamsRequestSchema = {
       ])
     ),
     datasetQuery: schema.maybe(schema.string()),
-    sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+    sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
     }),
     uncategorisedOnly: schema.boolean({ defaultValue: true }),

@@ -15,10 +15,10 @@ export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
   type?: PackageDataStreamTypes;
   datasetQuery?: string;
-  sortDirection: 'asc' | 'desc';
+  sortOrder: 'asc' | 'desc';
   uncategorisedOnly: boolean;
 }) {
-  const { esClient, type, datasetQuery, uncategorisedOnly, sortDirection } = options;
+  const { esClient, type, datasetQuery, uncategorisedOnly, sortOrder } = options;
 
   const allDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: type ? type : '*',
@@ -39,7 +39,7 @@ export async function getDataStreams(options: {
     return a.name.localeCompare(b.name);
   });
 
-  const dataStreams = sortDirection === 'asc' ? sortedDataStreams : sortedDataStreams.reverse();
+  const dataStreams = sortOrder === 'asc' ? sortedDataStreams : sortedDataStreams.reverse();
 
   return {
     items: dataStreams,

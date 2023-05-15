@@ -61,7 +61,7 @@ interface InstalledPackage {
 export interface GetInstalledPackagesResponse {
   items: InstalledPackage[];
   total: number;
-  pageAfter?: SortResults;
+  searchAfter?: SortResults;
 }
 
 export interface GetEpmDataStreamsResponse {
