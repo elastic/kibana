@@ -54,6 +54,9 @@ const navigationNodeToEuiItem = (
       navigationNodeToEuiItem(_item, { navigateToUrl, basePath, activeNavItemId })
     ),
     ['data-test-subj']: `nav-item-${subjId}`,
+    ...(item.icon && {
+      icon: <EuiIcon type={item.icon} size="s" />,
+    }),
   };
 };
 

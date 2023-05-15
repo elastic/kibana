@@ -6,7 +6,7 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, ValueOf } from '..';
+import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -122,6 +122,7 @@ export interface FullAgentPolicy {
       signing_key: string;
     };
   };
+  secret_references?: PolicySecretReference[];
   signed?: {
     data: string;
     signature: string;
