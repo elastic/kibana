@@ -1003,7 +1003,6 @@ x-pack/test/observability_functional @elastic/actionable-observability
 
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
-/x-pack/test/security_solution_endpoint/ @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
@@ -1183,7 +1182,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
