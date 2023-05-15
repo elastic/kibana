@@ -9,7 +9,6 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { getIndexTemplatesByIndexPattern } from '../index_templates_tab';
 
 type APIResponseType =
   APIReturnType<'GET /internal/apm/diagnostics/index_templates'>;
@@ -59,7 +58,7 @@ export function IndexTemplatesStatus() {
 }
 
 function getHasNonStandardIndexTemplates(data: APIResponseType | undefined) {
-  return getIndexTemplatesByIndexPattern(data)?.some(({ indexTemplates }) => {
+  return data?.matchingIndexTemplates?.some(({ indexTemplates }) => {
     return indexTemplates?.some(({ isNonStandard }) => isNonStandard);
   });
 }

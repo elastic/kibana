@@ -54,10 +54,11 @@ const indexTemplateRoute = createApmServerRoute({
     >;
     matchingIndexTemplates: Array<{
       indexPattern: string;
-      overlappingTemplates?: Array<{
+      indexTemplates?: Array<{
         priority: number | undefined;
         templateIndexPatterns: string[];
-        name: string;
+        templateName: string;
+        isNonStandard: boolean;
       }>;
     }>;
   }> => {
@@ -66,7 +67,8 @@ const indexTemplateRoute = createApmServerRoute({
       apmEventClient
     );
     const matchingIndexTemplates = await getMatchingIndexTemplates(
-      apmEventClient
+      apmEventClient,
+      expectedIndexTemplateStates
     );
 
     return { matchingIndexTemplates, expectedIndexTemplateStates };

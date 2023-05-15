@@ -14,28 +14,44 @@ export function getUniqueApmIndices(indices: APMEventClient['indices']) {
   );
 }
 
+type ExpectedIndexTemplateStates = Record<
+  string,
+  { exists: boolean; name?: string | undefined }
+>;
+
 export async function getMatchingIndexTemplates(
-  apmEventClient: APMEventClient
+  apmEventClient: APMEventClient,
+  expectedIndexTemplateStates: ExpectedIndexTemplateStates
 ) {
   const apmIndexPatterns = getUniqueApmIndices(apmEventClient.indices);
-  const matchingTemplates = await Promise.all(
+  const matchingIndexTemplates = await Promise.all(
     apmIndexPatterns.map(async (indexPattern) => {
       const simulateResponse = await apmEventClient.simulateIndexTemplate(
         'simulate_index_template',
-        {
-          index_patterns: [indexPattern],
-        }
+        { index_patterns: [indexPattern] }
       );
 
-      const overlappingTemplates = await Promise.all(
+      const indexTemplates = await Promise.all(
         (simulateResponse.overlapping ?? []).map(
-          async ({ index_patterns: templateIndexPatterns, name }) => {
-            const priority = await getTemplatePriority(apmEventClient, name);
+          async ({
+            index_patterns: templateIndexPatterns,
+            name: templateName,
+          }) => {
+            const priority = await getTemplatePriority(
+              apmEventClient,
+              templateName
+            );
+
+            const isNonStandard = getIsNonStandardIndexTemplate(
+              expectedIndexTemplateStates,
+              templateName
+            );
 
             return {
               priority,
               templateIndexPatterns,
-              name,
+              templateName,
+              isNonStandard,
             };
           }
         )
@@ -43,8 +59,8 @@ export async function getMatchingIndexTemplates(
 
       return {
         indexPattern,
-        overlappingTemplates: orderBy(
-          overlappingTemplates,
+        indexTemplates: orderBy(
+          indexTemplates,
           ({ priority }) => priority,
           'desc'
         ),
@@ -52,7 +68,7 @@ export async function getMatchingIndexTemplates(
     })
   );
 
-  return matchingTemplates;
+  return matchingIndexTemplates;
 }
 
 async function getTemplatePriority(
@@ -65,4 +81,22 @@ async function getTemplatePriority(
   );
 
   return res.index_templates[0].index_template.priority;
+}
+
+function getIsNonStandardIndexTemplate(
+  expectedIndexTemplateStates: ExpectedIndexTemplateStates,
+  templateName: string
+) {
+  const expectedIndexTemplates = Object.keys(expectedIndexTemplateStates);
+
+  const defaultXpackIndexTemplates = ['logs', 'metrics'];
+  const isNonStandard = [
+    ...expectedIndexTemplates,
+    ...defaultXpackIndexTemplates,
+  ].every((expectedIndexTemplate) => {
+    const notMatch = !templateName.startsWith(expectedIndexTemplate);
+    return notMatch;
+  });
+
+  return isNonStandard;
 }

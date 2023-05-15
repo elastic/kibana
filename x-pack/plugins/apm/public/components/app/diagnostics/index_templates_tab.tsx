@@ -47,7 +47,7 @@ function MatchingIndexTemplates({
   data: APIResponseType | undefined;
 }) {
   const router = useApmRouter();
-  const indexTemplatesByIndexPattern = getIndexTemplatesByIndexPattern(data);
+  const indexTemplatesByIndexPattern = data?.matchingIndexTemplates;
 
   if (
     !indexTemplatesByIndexPattern ||
@@ -64,29 +64,27 @@ function MatchingIndexTemplates({
             <h4>{indexPattern}</h4>
           </EuiTitle>
 
+          {!indexTemplates?.length && <em>No matching index templates</em>}
+
           {indexTemplates?.map(
             ({
               isNonStandard,
               templateName,
-              templateIndexPattern,
+              templateIndexPatterns,
               priority,
             }) => {
               return (
                 <EuiToolTip
-                  content={`${templateIndexPattern} (Priority: ${priority})`}
+                  content={`${templateIndexPatterns.join(
+                    ', '
+                  )} (Priority: ${priority})`}
                 >
-                  {isNonStandard ? (
-                    <EuiBadge color="warning">
-                      {templateName} (Non standard template)
-                    </EuiBadge>
-                  ) : (
-                    <EuiBadge
-                      color="hollow"
-                      css={{ marginRight: '5px', marginTop: '5px' }}
-                    >
-                      {templateName}
-                    </EuiBadge>
-                  )}
+                  <EuiBadge
+                    color={isNonStandard ? 'warning' : 'hollow'}
+                    css={{ marginRight: '5px', marginTop: '5px' }}
+                  >
+                    {templateName}
+                  </EuiBadge>
                 </EuiToolTip>
               );
             }
@@ -122,46 +120,46 @@ function MatchingIndexTemplates({
   );
 }
 
-export function getIndexTemplatesByIndexPattern(
-  data: APIResponseType | undefined
-) {
-  return data?.matchingIndexTemplates
-    .map(({ indexPattern, overlappingTemplates }) => {
-      const indexTemplates = overlappingTemplates?.map(
-        (overlappingTemplate) => {
-          const expectedIndexTemplates = Object.keys(
-            data.expectedIndexTemplateStates
-          );
+// export function getIndexTemplatesByIndexPattern(
+//   data: APIResponseType | undefined
+// ) {
+//   return data?.matchingIndexTemplates
+//     .map(({ indexPattern, overlappingTemplates }) => {
+//       const indexTemplates = overlappingTemplates?.map(
+//         (overlappingTemplate) => {
+//           const expectedIndexTemplates = Object.keys(
+//             data.expectedIndexTemplateStates
+//           );
 
-          const defaultXpackIndexTemplates = ['logs', 'metrics'];
-          const templateName = overlappingTemplate.name;
-          const templateIndexPattern =
-            overlappingTemplate.templateIndexPatterns.join(', ');
-          const { priority } = overlappingTemplate;
+//           const defaultXpackIndexTemplates = ['logs', 'metrics'];
+//           const templateName = overlappingTemplate.name;
+//           const templateIndexPattern =
+//             overlappingTemplate.templateIndexPatterns.join(', ');
+//           const { priority } = overlappingTemplate;
 
-          const isNonStandard = [
-            ...expectedIndexTemplates,
-            ...defaultXpackIndexTemplates,
-          ].every((expectedIndexTemplate) => {
-            const notMatch = !templateName.startsWith(expectedIndexTemplate);
-            return notMatch;
-          });
+//           const isNonStandard = [
+//             ...expectedIndexTemplates,
+//             ...defaultXpackIndexTemplates,
+//           ].every((expectedIndexTemplate) => {
+//             const notMatch = !templateName.startsWith(expectedIndexTemplate);
+//             return notMatch;
+//           });
 
-          return {
-            isNonStandard,
-            templateName,
-            templateIndexPattern,
-            priority,
-          };
-        }
-      );
+//           return {
+//             isNonStandard,
+//             templateName,
+//             templateIndexPattern,
+//             priority,
+//           };
+//         }
+//       );
 
-      return { indexPattern, indexTemplates };
-    })
-    .filter(({ indexTemplates }) => {
-      return indexTemplates && indexTemplates.length > 0;
-    });
-}
+//       return { indexPattern, indexTemplates };
+//     })
+//     .filter(({ indexTemplates }) => {
+//       return indexTemplates && indexTemplates.length > 0;
+//     });
+// }
 
 function ExpectedIndexTemplates({
   data,

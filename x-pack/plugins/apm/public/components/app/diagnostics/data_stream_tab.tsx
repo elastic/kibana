@@ -32,8 +32,8 @@ export function DiagnosticsDataStreams() {
       <NonDataStreamIndicesCallout data={data} />
 
       <EuiText>
-        This section shows the data streams that match the APM Indices, and
-        their backing index template
+        This section shows the APM data streams and their underlying index
+        template.
       </EuiText>
       <EuiSpacer />
       <DataStreamsTable data={data} />
