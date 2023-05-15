@@ -274,7 +274,6 @@ describe('xy_visualization', () => {
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
             ignoreGlobalFilters: true,
-            hide: false,
             simpleView: false,
           },
         ],
@@ -320,7 +319,6 @@ describe('xy_visualization', () => {
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
             ignoreGlobalFilters: true,
-            hide: false,
             simpleView: false,
           },
         ],
@@ -435,7 +433,6 @@ describe('xy_visualization', () => {
           annotationGroupRef: refName1,
           ignoreGlobalFilters: false, // different from the persisted group
           annotations: [], // different from the persisted group
-          hide: false,
           simpleView: false,
         },
         {
@@ -445,7 +442,6 @@ describe('xy_visualization', () => {
           annotationGroupRef: refName2,
           ignoreGlobalFilters: false, // different from the persisted group
           annotations: [], // different from the persisted group
-          hide: false,
           simpleView: false,
         },
       ];
@@ -476,7 +472,6 @@ describe('xy_visualization', () => {
           annotationGroupId: annotationGroupId1,
           ignoreGlobalFilters: persistedAnnotationLayers[0].ignoreGlobalFilters,
           annotations: persistedAnnotationLayers[0].annotations,
-          hide: persistedAnnotationLayers[0].hide,
           simpleView: persistedAnnotationLayers[0].simpleView,
           indexPatternId: dataViewId,
           __lastSaved: libraryAnnotationGroups[annotationGroupId1],
@@ -487,7 +482,6 @@ describe('xy_visualization', () => {
           annotationGroupId: annotationGroupId2,
           ignoreGlobalFilters: persistedAnnotationLayers[1].ignoreGlobalFilters,
           annotations: persistedAnnotationLayers[1].annotations,
-          hide: persistedAnnotationLayers[1].hide,
           simpleView: persistedAnnotationLayers[1].simpleView,
           indexPatternId: dataViewId,
           __lastSaved: libraryAnnotationGroups[annotationGroupId2],
@@ -546,7 +540,6 @@ describe('xy_visualization', () => {
           annotationGroupRef: refName1,
           ignoreGlobalFilters: false, // different from the persisted group
           annotations: [], // different from the persisted group
-          hide: false,
           simpleView: false,
         },
         {
@@ -556,7 +549,6 @@ describe('xy_visualization', () => {
           annotationGroupRef: refName2,
           ignoreGlobalFilters: false, // different from the persisted group
           annotations: [], // different from the persisted group
-          hide: false,
           simpleView: false,
         },
       ];
@@ -886,7 +878,6 @@ describe('xy_visualization', () => {
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                   ignoreGlobalFilters: true,
-                  hide: false,
                   simpleView: false,
                 },
               ],
@@ -913,7 +904,6 @@ describe('xy_visualization', () => {
               label: 'Event',
             },
           ],
-          hide: false,
           simpleView: false,
         });
       });
@@ -1139,7 +1129,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                 ],
@@ -1186,7 +1175,6 @@ describe('xy_visualization', () => {
               },
             ],
             ignoreGlobalFilters: true,
-            hide: false,
             simpleView: false,
           });
         });
@@ -1203,7 +1191,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                 ],
@@ -1250,7 +1237,6 @@ describe('xy_visualization', () => {
               },
             ],
             ignoreGlobalFilters: true,
-            hide: false,
             simpleView: false,
           });
         });
@@ -1267,7 +1253,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                 ],
@@ -1295,7 +1280,6 @@ describe('xy_visualization', () => {
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
             ignoreGlobalFilters: true,
-            hide: false,
             simpleView: false,
           });
         });
@@ -1312,7 +1296,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation, exampleAnnotation2],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                 ],
@@ -1341,7 +1324,6 @@ describe('xy_visualization', () => {
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2, exampleAnnotation],
             ignoreGlobalFilters: true,
-            hide: false,
             simpleView: false,
           });
         });
@@ -1359,7 +1341,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                   {
@@ -1368,7 +1349,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                 ],
@@ -1398,7 +1378,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
             {
@@ -1407,7 +1386,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [{ ...exampleAnnotation, id: 'an2' }],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
           ]);
@@ -1425,7 +1403,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                   {
@@ -1434,7 +1411,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                 ],
@@ -1464,7 +1440,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation2],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
             {
@@ -1473,7 +1448,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
           ]);
@@ -1491,7 +1465,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                   {
@@ -1500,7 +1473,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                 ],
@@ -1529,7 +1501,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
             {
@@ -1538,7 +1509,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
           ]);
@@ -1556,7 +1526,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
 
@@ -1566,7 +1535,6 @@ describe('xy_visualization', () => {
                     indexPatternId: 'indexPattern1',
                     annotations: [],
                     ignoreGlobalFilters: true,
-                    hide: false,
                     simpleView: false,
                   },
                 ],
@@ -1596,7 +1564,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
             {
@@ -1605,7 +1572,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
           ]);
@@ -1689,7 +1655,6 @@ describe('xy_visualization', () => {
                 indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
                 ignoreGlobalFilters: true,
-                hide: false,
                 simpleView: false,
               },
             ],
@@ -1711,7 +1676,6 @@ describe('xy_visualization', () => {
           indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation],
           ignoreGlobalFilters: true,
-          hide: false,
           simpleView: false,
         },
       ]);
@@ -2440,7 +2404,6 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
-              hide: false,
               simpleView: false,
             },
           ],
@@ -3076,7 +3039,6 @@ describe('xy_visualization', () => {
                 indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation],
                 ignoreGlobalFilters: false,
-                hide: false,
                 simpleView: false,
               },
             ],
@@ -3324,7 +3286,6 @@ describe('xy_visualization', () => {
         indexPatternId: 'some-id',
         ignoreGlobalFilters: true,
         simpleView: false,
-        hide: false,
         annotations: [
           {
             label: 'Event',
@@ -3358,7 +3319,6 @@ describe('xy_visualization', () => {
           indexPatternId: 'some-id',
           ignoreGlobalFilters: true,
           simpleView: false,
-          hide: false,
           annotations: [
             {
               label: 'Event',
@@ -3380,7 +3340,6 @@ describe('xy_visualization', () => {
           indexPatternId: 'some-id',
           ignoreGlobalFilters: true,
           simpleView: false,
-          hide: false,
           annotations: [
             {
               label: 'Event',
@@ -3430,7 +3389,6 @@ describe('xy_visualization', () => {
             },
           } as PointInTimeEventAnnotationConfig,
         ],
-        hide: false,
         simpleView: false,
       };
       state.layers = [layer];
@@ -3451,7 +3409,6 @@ describe('xy_visualization', () => {
                 "type": "manual",
               },
             ],
-            "hide": false,
             "ignoreGlobalFilters": false,
             "layerId": "layer-id",
             "layerType": "annotations",
@@ -3627,7 +3584,6 @@ describe('xy_visualization', () => {
           layerType: 'annotations',
           persistanceType: 'linked',
           annotations: layers[0].annotations,
-          hide: layers[0].hide,
           ignoreGlobalFilters: layers[0].ignoreGlobalFilters,
           simpleView: layers[0].simpleView,
         },
@@ -3637,7 +3593,6 @@ describe('xy_visualization', () => {
           layerType: 'annotations',
           persistanceType: 'linked',
           annotations: layers[1].annotations,
-          hide: layers[1].hide,
           ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
           simpleView: layers[1].simpleView,
         },
@@ -3667,7 +3622,6 @@ describe('xy_visualization', () => {
                 annotations: [exampleAnnotation2],
                 ignoreGlobalFilters: true,
                 indexPatternId: 'myIndexPattern',
-                hide: false,
                 simpleView: false,
               },
             ],
@@ -3702,7 +3656,6 @@ describe('xy_visualization', () => {
             annotations: [exampleAnnotation2],
             ignoreGlobalFilters: true,
             indexPatternId: 'myIndexPattern',
-            hide: false,
             simpleView: false,
           },
         ],
@@ -3720,7 +3673,6 @@ describe('xy_visualization', () => {
             annotations: [exampleAnnotation2],
             ignoreGlobalFilters: false,
             indexPatternId: 'myIndexPattern',
-            hide: false,
             simpleView: false,
           },
         ]),

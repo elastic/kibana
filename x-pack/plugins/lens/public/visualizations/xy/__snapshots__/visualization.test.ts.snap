@@ -34,7 +34,6 @@ Object {
       "type": "manual",
     },
   ],
-  "hide": false,
   "ignoreGlobalFilters": false,
   "indexPatternId": "indexPattern1",
   "layerId": "",
@@ -46,7 +45,6 @@ Object {
 exports[`xy_visualization #appendLayer adding an annotation layer adds a by-value annotation layer 1`] = `
 Object {
   "annotations": Array [],
-  "hide": false,
   "ignoreGlobalFilters": true,
   "indexPatternId": "indexPattern1",
   "layerId": "",
@@ -90,7 +88,6 @@ Array [
         "type": "manual",
       },
     ],
-    "hide": undefined,
     "ignoreGlobalFilters": true,
     "indexPatternId": "data-view-123",
     "layerId": "annotation",
@@ -130,7 +127,6 @@ Array [
         "type": "manual",
       },
     ],
-    "hide": undefined,
     "ignoreGlobalFilters": true,
     "indexPatternId": "data-view-773203",
     "layerId": "annotation",

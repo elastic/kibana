@@ -573,7 +573,6 @@ describe('xy_suggestions', () => {
       layerType: LayerTypes.ANNOTATIONS,
       indexPatternId: 'indexPattern1',
       ignoreGlobalFilters: true,
-      hide: false,
       simpleView: false,
       annotations: [
         {
@@ -632,7 +631,6 @@ describe('xy_suggestions', () => {
       layerType: LayerTypes.ANNOTATIONS,
       indexPatternId: 'indexPattern1',
       ignoreGlobalFilters: true,
-      hide: false,
       simpleView: false,
       annotations: [
         {
