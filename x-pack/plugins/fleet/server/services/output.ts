@@ -560,11 +560,9 @@ class OutputService {
         const allowEditFields = originalOutput.allow_edit ?? [];
 
         const allKeys = Array.from(new Set([...Object.keys(data)])) as Array<keyof Output>;
-        const isNotNullOrUndefinedOrEmpty = (o: any) => o !== null && o !== undefined && o !== '';
         for (const key of allKeys) {
           if (
-            (isNotNullOrUndefinedOrEmpty(originalOutput[key]) ||
-              isNotNullOrUndefinedOrEmpty(data[key])) &&
+            (!!originalOutput[key] || !!data[key]) &&
             !allowEditFields.includes(key) &&
             !deepEqual(originalOutput[key], data[key])
           ) {
