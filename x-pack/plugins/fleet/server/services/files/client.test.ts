@@ -5,24 +5,177 @@
  * 2.0.
  */
 
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+
+import { createFileClientMock } from '@kbn/files-plugin/server/mocks';
+
+import { createEsFileClient as _createEsFileClient } from '@kbn/files-plugin/server';
+
+import type { estypes } from '@elastic/elasticsearch';
+
+import type { FleetFileType } from '../..';
+
+import type { FileCustomMeta } from './types';
+
+import { createFromHostEsSearchResponseMock } from './mocks';
+
+import { FleetFilesClient } from './client';
+import type { HostUploadedFileMetadata } from './types';
+
+jest.mock('@kbn/files-plugin/server');
+
+const createEsFileClientMock = _createEsFileClient as jest.Mock;
+
 describe('When using FleetFilesClient', () => {
-  // FIXME:PT implement test
+  let esClientMock: ElasticsearchClientMock;
+  let esFileClientMock: ReturnType<typeof createFileClientMock>;
+  let loggerMock: ReturnType<typeof loggingSystemMock.createLogger>;
+  let esFleetFilesIndexSearchResponse: estypes.SearchResponse<HostUploadedFileMetadata>;
+  let esFleetFileDataIndexSearchResponse: estypes.SearchResponse;
 
-  it.todo('should create internal ES File client with expected arguments when type is `from-host');
+  const getFleetFilesInstance = (type: FleetFileType = 'from-host'): FleetFilesClient => {
+    loggerMock = loggingSystemMock.createLogger();
 
-  it.todo('should create internal ES File client with expected arguments when type is `to-host');
+    return new FleetFilesClient(esClientMock, loggerMock, 'foo', type, 12345);
+  };
+
+  beforeEach(() => {
+    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esFileClientMock = createFileClientMock<FileCustomMeta>({
+      hash: {
+        sha256: 'e5441eb2bb8a774783d4ff4690153832688bd546c878e953acc3da089ac05d06',
+      },
+      meta: {
+        action_id: '123',
+        target_agents: ['abc'],
+      },
+    });
+    createEsFileClientMock.mockReturnValue(esFileClientMock);
+
+    esFleetFilesIndexSearchResponse = createFromHostEsSearchResponseMock();
+    esFleetFileDataIndexSearchResponse = {
+      took: 3,
+      timed_out: false,
+      _shards: {
+        total: 2,
+        successful: 2,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 1,
+          relation: 'eq',
+        },
+        max_score: 0,
+        hits: [{ _index: '', _id: '' }],
+      },
+    };
+
+    esClientMock.search.mockImplementation(async (searchRequest = {}) => {
+      // File metadata
+      if ((searchRequest.index as string).startsWith('.fleet-files-')) {
+        return esFleetFilesIndexSearchResponse;
+      }
+
+      if ((searchRequest.index as string).startsWith('.fleet-file-data-')) {
+        return esFleetFileDataIndexSearchResponse;
+      }
+
+      return {
+        took: 3,
+        timed_out: false,
+        _shards: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          total: {
+            value: 1,
+            relation: 'eq',
+          },
+          max_score: 0,
+          hits: [],
+        },
+      };
+    });
+  });
+
+  it('should create internal ES File client with expected arguments when type is `from-host', () => {
+    getFleetFilesInstance('from-host');
+
+    expect(createEsFileClientMock).toHaveBeenCalledWith({
+      elasticsearchClient: esClientMock,
+      logger: loggerMock,
+      metadataIndex: '.fleet-files-foo',
+      blobStorageIndex: '.fleet-file-data-foo',
+      maxSizeBytes: 12345,
+      indexIsAlias: true,
+    });
+  });
+
+  it('should create internal ES File client with expected arguments when type is `to-host', () => {
+    getFleetFilesInstance('from-host');
+
+    expect(createEsFileClientMock).toHaveBeenCalledWith({
+      elasticsearchClient: esClientMock,
+      logger: loggerMock,
+      // FIXME:PT adjust indexes once new index patterns are added to ES
+      metadataIndex: '.fleet-files-foo',
+      blobStorageIndex: '.fleet-file-data-foo',
+      maxSizeBytes: 12345,
+      indexIsAlias: true,
+    });
+  });
 
   describe('#get() method', () => {
-    it.todo('should retrieve file info for files `from-host`');
+    it('should retrieve file info for files `from-host`', async () => {
+      await expect(getFleetFilesInstance('from-host').get('123')).resolves.toEqual({
+        actionId: '83484393-ddba-4f3c-9c7e-f492ee198a85',
+        agents: ['eef9254d-f3ed-4518-889f-18714bd6cec1'],
+        created: '2023-01-23T16:50:51.278Z',
+        id: '123',
+        mimeType: 'application/zip',
+        name: 'upload.zip',
+        sha256: 'e5441eb2bb8a774783d4ff4690153832688bd546c878e953acc3da089ac05d06',
+        size: 64395,
+        status: 'READY',
+      });
+    });
 
-    it.todo('should retrieve file info for file `to-host`');
+    it('should retrieve file info for file `to-host`', async () => {
+      await expect(getFleetFilesInstance('to-host').get('123')).resolves.toEqual({
+        actionId: '123',
+        agents: ['abc'],
+        created: '2022-10-10T14:57:30.682Z',
+        id: '123',
+        mimeType: 'text/plain',
+        name: 'test.txt',
+        sha256: 'e5441eb2bb8a774783d4ff4690153832688bd546c878e953acc3da089ac05d06',
+        size: 1234,
+        status: 'READY',
+      });
+    });
 
-    it.todo('should adjust `status` if no data exists for file `from-host`');
+    it('should adjust `status` if no data exists for file', async () => {
+      (esFleetFileDataIndexSearchResponse.hits.total as estypes.SearchTotalHits).value = 0;
+      esFleetFileDataIndexSearchResponse.hits.hits = [];
 
-    it.todo('should adjust `status` if no data exists for file `to-host`');
+      await expect(getFleetFilesInstance('from-host').get('123')).resolves.toHaveProperty(
+        'status',
+        'DELETED'
+      );
+    });
   });
 
   describe('#create() method', () => {
+    it.todo('should return a FleetFile on success');
+
     it.todo('should error is `type` is not `to-host`');
 
     it.todo('should error if `agentIds` is empty');
@@ -32,8 +185,6 @@ describe('When using FleetFilesClient', () => {
     it.todo('should upload a file and use transform to create hash');
 
     it.todo('should error if hash was not created');
-
-    it.todo('should return a FleetFile on success');
   });
 
   describe('#update() method', () => {
