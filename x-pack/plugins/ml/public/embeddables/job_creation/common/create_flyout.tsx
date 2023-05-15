@@ -71,7 +71,6 @@ export function createFlyout(
           'data-test-subj': 'mlFlyoutLayerSelector',
           ownFocus: true,
           onClose: onFlyoutClose,
-          // @ts-expect-error should take any number/string compatible with the CSS width attribute
           size: '35vw',
         }
       );
