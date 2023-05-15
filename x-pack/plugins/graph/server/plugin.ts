@@ -11,11 +11,14 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';
 import { registerExploreRoute } from './routes/explore';
 import { registerSampleData } from './sample_data';
 import { graphWorkspace } from './saved_objects';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { GraphStorage } from './content_management/graph_storage';
 
 export class GraphPlugin implements Plugin {
   private licenseState: LicenseState | null = null;
@@ -26,10 +29,12 @@ export class GraphPlugin implements Plugin {
       licensing,
       home,
       features,
+      contentManagement,
     }: {
       licensing: LicensingPluginSetup;
       home?: HomeServerPluginSetup;
       features?: FeaturesPluginSetup;
+      contentManagement: ContentManagementServerSetup;
     }
   ) {
     const licenseState = new LicenseState();
@@ -37,6 +42,14 @@ export class GraphPlugin implements Plugin {
     this.licenseState = licenseState;
     core.savedObjects.registerType(graphWorkspace);
     licensing.featureUsage.register('Graph', 'platinum');
+
+    contentManagement.register({
+      id: CONTENT_ID,
+      storage: new GraphStorage(),
+      version: {
+        latest: LATEST_VERSION,
+      },
+    });
 
     if (home) {
       registerSampleData(home.sampleData, licenseState);
