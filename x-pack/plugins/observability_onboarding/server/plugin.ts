@@ -60,6 +60,19 @@ export class ObservabilityOnboardingPlugin
       };
     }) as ObservabilityOnboardingRouteHandlerResources['plugins'];
 
+    // const router = core.http.createRouter();
+    // router.get(
+    //   { path: '/api/observability_onboarding/dev', validate: false },
+    //   async (context, req, res) => {
+    //     const coreContext = await context.core;
+    //     const esHosts = getESHosts({
+    //       cloudSetup: plugins.cloud,
+    //       esClient: coreContext.elasticsearch.client.asCurrentUser as Client,
+    //     });
+    //     return res.ok({ body: { esHosts } });
+    //   }
+    // );
+
     registerRoutes({
       core,
       logger: this.logger,

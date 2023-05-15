@@ -9,10 +9,12 @@ import type {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import { statusRouteRepository } from './status/route';
+import { customLogsRouteRepository } from './custom_logs/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
     ...statusRouteRepository,
+    ...customLogsRouteRepository,
   };
 
   return repository;
