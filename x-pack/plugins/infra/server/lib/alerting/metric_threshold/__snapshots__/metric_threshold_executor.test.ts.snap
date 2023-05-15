@@ -18,7 +18,7 @@ Object {
       "0.75",
     ],
   },
-  "timestamp": "2023-05-15T15:27:23.789Z",
+  "timestamp": "2021-01-01T00:00:00.000Z",
   "value": Object {
     "condition0": "1",
   },
@@ -44,7 +44,7 @@ Object {
       "0.75",
     ],
   },
-  "timestamp": "2023-05-15T15:27:23.789Z",
+  "timestamp": "2021-01-01T00:00:00.000Z",
   "value": Object {
     "condition0": "1",
   },
