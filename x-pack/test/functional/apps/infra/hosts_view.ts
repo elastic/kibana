@@ -180,7 +180,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(pageUrl).to.contain(HOSTS_VIEW_PATH);
     });
 
-    describe('#Landing page', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157718
+    describe.skip('#Landing page', () => {
       beforeEach(() => {
         setHostViewEnabled(false);
       });
@@ -222,7 +223,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('#Single host Flyout', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157719
+    // FLAKY: https://github.com/elastic/kibana/issues/157720
+    describe.skip('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await loginWithReadOnlyUser();
@@ -318,7 +321,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('#Page Content', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157721
+    describe.skip('#Page Content', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await loginWithReadOnlyUser();
