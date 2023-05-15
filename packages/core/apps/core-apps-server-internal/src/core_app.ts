@@ -7,8 +7,8 @@
  */
 
 import { stringify } from 'querystring';
-import { Env } from '@kbn/config';
-import { schema } from '@kbn/config-schema';
+import { Env, IConfigService } from '@kbn/config';
+import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -41,10 +41,12 @@ interface CommonRoutesParams {
 export class CoreAppsService {
   private readonly logger: Logger;
   private readonly env: Env;
+  private readonly configService: IConfigService;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
     this.env = core.env;
+    this.configService = core.configService;
   }
 
   preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
@@ -144,6 +146,36 @@ export class CoreAppsService {
         }
       }
     );
+
+    router.versioned
+      .put({
+        path: '/_settings',
+        access: 'internal',
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: {
+              body: schema.recordOf(schema.string(), schema.any()),
+            },
+            response: {
+              '200': { body: schema.object({ ok: schema.boolean() }) },
+            },
+          },
+        },
+        async (context, req, res) => {
+          try {
+            this.configService.setOverrides(req.body);
+          } catch (err) {
+            if (err instanceof ValidationError) {
+              return res.badRequest({ body: err });
+            }
+          }
+
+          return res.ok({ body: { ok: true } });
+        }
+      );
   }
 
   private registerCommonDefaultRoutes({

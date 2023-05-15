@@ -183,7 +183,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
           type: 'pass_through',
           _meta: {
             description:
-              'Custom labels added to the telemetry.labels config in the kibana.yml or extended via PUT /api/internal/telemetry/labels. Validated and limited to a known set of labels.',
+              'Custom labels added to the telemetry.labels config in the kibana.yml. Validated and limited to a known set of labels.',
           },
         },
       },
@@ -195,7 +195,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const router = http.createRouter();
 
     registerRoutes({
-      telemetryLabels$,
       config$,
       currentKibanaVersion,
       isDev,

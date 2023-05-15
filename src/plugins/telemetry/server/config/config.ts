@@ -50,6 +50,9 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
     hidePrivacyStatement: true,
     labels: true,
   },
+  dynamicConfig: {
+    labels: true,
+  },
   deprecations: () => [
     (cfg) => {
       if (cfg.telemetry?.enabled === false) {
