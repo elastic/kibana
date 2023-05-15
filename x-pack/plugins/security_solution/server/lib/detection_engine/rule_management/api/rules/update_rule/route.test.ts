@@ -23,6 +23,7 @@ import {
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
+import { RESPONSE_ACTION_TYPES } from '../../../../../../../common/detection_engine/rule_response_actions/schemas';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -222,6 +223,45 @@ describe('Update rule route', () => {
         body: {
           ...getCreateRulesSchemaMock(),
           response_actions: [defaultAction],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(401);
+      expect(response.body.message).toEqual(
+        'User is not authorized to change isolate response actions'
+      );
+    });
+    test('fails when isolate rbac and response action is being removed to finish as empty array', async () => {
+      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
+        canIsolateHost: jest.fn().mockReturnValue(false),
+      }));
+      clients.rulesClient.find.mockResolvedValue({
+        page: 1,
+        perPage: 1,
+        total: 1,
+        data: [
+          getRuleMock({
+            ...getQueryRuleParams(),
+            responseActions: [
+              {
+                actionTypeId: RESPONSE_ACTION_TYPES.ENDPOINT,
+                params: {
+                  command: 'isolate',
+                  comment: '',
+                },
+              },
+            ],
+          }),
+        ],
+      });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [],
         },
       });
 
