@@ -65,6 +65,8 @@ interface CalculateParams {
   isSuperuser: boolean;
 }
 
+type PrivilegeMap = Record<string, { executePackageAction: boolean }>;
+
 export const calculateAuthz = ({
   fleet,
   integrations,
@@ -102,23 +104,26 @@ export function calculatePackagePrivilegesFromCapabilities(
     return {};
   }
 
-  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce<
-    FleetAuthz['packagePrivileges']['endpoint']
-  >((acc, [privilege, { privilegeName }]) => {
-    acc[privilege] = {
-      executePackageAction: (capabilities.siem && capabilities.siem[privilegeName]) || false,
-    };
-    return acc;
-  }, {});
+  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce<PrivilegeMap>(
+    (acc, [privilege, { privilegeName }]) => {
+      acc[privilege] = {
+        executePackageAction:
+          (capabilities.siem && (capabilities.siem[privilegeName] as boolean)) || false,
+      };
+      return acc;
+    },
+    {}
+  );
 
-  const transformActions = Object.keys(capabilities.transform).reduce<
-    FleetAuthz['packagePrivileges']['transform']
-  >((acc, privilegeName) => {
-    acc[privilegeName] = {
-      executePackageAction: capabilities.transform[privilegeName] || false,
-    };
-    return acc;
-  }, {});
+  const transformActions = Object.keys(capabilities.transform).reduce<PrivilegeMap>(
+    (acc, privilegeName) => {
+      acc[privilegeName] = {
+        executePackageAction: (capabilities.transform[privilegeName] as boolean) || false,
+      };
+      return acc;
+    },
+    {}
+  );
 
   return {
     endpoint: {
@@ -158,19 +163,20 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     return {};
   }
 
-  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce<
-    FleetAuthz['packagePrivileges']['endpoint']
-  >((acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
-    const kibanaPrivilege = getAuthorizationFromPrivileges(
-      kibanaPrivileges,
-      `${appId}${privilegeSplit}`,
-      privilegeName
-    );
-    acc[privilege] = {
-      executePackageAction: kibanaPrivilege,
-    };
-    return acc;
-  }, {});
+  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce<PrivilegeMap>(
+    (acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
+      const kibanaPrivilege = getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${appId}${privilegeSplit}`,
+        privilegeName
+      );
+      acc[privilege] = {
+        executePackageAction: kibanaPrivilege,
+      };
+      return acc;
+    },
+    {}
+  );
 
   const hasTransformAdmin = getAuthorizationFromPrivileges(
     kibanaPrivileges,
