@@ -17,6 +17,8 @@ import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
 import { BetaBadge } from '../../shared/beta_badge';
 import { ApmRouter } from '../apm_route_config';
 import { ApmMainTemplate } from './apm_main_template';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -41,7 +43,17 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const router = useApmRouter();
   const defaultEnvironment = useDefaultEnvironment();
 
-  const tabs = getTabs({ core, selectedTab, router, defaultEnvironment });
+  const agentConfigurationAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.AgentConfigurationAvailable
+  );
+
+  const tabs = getTabs({
+    core,
+    selectedTab,
+    router,
+    defaultEnvironment,
+    agentConfigurationAvailable,
+  });
 
   return (
     <ApmMainTemplate
@@ -63,11 +75,13 @@ function getTabs({
   selectedTab,
   router,
   defaultEnvironment,
+  agentConfigurationAvailable,
 }: {
   core: CoreStart;
   selectedTab: Tab['key'];
   router: ApmRouter;
   defaultEnvironment: Environment;
+  agentConfigurationAvailable: boolean;
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
 
@@ -84,13 +98,17 @@ function getTabs({
       }),
       href: router.link('/settings/general-settings'),
     },
-    {
-      key: 'agent-configuration',
-      label: i18n.translate('xpack.apm.settings.agentConfig', {
-        defaultMessage: 'Agent Configuration',
-      }),
-      href: router.link('/settings/agent-configuration'),
-    },
+    ...(agentConfigurationAvailable
+      ? [
+          {
+            key: 'agent-configuration' as const,
+            label: i18n.translate('xpack.apm.settings.agentConfig', {
+              defaultMessage: 'Agent Configuration',
+            }),
+            href: router.link('/settings/agent-configuration'),
+          },
+        ]
+      : []),
     {
       key: 'agent-explorer',
       label: i18n.translate('xpack.apm.settings.agentExplorer', {
