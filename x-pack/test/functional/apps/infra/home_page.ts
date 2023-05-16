@@ -21,7 +21,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/157713
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

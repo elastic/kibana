@@ -33,7 +33,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { AddFilterProps } from '../../../components/alerts_kpis/common/types';
 import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
 
-const TREND_CHART_HEIGHT = 280; // px
+const TREND_CHART_HEIGHT = 240; // px
 const CHART_PANEL_HEIGHT = 375; // px
 
 const DETECTIONS_ALERTS_CHARTS_PANEL_ID = 'detection-alerts-charts-panel';
