@@ -6,6 +6,12 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  calendarAlignedTimeWindowSchema,
+  occurrencesBudgetingMethodSchema,
+  rollingTimeWindowSchema,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
 
 import {
   getSLOSummaryTransformId,
@@ -48,10 +54,20 @@ export class DefaultSummaryTransformGenerator implements SummaryTransformGenerat
               },
               {
                 range: {
-                  '@timestamp': {
-                    gte: 'now-7d/m',
-                    lte: 'now/m',
-                  },
+                  ...(rollingTimeWindowSchema.is(slo.timeWindow) && {
+                    '@timestamp': {
+                      gte: `now-${slo.timeWindow.duration.format()}/m`,
+                      lte: 'now/m',
+                    },
+                  }),
+                  ...(calendarAlignedTimeWindowSchema.is(slo.timeWindow) && {
+                    '@timestamp': {
+                      gte: `now/${slo.timeWindow.duration.unit}`,
+                      lte: `now+${slo.timeWindow.duration.format()}/${
+                        slo.timeWindow.duration.unit
+                      }`, // now + 1w/w or now + 1M/M
+                    },
+                  }),
                 },
               },
             ],
@@ -83,16 +99,30 @@ export class DefaultSummaryTransformGenerator implements SummaryTransformGenerat
               ],
             },
             aggs: {
-              good_events: {
-                sum: {
-                  field: 'slo.numerator',
+              ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+                good_events: {
+                  sum: {
+                    field: 'slo.numerator',
+                  },
                 },
-              },
-              total_events: {
-                sum: {
-                  field: 'slo.denominator',
+                total_events: {
+                  sum: {
+                    field: 'slo.denominator',
+                  },
                 },
-              },
+              }),
+              ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+                good_events: {
+                  sum: {
+                    field: 'slo.isGoodSlice',
+                  },
+                },
+                total_events: {
+                  value_count: {
+                    field: 'slo.isGoodSlice',
+                  },
+                },
+              }),
               objective: {
                 max: {
                   field: 'objective',

@@ -42,6 +42,7 @@ import type { SLO } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
+import { DefaultSummaryTransformGenerator } from '../../services/slo/summary_transform_generator';
 
 const getRollupTransformGenerator = (slo: SLO): RollupTransformGenerator => {
   const indicatorType = slo.indicator.type;
@@ -84,6 +85,7 @@ const createSLORoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(
       getRollupTransformGenerator,
+      new DefaultSummaryTransformGenerator(),
       esClient,
       logger
     );
@@ -114,6 +116,7 @@ const updateSLORoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(
       getRollupTransformGenerator,
+      new DefaultSummaryTransformGenerator(),
       esClient,
       logger
     );
@@ -151,6 +154,7 @@ const deleteSLORoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(
       getRollupTransformGenerator,
+      new DefaultSummaryTransformGenerator(),
       esClient,
       logger
     );
@@ -205,6 +209,7 @@ const enableSLORoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(
       getRollupTransformGenerator,
+      new DefaultSummaryTransformGenerator(),
       esClient,
       logger
     );
@@ -235,6 +240,7 @@ const disableSLORoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(
       getRollupTransformGenerator,
+      new DefaultSummaryTransformGenerator(),
       esClient,
       logger
     );
