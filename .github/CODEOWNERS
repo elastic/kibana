@@ -953,6 +953,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/.telemetryrc.json @elastic/kibana-core
 /src/plugins/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
 /x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
+x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @elastic/kibana-telemetry @shahinakmal
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization @elastic/kibana-core
