@@ -294,7 +294,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1082,7 +1082,7 @@ describe('Response actions history', () => {
           statuses: ['failed', 'pending'],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1284,7 +1284,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );
