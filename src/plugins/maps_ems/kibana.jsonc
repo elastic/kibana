@@ -10,8 +10,10 @@
       "map"
     ],
     "optionalPlugins": [
-      "licensing"
+      "licensing",
+      "usageCollection",
     ],
+    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": [
       "common"
     ]

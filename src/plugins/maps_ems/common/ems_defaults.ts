@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { StyleSpecification } from 'maplibre-gl';
+
 export const DEFAULT_EMS_FILE_API_URL = 'https://vector.maps.elastic.co';
 export const DEFAULT_EMS_TILE_API_URL = 'https://tiles.maps.elastic.co';
 export const DEFAULT_EMS_LANDING_PAGE_URL = 'https://maps.elastic.co/v8.7';
@@ -17,3 +19,11 @@ export const DEFAULT_EMS_ROADMAP_DESATURATED_ID = 'road_map_desaturated';
 export const DEFAULT_EMS_DARKMAP_ID = 'dark_map';
 
 export const EMS_APP_NAME = 'kibana'; // app-name submitted as the `app`-param to EMS
+export const APP_ID = 'ems';
+export const APP_NAME = 'Elastic Maps Service';
+
+export const DEFAULT_EMPTY_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {},
+  layers: [],
+};
