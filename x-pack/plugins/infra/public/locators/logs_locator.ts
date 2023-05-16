@@ -10,7 +10,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LogViewReference } from '../../common/log_views';
 import type { TimeRange } from '../../common/time';
 import type { InfraClientCoreSetup } from '../types';
-import { DISCOVER_APP_TARGET } from '../../common/constants';
 
 const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
@@ -27,13 +26,8 @@ export interface LogsLocatorParams extends SerializableRecord {
 
 export type LogsLocator = LocatorPublic<LogsLocatorParams>;
 
-interface LocatorConfig {
-  appTarget: string;
-}
-
 export interface LogsLocatorDependencies {
   core: InfraClientCoreSetup;
-  config: LocatorConfig;
 }
 
 export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
@@ -42,11 +36,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
   constructor(protected readonly deps: LogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
-    const { createSearchString, getLocationToDiscover } = await import('./helpers');
-
-    if (this.deps.config.appTarget === DISCOVER_APP_TARGET) {
-      return await getLocationToDiscover({ core: this.deps.core, ...params });
-    }
+    const { createSearchString } = await import('./helpers');
 
     const searchString = createSearchString(params);
 

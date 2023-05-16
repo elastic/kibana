@@ -29,7 +29,13 @@ import { createLazyHostMetricsTable } from './components/infrastructure_node_met
 import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
-import { InfraLocators, LogsLocatorDefinition, NodeLogsLocatorDefinition } from './locators';
+import {
+  DiscoverLogsLocatorDefinition,
+  DiscoverNodeLogsLocatorDefinition,
+  InfraLocators,
+  LogsLocatorDefinition,
+  NodeLogsLocatorDefinition,
+} from './locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -153,7 +159,21 @@ export class Plugin implements InfraClientPluginClass {
       new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
     );
 
+    // Register Locators
+    let logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
+    let nodeLogsLocator = pluginsSetup.share.url.locators.create(
+      new NodeLogsLocatorDefinition({ core })
+    );
+
     if (this.appTarget === DISCOVER_APP_TARGET) {
+      // Register Locators
+      logsLocator = pluginsSetup.share.url.locators.create(
+        new DiscoverLogsLocatorDefinition({ core })
+      );
+      nodeLogsLocator = pluginsSetup.share.url.locators.create(
+        new DiscoverNodeLogsLocatorDefinition({ core })
+      );
+
       core.application.register({
         id: 'logs-to-discover',
         title: '',
@@ -295,14 +315,6 @@ export class Plugin implements InfraClientPluginClass {
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
-
-    // Register Locators
-    const logsLocator = pluginsSetup.share.url.locators.create(
-      new LogsLocatorDefinition({ config: { appTarget: this.appTarget }, core })
-    );
-    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
-      new NodeLogsLocatorDefinition({ config: { appTarget: this.appTarget }, core })
-    );
 
     this.locators = {
       logsLocator,

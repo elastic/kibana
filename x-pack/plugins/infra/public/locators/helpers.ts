@@ -10,6 +10,7 @@ import { waitFor } from 'xstate/lib/waitFor';
 import { flowRight } from 'lodash';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import { findInventoryFields } from '../../common/inventory_models';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../common/constants';
 import {
   createLogViewStateMachine,
@@ -26,6 +27,7 @@ import type {
   LogViewReference,
   ResolvedLogView,
 } from '../../common/log_views';
+import type { NodeLogsLocatorParams } from './node_logs_locator';
 
 interface LocationToDiscoverParams {
   core: InfraClientCoreSetup;
@@ -33,6 +35,15 @@ interface LocationToDiscoverParams {
   filter?: string;
   logView?: LogViewReference;
 }
+
+export const createNodeLogsQuery = (params: NodeLogsLocatorParams) => {
+  const { nodeType, nodeId, filter } = params;
+
+  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
+  const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
+
+  return query;
+};
 
 export const createSearchString = ({
   time,

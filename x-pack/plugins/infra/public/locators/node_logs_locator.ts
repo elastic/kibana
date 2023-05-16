@@ -8,7 +8,6 @@
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { InventoryItemType } from '../../common/inventory_models/types';
 import type { LogsLocatorDependencies, LogsLocatorParams } from './logs_locator';
-import { DISCOVER_APP_TARGET } from '../../common/constants';
 
 const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
 
@@ -27,16 +26,9 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
   constructor(protected readonly deps: NodeLogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
-    const { createSearchString, getLocationToDiscover } = await import('./helpers');
-    const { findInventoryFields } = await import('../../common/inventory_models');
+    const { createNodeLogsQuery, createSearchString } = await import('./helpers');
 
-    const { nodeType, nodeId, filter, timeRange, logView } = params;
-    const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
-    const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
-
-    if (this.deps.config.appTarget === DISCOVER_APP_TARGET) {
-      return await getLocationToDiscover({ core: this.deps.core, timeRange, filter, logView });
-    }
+    const query = createNodeLogsQuery(params);
 
     const searchString = createSearchString({ ...params, filter: query });
 
