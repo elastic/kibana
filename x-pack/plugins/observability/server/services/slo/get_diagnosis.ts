@@ -51,7 +51,13 @@ export async function getSloDiagnosis(
 
   let sloSavedObject;
   try {
-    sloSavedObject = await soClient.get<StoredSLO>(SO_SLO_TYPE, sloId);
+    const response = await soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${sloId})`,
+    });
+    sloSavedObject = response.saved_objects[0];
   } catch (err) {
     // noop
   }
