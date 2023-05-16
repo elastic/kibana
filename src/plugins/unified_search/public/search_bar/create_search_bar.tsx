@@ -228,9 +228,9 @@ export function createSearchBar({
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
             onRefreshChange={
-              props.isAutoRefreshDisabled
-                ? undefined
-                : defaultOnRefreshChange(data.query, props.onRefreshChange)
+              !props.isAutoRefreshDisabled
+                ? defaultOnRefreshChange(data.query, props.onRefreshChange)
+                : undefined
             }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
