@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
+  const find = getService('find');
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'maintenance_windows'];
 
@@ -16,6 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('create window screenshot', async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
       await pageObjects.header.waitUntilLoadingHasFinished();
+      const createButton = await find.byCssSelector(
+        '[data-test-subj="mw-empty-prompt"] .euiButton'
+      );
+      await createButton.click();
       await commonScreenshots.takeScreenshot(
         'create-maintenance-window',
         screenshotDirectories,
