@@ -200,3 +200,16 @@ and applies to all spaces.
 
 [role="screenshot"]
 image::images/highlights-branding-settings.png[Settings in for customizing logo, organaization name, page title, and browser icon]
+
+[discrete]
+=== Alerting
+
+[discrete]
+==== Maintenance windows
+
+Schedule single or recurring maintenance windows to reduce alert noise and suppress notifications.
+For example, if you have a planned outage or event, a maintenance window prevents false alarms during this period.
+// For more information, check <<maintenance-windows>>.
+
+[role="screenshot"]
+image::images/highlights-maintenance-windows.png[Viewing maintenance windows in {kib}]
