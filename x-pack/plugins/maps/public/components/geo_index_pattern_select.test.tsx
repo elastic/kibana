@@ -32,7 +32,14 @@ import { DataView } from '@kbn/data-plugin/common';
 import { GeoIndexPatternSelect } from './geo_index_pattern_select';
 
 const defaultProps = {
-  dataView: { id: 'weblogs' } as unknown as DataView,
+  dataView: {
+    id: 'weblogs',
+    fields: [
+      {
+        type: 'geo_point',
+      }
+    ]
+  } as unknown as DataView,
   onChange: () => {},
 };
 
