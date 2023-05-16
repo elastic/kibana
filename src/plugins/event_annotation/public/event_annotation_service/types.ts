@@ -22,10 +22,6 @@ export interface EventAnnotationServiceType {
   ) => Promise<{ total: number; hits: EventAnnotationGroupContent[] }>;
   deleteAnnotationGroups: (ids: string[]) => Promise<void>;
   createAnnotationGroup: (group: EventAnnotationGroupConfig) => Promise<{ id: string }>;
-  // updateAnnotations: (
-  //   savedObjectId: string,
-  //   modifications: { delete?: string[]; upsert?: EventAnnotationConfig[] }
-  // ) => Promise<void>;
   updateAnnotationGroup: (
     group: EventAnnotationGroupConfig,
     savedObjectId: string
