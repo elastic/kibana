@@ -60,6 +60,7 @@ describe('split .kibana index into multiple system indices', () => {
     beforeAll(async () => {
       esServer = await startElasticsearch({
         dataArchive: Path.join(__dirname, '..', 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+        timeout: 60000,
       });
     });
 
