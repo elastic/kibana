@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFieldArray } from 'react-hook-form';
 import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
-import { range, first, xor } from 'lodash';
+import { range, first, xor, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 
@@ -80,6 +80,8 @@ export function MetricIndicator({
     control,
     name: `indicator.params.${type}.metrics`,
   });
+  const equation = watch(`indicator.params.${type}.equation`);
+  const indexPattern = watch('indicator.params.index');
 
   const disableAdd = metrics?.length === MAX_VARIABLES;
   const disableDelete = metrics?.length === 1;
@@ -89,31 +91,24 @@ export function MetricIndicator({
     nextMetrics: MetricCustomMetricDef['metrics']
   ) => {
     const defaultEquation = createEquationFromMetric(previousMetrics);
-    const currentEquation = watch(`indicator.params.${type}.equation`);
-    if (defaultEquation === currentEquation) {
+    if (defaultEquation === equation) {
       setValue(`indicator.params.${type}.equation`, createEquationFromMetric(nextMetrics));
     }
   };
 
   const handleDeleteMetric = (name: string) => () => {
-    const previousMetrics = watch(
-      `indicator.params.${type}.metrics`
-    ) as MetricCustomMetricDef['metrics'];
-    const nextMetrics = previousMetrics.filter((row) => row.name !== name) ?? [NEW_CUSTOM_METRIC];
+    const nextMetrics = metrics.filter((row) => row.name !== name) ?? [NEW_CUSTOM_METRIC];
     const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_CUSTOM_METRIC];
-    setDefaultEquationIfUnchanged(previousMetrics, finalMetrics);
-    replace(finalMetrics);
+    setDefaultEquationIfUnchanged(metrics, finalMetrics);
+    replace(finalMetrics.map((metric) => omit(metric, 'id')));
   };
 
   const handleAddMetric = () => {
-    const previousMetrics = watch(
-      `indicator.params.${type}.metrics`
-    ) as MetricCustomMetricDef['metrics'];
-    const currentVars = previousMetrics.map((m) => m.name) ?? [];
+    const currentVars = metrics.map((m) => m.name) ?? [];
     const name = first(xor(VAR_NAMES, currentVars))!;
-    const nextMetrics = [...(previousMetrics || []), { ...NEW_CUSTOM_METRIC, name }];
-    setDefaultEquationIfUnchanged(previousMetrics, nextMetrics);
-    replace(nextMetrics);
+    const nextMetrics = [...(metrics || []), { ...NEW_CUSTOM_METRIC, name }];
+    setDefaultEquationIfUnchanged(metrics, nextMetrics);
+    replace(nextMetrics.map((metric) => omit(metric, 'id')));
   };
 
   return (
@@ -131,6 +126,26 @@ export function MetricIndicator({
           >
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem>
+                <Controller
+                  name={`indicator.params.${type}.metrics.${index}.name`}
+                  shouldUnregister
+                  defaultValue=""
+                  rules={{ required: true }}
+                  control={control}
+                  render={({ field: { ref, ...field }, fieldState }) => (
+                    <input {...field} type="hidden" />
+                  )}
+                />
+                <Controller
+                  name={`indicator.params.${type}.metrics.${index}.aggregation`}
+                  shouldUnregister
+                  defaultValue="sum"
+                  rules={{ required: true }}
+                  control={control}
+                  render={({ field: { ref, ...field }, fieldState }) => (
+                    <input {...field} type="hidden" />
+                  )}
+                />
                 <Controller
                   name={`indicator.params.${type}.metrics.${index}.field`}
                   shouldUnregister
@@ -156,8 +171,8 @@ export function MetricIndicator({
                         { defaultMessage: 'Select a metric field' }
                       )}
                       isInvalid={fieldState.invalid}
-                      isDisabled={!watch('indicator.params.index')}
-                      isLoading={!!watch('indicator.params.index') && isLoadingIndex}
+                      isDisabled={!indexPattern}
+                      isLoading={!!indexPattern && isLoadingIndex}
                       onChange={(selected: EuiComboBoxOptionOption[]) => {
                         if (selected.length) {
                           return field.onChange(selected[0].value);
@@ -165,7 +180,7 @@ export function MetricIndicator({
                         field.onChange('');
                       }}
                       selectedOptions={
-                        !!watch('indicator.params.index') &&
+                        !!indexPattern &&
                         !!field.value &&
                         metricFields.some((metricField) => metricField.name === field.value)
                           ? [

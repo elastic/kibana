@@ -8,9 +8,8 @@
 import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { isObject } from 'lodash';
 
 import { SLI_OPTIONS } from '../constants';
 import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
@@ -29,25 +28,36 @@ interface SloEditFormIndicatorSectionProps {
 export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicatorSectionProps) {
   const { control, watch, setValue } = useFormContext<CreateSLOInput>();
 
+  const indicator = watch('indicator.type');
+
+  useEffect(() => {
+    if (!isEditMode) {
+      if (indicator === 'sli.metric.custom') {
+        setValue('indicator.params.index', '');
+        setValue('indicator.params.timestampField', '');
+        setValue('indicator.params.good.equation', 'A');
+        setValue('indicator.params.good.metrics', [NEW_CUSTOM_METRIC]);
+        setValue('indicator.params.total.equation', 'A');
+        setValue('indicator.params.total.metrics', [NEW_CUSTOM_METRIC]);
+      }
+      if (indicator === 'sli.kql.custom') {
+        setValue('indicator.params.index', '');
+        setValue('indicator.params.timestampField', '');
+        setValue('indicator.params.good', '');
+        setValue('indicator.params.total', '');
+      }
+    }
+  }, [indicator, setValue, isEditMode]);
+
   const getIndicatorTypeForm = () => {
     switch (watch('indicator.type')) {
       case 'sli.kql.custom':
-        if (isObject(watch('indicator.params.good'))) {
-          setValue('indicator.params.good', '');
-          setValue('indicator.params.total', '');
-        }
         return <CustomKqlIndicatorTypeForm />;
       case 'sli.apm.transactionDuration':
         return <ApmLatencyIndicatorTypeForm />;
       case 'sli.apm.transactionErrorRate':
         return <ApmAvailabilityIndicatorTypeForm />;
       case 'sli.metric.custom':
-        if (!isObject(watch('indicator.params.good'))) {
-          setValue('indicator.params.good.metrics', [NEW_CUSTOM_METRIC]);
-          setValue('indicator.params.good.equation', 'A');
-          setValue('indicator.params.total.metrics', [NEW_CUSTOM_METRIC]);
-          setValue('indicator.params.total.equation', 'A');
-        }
         return <CustomMetricIndicatorTypeForm />;
       default:
         return null;
