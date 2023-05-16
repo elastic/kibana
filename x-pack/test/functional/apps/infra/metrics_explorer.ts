@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Basic Functionality', () => {
       before(async () => {
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.goToMetricExplorer();
         await pageObjects.timePicker.setAbsoluteRange(
@@ -100,10 +100,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/156513
+    // FLAKY: https://github.com/elastic/kibana/issues/157738
     describe.skip('Saved Views', () => {
       before(async () => {
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.infraHome.goToMetricExplorer();
       });
 
@@ -115,7 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should open/close the views popover menu on button click', async () => {
         await pageObjects.infraSavedViews.clickSavedViewsButton();
-        testSubjects.existOrFail('savedViews-popover');
+        await testSubjects.existOrFail('savedViews-popover');
         await pageObjects.infraSavedViews.closeSavedViewsPopover();
       });
 

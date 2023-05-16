@@ -17,6 +17,11 @@ import { buildDataTableRecord } from '../../utils/build_data_record';
 import { EsHitRecord } from '../../types';
 
 const mockServices = {
+  settings: {
+    client: {
+      get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
+    },
+  },
   uiSettings: {
     get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
   },
