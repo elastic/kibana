@@ -186,7 +186,6 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     id: staticInventoryViewId,
     attributes: {
       ...staticInventoryViewAttributes,
-      time: Date.now(),
       isDefault: defaultViewId === InventoryViewsClient.STATIC_VIEW_ID,
     },
   });

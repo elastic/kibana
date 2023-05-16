@@ -198,7 +198,6 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     id: staticMetricsExplorerViewId,
     attributes: {
       ...staticMetricsExplorerViewAttributes,
-      time: Date.now(),
       isDefault: defaultViewId === MetricsExplorerViewsClient.STATIC_VIEW_ID,
     },
   });
