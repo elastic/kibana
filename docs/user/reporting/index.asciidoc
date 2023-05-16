@@ -17,11 +17,11 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 
 * *PNG Reports* &mdash; Generate and download PNG files of dashboards and visualization. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
-* *CSV Reports* &mdash; Generate and download CSV files of *Discover* saved searches.
+* *CSV Reports* &mdash; Generate and download CSV files of saved searches.
 
 * *CSV Download* &mdash; Generate and download CSV files of *Lens* visualizations.
 
-* *Get links* &mdash; Share direct links to *Discover* saved searches, dashboards, and visualizations.
+* *Get links* &mdash; Share direct links to saved searches, dashboards, and visualizations.
 
 * *Download as JSON* &mdash; Generate and download JSON files of *Canvas* workpads.
 
@@ -137,7 +137,7 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 
 Display your dashboards on an internal company website or personal web page with an iframe. To embed other {kib} objects, manually create the HTML code.
 
-For information about granting access to embedded dashboards, refer to <<anonymous-access-and-embedding>> and <<embedded-content-authentication>>.
+For information about granting access to embedded dashboards, refer to <<kibana-authentication>>.
 
 . Open the main menu, then open the dashboard you want to share.
 

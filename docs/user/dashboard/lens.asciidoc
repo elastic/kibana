@@ -178,7 +178,7 @@ For a time shift example, refer to <<compare-time-ranges>>.
 [[create-partition-charts-with-multiple-metrics]]
 ==== Create partition charts with multiple metrics
 
-To create partition charts, such as pie charts, you configure one or more *Slice by* dimensions to define the partitions, and a *Metric* dimension to define the size. 
+To create partition charts, such as pie charts, configure one or more *Slice by* dimensions to define the partitions, and a *Metric* dimension to define the size. 
 To create partition charts with multiple metrics, use the layer settings. Multiple metrics are unsupported for mosaic visualizations.
 
 . In the layer pane, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
@@ -193,7 +193,7 @@ To create partition charts with multiple metrics, use the layer settings. Multip
 
 preview::[]
 
-Data sampling allows you to improve the visualization loading time. To improve the performance, you use a lower sampling percentage, which lowers the accuracy. 
+Data sampling allows you to improve the visualization loading time. To decrease the loading time, use a lower sampling percentage, which also decreases the accuracy. 
 Use low sampling percentages on large datasets.
 
 . In the layer pane, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
