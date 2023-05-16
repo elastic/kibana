@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -134,7 +134,7 @@ export function StorageDetailsPerService({
   if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
-        <EuiLoadingContent data-test-subj="loadingSpinner" />
+        <EuiSkeletonText data-test-subj="loadingSpinner" />
       </div>
     );
   }

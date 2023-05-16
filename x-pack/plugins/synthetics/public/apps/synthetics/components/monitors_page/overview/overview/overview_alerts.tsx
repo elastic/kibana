@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -75,7 +75,7 @@ export const OverviewAlerts = () => {
       </EuiTitle>
       <EuiSpacer size="s" />
       {loading ? (
-        <EuiLoadingContent lines={3} />
+        <EuiSkeletonText lines={3} />
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
