@@ -82,6 +82,7 @@ disabled:
   # Serverless base config files
   - x-pack/test_serverless/api_integration/config.base.ts
   - x-pack/test_serverless/functional/config.base.ts
+  - x-pack/test_serverless/shared/config.base.ts
 
   # Serverless configs, currently only for manual tests runs, CI integration planned
   - x-pack/test_serverless/api_integration/test_suites/common/config.ts

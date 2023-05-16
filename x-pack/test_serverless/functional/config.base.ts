@@ -5,35 +5,38 @@
  * 2.0.
  */
 
+import { resolve } from 'path';
+
 import { FtrConfigProviderContext } from '@kbn/test';
+
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const xPackFunctionalTestsConfig = await readConfigFile(
-      // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-      require.resolve('../../test/functional/config.base.js')
-    );
+    const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
 
     return {
+      ...svlSharedConfig.getAll(),
+
       pageObjects,
       services,
-      servers: xPackFunctionalTestsConfig.get('servers'),
-      uiSettings: xPackFunctionalTestsConfig.get('uiSettings'),
       kbnTestServer: {
-        ...xPackFunctionalTestsConfig.get('kbnTestServer'),
+        ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless${options.serverlessProject ? `=${options.serverlessProject}` : ''}`,
         ],
       },
-      esTestCluster: {
-        ...xPackFunctionalTestsConfig.get('esTestCluster'),
-        serverArgs: ['xpack.security.enabled=false'],
-      },
       testFiles: options.testFiles,
+
+      uiSettings: {
+        defaults: {
+          'accessibility:disableAnimations': true,
+          'dateFormat:tz': 'UTC',
+        },
+      },
       // the apps section defines the urls that
       // `PageObjects.common.navigateTo(appKey)` will use.
       // Merge urls for your plugin with the urls defined in
@@ -49,6 +52,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
+      },
+      // choose where screenshots should be saved
+      screenshots: {
+        directory: resolve(__dirname, 'screenshots'),
       },
     };
   };

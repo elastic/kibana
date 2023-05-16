@@ -6,30 +6,24 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const xpackApiIntegrationTestsConfig = await readConfigFile(
-      // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-      require.resolve('../../test/api_integration/config.ts')
-    );
+    const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
 
     return {
+      ...svlSharedConfig.getAll(),
+
       services,
-      servers: xpackApiIntegrationTestsConfig.get('servers'),
-      uiSettings: xpackApiIntegrationTestsConfig.get('uiSettings'),
       kbnTestServer: {
-        ...xpackApiIntegrationTestsConfig.get('kbnTestServer'),
+        ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          ...xpackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless${options.serverlessProject ? `=${options.serverlessProject}` : ''}`,
         ],
-      },
-      esTestCluster: {
-        ...xpackApiIntegrationTestsConfig.get('esTestCluster'),
-        serverArgs: ['xpack.security.enabled=false'],
       },
       testFiles: options.testFiles,
     };
