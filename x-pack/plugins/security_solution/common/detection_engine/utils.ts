@@ -43,8 +43,7 @@ export const transformExceptionsToFilter = (
   indexPattern: DataViewBase
 ) => {
   if (!items.length) {
-    console.log('EMPTY', { indexPattern });
-    return buildEmptyFilter(false);
+    return buildEmptyFilter(false, indexPattern.title);
   }
   const { fields } = indexPattern;
 
@@ -52,18 +51,27 @@ export const transformExceptionsToFilter = (
     const { entries } = item;
     const entryFilters = entries.map((entry) => {
       const [foundField] = fields.filter(({ name }) => entry.field != null && entry.field === name);
-      console.log(entry.type, { indexPattern });
 
       switch (entry.type) {
         case 'match':
           const match = buildPhraseFilter(foundField, entry.value, indexPattern);
-          return { ...match, meta: { ...match.meta, negate: entry.operator === 'excluded' } };
+
+          return {
+            ...match,
+            meta: { ...match.meta, type: 'phrase', negate: entry.operator === 'excluded' },
+          };
         case 'exists':
           const exists = buildExistsFilter(foundField, indexPattern);
-          return { ...exists, meta: { ...exists.meta, negate: entry.operator === 'excluded' } };
+          return {
+            ...exists,
+            meta: { ...exists.meta, type: 'exists', negate: entry.operator === 'excluded' },
+          };
         case 'match_any':
           const matchAny = buildPhrasesFilter(foundField, entry.value, indexPattern);
-          return { ...matchAny, meta: { ...matchAny.meta, negate: entry.operator === 'excluded' } };
+          return {
+            ...matchAny,
+            meta: { ...matchAny.meta, type: 'phrases', negate: entry.operator === 'excluded' },
+          };
         default:
           return buildEmptyFilter(false, indexPattern.title);
       }

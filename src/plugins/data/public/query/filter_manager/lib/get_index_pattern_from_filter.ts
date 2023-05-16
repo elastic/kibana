@@ -12,5 +12,6 @@ export function getIndexPatternFromFilter<T extends DataViewBase = DataViewBase>
   filter: Filter,
   indexPatterns: T[]
 ): T | undefined {
+  console.log('INDEXPATTERNS', indexPatterns, 'FILTER', filter);
   return indexPatterns.find((indexPattern) => indexPattern.id === filter.meta.index);
 }

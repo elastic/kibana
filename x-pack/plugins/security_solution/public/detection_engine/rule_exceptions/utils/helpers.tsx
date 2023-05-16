@@ -902,8 +902,12 @@ export const prepopulateAlertData = (
     name,
   });
   const entries = fieldsToLookFor.reduce((acc, field) => {
+    console.log('ALERTS', alertData[field]);
     if (alertData[field]) {
-      return [...acc, { field, operator: 'is_one_of', type: 'match_any', value: alertData[field] }];
+      if (!Array.isArray(alertData[field])) {
+        return [...acc, { field, operator: 'included', type: 'match', value: alertData[field] }];
+      }
+      return [...acc, { field, operator: 'included', type: 'match_any', value: alertData[field] }];
     } else {
       return acc;
     }
