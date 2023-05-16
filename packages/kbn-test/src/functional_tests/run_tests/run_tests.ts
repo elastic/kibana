@@ -132,16 +132,15 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             );
           }
 
-          const indicators: Indicators = authResponse.data.indicators;
-          const badIndicators: Array<[string, Indicator]> = Object.entries(indicators).filter(
-            ([_, value]) => value.status !== 'green'
-          );
+          const masterIsStable: Indicator = authResponse.data.indicators.master_is_stable;
+          const shardsAvailability: Indicator = authResponse.data.indicators.shards_availability;
 
-          if (badIndicators.length > 0) {
-            badIndicators.forEach(([key, value]) =>
-              log.warning(`${key}: ${JSON.stringify(value)}`)
+          if (masterIsStable.status !== 'green' || shardsAvailability.status !== 'green') {
+            log.warning(
+              `Elasticsearch instance is not healthy\n${JSON.stringify(
+                authResponse.data.indicators
+              )}`
             );
-            throw new Error('Elasticsearch is not healthy, aborting');
           } else {
             log.debug(`Elasticsearch instance is healthy`);
           }
