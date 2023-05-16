@@ -22,8 +22,7 @@ import { css } from '@emotion/react';
 import Metadata from './metadata/metadata';
 import { LinkToUptime } from './links/link_to_uptime';
 import { LinkToApmServices } from './links/link_to_apm_services';
-// TODO add processes
-// import { Processes } from './processes/processes';
+import { Processes } from './processes/processes';
 import type { HostNodeRow } from './types';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import type { SetNewHostFlyoutOpen } from '../../pages/metrics/hosts/hooks/use_host_flyout_open_url_state';
@@ -33,7 +32,7 @@ export enum FlyoutTabIds {
   PROCESSES = 'processes',
 }
 
-type TabIds = 'metadata' | 'processes';
+export type TabIds = 'metadata' | 'processes';
 
 export interface Tab {
   id: FlyoutTabIds;
@@ -158,7 +157,13 @@ export const AssetDetails = ({
         )}
         {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
           <div hidden={(hostFlyoutOpen?.selectedTabId ?? selectedTabId) !== FlyoutTabIds.PROCESSES}>
-            {/* <Processes node={node} nodeType={NODE_TYPE} currentTime={currentTimeRange.to} /> */}
+            <Processes
+              node={node}
+              nodeType={NODE_TYPE}
+              currentTime={currentTimeRange.to}
+              hostFlyoutOpen={hostFlyoutOpen}
+              setHostFlyoutOpen={setHostFlyoutOpen}
+            />
           </div>
         )}
       </>
@@ -200,7 +205,13 @@ export const AssetDetails = ({
         )}
         {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
           <div hidden={(hostFlyoutOpen?.selectedTabId ?? selectedTabId) !== FlyoutTabIds.PROCESSES}>
-            {/* <Processes node={node} nodeType={NODE_TYPE} currentTime={currentTimeRange.to} /> */}
+            <Processes
+              node={node}
+              nodeType={NODE_TYPE}
+              currentTime={currentTimeRange.to}
+              hostFlyoutOpen={hostFlyoutOpen}
+              setHostFlyoutOpen={setHostFlyoutOpen}
+            />
           </div>
         )}
       </EuiFlyoutBody>
