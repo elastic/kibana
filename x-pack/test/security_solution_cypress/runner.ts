@@ -47,6 +47,8 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
         CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+        CYPRESS_ELECTRON_RUN_AS_NODE: 1,
+        ELECTRON_RUN_AS_NODE: 1,
         ...(config.get('kbnTestServer.env')?.cypress?.env || {}),
         ...process.env,
         ...envVars,
