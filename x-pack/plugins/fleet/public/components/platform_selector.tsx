@@ -19,11 +19,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CLOUD_FORMATION_PLATFORM_OPTION, type PLATFORM_TYPE } from '../hooks';
+import { type PLATFORM_TYPE } from '../hooks';
 import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
-import { CloudFormationInstructions } from './agent_enrollment_flyout/cloud_formation_instructions';
 
 interface Props {
   linuxCommand: string;
@@ -39,7 +38,6 @@ interface Props {
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
-  cloudFormationTemplateUrl?: string | null;
 }
 
 // Otherwise the copy button is over the text
@@ -61,15 +59,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   hasFleetServer,
   fullCopyButton,
   onCopy,
-  cloudFormationTemplateUrl,
 }) => {
   const getInitialPlatform = useCallback(() => {
-    if (cloudFormationTemplateUrl) return 'cloudFormation';
-
     if (hasK8sIntegration) return 'kubernetes';
 
     return 'linux';
-  }, [cloudFormationTemplateUrl, hasK8sIntegration]);
+  }, [hasK8sIntegration]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
@@ -80,12 +75,8 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   const getPlatformOptions = useCallback(() => {
     const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
 
-    if (cloudFormationTemplateUrl) {
-      return platformOptions.concat(CLOUD_FORMATION_PLATFORM_OPTION);
-    }
-
     return platformOptions;
-  }, [cloudFormationTemplateUrl, isReduced]);
+  }, [isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -118,7 +109,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
-    cloudFormation: '',
   };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -165,16 +155,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
           </>
         )}
-        {platform === 'cloudFormation' && cloudFormationTemplateUrl && (
-          <>
-            <CloudFormationInstructions
-              cloudFormationTemplateUrl={cloudFormationTemplateUrl}
-              enrollmentAPIKey={enrollToken}
-            />
-            <EuiSpacer size="s" />
-          </>
-        )}
-        {!hasK8sIntegrationMultiPage && platform !== 'cloudFormation' && (
+        {!hasK8sIntegrationMultiPage && (
           <>
             {platform === 'kubernetes' && (
               <EuiText>
