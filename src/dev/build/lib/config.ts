@@ -229,7 +229,7 @@ export class Config {
   }
 
   /**
-   * Get the date for this build
+   * Get the ISO 8601 date for this build
    */
   getBuildDate() {
     return this.versionInfo.buildDate;

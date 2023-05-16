@@ -30,23 +30,14 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
     isRelease ? '' : '-SNAPSHOT'
   );
 
-  const gitExists = fs.existsSync(join(REPO_ROOT, '.git'));
-
-  const buildSha = gitExists
+  const buildSha = fs.existsSync(join(REPO_ROOT, '.git'))
     ? (await execa('git', ['rev-parse', 'HEAD'], { cwd: REPO_ROOT })).stdout
     : process.env.GIT_COMMIT || process.env.BUILDKITE_COMMIT || '';
-
-  // Use the date of HEAD commit if available
-  const buildDate = gitExists
-    ? new Date(
-        (await execa('git', ['show', '-s', '--format=%cI', buildSha], { cwd: REPO_ROOT })).stdout
-      ).toISOString()
-    : new Date().toISOString();
 
   return {
     buildSha,
     buildVersion,
     buildNumber: await getBuildNumber(),
-    buildDate,
+    buildDate: new Date().toISOString(),
   };
 }

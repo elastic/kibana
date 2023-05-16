@@ -189,7 +189,7 @@ Some features require special configuration when running in different modes (dev
 
 |`buildDate`
 |`2023-05-15T23:12:09+0000`
-|The ISO 8601 date of the build (typically the date of HEAD commit)
+|The ISO 8601 date of the build
 
 |===
 
