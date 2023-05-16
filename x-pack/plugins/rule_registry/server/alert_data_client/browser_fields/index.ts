@@ -43,13 +43,8 @@ export const mergerBrowserField = (AllBrowserFields: BrowserFields[]): BrowserFi
   const results: BrowserFields = {};
   for (const browserFields of AllBrowserFields) {
     for (const [key, value] of Object.entries(browserFields)) {
-      if (results[key]) {
-        results[key] = {
-          fields: {
-            ...(results[key] && results[key].fields ? results[key].fields : {}),
-            ...value.fields,
-          },
-        };
+      if (results[key] && results[key].fields) {
+        Object.assign(results[key]?.fields, value.fields);
       } else {
         results[key] = value;
       }
@@ -71,10 +66,8 @@ export const fieldDescriptorToBrowserFieldMapper = async (
                 const category = getFieldCategory(field);
                 const browserField = browserFieldFactory(field, category);
 
-                if (browserFields[category]) {
-                  browserFields[category] = {
-                    fields: { ...browserFields[category].fields, ...browserField },
-                  };
+                if (browserFields[category] && browserFields[category].fields) {
+                  Object.assign(browserFields[category]?.fields, browserField);
                 } else {
                   browserFields[category] = { fields: browserField };
                 }
