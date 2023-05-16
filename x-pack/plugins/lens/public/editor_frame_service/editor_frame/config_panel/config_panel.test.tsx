@@ -30,6 +30,7 @@ import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { AddLayerButton } from '../../../visualizations/xy/add_layer';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 jest.mock('../../../id_generator');
 
@@ -117,7 +118,21 @@ describe('ConfigPanel', () => {
       activeVisualization: {
         ...visualizationMap.testVis,
         getLayerIds: () => Object.keys(frame.datasourceLayers),
-      } as unknown as Visualization,
+        getAddLayerButtonComponent: (props) => {
+          return (
+            <AddLayerButton
+              {...props}
+              eventAnnotationService={{} as EventAnnotationServiceType}
+              onAddLayerFromAnnotationGroup={async (loadedGroupInfo) => {
+                if (loadedGroupInfo.dataViewSpec) {
+                  await props.addIndexPatternFromDataViewSpec(loadedGroupInfo.dataViewSpec);
+                }
+                props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
+              }}
+            />
+          );
+        },
+      } as Visualization,
       datasourceStates: {
         testDatasource: {
           isLoading: false,
@@ -270,6 +285,7 @@ describe('ConfigPanel', () => {
       instance: ReactWrapper,
       layerType: LayerType = LayerTypes.REFERENCELINE
     ) {
+      // TODO - this test shouldn't know about the internals of a specific visualization's add layer menu
       act(() => {
         instance.find('button[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
       });
@@ -473,7 +489,11 @@ describe('ConfigPanel', () => {
       datasourceMap.testDatasource.initializeDimension = jest.fn();
       const props = getDefaultProps({ visualizationMap, datasourceMap });
       const { instance, lensStore } = await prepareAndMountComponent(props);
-      await clickToAddLayer(instance, LayerTypes.ANNOTATIONS);
+
+      act(() => {
+        instance.find(AddLayerButton).prop('addLayer')(LayerTypes.ANNOTATIONS);
+      });
+
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
 
       expect(visualizationMap.testVis.setDimension).toHaveBeenCalledWith({
