@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import Metadata from '../../../../../components/asset_details/metadata/metadata';
+import { Metadata } from '../../../../../components/asset_details/metadata/metadata';
 import { LinkToUptime } from './links/link_to_uptime';
 import { LinkToApmServices } from './links/link_to_apm_services';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
@@ -108,6 +108,7 @@ export const Flyout = ({
               currentTimeRange={currentTimeRange}
               node={node}
               nodeType={NODE_TYPE}
+              showActionsColumn
               persistMetadataSearchToUrlState={{
                 metadataSearchUrlState: hostFlyoutOpen.metadataSearch,
                 setMetadataSearchUrlState: setHostFlyoutOpen,

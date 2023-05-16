@@ -10,7 +10,9 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { FlyoutTabIds, useHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
-import { Flyout } from './flyout';
+import { AssetDetails } from '../../../../../components/asset_details/asset_details';
+import { metadataTab } from './metadata';
+import { processesTab } from './processes';
 
 export interface Props {
   node: HostNodeRow;
@@ -42,14 +44,18 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   };
 
   return (
-    <Flyout
+    <AssetDetails
       node={node}
       closeFlyout={closeFlyout}
       onTabClick={onTabClick}
-      renderedTabsSet={renderedTabsSet}
       currentTimeRange={currentTimeRange}
       hostFlyoutOpen={hostFlyoutOpen}
       setHostFlyoutOpen={setHostFlyoutOpen}
+      showActionsColumn
+      showInFlyout
+      renderedTabsSet={renderedTabsSet}
+      tabs={[metadataTab, processesTab]}
+      links={['apmServices', 'uptime']}
     />
   );
 };
