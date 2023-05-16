@@ -12,7 +12,8 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import TextBasedLanguagesEditor, {
+import {
+  TextBasedLanguagesEditor,
   TextBasedLanguagesEditorProps,
 } from './text_based_languages_editor';
 
