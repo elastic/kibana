@@ -1091,6 +1091,6 @@ export class AlertsClient {
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
     });
 
-    return await fieldDescriptorToBrowserFieldMapper(fields);
+    return fieldDescriptorToBrowserFieldMapper(fields);
   }
 }

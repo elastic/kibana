@@ -30,56 +30,17 @@ const browserFieldFactory = (
   };
 };
 
-const chunkFields = (fields: FieldDescriptor[]) => {
-  const chunkSize = 100;
-  const chunks = [];
-  for (let i = 0; i < fields.length; i += chunkSize) {
-    chunks.push(fields.slice(i, i + chunkSize));
-  }
-  return chunks;
-};
+export const fieldDescriptorToBrowserFieldMapper = (fields: FieldDescriptor[]): BrowserFields => {
+  return fields.reduce((browserFields: BrowserFields, field: FieldDescriptor) => {
+    const category = getFieldCategory(field);
+    const browserField = browserFieldFactory(field, category);
 
-export const mergerBrowserField = (AllBrowserFields: BrowserFields[]): BrowserFields => {
-  const results: BrowserFields = {};
-  for (const browserFields of AllBrowserFields) {
-    for (const [key, value] of Object.entries(browserFields)) {
-      if (results[key] && results[key].fields) {
-        Object.assign(results[key]?.fields, value.fields);
-      } else {
-        results[key] = value;
-      }
+    if (browserFields[category] && browserFields[category]) {
+      Object.assign(browserFields[category].fields, browserField);
+    } else {
+      browserFields[category] = { fields: browserField };
     }
-  }
-  return results;
-};
 
-export const fieldDescriptorToBrowserFieldMapper = async (
-  fields: FieldDescriptor[]
-): Promise<BrowserFields> => {
-  const mappedFields: BrowserFields[] = await Promise.all<BrowserFields>(
-    chunkFields(fields).map((cFields) => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(
-            cFields.reduce<BrowserFields>(
-              (browserFields: BrowserFields, field: FieldDescriptor) => {
-                const category = getFieldCategory(field);
-                const browserField = browserFieldFactory(field, category);
-
-                if (browserFields[category] && browserFields[category].fields) {
-                  Object.assign(browserFields[category]?.fields, browserField);
-                } else {
-                  browserFields[category] = { fields: browserField };
-                }
-
-                return browserFields;
-              },
-              {}
-            )
-          );
-        });
-      });
-    })
-  );
-  return mergerBrowserField(mappedFields);
+    return browserFields;
+  }, {});
 };
