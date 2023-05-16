@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import useIntersection from 'react-use/lib/useIntersection';
 
 export interface LoadWhenInViewProps {
@@ -46,7 +46,7 @@ export default function LoadWhenInView({
       aria-label={placeholderTitle}
       style={{ height: initialHeight }}
     >
-      <EuiLoadingContent />
+      <EuiSkeletonText />
     </div>
   );
 }
