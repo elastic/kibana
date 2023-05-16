@@ -153,7 +153,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
           <EuiCallOut
             color="danger"
             iconType="warning"
-            title={i18n.translate('xpack.serverlessSearch.apiKey.flyoutTitle', {
+            title={i18n.translate('xpack.serverlessSearch.apiKey.flyout.errorTitle', {
               defaultMessage: 'Error creating API key',
             })}
           >

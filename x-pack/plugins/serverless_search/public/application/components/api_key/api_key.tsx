@@ -137,7 +137,7 @@ export const ApiKeyPanel: React.FC = () => {
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
                         <FormattedMessage
-                          id="xpack.serverlessSearch.apiKey.manageLabel"
+                          id="xpack.serverlessSearch.apiKey.activeKeys"
                           defaultMessage="You have {number} active keys."
                           values={{
                             number: (

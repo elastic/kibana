@@ -54,7 +54,7 @@ export const ElasticsearchOverview = () => {
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xxxs">
                     <h2>
-                      {i18n.translate('xpack.serverlessSearch.header.title', {
+                      {i18n.translate('xpack.serverlessSearch.header.greeting.title', {
                         defaultMessage: 'Hi {name}!',
                         values: { name: userProfile.user.full_name || userProfile.user.username },
                       })}
