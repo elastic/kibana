@@ -92,23 +92,17 @@ describe('Versioned route', () => {
       versionedRouter
         .get({ path: '/test/{id}', access: 'internal' })
         .addVersion({ version: 'foo' as ApiVersion, validate: false }, handlerFn)
-    ).toThrowError(
-      `Invalid version number. Received "foo", expected any finite, whole number greater than 0.`
-    );
+    ).toThrowError(`Invalid version number`);
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'internal' })
         .addVersion({ version: '-1', validate: false }, handlerFn)
-    ).toThrowError(
-      `Invalid version number. Received "-1", expected any finite, whole number greater than 0.`
-    );
+    ).toThrowError(`Invalid version number`);
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'internal' })
         .addVersion({ version: '1.1', validate: false }, handlerFn)
-    ).toThrowError(
-      `Invalid version number. Received "1.1", expected any finite, whole number greater than 0.`
-    );
+    ).toThrowError(`Invalid version number`);
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'internal' })

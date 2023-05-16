@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
+import { docLinks } from '../common/doc_links';
 import {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
@@ -18,17 +19,29 @@ export class ServerlessSearchPlugin
   implements Plugin<ServerlessSearchPluginSetup, ServerlessSearchPluginStart>
 {
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     _setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
+    core.application.register({
+      id: 'serverlessElasticsearch',
+      title: 'Elasticsearch',
+      appRoute: '/app/elasticsearch',
+      async mount({ element }: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        return await renderApp(element, coreStart);
+      },
+    });
     return {};
   }
 
   public start(
     core: CoreStart,
-    _startDeps: ServerlessSearchPluginStartDependencies
+    { serverless }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    core.chrome.project.setSideNavComponent(createComponent(core));
+    serverless.setSideNavComponent(createComponent(core));
     return {};
   }
 
