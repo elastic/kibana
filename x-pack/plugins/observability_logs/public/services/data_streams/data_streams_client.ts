@@ -17,6 +17,7 @@ import {
   FindIntegrationsResponse,
   findIntegrationsResponseRT,
   getDataStreamsUrl,
+  getIntegrationsUrl,
 } from '../../../common';
 
 import { IDataStreamsClient } from './types';
@@ -32,9 +33,9 @@ export class DataStreamsClient implements IDataStreamsClient {
       (message: string) => new Error(`Failed to decode integrations search param: ${message}"`)
     )(params);
 
-    // const response = await this.http.get(getIntegrationsUrl(search)).catch((error) => {
-    //   throw new Error(`Failed to fetch integrations": ${error}`);
-    // });
+    const response = this.http.get(getIntegrationsUrl(search)).catch((error) => {
+      throw new Error(`Failed to fetch integrations": ${error}`);
+    });
 
     const data = decodeOrThrow(
       findIntegrationsResponseRT,
@@ -67,7 +68,7 @@ export class DataStreamsClient implements IDataStreamsClient {
 
 const mockIntegrationsResponse = {
   total: 11,
-  // searchAfter: [],
+  // searchAfter: undefined,
   items: [
     {
       name: 'kubernetes',
