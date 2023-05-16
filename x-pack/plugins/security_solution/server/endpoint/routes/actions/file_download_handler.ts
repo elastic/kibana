@@ -58,7 +58,7 @@ export const getActionFileDownloadRouteHandler = (
       await validateActionId(esClient, actionId);
       const file = await fleetFiles.get(fileId);
 
-      if (file.actionId !== actionId) {
+      if (file.id !== fileId) {
         throw new CustomHttpRequestError(
           `Invalid file id [${fileId}] for action [${actionId}]`,
           400

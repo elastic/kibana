@@ -94,6 +94,7 @@ export const createMockEndpointAppContextService = (
 ): jest.Mocked<EndpointAppContextService> => {
   const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock();
   const casesClientMock = createCasesClientMock();
+  const fleetFilesClientMock = createFleetFilesClientMock();
 
   return {
     start: jest.fn(),
@@ -107,7 +108,7 @@ export const createMockEndpointAppContextService = (
     getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
     getActionCreateService: jest.fn().mockReturnValue(createActionCreateServiceMock()),
-    getFleetFilesClient: jest.fn(async (_) => createFleetFilesClientMock()),
+    getFleetFilesClient: jest.fn(async (_) => fleetFilesClientMock),
     setup: jest.fn(),
     getLicenseService: jest.fn(),
     getFeatureUsageService: jest.fn(),

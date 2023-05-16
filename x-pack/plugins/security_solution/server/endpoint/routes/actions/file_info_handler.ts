@@ -32,25 +32,18 @@ export const getActionFileInfoRouteHandler = (
 
   return async (context, req, res) => {
     const fleetFiles = await endpointContext.service.getFleetFilesClient('from-host');
-    const { action_id: actionId, file_id: fileId } = req.params;
+    const { action_id: requestActionId, file_id: fileId } = req.params;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     try {
-      await validateActionId(esClient, actionId);
-      const {
-        actionId: fileActionId,
-        mimeType,
-        status,
-        size,
-        name,
-        id,
-        agents,
-        created,
-      } = await fleetFiles.get(fileId);
+      await validateActionId(esClient, requestActionId);
+      const { actionId, mimeType, status, size, name, id, agents, created } = await fleetFiles.get(
+        fileId
+      );
 
-      if (fileActionId !== actionId) {
+      if (id !== fileId) {
         throw new CustomHttpRequestError(
-          `Invalid file id [${fileId}] for action [${actionId}]`,
+          `Invalid file id [${fileId}] for action [${requestActionId}]`,
           400
         );
       }
