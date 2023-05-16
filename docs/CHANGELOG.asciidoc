@@ -778,7 +778,7 @@ Cases::
 * Adds new column `Updated on ` in `all cases list ` table. This column can be sorted and can persist sorting options {kibana-pull}149116[#149116]
 * Improves the design of all cases list select modal {kibana-pull}149851[#149851]
 * Adds a button to Case Detail and All Cases List to copy case UUIDs to the clipboard {kibana-pull}148962[#148962]
-* Sorting, severity filter and status filter are now persisted in the URL and local storage for the all cases list {kibana-pull}148549[#148549]
+* Adds the ability to persist sorting, severity filter, and status filter in the URL and local storage for the all cases list {kibana-pull}148549[#148549]
 * Sorting by status, severity, and title is now allowed in the all-cases list {kibana-pull}148193[#148193]
 * See "My recently assigned cases" to the recent cases widget of Security Solution dashboard {kibana-pull}147763[#147763]
 * Adds the ability to bulk edit assignees on multiple cases {kibana-pull}146907[#146907]
