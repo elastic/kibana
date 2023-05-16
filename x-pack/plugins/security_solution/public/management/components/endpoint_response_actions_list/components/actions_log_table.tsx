@@ -313,7 +313,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       const actionIdsWithDetails = getActionIdsWithDetails();
       const openDetails = actionIdsWithDetails.reduce<ExpandedRowMapType>(
         (idToRowMap, actionId) => {
-          const action = items.find((item) => item.id === actionId);
+          const action = items?.find((item) => item.id === actionId);
           if (action) {
             idToRowMap[actionId] = (
               <ActionsLogExpandedTray action={action} data-test-subj={dataTestSubj} />
