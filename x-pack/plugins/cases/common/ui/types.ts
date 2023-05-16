@@ -93,7 +93,10 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: CommentUI[] };
-export type CasesUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: CaseUI[] };
+export type CasesUI = CaseUI[];
+export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
+  cases: CasesUI;
+};
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;

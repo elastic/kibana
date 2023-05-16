@@ -14,8 +14,8 @@ import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { createBaseFlameGraph } from '../../common/flamegraph';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getStackTraces } from './get_stacktraces';
 import { createCommonFilter } from './query';
+import { searchStackTraces } from './search_stacktraces';
 
 export function registerFlameChartSearchRoute({
   router,
@@ -50,9 +50,7 @@ export function registerFlameChartSearchRoute({
 
         const t0 = Date.now();
         const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
-          await getStackTraces({
-            context,
-            logger,
+          await searchStackTraces({
             client: profilingElasticsearchClient,
             filter,
             sampleSize: targetSampleSize,
