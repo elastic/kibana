@@ -123,7 +123,9 @@ export class Env {
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
       dist: isKibanaDistributable,
-      buildDate: isKibanaDistributable ? new Date(pkg.build.date) : new Date(),
+      buildDate: isKibanaDistributable
+        ? new Date(pkg.build.date)
+        : new Date('2023-05-15T23:12:09+0000'),
     });
   }
 }
