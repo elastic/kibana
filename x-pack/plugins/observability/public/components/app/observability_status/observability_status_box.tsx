@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiTracker } from '../../../hooks/use_track_metric';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface ObservabilityStatusBoxProps {
