@@ -231,6 +231,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
+      const API_VERSION = '1';
       const { body, status } = await supertest
         .post('/internal/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
@@ -240,7 +241,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
-        '[get 1 body.job.analysis_config.bucket_span]: expected value of type [string] but got [undefined]'
+        `[get ${API_VERSION} body.job.analysis_config.bucket_span]: expected value of type [string] but got [undefined]`
       );
     });
 

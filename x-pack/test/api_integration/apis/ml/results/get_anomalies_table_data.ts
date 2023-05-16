@@ -97,6 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         maxRecords: 500,
       };
 
+      const API_VERSION = '1';
       const { body, status } = await supertest
         .post(`/internal/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
@@ -106,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
-        '[get 1 body.jobIds]: expected value of type [array] but got [undefined]'
+        `[get ${API_VERSION} body.jobIds]: expected value of type [array] but got [undefined]`
       );
     });
 

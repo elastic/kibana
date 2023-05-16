@@ -98,6 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
         end: 1454976000000, // February 9, 2016 12:00:00 AM GMT
       };
 
+      const API_VERSION = '1';
       const { body, status } = await supertest
         .post(`/internal/ml/results/datafeed_results_chart`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
@@ -107,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
-        '[get 1 body.jobId]: expected value of type [string] but got [undefined]'
+        `[get ${API_VERSION} body.jobId]: expected value of type [string] but got [undefined]`
       );
     });
 
