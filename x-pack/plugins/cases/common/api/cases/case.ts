@@ -196,67 +196,67 @@ const CasesFindRequestSearchFieldsRt = rt.keyof({
 
 export const CasesFindRequestRt = rt.exact(
   rt.partial({
-  /**
-   * Tags to filter by
-   */
-  tags: rt.union([rt.array(rt.string), rt.string]),
-  /**
-   * The status of the case (open, closed, in-progress)
-   */
-  status: CaseStatusRt,
-  /**
-   * The severity of the case
-   */
-  severity: CaseSeverityRt,
-  /**
-   * The uids of the user profiles to filter by
-   */
-  assignees: rt.union([rt.array(rt.string), rt.string]),
-  /**
-   * The reporters to filter by
-   */
-  reporters: rt.union([rt.array(rt.string), rt.string]),
-  /**
-   * Operator to use for the `search` field
-   */
-  defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
-  /**
-   * A KQL date. If used all cases created after (gte) the from date will be returned
-   */
-  from: rt.string,
-  /**
-   * The page of objects to return
-   */
-  page: NumberFromString,
-  /**
-   * The number of objects to include in each page
-   */
-  perPage: NumberFromString,
-  /**
-   * An Elasticsearch simple_query_string
-   */
-  search: rt.string,
-  /**
-   * The fields to perform the simple_query_string parsed query against
-   */
-  searchFields: rt.union([
-    rt.array(CasesFindRequestSearchFieldsRt),
-    CasesFindRequestSearchFieldsRt,
-  ]),
-  /**
-   * The root fields to perform the simple_query_string parsed query against
-   */
-  rootSearchFields: rt.array(rt.string),
-  /**
-   * The field to use for sorting the found objects.
-   *
-   * This only supports, `create_at`, `closed_at`, and `status`
-   */
-  sortField: rt.string,
-  /**
-   * The order to sort by
-   */
-  sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+    /**
+     * Tags to filter by
+     */
+    tags: rt.union([rt.array(rt.string), rt.string]),
+    /**
+     * The status of the case (open, closed, in-progress)
+     */
+    status: CaseStatusRt,
+    /**
+     * The severity of the case
+     */
+    severity: CaseSeverityRt,
+    /**
+     * The uids of the user profiles to filter by
+     */
+    assignees: rt.union([rt.array(rt.string), rt.string]),
+    /**
+     * The reporters to filter by
+     */
+    reporters: rt.union([rt.array(rt.string), rt.string]),
+    /**
+     * Operator to use for the `search` field
+     */
+    defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
+    /**
+     * A KQL date. If used all cases created after (gte) the from date will be returned
+     */
+    from: rt.string,
+    /**
+     * The page of objects to return
+     */
+    page: NumberFromString,
+    /**
+     * The number of objects to include in each page
+     */
+    perPage: NumberFromString,
+    /**
+     * An Elasticsearch simple_query_string
+     */
+    search: rt.string,
+    /**
+     * The fields to perform the simple_query_string parsed query against
+     */
+    searchFields: rt.union([
+      rt.array(CasesFindRequestSearchFieldsRt),
+      CasesFindRequestSearchFieldsRt,
+    ]),
+    /**
+     * The root fields to perform the simple_query_string parsed query against
+     */
+    rootSearchFields: rt.array(rt.string),
+    /**
+     * The field to use for sorting the found objects.
+     *
+     * This only supports, `create_at`, `closed_at`, and `status`
+     */
+    sortField: rt.string,
+    /**
+     * The order to sort by
+     */
+    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 
     /**
      * A KQL date. If used all cases created before (lte) the to date will be returned.
