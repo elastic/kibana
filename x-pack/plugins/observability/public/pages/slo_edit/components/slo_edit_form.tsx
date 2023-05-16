@@ -113,14 +113,6 @@ export function SloEditForm({ slo }: Props) {
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
 
-  const createProcessedValues = () => {
-    const values = getValues();
-    if (isEditMode) {
-      return transformValuesToUpdateSLOInput(values);
-    }
-    return transformValuesToCreateSLOInput(values);
-  };
-
   const handleCopyToJson = async () => {
     const isValid = await trigger();
     if (!isValid) {
@@ -145,7 +137,7 @@ export function SloEditForm({ slo }: Props) {
 
   const copyTextToClipboard = async (text: string) => {
     if (!window.navigator?.clipboard) {
-       throw new Error('Could not copy to clipboard!');
+      throw new Error('Could not copy to clipboard!');
     }
     await window.navigator.clipboard.writeText(text);
   };
