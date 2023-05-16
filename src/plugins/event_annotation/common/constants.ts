@@ -26,4 +26,4 @@ export const AvailableAnnotationIcons = {
 
 export const EVENT_ANNOTATION_GROUP_TYPE = 'event-annotation-group';
 
-export const ANNOTATION_LIBRARY_APP_ID = 'annotations';
+export const ANNOTATIONS_LISTING_VIEW_ID = 'annotations';

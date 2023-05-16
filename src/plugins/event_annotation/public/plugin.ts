@@ -25,6 +25,8 @@ import {
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
 import { EventAnnotationListingPageServices, getTableList } from './get_table_list';
+import { ANNOTATIONS_LISTING_VIEW_ID } from '../common/constants';
+
 export interface EventAnnotationStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   data: DataPublicPluginStart;
@@ -61,7 +63,7 @@ export class EventAnnotationPlugin
 
     dependencies.visualizations.listingViewRegistry.add({
       title: 'Annotation Groups',
-      id: 'annotations',
+      id: ANNOTATIONS_LISTING_VIEW_ID,
       getTableList: async (props) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
 

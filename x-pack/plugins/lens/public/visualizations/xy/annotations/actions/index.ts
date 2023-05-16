@@ -9,7 +9,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { ANNOTATION_LIBRARY_APP_ID } from '@kbn/event-annotation-plugin/common';
+import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
+import { ANNOTATIONS_LISTING_VIEW_ID } from '@kbn/event-annotation-plugin/common';
 import type { LayerAction, StateSetter } from '../../../../types';
 import { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
@@ -55,7 +56,10 @@ export const createAnnotationActions = ({
         toasts: core.notifications.toasts,
         savedObjectsTagging,
         dataViews,
-        goToAnnotationLibrary: () => core.application.navigateToApp(ANNOTATION_LIBRARY_APP_ID),
+        goToAnnotationLibrary: () =>
+          core.application.navigateToApp(VISUALIZE_APP_NAME, {
+            path: `#/${ANNOTATIONS_LISTING_VIEW_ID}`,
+          }),
       })
     );
   }

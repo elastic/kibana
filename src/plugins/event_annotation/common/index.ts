@@ -44,4 +44,4 @@ export type {
   EventAnnotationGroupAttributes,
 } from './types';
 
-export { EVENT_ANNOTATION_GROUP_TYPE, ANNOTATION_LIBRARY_APP_ID } from './constants';
+export { EVENT_ANNOTATION_GROUP_TYPE, ANNOTATIONS_LISTING_VIEW_ID } from './constants';
