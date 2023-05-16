@@ -57,7 +57,9 @@ function GroupSelection(props: GroupSelectionProps) {
         [
           ...props.visTypesRegistry.getAliases(),
           ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
-        ],
+        ].filter(visDefinition => {
+          return !visDefinition.hidden;
+        }),
         ['promotion', 'title'],
         ['asc', 'asc']
       ),

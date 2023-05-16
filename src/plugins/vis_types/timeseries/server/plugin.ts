@@ -24,7 +24,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { PluginStart as DataViewsPublicPluginStart } from '@kbn/data-views-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { VisTypeTimeseriesConfig } from './config';
+import { VisTypeTimeseriesConfig } from '../config';
 import { getVisData } from './lib/get_vis_data';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
