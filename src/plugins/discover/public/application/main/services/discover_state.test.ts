@@ -523,23 +523,29 @@ describe('actions', () => {
 
   test('onChangeDataView', async () => {
     const { state, getCurrentUrl } = await getState('/', savedSearchMock);
-    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
-    expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
-      dataViewMock.id
-    );
-    const unsubscribe = state.actions.initializeAndSync();
+    const { actions, savedSearchState, dataState, appState } = state;
+
+    await actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    const unsubscribe = actions.initializeAndSync();
     await new Promise(process.nextTick);
-    expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
-    );
-    await state.actions.onChangeDataView(dataViewComplexMock.id!);
-    await waitFor(() => {
-      expect(state.sharedState.getState().dataView?.id).toBe(dataViewComplexMock.id);
-    });
-    expect(state.appState.get().index).toBe(dataViewComplexMock.id);
-    expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
+    // test initial state
+    expect(dataState.fetch).toHaveBeenCalledTimes(0);
+    expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(dataViewMock.id);
+    expect(getCurrentUrl()).toContain(dataViewMock.id);
+
+    // change data view
+    await actions.onChangeDataView(dataViewComplexMock.id!);
+    await new Promise(process.nextTick);
+
+    // test changed state, fetch should be called once and URL should be updated
+    expect(dataState.fetch).toHaveBeenCalledTimes(1);
+    expect(appState.get().index).toBe(dataViewComplexMock.id);
+    expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewComplexMock.id
     );
+    // check if the changed data view is reflected in the URL
+    expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
+
     unsubscribe();
   });
   test('onDataViewCreated - persisted data view', async () => {
