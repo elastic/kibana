@@ -2814,10 +2814,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts@link:packages/kbn-alerts":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ambient-common-types@link:packages/kbn-ambient-common-types":
   version "0.0.0"
   uid ""
@@ -4382,6 +4378,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/infra-forge@link:x-pack/packages/kbn-infra-forge":
+  version "0.0.0"
+  uid ""
+
 "@kbn/infra-plugin@link:x-pack/plugins/infra":
   version "0.0.0"
   uid ""
@@ -4555,6 +4555,10 @@
   uid ""
 
 "@kbn/maps-plugin@link:x-pack/plugins/maps":
+  version "0.0.0"
+  uid ""
+
+"@kbn/maps-vector-tile-utils@link:x-pack/packages/maps/vector_tile_utils":
   version "0.0.0"
   uid ""
 

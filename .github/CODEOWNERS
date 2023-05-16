@@ -19,7 +19,6 @@ x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
-packages/kbn-alerts @elastic/security-solution
 packages/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
@@ -414,6 +413,7 @@ packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-management
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-app-services
+x-pack/packages/kbn-infra-forge @elastic/actionable-observability
 x-pack/plugins/infra @elastic/infra-monitoring-ui
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
 src/plugins/input_control_vis @elastic/kibana-presentation
@@ -458,6 +458,7 @@ packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
+x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
@@ -578,7 +579,7 @@ packages/kbn-server-route-repository @elastic/apm-ui
 x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_observability @elastic/appex-sharedux
 packages/serverless/project_switcher @elastic/appex-sharedux
-x-pack/plugins/serverless_search @elastic/appex-sharedux
+x-pack/plugins/serverless_search @elastic/enterprise-search-frontend
 x-pack/plugins/serverless_security @elastic/security-solution
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
