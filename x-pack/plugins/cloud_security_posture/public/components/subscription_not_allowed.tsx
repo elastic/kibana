@@ -28,7 +28,7 @@ export const SubscriptionNotAllowed = ({
         }
         body={
           licenseManagementLocator ? (
-            <p>
+            <p data-test-subj={'has_locator'}>
               <FormattedMessage
                 id="xpack.csp.subscriptionNotAllowed.promptDescription"
                 defaultMessage="To use these cloud security features, you must {link}."
@@ -45,7 +45,7 @@ export const SubscriptionNotAllowed = ({
               />
             </p>
           ) : (
-            <p>
+            <p data-test-subj={'no_locator'}>
               <FormattedMessage
                 id="xpack.csp.subscriptionNotAllowed.promptDescriptionNoLocator"
                 defaultMessage="Contact your administrator to change your license."

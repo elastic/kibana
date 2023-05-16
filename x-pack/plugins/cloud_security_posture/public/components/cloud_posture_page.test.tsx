@@ -77,6 +77,37 @@ describe('<CloudPosturePage />', () => {
     );
   };
 
+  it('renders with license url locator', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+
+    renderCloudPosturePage();
+    expect(screen.getByTestId('has_locator')).toBeInTheDocument();
+  });
+
+  it('renders no license url locator', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: undefined,
+      })
+    );
+
+    renderCloudPosturePage();
+    expect(screen.getByTestId('no_locator')).toBeInTheDocument();
+  });
+
   it('renders children if setup status is indexed', () => {
     const children = chance.sentence();
     renderCloudPosturePage({ children });
