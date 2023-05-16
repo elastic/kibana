@@ -227,7 +227,7 @@ describe('Update rule route', () => {
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
-      expect(response.status).toEqual(401);
+      expect(response.status).toEqual(403);
       expect(response.body.message).toEqual(
         'User is not authorized to change isolate response actions'
       );
@@ -266,7 +266,7 @@ describe('Update rule route', () => {
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
-      expect(response.status).toEqual(401);
+      expect(response.status).toEqual(403);
       expect(response.body.message).toEqual(
         'User is not authorized to change isolate response actions'
       );

@@ -117,7 +117,7 @@ export const validateResponseActionsPermissions = async (
     if (!isValid) {
       throw new CustomHttpRequestError(
         `User is not authorized to change ${action.params.command} response actions`,
-        401
+        403
       );
     }
   });
