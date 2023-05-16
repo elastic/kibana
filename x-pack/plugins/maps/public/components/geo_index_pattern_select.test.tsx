@@ -37,8 +37,8 @@ const defaultProps = {
     fields: [
       {
         type: 'geo_point',
-      }
-    ]
+      },
+    ],
   } as unknown as DataView,
   onChange: () => {},
 };
