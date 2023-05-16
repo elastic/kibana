@@ -193,7 +193,21 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.queryByTestId('prioritySelect')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('prioritySelect')).not.toBeVisible();
+  });
+
+  it('hides the parent issue if not supported', () => {
+    const response = omit('data.data.parent', useGetFieldsByIssueTypeResponse);
+
+    useGetFieldsByIssueTypeMock.mockReturnValue(response);
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    expect(screen.queryByTestId('search-parent-issues')).not.toBeVisible();
   });
 
   it('sets issue type correctly', () => {

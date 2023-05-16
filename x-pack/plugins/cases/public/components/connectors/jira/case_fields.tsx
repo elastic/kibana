@@ -94,40 +94,36 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
         isLoading={isLoadingFields && !isLoadingIssueTypes && !isEmpty(issueType)}
         data-test-subj="fields-by-issue-type-loading"
       >
-        {hasParent && (
-          <>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <SearchIssues actionConnector={connector} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {hasPriority && (
-          <>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <UseField
-                  path="fields.priority"
-                  component={SelectField}
-                  config={{
-                    label: i18n.PRIORITY,
-                  }}
-                  componentProps={{
-                    euiFieldProps: {
-                      'data-test-subj': 'prioritySelect',
-                      options: prioritiesSelectOptions,
-                      fullWidth: true,
-                      disabled: isLoadingIssueTypes || isLoadingFields,
-                      isLoading: isLoadingFields,
-                    },
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
+        <div style={{ display: hasParent ? 'block' : 'none' }}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <SearchIssues actionConnector={connector} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </div>
+        <div style={{ display: hasPriority ? 'block' : 'none' }}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <UseField
+                path="fields.priority"
+                component={SelectField}
+                config={{
+                  label: i18n.PRIORITY,
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'prioritySelect',
+                    options: prioritiesSelectOptions,
+                    fullWidth: true,
+                    disabled: isLoadingIssueTypes || isLoadingFields,
+                    isLoading: isLoadingFields,
+                  },
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </EuiSkeletonText>
     </div>
   );
