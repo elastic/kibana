@@ -4,7 +4,7 @@
   "owner": "@elastic/uptime",
   "plugin": {
     "id": "exploratoryView",
-    "server": true,
+    "server": false,
     "browser": true,
     "configPath": ["xpack", "exploratory_view"],
     "requiredPlugins": [
@@ -26,9 +26,9 @@
     ],
     "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection"],
     "requiredBundles": [
-      "data",
       "dataViews",
       "embeddable",
+      "data",
       "kibanaReact",
       "kibanaUtils",
       "lens",

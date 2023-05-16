@@ -149,6 +149,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
                   action={action}
                   actionContext={actionContext}
                   showTooltip={showActionTooltips}
+                  onClick={closePopover}
                 />
               ))}
               {extraActions.length > 0 && (

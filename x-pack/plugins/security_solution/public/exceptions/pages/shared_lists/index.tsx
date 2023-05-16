@@ -539,7 +539,6 @@ export const SharedLists = React.memo(() => {
             setDisplayAddExceptionItemFlyout(false);
             if (didRuleChange) handleRefresh();
           }}
-          isNonTimeline={true}
         />
       )}
 
