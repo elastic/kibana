@@ -80,7 +80,7 @@ export function useTextBasedQueryLanguage({
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const internalState = stateContainer.internalState.getState();
+        const internalState = stateContainer.sharedState.getState();
         const dataViewList = [...internalState.savedDataViews, ...internalState.adHocDataViews];
         let dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
@@ -90,7 +90,7 @@ export function useTextBasedQueryLanguage({
           dataViewObj = await dataViews.create({
             title: indexPatternFromQuery,
           });
-          stateContainer.internalState.transitions.setAdHocDataViews([dataViewObj]);
+          stateContainer.sharedState.transitions.setAdHocDataViews([dataViewObj]);
 
           if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
             dataViewObj.timeFieldName = '@timestamp';

@@ -44,7 +44,7 @@ export function AlertsPopover({
   stateContainer,
   onClose: originalOnClose,
 }: AlertsPopoverProps) {
-  const dataView = stateContainer.internalState.getState().dataView;
+  const dataView = stateContainer.sharedState.getState().dataView;
   const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
   const onClose = useCallback(() => {
@@ -81,7 +81,7 @@ export function AlertsPopover({
 
     const onFinishFlyoutInteraction = async (metadata: EsQueryAlertMetaData) => {
       await stateContainer.actions.loadDataViewList();
-      stateContainer.internalState.transitions.setAdHocDataViews(metadata.adHocDataViewList);
+      stateContainer.sharedState.transitions.setAdHocDataViews(metadata.adHocDataViewList);
     };
 
     return triggersActionsUi?.getAddRuleFlyout({

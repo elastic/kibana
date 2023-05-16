@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DiscoverInternalStateContainer } from '../services/discover_internal_state_container';
+import { DiscoverSharedStateContainer } from '../services/discover_shared_state_container';
 import { DiscoverServices } from '../../../build_services';
 interface DataViewData {
   /**
@@ -180,7 +180,7 @@ export const loadAndResolveDataView = async (
   {
     internalStateContainer,
     services,
-  }: { internalStateContainer: DiscoverInternalStateContainer; services: DiscoverServices }
+  }: { internalStateContainer: DiscoverSharedStateContainer; services: DiscoverServices }
 ) => {
   const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
   const adHocDataView = adHocDataViews.find((dataView) => dataView.id === id);

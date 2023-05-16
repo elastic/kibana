@@ -9,7 +9,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { loadAndResolveDataView } from '../utils/resolve_data_view';
-import { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import { DiscoverSharedStateContainer } from './discover_shared_state_container';
 import { DiscoverDataStateContainer } from './discover_data_state_container';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getValidFilters } from '../../../utils/get_valid_filters';
@@ -26,7 +26,7 @@ import { DiscoverServices } from '../../../build_services';
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
   dataStateContainer: DiscoverDataStateContainer;
-  internalStateContainer: DiscoverInternalStateContainer;
+  internalStateContainer: DiscoverSharedStateContainer;
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
   setDataView: DiscoverStateContainer['actions']['setDataView'];
@@ -144,7 +144,7 @@ const getStateDataView = async (
     savedSearch?: SavedSearch;
     appState?: DiscoverAppState;
     services: DiscoverServices;
-    internalStateContainer: DiscoverInternalStateContainer;
+    internalStateContainer: DiscoverSharedStateContainer;
   }
 ) => {
   const { dataView, dataViewSpec } = params ?? {};

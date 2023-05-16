@@ -28,7 +28,7 @@ import type { DataDocuments$ } from '../../services/discover_data_state_containe
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { addLog } from '../../../../utils/add_log';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
+import { useDiscoverSharedStateSelector } from '../../services/discover_shared_state_container';
 import type { DiscoverAppState } from '../../services/discover_app_state_container';
 
 export interface UseDiscoverHistogramProps {
@@ -292,7 +292,7 @@ export const useDiscoverHistogram = ({
   // When the data view or query changes, which will trigger a current suggestion change,
   // skip the next refetch since we want to wait for the columns to update first, which
   // doesn't happen until after the documents are fetched
-  const dataViewId = useInternalStateSelector((state) => state.dataView?.id);
+  const dataViewId = useDiscoverSharedStateSelector((state) => state.dataView?.id);
   const skipFetchParams = useRef({ dataViewId, query });
 
   useEffect(() => {

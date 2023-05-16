@@ -9,7 +9,7 @@
 import React, { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { InternalStateProvider } from './discover_internal_state_container';
+import { DiscoverSharedStateProvider } from './discover_shared_state_container';
 import { DiscoverAppStateProvider } from './discover_app_state_container';
 import { DiscoverStateContainer } from './discover_state';
 
@@ -53,7 +53,7 @@ export const DiscoverMainProvider = ({
   return (
     <DiscoverStateProvider value={value}>
       <DiscoverAppStateProvider value={value.appState}>
-        <InternalStateProvider value={value.internalState}>{children}</InternalStateProvider>
+        <DiscoverSharedStateProvider value={value.sharedState}>{children}</DiscoverSharedStateProvider>
       </DiscoverAppStateProvider>
     </DiscoverStateProvider>
   );

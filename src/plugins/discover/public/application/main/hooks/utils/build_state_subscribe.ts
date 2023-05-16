@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import type { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
+import type { DiscoverSharedStateContainer } from '../../services/discover_shared_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
@@ -36,7 +36,7 @@ export const buildStateSubscribe =
   }: {
     appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
-    internalState: DiscoverInternalStateContainer;
+    internalState: DiscoverSharedStateContainer;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
     setDataView: DiscoverStateContainer['actions']['setDataView'];

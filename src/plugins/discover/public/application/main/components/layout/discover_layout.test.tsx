@@ -108,7 +108,7 @@ async function mountComponent(
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
   stateContainer.appState.update({ interval: 'auto', query });
-  stateContainer.internalState.transitions.setDataView(dataView);
+  stateContainer.sharedState.transitions.setDataView(dataView);
 
   const props = {
     dataView,

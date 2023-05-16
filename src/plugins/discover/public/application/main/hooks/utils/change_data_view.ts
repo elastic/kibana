@@ -8,7 +8,7 @@
 
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
+import { DiscoverSharedStateContainer } from '../../services/discover_shared_state_container';
 import { DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverServices } from '../../../../build_services';
@@ -26,7 +26,7 @@ export async function changeDataView(
     appState,
   }: {
     services: DiscoverServices;
-    internalState: DiscoverInternalStateContainer;
+    internalState: DiscoverSharedStateContainer;
     appState: DiscoverAppStateContainer;
   }
 ) {

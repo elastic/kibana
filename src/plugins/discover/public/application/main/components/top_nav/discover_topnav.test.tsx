@@ -29,7 +29,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 function getProps(savePermissions = true): DiscoverTopNavProps {
   discoverServiceMock.capabilities.discover!.save = savePermissions;
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState.transitions.setDataView(dataViewMock);
+  stateContainer.sharedState.transitions.setDataView(dataViewMock);
 
   return {
     stateContainer,

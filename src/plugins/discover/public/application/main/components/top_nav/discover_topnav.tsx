@@ -10,7 +10,7 @@ import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
+import { useDiscoverSharedStateSelector } from '../../services/discover_shared_state_container';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/discover_layout';
@@ -46,9 +46,9 @@ export const DiscoverTopNav = ({
   onFieldEdited,
   persistDataView,
 }: DiscoverTopNavProps) => {
-  const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
-  const dataView = useInternalStateSelector((state) => state.dataView!);
-  const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
+  const adHocDataViews = useDiscoverSharedStateSelector((state) => state.adHocDataViews);
+  const dataView = useDiscoverSharedStateSelector((state) => state.dataView!);
+  const savedDataViews = useDiscoverSharedStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,

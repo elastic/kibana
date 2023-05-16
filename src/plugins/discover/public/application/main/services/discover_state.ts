@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import {
   createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -41,9 +40,9 @@ import {
   GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
-  DiscoverInternalStateContainer,
-  getInternalStateContainer,
-} from './discover_internal_state_container';
+  DiscoverSharedStateContainer,
+  getSharedStateContainer,
+} from './discover_shared_state_container';
 import { DiscoverServices } from '../../../build_services';
 import {
   getDefaultAppState,
@@ -96,13 +95,9 @@ export interface DiscoverStateContainer {
    **/
   dataState: DiscoverDataStateContainer;
   /**
-   * Internal shared state that's used at several places in the UI
+   *  Shared state that's used at several places in the UI
    */
-  internalState: DiscoverInternalStateContainer;
-  /**
-   * kbnUrlStateStorage - it keeps the state in sync with the URL
-   */
-  kbnUrlStateStorage: IKbnUrlStateStorage;
+  sharedState: DiscoverSharedStateContainer;
   /**
    * State of saved search, the saved object of Discover
    */
@@ -235,7 +230,7 @@ export function getDiscoverStateContainer({
   /**
    * Internal State Container, state that's not persisted and not part of the URL
    */
-  const internalStateContainer = getInternalStateContainer();
+  const internalStateContainer = getSharedStateContainer();
 
   const dataStateContainer = getDataStateContainer({
     services,
@@ -448,9 +443,8 @@ export function getDiscoverStateContainer({
   };
 
   return {
-    kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
-    internalState: internalStateContainer,
+    sharedState: internalStateContainer,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
     searchSessionManager,

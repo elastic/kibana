@@ -33,7 +33,7 @@ function getHookProps(
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.replaceUrlState = replaceUrlState;
   stateContainer.appState.update({ columns: [], ...appState });
-  stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
+  stateContainer.sharedState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
 
   const msgLoading = {
     recordRawType: RecordRawType.PLAIN,

@@ -48,7 +48,7 @@ function getStateContainer({ query }: { query?: Query | AggregateQuery }) {
     query: query ?? { query: '', language: 'lucene' },
     filters: [],
   });
-  state.internalState.transitions.setDataView(stubLogstashDataView);
+  state.sharedState.transitions.setDataView(stubLogstashDataView);
   return state;
 }
 

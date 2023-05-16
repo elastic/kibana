@@ -31,7 +31,7 @@ function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
     rowsPerPage: 250,
   }));
   if (dataView) {
-    stateContainer.internalState.transitions.setDataView(dataView);
+    stateContainer.sharedState.transitions.setDataView(dataView);
   }
   return stateContainer;
 }

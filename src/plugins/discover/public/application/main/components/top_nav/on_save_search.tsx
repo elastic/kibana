@@ -93,7 +93,7 @@ export async function onSaveSearch({
   onSaveCb?: () => void;
 }) {
   const { uiSettings, savedObjectsTagging } = services;
-  const dataView = state.internalState.getState().dataView;
+  const dataView = state.sharedState.getState().dataView;
   const onSave = async ({
     newTitle,
     newCopyOnSave,

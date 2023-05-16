@@ -203,7 +203,7 @@ export function DiscoverMainRoute(props: Props) {
   // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
     // restore the previously selected data view for a new state
-    loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
+    loadSavedSearch(!savedSearchId ? stateContainer.sharedState.getState().dataView : undefined);
   }, [loadSavedSearch, savedSearchId, stateContainer]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
@@ -212,7 +212,7 @@ export function DiscoverMainRoute(props: Props) {
     savedSearchId,
     onNewUrl: () => {
       // restore the previously selected data view for a new state
-      const dataView = stateContainer.internalState.getState().dataView;
+      const dataView = stateContainer.sharedState.getState().dataView;
       loadSavedSearch(dataView);
     },
   });

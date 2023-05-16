@@ -86,7 +86,7 @@ describe('Test discover state', () => {
   });
   test('setting app state and syncing to URL', async () => {
     state.appState.update({ index: 'modified' });
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
     );
@@ -280,7 +280,7 @@ describe('actions', () => {
   test('setDataView', async () => {
     const { state } = await getState('');
     state.actions.setDataView(dataViewMock);
-    expect(state.internalState.getState().dataView).toBe(dataViewMock);
+    expect(state.sharedState.getState().dataView).toBe(dataViewMock);
   });
 
   test('fetchData', async () => {
@@ -301,7 +301,7 @@ describe('actions', () => {
   });
   test('loadDataViewList', async () => {
     const { state } = await getState('');
-    expect(state.internalState.getState().savedDataViews.length).toBe(3);
+    expect(state.sharedState.getState().savedDataViews.length).toBe(3);
   });
   test('loadSavedSearch with no id given an empty URL', async () => {
     const { state, getCurrentUrl } = await getState('');
@@ -309,7 +309,7 @@ describe('actions', () => {
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
@@ -336,7 +336,7 @@ describe('actions', () => {
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
@@ -350,7 +350,7 @@ describe('actions', () => {
     const newSavedSearch = await state.actions.loadSavedSearch({ useAppState: true });
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
     );
@@ -364,7 +364,7 @@ describe('actions', () => {
     const newSavedSearch = await state.actions.loadSavedSearch({ useAppState: true });
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
     );
@@ -377,7 +377,7 @@ describe('actions', () => {
       savedSearchId: 'the-saved-search-id',
     });
     const unsubscribe = state.actions.initializeAndSync();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(newSavedSearch?.id).toBe('the-saved-search-id');
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
@@ -390,7 +390,7 @@ describe('actions', () => {
     const { state, getCurrentUrl } = await getState(url, savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id, useAppState: true });
     const unsubscribe = state.actions.initializeAndSync();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(message),index:the-data-view-id,interval:month,sort:!())&_g=()"`
     );
@@ -488,7 +488,7 @@ describe('actions', () => {
       state.savedSearchState.getCurrent$().getValue().searchSource?.getField('index')?.id
     ).toEqual(dataViewSpecMock.id);
     expect(state.savedSearchState.getHasChanged$().getValue()).toEqual(false);
-    expect(state.internalState.getState().adHocDataViews.length).toBe(1);
+    expect(state.sharedState.getState().adHocDataViews.length).toBe(1);
   });
 
   test('loadSavedSearch resetting query & filters of data service', async () => {
@@ -518,7 +518,7 @@ describe('actions', () => {
     const { state } = await getState('/', savedSearchAdHocCopy);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchAdHoc.id });
     expect(state.appState.getState().index).toBe(adHocDataViewId);
-    expect(state.internalState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
+    expect(state.sharedState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
   });
 
   test('onChangeDataView', async () => {
@@ -528,13 +528,13 @@ describe('actions', () => {
       dataViewMock.id
     );
     const unsubscribe = state.actions.initializeAndSync();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     await state.actions.onChangeDataView(dataViewComplexMock.id!);
     await waitFor(() => {
-      expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id);
+      expect(state.sharedState.getState().dataView?.id).toBe(dataViewComplexMock.id);
     });
     expect(state.appState.get().index).toBe(dataViewComplexMock.id);
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
@@ -548,7 +548,7 @@ describe('actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.onDataViewCreated(dataViewComplexMock);
     await waitFor(() => {
-      expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id);
+      expect(state.sharedState.getState().dataView?.id).toBe(dataViewComplexMock.id);
     });
     expect(state.appState.get().index).toBe(dataViewComplexMock.id);
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
@@ -562,7 +562,7 @@ describe('actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.onDataViewCreated(dataViewAdHoc);
     await waitFor(() => {
-      expect(state.internalState.getState().dataView?.id).toBe(dataViewAdHoc.id);
+      expect(state.sharedState.getState().dataView?.id).toBe(dataViewAdHoc.id);
     });
     expect(state.appState.get().index).toBe(dataViewAdHoc.id);
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
@@ -573,7 +573,7 @@ describe('actions', () => {
   test('onDataViewEdited - persisted data view', async () => {
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
-    const selectedDataView = state.internalState.getState().dataView;
+    const selectedDataView = state.sharedState.getState().dataView;
     await waitFor(() => {
       expect(selectedDataView).toBe(dataViewMock);
     });
@@ -581,7 +581,7 @@ describe('actions', () => {
     await state.actions.onDataViewEdited(dataViewMock);
 
     await waitFor(() => {
-      expect(state.internalState.getState().dataView).not.toBe(selectedDataView);
+      expect(state.sharedState.getState().dataView).not.toBe(selectedDataView);
     });
     unsubscribe();
   });
@@ -592,7 +592,7 @@ describe('actions', () => {
     const previousId = dataViewAdHoc.id;
     await state.actions.onDataViewEdited(dataViewAdHoc);
     await waitFor(() => {
-      expect(state.internalState.getState().dataView?.id).not.toBe(previousId);
+      expect(state.sharedState.getState().dataView?.id).not.toBe(previousId);
     });
     unsubscribe();
   });
@@ -631,7 +631,7 @@ describe('actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.onCreateDefaultAdHocDataView('ad-hoc-test');
     expect(state.appState.getState().index).toBe('ad-hoc-id');
-    expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
+    expect(state.sharedState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();
   });
   test('undoSavedSearchChanges - when changing data views', async () => {
@@ -639,31 +639,31 @@ describe('actions', () => {
     // Load a given persisted saved search
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     const initialUrlState =
       '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())';
     expect(getCurrentUrl()).toBe(initialUrlState);
-    expect(state.internalState.getState().dataView?.id).toBe(dataViewMock.id!);
+    expect(state.sharedState.getState().dataView?.id).toBe(dataViewMock.id!);
 
     // Change the data view, this should change the URL and trigger a fetch
     await state.actions.onChangeDataView(dataViewComplexMock.id!);
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
     );
     await waitFor(() => {
       expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
     });
-    expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id!);
+    expect(state.sharedState.getState().dataView?.id).toBe(dataViewComplexMock.id!);
 
     // Undo all changes to the saved search, this should trigger a fetch, again
     await state.actions.undoSavedSearchChanges();
-    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toBe(initialUrlState);
     await waitFor(() => {
       expect(state.dataState.fetch).toHaveBeenCalledTimes(2);
     });
-    expect(state.internalState.getState().dataView?.id).toBe(dataViewMock.id!);
+    expect(state.sharedState.getState().dataView?.id).toBe(dataViewMock.id!);
 
     unsubscribe();
   });
