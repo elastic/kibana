@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 interface BasicSetupFormProps {
@@ -37,6 +38,11 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
   onChangeName,
   onChangeExpires,
 }) => {
+  let expirationDate: Date | undefined;
+  if (expires) {
+    expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + parseInt(expires, 10));
+  }
   return (
     <EuiForm>
       <EuiFormRow
@@ -112,7 +118,27 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
         />
       </EuiFormRow>
       {expires !== null && (
-        <EuiFormRow fullWidth>
+        <EuiFormRow
+          fullWidth
+          helpText={
+            <FormattedMessage
+              id="xpack.serverlessSearch.apiKey.expiresHelpText"
+              defaultMessage="This API Key will expire on {expirationDate}"
+              values={{
+                expirationDate: (
+                  <strong>
+                    <FormattedDate
+                      year="numeric"
+                      month="long"
+                      day="numeric"
+                      value={expirationDate!}
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          }
+        >
           <EuiFieldNumber
             fullWidth
             disabled={isLoading}
