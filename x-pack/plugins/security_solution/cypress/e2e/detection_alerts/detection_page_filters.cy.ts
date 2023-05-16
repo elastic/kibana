@@ -10,11 +10,14 @@ import { getNewRule } from '../../objects/rule';
 import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
+  CONTROL_POPOVER,
   FILTER_GROUP_CHANGED_BANNER,
   FILTER_GROUP_SAVE_CHANGES_POPOVER,
+  OPTION_IGNORED,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
+  OPTION_SELECTABLE_COUNT,
 } from '../../screens/common/filter_group';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -25,15 +28,17 @@ import { formatPageFilterSearchParam } from '../../../common/utils/format_page_f
 import {
   closePageFilterPopover,
   markAcknowledgedFirstAlert,
+  openFirstAlert,
   openPageFilterPopover,
   resetFilters,
   selectCountTable,
+  togglePageFilterPopover,
   visitAlertsPageWithCustomFilters,
   waitForAlerts,
   waitForPageFilters,
 } from '../../tasks/alerts';
-import { ALERTS_COUNT } from '../../screens/alerts';
-import { navigateFromHeaderTo } from '../../tasks/security_header';
+import { ALERTS_COUNT, ALERTS_REFRESH_BTN } from '../../screens/alerts';
+import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../../tasks/security_header';
 import { ALERTS, CASES } from '../../screens/security_header';
 import {
   addNewFilterGroupControlValues,
@@ -43,6 +48,10 @@ import {
   editFilterGroupControls,
   saveFilterGroupControls,
 } from '../../tasks/common/filter_group';
+import { TOASTER } from '../../screens/alerts_detection_rules';
+import { setEndDate, setStartDate } from '../../tasks/date_picker';
+import { fillAddFilterForm, openAddFilterPopover } from '../../tasks/search_bar';
+import { GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE } from '../../screens/search_bar';
 
 const customFilters = [
   {
@@ -153,7 +162,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
-    it('should not sync to the URL in edit mode but only in view mode', () => {
+    it('should not sync to the URL in edit mode but in view mode', () => {
       cy.url().then((urlString) => {
         editFilterGroupControls();
         deleteFilterGroupControl(3);
@@ -228,13 +237,21 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
         markAcknowledgedFirstAlert();
         waitForAlerts();
         cy.get(OPTION_LIST_VALUES(0)).click();
-        cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible');
+        cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible').trigger('click');
         cy.get(ALERTS_COUNT)
           .invoke('text')
           .should((newAlertCount) => {
             expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10) - 1));
           });
       });
+
+    // cleanup
+    // revert the changes so that data does not change for further tests.
+    // It would make sure that tests can run in any order.
+    cy.get(OPTION_SELECTABLE(0, 'open')).trigger('click');
+    togglePageFilterPopover(0);
+    openFirstAlert();
+    waitForAlerts();
   });
 
   it(`URL is updated when filters are updated`, () => {
@@ -307,5 +324,69 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
     waitForPageFilters();
     resetFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
+  });
+
+  context('Impact of inputs', { testIsolation: false }, () => {
+    it('should recover from invalide kql Query result', () => {
+      // do an invalid search
+      //
+      kqlSearch('\\');
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      waitForPageFilters();
+      cy.get(TOASTER).should('contain.text', 'KQLSyntaxError');
+      togglePageFilterPopover(0);
+      cy.get(OPTION_SELECTABLE(0, 'open')).should('be.visible');
+      cy.get(OPTION_SELECTABLE(0, 'open')).should('contain.text', 'open');
+      cy.get(OPTION_SELECTABLE(0, 'open')).get(OPTION_SELECTABLE_COUNT).should('have.text', 2);
+      // cleanup
+      togglePageFilterPopover(0);
+      clearSearchBar();
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+    });
+
+    it('should take kqlQuery into account', () => {
+      kqlSearch('kibana.alert.workflow_status: "nothing"');
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      waitForPageFilters();
+      togglePageFilterPopover(0);
+      cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
+      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+      // cleanup
+      togglePageFilterPopover(0);
+      clearSearchBar();
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+    });
+
+    it('should take timeRange into account', () => {
+      const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
+      const endDateWithZeroAlerts = 'Jan 1, 2010 @ 00:00:00.000';
+
+      setStartDate(startDateWithZeroAlerts);
+      setEndDate(endDateWithZeroAlerts);
+
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      waitForPageFilters();
+      togglePageFilterPopover(0);
+      cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
+      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+      // cleanup
+      togglePageFilterPopover(0);
+      clearSearchBar();
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+    });
+
+    it('should take filters into account', () => {
+      openAddFilterPopover();
+      fillAddFilterForm({
+        key: 'kibana.alert.workflow_status',
+        value: 'invalid',
+      });
+      waitForPageFilters();
+      togglePageFilterPopover(0);
+      cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
+      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+      // cleanup
+      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).trigger('click');
+    });
   });
 });

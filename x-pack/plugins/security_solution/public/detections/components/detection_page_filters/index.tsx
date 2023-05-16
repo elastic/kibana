@@ -32,6 +32,7 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
 
   const {
     indexPattern: { title },
+    dataViewId,
   } = useSourcererDataView(SourcererScopeName.detections);
 
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
@@ -43,17 +44,19 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
   useEffect(() => {
     (async () => {
       // creates an adhoc dataview if it does not already exists just for alert index
+      const { timeFieldName = '@timestamp' } = await dataViewService.get(dataViewId ?? '');
       await dataViewService.create({
         id: SECURITY_ALERT_DATA_VIEW.id,
         name: SECURITY_ALERT_DATA_VIEW.name,
         title,
         allowNoIndex: true,
+        timeFieldName,
       });
       setLoadingPageFilters(false);
     })();
 
     return () => dataViewService.clearInstanceCache();
-  }, [title, dataViewService]);
+  }, [title, dataViewService, dataViewId]);
 
   const [initialFilterControls] = useState(DEFAULT_DETECTION_PAGE_FILTERS);
 

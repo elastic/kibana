@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../../helpers/common';
+
 export const FILTER_GROUP_LOADING = '[data-test-subj="filter-group__loading"]';
 export const FILTER_GROUP_ITEMS = '[data-test-subj="filter-group__items"]';
 export const FILTER_GROUP_CLEAR = '[data-test-subj="filter-group__clear"]';
@@ -33,6 +35,12 @@ export const OPTION_SELECTABLE = (popoverIndex: number, value: string) =>
 
 export const OPTION_IGNORED = (popoverIndex: number, value: string) =>
   `#control-popover-${popoverIndex} [data-test-subj="optionsList-control-ignored-selection-${value}"]`;
+
+export const OPTION_SELECTABLE_COUNT = getDataTestSubjectSelector(
+  'optionsList-document-count-badge'
+);
+
+export const CONTROL_POPOVER = (popoverIdx: number) => `#control-popover-${popoverIdx}`;
 
 export const DETECTION_PAGE_FILTER_GROUP_WRAPPER = '.filter-group__wrapper';
 
