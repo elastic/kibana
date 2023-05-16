@@ -120,38 +120,40 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
       await Promise.all(errorAlertIds.map((id) => getEventLogWithRetry(id)));
 
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`)
-        .set('kbn-xsrf', 'foo')
-        .send({});
+      await retry.try(async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`)
+          .set('kbn-xsrf', 'foo')
+          .send({});
 
-      expect(response.status).to.eql(200);
-      expect(response.body).to.eql({
-        rule_enabled_status: {
-          disabled: 0,
-          enabled: 7,
-        },
-        rule_execution_status: {
-          ok: NumOkAlerts,
-          active: NumActiveAlerts,
-          error: NumErrorAlerts,
-          pending: 0,
-          unknown: 0,
-          warning: 0,
-        },
-        rule_last_run_outcome: {
-          succeeded: 5,
-          warning: 0,
-          failed: 2,
-        },
-        rule_muted_status: {
-          muted: 0,
-          unmuted: 7,
-        },
-        rule_snoozed_status: {
-          snoozed: 0,
-        },
-        rule_tags: ['foo'],
+        expect(response.status).to.eql(200);
+        expect(response.body).to.eql({
+          rule_enabled_status: {
+            disabled: 0,
+            enabled: 7,
+          },
+          rule_execution_status: {
+            ok: NumOkAlerts,
+            active: NumActiveAlerts,
+            error: NumErrorAlerts,
+            pending: 0,
+            unknown: 0,
+            warning: 0,
+          },
+          rule_last_run_outcome: {
+            succeeded: 5,
+            warning: 0,
+            failed: 2,
+          },
+          rule_muted_status: {
+            muted: 0,
+            unmuted: 7,
+          },
+          rule_snoozed_status: {
+            snoozed: 0,
+          },
+          rule_tags: ['foo'],
+        });
       });
     });
 
