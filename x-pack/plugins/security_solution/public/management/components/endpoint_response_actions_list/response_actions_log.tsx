@@ -118,7 +118,7 @@ export const ResponseActionsLog = memo<
         startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
         endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
       },
-      { retry: false, keepPreviousData: true }
+      { retry: false }
     );
 
     // total actions
