@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { TextBasedLanguagesEditor, TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
+import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
 
 interface StatefulEditorDeps {
   core: CoreStart;
 }
+
+const TextBasedLanguagesEditorLazy = React.lazy(() => import('@kbn/text-based-editor'));
+const TextBasedLanguagesEditor = withSuspense(TextBasedLanguagesEditorLazy);
 
 export function createEditor({ core }: StatefulEditorDeps) {
   return (props: TextBasedLanguagesEditorProps) => {

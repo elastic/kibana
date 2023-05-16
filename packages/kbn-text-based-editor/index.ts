@@ -7,4 +7,8 @@
  */
 
 export type { TextBasedLanguagesEditorProps } from './src/text_based_languages_editor';
-export { TextBasedLanguagesEditor } from './src/text_based_languages_editor';
+import { TextBasedLanguagesEditor } from './src/text_based_languages_editor';
+
+// React.lazy support
+// eslint-disable-next-line import/no-default-export
+export default TextBasedLanguagesEditor;
