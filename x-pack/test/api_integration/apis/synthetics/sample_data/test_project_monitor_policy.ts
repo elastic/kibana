@@ -101,7 +101,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             id: {
               type: 'text',
-              value: id,
+              value: JSON.stringify(id),
             },
             ipv4: {
               type: 'bool',
@@ -113,7 +113,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             location_name: {
               type: 'text',
-              value: 'Test private location 0',
+              value: '"Test private location 0"',
             },
             max_redirects: {
               type: 'integer',
@@ -125,15 +125,15 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             'monitor.project.id': {
               type: 'text',
-              value: projectId,
+              value: JSON.stringify(projectId),
             },
             'monitor.project.name': {
               type: 'text',
-              value: projectId,
+              value: JSON.stringify(projectId),
             },
             name: {
               type: 'text',
-              value: name,
+              value: JSON.stringify(name),
             },
             origin: {
               type: 'text',
@@ -141,7 +141,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             password: {
               type: 'password',
-              value: '',
+              value: null,
             },
             proxy_headers: {
               type: 'yaml',
@@ -149,7 +149,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             proxy_url: {
               type: 'text',
-              value: 'testGlobalParamOverwrite',
+              value: JSON.stringify('testGlobalParamOverwrite'),
             },
             'response.include_body': {
               type: 'text',
@@ -173,7 +173,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             'service.name': {
               type: 'text',
-              value: '',
+              value: null,
             },
             'ssl.certificate': {
               type: 'yaml',
@@ -213,11 +213,11 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             urls: {
               type: 'text',
-              value: 'http://localhost:9200',
+              value: '"http://localhost:9200"',
             },
             username: {
               type: 'text',
-              value: '',
+              value: null,
             },
           },
           compiled_stream: {
