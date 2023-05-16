@@ -18,7 +18,8 @@ export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependen
       const user = security.authc.getCurrentUser(request);
       if (user) {
         const apiKeys = await client.asCurrentUser.security.getApiKey({ username: user.username });
-        return response.ok({ body: { apiKeys: apiKeys.api_keys } });
+        const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
+        return response.ok({ body: { apiKeys: validKeys } });
       }
       return response.customError({
         statusCode: 502,
