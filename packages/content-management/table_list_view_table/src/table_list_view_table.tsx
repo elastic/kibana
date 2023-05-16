@@ -20,6 +20,7 @@ import {
   CriteriaWithPagination,
   Query,
   Ast,
+  EuiPaddingSize,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -105,12 +106,16 @@ export interface TableListViewTableProps<
    * @deprecated
    */
   withoutPageTemplateWrapper?: boolean;
+  withPageTemplateHeader?: boolean;
   contentEditor?: ContentEditorConfig;
 
   tableCaption: string;
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
+  restrictPageSectionWidth?: boolean;
+  pageSectionPadding?: EuiPaddingSize;
+  tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -268,6 +273,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
+  withPageTemplateHeader = true,
+  restrictPageSectionWidth = true,
+  pageSectionPadding = 'm',
+  fixedTag,
+  tagReferences,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -303,6 +313,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     getTagList,
   } = useServices();
+
+  const getTagListing = useCallback(() => {
+    let tags = getTagList();
+    if (fixedTag) {
+      tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
+    }
+    return tags;
+  }, [fixedTag, getTagList]);
 
   const openContentEditor = useOpenContentEditor();
 
@@ -385,9 +403,16 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         referencesToExclude,
       } = searchQueryParser
         ? await searchQueryParser(searchQuery.text)
-        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
+        : {
+            searchQuery: searchQuery.text,
+            references: tagReferences ?? undefined,
+            referencesToExclude: undefined,
+          };
 
-      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+      const response = await findItems(searchQueryParsed, {
+        references: tagReferences ?? references,
+        referencesToExclude,
+      });
 
       if (!isMounted.current) {
         return;
@@ -409,7 +434,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess]);
+  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, tagReferences]);
 
   useEffect(() => {
     fetchItems();
@@ -444,7 +469,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const inspectItem = useCallback(
     (item: T) => {
       const tags = getTagIdsFromReferences(item.references).map((_id) => {
-        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
+        return item.references.find(({ id: refId }) => {
+          return refId === _id;
+        }) as SavedObjectsReference;
       });
 
       const close = openContentEditor({
@@ -823,7 +850,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         termMatch = searchTerm;
 
         if (references?.length || referencesToExclude?.length) {
-          const allTags = getTagList();
+          const allTags = getTagListing();
 
           if (references?.length) {
             references.forEach(({ id: refId }) => {
@@ -879,7 +906,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
     updateQueryFromURL(urlState.s);
     updateSortFromURL(urlState.sort);
-  }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
+  }, [urlState, searchQueryParser, getTagListing, urlStateEnabled]);
 
   useEffect(() => {
     isMounted.current = true;

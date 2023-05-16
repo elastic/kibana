@@ -34,6 +34,7 @@ export interface Params {
   query: Query | null;
   tagsToTableItemMap: { [tagId: string]: string[] };
   getTagList: () => Tag[];
+  fixedTag?: string;
   addOrRemoveIncludeTagFilter: (tag: Tag) => void;
   addOrRemoveExcludeTagFilter: (tag: Tag) => void;
 }
@@ -42,6 +43,7 @@ export const useTagFilterPanel = ({
   query,
   tagsToTableItemMap,
   getTagList,
+  fixedTag = 'Security Solution',
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
 }: Params) => {
@@ -52,7 +54,9 @@ export const useTagFilterPanel = ({
   // "isInUse" state which disable the transition.
   const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
-  const [tagSelection, setTagSelection] = useState<TagSelection>({});
+  const [tagSelection, setTagSelection] = useState<TagSelection>(
+    fixedTag ? { [fixedTag]: 'include' } : {}
+  );
   const totalActiveFilters = Object.keys(tagSelection).length;
 
   const onSelectChange = useCallback(
@@ -68,6 +72,9 @@ export const useTagFilterPanel = ({
 
   const onOptionClick = useCallback(
     (tag: Tag) => (e: MouseEvent) => {
+      if (fixedTag) {
+        return;
+      }
       const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
 
       if (withModifierKey) {
@@ -76,7 +83,7 @@ export const useTagFilterPanel = ({
         addOrRemoveIncludeTagFilter(tag);
       }
     },
-    [addOrRemoveIncludeTagFilter, addOrRemoveExcludeTagFilter]
+    [fixedTag, addOrRemoveExcludeTagFilter, addOrRemoveIncludeTagFilter]
   );
 
   const updateTagList = useCallback(() => {
@@ -118,7 +125,7 @@ export const useTagFilterPanel = ({
     });
 
     setOptions(tagsToSelectOptions);
-  }, [getTagList, tagsToTableItemMap, tagSelection, onOptionClick]);
+  }, [getTagList, fixedTag, tagSelection, onOptionClick, tagsToTableItemMap]);
 
   const onFilterButtonClick = useCallback(() => {
     setIsPopoverOpen((prev) => !prev);
@@ -129,6 +136,9 @@ export const useTagFilterPanel = ({
   }, []);
 
   useEffect(() => {
+    if (fixedTag) {
+      return;
+    }
     /**
      * Data flow for tag filter panel state:
      * When we click (or Ctrl + click) on a tag in the filter panel:
@@ -160,7 +170,7 @@ export const useTagFilterPanel = ({
 
       setTagSelection(updatedTagSelection);
     }
-  }, [query]);
+  }, [fixedTag, query]);
 
   useEffect(() => {
     if (isPopoverOpen) {

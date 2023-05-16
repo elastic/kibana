@@ -86,6 +86,7 @@ export function Table<T extends UserContentCommonSchema>({
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
+  fixedTag = 'Security Solution',
 }: Props<T>) {
   const { getTagList } = useServices();
 
@@ -150,7 +151,14 @@ export function Table<T extends UserContentCommonSchema>({
     totalActiveFilters,
   } = useTagFilterPanel({
     query: searchQuery.query,
-    getTagList,
+    getTagList: useCallback(() => {
+      let tags = getTagList();
+      if (fixedTag) {
+        tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
+      }
+      return tags;
+    }, [fixedTag, getTagList]),
+    fixedTag: 'Security Solution',
     tagsToTableItemMap,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
