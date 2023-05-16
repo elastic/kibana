@@ -64,18 +64,10 @@ export async function getAssets({
       });
     }
 
-    if (filters.type?.length) {
+    if (filters.kind?.length) {
       musts.push({
         terms: {
-          ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],
-        },
-      });
-    }
-
-    if (filters.kind) {
-      musts.push({
-        term: {
-          ['asset.kind']: filters.kind,
+          ['asset.kind']: Array.isArray(filters.kind) ? filters.kind : [filters.kind],
         },
       });
     }
@@ -96,10 +88,10 @@ export async function getAssets({
       });
     }
 
-    if (filters.typeLike) {
+    if (filters.kindLike) {
       musts.push({
         wildcard: {
-          ['asset.type']: filters.typeLike,
+          ['asset.kind']: filters.kindLike,
         },
       });
     }

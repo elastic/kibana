@@ -39,6 +39,19 @@ export const InfraAssetMetadataRT = rt.type({
   value: rt.union([rt.string, rt.null]),
 });
 
+const AssetInformationRT = rt.type({
+  count: rt.number,
+  items: rt.array(rt.string),
+});
+
+export type AssetInformationType = rt.TypeOf<typeof AssetInformationRT>;
+
+export const InfraAssetInformationRT = rt.type({
+  containerInformation: AssetInformationRT,
+  serviceInformation: AssetInformationRT,
+  alertInformation: AssetInformationRT,
+});
+
 export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     query: rt.UnknownRecord,
@@ -56,6 +69,7 @@ export const InfraAssetMetricsItemRT = rt.type({
   name: rt.string,
   metrics: rt.array(InfraAssetMetricsRT),
   metadata: rt.array(InfraAssetMetadataRT),
+  assetInformation: InfraAssetInformationRT,
 });
 
 export const GetInfraMetricsResponsePayloadRT = rt.type({

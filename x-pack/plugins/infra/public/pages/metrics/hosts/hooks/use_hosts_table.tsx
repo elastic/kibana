@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
@@ -19,6 +19,7 @@ import {
   InfraAssetMetadataType,
   InfraAssetMetricsItem,
   InfraAssetMetricType,
+  AssetInformationType,
 } from '../../../../../common/http_api';
 import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
@@ -51,7 +52,7 @@ const formatMetric = (type: InfraAssetMetricType, value: number | undefined | nu
 };
 
 const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
-  return nodes.map(({ metrics, metadata, name }) => {
+  return nodes.map(({ metrics, metadata, name, assetInformation }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
         ...acc,
@@ -76,6 +77,9 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
         }),
         {} as HostMetrics
       ),
+      containerInformation: assetInformation.containerInformation,
+      serviceInformation: assetInformation.serviceInformation,
+      alertInformation: assetInformation.alertInformation,
     };
   });
 };
@@ -313,6 +317,78 @@ export const useHostsTable = () => {
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memory',
         render: (avg: number) => formatMetric('memory', avg),
+        align: 'right',
+      },
+      {
+        name: 'Container count',
+        field: 'containerInformation',
+        render: (info: AssetInformationType) => {
+          if (info.count === -1) {
+            return 'N/A';
+          }
+
+          if (info.count === 0) {
+            return 0;
+          }
+
+          const content = info.items.join(', ');
+
+          return (
+            <EuiToolTip content={content}>
+              <span>{info.count}</span>
+            </EuiToolTip>
+          );
+        },
+        sortable: true,
+        'data-test-subj': 'hostsView-tableRow-containerCount',
+        align: 'right',
+      },
+      {
+        name: 'Service count',
+        field: 'serviceInformation',
+        render: (info: AssetInformationType) => {
+          if (info.count === -1) {
+            return 'N/A';
+          }
+
+          if (info.count === 0) {
+            return 0;
+          }
+
+          const content = info.items.join(', ');
+
+          return (
+            <EuiToolTip content={content}>
+              <span>{info.count}</span>
+            </EuiToolTip>
+          );
+        },
+        sortable: true,
+        'data-test-subj': 'hostsView-tableRow-serviceCount',
+        align: 'right',
+      },
+      {
+        name: 'Alert count',
+        field: 'alertInformation',
+        render: (info: AssetInformationType) => {
+          if (info.count === -1) {
+            return 'N/A';
+          }
+
+          if (info.count === 0) {
+            return 0;
+          }
+
+          const content = info.items.join(', ');
+
+          return (
+            <EuiToolTip content={content}>
+              <span>{info.count}</span>
+            </EuiToolTip>
+          );
+        },
+        sortable: true,
+        'data-test-subj': 'hostsView-tableRow-alertCount',
         align: 'right',
       },
     ],

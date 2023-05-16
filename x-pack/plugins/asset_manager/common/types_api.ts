@@ -7,14 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const assetTypeRT = schema.oneOf([
-  schema.literal('k8s.pod'),
-  schema.literal('k8s.cluster'),
-  schema.literal('k8s.node'),
+export const assetKindRT = schema.oneOf([
+  schema.literal('cluster'),
+  schema.literal('host'),
+  schema.literal('pod'),
+  schema.literal('container'),
+  schema.literal('service'),
+  schema.literal('alert'),
 ]);
-export type AssetType = typeof assetTypeRT.type;
 
-export type AssetKind = 'cluster' | 'host' | 'pod' | 'container' | 'service';
+export type AssetKind = typeof assetKindRT.type;
+
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
@@ -59,7 +62,6 @@ export interface Asset extends ECSDocument {
   'asset.id': string;
   'asset.kind': AssetKind;
   'asset.name'?: string;
-  'asset.type'?: AssetType;
   'asset.status'?: AssetStatus;
   'asset.parents'?: string | string[];
   'asset.children'?: string | string[];
@@ -122,11 +124,10 @@ export interface K8sCluster extends WithTimestamp {
 }
 
 export interface AssetFilters {
-  type?: AssetType | AssetType[];
-  kind?: AssetKind;
+  kind?: AssetKind | AssetKind[];
   ean?: string | string[];
   id?: string;
-  typeLike?: string;
+  kindLike?: string;
   eanLike?: string;
   collectionVersion?: number | 'latest' | 'all';
   from?: string;

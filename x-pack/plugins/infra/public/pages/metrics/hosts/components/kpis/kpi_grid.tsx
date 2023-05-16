@@ -73,6 +73,7 @@ export const KPIGrid = () => {
         data-test-subj="hostsViewKPIGrid"
       >
         <EuiFlexItem>
+          {/* Should be updated to pull data from Assets API as well */}
           <HostsTile />
         </EuiFlexItem>
         {KPI_CHARTS.map(({ ...chartProp }) => (

@@ -6,7 +6,13 @@
  */
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { collectContainers, collectHosts, collectPods, collectServices } from './collectors';
+import {
+  collectContainers,
+  collectHosts,
+  collectPods,
+  collectServices,
+  collectAlerts,
+} from './collectors';
 import { CollectorRunner } from './collector_runner';
 
 export interface ImplicitCollectionOptions {
@@ -22,8 +28,9 @@ export function startImplicitCollection(options: ImplicitCollectionOptions): () 
   runner.registerCollector('hosts', collectHosts);
   runner.registerCollector('pods', collectPods);
   runner.registerCollector('services', collectServices);
+  runner.registerCollector('alerts', collectAlerts);
 
-  const timer = setInterval(async () => {
+  const runCollection = async () => {
     options.logger.info('Starting execution');
     try {
       await runner.run();
@@ -31,7 +38,12 @@ export function startImplicitCollection(options: ImplicitCollectionOptions): () 
     } catch (err) {
       options.logger.info(`Execution ended with error: ${err}`);
     }
-  }, options.intervalMs);
+  };
+
+  // If dev mode
+  runCollection();
+
+  const timer = setInterval(runCollection, options.intervalMs);
 
   return () => {
     options.logger.debug('Stopping periodic collection');

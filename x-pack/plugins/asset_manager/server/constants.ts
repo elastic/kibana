@@ -8,6 +8,8 @@
 export const ASSETS_INDEX_PREFIX = 'assets';
 export const ASSET_MANAGER_API_BASE = '/api/asset-manager';
 
-export const LOGS_INDICES = 'logs-*,filebeat-*';
-export const APM_INDICES = 'traces-*,apm*,metrics-apm*,logs-apm*';
-export const METRICS_INDICES = 'metrics-*,metricbeat-*';
+// How do we even know these are the right indices to hit?
+export const LOGS_INDICES = 'remote_cluster:logs-*,remote_cluster:filebeat-*';
+export const APM_INDICES =
+  'remote_cluster:traces-*,remote_cluster:apm*,remote_cluster:metrics-apm*,remote_cluster:logs-apm*';
+export const METRICS_INDICES = 'remote_cluster:metrics-*,remote_cluster:metricbeat-*';

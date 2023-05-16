@@ -29,7 +29,6 @@ export function getSampleAssetDocs({
 
 const sampleK8sClusters: AssetWithoutTimestamp[] = [
   {
-    'asset.type': 'k8s.cluster',
     'asset.kind': 'cluster',
     'asset.id': 'cluster-001',
     'asset.name': 'Cluster 001 (AWS EKS)',
@@ -42,7 +41,6 @@ const sampleK8sClusters: AssetWithoutTimestamp[] = [
     'cloud.service.name': 'eks',
   },
   {
-    'asset.type': 'k8s.cluster',
     'asset.kind': 'cluster',
     'asset.id': 'cluster-002',
     'asset.name': 'Cluster 002 (Azure AKS)',
@@ -58,7 +56,6 @@ const sampleK8sClusters: AssetWithoutTimestamp[] = [
 
 const sampleK8sNodes: AssetWithoutTimestamp[] = [
   {
-    'asset.type': 'k8s.node',
     'asset.kind': 'host',
     'asset.id': 'node-101',
     'asset.name': 'k8s-node-101-aws',
@@ -72,7 +69,6 @@ const sampleK8sNodes: AssetWithoutTimestamp[] = [
     'cloud.service.name': 'eks',
   },
   {
-    'asset.type': 'k8s.node',
     'asset.kind': 'host',
     'asset.id': 'node-102',
     'asset.name': 'k8s-node-102-aws',
@@ -86,7 +82,6 @@ const sampleK8sNodes: AssetWithoutTimestamp[] = [
     'cloud.service.name': 'eks',
   },
   {
-    'asset.type': 'k8s.node',
     'asset.kind': 'host',
     'asset.id': 'node-103',
     'asset.name': 'k8s-node-103-aws',
@@ -103,7 +98,6 @@ const sampleK8sNodes: AssetWithoutTimestamp[] = [
 
 const sampleK8sPods: AssetWithoutTimestamp[] = [
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200xrg1',
     'asset.name': 'k8s-pod-200xrg1-aws',
@@ -112,7 +106,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.references': ['k8s.cluster:cluster-001'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200dfp2',
     'asset.name': 'k8s-pod-200dfp2-aws',
@@ -120,7 +113,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.parents': ['k8s.node:node-101'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200wwc3',
     'asset.name': 'k8s-pod-200wwc3-aws',
@@ -128,7 +120,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.parents': ['k8s.node:node-101'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200naq4',
     'asset.name': 'k8s-pod-200naq4-aws',
@@ -136,7 +127,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.parents': ['k8s.node:node-102'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200ohr5',
     'asset.name': 'k8s-pod-200ohr5-aws',
@@ -144,7 +134,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.parents': ['k8s.node:node-102'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200yyx6',
     'asset.name': 'k8s-pod-200yyx6-aws',
@@ -152,7 +141,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.parents': ['k8s.node:node-103'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200psd7',
     'asset.name': 'k8s-pod-200psd7-aws',
@@ -160,7 +148,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.parents': ['k8s.node:node-103'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200wmc8',
     'asset.name': 'k8s-pod-200wmc8-aws',
@@ -168,7 +155,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.parents': ['k8s.node:node-103'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-200ugg9',
     'asset.name': 'k8s-pod-200ugg9-aws',
@@ -179,7 +165,6 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
 
 const sampleCircularReferences: AssetWithoutTimestamp[] = [
   {
-    'asset.type': 'k8s.node',
     'asset.kind': 'host',
     'asset.id': 'node-203',
     'asset.name': 'k8s-node-203-aws',
@@ -193,7 +178,6 @@ const sampleCircularReferences: AssetWithoutTimestamp[] = [
     'asset.references': ['k8s.pod:pod-203ugg9', 'k8s.pod:pod-203ugg5'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-203ugg5',
     'asset.name': 'k8s-pod-203ugg5-aws',
@@ -201,7 +185,6 @@ const sampleCircularReferences: AssetWithoutTimestamp[] = [
     'asset.references': ['k8s.node:node-203'],
   },
   {
-    'asset.type': 'k8s.pod',
     'asset.kind': 'pod',
     'asset.id': 'pod-203ugg9',
     'asset.name': 'k8s-pod-203ugg9-aws',
