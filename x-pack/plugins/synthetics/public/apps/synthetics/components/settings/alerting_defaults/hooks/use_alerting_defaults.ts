@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { selectDynamicSettings } from '../../../../state/settings/selectors';
