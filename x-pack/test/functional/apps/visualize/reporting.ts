@@ -42,7 +42,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Print PDF button', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/156964
+    describe.skip('Print PDF button', () => {
       const ecommerceSOPath =
         'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 

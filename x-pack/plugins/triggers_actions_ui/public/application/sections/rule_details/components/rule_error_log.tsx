@@ -30,6 +30,7 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { EventLogListCellRenderer } from '../../common/components/event_log';
+import { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -62,7 +63,7 @@ const MAX_RESULTS = 1000;
 export type RuleErrorLogProps = {
   ruleId: string;
   runId?: string;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   spaceId?: string;
   logFromDifferentSpace?: boolean;
   requestRefresh?: () => Promise<void>;

@@ -2359,6 +2359,67 @@ describe('bulkEdit()', () => {
         'Error updating rule: the interval is less than the allowed minimum interval of 3m'
       );
     });
+
+    test('should not update saved object and return error if schedule interval is shorter than any action frequency in the rule', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test',
+                  frequency: { notifyWhen: 'onThrottleInterval', summary: false, throttle: '5m' },
+                  group: 'default',
+                  params: {},
+                  uuid: '111',
+                },
+                {
+                  actionRef: 'action_1',
+                  actionTypeId: '',
+                  frequency: { notifyWhen: 'onThrottleInterval', summary: true, throttle: '10s' },
+                  group: 'default',
+                  params: {},
+                  uuid: '100',
+                },
+              ],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'action_1',
+                type: 'action',
+                id: '2',
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ] as any,
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '10m' },
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.rules).toHaveLength(0);
+      expect(result.errors[0].message).toBe(
+        `Error updating rule with ID "${existingDecryptedRule.id}": the interval 10m is longer than the action frequencies`
+      );
+    });
   });
 
   describe('paramsModifier', () => {

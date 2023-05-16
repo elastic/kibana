@@ -17,14 +17,14 @@ import { Status } from '../../../../../../common/types/api';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
-import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
-
-import { FetchCloudHealthApiLogic } from '../../../api/stats/fetch_cloud_health_api_logic';
-import { NATIVE_CONNECTORS } from '../../search_index/connector/constants';
 import {
   LicensingCallout,
   LICENSING_FEATURE,
-} from '../../shared/licensing_callout/licensing_callout';
+} from '../../../../shared/licensing_callout/licensing_callout';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
+
+import { FetchCloudHealthApiLogic } from '../../../api/stats/fetch_cloud_health_api_logic';
+import { BETA_CONNECTORS, NATIVE_CONNECTORS } from '../../search_index/connector/constants';
 import { NewSearchIndexLogic } from '../new_search_index_logic';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
@@ -48,6 +48,9 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType })
   const isNative =
     Boolean(NATIVE_CONNECTORS.find((connector) => connector.serviceType === serviceType)) &&
     (isCloud || hasPlatinumLicense);
+  const isBeta = Boolean(
+    BETA_CONNECTORS.find((connector) => connector.serviceType === serviceType)
+  );
 
   const isGated = isNative && !isCloud && !hasPlatinumLicense;
 
@@ -79,6 +82,7 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType })
             makeRequest({ indexName: name, isNative, language: lang, serviceType })
           }
           buttonLoading={status === Status.LOADING}
+          isBeta={isBeta}
         />
 
         {isModalVisible && (

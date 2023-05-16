@@ -417,3 +417,12 @@ export const dataViewComplexMock = buildDataViewMock({
   fields,
   timeFieldName: 'data',
 });
+
+export const dataViewAdHoc = {
+  ...buildDataViewMock({
+    name: 'data-view-ad-hoc',
+    fields,
+    timeFieldName: 'time',
+  }),
+  isPersisted: () => false,
+} as DataView;

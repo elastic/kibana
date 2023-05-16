@@ -9,7 +9,9 @@
         "type": "Function",
         "tags": [],
         "label": "getSavedSearch",
-        "description": [],
+        "description": [
+          "\nReturns a persisted or a new saved search"
+        ],
         "signature": [
           "(savedSearchId: string | undefined, dependencies: GetSavedSearchDependencies) => Promise<",
           {
@@ -31,7 +33,9 @@
             "type": "string",
             "tags": [],
             "label": "savedSearchId",
-            "description": [],
+            "description": [
+              "- when undefined a new saved search is returned"
+            ],
             "signature": [
               "string | undefined"
             ],
