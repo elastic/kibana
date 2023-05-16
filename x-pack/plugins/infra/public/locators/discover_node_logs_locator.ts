@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { LocatorDefinition } from '@kbn/share-plugin/public';
+import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { NodeLogsLocatorDependencies, NodeLogsLocatorParams } from './node_logs_locator';
 
 const DISCOVER_NODE_LOGS_LOCATOR_ID = 'DISCOVER_NODE_LOGS_LOCATOR';
+
+export type DiscoverNodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
 
 export class DiscoverNodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLocatorParams> {
   public readonly id = DISCOVER_NODE_LOGS_LOCATOR_ID;
