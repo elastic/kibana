@@ -68,10 +68,6 @@ export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 
    * If false, forces all breakpoint versions into the open state without the ability to hide.
    */
   canBeCollapsed?: boolean;
-  /**
-   * Allows to set the `data-test-subj` prop of the nav title element
-   */
-  titleDataTestSubj?: string;
 };
 
 const FLYOUT_SIZE = 248;
@@ -125,7 +121,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   const HeadingElement = headingProps?.element || 'h2';
 
   const titleText = (
-    <EuiTitle size="xs" id={headingID} data-test-subj={rest.titleDataTestSubj}>
+    <EuiTitle size="xs" id={headingID} data-test-subj={headingProps?.['data-test-subj']}>
       <HeadingElement>
         {icon && (
           <KibanaSolutionAvatar className="kbnSolutionNav__avatar" iconType={icon} name={name} />
