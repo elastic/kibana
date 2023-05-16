@@ -95,6 +95,12 @@ export interface BaseState extends ControlState {
    * http.max_content_length which defaults to 100mb.
    */
   readonly maxBatchSizeBytes: number;
+  /**
+   * If a read batch exceeds this limit we half the batchSize and retry. By
+   * not JSON.parsing and transforming large batches we can avoid RangeErrors
+   * or Kibana OOMing.
+   */
+  readonly maxReadBatchSizeBytes: number;
   readonly logs: MigrationLog[];
   /**
    * If saved objects exist which have an unknown type they will cause

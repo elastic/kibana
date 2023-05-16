@@ -16,6 +16,7 @@ const migrationSchema = schema.object({
   }),
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
+  maxReadBatchSizeBytes: schema.byteSize({ defaultValue: 536870888, max: 536870888 }),
   discardUnknownObjects: schema.maybe(
     schema.string({
       validate: (value: string) =>

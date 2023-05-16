@@ -880,17 +880,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (isTypeof(left, 'es_response_too_large')) {
+        const batchSize = Math.floor(stateP.batchSize / 2);
         return {
           ...stateP,
-          batchSize: stateP.batchSize / 2,
+          batchSize,
           controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
           logs: [
             ...stateP.logs,
             {
               level: 'warning',
-              message: `Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half to ${
-                stateP.batchSize / 2
-              }.`,
+              message: `Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
             },
           ],
         };
@@ -1204,17 +1203,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (isTypeof(left, 'es_response_too_large')) {
+        const batchSize = Math.floor(stateP.batchSize / 2);
         return {
           ...stateP,
-          batchSize: stateP.batchSize / 2,
+          batchSize,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
           logs: [
             ...stateP.logs,
             {
               level: 'warning',
-              message: `Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half to ${
-                stateP.batchSize / 2
-              }.`,
+              message: `Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
             },
           ],
         };

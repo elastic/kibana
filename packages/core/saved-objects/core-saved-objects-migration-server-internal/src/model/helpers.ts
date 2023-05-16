@@ -291,7 +291,7 @@ export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): st
 export const increaseBatchSize = (
   stateP: OutdatedDocumentsSearchRead | ReindexSourceToTempRead
 ) => {
-  const increasedBatchSize = stateP.batchSize * 1.2;
+  const increasedBatchSize = Math.floor(stateP.batchSize * 1.2);
   return increasedBatchSize > stateP.defaultBatchSize
     ? stateP.defaultBatchSize
     : increasedBatchSize;

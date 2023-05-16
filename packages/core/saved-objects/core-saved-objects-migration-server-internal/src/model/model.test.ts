@@ -1873,7 +1873,7 @@ describe('migrations v2 model', () => {
           Array [
             Object {
               "level": "warning",
-              "message": "Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half to 500.",
+              "message": "Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
             },
           ]
         `);
@@ -2412,7 +2412,7 @@ describe('migrations v2 model', () => {
           Array [
             Object {
               "level": "warning",
-              "message": "Read a batch that exceeded the NodeJS maximum string length, retrying by reducing the batch size in half to 500.",
+              "message": "Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
             },
           ]
         `);
