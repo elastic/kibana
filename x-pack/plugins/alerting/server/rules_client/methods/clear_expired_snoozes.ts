@@ -13,7 +13,7 @@ import { updateMeta } from '../lib';
 
 export async function clearExpiredSnoozes(
   context: RulesClientContext,
-  { rule }: { rule: SanitizedRule<RuleTypeParams> }
+  { rule }: { rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'> }
 ): Promise<void> {
   const snoozeSchedule = rule.snoozeSchedule
     ? rule.snoozeSchedule.filter((s) => {
