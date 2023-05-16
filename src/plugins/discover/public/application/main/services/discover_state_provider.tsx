@@ -53,7 +53,9 @@ export const DiscoverMainProvider = ({
   return (
     <DiscoverStateProvider value={value}>
       <DiscoverAppStateProvider value={value.appState}>
-        <DiscoverSharedStateProvider value={value.sharedState}>{children}</DiscoverSharedStateProvider>
+        <DiscoverSharedStateProvider value={value.sharedState}>
+          {children}
+        </DiscoverSharedStateProvider>
       </DiscoverAppStateProvider>
     </DiscoverStateProvider>
   );
