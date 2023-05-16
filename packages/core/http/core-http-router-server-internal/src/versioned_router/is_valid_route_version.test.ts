@@ -22,10 +22,22 @@ describe('isValidRouteVersion', () => {
   });
   describe('internal', () => {
     test('allows valid numbers', () => {
-      expect(isValidRouteVersion(false, '1')).toBe(undefined);
+      expect(isValidRouteVersion(false, '1234')).toBe(undefined);
     });
 
-    test.each([['1.1'], [''], ['abc']])('%p returns an error message', (value: string) => {
+    test.each([
+      ['1.1'],
+      [''],
+      ['abc'],
+      ['2023-02-01'],
+      ['2023.02.01'],
+      ['2023 01 02'],
+      ['0'],
+      [' 11'],
+      ['11 '],
+      [' 11 '],
+      ['-1'],
+    ])('%p returns an error message', (value: string) => {
       expect(isValidRouteVersion(false, value)).toMatch(/Invalid version number/);
     });
   });
