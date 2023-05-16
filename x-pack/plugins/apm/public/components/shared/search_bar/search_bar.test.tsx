@@ -49,6 +49,8 @@ function setup({
         timefilter: {
           timefilter: {
             setTime: () => {},
+            getRefreshInterval: () => {},
+            setRefreshInterval: () => {},
           },
         },
       },
