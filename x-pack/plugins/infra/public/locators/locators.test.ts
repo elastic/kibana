@@ -10,17 +10,15 @@ import { LogsLocatorDefinition, LogsLocatorDependencies } from './logs_locator';
 import { NodeLogsLocatorDefinition } from './node_logs_locator';
 import type { LogsLocatorParams } from './logs_locator';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
-import { LOGS_APP_TARGET } from '../../common/constants';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findInventoryFields } from '../../common/inventory_models';
 import moment from 'moment';
 import { DEFAULT_LOG_VIEW } from '../observability_logs/log_view_state';
 import type { LogViewReference } from '../../common/log_views';
 
-const setupLogsLocator = async (appTarget: string = LOGS_APP_TARGET) => {
+const setupLogsLocator = async () => {
   const deps: LogsLocatorDependencies = {
     core: coreMock.createSetup(),
-    config: { appTarget },
   };
   const logsLocator = new LogsLocatorDefinition(deps);
   const nodeLogsLocator = new NodeLogsLocatorDefinition(deps);
