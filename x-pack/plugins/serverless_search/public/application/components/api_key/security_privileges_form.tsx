@@ -23,15 +23,17 @@ import { OPTIONAL_LABEL } from '../../../../common/i18n_string';
 interface SecurityPrivilegesFormProps {
   roleDescriptors: string;
   onChangeRoleDescriptors: (roleDescriptors: string) => void;
+  error?: React.ReactNode | React.ReactNode[];
 }
 
 export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
   roleDescriptors,
   onChangeRoleDescriptors,
+  error,
 }) => {
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
@@ -59,6 +61,11 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
         })}
       </EuiLink>
       <EuiSpacer />
+      {error && (
+        <EuiText size="s" color="danger">
+          <p>{error}</p>
+        </EuiText>
+      )}
       <CodeEditorField
         allowFullScreen
         fullWidth

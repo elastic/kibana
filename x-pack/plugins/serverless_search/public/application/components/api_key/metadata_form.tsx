@@ -23,12 +23,17 @@ import { OPTIONAL_LABEL } from '../../../../common/i18n_string';
 interface MetadataFormProps {
   metadata: string;
   onChangeMetadata: (metadata: string) => void;
+  error?: React.ReactNode | React.ReactNode[];
 }
 
-export const MetadataForm: React.FC<MetadataFormProps> = ({ metadata, onChangeMetadata }) => {
+export const MetadataForm: React.FC<MetadataFormProps> = ({
+  metadata,
+  onChangeMetadata,
+  error,
+}) => {
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
@@ -56,6 +61,11 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({ metadata, onChangeMe
         })}
       </EuiLink>
       <EuiSpacer />
+      {error && (
+        <EuiText size="s" color="danger">
+          <p>{error}</p>
+        </EuiText>
+      )}
       <CodeEditorField
         allowFullScreen
         fullWidth

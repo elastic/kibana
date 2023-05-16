@@ -22,7 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { ApiKey } from '@kbn/security-plugin/common';
 import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { BACK_LABEL, CANCEL_LABEL, NEXT_LABEL } from '../../../../common/i18n_string';
+import {
+  BACK_LABEL,
+  CANCEL_LABEL,
+  NEXT_LABEL,
+  INVALID_JSON_ERROR,
+} from '../../../../common/i18n_string';
 import { CreateAPIKeyArgs } from '../../../../common/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { CREATE_API_KEY_PATH } from '../../routes';
@@ -87,7 +92,9 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);
   const [roleDescriptors, setRoleDescriptors] = useState('');
+  const [roleDescriptorsError, setRoleDescriptorsError] = useState<string | undefined>(undefined);
   const [metadata, setMetadata] = useState('');
+  const [metadataError, setMetadataError] = useState<string | undefined>(undefined);
 
   const onCreateClick = () => {
     let parsedRoleDescriptors: Record<string, any> | undefined;
@@ -95,17 +102,19 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
       parsedRoleDescriptors = roleDescriptors.length > 0 ? JSON.parse(roleDescriptors) : undefined;
     } catch (e) {
       setCurrentStep(Steps.PRIVILEGES);
-      // TODO: set error
+      setRoleDescriptorsError(INVALID_JSON_ERROR);
       return;
     }
+    if (roleDescriptorsError) setRoleDescriptorsError(undefined);
     let parsedMetadata: Record<string, any> | undefined;
     try {
       parsedMetadata = metadata.length > 0 ? JSON.parse(metadata) : undefined;
     } catch (e) {
       setCurrentStep(Steps.METADATA);
-      // TODO: set error
+      setMetadataError(INVALID_JSON_ERROR);
       return;
     }
+    if (metadataError) setMetadataError(undefined);
     const expiration = expires !== null ? `${expires}d` : undefined;
 
     mutate({
@@ -196,10 +205,11 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
           <SecurityPrivilegesForm
             roleDescriptors={roleDescriptors}
             onChangeRoleDescriptors={setRoleDescriptors}
+            error={roleDescriptorsError}
           />
         )}
         {currentStep === Steps.METADATA && (
-          <MetadataForm metadata={metadata} onChangeMetadata={setMetadata} />
+          <MetadataForm metadata={metadata} onChangeMetadata={setMetadata} error={metadataError} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
