@@ -25,7 +25,8 @@ const store = {
 const value = 'the-value';
 
 const context = {
-  field: { name: 'user.name', value, type: 'text' },
+  field: { name: 'user.name', type: 'text' },
+  value,
 } as CellActionExecutionContext;
 
 const defaultAddProviderAction = {

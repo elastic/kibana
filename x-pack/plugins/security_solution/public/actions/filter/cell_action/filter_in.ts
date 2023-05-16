@@ -30,7 +30,7 @@ export const createFilterInCellActionFactory = ({
   return genericFilterInActionFactory.combine<SecurityCellAction>({
     type: SecurityCellActionType.FILTER,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
-    execute: async ({ field, metadata }) => {
+    execute: async ({ field, value, metadata }) => {
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterOut with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;
 
@@ -43,13 +43,13 @@ export const createFilterInCellActionFactory = ({
         addFilter({
           filterManager: timelineFilterManager,
           fieldName: field.name,
-          value: field.value,
+          value,
         });
       } else {
         addFilter({
           filterManager,
           fieldName: field.name,
-          value: field.value,
+          value,
         });
       }
     },

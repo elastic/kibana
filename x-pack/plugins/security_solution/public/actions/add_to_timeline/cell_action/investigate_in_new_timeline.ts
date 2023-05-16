@@ -40,12 +40,12 @@ export const createInvestigateInNewTimelineCellActionFactory = createCellActionF
       getDisplayNameTooltip: () => INVESTIGATE_IN_TIMELINE,
       isCompatible: async ({ field }) =>
         fieldHasCellActions(field.name) && isValidDataProviderField(field.name, field.type),
-      execute: async ({ field, metadata }) => {
+      execute: async ({ field, value, metadata }) => {
         const dataProviders =
           createDataProviders({
             contextId: TimelineId.active,
             fieldType: field.type,
-            values: field.value,
+            values: value,
             field: field.name,
             negate: metadata?.negateFilters === true,
           }) ?? [];

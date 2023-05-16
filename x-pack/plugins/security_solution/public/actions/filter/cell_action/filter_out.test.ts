@@ -48,7 +48,8 @@ describe('createFilterOutCellActionFactory', () => {
   });
 
   const context = {
-    field: { name: 'user.name', value: 'the value', type: 'text' },
+    field: { name: 'user.name', type: 'text' },
+    value: 'the value',
   } as SecurityCellActionExecutionContext;
 
   it('should return display name', () => {
