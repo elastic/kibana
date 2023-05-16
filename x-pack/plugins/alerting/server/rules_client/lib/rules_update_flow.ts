@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObject, SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
@@ -91,7 +90,6 @@ type RulesUpdateState = Record<
     };
     validation: {
       hasValidatedAttributes: boolean;
-      hasMigratedActions: boolean;
       hasExtractedRefs: boolean;
     };
   }
@@ -158,8 +156,6 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
       },
       validation: {
         hasValidatedAttributes: false,
-        // Only need to migrate actions for SIEM rules
-        hasMigratedActions: savedObject.attributes.consumer !== AlertConsumers.SIEM,
         // Initialize to need to extract refs to true, only need to extract when we changes
         // actions or params
         hasExtractedRefs: true,
@@ -301,7 +297,7 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
       updatedAttributes.params
     );
 
-    if (shouldIncrementByRoot && shouldIncrementByParams) {
+    if (shouldIncrementByRoot || shouldIncrementByParams) {
       await updateInternalAttributes(id, { revision: updatedAttributes.revision + 1 });
     }
   };
@@ -416,14 +412,10 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
   };
 
   const getUpdatedAttributeAndRefsForSaving = async (id: string) => {
-    const { hasExtractedRefs, hasMigratedActions, hasValidatedAttributes } =
-      getRuleToUpdate(id).validation;
+    const { hasExtractedRefs, hasValidatedAttributes } = getRuleToUpdate(id).validation;
 
     if (!hasValidatedAttributes) {
       throw new Error('New rule attribute need to be validate before saving.');
-    }
-    if (!hasMigratedActions) {
-      throw new Error('Actions must be migrated before saving.');
     }
     if (!hasExtractedRefs) {
       throw new Error('Extract references before saving.');
