@@ -177,7 +177,7 @@ vault_get() {
 
   fullPath="secret/ci/elastic-kibana/migrated/$path"
   if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
-    fullPath="secret/kibana-issues/prod/$path"
+    fullPath="secret/kibana-issues/dev/$path"
   fi
 
   retry 5 5 vault read -field="$field" "$fullPath"
