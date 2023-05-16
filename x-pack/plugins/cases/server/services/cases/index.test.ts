@@ -1963,6 +1963,93 @@ describe('CasesService', () => {
         await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.not.toThrow();
       });
 
+      it('do not encodes errors', async () => {
+        const errorSO = {
+          ...omit(createCaseSavedObjectResponse({ caseId: '2' }), 'attributes'),
+          error: {
+            statusCode: 404,
+          },
+        };
+
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            // @ts-expect-error: bulkUpdate type expects attributes to be defined
+            errorSO,
+          ],
+        });
+
+        const res = await service.getCases({ caseIds: ['a', 'b'] });
+
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+              Object {
+                "error": Object {
+                  "statusCode": 404,
+                },
+                "id": "2",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
+      });
+
       it.each(Object.keys(attributesToValidateIfMissing))(
         'throws if %s is omitted',
         async (key) => {
@@ -2133,6 +2220,61 @@ describe('CasesService', () => {
             ],
           })
         ).resolves.not.toThrow();
+      });
+
+      it('do not encodes errors', async () => {
+        const errorSO = {
+          ...omit(createCaseSavedObjectResponse({ caseId: '2' }), 'attributes'),
+          error: {
+            statusCode: 404,
+          },
+        };
+
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              ...createCaseSavedObjectResponse({ caseId: '1' }),
+              attributes: { description: 'updated desc' },
+            },
+            // @ts-expect-error: bulkUpdate type expects attributes to be defined
+            errorSO,
+          ],
+        });
+
+        const res = await service.patchCases({
+          cases: [
+            {
+              caseId: '1',
+              updatedAttributes: createCasePostParams({
+                connector: getNoneCaseConnector(),
+              }),
+              originalCase: {} as CaseSavedObjectTransformed,
+            },
+          ],
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "description": "updated desc",
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+              Object {
+                "error": Object {
+                  "statusCode": 404,
+                },
+                "id": "2",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
       });
 
       it('strips out excess attributes', async () => {
