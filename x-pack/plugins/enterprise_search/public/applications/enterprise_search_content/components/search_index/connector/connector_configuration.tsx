@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { BetaConnectorCallout } from '../../../../shared/beta/beta_connector_callout';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
@@ -43,7 +44,7 @@ import { SearchIndexTabId } from '../search_index';
 import { ApiKeyConfig } from './api_key_configuration';
 import { ConnectorConfigurationConfig } from './connector_configuration_config';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
-import { CONNECTORS } from './constants';
+import { BETA_CONNECTORS, CONNECTORS } from './constants';
 import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
@@ -63,6 +64,13 @@ export const ConnectorConfiguration: React.FC = () => {
   const docsUrl = CONNECTORS.find(
     ({ serviceType }) => serviceType === index.connector.service_type
   )?.docsUrl;
+
+  // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
+  const isBeta =
+    !index.connector.service_type ||
+    Boolean(
+      BETA_CONNECTORS.find(({ serviceType }) => serviceType === index.connector.service_type)
+    );
 
   return (
     <>
@@ -350,65 +358,6 @@ export const ConnectorConfiguration: React.FC = () => {
                       )}
                     </EuiLink>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://discuss.elastic.co/c/enterprise-search/84"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.getHelp.label',
-                        {
-                          defaultMessage: 'Get help',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://github.com/elastic/connectors-python/issues"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.issue.label',
-                        {
-                          defaultMessage: 'File an issue',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLinkTo to={'/app/integrations/browse'} shouldNotCreateHref>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.dontSeeIntegration.label',
-                        {
-                          defaultMessage: 'Don’t see the integration you’re looking for?',
-                        }
-                      )}
-                    </EuiLinkTo>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://docs.elastic.co/search-ui/tutorials/workplace-search"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.searchUI.label',
-                        {
-                          defaultMessage: 'Use Search UI for Workplace Search',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink href="https://www.elastic.co/kibana/feedback" target="_blank">
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
-                        {
-                          defaultMessage: 'Connector feedback',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
                   {docsUrl && (
                     <EuiFlexItem>
                       <EuiLink href={docsUrl} target="_blank">
@@ -437,6 +386,11 @@ export const ConnectorConfiguration: React.FC = () => {
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
+            {isBeta ? (
+              <EuiFlexItem>
+                <BetaConnectorCallout />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

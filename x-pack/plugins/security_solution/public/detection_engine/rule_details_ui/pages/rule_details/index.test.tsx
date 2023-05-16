@@ -159,6 +159,11 @@ jest.mock('../../../../common/lib/kibana', () => {
                   },
                 ],
                 getIndexPattern: () => title,
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
               }),
             get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
               Promise.resolve({
@@ -202,6 +207,11 @@ jest.mock('../../../../common/lib/kibana', () => {
                   },
                 ],
                 getIndexPattern: () => 'hello*,world*,refreshed*',
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
               }),
           },
           search: {

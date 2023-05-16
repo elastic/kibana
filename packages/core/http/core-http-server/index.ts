@@ -90,7 +90,6 @@ export type {
   RouteValidatorFullConfig,
   RouteValidatorOptions,
   IRouter,
-  IRouterWithVersion,
   RouteRegistrar,
   RouterRoute,
   IKibanaSocket,

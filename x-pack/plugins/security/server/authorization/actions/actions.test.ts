@@ -7,27 +7,10 @@
 
 import { Actions } from './actions';
 
-describe('#constructor', () => {
-  test(`doesn't allow an empty string`, () => {
-    expect(() => new Actions('')).toThrowErrorMatchingInlineSnapshot(
-      `"version can't be an empty string"`
-    );
-  });
-});
-
 describe('#login', () => {
   test('returns login:', () => {
-    const actions = new Actions('mock-version');
+    const actions = new Actions();
 
     expect(actions.login).toBe('login:');
-  });
-});
-
-describe('#version', () => {
-  test("returns `version:${config.get('pkg.version')}`", () => {
-    const version = 'mock-version';
-    const actions = new Actions(version);
-
-    expect(actions.version).toBe(`version:${version}`);
   });
 });

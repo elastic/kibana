@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { timeslicesBudgetingMethodSchema, Duration, DurationUnit } from '@kbn/slo-schema';
+import {
+  timeslicesBudgetingMethodSchema,
+  Duration,
+  DurationUnit,
+  rollingTimeWindowSchema,
+  calendarAlignedTimeWindowSchema,
+} from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
 import { SLO } from '../models';
 
@@ -21,7 +27,17 @@ export function validateSLO(slo: SLO) {
     throw new IllegalArgumentError('Invalid objective.target');
   }
 
-  if (!isValidTimeWindowDuration(slo.timeWindow.duration)) {
+  if (
+    rollingTimeWindowSchema.is(slo.timeWindow) &&
+    !isValidRollingTimeWindowDuration(slo.timeWindow.duration)
+  ) {
+    throw new IllegalArgumentError('Invalid time_window.duration');
+  }
+
+  if (
+    calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
+    !isValidCalendarAlignedTimeWindowDuration(slo.timeWindow.duration)
+  ) {
     throw new IllegalArgumentError('Invalid time_window.duration');
   }
 
@@ -58,7 +74,7 @@ function isValidTargetNumber(value: number): boolean {
   return value > 0 && value < 1;
 }
 
-function isValidTimeWindowDuration(duration: Duration): boolean {
+function isValidRollingTimeWindowDuration(duration: Duration): boolean {
   return [
     DurationUnit.Day,
     DurationUnit.Week,
@@ -66,6 +82,11 @@ function isValidTimeWindowDuration(duration: Duration): boolean {
     DurationUnit.Quarter,
     DurationUnit.Year,
   ].includes(duration.unit);
+}
+
+function isValidCalendarAlignedTimeWindowDuration(duration: Duration): boolean {
+  // 1 week or 1 month
+  return [DurationUnit.Week, DurationUnit.Month].includes(duration.unit) && duration.value === 1;
 }
 
 function isValidTimesliceWindowDuration(timesliceWindow: Duration, timeWindow: Duration): boolean {

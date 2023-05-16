@@ -2163,6 +2163,10 @@
               "path": "src/plugins/maps_ems/server/index.ts"
             },
             {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/handlers/action/create_action_service.ts"
+            },
+            {
               "plugin": "painlessLab",
               "path": "x-pack/plugins/painless_lab/server/services/license.ts"
             },

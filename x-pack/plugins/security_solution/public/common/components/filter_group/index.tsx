@@ -46,6 +46,7 @@ import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
 import { TEST_IDS } from './constants';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
+import { convertToBuildEsQuery } from '../../lib/kuery';
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -149,14 +150,41 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     return cleanup;
   }, []);
 
-  useEffect(() => {
-    controlGroup?.updateInput({
-      timeRange,
+  const { filters: validatedFilters, query: validatedQuery } = useMemo(() => {
+    const [_, kqlError] = convertToBuildEsQuery({
+      config: {},
+      queries: query ? [query] : [],
+      filters: filters ?? [],
+      indexPattern: { fields: [], title: '' },
+    });
+
+    // we only need to handle kqlError because control group can handle Lucene error
+    if (kqlError) {
+      /*
+       * Based on the behaviour from other components,
+       * ignore all filters and queries if there is some error
+       * in the input filters and queries
+       *
+       * */
+      return {
+        filters: [],
+        query: undefined,
+      };
+    }
+    return {
       filters,
       query,
+    };
+  }, [filters, query]);
+
+  useEffect(() => {
+    controlGroup?.updateInput({
+      filters: validatedFilters,
+      query: validatedQuery,
+      timeRange,
       chainingSystem,
     });
-  }, [timeRange, filters, query, chainingSystem, controlGroup]);
+  }, [timeRange, chainingSystem, controlGroup, validatedQuery, validatedFilters]);
 
   const handleInputUpdates = useCallback(
     (newInput: ControlGroupInput) => {
@@ -171,7 +199,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     [setControlGroupInputUpdates, getStoredControlInput, isViewMode, setHasPendingChanges]
   );
 
-  const handleFilterUpdates = useCallback(
+  const handleOutputFilterUpdates = useCallback(
     ({ filters: newFilters }: ControlGroupOutput) => {
       if (isEqual(currentFiltersRef.current, newFilters)) return;
       if (onFilterChange) onFilterChange(newFilters ?? []);
@@ -181,8 +209,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const debouncedFilterUpdates = useMemo(
-    () => debounce(handleFilterUpdates, 500),
-    [handleFilterUpdates]
+    () => debounce(handleOutputFilterUpdates, 500),
+    [handleOutputFilterUpdates]
   );
 
   useEffect(() => {

@@ -26,6 +26,7 @@ export const createContext = ({
   indexPrefix,
   typeRegistry,
   serializer,
+  nodeRoles,
 }: CreateContextOps): MigratorContext => {
   return {
     migrationConfig,
@@ -41,5 +42,6 @@ export const createContext = ({
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
     deletedTypes: REMOVED_TYPES,
     discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
+    nodeRoles,
   };
 };

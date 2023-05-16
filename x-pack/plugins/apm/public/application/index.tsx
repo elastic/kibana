@@ -54,6 +54,7 @@ export const renderApp = ({
     dataViews: pluginsStart.dataViews,
     unifiedSearch: pluginsStart.unifiedSearch,
     lens: pluginsStart.lens,
+    uiActions: pluginsStart.uiActions,
   };
 
   // render APM feedback link in global help menu

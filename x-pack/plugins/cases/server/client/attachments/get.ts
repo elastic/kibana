@@ -8,12 +8,12 @@ import type { SavedObject } from '@kbn/core/server';
 
 import type {
   AlertResponse,
-  AllCommentsResponse,
+  Comments,
   AttributesTypeAlerts,
-  CommentResponse,
-  CommentsResponse,
+  Comment,
+  CommentsFindResponse,
 } from '../../../common/api';
-import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
+import { CommentsRt, CommentRt, CommentsFindResponseRt } from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -100,7 +100,7 @@ export const getAllAlertsAttachToCase = async (
 export async function find(
   { caseID, queryParams }: FindArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentsResponse> {
+): Promise<CommentsFindResponse> {
   const {
     unsecuredSavedObjectsClient,
     services: { caseService },
@@ -159,7 +159,7 @@ export async function find(
       }))
     );
 
-    return CommentsResponseRt.encode(transformComments(theComments));
+    return CommentsFindResponseRt.encode(transformComments(theComments));
   } catch (error) {
     throw createCaseError({
       message: `Failed to find comments case id: ${caseID}: ${error}`,
@@ -175,7 +175,7 @@ export async function find(
 export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentResponse> {
+): Promise<Comment> {
   const {
     services: { attachmentService },
     logger,
@@ -192,7 +192,7 @@ export async function get(
       operation: Operations.getComment,
     });
 
-    return CommentResponseRt.encode(flattenCommentSavedObject(comment));
+    return CommentRt.encode(flattenCommentSavedObject(comment));
   } catch (error) {
     throw createCaseError({
       message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
@@ -208,7 +208,7 @@ export async function get(
 export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
-): Promise<AllCommentsResponse> {
+): Promise<Comments> {
   const {
     services: { caseService },
     logger,
@@ -232,7 +232,7 @@ export async function getAll(
       comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
     );
 
-    return AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects));
+    return CommentsRt.encode(flattenCommentSavedObjects(comments.saved_objects));
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

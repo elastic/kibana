@@ -23,7 +23,3 @@ export type CreateInventoryViewAttributesRequestPayload = rt.TypeOf<
 export const createInventoryViewRequestPayloadRT = rt.type({
   attributes: createInventoryViewAttributesRequestPayloadRT,
 });
-
-export type CreateInventoryViewRequestPayload = rt.TypeOf<
-  typeof createInventoryViewRequestPayloadRT
->;

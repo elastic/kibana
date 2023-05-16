@@ -195,7 +195,10 @@ export class StatusRuleExecutor {
         delete downConfigs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        if (!locations.some((l) => l.label === downConfig.location)) {
+        const isLocationRemoved = !locations.some(
+          (l) => l.id === this.getLocationId(downConfig.location)
+        );
+        if (isLocationRemoved) {
           staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
           delete downConfigs[locPlusId];
         }

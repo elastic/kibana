@@ -143,7 +143,7 @@ const configSchema = schema.object(
       logging: schema.object({
         enabled: schema.conditional(
           schema.contextRef('dist'),
-          schema.literal(false),
+          false,
           schema.boolean({ defaultValue: true }),
           schema.boolean({ defaultValue: false })
         ),
@@ -166,6 +166,7 @@ const configSchema = schema.object(
         },
       }
     ),
+    restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
   },
   {
     validate: (rawConfig) => {
@@ -239,6 +240,7 @@ export class HttpConfig implements IHttpConfig {
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public shutdownTimeout: Duration;
+  public restrictInternalApis: boolean;
 
   public eluMonitor: IHttpEluMonitorConfig;
 
@@ -282,6 +284,7 @@ export class HttpConfig implements IHttpConfig {
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
     this.eluMonitor = rawHttpConfig.eluMonitor;
   }
 }

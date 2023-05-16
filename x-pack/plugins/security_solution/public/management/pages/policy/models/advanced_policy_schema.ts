@@ -1264,4 +1264,26 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.api',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
+      {
+        defaultMessage:
+          'Controls whether API events are enabled. Set to false to disable API event collection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.rollback.self_healing.registry_enabled',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.registry_enabled',
+      {
+        defaultMessage:
+          'Enables self-healing of registry based malware artifacts. Requires rollback.self_healing.enabled to also be enabled. Default: true',
+      }
+    ),
+  },
 ];
