@@ -352,7 +352,7 @@ Add the title, tags, design options, and more to the dashboard.
 
 * *Show panel titles* &mdash; Displays the titles in the panel headers.
 
-* *Sync color pallettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
+* *Sync color palettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
 
 * *Sync cursor across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart and a heatmap chart, the cursor on all other related dashboard charts automatically appear.
 
