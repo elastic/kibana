@@ -23,6 +23,8 @@ export interface TypeTransforms {
   latestVersion: Record<TransformType, string>;
   /** Ordered list of transforms registered for the type **/
   transforms: Transform[];
+  /** Per-version schemas for the given type */
+  versionSchemas: Record<string, VersionEvictionSchema>;
 }
 
 /**
@@ -84,3 +86,8 @@ export interface TransformResult {
    */
   additionalDocs: SavedObjectUnsanitizedDoc[];
 }
+
+/**
+ * per-version eviction schema for {@link TypeTransforms}
+ */
+export type VersionEvictionSchema = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;

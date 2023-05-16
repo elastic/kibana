@@ -18,6 +18,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
   private kibanaVersion: string;
   private originalDoc: SavedObjectUnsanitizedDoc;
   private typeTransforms: TypeTransforms;
+  private ignoreMissingTransforms: boolean;
   private targetTypeVersion: string;
   private targetCoreVersion?: string;
 
@@ -27,11 +28,13 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
     typeTransforms,
     targetTypeVersion,
     targetCoreVersion,
+    ignoreMissingTransforms,
   }: {
     document: SavedObjectUnsanitizedDoc;
     typeTransforms: TypeTransforms;
     kibanaVersion: string;
     targetTypeVersion: string;
+    ignoreMissingTransforms: boolean;
     targetCoreVersion?: string;
   }) {
     this.originalDoc = document;
@@ -40,6 +43,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
     this.typeTransforms = typeTransforms;
     this.targetTypeVersion = targetTypeVersion;
     this.targetCoreVersion = targetCoreVersion;
+    this.ignoreMissingTransforms = ignoreMissingTransforms;
   }
 
   run(): MigrationPipelineResult {
@@ -48,6 +52,9 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
 
     for (const transform of this.getPendingTransforms()) {
       if (!transform.transformDown) {
+        if (this.ignoreMissingTransforms) {
+          continue;
+        }
         throw new Error(
           `Could not apply transformation ${transform.transformType}:${transform.version}: no down conversion registered`
         );
@@ -60,6 +67,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
     }
 
     this.document = this.ensureVersion(this.document);
+    this.document = this.applyVersionSchema(this.document);
 
     return {
       document: this.document,
@@ -103,14 +111,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
    * And that the targetTypeVersion is not greater than the document's
    */
   private assertCompatibility() {
-    const { id, typeMigrationVersion: currentVersion } = this.document;
-    const latestVersion = this.typeTransforms.latestVersion.migrate;
-
-    if (currentVersion && Semver.gt(currentVersion, latestVersion)) {
-      throw new Error(
-        `Document "${id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
-      );
-    }
+    const { typeMigrationVersion: currentVersion } = this.document;
 
     if (currentVersion && Semver.gt(this.targetTypeVersion, currentVersion)) {
       throw new Error(
@@ -131,5 +132,14 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
       typeMigrationVersion: this.targetTypeVersion,
       ...(coreMigrationVersion ? { coreMigrationVersion } : {}),
     };
+  }
+
+  private applyVersionSchema(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
+    const targetVersion = this.targetTypeVersion;
+    const versionSchema = this.typeTransforms.versionSchemas[targetVersion];
+    if (versionSchema) {
+      return versionSchema(doc);
+    }
+    return doc;
   }
 }

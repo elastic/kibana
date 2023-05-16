@@ -133,7 +133,8 @@ export type {
   SavedObjectModelTransformationResult,
   SavedObjectModelDataBackfillFn,
   SavedObjectsModelVersionSchemaDefinitions,
-  SavedObjectModelVersionCreateSchema,
+  SavedObjectModelVersionBackwardConversionFn,
+  SavedObjectModelVersionBackwardConversionSchema,
 } from './src/model_version';
 
 // We re-export the SavedObject types here for convenience.

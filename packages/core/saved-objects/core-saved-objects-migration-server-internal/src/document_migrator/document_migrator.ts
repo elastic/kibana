@@ -16,9 +16,12 @@ import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
 import { DocumentUpgradePipeline, DocumentDowngradePipeline } from './pipelines';
+import { downgradeRequired } from './utils';
+import { TransformType } from './types';
 
 interface TransformOptions {
   convertNamespaceTypes?: boolean;
+  allowDowngrade?: boolean;
 }
 
 interface DocumentMigratorOptions {
@@ -29,29 +32,41 @@ interface DocumentMigratorOptions {
 }
 
 /**
+ * Options for {@link VersionedTransformer.migrate1}
+ */
+export interface DocumentMigrateOptions {
+  /**
+   * Defines whether it is allowed to convert documents from an higher version or not.
+   * - If `true`, documents from higher versions will go though the downgrade pipeline.
+   * - If `false`, an error will be thrown when trying to process a document with an higher type version.
+   * Defaults to `false`.
+   */
+  allowDowngrade?: boolean;
+}
+
+/**
  * Manages transformations of individual documents.
  */
 export interface VersionedTransformer {
   /**
    * Migrates a document to its latest version.
    */
-  migrate: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+  migrate: (
+    doc: SavedObjectUnsanitizedDoc,
+    options?: DocumentMigrateOptions
+  ) => SavedObjectUnsanitizedDoc;
   /**
    * Migrates a document to the latest version and applies type conversions if applicable.
    * Also returns any additional document(s) that may have been created during the transformation process.
+   *
+   * @remark This only be used by the savedObject migration during upgrade. For all other scenarios,
+   *         {@link VersionedTransformer#migrate} should be used instead.
    */
   migrateAndConvert: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
-  /**
-   * Converts a document down to the specified version.
-   */
-  transformDown: (
-    doc: SavedObjectUnsanitizedDoc,
-    options: { targetTypeVersion: string }
-  ) => SavedObjectUnsanitizedDoc;
 }
 
 /**
- * A concrete implementation of the VersionedTransformer interface.
+ * A concrete implementation of the {@link VersionedTransformer} interface.
  */
 export class DocumentMigrator implements VersionedTransformer {
   private options: DocumentMigratorOptions;
@@ -104,9 +119,13 @@ export class DocumentMigrator implements VersionedTransformer {
   /**
    * Migrates a document to the latest version.
    */
-  public migrate = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
-    const { document } = this.transform(doc);
-
+  public migrate = (
+    doc: SavedObjectUnsanitizedDoc,
+    { allowDowngrade = false }: DocumentMigrateOptions = {}
+  ): SavedObjectUnsanitizedDoc => {
+    const { document } = this.transform(doc, {
+      allowDowngrade,
+    });
     return document;
   };
 
@@ -115,30 +134,36 @@ export class DocumentMigrator implements VersionedTransformer {
    * have been created during the transformation process.
    */
   public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] => {
-    const { document, additionalDocs } = this.transform(doc, { convertNamespaceTypes: true });
-
+    const { document, additionalDocs } = this.transform(doc, {
+      convertNamespaceTypes: true,
+      allowDowngrade: false,
+    });
     return [document, ...additionalDocs];
   };
 
-  public transformDown = (
+  private transform(
     doc: SavedObjectUnsanitizedDoc,
-    options: { targetTypeVersion: string }
-  ): SavedObjectUnsanitizedDoc => {
+    { convertNamespaceTypes = false, allowDowngrade = false }: TransformOptions = {}
+  ) {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
+    const typeMigrations = this.migrations[doc.type];
+    if (downgradeRequired(doc, typeMigrations.latestVersion)) {
+      const currentVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
+      const latestVersion = this.migrations[doc.type].latestVersion[TransformType.Migrate];
+      if (!allowDowngrade) {
+        throw new Error(
+          `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
+        );
+      }
+      return this.transformDown(doc, { targetTypeVersion: latestVersion! });
+    } else {
+      return this.transformUp(doc, { convertNamespaceTypes, allowDowngrade });
+    }
+  }
 
-    const pipeline = new DocumentDowngradePipeline({
-      document: doc,
-      typeTransforms: this.migrations[doc.type],
-      kibanaVersion: this.options.kibanaVersion,
-      targetTypeVersion: options.targetTypeVersion,
-    });
-    const { document } = pipeline.run();
-    return document;
-  };
-
-  private transform(
+  private transformUp(
     doc: SavedObjectUnsanitizedDoc,
     { convertNamespaceTypes = false }: TransformOptions = {}
   ) {
@@ -156,4 +181,24 @@ export class DocumentMigrator implements VersionedTransformer {
 
     return { document, additionalDocs };
   }
+
+  private transformDown = (
+    doc: SavedObjectUnsanitizedDoc,
+    options: { targetTypeVersion: string }
+  ) => {
+    if (!this.migrations) {
+      throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
+    }
+
+    const pipeline = new DocumentDowngradePipeline({
+      document: doc,
+      typeTransforms: this.migrations[doc.type],
+      kibanaVersion: this.options.kibanaVersion,
+      targetTypeVersion: options.targetTypeVersion,
+      ignoreMissingTransforms: true,
+    });
+    const { document } = pipeline.run();
+    const additionalDocs: SavedObjectUnsanitizedDoc[] = [];
+    return { document, additionalDocs };
+  };
 }

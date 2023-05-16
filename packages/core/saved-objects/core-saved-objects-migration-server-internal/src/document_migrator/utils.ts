@@ -83,3 +83,18 @@ export function transformComparator(a: Transform, b: Transform) {
 
   return Semver.compare(a.version, b.version) || aPriority - bPriority;
 }
+
+/**
+ * Returns true if the given document has an higher version that the last known version, false otherwise
+ */
+export function downgradeRequired(
+  doc: SavedObjectUnsanitizedDoc,
+  latestVersions: Record<TransformType, string>
+): boolean {
+  const docTypeVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
+  const latestMigrationVersion = latestVersions[TransformType.Migrate];
+  if (!docTypeVersion || !latestMigrationVersion) {
+    return false;
+  }
+  return Semver.gt(docTypeVersion, latestMigrationVersion);
+}

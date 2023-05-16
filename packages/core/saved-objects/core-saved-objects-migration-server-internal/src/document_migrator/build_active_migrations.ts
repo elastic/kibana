@@ -17,7 +17,7 @@ import {
 } from './internal_transforms';
 import { validateTypeMigrations } from './validate_migrations';
 import { transformComparator, convertMigrationFunction } from './utils';
-import { getModelVersionTransforms } from './model_version';
+import { getModelVersionTransforms, getModelVersionSchemas } from './model_version';
 
 /**
  * Converts migrations from a format that is convenient for callers to a format that
@@ -95,11 +95,16 @@ const buildTypeTransforms = ({
     ...modelVersionTransforms,
   ].sort(transformComparator);
 
+  const modelVersionSchemas = getModelVersionSchemas({ typeDefinition: type });
+
   return {
     latestVersion: _.chain(transforms)
       .groupBy('transformType')
       .mapValues((items) => _.last(items)?.version)
       .value() as Record<TransformType, string>,
     transforms,
+    versionSchemas: {
+      ...modelVersionSchemas,
+    },
   };
 };

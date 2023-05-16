@@ -64,4 +64,5 @@ export {
   getModelVersionDelta,
   buildModelVersionTransformFn,
   aggregateMappingAdditions,
+  convertModelVersionBackwardConversionSchema,
 } from './src/model_version';

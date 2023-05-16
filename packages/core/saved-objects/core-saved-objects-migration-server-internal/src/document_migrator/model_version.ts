@@ -17,9 +17,36 @@ import {
   modelVersionToVirtualVersion,
   assertValidModelVersion,
   buildModelVersionTransformFn,
+  convertModelVersionBackwardConversionSchema,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { TransformSavedObjectDocumentError } from '../core';
-import { type Transform, type TransformFn, TransformType } from './types';
+import {
+  type Transform,
+  type TransformFn,
+  TransformType,
+  type VersionEvictionSchema,
+} from './types';
+
+export const getModelVersionSchemas = ({
+  typeDefinition,
+}: {
+  typeDefinition: SavedObjectsType;
+}): Record<string, VersionEvictionSchema> => {
+  const modelVersionMap =
+    typeof typeDefinition.modelVersions === 'function'
+      ? typeDefinition.modelVersions()
+      : typeDefinition.modelVersions ?? {};
+
+  return Object.entries(modelVersionMap).reduce((map, [rawModelVersion, versionDefinition]) => {
+    const schema = versionDefinition.schemas?.backwardConversion;
+    if (schema) {
+      const modelVersion = assertValidModelVersion(rawModelVersion);
+      const virtualVersion = modelVersionToVirtualVersion(modelVersion);
+      map[virtualVersion] = convertModelVersionBackwardConversionSchema(schema);
+    }
+    return map;
+  }, {} as Record<string, VersionEvictionSchema>);
+};
 
 export const getModelVersionTransforms = ({
   typeDefinition,
