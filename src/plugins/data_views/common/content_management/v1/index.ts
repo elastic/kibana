@@ -14,4 +14,4 @@ export type { DataViewContentType } from './constants';
 
 export { DataViewSOType } from './constants';
 
-export { serviceDefinition } from './cm_services';
+// export { serviceDefinition } from './cm_services';

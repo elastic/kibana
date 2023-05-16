@@ -9,7 +9,8 @@
 import { SOContentStorage } from '@kbn/content-management-utils';
 
 import type { DataViewCrudTypes } from '../../common/content_management';
-import { DataViewSOType, cmServicesDefinition } from '../../common/content_management';
+import { DataViewSOType } from '../../common/content_management';
+import { cmServicesDefinition } from '../../common/content_management/cm_services';
 
 export class DataViewsStorage extends SOContentStorage<DataViewCrudTypes> {
   constructor() {

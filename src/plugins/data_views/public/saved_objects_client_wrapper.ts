@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { SavedObjectsClientContract } from '@kbn/core/public';
+import type { SavedObjectsClientContract } from '@kbn/core/public';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
@@ -19,7 +19,8 @@ import {
 
 import type { DataViewCrudTypes } from '../common/content_management';
 
-import { DataViewSOType } from '../common/content_management';
+// import { DataViewSOType } from '../common/content_management';
+const DataViewSOType = 'index-pattern';
 
 type SOClient = Pick<SavedObjectsClientContract, 'resolve'>;
 
