@@ -2139,8 +2139,12 @@ describe('CasesService', () => {
         const theCase = createCaseSavedObjectResponse();
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            { ...theCase, attributes: { description: 'update desc', 'not-exists': 'not-exists' } },
-            { ...theCase, attributes: { title: 'update title' } },
+            {
+              ...theCase,
+              id: '1',
+              attributes: { description: 'update desc', 'not-exists': 'not-exists' },
+            },
+            { ...theCase, id: '2', attributes: { title: 'update title' } },
           ],
         });
 
@@ -2163,7 +2167,7 @@ describe('CasesService', () => {
           saved_objects: [
             {
               attributes: {
-                title: 'update title',
+                description: 'update desc',
               },
               id: '1',
               references: [],
@@ -2173,7 +2177,7 @@ describe('CasesService', () => {
               attributes: {
                 title: 'update title',
               },
-              id: '1',
+              id: '2',
               references: [],
               type: 'cases',
             },

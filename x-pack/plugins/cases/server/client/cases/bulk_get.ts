@@ -26,11 +26,12 @@ import {
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
-import type { CasesClientArgs, SOWithErrors } from '../types';
+import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { SOWithErrors } from '../../common/types';
 
-type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
+type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 type BulkGetCase = CasesBulkGetResponse['cases'][number];
 
 /**
