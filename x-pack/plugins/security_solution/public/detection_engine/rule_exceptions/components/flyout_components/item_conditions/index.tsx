@@ -10,9 +10,6 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import type {
-  CreateRuleExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
   ExceptionListType,
   OsType,
   OsTypeArray,
@@ -24,8 +21,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
-import { getFilterParams } from '@kbn/es-query';
-import styled, { css, createGlobalStyle } from 'styled-components';
+import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
   FiltersBuilderEditor,

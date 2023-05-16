@@ -14,12 +14,9 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiText,
-  EuiToolTip,
   EuiBadge,
   withEuiTheme,
   EuiTextColor,
@@ -43,7 +40,6 @@ import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { cx } from '@emotion/css';
 import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import { GenericComboBox } from './generic_combo_box';
 import {
@@ -51,14 +47,7 @@ import {
   getOperatorFromFilter,
   isFilterValid,
 } from './lib/filter_editor_utils';
-import { FiltersBuilder } from '../../filters_builder';
-import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
-import {
-  filterBadgeStyle,
-  filterPreviewLabelStyle,
-  filtersBuilderMaxHeightCss,
-} from './filter_editor.styles';
 import { Operator } from './lib';
 import { FiltersBuilderEditor } from './filters_builder_editor';
 
