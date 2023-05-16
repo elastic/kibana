@@ -18,7 +18,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/156901
   describe('Listing of Reports', function () {
     before(async () => {
       await security.testUser.setRoles([
