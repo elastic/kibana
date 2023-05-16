@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'maintenance_windows'];
+  const testSubjects = getService('testSubjects');
 
   describe('create maintenance window', function () {
     it('create window screenshot', async () => {
@@ -27,6 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+      const cancelButton = await testSubjects.find('cancelMaintenanceWindow');
+      await cancelButton.click();
     });
   });
 }

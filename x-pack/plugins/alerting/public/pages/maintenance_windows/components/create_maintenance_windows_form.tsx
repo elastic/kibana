@@ -244,7 +244,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} size="s">
+            <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
