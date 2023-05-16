@@ -16,7 +16,6 @@ import type {
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
@@ -33,7 +32,7 @@ export const createVisEmbeddableFromObject =
       VisualizeByReferenceInput
     >,
     parent?: IContainer
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable> => {
     try {
       const visId = vis.id as string;
 

@@ -28,7 +28,6 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { checkForDuplicateTitle } from '../utils/saved_objects_utils/check_for_duplicate_title';
-import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
@@ -75,7 +74,7 @@ export class VisualizeEmbeddableFactory
     EmbeddableFactoryDefinition<
       VisualizeInput,
       VisualizeOutput | EmbeddableOutput,
-      VisualizeEmbeddable | DisabledLabEmbeddable,
+      VisualizeEmbeddable,
       VisualizationAttributes
     >
 {
@@ -151,7 +150,7 @@ export class VisualizeEmbeddableFactory
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
     parent?: IContainer
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable> {
     const startDeps = await this.deps.start();
 
     try {
