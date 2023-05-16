@@ -39,6 +39,7 @@
     "@kbn/ui-theme",
     "@kbn/saved-objects-management-plugin",
     "@kbn/text-based-languages",
+    "@kbn/text-based-editor",
   ],
   "exclude": [
     "target/**/*",
