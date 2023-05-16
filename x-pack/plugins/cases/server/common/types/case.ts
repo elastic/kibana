@@ -54,9 +54,10 @@ export const CaseTransformedAttributesRt = CaseAttributesRt;
 
 export const getPartialCaseTransformedAttributesRt = (): Type<Partial<CaseAttributes>> => {
   const caseTransformedAttributesProps = CaseAttributesRt.types.reduce(
-    (acc, type) => ({ ...acc, ...type.props }),
+    (acc, type) => Object.assign(acc, type.props),
     {}
   );
+
   return exact(partial({ ...caseTransformedAttributesProps }));
 };
 
