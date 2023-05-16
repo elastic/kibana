@@ -23,6 +23,7 @@ export interface GetScoresParams {
   index: string;
   filter?: unknown;
   identifierType?: IdentifierType;
+  maxIdentifierBuckets: number;
   range: { start: string; end: string };
   weights?: RiskScoreWeight[];
 }

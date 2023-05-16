@@ -114,18 +114,22 @@ const buildReduceScript = ({
   `;
 };
 
-const buildIdentifierTypeAggregation = (
-  identifierType: IdentifierType,
-  weights?: GetScoresParams['weights']
-): SearchRequest['aggs'] => {
+const buildIdentifierTypeAggregation = ({
+  identifierType,
+  maxIdentifierBuckets,
+  weights,
+}: {
+  identifierType: IdentifierType;
+  maxIdentifierBuckets: number;
+  weights?: GetScoresParams['weights'];
+}): SearchRequest['aggs'] => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
   const identifierField = getFieldForIdentifierAgg(identifierType);
 
   return {
     [identifierType]: {
-      // per identity field, per category
       composite: {
-        size: 65536, // TODO make a param,
+        size: maxIdentifierBuckets,
         sources: [
           {
             [identifierField]: {
@@ -190,6 +194,7 @@ export const calculateRiskScores = async ({
   identifierType,
   index,
   logger,
+  maxIdentifierBuckets,
   range,
   weights,
 }: {
@@ -217,7 +222,11 @@ export const calculateRiskScores = async ({
       aggs: identifierTypes.reduce(
         (aggs, _identifierType) => ({
           ...aggs,
-          ...buildIdentifierTypeAggregation(_identifierType, weights),
+          ...buildIdentifierTypeAggregation({
+            identifierType: _identifierType,
+            maxIdentifierBuckets,
+            weights,
+          }),
         }),
         {}
       ),
