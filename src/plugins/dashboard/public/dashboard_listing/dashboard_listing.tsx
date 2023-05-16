@@ -20,6 +20,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 
+import { EuiPaddingSize } from '@elastic/eui';
 import {
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
@@ -75,6 +76,10 @@ export type DashboardListingProps = PropsWithChildren<{
   useSessionStorageIntegration?: boolean;
   goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
+  withPageTemplateHeader?: boolean;
+  restrictPageSectionWidth?: boolean;
+  pageSectionPadding?: EuiPaddingSize;
+  tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
 }>;
 
 export const DashboardListing = ({
@@ -83,6 +88,10 @@ export const DashboardListing = ({
   goToDashboard,
   getDashboardUrl,
   useSessionStorageIntegration,
+  withPageTemplateHeader = true,
+  restrictPageSectionWidth = true,
+  pageSectionPadding = 'm',
+  tagReferences,
 }: DashboardListingProps) => {
   const {
     application,
@@ -242,7 +251,11 @@ export const DashboardListing = ({
           listingLimit={listingLimit}
           emptyPrompt={emptyPrompt}
           findItems={fetchItems}
+          tagReferences={tagReferences}
           id="dashboard"
+          withPageTemplateHeader={withPageTemplateHeader}
+          restrictPageSectionWidth={restrictPageSectionWidth}
+          pageSectionPadding={pageSectionPadding}
         >
           <>
             {children}

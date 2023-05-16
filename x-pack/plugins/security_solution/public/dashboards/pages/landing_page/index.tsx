@@ -55,7 +55,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 
 export const DashboardsLandingPage = () => {
   const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboards)?.links ?? [];
-  const { show: canReadDashboard } =
+  const { show: canReadDashboard, createNew: canCreateDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
@@ -68,6 +68,16 @@ export const DashboardsLandingPage = () => {
 
   return (
     <SecuritySolutionPageWrapper noPadding>
+      <Header canCreateDashboard={canCreateDashboard} />
+      <EuiSpacer size="xl" />
+
+      <EuiTitle size="xxxs">
+        <h2>{i18n.DASHBOARDS_PAGE_SECTION_DEFAULT}</h2>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
+      <LandingImageCards items={dashboardLinks} />
+      <EuiSpacer size="m" />
+
       {canReadDashboard && (
         <>
           <DashboardListingTable
@@ -80,9 +90,10 @@ export const DashboardsLandingPage = () => {
             getDashboardUrl={(id, timeRestore) => {
               return getHref(id);
             }}
+            withPageTemplateHeader={false}
+            restrictPageSectionWidth={false}
+            pageSectionPadding="none"
           >
-            <LandingImageCards items={dashboardLinks} />
-            <EuiSpacer size="m" />
             <EuiTitle size="xxxs">
               <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
             </EuiTitle>

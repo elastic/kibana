@@ -20,6 +20,7 @@ import {
   CriteriaWithPagination,
   Query,
   Ast,
+  EuiPaddingSize,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -103,7 +104,11 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
    * @deprecated
    */
   withoutPageTemplateWrapper?: boolean;
+  withPageTemplateHeader?: boolean;
   contentEditor?: ContentEditorConfig;
+  restrictPageSectionWidth?: boolean;
+  pageSectionPadding?: EuiPaddingSize;
+  tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -260,6 +265,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions = [],
   withoutPageTemplateWrapper,
+  withPageTemplateHeader = true,
+  restrictPageSectionWidth = true,
+  pageSectionPadding = 'm',
+  fixedTag = 'Security Solution',
+  tagReferences,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -291,6 +301,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     getTagList,
   } = useServices();
+
+  const getTagListing = useCallback(() => {
+    let tags = getTagList();
+    if (fixedTag) {
+      tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
+    }
+    return tags;
+  }, [fixedTag, getTagList]);
 
   const openContentEditor = useOpenContentEditor();
 
@@ -374,9 +392,16 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         referencesToExclude,
       } = searchQueryParser
         ? await searchQueryParser(searchQuery.text)
-        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
+        : {
+            searchQuery: searchQuery.text,
+            references: tagReferences ?? undefined,
+            referencesToExclude: undefined,
+          };
 
-      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+      const response = await findItems(searchQueryParsed, {
+        references: tagReferences ?? references,
+        referencesToExclude,
+      });
 
       if (!isMounted.current) {
         return;
@@ -396,7 +421,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, findItems, searchQuery.text]);
+  }, [searchQueryParser, searchQuery.text, tagReferences, findItems]);
 
   const updateQuery = useCallback(
     (query: Query) => {
@@ -427,7 +452,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const inspectItem = useCallback(
     (item: T) => {
       const tags = getTagIdsFromReferences(item.references).map((_id) => {
-        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
+        return item.references.find(({ id: refId }) => {
+          return refId === _id;
+        }) as SavedObjectsReference;
       });
 
       const close = openContentEditor({
@@ -804,7 +831,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         termMatch = searchTerm;
 
         if (references?.length || referencesToExclude?.length) {
-          const allTags = getTagList();
+          const allTags = getTagListing();
 
           if (references?.length) {
             references.forEach(({ id: refId }) => {
@@ -860,7 +887,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     updateQueryFromURL(urlState.s);
     updateSortFromURL(urlState.sort);
-  }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
+  }, [urlState, searchQueryParser, getTagListing, urlStateEnabled]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -911,16 +938,22 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
-      <KibanaPageTemplate.Header
-        pageTitle={<span id={headingId}>{tableListTitle}</span>}
-        description={tableListDescription}
-        rightSideItems={[
-          renderCreateButton() ?? <span />,
-          ...additionalRightSideActions?.slice(0, 2),
-        ]}
-        data-test-subj="top-nav"
-      />
-      <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
+      {withPageTemplateHeader && (
+        <KibanaPageTemplate.Header
+          pageTitle={<span id={headingId}>{tableListTitle}</span>}
+          description={tableListDescription}
+          rightSideItems={[
+            renderCreateButton() ?? <span />,
+            ...additionalRightSideActions?.slice(0, 2),
+          ]}
+          data-test-subj="top-nav"
+        />
+      )}
+      <KibanaPageTemplate.Section
+        aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
+        restrictWidth={restrictPageSectionWidth}
+        paddingSize={pageSectionPadding}
+      >
         {/* Any children passed to the component */}
         {children}
 
