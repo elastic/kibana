@@ -17,6 +17,7 @@ import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_uti
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
 import { useSavedSearchInitial } from './services/discover_state_provider';
+import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
@@ -47,6 +48,11 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * Search session logic
    */
   useSearchSession({ services, stateContainer });
+
+  /**
+   * Adhoc data views functionality
+   */
+  useAdHocDataViews({ stateContainer, services });
 
   /**
    * State changes (data view, columns), when a text base query result is returned
