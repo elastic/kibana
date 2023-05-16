@@ -118,12 +118,6 @@ export { checkForUnknownDocs } from './check_for_unknown_docs';
 
 export { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
 
-export type {
-  SearchResponse,
-  SearchForOutdatedDocumentsOptions,
-} from './search_for_outdated_documents';
-export { searchForOutdatedDocuments } from './search_for_outdated_documents';
-
 export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
 export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { twoDaysAgo } from '../../services/slo/fixtures/date';
 import { oneMinute } from '../../services/slo/fixtures/duration';
 import { createSLO } from '../../services/slo/fixtures/slo';
 import { sevenDaysRolling, weeklyCalendarAligned } from '../../services/slo/fixtures/time_window';
@@ -64,10 +63,14 @@ describe('computeErrorBudget', () => {
 
   describe('for calendar aligned time window', () => {
     describe('for occurrences budgeting method', () => {
+      beforeEach(() => {
+        jest.useFakeTimers({ now: new Date('2023-05-09') });
+      });
+
       it('computes the error budget with an estimation of total events', () => {
         const slo = createSLO({
           budgetingMethod: 'occurrences',
-          timeWindow: weeklyCalendarAligned(twoDaysAgo()),
+          timeWindow: weeklyCalendarAligned(),
           objective: { target: 0.95 },
         });
         const dateRange = toDateRange(slo.timeWindow);
@@ -90,7 +93,7 @@ describe('computeErrorBudget', () => {
       it('computes the error budget', () => {
         const slo = createSLO({
           budgetingMethod: 'timeslices',
-          timeWindow: weeklyCalendarAligned(twoDaysAgo()),
+          timeWindow: weeklyCalendarAligned(),
           objective: { target: 0.95, timesliceTarget: 0.95, timesliceWindow: oneMinute() },
         });
         const dateRange = toDateRange(slo.timeWindow);
@@ -106,8 +109,8 @@ describe('computeErrorBudget', () => {
         // consumed = error rate / error budget = 0.00565476 / 0.05 = 0.1130952
         expect(errorBudget).toEqual({
           initial: 0.05,
-          consumed: 0.113095,
-          remaining: 0.886905,
+          consumed: 0.113106,
+          remaining: 0.886894,
           isEstimated: false,
         });
       });

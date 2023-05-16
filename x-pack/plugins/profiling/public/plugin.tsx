@@ -13,7 +13,7 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { NavigationSection } from '@kbn/observability-plugin/public';
+import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { getServices } from './services';
