@@ -273,6 +273,28 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
+
+        'telemetry.allowChangingOptInStatus (boolean)',
+        'telemetry.banner (boolean)',
+        'telemetry.labels.branch (string)',
+        'telemetry.labels.ciBuildId (string)',
+        'telemetry.labels.ciBuildJobId (string)',
+        'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.ftrConfig (string)',
+        'telemetry.labels.gitRev (string)',
+        'telemetry.labels.isPr (boolean)',
+        'telemetry.labels.journeyName (string)',
+        'telemetry.labels.prId (number)',
+        'telemetry.labels.testBuildId (string)',
+        'telemetry.labels.testJobId (string)',
+        'telemetry.labels.ciBuildName (string)',
+        'telemetry.labels.performancePhase (string)',
+        'telemetry.hidePrivacyStatement (boolean)',
+        'telemetry.optIn (boolean)',
+        'telemetry.sendUsageFrom (alternatives)',
+        'telemetry.sendUsageTo (any)',
+        'usageCollection.uiCounters.debug (boolean)',
+        'usageCollection.uiCounters.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
