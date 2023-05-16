@@ -79,7 +79,16 @@ export const performGet = async <T>(
   const document = getSavedObjectFromSource<T>(registry, type, id, body, {
     migrationVersionCompatibility,
   });
-  const migrated = migrator.migrateDocument(document) as SavedObject<T>;
+
+  let migrated: SavedObject<T>;
+  try {
+    migrated = migrator.migrateDocument(document) as SavedObject<T>;
+  } catch (error) {
+    throw SavedObjectsErrorHelpers.decorateGeneralError(
+      error,
+      'Failed to migrate document to the latest version.'
+    );
+  }
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(
     migrated,

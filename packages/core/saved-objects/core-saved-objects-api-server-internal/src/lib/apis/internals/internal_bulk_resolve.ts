@@ -216,28 +216,39 @@ export async function internalBulkResolve<T>(
     const { type, id } = either.value;
     let result: SavedObjectsResolveResponse<T> | null = null;
 
-    if (foundExactMatch && foundAliasMatch) {
-      result = {
-        saved_object: await getSavedObject(type, id, exactMatchDoc!),
-        outcome: 'conflict',
-        alias_target_id: aliasInfo!.targetId,
-        alias_purpose: aliasInfo!.purpose,
+    try {
+      if (foundExactMatch && foundAliasMatch) {
+        result = {
+          saved_object: await getSavedObject(type, id, exactMatchDoc!),
+          outcome: 'conflict',
+          alias_target_id: aliasInfo!.targetId,
+          alias_purpose: aliasInfo!.purpose,
+        };
+        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
+      } else if (foundExactMatch) {
+        result = {
+          saved_object: await getSavedObject(type, id, exactMatchDoc!),
+          outcome: 'exactMatch',
+        };
+        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
+      } else if (foundAliasMatch) {
+        result = {
+          saved_object: await getSavedObject(type, aliasInfo!.targetId, aliasMatchDoc!),
+          outcome: 'aliasMatch',
+          alias_target_id: aliasInfo!.targetId,
+          alias_purpose: aliasInfo!.purpose,
+        };
+        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
+      }
+    } catch (error) {
+      return {
+        id,
+        type,
+        error: SavedObjectsErrorHelpers.decorateGeneralError(
+          error,
+          'Failed to migrate document to the latest version.'
+        ),
       };
-      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
-    } else if (foundExactMatch) {
-      result = {
-        saved_object: await getSavedObject(type, id, exactMatchDoc!),
-        outcome: 'exactMatch',
-      };
-      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-    } else if (foundAliasMatch) {
-      result = {
-        saved_object: await getSavedObject(type, aliasInfo!.targetId, aliasMatchDoc!),
-        outcome: 'aliasMatch',
-        alias_target_id: aliasInfo!.targetId,
-        alias_purpose: aliasInfo!.purpose,
-      };
-      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
     }
 
     if (result !== null) {
