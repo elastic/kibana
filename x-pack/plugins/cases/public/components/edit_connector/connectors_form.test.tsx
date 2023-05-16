@@ -200,7 +200,7 @@ describe('ConnectorsForm ', () => {
     });
   });
 
-  it('disabled the save button if the fields have not been changed', async () => {
+  it('disables the save button if the fields have not been changed', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
@@ -208,6 +208,33 @@ describe('ConnectorsForm ', () => {
     });
 
     expect(screen.getByTestId('edit-connectors-submit')).toBeDisabled();
+  });
+
+  it('disables the save button if the fields have not been changed and the fields contain null values', async () => {
+    const caseConnectorsWithNullFields = {
+      ...caseConnectorsWithFields,
+      'servicenow-1': {
+        ...caseConnectorsWithFields['servicenow-1'],
+        fields: {
+          ...caseConnectorsWithFields['servicenow-1'].fields,
+          impact: null,
+        },
+      },
+    } as CaseConnectors;
+
+    const caseData = { ...basicCase, connector: caseConnectorsWithNullFields['servicenow-1'] };
+
+    appMockRender.render(
+      <ConnectorsForm
+        {...props}
+        caseConnectors={caseConnectorsWithNullFields}
+        caseData={caseData}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-connectors-submit')).toBeDisabled();
+    });
   });
 
   it('calls onCancel when clicking the cancel button', async () => {
@@ -221,7 +248,7 @@ describe('ConnectorsForm ', () => {
     expect(onCancel).toBeCalled();
   });
 
-  it('disabled the submit button correctly if the initial connector is the none', async () => {
+  it('disables the submit button correctly if the initial connector is the none', async () => {
     appMockRender.render(<ConnectorsForm {...props} caseData={basicCase} />);
 
     await waitFor(() => {

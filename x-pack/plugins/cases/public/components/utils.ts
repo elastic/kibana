@@ -10,7 +10,6 @@ import type {
   FieldConfig,
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { isEmpty } from 'lodash';
 import type { ConnectorTypeFields } from '../../common/api';
 import { ConnectorTypes } from '../../common/api';
 import type { CasesPluginStart } from '../types';
@@ -77,13 +76,7 @@ export const getConnectorsFormSerializer = <T extends { fields: ConnectorTypeFie
   data: T
 ): T => {
   if (data.fields) {
-    const serializedFields = Object.entries(data.fields).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: isEmpty(value) ? null : value,
-      }),
-      {}
-    );
+    const serializedFields = convertEmptyValuesToNull(data.fields);
 
     return {
       ...data,
@@ -93,6 +86,31 @@ export const getConnectorsFormSerializer = <T extends { fields: ConnectorTypeFie
 
   return data;
 };
+
+export const convertEmptyValuesToNull = <T>(fields: T | null | undefined): T | null => {
+  if (fields) {
+    return Object.entries(fields).reduce((acc, [key, value]) => {
+      return {
+        ...acc,
+        [key]: isEmptyValue(value) ? null : value,
+      };
+    }, {} as T);
+  }
+
+  return null;
+};
+
+/**
+ * We cannot use lodash isEmpty util function
+ * because it will return true for primitive values
+ * like boolean or numbers
+ */
+
+export const isEmptyValue = (value: unknown) =>
+  value === null ||
+  value === undefined ||
+  (typeof value === 'object' && Object.keys(value).length === 0) ||
+  (typeof value === 'string' && value.trim().length === 0);
 
 /**
  * Form html elements do not support null values.

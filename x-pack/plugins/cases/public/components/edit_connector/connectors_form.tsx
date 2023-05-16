@@ -12,7 +12,7 @@ import {
   useForm,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CaseConnectors, CaseUI } from '../../../common/ui/types';
 import type { CaseConnector, ConnectorTypeFields } from '../../../common/api';
@@ -20,6 +20,7 @@ import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import type { CaseActionConnector } from '../types';
 import {
+  convertEmptyValuesToNull,
   getConnectorById,
   getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
@@ -63,6 +64,8 @@ const ConnectorsFormComponent: React.FC<Props> = ({
 
   const [{ connectorId, fields }] = useFormData<FormState>({ form });
 
+  const fieldsWithNullValues = useMemo(() => convertEmptyValuesToNull(fields), [fields]);
+
   const { submit } = form;
 
   const currentActionConnector = getConnectorById(connectorId, supportedActionConnectors);
@@ -79,7 +82,7 @@ const ConnectorsFormComponent: React.FC<Props> = ({
 
   const enableSave =
     (!isDefaultNoneConnectorSelected && currentActionConnector?.id !== initialConnectorId) ||
-    !deepEqual(fields ?? null, initialConnectorFields);
+    !deepEqual(fieldsWithNullValues, initialConnectorFields);
 
   const onConnectorChange = (newConnectorId: string) => {
     const newFields = caseConnectors[newConnectorId]?.fields;
