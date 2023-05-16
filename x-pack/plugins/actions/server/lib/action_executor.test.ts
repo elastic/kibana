@@ -664,8 +664,12 @@ test('successfully executes as a task', async () => {
   const eventTask = eventLogger.logEvent.mock.calls[0][0]?.kibana?.task;
   expect(eventTask).toBeDefined();
   expect(eventTask?.scheduled).toBe(scheduled.toISOString());
-  expect(eventTask?.schedule_delay).toBeGreaterThanOrEqual(scheduleDelay * 1000 * 1000);
-  expect(eventTask?.schedule_delay).toBeLessThanOrEqual(2 * scheduleDelay * 1000 * 1000);
+  const eventTaskScheduleDelay =
+    typeof eventTask?.schedule_delay === 'string'
+      ? parseInt(eventTask?.schedule_delay, 10)
+      : eventTask?.schedule_delay;
+  expect(eventTaskScheduleDelay).toBeGreaterThanOrEqual(scheduleDelay * 1000 * 1000);
+  expect(eventTaskScheduleDelay).toBeLessThanOrEqual(2 * scheduleDelay * 1000 * 1000);
 });
 
 test('provides empty config when config and / or secrets is empty', async () => {
