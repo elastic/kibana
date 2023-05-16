@@ -7,6 +7,7 @@
 
 import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
 import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
+import { isObject } from 'lodash';
 
 interface Props {
   getFieldState: UseFormGetFieldState<CreateSLOInput>;
@@ -25,7 +26,8 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
           'indicator.params.good'
         ) as MetricCustomIndicatorSchema['params']['good'];
         const isEquationValid = !getFieldState('indicator.params.good.equation').invalid;
-        const areMetricsValid = (data.metrics ?? []).every((metric) => Boolean(metric.field));
+        const areMetricsValid =
+          isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
         return isEquationValid && areMetricsValid;
       };
 
@@ -34,7 +36,8 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
           'indicator.params.total'
         ) as MetricCustomIndicatorSchema['params']['total'];
         const isEquationValid = !getFieldState('indicator.params.total.equation').invalid;
-        const areMetricsValid = (data.metrics ?? []).every((metric) => Boolean(metric.field));
+        const areMetricsValid =
+          isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
         return isEquationValid && areMetricsValid;
       };
 
