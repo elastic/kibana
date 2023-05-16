@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find } from 'lodash/fp';
+import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { hasData } from '../../../common/components/event_details/insights/helpers';
-import { hasCorrectAgentTypeAndEventModule } from '../../../common/components/event_details/insights/insights';
 import { useLicense } from '../../../common/hooks/use_license';
 
 export interface UseShowRelatedAlertsByAncestryParams {
@@ -17,6 +17,10 @@ export interface UseShowRelatedAlertsByAncestryParams {
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
+   * An object with top level fields from the ECS object
+   */
+  dataAsNestedObject: Ecs | null;
 }
 
 /**
@@ -24,25 +28,15 @@ export interface UseShowRelatedAlertsByAncestryParams {
  */
 export const useShowRelatedAlertsByAncestry = ({
   dataFormattedForFieldBrowser,
+  dataAsNestedObject,
 }: UseShowRelatedAlertsByAncestryParams): boolean => {
   const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
     'insightsRelatedAlertsByProcessAncestry'
   );
-  const agentTypeField = find(
-    { category: 'agent', field: 'agent.type' },
-    dataFormattedForFieldBrowser
+  const hasProcessEntityInfo = isInvestigateInResolverActionEnabled(
+    dataAsNestedObject || undefined
   );
-  const eventModuleField = find(
-    { category: 'event', field: 'event.module' },
-    dataFormattedForFieldBrowser
-  );
-  const processEntityField = find(
-    { category: 'process', field: 'process.entity_id' },
-    dataFormattedForFieldBrowser
-  );
-  const hasProcessEntityInfo =
-    hasData(processEntityField) &&
-    hasCorrectAgentTypeAndEventModule(agentTypeField, eventModuleField);
+
   const originalDocumentId = find(
     { category: 'kibana', field: 'kibana.alert.ancestors.id' },
     dataFormattedForFieldBrowser

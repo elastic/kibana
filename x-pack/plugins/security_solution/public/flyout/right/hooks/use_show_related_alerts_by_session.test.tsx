@@ -8,12 +8,12 @@
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 
-import type { UseFetchRelatedAlertsBySessionParams } from './use_show_related_alerts_by_session';
+import type { UseShowRelatedAlertsBySessionParams } from './use_show_related_alerts_by_session';
 import { useShowRelatedAlertsBySession } from './use_show_related_alerts_by_session';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
 describe('useShowRelatedAlertsBySession', () => {
-  let hookResult: RenderHookResult<UseFetchRelatedAlertsBySessionParams, boolean>;
+  let hookResult: RenderHookResult<UseShowRelatedAlertsBySessionParams, boolean>;
 
   it('should return false if dataFormattedForFieldBrowser is null', () => {
     const dataFormattedForFieldBrowser = null;

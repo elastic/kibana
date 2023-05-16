@@ -162,7 +162,6 @@ export const Insights = React.memo<Props>(
             (hasAtLeastPlatinum ? (
               <EuiFlexItem data-test-subj="related-alerts-by-ancestry">
                 <RelatedAlertsByProcessAncestry
-                  data={processEntityField}
                   originalDocumentId={originalDocumentId}
                   index={originalDocumentIndex}
                   eventId={eventId}

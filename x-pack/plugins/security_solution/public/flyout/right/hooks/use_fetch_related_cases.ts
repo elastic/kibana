@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
-import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
-import { CASES_ERROR_TOAST } from '../../../common/components/event_details/insights/translations';
+
+const QUERY_KEY = 'useFetchRelatedCases';
 
 export interface UseFetchRelatedCasesParams {
   /**
@@ -17,7 +18,8 @@ export interface UseFetchRelatedCasesParams {
    */
   eventId: string;
 }
-export interface UseFetchRelatedCasesValue {
+
+export interface UseFetchRelatedCasesResult {
   /**
    * Returns true while data is loading
    */
@@ -41,47 +43,23 @@ export interface UseFetchRelatedCasesValue {
  */
 export const useFetchRelatedCases = ({
   eventId,
-}: UseFetchRelatedCasesParams): UseFetchRelatedCasesValue => {
+}: UseFetchRelatedCasesParams): UseFetchRelatedCasesResult => {
   const {
     services: { cases },
   } = useKibana();
-  const toasts = useToasts();
-
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<boolean>(false);
-  const [relatedCases, setRelatedCases] = useState<CasesByAlertId | undefined>(undefined);
-
-  // fetch related cases
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true);
-
-      let relatedCaseList: CasesByAlertId = [];
-      try {
-        if (eventId) {
-          relatedCaseList =
-            (await cases.api.getRelatedCases(eventId, {
-              owner: APP_ID,
-            })) ?? [];
-        }
-      } catch (err) {
-        setError(true);
-        setLoading(false);
-
-        toasts.addWarning(CASES_ERROR_TOAST(err));
-      }
-
-      setLoading(false);
-      setRelatedCases(relatedCaseList);
-    };
-
-    fetch();
-  }, [cases.api, eventId, toasts]);
+  const { data, isLoading, isError } = useQuery<CasesByAlertId | undefined>(
+    [QUERY_KEY, eventId],
+    () =>
+      cases.api.getRelatedCases(eventId, {
+        owner: APP_ID,
+      }),
+    { keepPreviousData: true }
+  );
 
   return {
-    loading,
-    error,
-    data: relatedCases,
-    dataCount: (relatedCases || []).length,
+    loading: isLoading,
+    error: isError,
+    data,
+    dataCount: (data || []).length,
   };
 };

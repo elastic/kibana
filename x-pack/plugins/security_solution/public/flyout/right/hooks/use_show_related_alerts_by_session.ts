@@ -9,7 +9,7 @@ import { find } from 'lodash/fp';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { hasData } from '../../../common/components/event_details/insights/helpers';
 
-export interface UseFetchRelatedAlertsBySessionParams {
+export interface UseShowRelatedAlertsBySessionParams {
   /**
    * An array of field objects with category and value
    */
@@ -21,7 +21,7 @@ export interface UseFetchRelatedAlertsBySessionParams {
  */
 export const useShowRelatedAlertsBySession = ({
   dataFormattedForFieldBrowser,
-}: UseFetchRelatedAlertsBySessionParams): boolean => {
+}: UseShowRelatedAlertsBySessionParams): boolean => {
   const processSessionField = find(
     { category: 'process', field: 'process.entry_leader.entity_id' },
     dataFormattedForFieldBrowser

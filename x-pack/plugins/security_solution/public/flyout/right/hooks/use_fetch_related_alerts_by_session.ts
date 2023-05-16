@@ -10,7 +10,7 @@ import { find } from 'lodash/fp';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 import { isActiveTimeline } from '../../../helpers';
 
-export interface UseFetchRelatedCasesParams {
+export interface UseFetchRelatedAlertsBySessionParams {
   /**
    * An array of field objects with category and value
    */
@@ -20,7 +20,7 @@ export interface UseFetchRelatedCasesParams {
    */
   scopeId: string;
 }
-export interface UseFetchRelatedCasesValue {
+export interface UseFetchRelatedAlertsBySessionResult {
   /**
    * Returns true while data is loading
    */
@@ -45,7 +45,7 @@ export interface UseFetchRelatedCasesValue {
 export const useFetchRelatedAlertsBySession = ({
   dataFormattedForFieldBrowser,
   scopeId,
-}: UseFetchRelatedCasesParams): UseFetchRelatedCasesValue => {
+}: UseFetchRelatedAlertsBySessionParams): UseFetchRelatedAlertsBySessionResult => {
   const processSessionField = find(
     { category: 'process', field: 'process.entry_leader.entity_id' },
     dataFormattedForFieldBrowser

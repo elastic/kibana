@@ -20,7 +20,7 @@ export interface UseFetchRelatedAlertsBySameSourceEventParams {
    */
   scopeId: string;
 }
-export interface UseFetchRelatedAlertsBySameSourceEventValue {
+export interface UseFetchRelatedAlertsBySameSourceEventResult {
   /**
    * Returns true while data is loading
    */
@@ -45,7 +45,7 @@ export interface UseFetchRelatedAlertsBySameSourceEventValue {
 export const useFetchRelatedAlertsBySameSourceEvent = ({
   dataFormattedForFieldBrowser,
   scopeId,
-}: UseFetchRelatedAlertsBySameSourceEventParams): UseFetchRelatedAlertsBySameSourceEventValue => {
+}: UseFetchRelatedAlertsBySameSourceEventParams): UseFetchRelatedAlertsBySameSourceEventResult => {
   const sourceEventField = find(
     { category: 'kibana', field: 'kibana.alert.original_event.id' },
     dataFormattedForFieldBrowser

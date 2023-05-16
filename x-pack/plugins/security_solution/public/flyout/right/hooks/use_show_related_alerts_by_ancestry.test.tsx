@@ -7,12 +7,13 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { UseShowRelatedAlertsByAncestryParams } from './use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_ancestry';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { licenseService } from '../../../common/hooks/use_license';
+import { mockDataAsNestedObject } from '../mocks/mock_context';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/hooks/use_license', () => {
@@ -27,6 +28,8 @@ jest.mock('../../../common/hooks/use_license', () => {
   };
 });
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+const dataAsNestedObject = mockDataAsNestedObject as unknown as Ecs;
 
 const agentType = {
   category: 'agent',
@@ -71,7 +74,9 @@ describe('useShowRelatedAlertsBySameSourceEvent', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     const dataFormattedForFieldBrowser = null;
-    hookResult = renderHook(() => useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+    );
 
     expect(hookResult.result.current).toEqual(false);
   });
@@ -86,7 +91,9 @@ describe('useShowRelatedAlertsBySameSourceEvent', () => {
       alertAncestorId,
       ruleParameterIndex,
     ];
-    hookResult = renderHook(() => useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+    );
 
     expect(hookResult.result.current).toEqual(false);
   });
@@ -100,7 +107,9 @@ describe('useShowRelatedAlertsBySameSourceEvent', () => {
       processEntityId,
       ruleParameterIndex,
     ];
-    hookResult = renderHook(() => useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+    );
 
     expect(hookResult.result.current).toEqual(false);
   });
@@ -114,7 +123,9 @@ describe('useShowRelatedAlertsBySameSourceEvent', () => {
       processEntityId,
       alertAncestorId,
     ];
-    hookResult = renderHook(() => useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+    );
 
     expect(hookResult.result.current).toEqual(false);
   });
@@ -128,7 +139,9 @@ describe('useShowRelatedAlertsBySameSourceEvent', () => {
       alertAncestorId,
       ruleParameterIndex,
     ];
-    hookResult = renderHook(() => useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+    );
 
     expect(hookResult.result.current).toEqual(false);
   });
@@ -148,7 +161,9 @@ describe('useShowRelatedAlertsBySameSourceEvent', () => {
       alertAncestorId,
       ruleParameterIndex,
     ];
-    hookResult = renderHook(() => useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+    );
 
     expect(hookResult.result.current).toEqual(false);
   });
@@ -162,7 +177,9 @@ describe('useShowRelatedAlertsBySameSourceEvent', () => {
       alertAncestorId,
       ruleParameterIndex,
     ];
-    hookResult = renderHook(() => useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+    );
 
     expect(hookResult.result.current).toEqual(false);
   });

@@ -8,12 +8,12 @@
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 
-import type { ShowRElatedAlertsBySameSourceEventParams } from './use_show_related_alerts_by_same_source_event';
+import type { ShowRelatedAlertsBySameSourceEventParams } from './use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySameSourceEvent } from './use_show_related_alerts_by_same_source_event';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
 describe('useShowRelatedAlertsBySameSourceEvent', () => {
-  let hookResult: RenderHookResult<ShowRElatedAlertsBySameSourceEventParams, boolean>;
+  let hookResult: RenderHookResult<ShowRelatedAlertsBySameSourceEventParams, boolean>;
 
   it('should return false if dataFormattedForFieldBrowser is null', () => {
     const dataFormattedForFieldBrowser = null;

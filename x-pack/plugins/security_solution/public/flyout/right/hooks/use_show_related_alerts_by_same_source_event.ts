@@ -9,7 +9,7 @@ import { find } from 'lodash/fp';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { hasData } from '../../../common/components/event_details/insights/helpers';
 
-export interface ShowRElatedAlertsBySameSourceEventParams {
+export interface ShowRelatedAlertsBySameSourceEventParams {
   /**
    * An array of field objects with category and value
    */
@@ -21,7 +21,7 @@ export interface ShowRElatedAlertsBySameSourceEventParams {
  */
 export const useShowRelatedAlertsBySameSourceEvent = ({
   dataFormattedForFieldBrowser,
-}: ShowRElatedAlertsBySameSourceEventParams): boolean => {
+}: ShowRelatedAlertsBySameSourceEventParams): boolean => {
   const sourceEventField = find(
     { category: 'kibana', field: 'kibana.alert.original_event.id' },
     dataFormattedForFieldBrowser
