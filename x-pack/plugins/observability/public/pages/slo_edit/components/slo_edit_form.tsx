@@ -144,11 +144,10 @@ export function SloEditForm({ slo }: Props) {
   };
 
   const copyTextToClipboard = async (text: string) => {
-    if (window.navigator?.clipboard) {
-      await window.navigator.clipboard.writeText(text);
-      return;
+    if (!window.navigator?.clipboard) {
+       throw new Error('Could not copy to clipboard!');
     }
-    throw new Error('Could not copy to clipboard!');
+    await window.navigator.clipboard.writeText(text);
   };
 
   const handleSubmit = async () => {
