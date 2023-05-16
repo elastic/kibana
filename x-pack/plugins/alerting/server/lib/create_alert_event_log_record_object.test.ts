@@ -83,7 +83,7 @@ describe('createAlertEventLogRecordObject', () => {
         ],
         space_ids: ['default'],
         task: {
-          schedule_delay: 0,
+          schedule_delay: '0',
           scheduled: '1970-01-01T00:00:00.000Z',
         },
       },

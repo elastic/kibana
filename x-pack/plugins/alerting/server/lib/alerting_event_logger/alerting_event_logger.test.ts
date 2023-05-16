@@ -1024,7 +1024,7 @@ describe('initializeExecuteRecord', () => {
       contextWithScheduleDelay.taskScheduledAt.toISOString()
     );
     expect(record.kibana?.task?.schedule_delay).toEqual(
-      contextWithScheduleDelay.taskScheduleDelay * 1000000
+      `${contextWithScheduleDelay.taskScheduleDelay * 1000000}`
     );
     expect(record?.rule?.id).toEqual(contextWithScheduleDelay.ruleId);
     expect(record?.rule?.license).toEqual(contextWithScheduleDelay.ruleType.minimumLicenseRequired);
