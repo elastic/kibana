@@ -16198,6 +16198,20 @@
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.uninstallTokenService",
+          "type": "Object",
+          "tags": [],
+          "label": "uninstallTokenService",
+          "description": [],
+          "signature": [
+            "UninstallTokenServiceInterface"
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -16643,6 +16657,17 @@
             "signature": [
               "number | undefined"
             ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AgentPolicy.is_protected",
+            "type": "boolean",
+            "tags": [],
+            "label": "is_protected",
+            "description": [],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -19764,6 +19789,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.is_protected",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_protected",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -21986,7 +22025,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"password\" | \"bool\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -23925,6 +23964,21 @@
           "10000"
         ],
         "path": "x-pack/plugins/fleet/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.UNINSTALL_TOKENS_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "UNINSTALL_TOKENS_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-uninstall-tokens\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/uninstall_tokens.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

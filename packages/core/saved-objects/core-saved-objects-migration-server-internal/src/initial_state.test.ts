@@ -266,12 +266,11 @@ describe('createInitialState', () => {
         "tempIndexMappings": Object {
           "dynamic": false,
           "properties": Object {
-            "migrationVersion": Object {
-              "dynamic": "true",
-              "type": "object",
-            },
             "type": Object {
               "type": "keyword",
+            },
+            "typeMigrationVersion": Object {
+              "type": "version",
             },
           },
         },

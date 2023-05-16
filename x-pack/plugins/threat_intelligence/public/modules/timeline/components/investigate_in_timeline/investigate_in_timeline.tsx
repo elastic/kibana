@@ -42,7 +42,7 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
   if (!investigateInTimelineFn) {
-    return <></>;
+    return null;
   }
 
   const menuItemClicked = () => {
@@ -78,7 +78,7 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
   if (!investigateInTimelineFn) {
-    return <></>;
+    return null;
   }
 
   return (
