@@ -8,7 +8,7 @@
 
 import { Logger } from '../cli/logger';
 
-export function list(keystore, command, options = {}) {
+export function list(keystore, options = {}) {
   const logger = new Logger(options);
 
   if (!keystore.exists()) {
