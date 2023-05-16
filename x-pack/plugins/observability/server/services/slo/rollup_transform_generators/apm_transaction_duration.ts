@@ -17,7 +17,7 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
-import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
+import { getSLORollupTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { getElastichsearchQueryOrThrow, RollupTransformGenerator } from '.';
 import { Query } from './types';
@@ -29,7 +29,7 @@ export class ApmTransactionDurationTransformGenerator extends RollupTransformGen
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
-    return getSLOTransformTemplate(
+    return getSLORollupTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),

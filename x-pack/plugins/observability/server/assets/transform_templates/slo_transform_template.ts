@@ -19,7 +19,7 @@ export interface TransformSettings {
   sync_delay: TransformTimeSync['delay'];
 }
 
-export const getSLOTransformTemplate = (
+export const getSLORollupTransformTemplate = (
   transformId: string,
   description: string,
   source: TransformSource,
