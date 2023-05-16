@@ -98,7 +98,6 @@ const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
 interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   threatIndicesConfig: string[];
-  initialValues?: DefineStepRule;
   onPreviewDisabledStateChange?: (isDisabled: boolean) => void;
   defaultSavedQuery?: SavedQuery;
   form: FormHook<DefineStepRule>;
@@ -133,7 +132,6 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
 }))<{ $isVisible: boolean }>``;
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
-  initialValues,
   isLoading,
   isUpdateView = false,
   kibanaDataViews,
@@ -826,8 +824,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 componentProps={{
                   browserFields: termsAggregationFields,
                   isDisabled:
-                    !license.isAtLeast(minimumLicenseForSuppression) &&
-                    initialValues?.groupByFields.length === 0,
+                    !license.isAtLeast(minimumLicenseForSuppression) && groupByFields?.length === 0,
                 }}
               />
             </RuleTypeEuiFormRow>

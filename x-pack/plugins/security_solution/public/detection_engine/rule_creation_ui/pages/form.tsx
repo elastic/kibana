@@ -13,7 +13,6 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
 } from '../../../detections/pages/detection_engine/rules/types';
-import { stepDefineDefaultValue } from '../../../detections/pages/detection_engine/rules/utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { useForm, useFormData } from '../../../shared_imports';
 import { schema as defineRuleSchema } from '../../../detections/components/rules/step_define_rule/schema';
@@ -47,16 +46,18 @@ export const useRuleForms = ({
     options: { stripEmptyFields: false },
     schema: defineRuleSchema,
   });
-  // TODO: include eqlOptionsSelected in submitted rule to rulePreview and real createRule
   const [eqlOptionsSelected, setEqlOptionsSelected] = useState<EqlOptionsSelected>(
-    stepDefineDefaultValue.eqlOptions
+    defineStepDefault.eqlOptions
   );
   const [defineStepFormData] = useFormData<DefineStepRule | {}>({
     form: defineStepForm,
   });
   // FormData doesn't populate on the first render, so we use the defaultValue if the formData
   // doesn't have what we wanted
-  const defineStepData = 'index' in defineStepFormData ? defineStepFormData : defineStepDefault;
+  const defineStepData =
+    'index' in defineStepFormData
+      ? { ...defineStepFormData, eqlOptions: eqlOptionsSelected }
+      : defineStepDefault;
 
   // ABOUT STEP FORM
   const isThreatMatchRuleValue = useMemo(

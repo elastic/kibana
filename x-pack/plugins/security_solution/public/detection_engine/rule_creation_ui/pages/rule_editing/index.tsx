@@ -134,21 +134,10 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   });
 
   const loading = userInfoLoading || listsConfigLoading;
-  const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
+  const { isSavedQueryLoading, savedQuery } = useGetSavedQuery(rule?.saved_id, {
     ruleType: rule?.type,
     onError: noop,
   });
-
-  const defineStepDataWithSavedQuery = useMemo(
-    () =>
-      defineStepData
-        ? {
-            ...defineStepData,
-            queryBar: savedQueryBar ?? defineStepData.queryBar,
-          }
-        : defineStepData,
-    [defineStepData, savedQueryBar]
-  );
 
   // Since in the edit step we start with an existing rule, we assume that
   // the steps are valid if isValid is undefined. Once the user triggers validation by
@@ -197,12 +186,10 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
           >
             <EuiSpacer />
             <StepPanel loading={loading || isSavedQueryLoading} title={ruleI18n.DEFINITION}>
-              {defineStepDataWithSavedQuery != null && !isSavedQueryLoading && (
+              {!isSavedQueryLoading && (
                 <StepDefineRule
                   isLoading={loading || isLoading || isSavedQueryLoading}
                   isUpdateView
-                  // TODO: separate the initial rule values from the form state
-                  initialValues={defineStepDataWithSavedQuery}
                   kibanaDataViews={dataViewOptions}
                   indicesConfig={indicesConfig}
                   threatIndicesConfig={threatIndicesConfig}
@@ -310,7 +297,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
       activeStep,
       loading,
       isSavedQueryLoading,
-      defineStepDataWithSavedQuery,
       isLoading,
       dataViewOptions,
       indicesConfig,
