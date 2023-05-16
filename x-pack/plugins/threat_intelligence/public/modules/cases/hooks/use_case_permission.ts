@@ -6,7 +6,7 @@
  */
 
 import { CasesPermissions } from '@kbn/cases-plugin/common';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { EMPTY_VALUE } from '../../../constants/common';
 import { useKibana } from '../../../hooks/use_kibana';
 
 /**
