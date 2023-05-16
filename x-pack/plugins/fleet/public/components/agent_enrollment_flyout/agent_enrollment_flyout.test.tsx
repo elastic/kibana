@@ -44,6 +44,7 @@ const testAgentPolicy: AgentPolicy = {
   updated_at: 'test',
   updated_by: 'test',
   name: 'test',
+  is_protected: false,
 };
 
 describe('<AgentEnrollmentFlyout />', () => {
