@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { fetchMonitorManagementList } from '../../../state';
 
