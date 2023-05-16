@@ -213,3 +213,14 @@ For example, if you have a planned outage or event, a maintenance window prevent
 
 [role="screenshot"]
 image::images/highlights-maintenance-windows.png[Viewing maintenance windows in {kib}]
+
+[discrete]
+=== Cases
+
+These features are all available for cases in {stack-manage-app}, {observability}, and the {security-app}.
+
+[discrete]
+==== Case attachments
+
+You can now attach files to cases for better investigation processes.
+With the new capability you can upload indicators of compromise (IOCs) and other files to support alert and case triage. For more information, check <<add-case-files>>.
