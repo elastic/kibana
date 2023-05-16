@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { isEmpty } from 'lodash';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { checkArtifactHasData } from '../../../../management/services/exceptions_list/check_artifact_has_data';
 import { HostIsolationExceptionsApiClient } from '../../../../management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -61,7 +62,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading,
-      ...(!loading && fleetAuthz
+      ...(!loading && fleetAuthz && !isEmpty(user)
         ? calculateEndpointAuthz(
             licenseService,
             fleetAuthz,
