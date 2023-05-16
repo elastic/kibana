@@ -72,6 +72,8 @@ describe('Version Compatibility', () => {
           elasticsearch: {
             ignoreVersionMismatch,
           },
+          // Skipping migrations because we are setting a customKibanaVersion and that makes new registered migrations fail.
+          migrations: { skip: true },
         },
       },
     });
