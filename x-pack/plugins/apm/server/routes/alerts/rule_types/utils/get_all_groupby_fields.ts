@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { union } from 'lodash';
 import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_ENVIRONMENT,
@@ -16,7 +17,7 @@ export const getAllGroupByFields = (
   ruleType: string,
   groupBy: string[] | undefined = []
 ) => {
-  const predefinedGroupby =
+  const predefinedGroupBy =
     ruleType === ApmRuleType.TransactionDuration ||
     ruleType === ApmRuleType.TransactionErrorRate
       ? [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE]
@@ -24,5 +25,5 @@ export const getAllGroupByFields = (
       ? [SERVICE_NAME, SERVICE_ENVIRONMENT]
       : [];
 
-  return Array.from(new Set([...predefinedGroupby, ...groupBy]));
+  return union(predefinedGroupBy, groupBy);
 };
