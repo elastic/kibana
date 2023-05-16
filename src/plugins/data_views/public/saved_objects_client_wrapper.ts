@@ -19,8 +19,7 @@ import {
 
 import type { DataViewCrudTypes } from '../common/content_management';
 
-// import { DataViewSOType } from '../common/content_management';
-const DataViewSOType = 'index-pattern';
+import { DataViewSOType } from '../common/content_management';
 
 type SOClient = Pick<SavedObjectsClientContract, 'resolve'>;
 
