@@ -170,12 +170,10 @@ describe('Upload response action create API handler', () => {
           command: 'upload',
           endpoint_ids: ['123-456'],
           parameters: {
-            file: {
-              file_id: '123',
-              file_name: 'test.txt',
-              sha256: 'abc',
-              size: 1234,
-            },
+            file_id: '123',
+            file_name: 'test.txt',
+            file_sha256: 'abc',
+            file_size: 1234,
             overwrite: true,
           },
           user: undefined,

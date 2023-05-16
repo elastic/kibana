@@ -87,6 +87,7 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/ui-actions-plugin",
+    "@kbn/observability-alert-details",
   ],
   "exclude": [
     "target/**/*",

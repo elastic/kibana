@@ -17,7 +17,8 @@ export default function ({ loadTestFile, getService }) {
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup')); // ~ 6s
 
-    // Enrollment API keys
+    loadTestFile(require.resolve('./policy_secrets')); // ~40s
+
     loadTestFile(require.resolve('./enrollment_api_keys/crud')); // ~ 20s
 
     // Data Streams
