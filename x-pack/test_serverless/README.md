@@ -17,6 +17,9 @@ set of helper methods and sub-directories for
 - `search` project specific functionality
 - `security` project specific functionality
 
+The `shared` directory contains fixtures, services, ... that are shared across
+`api_integration` abd `functional` tests
+
 ```
 x-pack/test_serverless/
 ├─ api_integration
@@ -34,6 +37,10 @@ x-pack/test_serverless/
 │  │  ├─ observability
 │  │  ├─ search
 │  │  ├─ security
+├─ shared
+│  ├─ fixtures
+│  ├─ services
+│  ├─ types
 ```
 
 ### Shared services and page objects
