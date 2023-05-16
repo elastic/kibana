@@ -10,12 +10,17 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter } from '@kbn/es-query';
 import { SearchBar, SearchBarProps } from '../search_bar';
 import { setIndexPatterns } from '../services';
+
+const TextBasedLanguagesEditorLazy = React.lazy(() => import('@kbn/text-based-editor'));
+const TextBasedLanguagesEditor = withSuspense(TextBasedLanguagesEditorLazy);
 
 const mockIndexPatterns = [
   {
@@ -79,6 +84,21 @@ const createMockStorage = () => ({
   get: () => true,
 });
 
+function createEditor() {
+  return (props: TextBasedLanguagesEditorProps) => {
+    return (
+      <KibanaContextProvider
+        services={{
+          settings: { client: { get: () => {} } },
+          uiSettings: { get: () => {} },
+        }}
+      >
+        <TextBasedLanguagesEditor {...props} isDarkMode={false} />
+      </KibanaContextProvider>
+    );
+  };
+}
+
 const services = {
   uiSettings: {
     get: () => {},
@@ -96,6 +116,9 @@ const services = {
         kueryQuerySyntax: '',
       },
     },
+  },
+  textBasedLanguages: {
+    Editor: createEditor(),
   },
   storage: createMockStorage(),
   data: {

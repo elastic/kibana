@@ -50,7 +50,7 @@ describe('TextBasedLanguagesEditor', () => {
   it('should  render the editor component', async () => {
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
-      expect(component.find('[data-test-subj="unifiedTextLangEditor"]').length).not.toBe(0);
+      expect(component.find('[data-test-subj="TextBasedLangEditor"]').length).not.toBe(0);
     });
   });
 
@@ -58,7 +58,7 @@ describe('TextBasedLanguagesEditor', () => {
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
       expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-inline-lines-badge"]').length
+        component.find('[data-test-subj="TextBasedLangEditor-inline-lines-badge"]').length
       ).not.toBe(0);
     });
   });
@@ -71,7 +71,7 @@ describe('TextBasedLanguagesEditor', () => {
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
       expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-inline-errors-badge"]').length
+        component.find('[data-test-subj="TextBasedLangEditor-inline-errors-badge"]').length
       ).not.toBe(0);
     });
   });
@@ -79,9 +79,9 @@ describe('TextBasedLanguagesEditor', () => {
   it('should render the correct buttons for the inline code editor mode', async () => {
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
-      expect(component.find('[data-test-subj="unifiedTextLangEditor-expand"]').length).not.toBe(0);
+      expect(component.find('[data-test-subj="TextBasedLangEditor-expand"]').length).not.toBe(0);
       expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-inline-documentation"]').length
+        component.find('[data-test-subj="TextBasedLangEditor-inline-documentation"]').length
       ).not.toBe(0);
     });
   });
@@ -94,7 +94,7 @@ describe('TextBasedLanguagesEditor', () => {
     };
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-      findTestSubject(component, 'unifiedTextLangEditor-expand').simulate('click');
+      findTestSubject(component, 'TextBasedLangEditor-expand').simulate('click');
       expect(expandCodeEditorSpy).toHaveBeenCalled();
     });
   });
@@ -107,13 +107,13 @@ describe('TextBasedLanguagesEditor', () => {
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
       expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-toggleWordWrap"]').length
+        component.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
       ).not.toBe(0);
-      expect(component.find('[data-test-subj="unifiedTextLangEditor-minimize"]').length).not.toBe(
+      expect(component.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).not.toBe(
         0
       );
       expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-documentation"]').length
+        component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length
       ).not.toBe(0);
     });
   });
@@ -127,7 +127,7 @@ describe('TextBasedLanguagesEditor', () => {
     };
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-      findTestSubject(component, 'unifiedTextLangEditor-minimize').simulate('click');
+      findTestSubject(component, 'TextBasedLangEditor-minimize').simulate('click');
       expect(expandCodeEditorSpy).toHaveBeenCalled();
     });
   });
@@ -139,7 +139,7 @@ describe('TextBasedLanguagesEditor', () => {
     };
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-      expect(component.find('[data-test-subj="unifiedTextLangEditor-resize"]').length).not.toBe(0);
+      expect(component.find('[data-test-subj="TextBasedLangEditor-resize"]').length).not.toBe(0);
     });
   });
 
@@ -150,9 +150,9 @@ describe('TextBasedLanguagesEditor', () => {
     };
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-      expect(component.find('[data-test-subj="unifiedTextLangEditor-footer"]').length).not.toBe(0);
+      expect(component.find('[data-test-subj="TextBasedLangEditor-footer"]').length).not.toBe(0);
       expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-footer-lines"]').at(0).text()
+        component.find('[data-test-subj="TextBasedLangEditor-footer-lines"]').at(0).text()
       ).toBe('1 line');
     });
   });

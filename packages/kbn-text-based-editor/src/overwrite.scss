@@ -1,45 +1,45 @@
-.unifiedTextLangEditor .monaco-editor {
+.TextBasedLangEditor .monaco-editor {
   border-top-left-radius: 6px;
   border-bottom-left-radius: 6px;
 }
 
-.unifiedTextLangEditor .monaco-editor .monaco-hover {
+.TextBasedLangEditor .monaco-editor .monaco-hover {
   display: none !important;
 }
 
-.unifiedTextLangEditor--expanded .monaco-editor .monaco-hover {
+.TextBasedLangEditor--expanded .monaco-editor .monaco-hover {
   display: block !important;
 }
 
-.unifiedTextLangEditor .monaco-editor .margin {
+.TextBasedLangEditor .monaco-editor .margin {
   border-top-left-radius: 6px;
   border-bottom-left-radius: 6px;
 }
 
-.unifiedTextLangEditor--compact .monaco-editor {
+.TextBasedLangEditor--compact .monaco-editor {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
 
-.unifiedTextLangEditor--compact .monaco-editor .margin {
+.TextBasedLangEditor--compact .monaco-editor .margin {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   background-color: $euiColorLightestShade;
   color: $euiColorDisabledText;
 }
 
-.unifiedTextLangEditor .monaco-editor .margin-view-overlays .line-numbers {
+.TextBasedLangEditor .monaco-editor .margin-view-overlays .line-numbers {
   color: $euiColorDisabledText;
 }
 
-.unifiedTextLangEditor .monaco-editor .current-line ~ .line-numbers {
+.TextBasedLangEditor .monaco-editor .current-line ~ .line-numbers {
   color: $euiTextSubduedColor;
 }
 
-.unifiedTextLangEditor--compact .monaco-editor .monaco-scrollable-element {
+.TextBasedLangEditor--compact .monaco-editor .monaco-scrollable-element {
   margin-left: 4px;
 }
 
-.unifiedTextLangEditor_errorMessage {
+.TextBasedLangEditor_errorMessage {
   @include euiTextBreakWord;
 }

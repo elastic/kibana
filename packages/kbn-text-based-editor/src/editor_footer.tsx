@@ -48,14 +48,14 @@ export const EditorFooter = memo(function EditorFooter({
     <EuiFlexGroup
       gutterSize="s"
       justifyContent="spaceBetween"
-      data-test-subj="unifiedTextLangEditor-footer"
+      data-test-subj="TextBasedLangEditor-footer"
       css={containerCSS}
       responsive={false}
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
-            <EuiText size="xs" color="subdued" data-test-subj="unifiedTextLangEditor-footer-lines">
+            <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-footer-lines">
               <p>
                 {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineCount', {
                   defaultMessage: '{count} {count, plural, one {line} other {lines}}',
@@ -142,7 +142,7 @@ export const EditorFooter = memo(function EditorFooter({
                                 </EuiFlexItem>
                                 <EuiFlexItem
                                   grow={false}
-                                  className="unifiedTextLangEditor_errorMessage"
+                                  className="TextBasedLangEditor_errorMessage"
                                 >
                                   {error.message}
                                 </EuiFlexItem>

@@ -120,10 +120,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
-  const editorClassName = classNames('unifiedTextLangEditor', {
-    'unifiedTextLangEditor--expanded': isCodeEditorExpanded,
-    'unifiedTextLangEditor--compact': isCompactFocused,
-    'unifiedTextLangEditor--initial': !isCompactFocused,
+  const editorClassName = classNames('TextBasedLangEditor', {
+    'TextBasedLangEditor--expanded': isCodeEditorExpanded,
+    'TextBasedLangEditor--compact': isCompactFocused,
+    'TextBasedLangEditor--initial': !isCompactFocused,
   });
 
   // When the editor is on full size mode, the user can resize the height of the editor.
@@ -391,7 +391,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               <EuiButtonIcon
                 iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
                 color="text"
-                data-test-subj="unifiedTextLangEditor-toggleWordWrap"
+                data-test-subj="TextBasedLangEditor-toggleWordWrap"
                 aria-label={
                   isWordWrapped
                     ? i18n.translate(
@@ -438,7 +438,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         defaultMessage: 'Minimize editor',
                       }
                     )}
-                    data-test-subj="unifiedTextLangEditor-minimize"
+                    data-test-subj="TextBasedLangEditor-minimize"
                     onClick={() => {
                       expandCodeEditor(false);
                       updateLinesFromModel = false;
@@ -452,7 +452,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   sections={documentationSections}
                   buttonProps={{
                     color: 'text',
-                    'data-test-subj': 'unifiedTextLangEditor-documentation',
+                    'data-test-subj': 'TextBasedLangEditor-documentation',
                     'aria-label': i18n.translate(
                       'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
                       {
@@ -480,13 +480,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               }}
             >
               <div ref={resizeRef} css={styles.resizableContainer}>
-                <EuiFlexItem data-test-subj="unifiedTextLangEditor" className={editorClassName}>
+                <EuiFlexItem data-test-subj="TextBasedLangEditor" className={editorClassName}>
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge
                         color={euiTheme.colors.lightShade}
                         css={styles.linesBadge}
-                        data-test-subj="unifiedTextLangEditor-inline-lines-badge"
+                        data-test-subj="TextBasedLangEditor-inline-lines-badge"
                       >
                         {i18n.translate(
                           'textBasedEditor.query.textBasedLanguagesEditor.lineCount',
@@ -503,7 +503,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         css={styles.errorsBadge}
                         iconType="error"
                         iconSide="left"
-                        data-test-subj="unifiedTextLangEditor-inline-errors-badge"
+                        data-test-subj="TextBasedLangEditor-inline-errors-badge"
                       >
                         {errors.length}
                       </EuiBadge>
@@ -559,7 +559,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     size="m"
                     aria-label="Expand"
                     onClick={() => expandCodeEditor(true)}
-                    data-test-subj="unifiedTextLangEditor-expand"
+                    data-test-subj="TextBasedLangEditor-expand"
                     css={{
                       borderRadius: 0,
                       backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
@@ -574,7 +574,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   sections={documentationSections}
                   buttonProps={{
                     display: 'empty',
-                    'data-test-subj': 'unifiedTextLangEditor-inline-documentation',
+                    'data-test-subj': 'TextBasedLangEditor-inline-documentation',
                     'aria-label': i18n.translate(
                       'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
                       {
