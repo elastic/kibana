@@ -180,6 +180,7 @@ export function Table<T extends UserContentCommonSchema>({
     return {
       type: 'custom_component',
       component: () => {
+        const disableActions = fixedTag != null;
         return (
           <TagFilterPanel
             isPopoverOpen={isPopoverOpen}
@@ -190,6 +191,7 @@ export function Table<T extends UserContentCommonSchema>({
             onFilterButtonClick={onFilterButtonClick}
             onSelectChange={onSelectChange}
             clearTagSelection={clearTagSelection}
+            disableActions={disableActions}
           />
         );
       },
@@ -203,6 +205,7 @@ export function Table<T extends UserContentCommonSchema>({
     onFilterButtonClick,
     onSelectChange,
     clearTagSelection,
+    fixedTag,
   ]);
 
   const searchFilters = useMemo(() => {

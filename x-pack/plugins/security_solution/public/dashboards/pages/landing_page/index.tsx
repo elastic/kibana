@@ -11,7 +11,7 @@ import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-p
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../../../landing_pages/components/landing_links_images';
-import { SecurityPageName } from '../../../../common/constants';
+import { SecurityPageName, SECURITY_TAG_NAME } from '../../../../common/constants';
 import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
 import { useRootNavLink } from '../../../common/links/nav_links';
 import { Title } from '../../../common/components/header_page/title';
@@ -21,6 +21,7 @@ import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemet
 import { DASHBOARDS_PAGE_TITLE } from '../translations';
 import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 import { useCreateSecurityDashboardLink } from '../../hooks/use_create_security_dashboard_link';
+import { useSecurityTags } from '../../context/dashboard_context';
 
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
@@ -64,7 +65,9 @@ export const DashboardsLandingPage = () => {
       deepLinkId: SecurityPageName.dashboards,
       path: id,
     })}`;
-  useCreateSecurityDashboardLink();
+
+  const securityTags = useSecurityTags();
+  const tagReferences = securityTags?.map((tag) => ({ id: tag.id, type: 'tag' }));
 
   return (
     <SecuritySolutionPageWrapper noPadding>
@@ -93,6 +96,8 @@ export const DashboardsLandingPage = () => {
             withPageTemplateHeader={false}
             restrictPageSectionWidth={false}
             pageSectionPadding="none"
+            tagReferences={tagReferences}
+            fixedTag={SECURITY_TAG_NAME}
           >
             <EuiTitle size="xxxs">
               <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>

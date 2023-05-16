@@ -52,6 +52,7 @@ interface Props {
   totalActiveFilters: number;
   onFilterButtonClick: () => void;
   onSelectChange: (updatedOptions: TagOptionItem[]) => void;
+  disableActions?: boolean;
 }
 
 export const TagFilterPanel: FC<Props> = ({
@@ -63,6 +64,7 @@ export const TagFilterPanel: FC<Props> = ({
   onSelectChange,
   closePopover,
   clearTagSelection,
+  disableActions,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
@@ -122,18 +124,24 @@ export const TagFilterPanel: FC<Props> = ({
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
           <EuiFlexGroup>
             <EuiFlexItem>Tags</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {totalActiveFilters > 0 && (
-                <EuiButtonEmpty flush="both" onClick={clearTagSelection} css={clearSelectionBtnCSS}>
-                  {i18n.translate(
-                    'contentManagement.tableList.tagFilterPanel.clearSelectionButtonLabelLabel',
-                    {
-                      defaultMessage: 'Clear selection',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
+            {!disableActions && (
+              <EuiFlexItem grow={false}>
+                {totalActiveFilters > 0 && (
+                  <EuiButtonEmpty
+                    flush="both"
+                    onClick={clearTagSelection}
+                    css={clearSelectionBtnCSS}
+                  >
+                    {i18n.translate(
+                      'contentManagement.tableList.tagFilterPanel.clearSelectionButtonLabelLabel',
+                      {
+                        defaultMessage: 'Clear selection',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                )}
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiSelectable<any>
@@ -143,7 +151,7 @@ export const TagFilterPanel: FC<Props> = ({
           renderOption={(option) => option.view}
           emptyMessage="There aren't any tags"
           noMatchesMessage="No tag matches the search"
-          onChange={onSelectChange}
+          onChange={!disableActions ? onSelectChange : null}
           data-test-subj="tagSelectableList"
           {...searchProps}
         >
@@ -156,49 +164,51 @@ export const TagFilterPanel: FC<Props> = ({
             );
           }}
         </EuiSelectable>
-        <EuiPopoverFooter paddingSize="m">
-          <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <EuiTextColor color="dimgrey">
-                  {i18n.translate(
-                    'contentManagement.tableList.tagFilterPanel.modifierKeyHelpText',
-                    {
-                      defaultMessage: '{modifierKeyPrefix} + click exclude',
-                      values: {
-                        modifierKeyPrefix,
-                      },
-                    }
-                  )}
-                </EuiTextColor>
-              </EuiText>
-            </EuiFlexItem>
+        {!disableActions && (
+          <EuiPopoverFooter paddingSize="m">
+            <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <EuiTextColor color="dimgrey">
+                    {i18n.translate(
+                      'contentManagement.tableList.tagFilterPanel.modifierKeyHelpText',
+                      {
+                        defaultMessage: '{modifierKeyPrefix} + click exclude',
+                        values: {
+                          modifierKeyPrefix,
+                        },
+                      }
+                    )}
+                  </EuiTextColor>
+                </EuiText>
+              </EuiFlexItem>
 
-            <EuiFlexItem css={saveBtnWrapperCSS}>
-              <EuiButton onClick={closePopover}>Save</EuiButton>
-            </EuiFlexItem>
+              <EuiFlexItem css={saveBtnWrapperCSS}>
+                <EuiButton onClick={closePopover}>Save</EuiButton>
+              </EuiFlexItem>
 
-            <EuiFlexItem>
-              <RedirectAppLinks
-                coreStart={{
-                  application: {
-                    navigateToUrl,
-                    currentAppId$,
-                  },
-                }}
-              >
-                <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
-                  {i18n.translate(
-                    'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
-                    {
-                      defaultMessage: 'Manage tags',
-                    }
-                  )}
-                </EuiLink>
-              </RedirectAppLinks>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
+              <EuiFlexItem>
+                <RedirectAppLinks
+                  coreStart={{
+                    application: {
+                      navigateToUrl,
+                      currentAppId$,
+                    },
+                  }}
+                >
+                  <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
+                    {i18n.translate(
+                      'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
+                      {
+                        defaultMessage: 'Manage tags',
+                      }
+                    )}
+                  </EuiLink>
+                </RedirectAppLinks>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        )}
       </EuiPopover>
     </>
   );

@@ -125,7 +125,7 @@ export const useTagFilterPanel = ({
     });
 
     setOptions(tagsToSelectOptions);
-  }, [getTagList, fixedTag, tagSelection, onOptionClick, tagsToTableItemMap]);
+  }, [getTagList, tagSelection, onOptionClick, tagsToTableItemMap]);
 
   const onFilterButtonClick = useCallback(() => {
     setIsPopoverOpen((prev) => !prev);

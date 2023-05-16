@@ -109,6 +109,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
   tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
+  fixedTag?: string;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -268,7 +269,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   withPageTemplateHeader = true,
   restrictPageSectionWidth = true,
   pageSectionPadding = 'm',
-  fixedTag = 'Security Solution',
+  fixedTag,
   tagReferences,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
