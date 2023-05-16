@@ -46,6 +46,7 @@ import {
   severitySortScript,
   VULNERABILITY_SEVERITY_FIELD,
 } from './utils/custom_sort_script';
+import { usePageSlice } from '../../common/hooks/use_page_slice';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -112,8 +113,13 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     enabled: !queryError,
   });
 
+  const slicedPage = usePageSlice(data?.page, pageIndex, pageSize);
+
   const invalidIndex = -1;
-  const selectedVulnerability = data?.page[urlQuery.vulnerabilityIndex];
+
+  const selectedVulnerability = useMemo(() => {
+    return slicedPage[urlQuery.vulnerabilityIndex];
+  }, [slicedPage, urlQuery.vulnerabilityIndex]);
 
   const onCloseFlyout = () => {
     setUrlQuery({
@@ -122,12 +128,21 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   };
 
   const onOpenFlyout = useCallback(
-    (rowIndex: number) => {
+    (vulnerabilityRow: VulnerabilityRecord) => {
+      const vulnerabilityIndex = slicedPage.findIndex(
+        (vulnerabilityRecord: VulnerabilityRecord) =>
+          vulnerabilityRecord.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
+          vulnerabilityRecord.resource?.id === vulnerabilityRow.resource?.id &&
+          vulnerabilityRecord.vulnerability.package.name ===
+            vulnerabilityRow.vulnerability.package.name &&
+          vulnerabilityRecord.vulnerability.package.version ===
+            vulnerabilityRow.vulnerability.package.version
+      );
       setUrlQuery({
-        vulnerabilityIndex: rowIndex,
+        vulnerabilityIndex,
       });
     },
-    [setUrlQuery]
+    [setUrlQuery, slicedPage]
   );
 
   const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
@@ -232,7 +247,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             iconType="expand"
             aria-label="View"
             onClick={() => {
-              onOpenFlyout(rowIndex);
+              onOpenFlyout(vulnerabilityRow);
             }}
           />
         );
@@ -299,7 +314,6 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   );
 
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
-
   const error = queryError || null;
 
   if (error) {
@@ -409,9 +423,9 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
           {isLastLimitedPage && <LimitedResultsBar />}
           {showVulnerabilityFlyout && (
             <VulnerabilityFindingFlyout
-              flyoutIndex={flyoutVulnerabilityIndex + urlQuery.pageIndex * pageSize}
+              flyoutIndex={flyoutVulnerabilityIndex + pageIndex * pageSize}
               vulnerabilityRecord={selectedVulnerability}
-              totalVulnerabilitiesCount={data?.total}
+              totalVulnerabilitiesCount={limitedTotalItemCount}
               onPaginate={onPaginateFlyout}
               closeFlyout={onCloseFlyout}
             />

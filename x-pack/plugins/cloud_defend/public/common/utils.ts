@@ -5,6 +5,7 @@
  * 2.0.
  */
 import yaml from 'js-yaml';
+import { uniq } from 'lodash';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { errorBlockActionRequiresTargetFilePath } from '../components/control_general_view/translations';
@@ -74,6 +75,15 @@ export function getTotalsByType(selectors: Selector[], responses: Response[]) {
   return totalsByType;
 }
 
+function selectorUsesFIM(selector?: Selector) {
+  return (
+    selector &&
+    (!selector.operation ||
+      selector.operation.length === 0 ||
+      selector.operation.some((r) => FIM_OPERATIONS.indexOf(r) >= 0))
+  );
+}
+
 function selectorsIncludeConditionsForFIMOperations(
   selectors: Selector[],
   conditions: SelectorCondition[],
@@ -82,9 +92,9 @@ function selectorsIncludeConditionsForFIMOperations(
 ) {
   const result =
     selectorNames &&
-    selectorNames.reduce((prev, cur, index) => {
+    selectorNames.reduce((prev, cur) => {
       const selector = selectors.find((s) => s.name === cur);
-      const usesFIM = selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0);
+      const usesFIM = selectorUsesFIM(selector);
       const hasAllConditions =
         !usesFIM ||
         !!(
@@ -95,15 +105,11 @@ function selectorsIncludeConditionsForFIMOperations(
         );
 
       if (requireForAll) {
-        if (index === 0) {
-          return hasAllConditions;
-        }
-
         return prev && hasAllConditions;
       } else {
         return prev || hasAllConditions;
       }
-    }, false);
+    }, requireForAll);
 
   return !!result;
 }
@@ -116,7 +122,7 @@ export function selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar(
     selectorNames &&
     selectorNames.reduce((prev, cur) => {
       const selector = selectors.find((s) => s.name === cur);
-      const usesFIM = selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0);
+      const usesFIM = selectorUsesFIM(selector);
       return prev || !!(usesFIM && selector?.targetFilePath?.includes('/**'));
     }, false);
 
@@ -172,15 +178,22 @@ export function validateMaxSelectorsAndResponses(selectors: Selector[], response
   return errors;
 }
 
-export function validateStringValuesForCondition(condition: SelectorCondition, values: string[]) {
+export function validateStringValuesForCondition(condition: SelectorCondition, values?: string[]) {
   const errors: string[] = [];
   const maxValueBytes =
     SelectorConditionsMap[condition].maxValueBytes || MAX_CONDITION_VALUE_LENGTH_BYTES;
 
   const { pattern, patternError } = SelectorConditionsMap[condition];
 
-  values.forEach((value) => {
-    if (pattern && !new RegExp(pattern).test(value)) {
+  values?.forEach((value) => {
+    if (value?.length === 0) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorGenericEmptyValue', {
+          defaultMessage: '"{condition}" values cannot be empty',
+          values: { condition },
+        })
+      );
+    } else if (pattern && !new RegExp(pattern).test(value)) {
       if (patternError) {
         errors.push(patternError);
       } else {
@@ -204,7 +217,7 @@ export function validateStringValuesForCondition(condition: SelectorCondition, v
     }
   });
 
-  return errors;
+  return uniq(errors);
 }
 
 export function getRestrictedValuesForCondition(

@@ -30,9 +30,12 @@ export const getBaseMigratorParams = ({
 });
 
 export const dummyModelVersion: SavedObjectsModelVersion = {
-  modelChange: {
-    type: 'expansion',
-  },
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {},
+    },
+  ],
 };
 
 export const noopMigration: SavedObjectMigrationFn = (doc) => doc;
