@@ -19,3 +19,6 @@ export const SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME = '.slo-observability.
 
 export const getSLOTransformId = (sloId: string, sloRevision: number) =>
   `slo-${sloId}-${sloRevision}`;
+
+export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
+  `slo-${sloId}-${sloRevision}-summary`;
