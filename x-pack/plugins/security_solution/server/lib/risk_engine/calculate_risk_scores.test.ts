@@ -20,6 +20,7 @@ describe('calculateRiskScores()', () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     logger = loggingSystemMock.createLogger();
     params = {
+      afterKeys: {},
       esClient,
       logger,
       index: 'index',
@@ -65,6 +66,66 @@ describe('calculateRiskScores()', () => {
         );
         expect(call.aggs).toHaveProperty('host');
         expect(call.aggs).not.toHaveProperty('user');
+      });
+    });
+
+    describe('after_keys', () => {
+      it('applies a single after_key to the correct aggregation', async () => {
+        params = { ...params, afterKeys: { host: { 'host.name': 'foo' } } };
+        await calculateRiskScores(params);
+        const [[call]] = (esClient.search as jest.Mock).mock.calls;
+        expect(call).toEqual(
+          expect.objectContaining({
+            aggs: expect.objectContaining({
+              host: expect.objectContaining({
+                composite: expect.objectContaining({ after: { 'host.name': 'foo' } }),
+              }),
+            }),
+          })
+        );
+      });
+
+      it('applies multiple after_keys to the correct aggregations', async () => {
+        params = {
+          ...params,
+          afterKeys: {
+            host: { 'host.name': 'foo' },
+            user: { 'user.name': 'bar' },
+          },
+        };
+        await calculateRiskScores(params);
+        const [[call]] = (esClient.search as jest.Mock).mock.calls;
+
+        expect(call).toEqual(
+          expect.objectContaining({
+            aggs: expect.objectContaining({
+              host: expect.objectContaining({
+                composite: expect.objectContaining({ after: { 'host.name': 'foo' } }),
+              }),
+              user: expect.objectContaining({
+                composite: expect.objectContaining({ after: { 'user.name': 'bar' } }),
+              }),
+            }),
+          })
+        );
+      });
+
+      it('uses an undefined after_key by default', async () => {
+        await calculateRiskScores(params);
+        const [[call]] = (esClient.search as jest.Mock).mock.calls;
+
+        expect(call).toEqual(
+          expect.objectContaining({
+            aggs: expect.objectContaining({
+              host: expect.objectContaining({
+                composite: expect.objectContaining({ after: undefined }),
+              }),
+              user: expect.objectContaining({
+                composite: expect.objectContaining({ after: undefined }),
+              }),
+            }),
+          })
+        );
       });
     });
   });

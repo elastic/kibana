@@ -19,16 +19,27 @@ import {
   getGlobalWeightForIdentifierType,
 } from './category_weights';
 import type {
+  AfterKey,
+  AfterKeys,
   CalculateRiskScoreAggregations,
   GetScoresParams,
   GetScoresResponse,
   IdentifierType,
   RiskScore,
   RiskScoreBucket,
+  RiskScoreWeight,
 } from './types';
 
 const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
   identifierType === 'host' ? 'host.name' : 'user.name';
+
+const getAfterKeyForIdentifierType = ({
+  afterKeys,
+  identifierType,
+}: {
+  afterKeys: AfterKeys;
+  identifierType: IdentifierType;
+}): AfterKey | undefined => afterKeys[identifierType];
 
 const bucketToResponse = ({
   bucket,
@@ -115,13 +126,15 @@ const buildReduceScript = ({
 };
 
 const buildIdentifierTypeAggregation = ({
+  afterKeys,
   identifierType,
   maxIdentifierBuckets,
   weights,
 }: {
+  afterKeys: AfterKeys;
   identifierType: IdentifierType;
   maxIdentifierBuckets: number;
-  weights?: GetScoresParams['weights'];
+  weights?: RiskScoreWeight[];
 }): SearchRequest['aggs'] => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
   const identifierField = getFieldForIdentifierAgg(identifierType);
@@ -139,7 +152,7 @@ const buildIdentifierTypeAggregation = ({
             },
           },
         ],
-        after: undefined, // TODO make a param
+        after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
       },
       aggs: {
         riskiest_inputs: {
@@ -188,6 +201,7 @@ const buildIdentifierTypeAggregation = ({
 };
 
 export const calculateRiskScores = async ({
+  afterKeys: userAfterKeys,
   debug,
   esClient,
   filter: userFilter,
@@ -223,6 +237,7 @@ export const calculateRiskScores = async ({
         (aggs, _identifierType) => ({
           ...aggs,
           ...buildIdentifierTypeAggregation({
+            afterKeys: userAfterKeys,
             identifierType: _identifierType,
             maxIdentifierBuckets,
             weights,
@@ -243,11 +258,20 @@ export const calculateRiskScores = async ({
     }
 
     if (response.aggregations == null) {
-      return { ...(debug ? { request, response } : {}), scores: [] };
+      return {
+        ...(debug ? { request, response } : {}),
+        after_keys: {},
+        scores: [],
+      };
     }
 
     const userBuckets = response.aggregations.user?.buckets ?? [];
     const hostBuckets = response.aggregations.host?.buckets ?? [];
+
+    const afterKeys = {
+      host: response.aggregations.host?.after_key,
+      user: response.aggregations.user?.after_key,
+    };
 
     const scores = userBuckets
       .map((bucket) =>
@@ -269,6 +293,7 @@ export const calculateRiskScores = async ({
 
     return {
       ...(debug ? { request, response } : {}),
+      after_keys: afterKeys,
       scores,
     };
   });

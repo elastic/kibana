@@ -39,6 +39,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
       });
 
       const {
+        after_keys: userAfterKeys,
         data_view_id: dataViewId,
         debug,
         identifier_type: identifierType,
@@ -57,9 +58,12 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
             }))) ??
           siemClient.getAlertsIndex();
 
+        const afterKeys = userAfterKeys ?? {};
         const range = userRange ?? { start: 'now-15d', end: 'now' };
         const maxIdentifierBuckets = DEFAULT_MAX_RISK_SCORE_IDENTIFIER_BUCKETS;
+
         const result = await riskScore.getScores({
+          afterKeys,
           debug,
           index,
           filter,

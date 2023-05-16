@@ -8,9 +8,15 @@
 import * as t from 'io-ts';
 import { DataViewId } from '../../detection_engine/rule_schema';
 
+const afterKey = t.record(t.string, t.string);
+
 export type RiskScoresRequestSchema = t.TypeOf<typeof riskScoresRequestSchema>;
 export const riskScoresRequestSchema = t.exact(
   t.partial({
+    after_keys: t.partial({
+      host: afterKey,
+      user: afterKey,
+    }),
     data_view_id: DataViewId,
     debug: t.boolean,
     filter: t.unknown,

@@ -19,6 +19,7 @@ export interface RiskScoreWeight {
 }
 
 export interface GetScoresParams {
+  afterKeys: AfterKeys;
   debug?: boolean;
   index: string;
   filter?: unknown;
@@ -28,11 +29,21 @@ export interface GetScoresParams {
   weights?: RiskScoreWeight[];
 }
 
+export interface AfterKey {
+  [identifierField: string]: string;
+}
+
+export interface AfterKeys {
+  host?: AfterKey;
+  user?: AfterKey;
+}
+
 export interface GetScoresResponse {
   debug?: {
     request: unknown;
     response: unknown;
   };
+  after_keys: AfterKeys;
   scores: RiskScore[];
 }
 
@@ -59,11 +70,11 @@ export interface RiskScore {
 
 export interface CalculateRiskScoreAggregations {
   user?: {
-    after_key: { [identifierField: string]: string };
+    after_key: AfterKey;
     buckets: RiskScoreBucket[];
   };
   host?: {
-    after_key: { [identifierField: string]: string };
+    after_key: AfterKey;
     buckets: RiskScoreBucket[];
   };
 }
