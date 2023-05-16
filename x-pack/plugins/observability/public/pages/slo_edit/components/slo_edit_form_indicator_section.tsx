@@ -9,7 +9,7 @@ import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { isObject } from 'lodash';
 
 import { SLI_OPTIONS } from '../constants';
