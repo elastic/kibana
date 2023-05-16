@@ -491,7 +491,7 @@ export class TaskRunner<
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
-      await rulesClient.clearExpiredSnoozes({ id: rule.id });
+      await rulesClient.clearExpiredSnoozes({ rule });
 
       if (isRuleSnoozed(rule)) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);

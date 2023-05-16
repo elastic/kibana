@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
+import { RuleTypeParams, SanitizedRule } from '../../../common';
 import { partiallyUpdateAlert } from '../../saved_objects';
 import { isSnoozeExpired } from '../../lib';
 import { RulesClientContext } from '../types';
@@ -13,15 +13,10 @@ import { updateMeta } from '../lib';
 
 export async function clearExpiredSnoozes(
   context: RulesClientContext,
-  { id }: { id: string }
+  { rule }: { rule: SanitizedRule<RuleTypeParams> }
 ): Promise<void> {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
-    'alert',
-    id
-  );
-
-  const snoozeSchedule = attributes.snoozeSchedule
-    ? attributes.snoozeSchedule.filter((s) => {
+  const snoozeSchedule = rule.snoozeSchedule
+    ? rule.snoozeSchedule.filter((s) => {
         try {
           return !isSnoozeExpired(s);
         } catch (e) {
@@ -31,18 +26,18 @@ export async function clearExpiredSnoozes(
       })
     : [];
 
-  if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
+  if (snoozeSchedule.length === rule.snoozeSchedule?.length) return;
 
   const updateAttributes = updateMeta(context, {
     snoozeSchedule,
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
-  const updateOptions = { version };
+  const updateOptions = { refresh: false };
 
   await partiallyUpdateAlert(
     context.unsecuredSavedObjectsClient,
-    id,
+    rule.id,
     updateAttributes,
     updateOptions
   );

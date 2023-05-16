@@ -147,7 +147,7 @@ export class RulesClient {
   public snooze = (options: SnoozeParams) => snooze(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnooze(this.context, options);
 
-  public clearExpiredSnoozes = (options: { id: string }) =>
+  public clearExpiredSnoozes = (options: { rule: SanitizedRule<RuleTypeParams> }) =>
     clearExpiredSnoozes(this.context, options);
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
