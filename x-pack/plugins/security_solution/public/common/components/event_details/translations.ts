@@ -158,7 +158,7 @@ export const ENDPOINT_COMMANDS = Object.freeze({
     defaultMessage: 'released the host',
   }),
   generic: (command: string) =>
-    i18n.translate('xpack.securitySolution.eventDetails.viewColumnCheckboxAriaLabel', {
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.generic', {
       values: { command },
       defaultMessage: 'executed command {command}',
     }),
