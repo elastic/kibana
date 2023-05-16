@@ -4,11 +4,7 @@
 DEFAULT_CONFIG_FILE="./config/kibana.dev.yml"
 
 # Check if a config file is provided and use the default if not
-if [ "$#" -eq 1 ]; then
-    CONFIG_FILE="$1"
-else
-    CONFIG_FILE="$DEFAULT_CONFIG_FILE"
-fi
+CONFIG_FILE=${1:-$DEFAULT_CONFIG_FILE}
 
 save_and_exit ( ) {
     # the dev process doesn't restart without a sleep after the HTTP calls, not sure why
