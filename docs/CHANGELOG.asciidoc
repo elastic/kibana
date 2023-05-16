@@ -173,9 +173,6 @@ Alerting::
 * Adds support for users authenticated with API keys to manage alerting rules {kibana-pull}154189[#154189]
 * Adds the ability to control allowed attached file mime types and the maximum file size {kibana-pull}154013[#154013]
 * Adds query and timeframe params to RuleAction to filter alerts {kibana-pull}152360[#152360]
-* Adds the Cases column to the alerts table {kibana-pull}150963[#150963]
-* Adds filtering and sorting for the case activity {kibana-pull}149396[#149396]
-* Adds the ability to filter user activities with pagination {kibana-pull}152702[#152702]
 
 APM::
 * Adds group-by feature in APM rules {kibana-pull}155001[#155001]
@@ -186,6 +183,9 @@ APM::
 
 Cases::
 * Adds support for file attachments in Cases {kibana-pull}154436[#154436]
+* Adds the Cases column to the alerts table {kibana-pull}150963[#150963]
+* Adds filtering and sorting for the case activity {kibana-pull}149396[#149396]
+* Adds the ability to filter user activities with pagination {kibana-pull}152702[#152702]
 
 Dashboard::
 Pins the unified search bar and dashboard toolbar to the top of the dashboard page when scrolling {kibana-pull}145628[#145628]
@@ -748,14 +748,6 @@ For detailed information about the 8.7.0 release, review the enhancements and bu
 === Enhancements
 Alerting::
 * Bring flapping status and settings in o11y {kibana-pull}150483[#150483]
-* Redesign all cases list select modal {kibana-pull}149851[#149851]
-* RenderCustomActionsRow with named params instead of args {kibana-pull}149304[#149304]
-* Users can now click a button on Case Detail and All Cases List to copy a case's UUID to the clipboard {kibana-pull}148962[#148962]
-* Sorting, severity filter and status filter are now persisted in the URL and local storage for the all cases list {kibana-pull}148549[#148549]
-* Sorting by status, severity, and title is now allowed in the all-cases list {kibana-pull}148193[#148193]
-* See "My recently assigned cases" to the recent cases widget of Security Solution dashboard {kibana-pull}147763[#147763]
-* Adds the ability to bulk edit assignees on multiple cases {kibana-pull}146907[#146907]
-* Save draft user comment {kibana-pull}146327[#146327]
 * Ram 145739 use bulk enable disable in UI {kibana-pull}145928[#145928]
 * Create generic retry if function {kibana-pull}145713[#145713]
 * Return rules from bulk enable {kibana-pull}145391[#145391]
@@ -783,6 +775,14 @@ APM::
 
 Cases::
 * Adds new column `Updated on ` in `all cases list ` table. This column can be sorted and can persist sorting options {kibana-pull}149116[#149116]
+* Redesign all cases list select modal {kibana-pull}149851[#149851]
+* RenderCustomActionsRow with named params instead of args {kibana-pull}149304[#149304]
+* Users can now click a button on Case Detail and All Cases List to copy a case's UUID to the clipboard {kibana-pull}148962[#148962]
+* Sorting, severity filter and status filter are now persisted in the URL and local storage for the all cases list {kibana-pull}148549[#148549]
+* Sorting by status, severity, and title is now allowed in the all-cases list {kibana-pull}148193[#148193]
+* See "My recently assigned cases" to the recent cases widget of Security Solution dashboard {kibana-pull}147763[#147763]
+* Adds the ability to bulk edit assignees on multiple cases {kibana-pull}146907[#146907]
+* Save draft user comment {kibana-pull}146327[#146327]
 
 Dashboard::
 * Add new panel settings option to change the title, description, and time range for panels {kibana-pull}148301[#148301]
