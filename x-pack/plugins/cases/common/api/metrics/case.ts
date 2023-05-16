@@ -143,29 +143,31 @@ export const SingleCaseMetricsResponseRt = rt.exact(
       /**
        * Actions taken within the case
        */
-      actions: rt.partial(
-        rt.strict({
-          isolateHost: rt.strict({
-            /**
-             * Isolate host action information
-             */
-            isolate: rt.strict({
+      actions: rt.exact(
+        rt.partial(
+          rt.strict({
+            isolateHost: rt.strict({
               /**
-               * Total times the isolate host action has been performed
+               * Isolate host action information
                */
-              total: rt.number,
-            }),
-            /**
-             * Unisolate host action information
-             */
-            unisolate: rt.strict({
+              isolate: rt.strict({
+                /**
+                 * Total times the isolate host action has been performed
+                 */
+                total: rt.number,
+              }),
               /**
-               * Total times the unisolate host action has been performed
+               * Unisolate host action information
                */
-              total: rt.number,
+              unisolate: rt.strict({
+                /**
+                 * Total times the unisolate host action has been performed
+                 */
+                total: rt.number,
+              }),
             }),
-          }),
-        }).type.props
+          }).type.props
+        )
       ),
       /**
        * The case's open,close,in-progress details
