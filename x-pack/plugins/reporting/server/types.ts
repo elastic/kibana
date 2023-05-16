@@ -71,30 +71,6 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
   stream: Writable
 ) => Promise<TaskRunResult>;
 
-// export type CreateJobFnFactory<CreateJobFnType> = (
-//   reporting: ReportingCore,
-//   logger: Logger
-// ) => CreateJobFnType;
-
-// export type RunTaskFnFactory<RunTaskFnType> = (
-//   reporting: ReportingCore,
-//   logger: Logger
-// ) => RunTaskFnType;
-
-// export interface ExportTypeDefinition<
-//   CreateJobFnType = CreateJobFn | null,
-//   RunTaskFnType = RunTaskFn
-// > {
-//   id: string;
-//   name: string;
-//   jobType: string;
-//   jobContentEncoding?: string;
-//   jobContentExtension: string;
-//   createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
-//   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
-//   validLicenses: string[];
-// }
-
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;

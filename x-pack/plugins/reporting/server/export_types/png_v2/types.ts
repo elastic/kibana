@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { PngCore } from '../common/generate_png';
+import { PngCore } from '../png/types';
 
 export type { JobParamsPNGV2, TaskPayloadPNGV2 } from '../../../common/types/export_types/png_v2';
 

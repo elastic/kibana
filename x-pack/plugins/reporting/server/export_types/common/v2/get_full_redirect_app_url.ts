@@ -8,7 +8,7 @@
 import { format } from 'url';
 import { buildKibanaPath } from '../../../../common/build_kibana_path';
 import { getRedirectAppPath } from '../../../../common/constants';
-import { PdfCore } from '../../printable_pdf/lib/generate_pdf';
+import { PdfCore } from '../../printable_pdf/types';
 
 export function getFullRedirectAppUrl(reporting: PdfCore, spaceId?: string, forceNow?: string) {
   const {

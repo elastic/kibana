@@ -10,7 +10,6 @@ export { getFullUrls } from './get_full_urls';
 export { validateUrls } from './validate_urls';
 export { generatePngObservable } from './generate_png';
 export { getCustomLogo } from './get_custom_logo';
-
 export interface TimeRangeParams {
   min?: Date | string | number | null;
   max?: Date | string | number | null;

@@ -12,9 +12,9 @@ import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { RunTaskFn } from '../../types';
 import { decryptJobHeaders, generatePngObservable } from '../common';
-import { PngCore } from '../common/generate_png';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
-import { PdfCore } from '../printable_pdf/lib/generate_pdf';
+import { PngCore } from '../png/types';
+import { PdfCore } from '../printable_pdf/types';
 import { RunTaskFnFactory, TaskPayloadPNGV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =

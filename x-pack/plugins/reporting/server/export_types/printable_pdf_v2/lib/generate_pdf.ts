@@ -12,7 +12,7 @@ import type { PdfScreenshotOptions } from '../../../types';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import { getTracker } from '../../common/pdf_tracker';
 import type { TaskPayloadPDFV2 } from '../types';
-import { PdfCore } from '../../printable_pdf/lib/generate_pdf';
+import { PdfCore } from '../../printable_pdf/types';
 
 interface PdfResult {
   buffer: Uint8Array | null;
