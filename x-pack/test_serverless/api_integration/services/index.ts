@@ -7,11 +7,13 @@
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { services as xpackApiIntegrationServices } from '../../../test/api_integration/services';
+import { services as svlSharedServices } from '../../shared/services';
 
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 
 export const services = {
   ...xpackApiIntegrationServices,
+  ...svlSharedServices,
 
   svlCommonApi: SvlCommonApiServiceProvider,
 };

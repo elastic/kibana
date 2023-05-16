@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { services } from './services';
-import type { CreateTestConfigOptions } from '../shared_types';
+import type { CreateTestConfigOptions } from '../shared/types';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {

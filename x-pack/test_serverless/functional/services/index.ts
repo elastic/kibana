@@ -7,6 +7,7 @@
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { services as xpackFunctionalServices } from '../../../test/functional/services';
+import { services as svlSharedServices } from '../../shared/services';
 
 import { SvlCommonNavigationServiceProvider } from './svl_common_navigation';
 import { SvlObltNavigationServiceProvider } from './svl_oblt_navigation';
@@ -15,6 +16,7 @@ import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
 
 export const services = {
   ...xpackFunctionalServices,
+  ...svlSharedServices,
 
   svlCommonNavigation: SvlCommonNavigationServiceProvider,
   svlObltNavigation: SvlObltNavigationServiceProvider,
