@@ -13,6 +13,5 @@ export const PLUGIN_NAME = 'observabilityLogs';
 /**
  * Exporting versioned APIs types
  */
-export type { FindIntegrationsRequestQuery, FindIntegrationsResponse } from './latest';
 export * from './latest';
 export * as dataStreamsV1 from './data_streams/v1';

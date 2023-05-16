@@ -37,6 +37,7 @@ import {
   POPOVER_ID,
   selectViewLabel,
   sortDirectionsLabel,
+  sortOptions,
   uncategorizedLabel,
   UNCATEGORIZED_STREAMS_PANEL_ID,
 } from './constants';
@@ -46,16 +47,18 @@ import { useBoolean } from '../../hooks/use_boolean';
 
 import type { DataStream, Integration } from '../../../common/data_streams';
 import { LoadMoreIntegrations, SearchIntegrations } from '../../hooks/use_integrations';
+import { IntegrationsSearchParams } from '../../state_machines/integrations';
+
 export interface DataStreamSelectorProps {
   title: string;
+  search?: IntegrationsSearchParams;
   integrations: Integration[] | null;
   uncategorizedStreams: any[];
-  isSearching: boolean;
   isLoadingIntegrations: boolean;
   isLoadingMoreIntegrations: boolean;
   isLoadingUncategorizedStreams: boolean;
-  /* Triggered when a search or sorting is performed */
-  onSearch: SearchIntegrations;
+  /* Triggered when a search or sorting is performed on integrations */
+  onIntegrationsSearch: SearchIntegrations;
   /* Triggered when we reach the bottom of the integration list and want to load more */
   onLoadMore: LoadMoreIntegrations;
   /* Triggered when the uncategorized streams entry is selected */
@@ -69,20 +72,21 @@ type CurrentPanelId =
   | typeof UNCATEGORIZED_STREAMS_PANEL_ID
   | `integration-${string}`;
 
+type SearchStrategy = 'integrations' | 'integrationsStreams' | 'uncategorizedStreams';
 type StreamSelectionHandler = (stream: DataStream) => void;
 
 export function DataStreamSelector({
   title,
   integrations,
   uncategorizedStreams,
-  isSearching,
   isLoadingIntegrations,
   isLoadingMoreIntegrations,
   isLoadingUncategorizedStreams,
-  onSearch,
+  onIntegrationsSearch,
   onLoadMore,
   onStreamSelected,
   onUncategorizedClick,
+  search,
 }: DataStreamSelectorProps) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
@@ -167,6 +171,9 @@ export function DataStreamSelector({
     </DataStreamButton>
   );
 
+  // TODO: Handle search strategy by current panel id
+  const handleSearch = onIntegrationsSearch;
+
   return (
     <EuiPopover
       id={POPOVER_ID}
@@ -178,7 +185,7 @@ export function DataStreamSelector({
       buffer={8}
     >
       <EuiContextMenuPanel title={selectViewLabel}>
-        <SearchControls isSearching={isSearching} onSearch={onSearch} />
+        <SearchControls search={search} onSearch={handleSearch} />
         <EuiHorizontalRule margin="none" />
         <ContextMenuSkeleton isLoading={isLoadingIntegrations}>
           <EuiContextMenu
@@ -204,52 +211,35 @@ const DataStreamButton = (props: DataStreamButtonProps) => {
   return <EuiButton css={buttonStyles} iconType="arrowDown" iconSide="right" {...props} />;
 };
 
-type SearchStrategy = 'integrations' | 'integrationsStreams' | 'uncategorizedStreams';
-
 interface SearchControlsProps {
-  isSearching: boolean;
-  onSearch: () => void;
+  search: IntegrationsSearchParams;
+  onSearch: (params: searchParams) => void;
 }
 
-const SearchControls = ({ isSearching, onSearch }: SearchControlsProps) => {
-  /**
-   * TODO: implement 3 different search strategies
-   * - Search integrations: API request
-   * - Search integrations streams: in memory sorting
-   * - Search uncategorized streams: API request
-   */
-  // const { search, searchByText, sortByDirection, isSearching } = useSearch(strategy);
+const SearchControls = ({ search, onSearch }: SearchControlsProps) => {
+  const handleQueryChange = (event) => {
+    const name = event.target.value;
+    onSearch({ ...search, name });
+  };
+
+  const handleSortChange = (sortOrder: IntegrationsSearchParams['sortOrder']) => {
+    onSearch({ ...search, sortOrder });
+  };
 
   return (
     <EuiContextMenuItem disabled css={{ width: DATA_VIEW_POPOVER_CONTENT_WIDTH }}>
       <EuiFlexGroup gutterSize="xs" responsive={false}>
         <EuiFlexItem>
-          <EuiFieldSearch
-            compressed
-            incremental
-            isLoading={isSearching}
-            // onChange={searchByText} isLoading={isSearching}
-          />
+          <EuiFieldSearch compressed incremental onChange={handleQueryChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             isIconOnly
             buttonSize="compressed"
-            options={[
-              {
-                id: 'asc',
-                iconType: 'sortAscending',
-                label: 'Ascending',
-              },
-              {
-                id: 'desc',
-                iconType: 'sortDescending',
-                label: 'Descending',
-              },
-            ]}
+            options={sortOptions}
             legend={sortDirectionsLabel}
-            // idSelected={search.sortingDirection}
-            // onChange={sortByDirection}
+            idSelected={search.sortOrder}
+            onChange={handleSortChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

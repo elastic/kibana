@@ -30,7 +30,20 @@ export const uncategorizedLabel = i18n.translate(
   { defaultMessage: 'Uncategorized' }
 );
 
-export const sortDirectionsLabel = i18n.translate(
-  'xpack.observabilityLogs.dataStreamSelector.sortDirections',
+export const sortOrdersLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.sortOrders',
   { defaultMessage: 'Sort directions' }
 );
+
+export const sortOptions = [
+  {
+    id: 'asc',
+    iconType: 'sortAscending',
+    label: 'Ascending',
+  },
+  {
+    id: 'desc',
+    iconType: 'sortDescending',
+    label: 'Descending',
+  },
+];

@@ -7,9 +7,9 @@
 
 import * as rt from 'io-ts';
 import { integrationRT } from '../types';
-import { sortDirectionRT } from './common';
+import { sortOrderRT } from './common';
 
-const pageAfterRT = rt.array(rt.union([rt.number, rt.string]));
+const searchAfterRT = rt.array(rt.union([rt.number, rt.string]));
 
 export const findIntegrationsResponseRT = rt.exact(
   rt.intersection([
@@ -18,19 +18,19 @@ export const findIntegrationsResponseRT = rt.exact(
       total: rt.number,
     }),
     rt.partial({
-      pageAfter: pageAfterRT,
+      searchAfter: searchAfterRT,
     }),
   ])
 );
 
 export const findIntegrationsRequestQueryRT = rt.partial({
   nameQuery: rt.string,
-  pageSize: rt.number,
-  type: rt.literal('log'),
-  pageAfter: pageAfterRT,
-  sortDirection: sortDirectionRT,
+  perPage: rt.number,
+  dataStreamType: rt.literal('logs'),
+  searchAfter: searchAfterRT,
+  sortOrder: sortOrderRT,
 });
 
-export type PageAfter = rt.TypeOf<typeof pageAfterRT>;
+export type SearchAfter = rt.TypeOf<typeof searchAfterRT>;
 export type FindIntegrationsRequestQuery = rt.TypeOf<typeof findIntegrationsRequestQueryRT>;
 export type FindIntegrationsResponse = rt.TypeOf<typeof findIntegrationsResponseRT>;

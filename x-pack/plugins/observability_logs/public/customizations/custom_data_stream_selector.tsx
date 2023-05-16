@@ -23,7 +23,8 @@ interface CustomDataStreamSelectorProps {
 export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
-  const { integrations, isLoading, isLoadingMore, loadMore, search } = useIntegrationsContext();
+  const { integrations, isLoading, isLoadingMore, loadMore, search, searchIntegrations } =
+    useIntegrationsContext();
 
   const handleStreamSelection = (dataStream: DataStream) => {
     return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream);
@@ -31,17 +32,17 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
 
   return (
     <DataStreamSelector
-      title={dataView.getName()}
       integrations={integrations}
-      uncategorizedStreams={mockUncategorized}
-      isSearching={false}
       isLoadingIntegrations={isLoading}
       isLoadingMoreIntegrations={isLoadingMore}
       isLoadingUncategorizedStreams={false}
+      onIntegrationsSearch={searchIntegrations}
       onLoadMore={loadMore}
-      onSearch={search}
       onStreamSelected={handleStreamSelection}
       onUncategorizedClick={() => console.log('fetch uncategorized streams')}
+      search={search}
+      title={dataView.getName()}
+      uncategorizedStreams={mockUncategorized}
     />
   );
 });
