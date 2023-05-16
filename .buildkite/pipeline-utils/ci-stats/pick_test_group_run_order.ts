@@ -404,7 +404,10 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest',
             agents: {
-              queue: 'n2-4-spot',
+              provider: 'gcp',
+              image: 'family/brian-ubuntu-2004',
+              imageProject: 'elastic-images-qa',
+              machineType: 'n1-standard-4',
             },
             retry: {
               automatic: [
@@ -424,7 +427,10 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest-integration',
             agents: {
-              queue: 'n2-4-spot',
+              provider: 'gcp',
+              image: 'family/brian-ubuntu-2004',
+              imageProject: 'elastic-images-qa',
+              machineType: 'n1-standard-4',
             },
             retry: {
               automatic: [
@@ -455,12 +461,16 @@ export async function pickTestGroupRunOrder() {
                   : -1
               )
               .map(
-                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                //({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                ({ title, key }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 90,
                   agents: {
-                    queue,
+                    provider: 'gcp',
+                    image: 'family/brian-ubuntu-2004',
+                    imageProject: 'elastic-images-qa',
+                    machineType: 'n1-standard-4',
                   },
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,

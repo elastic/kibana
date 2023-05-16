@@ -29,7 +29,11 @@ export interface BuildkiteStep {
   label: string;
   parallelism?: number;
   agents: {
-    queue: string;
+    queue?: string;
+    provider?: string;
+    image?: string;
+    imageProject?: string;
+    machineType?: string;
   };
   timeout_in_minutes?: number;
   key?: string;
