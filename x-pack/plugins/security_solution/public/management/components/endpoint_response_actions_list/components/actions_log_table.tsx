@@ -294,7 +294,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const { withOutputs: withOutputsFromUrl } = useActionHistoryUrlParams();
 
-    const getActionIdsWithDetails = useCallback((): string[] => {
+    const actionIdsWithOpenTrays = useMemo((): string[] => {
       // get the list of action ids from URL params on the history page
       if (!isFlyout) {
         return withOutputsFromUrl ?? [];
@@ -306,11 +306,6 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           : queryParams.withOutputs
         : [];
     }, [isFlyout, queryParams.withOutputs, withOutputsFromUrl]);
-
-    const actionIdsWithOpenTrays: string[] = useMemo(
-      () => getActionIdsWithDetails(),
-      [getActionIdsWithDetails]
-    );
 
     const redoOpenTrays = useCallback(() => {
       if (actionIdsWithOpenTrays.length && items.length) {
