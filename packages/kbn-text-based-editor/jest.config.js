@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TextBasedLanguagesPlugin } from './plugin';
-export type { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
-export type { TextBasedLanguagesPluginStart } from './types';
-
-export function plugin() {
-  return new TextBasedLanguagesPlugin();
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-text-based-editor'],
+};

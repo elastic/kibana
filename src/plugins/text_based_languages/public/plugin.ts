@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Plugin } from '@kbn/core/public';
-import { Editor } from './components';
+import { Plugin, CoreStart } from '@kbn/core/public';
+import { createEditor } from './create_editor';
 import type { TextBasedLanguagesPluginStart } from './types';
 
 export class TextBasedLanguagesPlugin implements Plugin<{}, TextBasedLanguagesPluginStart> {
@@ -15,7 +15,10 @@ export class TextBasedLanguagesPlugin implements Plugin<{}, TextBasedLanguagesPl
     return {};
   }
 
-  public start(): TextBasedLanguagesPluginStart {
+  public start(core: CoreStart): TextBasedLanguagesPluginStart {
+    const Editor = createEditor({
+      core,
+    });
     return {
       Editor,
     };

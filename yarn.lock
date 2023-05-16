@@ -5402,6 +5402,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/text-based-editor@link:packages/kbn-text-based-editor":
+  version "0.0.0"
+  uid ""
+
 "@kbn/text-based-languages@link:src/plugins/text_based_languages":
   version "0.0.0"
   uid ""

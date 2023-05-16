@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
 import classNames from 'classnames';
 import { SQLLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -80,7 +80,17 @@ const languageId = (language: string) => {
 let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
-function TextBasedLanguagesEditor({
+// export function TextBasedLanguagesEditor({
+//   query,
+//   onTextLangQueryChange,
+//   onTextLangQuerySubmit,
+//   expandCodeEditor,
+//   isCodeEditorExpanded,
+//   errors,
+//   isDisabled,
+//   isDarkMode,
+// }: TextBasedLanguagesEditorProps) {
+export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
@@ -90,16 +100,6 @@ function TextBasedLanguagesEditor({
   isDisabled,
   isDarkMode,
 }: TextBasedLanguagesEditorProps) {
-  // const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
-  //   query,
-  //   onTextLangQueryChange,
-  //   onTextLangQuerySubmit,
-  //   expandCodeEditor,
-  //   isCodeEditorExpanded,
-  //   errors,
-  //   isDisabled,
-  //   isDarkMode,
-  // }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
@@ -625,8 +625,4 @@ function TextBasedLanguagesEditor({
   );
 
   return editorPanel;
-}
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default TextBasedLanguagesEditor;
+});

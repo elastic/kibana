@@ -10,14 +10,8 @@
     "server/**/*",
   ],
   "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/monaco",
-    "@kbn/es-query",
-    "@kbn/core",
+    "@kbn/text-based-editor",
     "@kbn/kibana-react-plugin",
-    "@kbn/language-documentation-popover",
-    "@kbn/test-jest-helpers",
-    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",
