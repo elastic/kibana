@@ -324,6 +324,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             onChange={(e) => {
               updateAgentPolicy({ is_protected: e.target.checked });
             }}
+            data-test-subj="tamperProtectionSwitch"
           />
           <EuiSpacer size="s" />
           <EuiLink
@@ -331,6 +332,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               setIsUninstallCommandFlyoutOpen(true);
             }}
             disabled={agentPolicy.is_protected === false}
+            data-test-subj="uninstallCommandLink"
           >
             {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
               defaultMessage: 'Get uninstall command',
