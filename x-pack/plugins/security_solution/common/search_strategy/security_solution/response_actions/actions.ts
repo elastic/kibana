@@ -6,7 +6,13 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { Direction, Inspect, Maybe, ResultEdges, RequestBasicOptions } from './types';
+import type {
+  Direction,
+  Inspect,
+  Maybe,
+  RequestBasicOptions,
+  ResponseActionsSearchHit,
+} from './types';
 
 export interface ActionRequestOptions extends RequestBasicOptions {
   alertIds: string[];
@@ -18,13 +24,14 @@ export interface ActionRequestOptions extends RequestBasicOptions {
 }
 
 export interface ActionRequestStrategyResponse extends IEsSearchResponse {
-  edges: ResultEdges;
+  edges: ResponseActionsSearchHit[];
   inspect?: Maybe<Inspect>;
 }
 
 export interface LogsOsqueryAction {
   '@timestamp': string;
   action_id: string;
+  // TODO check agents vs agent_ids, do we need both?
   agent_ids: string[];
   agents: string[];
   alert_ids: string[];

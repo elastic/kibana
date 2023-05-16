@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { EuiCode, EuiComment, EuiEmptyPrompt, EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import { EuiComment, EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { useKibana } from '../../common/lib/kibana';
-import { PERMISSION_DENIED } from '../osquery_action/translations';
 import type { StartPlugins } from '../../types';
 import { queryClient } from '../../query_client';
 import { AlertAttachmentContext } from '../../common/contexts';
@@ -34,31 +33,9 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
       skip: !read,
     });
 
-    useLayoutEffect(() => {
+    useEffect(() => {
       setIsLive(() => !(data?.status === 'completed'));
     }, [data?.status]);
-
-    const emptyPrompt = useMemo(
-      () => (
-        <EuiEmptyPrompt
-          iconType="logoOsquery"
-          title={<h2>{PERMISSION_DENIED}</h2>}
-          titleSize="xs"
-          body={
-            <FormattedMessage
-              id="xpack.osquery.results.permissionDenied"
-              defaultMessage="To access these results, ask your administrator for {osquery} Kibana
-              privileges."
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              values={{
-                osquery: <EuiCode>osquery</EuiCode>,
-              }}
-            />
-          }
-        />
-      ),
-      []
-    );
 
     return (
       <AlertAttachmentContext.Provider value={ecsData}>
@@ -70,7 +47,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
           data-test-subj={'osquery-results-comment'}
         >
           {!read ? (
-            emptyPrompt
+            <EmptyPrompt />
           ) : (
             <PackQueriesStatusTable
               actionId={actionId}

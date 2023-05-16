@@ -30,6 +30,8 @@ export type ResultEdges = estypes.SearchResponse<
   LogsOsqueryAction | LogsEndpointAction
 >['hits']['hits'];
 
+export type ResponseActionsSearchHit = estypes.SearchHit<LogsOsqueryAction | LogsEndpointAction>;
+
 export interface Inspect {
   dsl: string[];
 }

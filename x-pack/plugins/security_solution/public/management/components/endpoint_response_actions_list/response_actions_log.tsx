@@ -175,7 +175,7 @@ export const ResponseActionsLog = memo<
       [setQueryParams]
     );
 
-    const onChangeWithAutomatedActionsFilter = useCallback(() => {
+    const onToggleAutomatedActionsFilter = useCallback(() => {
       setQueryParams((prevState) => ({
         ...prevState,
         withAutomatedActions: !prevState.withAutomatedActions,
@@ -252,7 +252,7 @@ export const ResponseActionsLog = memo<
           onChangeCommandsFilter={onChangeCommandsFilter}
           onChangeStatusesFilter={onChangeStatusesFilter}
           onChangeUsersFilter={onChangeUsersFilter}
-          onChangeWithAutomatedActionsFilter={onChangeWithAutomatedActionsFilter}
+          onChangeWithAutomatedActionsFilter={onToggleAutomatedActionsFilter}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
