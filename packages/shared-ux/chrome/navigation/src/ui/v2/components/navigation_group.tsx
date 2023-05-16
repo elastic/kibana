@@ -15,9 +15,9 @@ import React, {
   useRef,
   useEffect,
 } from 'react';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import type { RegisterFunction } from './navigation';
-import type { NavigationNode } from '../types';
 import { useInitNavnode } from '../use_init_navnode';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
@@ -45,7 +45,7 @@ export function useNavigationGroup<T extends boolean = true>(
 }
 
 export const NavigationGroup = ({ children, id: _id, title: _title, link }: Props) => {
-  const navNodes = useRef<Record<string, NavigationNode>>({});
+  const navNodes = useRef<Record<string, ChromeProjectNavigationNode>>({});
 
   const { id, title } = useInitNavnode({ id: _id, title: _title, link });
   const { register } = useRegisterTreeNode();
@@ -58,7 +58,7 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link }: Prop
         id,
         title,
         link,
-        items: Object.values(navNodes.current),
+        children: Object.values(navNodes.current),
       });
 
       // Unregister function
@@ -73,7 +73,7 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link }: Prop
           id,
           title,
           link,
-          items: Object.values(navNodes.current),
+          children: Object.values(navNodes.current),
         });
       };
     },
@@ -91,7 +91,7 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link }: Prop
       id,
       title,
       link,
-      items: Object.values(navNodes.current),
+      children: Object.values(navNodes.current),
     });
   }, [register, id, title, link]);
 

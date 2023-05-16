@@ -7,15 +7,16 @@
  */
 
 import React, { FC } from 'react';
-import { Navigation } from './components';
-import { NavigationNode } from './types';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-const renderItems = (items: NavigationNode[]) => {
+import { Navigation } from './components';
+
+const renderItems = (items: ChromeProjectNavigationNode[]) => {
   return items.map((item) => (
     <React.Fragment key={item.id}>
-      {item.items ? (
+      {item.children ? (
         <Navigation.Group id={item.id} title={item.title}>
-          {renderItems(item.items)}
+          {renderItems(item.children)}
         </Navigation.Group>
       ) : (
         <Navigation.Item id={item.id} link={item.link} title={item.title}>
@@ -27,7 +28,7 @@ const renderItems = (items: NavigationNode[]) => {
 };
 
 interface Props {
-  navTree: NavigationNode[];
+  navTree: ChromeProjectNavigationNode[];
 }
 
 export const DefaultNavigation: FC<Props> = ({ navTree }) => {

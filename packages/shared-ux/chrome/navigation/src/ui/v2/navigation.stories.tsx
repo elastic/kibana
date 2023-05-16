@@ -8,21 +8,22 @@
 
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { NavigationStorybookMock } from '../../../mocks';
 import mdx from '../../../README.mdx';
 import { NavigationProvider } from '../../services';
 import { DefaultNavigation } from './default_navigation';
-import type { NavigationNode } from './types';
 import type { ChromeNavigationViewModel, NavigationServices } from '../../../types';
 
 const storybookMock = new NavigationStorybookMock();
 
-const navTree: NavigationNode[] = [
+const navTree: ChromeProjectNavigationNode[] = [
   {
     id: 'group1',
     title: 'Group 1',
-    items: [
+    children: [
       {
         id: 'item1',
         title: 'Group 1: Item 1',
@@ -43,7 +44,7 @@ const navTree: NavigationNode[] = [
   {
     id: 'group2',
     title: 'Group 2',
-    items: [
+    children: [
       {
         id: 'item1',
         title: 'Group 2: Item 1',
@@ -52,7 +53,7 @@ const navTree: NavigationNode[] = [
       {
         id: 'item2',
         title: 'Group 2: subGroup 1',
-        items: [
+        children: [
           {
             id: 'item1',
             title: 'Group 2: Sub 1: Item 1',
@@ -75,7 +76,7 @@ const navTree: NavigationNode[] = [
   {
     id: 'group3',
     title: 'Group 3',
-    items: [
+    children: [
       {
         id: 'item1',
         title: 'Group 3: Item 1',
@@ -86,7 +87,12 @@ const navTree: NavigationNode[] = [
 ];
 
 const Template = (args: ChromeNavigationViewModel & NavigationServices) => {
-  const services = storybookMock.getServices(args);
+  const services = storybookMock.getServices({
+    ...args,
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(updated);
+    },
+  });
 
   return (
     <NavigationProvider {...services}>

@@ -37,6 +37,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     navLinks$: chrome.navLinks.getNavLinks$(),
     navigateToUrl,
     navIsOpen: true,
+    onProjectNavigationChange: chrome.project.setNavigation,
   };
 
   return (

@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { NavigationNode } from './types';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-export const useInitNavnode = ({ id: _id, link, title: _title = '' }: NavigationNode) => {
+export const useInitNavnode = ({
+  id: _id,
+  link,
+  title: _title = '',
+}: ChromeProjectNavigationNode) => {
   const id = _id ?? link;
 
   let title = _title;

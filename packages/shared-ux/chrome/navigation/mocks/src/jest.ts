@@ -23,6 +23,7 @@ export const getServicesMock = (): NavigationServices => {
     navLinks$,
     navIsOpen: true,
     navigateToUrl,
+    onProjectNavigationChange: jest.fn(),
   };
 };
 

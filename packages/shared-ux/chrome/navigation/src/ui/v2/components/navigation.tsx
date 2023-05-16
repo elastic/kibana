@@ -15,8 +15,10 @@ import React, {
   useEffect,
   useContext,
 } from 'react';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import { InternalNavigationNode, NavigationNode } from '../types';
+import { useNavigation as useNavigationServices } from '../../../services';
+import { InternalNavigationNode } from '../types';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
 
@@ -37,7 +39,10 @@ interface Props {
 }
 
 export function Navigation({ children }: Props) {
-  const [navigationItems, setNavigationItems] = useState<Record<string, NavigationNode>>({});
+  const { onProjectNavigationChange } = useNavigationServices();
+  const [navigationItems, setNavigationItems] = useState<
+    Record<string, ChromeProjectNavigationNode>
+  >({});
 
   const register = useCallback((navNode: InternalNavigationNode) => {
     setNavigationItems((prevItems) => {
@@ -64,10 +69,10 @@ export function Navigation({ children }: Props) {
   );
 
   useEffect(() => {
-    // Update the Chrome service nav tree
-
-    console.log(Object.values(navigationItems));
-  }, [navigationItems]);
+    onProjectNavigationChange({
+      navigationTree: Object.values(navigationItems),
+    });
+  }, [navigationItems, onProjectNavigationChange]);
 
   return (
     <NavigationContext.Provider value={contextValue}>

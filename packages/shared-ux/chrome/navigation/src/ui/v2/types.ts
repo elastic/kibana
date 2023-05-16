@@ -6,19 +6,8 @@
  * Side Public License, v 1.
  */
 
-export interface NavigationNode {
-  /** Optional id. If not provided a "link" must be passed */
-  id?: string;
-  /** Optional deepLink id. If not provided an "id" must be passed */
-  link?: string;
-  /** Optional title, if not provided we'll read the DeepLink title */
-  title?: string;
-  /** eui icon type if needed */
-  icon?: string;
-  /** Optional sub navigation */
-  items?: NavigationNode[];
-}
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-export interface InternalNavigationNode extends Omit<NavigationNode, 'id'> {
+export interface InternalNavigationNode extends Omit<ChromeProjectNavigationNode, 'id'> {
   id: string;
 }
