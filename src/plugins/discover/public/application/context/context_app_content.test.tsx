@@ -17,7 +17,7 @@ import { LoadingStatus } from './services/context_query_state';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
-import { ServicesContextProvider } from '../services_provider';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 
 const MockDiscoverGrid = () => <></>;
@@ -78,9 +78,9 @@ describe('ContextAppContent test', () => {
     } as unknown as ContextAppContentProps;
 
     return mountWithIntl(
-      <ServicesContextProvider services={discoverServiceMock}>
+      <KibanaContextProvider services={discoverServiceMock}>
         <ContextAppContent {...props} />
-      </ServicesContextProvider>
+      </KibanaContextProvider>
     );
   };
 
