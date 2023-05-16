@@ -7,7 +7,7 @@
 
 import { copyAllowlistedFields } from '.';
 import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
-import { AllowlistFields } from './types';
+import type { AllowlistFields } from './types';
 
 describe('Security Telemetry filters', () => {
   describe('allowlistEventFields', () => {
@@ -25,7 +25,7 @@ describe('Security Telemetry filters', () => {
 
     const allowlist = {
       ...prebuiltRuleAllowlistFields,
-      ...testingKeys
+      ...testingKeys,
     };
 
     it('filters top level', () => {
@@ -47,46 +47,46 @@ describe('Security Telemetry filters', () => {
       const expected = {
         dll: {
           code_signature: {
-            trusted: "1",
+            trusted: '1',
           },
           Ext: {
-            relative_file_creation_time: "2",
-            relative_file_name_modify_time: "3",
+            relative_file_creation_time: '2',
+            relative_file_name_modify_time: '3',
           },
           hash: {
-            sha256: "4",
+            sha256: '4',
           },
-          name: "5",
-          path: "6",
+          name: '5',
+          path: '6',
           pe: {
-            imphash: "7",
-            original_file_name: "8",
-          }
+            imphash: '7',
+            original_file_name: '8',
+          },
         },
         file: {
-          directory: "9",
+          directory: '9',
           Ext: {
-            entropy: "10",
-            header_bytes: "11",
+            entropy: '10',
+            header_bytes: '11',
             original: {
-              name: "12",
+              name: '12',
             },
           },
         },
         process: {
           Ext: {
             api: {
-              name: "13",
+              name: '13',
             },
             effective_parent: {
-              executable: "14",
-              name: "15",
+              executable: '14',
+              name: '15',
             },
           },
           parent: {
             Ext: {
               real: {
-                pid: "16",
+                pid: '16',
               },
             },
           },
@@ -99,7 +99,7 @@ describe('Security Telemetry filters', () => {
           val1: 'unexpected-1',
           val2: 'unexpected-2',
         },
-      }
+      };
 
       expect(copyAllowlistedFields(allowlist, event)).toStrictEqual(expected);
     });
