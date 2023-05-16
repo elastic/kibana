@@ -6,11 +6,11 @@
  */
 
 import React, { FC, Suspense } from 'react';
-import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
+import { EuiDelayRender, EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
 
 const Fallback = () => (
   <EuiDelayRender>
-    <EuiSkeletonText lines={3} />
+    <EuiLoadingContent lines={3} />
   </EuiDelayRender>
 );
 

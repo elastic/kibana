@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiProgress, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiProgress, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -18,6 +18,12 @@ const ProgressContainer = styled.div`
   min-width: 100px;
   @media only screen and (min-width: 1400px) {
     min-width: 200px;
+  }
+`;
+
+const LoadingContent = styled(EuiLoadingContent)`
+  .euiLoadingContent__singleLine {
+    margin-bottom: 0px;
   }
 `;
 
@@ -53,7 +59,7 @@ const StatValueComponent: React.FC<{
       <EuiFlexItem grow={false}>
         <ProgressContainer>
           {isLoading ? (
-            <EuiSkeletonText data-test-subj="stat-value-loading-spinner" lines={1} />
+            <LoadingContent data-test-subj="stat-value-loading-spinner" lines={1} />
           ) : (
             <EuiProgress
               color={isGroupStat ? 'primary' : 'subdued'}

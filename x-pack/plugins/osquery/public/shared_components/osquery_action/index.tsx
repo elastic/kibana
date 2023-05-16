@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSkeletonText, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -66,11 +66,11 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   }
 
   if (agentId && isLoading) {
-    return <EuiSkeletonText lines={10} />;
+    return <EuiLoadingContent lines={10} />;
   }
 
   if (agentId && !policyFetched && policyLoading) {
-    return <EuiSkeletonText lines={10} />;
+    return <EuiLoadingContent lines={10} />;
   }
 
   if (agentId && !osqueryAvailable) {

@@ -15,12 +15,12 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIcon,
+  EuiLoadingContent,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
@@ -162,7 +162,9 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiSkeletonText isLoading={isLoading}>
+        {isLoading ? (
+          <EuiLoadingContent />
+        ) : (
           <EuiForm
             id={modalFormId}
             component="form"
@@ -280,7 +282,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
               />
             </EuiFormRow>
           </EuiForm>
-        </EuiSkeletonText>
+        )}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty

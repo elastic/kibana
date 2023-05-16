@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -36,7 +36,7 @@ export const StepMetaInfo = ({
   if (!step) {
     return (
       <EuiFlexItem grow={true}>
-        <EuiSkeletonText lines={4} />
+        <EuiLoadingContent lines={4} />
       </EuiFlexItem>
     );
   }

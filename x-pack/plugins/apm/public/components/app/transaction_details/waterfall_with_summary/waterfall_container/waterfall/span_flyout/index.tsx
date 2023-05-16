@@ -13,7 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
@@ -166,17 +166,16 @@ export function SpanFlyout({
           )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiSkeletonText isLoading={isLoading}>
-            {span && (
-              <SpanFlyoutBody
-                span={span}
-                parentTransaction={parentTransaction}
-                totalDuration={totalDuration}
-                spanLinksCount={spanLinksCount}
-                flyoutDetailTab={flyoutDetailTab}
-              />
-            )}
-          </EuiSkeletonText>
+          {isLoading && <EuiLoadingContent />}
+          {span && (
+            <SpanFlyoutBody
+              span={span}
+              parentTransaction={parentTransaction}
+              totalDuration={totalDuration}
+              spanLinksCount={spanLinksCount}
+              flyoutDetailTab={flyoutDetailTab}
+            />
+          )}
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>

@@ -15,7 +15,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -359,7 +359,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           ecsData: ecsAlert,
         });
       } else if (isLoading) {
-        return <EuiSkeletonText lines={1} />;
+        return <EuiLoadingContent lines={1} />;
       }
       return null;
     },

@@ -18,7 +18,7 @@ import {
   EuiButton,
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
-  EuiSkeletonText,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -112,9 +112,7 @@ export const Credentials: React.FC = () => {
       </EuiPageContentHeader>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder>
-        <EuiSkeletonText lines={3} isLoading={!!dataLoading}>
-          <CredentialsList />
-        </EuiSkeletonText>
+        {!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}
       </EuiPanel>
     </AppSearchPageTemplate>
   );

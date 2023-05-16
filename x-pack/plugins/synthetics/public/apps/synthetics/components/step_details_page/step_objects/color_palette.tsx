@@ -10,11 +10,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiSkeletonRectangle,
+  EuiLoadingContent,
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { useTheme } from '@kbn/observability-plugin/public';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { colourPalette } from '../common/network_data/data_formatting';
 
@@ -135,7 +136,7 @@ export const ColorPaletteFlexItem = ({
   }, [loading]);
 
   if (loading) {
-    return <EuiSkeletonRectangle height="20px" width="100%" />;
+    return <LoadingLine lines={1} />;
   }
 
   return (
@@ -158,3 +159,11 @@ export const ColorPaletteFlexItem = ({
     </EuiFlexGroup>
   );
 };
+
+const LoadingLine = styled(EuiLoadingContent)`
+  &&& {
+    > span {
+      height: 20px;
+    }
+  }
+`;

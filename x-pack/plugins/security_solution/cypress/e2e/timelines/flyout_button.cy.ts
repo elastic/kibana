@@ -68,7 +68,7 @@ describe('timeline flyout button', () => {
       .pipe(($el) => $el.trigger('focus'))
       .should('have.focus');
     cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').type('{esc}');
-    cy.get(CREATE_NEW_TIMELINE).should('not.exist');
+    cy.get(CREATE_NEW_TIMELINE).should('not.be.visible');
   });
 
   it('should render the global search dropdown when the input is focused', () => {

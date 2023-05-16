@@ -7,7 +7,7 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter, Query } from '@kbn/es-query';
-import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -196,7 +196,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {alertViewSelection === 'trend' && (
         <FullHeightFlexItem grow={2}>
           {isLoadingIndexPattern ? (
-            <EuiSkeletonText lines={10} data-test-subj="trendLoadingSpinner" />
+            <EuiLoadingContent lines={10} data-test-subj="trendLoadingSpinner" />
           ) : (
             <AlertsHistogramPanel
               alignHeader="flexStart"
@@ -230,7 +230,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {alertViewSelection === 'table' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiSkeletonText lines={10} data-test-subj="tableLoadingSpinner" />
+            <EuiLoadingContent lines={10} data-test-subj="tableLoadingSpinner" />
           ) : (
             <AlertsCountPanel
               alignHeader="flexStart"
@@ -261,7 +261,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {alertViewSelection === 'treemap' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiSkeletonText lines={10} data-test-subj="treemapLoadingSpinner" />
+            <EuiLoadingContent lines={10} data-test-subj="treemapLoadingSpinner" />
           ) : (
             <AlertsTreemapPanel
               addFilter={addFilter}
@@ -294,7 +294,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {isAlertsPageChartsEnabled && alertViewSelection === 'charts' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiSkeletonText lines={10} data-test-subj="chartsLoadingSpinner" />
+            <EuiLoadingContent lines={10} data-test-subj="chartsLoadingSpinner" />
           ) : (
             <AlertsSummaryChartsPanel
               alignHeader="flexStart"

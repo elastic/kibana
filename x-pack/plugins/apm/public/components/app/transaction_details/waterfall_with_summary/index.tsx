@@ -12,7 +12,7 @@ import {
   EuiPagination,
   EuiSpacer,
   EuiTitle,
-  EuiSkeletonText,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
@@ -151,7 +151,7 @@ export function WaterfallWithSummary<TSample extends {}>({
       {isLoading || !entryTransaction ? (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
-          <EuiSkeletonText lines={1} data-test-sub="loading-content" />
+          <EuiLoadingContent lines={1} data-test-sub="loading-content" />
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>

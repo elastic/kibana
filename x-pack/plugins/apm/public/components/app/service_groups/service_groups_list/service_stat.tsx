@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { PropsWithChildren } from 'react';
 
 interface Props {
@@ -21,7 +21,7 @@ export function ServiceStat({
   return (
     <EuiFlexItem grow={grow}>
       {loading ? (
-        <EuiSkeletonText lines={1} style={{ marginTop: '4px' }} />
+        <EuiLoadingContent lines={1} style={{ marginTop: '4px' }} />
       ) : (
         <>{children}</>
       )}

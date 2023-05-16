@@ -16,7 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -108,7 +108,7 @@ export function LabsFlyout({ onClose }: Props) {
       </EuiFlyoutHeader>
 
       {isLoading ? (
-        <EuiSkeletonText lines={3} />
+        <EuiLoadingContent lines={3} />
       ) : (
         <>
           <EuiFlyoutBody>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import type {
   FieldFormatEditor as InnerFieldFormatEditor,
   FieldFormatEditorFactory,
@@ -67,10 +67,10 @@ export class FieldFormatEditor extends PureComponent<
           <React.Suspense
             fallback={
               // We specify minHeight to avoid too mitigate layout shifts while loading an editor
-              // ~430 corresponds to "4 lines" of EuiSkeletonText
+              // ~430 corresponds to "4 lines" of EuiLoadingContent
               <div style={{ minHeight: 430, marginTop: 8 }}>
                 <EuiDelayRender>
-                  <EuiSkeletonText lines={4} />
+                  <EuiLoadingContent lines={4} />
                 </EuiDelayRender>
               </div>
             }

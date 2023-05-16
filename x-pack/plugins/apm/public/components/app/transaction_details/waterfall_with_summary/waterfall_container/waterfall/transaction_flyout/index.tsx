@@ -11,7 +11,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
@@ -91,17 +91,16 @@ export function TransactionFlyout({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiSkeletonText isLoading={isLoading}>
-            {transaction && (
-              <TransactionFlyoutBody
-                transaction={transaction!}
-                errorCount={errorCount}
-                rootTransactionDuration={rootTransactionDuration}
-                spanLinksCount={spanLinksCount}
-                flyoutDetailTab={flyoutDetailTab}
-              />
-            )}
-          </EuiSkeletonText>
+          {isLoading && <EuiLoadingContent />}
+          {transaction && (
+            <TransactionFlyoutBody
+              transaction={transaction!}
+              errorCount={errorCount}
+              rootTransactionDuration={rootTransactionDuration}
+              spanLinksCount={spanLinksCount}
+              flyoutDetailTab={flyoutDetailTab}
+            />
+          )}
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>

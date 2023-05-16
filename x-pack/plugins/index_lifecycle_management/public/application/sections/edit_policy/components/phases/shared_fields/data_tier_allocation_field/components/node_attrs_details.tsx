@@ -16,7 +16,7 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiPortal,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiCallOut,
   EuiButton,
 } from '@elastic/eui';
@@ -32,7 +32,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
   const { data, isLoading, error, resendRequest } = useLoadNodeDetails(selectedNodeAttrs);
   let content;
   if (isLoading) {
-    content = <EuiSkeletonText lines={3} />;
+    content = <EuiLoadingContent lines={3} />;
   } else if (error) {
     const { statusCode, message } = error;
     content = (

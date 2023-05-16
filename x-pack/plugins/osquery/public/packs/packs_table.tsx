@@ -14,7 +14,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
-  EuiSkeletonText,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -229,7 +229,7 @@ const PacksTableComponent = () => {
   );
 
   if (isLoading) {
-    return <EuiSkeletonText lines={10} />;
+    return <EuiLoadingContent lines={10} />;
   }
 
   return (

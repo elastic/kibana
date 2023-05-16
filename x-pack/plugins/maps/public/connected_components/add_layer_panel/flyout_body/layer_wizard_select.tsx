@@ -12,7 +12,7 @@ import {
   EuiIcon,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiFacetGroup,
   EuiFacetButton,
   EuiPanel,
@@ -138,7 +138,7 @@ export class LayerWizardSelect extends Component<Props, State> {
     if (!this.state.hasLoadedWizards) {
       return (
         <EuiPanel>
-          <EuiSkeletonText lines={2} />
+          <EuiLoadingContent lines={2} />
         </EuiPanel>
       );
     }

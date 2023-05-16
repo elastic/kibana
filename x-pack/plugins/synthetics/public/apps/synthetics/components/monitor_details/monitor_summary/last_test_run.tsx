@@ -12,8 +12,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
-  EuiSkeletonRectangle,
+  EuiLoadingContent,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -169,12 +168,12 @@ const PanelHeader = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
           <EuiFlexItem>
-            <EuiSkeletonRectangle width="52px" height="20px" />
+            <EuiLoadingContent css={{ width: 52 }} lines={1} />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <EuiSkeletonText lines={1} />
+            <EuiLoadingContent lines={1} />
           </EuiFlexItem>
-          <EuiFlexItem>{isBrowserMonitor ? <EuiSkeletonText lines={1} /> : null}</EuiFlexItem>
+          <EuiFlexItem>{isBrowserMonitor ? <EuiLoadingContent lines={1} /> : null}</EuiFlexItem>
         </EuiFlexGroup>
       </>
     );

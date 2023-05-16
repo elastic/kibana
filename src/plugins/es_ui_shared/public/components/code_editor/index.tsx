@@ -7,18 +7,18 @@
  */
 
 import React from 'react';
-import { EuiSkeletonTextProps, EuiSkeletonText } from '@elastic/eui';
+import { EuiLoadingContentProps, EuiLoadingContent } from '@elastic/eui';
 import type { EuiCodeEditorProps } from './code_editor';
 
 const Placeholder = ({ height }: { height?: string }) => {
   const numericalHeight = height ? parseInt(height, 10) : 0;
-  // The height of one EuiSkeletonText line is 24px.
+  // The height of one EuiLoadingContent line is 24px.
   const lineHeight = 24;
   const calculatedLineCount =
     numericalHeight < lineHeight ? 1 : Math.floor(numericalHeight / lineHeight);
   const lines = Math.min(10, calculatedLineCount);
 
-  return <EuiSkeletonText lines={lines as EuiSkeletonTextProps['lines']} />;
+  return <EuiLoadingContent lines={lines as EuiLoadingContentProps['lines']} />;
 };
 
 const LazyEuiCodeEditor = React.lazy(() => import('./code_editor'));

@@ -16,7 +16,7 @@ import {
   EuiFormRow,
   EuiHealth,
   EuiIcon,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -207,7 +207,9 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         </>
       )}
 
-      <EuiSkeletonText isLoading={isLoading}>
+      {isLoading ? (
+        <EuiLoadingContent />
+      ) : (
         <EuiForm
           component="form"
           isInvalid={form.isInvalid}
@@ -422,7 +424,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
           {/* Hidden submit button is required for enter key to trigger form submission */}
           <input type="submit" hidden />
         </EuiForm>
-      </EuiSkeletonText>
+      )}
     </FormFlyout>
   );
 };

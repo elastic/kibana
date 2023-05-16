@@ -14,7 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiModal,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
@@ -172,7 +172,7 @@ export const TransformManagement: FC = () => {
       <EuiSpacer size="l" />
 
       <EuiPageContentBody data-test-subj="transformPageTransformList">
-        {!isInitialized && <EuiSkeletonText lines={2} />}
+        {!isInitialized && <EuiLoadingContent lines={2} />}
         {isInitialized && (
           <>
             {unauthorizedTransformsWarning}

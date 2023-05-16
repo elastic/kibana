@@ -20,7 +20,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiFlexGroup,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
@@ -468,8 +468,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         <EuiSpacer size="m" />
       </FlyoutHeader>
 
-      <FlyoutBodySection className="builder-section">
-        <EuiSkeletonText data-test-subj="loadingAddExceptionFlyout" lines={4} isLoading={isLoading}>
+      {isLoading && <EuiLoadingContent data-test-subj="loadingAddExceptionFlyout" lines={4} />}
+      {!isLoading && (
+        <FlyoutBodySection className="builder-section">
           {errorSubmitting != null && (
             <>
               <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
@@ -555,8 +556,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               />
             </>
           )}
-        </EuiSkeletonText>
-      </FlyoutBodySection>
+        </FlyoutBodySection>
+      )}
       <EuiFlyoutFooter>
         <FlyoutFooterGroup justifyContent="spaceBetween">
           <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleCloseFlyout}>

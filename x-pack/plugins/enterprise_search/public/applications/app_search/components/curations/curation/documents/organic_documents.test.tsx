@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSkeletonText, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../../test_helpers';
 
@@ -63,7 +63,7 @@ describe('OrganicDocuments', () => {
     setMockValues({ ...values, organicDocumentsLoading: true });
     const wrapper = shallow(<OrganicDocuments />);
 
-    expect(wrapper.find(EuiSkeletonText).prop('isLoading')).toEqual(true);
+    expect(wrapper.find(EuiLoadingContent)).toHaveLength(1);
   });
 
   describe('empty state', () => {

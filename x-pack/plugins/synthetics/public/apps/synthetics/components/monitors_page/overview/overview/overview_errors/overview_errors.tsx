@@ -8,7 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -40,7 +40,7 @@ export function OverviewErrors() {
       </EuiTitle>
       <EuiSpacer size="s" />
       {loading ? (
-        <EuiSkeletonText lines={3} />
+        <EuiLoadingContent lines={3} />
       ) : (
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>

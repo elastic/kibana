@@ -17,7 +17,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
@@ -297,7 +297,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
         </HeaderSection>
         {toggleStatus &&
           (loadingInitial ? (
-            <EuiSkeletonText data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
+            <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
           ) : (
             <>
               <BasicTable

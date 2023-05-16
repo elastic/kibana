@@ -20,7 +20,7 @@ import {
   EuiDataGrid,
   EuiPanel,
   EuiLink,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiProgress,
   EuiIconTip,
 } from '@elastic/eui';
@@ -393,7 +393,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   if (isLoading) {
-    return <EuiSkeletonText lines={5} />;
+    return <EuiLoadingContent lines={5} />;
   }
 
   if (!hasActionResultsPrivileges) {

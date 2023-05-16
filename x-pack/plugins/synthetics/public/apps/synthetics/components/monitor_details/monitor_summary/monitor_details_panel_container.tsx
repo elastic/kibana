@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSkeletonText } from '@elastic/eui';
+import { EuiLoadingContent } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
@@ -28,7 +28,7 @@ export const MonitorDetailsPanelContainer = (props: Partial<MonitorDetailsPanelP
     (latestPing && latestPing?.config_id !== configId) ||
     (monitor && monitor[ConfigKey.CONFIG_ID] !== configId)
   ) {
-    return <EuiSkeletonText lines={6} />;
+    return <EuiLoadingContent lines={6} />;
   }
 
   return (

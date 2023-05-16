@@ -10,7 +10,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -51,7 +51,7 @@ export const AlertActions = ({
   };
 
   if (!monitor) {
-    return <EuiSkeletonText lines={1} />;
+    return <EuiLoadingContent lines={1} />;
   }
 
   const onToggleAlertClick = () => {

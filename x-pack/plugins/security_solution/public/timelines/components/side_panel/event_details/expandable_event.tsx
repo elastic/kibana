@@ -10,7 +10,7 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
   EuiTextColor,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -176,7 +176,7 @@ export const ExpandableEvent = React.memo<Props>(
     }
 
     if (loading) {
-      return <EuiSkeletonText lines={10} />;
+      return <EuiLoadingContent lines={10} />;
     }
 
     return (

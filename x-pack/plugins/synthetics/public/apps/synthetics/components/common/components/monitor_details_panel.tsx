@@ -11,7 +11,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -62,7 +62,7 @@ export const MonitorDetailsPanel = ({
   const dispatch = useDispatch();
 
   if (!monitor) {
-    return <EuiSkeletonText lines={8} />;
+    return <EuiLoadingContent lines={8} />;
   }
 
   const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];

@@ -9,7 +9,7 @@ import {
   EuiBasicTable,
   EuiConfirmModal,
   EuiEmptyPrompt,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiProgress,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -248,7 +248,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {isTableEmpty && <PrePackagedRulesPrompt />}
       {isLoading && (
-        <EuiSkeletonText data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+        <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
       )}
       {isDeleteConfirmationVisible && (
         <EuiConfirmModal

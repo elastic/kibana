@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
+  EuiLoadingContent,
   EuiPanel,
   EuiText,
   EuiButton,
@@ -237,7 +237,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
     return (
       <Fragment>
         <EuiPanel>
-          <EuiSkeletonText lines={1} />
+          <EuiLoadingContent lines={1} />
         </EuiPanel>
         <EuiSpacer />
       </Fragment>
