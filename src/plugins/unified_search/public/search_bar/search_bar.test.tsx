@@ -11,6 +11,7 @@ import SearchBar from './search_bar';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { textBasedLanguagesPluginMock } from '@kbn/text-based-languages/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -94,6 +95,7 @@ function wrapSearchBarInContext(testProps: any) {
     notifications: startMock.notifications,
     http: startMock.http,
     storage: createMockStorage(),
+    textBasedLanguages: textBasedLanguagesPluginMock.createStartContract(),
     data: {
       query: {
         savedQueries: {
@@ -140,7 +142,7 @@ describe('SearchBar', () => {
   const QUERY_BAR = '.kbnQueryBar';
   const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
   const QUERY_MENU_BUTTON = '[data-test-subj="showQueryBarMenu"]';
-  const EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
+  const EDITOR = '[data-test-subj="textBasedLanguagesEditor"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
