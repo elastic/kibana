@@ -21,6 +21,7 @@ export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'histo
 export const LeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
 
 export const LeftPanelInsightsTabPath: LeftPanelProps['path'] = ['insights'];
+export const LeftPanelInvestigationTabPath: LeftPanelProps['path'] = ['investigation'];
 
 export interface LeftPanelProps extends FlyoutPanel {
   key: 'document-details-left';
