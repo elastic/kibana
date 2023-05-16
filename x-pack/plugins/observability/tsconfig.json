@@ -9,8 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*",
-    "../observability_shared/public/components/date_picker/date_picker.test.tsx"
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
