@@ -9,10 +9,18 @@ import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../..';
-import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
+import {
+  PdfScreenshotResult,
+  PngScreenshotResult,
+  ScreenshottingStart,
+} from '@kbn/screenshotting-plugin/server';
+import { ScreenshotOptions } from '@kbn/screenshotting-plugin/server';
+import {
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  REPORTING_TRANSACTION_TYPE,
+} from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
-import type { PngScreenshotOptions } from '../../types';
+import type { PdfScreenshotOptions, PngScreenshotOptions } from '../../types';
 
 interface PngResult {
   buffer: Buffer;
@@ -20,8 +28,32 @@ interface PngResult {
   warnings: string[];
 }
 
+interface PngInternalStart {
+  screenshotting: ScreenshottingStart;
+}
+
+export class PngCore {
+  private pluginStartDeps!: PngInternalStart;
+  getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  getScreenshots(
+    options: PngScreenshotOptions | PdfScreenshotOptions
+  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
+    return Rx.defer(() => {
+      return this.pluginStartDeps.screenshotting.getScreenshots({
+        ...options,
+        urls: options.urls.map((url) =>
+          typeof url === 'string'
+            ? url
+            : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+        ),
+      } as ScreenshotOptions);
+    });
+  }
+}
+
 export function generatePngObservable(
-  reporting: ReportingCore,
+  reporting: PngCore,
   logger: Logger,
   options: Omit<PngScreenshotOptions, 'format'>
 ): Rx.Observable<PngResult> {
