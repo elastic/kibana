@@ -1609,10 +1609,6 @@
       "shipper": {
         "dynamic": false,
         "properties": {}
-      },
-      "allow_edit": {
-        "type": "keyword",
-        "index": false
       }
     }
   },
