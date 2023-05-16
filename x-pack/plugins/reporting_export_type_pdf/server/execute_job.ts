@@ -17,8 +17,7 @@ import { TaskPayloadPDFV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
   function executeJobFactoryFn(reporting, parentLogger) {
-    const config = reporting.getConfig();
-    const encryptionKey = config.get('encryptionKey');
+    const { encryptionKey } = reporting.getConfig();
 
     return async function runTask(jobId, job, cancellationToken, stream) {
       const jobLogger = parentLogger.get(`execute-job:${jobId}`);

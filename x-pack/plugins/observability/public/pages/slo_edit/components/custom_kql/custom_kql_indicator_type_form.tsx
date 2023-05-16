@@ -147,6 +147,7 @@ export function CustomKqlIndicatorTypeForm() {
               defaultMessage: 'Define the good events',
             }
           )}
+          required
           tooltip={
             <EuiIconTip
               content={i18n.translate(
