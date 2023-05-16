@@ -99,8 +99,7 @@ describe('Response actions', () => {
       cleanupRule(ruleId);
     });
 
-    // Flaky
-    it.skip('edit response action inside of a rule', () => {
+    it('edit response action inside of a rule', () => {
       visitRuleActions(ruleId);
       cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
         cy.getByTestSubj('input').should('have.value', 'Isolate host');
@@ -124,8 +123,7 @@ describe('Response actions', () => {
       cy.contains(`${ruleName} was saved`).should('exist');
     });
 
-    // Flaky
-    it.skip('delete response action inside of a rule', () => {
+    it('delete response action inside of a rule', () => {
       visitRuleActions(ruleId);
       cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
         cy.getByTestSubj('remove-response-action').click();
@@ -152,8 +150,7 @@ describe('Response actions', () => {
       cleanupRule(ruleId);
     });
 
-    // FLAKY: https://github.com/elastic/security-team/issues/6518
-    it.skip('All response action controls are disabled', () => {
+    it('All response action controls are disabled', () => {
       visitRuleActions(ruleId);
       cy.getByTestSubj('response-actions-wrapper').within(() => {
         cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
