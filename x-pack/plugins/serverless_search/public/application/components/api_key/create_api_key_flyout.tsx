@@ -31,6 +31,7 @@ import {
 import { CreateAPIKeyArgs } from '../../../../common/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { CREATE_API_KEY_PATH } from '../../routes';
+import { isApiError } from '../../../utils/api';
 import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';
 import { SecurityPrivilegesForm } from './security_privileges_form';
@@ -71,13 +72,11 @@ function getPreviousStep(currentStep: Steps): Steps {
 
 const parseCreateError = (error: unknown): string | undefined => {
   if (!error) return undefined;
-  if (typeof error === 'object') {
-    if ('body' in error && typeof (error as { body: unknown }).body === 'object') {
-      const errorWBody = error as { body: object };
-      if ('message' in errorWBody.body) {
-        return (errorWBody as { body: { message: string } }).body.message;
-      }
-    }
+  if (isApiError(error)) {
+    return error.body.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
   }
   return JSON.stringify(error);
 };
