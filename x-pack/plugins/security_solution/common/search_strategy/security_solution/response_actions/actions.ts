@@ -6,8 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { Direction, Inspect, Maybe, ResultEdges } from './types';
-import type { RequestBasicOptions } from './types';
+import type { Direction, Inspect, Maybe, ResultEdges, RequestBasicOptions } from './types';
 
 export interface ActionRequestOptions extends RequestBasicOptions {
   alertIds: string[];

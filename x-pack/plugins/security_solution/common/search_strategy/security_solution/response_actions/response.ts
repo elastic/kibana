@@ -8,8 +8,7 @@
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsEndpointActionResponse } from '../../../endpoint/types';
-import type { Direction, Inspect, Maybe } from './types';
-import type { RequestBasicOptions } from './types';
+import type { Direction, Inspect, Maybe, RequestBasicOptions } from './types';
 
 export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
 
