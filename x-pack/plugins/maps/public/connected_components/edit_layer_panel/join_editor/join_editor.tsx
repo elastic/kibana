@@ -90,7 +90,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
     return () => {
       ignore = true;
     };
-  }, [layer, setSupportsSpatialJoin, setSpatialJoinDisableReason, setIsLoading]);
+  }, [layer]);
 
   const renderJoins = () => {
     return joins.map((joinDescriptor: Partial<JoinDescriptor>, index: number) => {
