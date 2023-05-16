@@ -12,6 +12,7 @@
   "kbn_references": [
     "@kbn/text-based-editor",
     "@kbn/kibana-react-plugin",
+    "@kbn/core",
   ],
   "exclude": [
     "target/**/*",
