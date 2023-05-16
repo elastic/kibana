@@ -19,7 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/156901
-  describe.skip('Listing of Reports', function () {
+  describe('Listing of Reports', function () {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin', // to access stack management
