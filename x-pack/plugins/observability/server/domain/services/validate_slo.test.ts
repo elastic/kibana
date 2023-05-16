@@ -36,6 +36,42 @@ describe('validateSLO', () => {
       expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
     });
 
+    it.each([
+      { duration: new Duration(1, DurationUnit.Hour), shouldThrow: true },
+      { duration: new Duration(2, DurationUnit.Hour), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Day), shouldThrow: true },
+      { duration: new Duration(7, DurationUnit.Day), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Week), shouldThrow: false },
+      { duration: new Duration(2, DurationUnit.Week), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Month), shouldThrow: false },
+      { duration: new Duration(2, DurationUnit.Month), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Quarter), shouldThrow: true },
+      { duration: new Duration(3, DurationUnit.Quarter), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Year), shouldThrow: true },
+      { duration: new Duration(3, DurationUnit.Year), shouldThrow: true },
+    ])(
+      'throws when time window calendar aligned is not 1 week or 1 month',
+      ({ duration, shouldThrow }) => {
+        if (shouldThrow) {
+          expect(() =>
+            validateSLO(
+              createSLO({
+                timeWindow: { duration, isCalendar: true },
+              })
+            )
+          ).toThrowError('Invalid time_window.duration');
+        } else {
+          expect(() =>
+            validateSLO(
+              createSLO({
+                timeWindow: { duration, isCalendar: true },
+              })
+            )
+          ).not.toThrowError();
+        }
+      }
+    );
+
     describe('settings', () => {
       it("throws when frequency is longer or equal than '1h'", () => {
         const slo = createSLO({

@@ -38,7 +38,9 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
+import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -49,6 +51,7 @@ import {
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
+import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -1070,5 +1073,24 @@ export class AlertsClient {
       this.logger.error(errMessage);
       throw Boom.failedDependency(errMessage);
     }
+  }
+
+  public async getBrowserFields({
+    indices,
+    metaFields,
+    allowNoIndex,
+  }: {
+    indices: string[];
+    metaFields: string[];
+    allowNoIndex: boolean;
+  }): Promise<BrowserFields> {
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: indices,
+      metaFields,
+      fieldCapsOptions: { allow_no_indices: allowNoIndex },
+    });
+
+    return fieldDescriptorToBrowserFieldMapper(fields);
   }
 }
