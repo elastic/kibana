@@ -91,3 +91,11 @@ export const getValueFromAccessor = (
     return value[value.length - 1];
   }
 };
+
+export function getConfigurationAccessors(state: RevealImageVisualizationState) {
+  const { metricAccessor } = state ?? {};
+
+  const accessors = getAccessorsFromState(state);
+
+  return { metricAccessor, accessors };
+}

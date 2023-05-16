@@ -12,31 +12,20 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import {
-  buildExpression,
-  buildExpressionFunction,
-  DatatableRow,
-} from '@kbn/expressions-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import {
   Origin,
   ExpressionRevealImageFunctionDefinition,
 } from '@kbn/expression-reveal-image-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { Accessors } from '@kbn/expression-gauge-plugin/common';
 import { FilesClient } from '@kbn/files-plugin/public';
 import { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import type {
-  DatasourceLayers,
-  FramePublicAPI,
-  OperationMetadata,
-  Suggestion,
-  Visualization,
-} from '../../types';
+import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_REVEAL_IMAGE_ID, RevealImageVisualizationState } from './constants';
-import { getAccessorsFromState } from './utils';
+import { getAccessorsFromState, getConfigurationAccessors, getMaxValue } from './utils';
 import { generateId } from '../../id_generator';
 import { RevealImageToolbar } from './toolbar_component';
 export type { FileImageMetadata } from '@kbn/shared-ux-file-types';
@@ -148,9 +137,6 @@ export const getRevealImageVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
-        imageId: null,
-        emptyImageId: null,
-        origin: Origin.BOTTOM,
       }
     );
   },
@@ -158,10 +144,7 @@ export const getRevealImageVisualization = ({
 
   getConfiguration({ state, frame }) {
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
-    const { metricAccessor, accessors } = getConfigurationAccessorsAndPalette(
-      state,
-      frame.activeData
-    );
+    const { metricAccessor, accessors } = getConfigurationAccessors(state);
 
     return {
       groups: [
@@ -335,7 +318,7 @@ export const getRevealImageVisualization = ({
   },
 
   getVisualizationInfo(state, frame) {
-    const { accessors } = getConfigurationAccessorsAndPalette(state);
+    const { accessors } = getConfigurationAccessors(state);
     const dimensions = [];
     if (accessors?.metric) {
       dimensions.push({
@@ -369,20 +352,3 @@ export const getRevealImageVisualization = ({
     };
   },
 });
-
-function getConfigurationAccessorsAndPalette(
-  state: RevealImageVisualizationState,
-  activeData?: FramePublicAPI['activeData']
-) {
-  const { metricAccessor } = state ?? {};
-
-  const accessors = getAccessorsFromState(state);
-
-  return { metricAccessor, accessors };
-}
-function getMaxValue(
-  row: DatatableRow | undefined,
-  accessors: Accessors | undefined
-): number | undefined {
-  throw new Error('Function not implemented.');
-}
