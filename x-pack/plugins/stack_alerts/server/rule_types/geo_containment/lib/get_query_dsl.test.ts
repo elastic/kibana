@@ -8,7 +8,7 @@
 import { getQueryDsl } from './get_query_dsl';
 
 describe('getQueryDsl', () => {
-  test('should convert lucene queries to elasticasearch dsl', async () => {
+  test('should convert lucene queries to elasticsearch dsl', async () => {
     const testLuceneQuery1 = {
       query: `"airport": "Denver"`,
       language: 'lucene',
