@@ -776,7 +776,7 @@ APM::
 
 Cases::
 * Adds new column `Updated on ` in `all cases list ` table. This column can be sorted and can persist sorting options {kibana-pull}149116[#149116]
-* Redesign all cases list select modal {kibana-pull}149851[#149851]
+* Improves the design of all cases list select modal {kibana-pull}149851[#149851]
 * Users can now click a button on Case Detail and All Cases List to copy a case's UUID to the clipboard {kibana-pull}148962[#148962]
 * Sorting, severity filter and status filter are now persisted in the URL and local storage for the all cases list {kibana-pull}148549[#148549]
 * Sorting by status, severity, and title is now allowed in the all-cases list {kibana-pull}148193[#148193]
