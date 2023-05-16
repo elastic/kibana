@@ -188,8 +188,8 @@ Some features require special configuration when running in different modes (dev
 |The build SHA (typically refers to the last commit's SHA)
 
 |`buildDate`
-|`12345`
-|The date of the build (typically the date of HEAD commit)
+|`2023-05-15T23:12:09+0000`
+|The ISO 8601 date of the build (typically the date of HEAD commit)
 
 |===
 
