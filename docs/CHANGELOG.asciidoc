@@ -50,6 +50,36 @@ coming::[8.8.0]
 Review the following information about the {kib} 8.8.0 release.
 
 [float]
+[[known-issues-8.8.0]]
+=== Known issues
+
+// tag::known-issue-155203[]
+[discrete]
+.Monitors in Synthetics may stop running
+[%collapsible]
+====
+*Details* +
+If Monitor Management was enabled prior to 8.6.0, the API key generated internally will not contain the required permissions. The Synthetics app will attempt to fix this automatically in {kibana-pull}155203[#155203] when a user with sufficient privileges visits this page for the first time after upgrading to 8.8.0.
+
+*Impact* +
+All monitors configured to run on Elastic’s global managed testing infrastructure will stop running until a user with permissions has loaded the Synthetics app.
+====
+// end::known-issue-155203[]
+
+// tag::known-issue-156798[]
+[discrete]
+.Network throttling disabled for browser monitors in Synthetics
+[%collapsible]
+====
+*Details* +
+Network throttling has been temporarily disabled for browser based Synthetics monitors running on Elastic’s global managed testing infrastructure and Private Locations. This will be enabled again at some point in the future. The latest information regarding this can be found https://github.com/elastic/synthetics/blob/main/docs/throttling.md[here].
+
+*Impact* +
+With network throttling being disabled, your monitors may run more quickly (i.e. have a lower duration) than you observed previously, and when network throttling is enabled again in the future. No monitor configurations have been changed, but the network throttling settings are being ignored until this is reinstated in the future.
+====
+// end::known-issue-156798[]
+
+[float]
 [[breaking-changes-8.8.0]]
 === Breaking changes
 
@@ -79,6 +109,24 @@ The privileges for attaching alerts to cases has changed. For more information, 
 
 *Impact* +
 To attach alerts to cases, you must have `Read` access to an {observability} or Security feature that has alerts and `All` access to the **Cases** feature. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html[{kib} privileges] and link:https://www.elastic.co/guide/en/kibana/current/setup-cases.html[Configure access to cases]. 
+====
+
+[discrete]
+[[breaking-157234]]
+.New alerts will be generated for Synthetics monitors
+[%collapsible]
+====
+*Details* +
+All monitor status alerts for the Synthetics app that are active at the time of upgrading will be resolved. A new alert will be created in its place, refer to {kibana-pull}157234[#157234].
+====
+
+[discrete]
+[[breaking-156324]]
+.New Synthetics errors for monitors running on private locations
+[%collapsible]
+====
+*Details* +
+All Synthetics errors that are in-progress for private locations at the time the stack is upgrading will be resolved. A new error state will take its place, refer to {kibana-pull}156324[#156324].
 ====
 // end::notable-breaking-changes[]
 
