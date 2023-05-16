@@ -25,7 +25,7 @@ import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies
  * @returns an array of field names
  * @param fields
  */
-export const parseArrayFields = (fields: string | string[]): string[] => {
+export const parseFields = (fields: string | string[]): string[] => {
   if (Array.isArray(fields)) return fields;
   try {
     return JSON.parse(fields);
@@ -83,8 +83,8 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   let parsedFields: string[] = [];
   let parsedMetaFields: string[] = [];
   try {
-    parsedMetaFields = parseArrayFields(metaFields);
-    parsedFields = parseArrayFields(request.query.fields ?? []);
+    parsedMetaFields = parseFields(metaFields);
+    parsedFields = parseFields(request.query.fields ?? []);
   } catch (error) {
     return response.badRequest();
   }
@@ -92,7 +92,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   try {
     const { fields, indices } = await indexPatterns.getFieldsForWildcard({
       pattern,
-      metaFields: parsedFields,
+      metaFields: parsedMetaFields,
       type,
       rollupIndex,
       fieldCapsOptions: {
