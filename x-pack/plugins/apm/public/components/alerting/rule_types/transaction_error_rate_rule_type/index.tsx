@@ -95,7 +95,6 @@ export function TransactionErrorRateRuleType(props: Props) {
                 interval,
                 start,
                 end,
-                groupBy: params.groupBy,
               },
             },
           }
@@ -109,7 +108,6 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.serviceName,
       params.windowSize,
       params.windowUnit,
-      params.groupBy,
     ]
   );
 
@@ -175,7 +173,7 @@ export function TransactionErrorRateRuleType(props: Props) {
 
   const chartPreview = (
     <ChartPreview
-      series={data?.errorRateChartPreview ?? []}
+      series={[{ data: data?.errorRateChartPreview ?? [] }]}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
       uiSettings={services.uiSettings}

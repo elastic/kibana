@@ -6,12 +6,10 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  EVENT_OUTCOME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { AlertParams } from '../../route';
@@ -20,15 +18,17 @@ import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
+import {
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+} from '../../../../lib/helpers/transaction_error_rate';
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getAllGroupByFields } from '../utils/get_all_groupby_fields';
-import { EventOutcome } from '../../../../../common/event_outcome';
-import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { ApmDocumentType } from '../../../../../common/document_type';
 
 export type TransactionErrorRateChartPreviewResponse = Array<{
-  name: string;
-  data: Array<{ x: number; y: number | null }>;
+  x: number;
+  y: number;
 }>;
 
 export async function getTransactionErrorRateChartPreview({
@@ -48,19 +48,15 @@ export async function getTransactionErrorRateChartPreview({
     start,
     end,
     transactionName,
-    groupBy,
   } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
     apmEventClient,
     kuery: '',
+    start,
+    end,
   });
-
-  const allGroupByFields = getAllGroupByFields(
-    ApmRuleType.TransactionErrorRate,
-    groupBy
-  );
 
   const params = {
     apm: {
@@ -72,25 +68,14 @@ export async function getTransactionErrorRateChartPreview({
       query: {
         bool: {
           filter: [
-            ...termQuery(SERVICE_NAME, serviceName, {
-              queryEmptyString: false,
-            }),
-            ...termQuery(TRANSACTION_TYPE, transactionType, {
-              queryEmptyString: false,
-            }),
-            ...termQuery(TRANSACTION_NAME, transactionName, {
-              queryEmptyString: false,
-            }),
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
-            {
-              terms: {
-                [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
-              },
-            },
           ],
         },
       },
@@ -104,22 +89,11 @@ export async function getTransactionErrorRateChartPreview({
               max: end,
             },
           },
-          aggs: {
-            series: {
-              multi_terms: {
-                terms: [...getGroupByTerms(allGroupByFields)],
-                size: 3,
-                order: { _count: 'desc' as const },
-              },
-              aggs: {
-                outcomes: {
-                  terms: {
-                    field: EVENT_OUTCOME,
-                  },
-                },
-              },
-            },
-          },
+          aggs: getOutcomeAggregation(
+            searchAggregatedTransactions
+              ? ApmDocumentType.TransactionMetric
+              : ApmDocumentType.TransactionEvent
+          ),
         },
       },
     },
@@ -134,44 +108,10 @@ export async function getTransactionErrorRateChartPreview({
     return [];
   }
 
-  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
-    (acc, bucket) => {
-      const x = bucket.key;
-      bucket.series.buckets.forEach((seriesBucket) => {
-        const bucketKey = seriesBucket.key.join('_');
-        const y = calculateErrorRate(seriesBucket.outcomes.buckets);
-
-        if (acc[bucketKey]) {
-          acc[bucketKey].push({ x, y });
-        } else {
-          acc[bucketKey] = [{ x, y }];
-        }
-      });
-
-      return acc;
-    },
-    {} as Record<string, Array<{ x: number; y: number | null }>>
-  );
-
-  return Object.keys(seriesDataMap).map((key) => ({
-    name: key,
-    data: seriesDataMap[key],
-  }));
+  return resp.aggregations.timeseries.buckets.map((bucket) => {
+    return {
+      x: bucket.key,
+      y: calculateFailedTransactionRate(bucket),
+    };
+  });
 }
-
-const calculateErrorRate = (
-  buckets: Array<{
-    doc_count: number;
-    key: string | number;
-  }>
-) => {
-  const failed =
-    buckets.find((outcomeBucket) => outcomeBucket.key === EventOutcome.failure)
-      ?.doc_count ?? 0;
-
-  const succesful =
-    buckets.find((outcomeBucket) => outcomeBucket.key === EventOutcome.success)
-      ?.doc_count ?? 0;
-
-  return (failed / (failed + succesful)) * 100;
-};
