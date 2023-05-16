@@ -54,7 +54,7 @@ export const createDashboardSavedObjectType = ({
 
       // Search
       kibanaSavedObjectMeta: schema.object({
-        searchSourceJSON: schema.string(),
+        searchSourceJSON: schema.maybe(schema.string()),
       }),
 
       // Time
@@ -65,6 +65,8 @@ export const createDashboardSavedObjectType = ({
         schema.object({
           pause: schema.boolean(),
           value: schema.number(),
+          display: schema.maybe(schema.string()),
+          section: schema.maybe(schema.number()),
         })
       ),
 
