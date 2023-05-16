@@ -32,7 +32,11 @@ const openAiConfig: ConfigFieldSchema[] = [
         id="xpack.stackConnectors.components.genAi.openAiDocumentation"
         values={{
           genAiAPIUrlDocs: (
-            <EuiLink href="https://platform.openai.com/docs/api-reference" target="_blank">
+            <EuiLink
+              data-test-subj="open-ai-api-doc"
+              href="https://platform.openai.com/docs/api-reference"
+              target="_blank"
+            >
               {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}
             </EuiLink>
           ),
@@ -55,6 +59,7 @@ const azureAiConfig: ConfigFieldSchema[] = [
         values={{
           genAiAPIUrlDocs: (
             <EuiLink
+              data-test-subj="azure-ai-api-doc"
               href="https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference"
               target="_blank"
             >
@@ -78,7 +83,11 @@ const openAiSecrets: SecretsFieldSchema[] = [
         id="xpack.stackConnectors.components.genAi.openAiApiKeyDocumentation"
         values={{
           genAiAPIKeyDocs: (
-            <EuiLink href="https://platform.openai.com/account/api-keys" target="_blank">
+            <EuiLink
+              data-test-subj="open-ai-api-keys-doc"
+              href="https://platform.openai.com/account/api-keys"
+              target="_blank"
+            >
               {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}
             </EuiLink>
           ),
@@ -100,6 +109,7 @@ const azureAiSecrets: SecretsFieldSchema[] = [
         values={{
           genAiAPIKeyDocs: (
             <EuiLink
+              data-test-subj="azure-ai-api-keys-doc"
               href="https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#authentication"
               target="_blank"
             >
@@ -115,10 +125,12 @@ const azureAiSecrets: SecretsFieldSchema[] = [
 const providerOptions = [
   {
     value: OpenAiProviderType.OpenAi,
+    text: i18n.OPEN_AI,
     label: i18n.OPEN_AI,
   },
   {
     value: OpenAiProviderType.AzureAi,
+    text: i18n.AZURE_AI,
     label: i18n.AZURE_AI,
   },
 ];
@@ -141,6 +153,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   return (
     <>
       <SelectField
+        data-test-subj="config.apiProvider-select"
         defaultValue={selectedProviderDefaultValue}
         path="config.apiProvider"
         label={i18n.API_PROVIDER_LABEL}

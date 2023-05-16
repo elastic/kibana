@@ -63,7 +63,7 @@ const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
 
-export const ConnectorTypeId = '.genAi';
+export const ConnectorTypeId = '.gen-ai';
 // connector type definition
 export function getConnectorType(): GenerativeAiConnectorType {
   return {

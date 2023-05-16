@@ -141,7 +141,7 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         18,
         expect.objectContaining({
-          id: '.genAi',
+          id: '.gen-ai',
           name: 'Generative AI',
         })
       );
