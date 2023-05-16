@@ -25,7 +25,7 @@ interface CreateActionEventLogRecordParams {
   consumer?: string;
   task?: {
     scheduled?: string;
-    scheduleDelay?: number;
+    scheduleDelay?: string;
   };
   executionId?: string;
   savedObjects: Array<{

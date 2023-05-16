@@ -194,7 +194,7 @@ export class SyntheticsService {
                 service.logger.error(e);
               }
 
-              return { schedule: { interval } };
+              return { state: {}, schedule: { interval } };
             },
             async cancel() {
               service.logger?.warn(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} timed out`);

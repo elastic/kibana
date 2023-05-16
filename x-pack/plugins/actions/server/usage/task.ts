@@ -54,7 +54,7 @@ function registerActionsTelemetryTask(
           count_total: schema.number(),
           count_by_type: schema.recordOf(schema.string(), schema.number()),
           count_active_total: schema.number(),
-          count_active_by_type: schema.number(),
+          count_active_by_type: schema.recordOf(schema.string(), schema.number()),
           count_active_alert_history_connectors: schema.number(),
           count_active_email_connectors_by_service_type: schema.recordOf(
             schema.string(),

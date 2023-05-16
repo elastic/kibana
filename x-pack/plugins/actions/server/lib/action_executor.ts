@@ -11,7 +11,11 @@ import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import {
+  IEventLogger,
+  SAVED_OBJECT_REL_PRIMARY,
+  millisToNanos,
+} from '@kbn/event-log-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -33,9 +37,6 @@ import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
-
-// 1,000,000 nanoseconds in 1 millisecond
-const Millis2Nanos = 1000 * 1000;
 
 export interface ActionExecutorContext {
   logger: Logger;
@@ -160,7 +161,7 @@ export class ActionExecutor {
           ? {
               task: {
                 scheduled: taskInfo.scheduled.toISOString(),
-                scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+                scheduleDelay: millisToNanos(Date.now() - taskInfo.scheduled.getTime()),
               },
             }
           : {};
@@ -323,7 +324,7 @@ export class ActionExecutor {
       ? {
           task: {
             scheduled: taskInfo.scheduled.toISOString(),
-            scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+            scheduleDelay: millisToNanos(Date.now() - taskInfo.scheduled.getTime()),
           },
         }
       : {};
