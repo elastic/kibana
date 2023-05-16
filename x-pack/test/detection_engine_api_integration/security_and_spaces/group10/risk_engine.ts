@@ -6,7 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { RISK_SCORES_URL } from '@kbn/security-solution-plugin/common/constants';
+import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -21,7 +23,7 @@ import {
 import { dataGeneratorFactory } from '../../utils/data_generator';
 
 const removeFields = (scores: any[]) =>
-  scores.map((item: any) => {
+  scores.map((item) => {
     delete item['@timestamp'];
     delete item.riskiestInputs;
     delete item.notes;
@@ -81,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
     await waitForSignalsToBePresent(supertest, log, alerts, [id]);
   };
 
-  const getRiskScores = async ({ body }: { body: object }): Promise<{ scores: unknown[] }> => {
+  const getRiskScores = async ({ body }: { body: object }): Promise<{ scores: RiskScore[] }> => {
     const { body: result } = await supertest
       .post(RISK_SCORES_URL)
       .set('kbn-xsrf', 'true')
@@ -322,6 +324,70 @@ export default ({ getService }: FtrProviderContext): void => {
               identifierValue: 'host-1',
             },
           ]);
+        });
+      });
+
+      describe('risk score pagination', () => {
+        it('respects the specified after_keys', async () => {
+          const aaaId = uuidv4();
+          const zzzId = uuidv4();
+          const aaaDoc = buildDocument({ 'user.name': 'aaa' }, aaaId);
+          const zzzDoc = buildDocument({ 'user.name': 'zzz' }, zzzId);
+          await indexListOfDocuments(Array(50).fill(aaaDoc).concat(Array(50).fill(zzzDoc)));
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${aaaId} OR ${zzzId}`,
+            alerts: 100,
+            riskScore: 100,
+          });
+
+          const { scores } = await getRiskScores({
+            body: {
+              after_keys: { user: { 'user.name': 'aaa' } },
+            },
+          });
+          // if after_key was not respected, 'aaa' would be included here
+          expect(scores).to.have.length(1);
+          expect(scores[0].identifierValue).to.equal('zzz');
+        });
+      });
+
+      describe('risk score filtering', () => {
+        it('restricts the range of risk inputs used for scoring', async () => {
+          const documentId = uuidv4();
+          const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
+          await indexListOfDocuments(
+            Array(100)
+              .fill(doc)
+              .map((_doc, i) => ({ ...doc, 'event.risk_score': i === 99 ? 1 : 100 }))
+          );
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${documentId}`,
+            alerts: 100,
+            riskScore: 100,
+            riskScoreOverride: 'event.risk_score',
+          });
+          const { scores } = await getRiskScores({
+            body: {
+              filter: {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        [ALERT_RISK_SCORE]: {
+                          lte: 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          });
+
+          expect(scores).to.have.length(1);
+          expect(scores[0].riskiestInputs).to.have.length(1);
         });
       });
 
