@@ -24,6 +24,7 @@ export interface RouteDependencies {
 export class ServerlessSearchPlugin
   implements Plugin<ServerlessSearchPluginSetup, ServerlessSearchPluginStart>
 {
+  // @ts-ignore config is not used for now
   private readonly config: ServerlessSearchConfig;
   private readonly logger: Logger;
   private security?: SecurityPluginStart;
