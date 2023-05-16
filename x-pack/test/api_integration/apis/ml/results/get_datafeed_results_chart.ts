@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
-        '[request body.jobId]: expected value of type [string] but got [undefined]'
+        '[get 1 body.jobId]: expected value of type [string] but got [undefined]'
       );
     });
 
