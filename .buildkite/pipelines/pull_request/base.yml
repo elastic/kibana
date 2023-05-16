@@ -40,53 +40,53 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  # - command: .buildkite/scripts/steps/ci_stats_ready.sh
-  #   label: Mark CI Stats as ready
-  #   agents:
-  #     provider: gcp
-  #     image: family/brian-ubuntu-2004
-  #     imageProject: elastic-images-qa
-  #     machineType: n1-standard-2
-  #   timeout_in_minutes: 10
-  #   depends_on:
-  #     - build
-  #     - build_api_docs
-  #   retry:
-  #     automatic:
-  #       - exit_status: '*'
-  #         limit: 1
-
-  # - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-  #   label: 'Pick Test Group Run Order'
-  #   agents:
-  #     provider: gcp
-  #     image: family/brian-ubuntu-2004
-  #     imageProject: elastic-images-qa
-  #     machineType: n1-standard-2
-  #   env:
-  #     JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
-  #     JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-  #     FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-  #   retry:
-  #     automatic:
-  #       - exit_status: '*'
-  #         limit: 1
-
-  - command: .buildkite/scripts/steps/test/ftr_configs.sh
-    label: 'FTR Configs'
-    timeout_in_minutes: 90
-    depends_on: build
+  - command: .buildkite/scripts/steps/ci_stats_ready.sh
+    label: Mark CI Stats as ready
     agents:
       provider: gcp
       image: family/brian-ubuntu-2004
       imageProject: elastic-images-qa
-      machineType: n1-standard-4
-    env:
-      FTR_CONFIG_GROUP_KEY: ftr_configs_0
+      machineType: n1-standard-2
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+      - build_api_docs
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
+
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
+    agents:
+      provider: gcp
+      image: family/brian-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n1-standard-2
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  # - command: .buildkite/scripts/steps/test/ftr_configs.sh
+  #   label: 'FTR Configs'
+  #   timeout_in_minutes: 90
+  #   depends_on: build
+  #   agents:
+  #     provider: gcp
+  #     image: family/brian-ubuntu-2004
+  #     imageProject: elastic-images-qa
+  #     machineType: n1-standard-4
+  #   env:
+  #     FTR_CONFIG_GROUP_KEY: ftr_configs_0
+  #   retry:
+  #     automatic:
+  #       - exit_status: '*'
+  #         limit: 1
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
