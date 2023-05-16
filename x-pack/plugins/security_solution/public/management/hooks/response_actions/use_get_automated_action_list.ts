@@ -69,16 +69,17 @@ export const useGetAutomatedActionList = (
 interface GetAutomatedActionResponseListOptions {
   skip?: boolean;
   action: LogsEndpointAction;
+  isLive?: boolean;
 }
 
 type GetAutomatedActionResponseListResponse = Pick<
   ActionDetails,
-  'completedAt' | 'isExpired' | 'wasSuccessful' | 'isCompleted'
+  'completedAt' | 'isExpired' | 'wasSuccessful' | 'isCompleted' | 'status'
 >;
 
 export const useGetAutomatedActionResponseList = (
   query: EndpointAutomatedActionResponseRequestQuery,
-  { skip = false, action: requestAction }: GetAutomatedActionResponseListOptions
+  { skip = false, action: requestAction, isLive = false }: GetAutomatedActionResponseListOptions
 ) => {
   const { data } = useKibana().services;
   const { expiration, actionId, agent } = query;
@@ -131,16 +132,27 @@ export const useGetAutomatedActionResponseList = (
 
       const action = responseData.items[0]?._source;
 
+      // TODO use getActionsStatus() - this requires a refactor of the function to accept isExpired
+      const status = responseData.isExpired
+        ? 'failed'
+        : responseData?.isCompleted
+        ? responseData.wasSuccessful
+          ? 'successful'
+          : 'failed'
+        : 'pending';
+
       return {
         completedAt: action?.EndpointActions.completed_at,
         isExpired: responseData.isExpired,
         wasSuccessful: responseData.wasSuccessful,
         isCompleted: responseData.isCompleted,
+        status,
       };
     },
     select: (response) => combineResponse(requestAction, response),
     keepPreviousData: true,
     enabled: !skip,
+    refetchInterval: isLive ? 5000 : false,
   });
 };
 
@@ -150,15 +162,6 @@ const combineResponse = (
 ): ActionDetails => {
   const { rule } = action;
   const { parameters, alert_id: alertId, comment, command } = action.EndpointActions.data;
-
-  // TODO use getActionsStatus() - this requires a refactor of the function to accept isExpired
-  const status = responseData?.isExpired
-    ? 'failed'
-    : responseData?.isCompleted
-    ? responseData?.wasSuccessful
-      ? 'successful'
-      : 'failed'
-    : 'pending';
 
   return {
     id: action.EndpointActions.action_id,
@@ -188,7 +191,7 @@ const combineResponse = (
     isCompleted: !!responseData?.isCompleted,
     isExpired: !!responseData?.isExpired,
     wasSuccessful: !!responseData?.isCompleted,
-    status: status as 'pending' | 'successful' | 'failed',
+    status: responseData.status,
     agentState: {},
     errors: action.error ? [action.error.message as string] : undefined,
   };

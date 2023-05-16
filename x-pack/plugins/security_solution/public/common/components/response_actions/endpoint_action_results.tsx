@@ -7,7 +7,7 @@
 
 import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUserPrivileges } from '../user_privileges';
 import type { LogsEndpointAction } from '../../../../common/endpoint/types';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
@@ -27,11 +27,21 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
     endpointPrivileges: { canReadActionsLogManagement, canAccessEndpointActionsLogManagement },
   } = useUserPrivileges();
 
+  const [isLive, setIsLive] = useState(true);
   const canReadEndpoint = canReadActionsLogManagement && canAccessEndpointActionsLogManagement;
   const { data: expandedAction } = useGetAutomatedActionResponseList(
     { actionId, expiration, agent },
-    { skip: !canReadEndpoint, action }
+    { skip: !canReadEndpoint, action, isLive }
   );
+
+  useEffect(() => {
+    setIsLive(() => {
+      if (!expandedAction) {
+        return true;
+      }
+      return !expandedAction.errors?.length && expandedAction.status === 'pending';
+    });
+  }, [expandedAction]);
 
   const eventText = getCommentText(action.EndpointActions.data.command);
 
