@@ -9,9 +9,7 @@ import { Readable } from 'stream';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { HapiReadableStream } from '@kbn/security-solution-plugin/server/types';
-
-import type { FleetFileClientInterface } from './types';
+import type { FleetFileClientInterface, HapiReadableStream } from './types';
 import type { FleetFile } from './types';
 import type { HostUploadedFileMetadata } from './types';
 

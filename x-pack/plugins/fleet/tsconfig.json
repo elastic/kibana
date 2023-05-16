@@ -97,6 +97,5 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-file-types",
-    "@kbn/security-solution-plugin",
   ]
 }
