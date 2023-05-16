@@ -10,6 +10,18 @@ else
     CONFIG_FILE="$DEFAULT_CONFIG_FILE"
 fi
 
+save_and_exit ( ) {
+    # the dev process doesn't restart without a sleep after the HTTP calls, not sure why
+    sleep 1
+
+    echo "Saving config file to trigger a restart..."
+
+    # Touch the config file to trigger a file change
+    touch -c "$CONFIG_FILE"
+
+    exit 0
+}
+
 # Parse the YAML file using grep and sed to extract the required values
 ELASTICSEARCH_HOSTS=$(grep -E '^elasticsearch.hosts: ' "$CONFIG_FILE" | sed 's/.*: //')
 ELASTICSEARCH_USERNAME=$(grep -E '^elasticsearch.username: ' "$CONFIG_FILE" | sed 's/.*: //')
@@ -22,17 +34,20 @@ ELASTICSEARCH_PASSWORD=$(grep -E '^elasticsearch.password: ' "$CONFIG_FILE" | se
 
 # Get the list of indices from the _cat/indices API
 echo "Getting list of indices..."
-INDICES=$(curl -s -w "%{http_code}" -X GET "${ELASTICSEARCH_HOSTS}/_cat/indices/.kibana*?format=txt" \
+INDICES=$(curl -s -X GET "${ELASTICSEARCH_HOSTS}/_cat/indices/.kibana*?format=txt" \
      -u "${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}" | awk '{print $3}')
-HTTP_STATUS="${INDICES##* }"
-INDICES="${INDICES% *}"
-if [ $? -ne 0 ] && [ "$HTTP_STATUS" != "404" ]; then
+if [ $? -ne 0 ]; then
     echo "Failed to get the list of indices."
     exit 1
 fi
 
 # Convert the list of indices to a comma-separated list
 INDICES_CSV=$(echo $INDICES | tr ' ' ',')
+
+if [ -z "$INDICES_CSV" ]; then
+    echo "No indices to delete."
+    save_and_exit
+fi
 
 # Execute the DELETE call with curl using the extracted list of indices
 echo "Deleting indices: $INDICES_CSV"
@@ -43,12 +58,4 @@ if [ $? -ne 0 ] && [ "$HTTP_STATUS" != "404" ]; then
     exit 1
 fi
 
-
-
-# the dev process doesn't restart without a sleep after the HTTP calls, not sure why
-sleep 1
-
-echo "Saving config file to trigger a restart..."
-
-# Touch the config file to trigger a file change
-touch -c "$CONFIG_FILE"
+save_and_exit
