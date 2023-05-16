@@ -22,7 +22,7 @@ export function isValidRouteVersion(isPublicApi: boolean, version: string): unde
       ? undefined
       : `Invalid version. Received "${version}", expected a valid date string formatted as YYYY-MM-DD.`;
   }
-  return INTERNAL_VERSION_REGEX.test(version)
+  return INTERNAL_VERSION_REGEX.test(version) && version !== '0'
     ? undefined
-    : `Invalid version number. Received "${version}", expected any finite, whole number greater than 0.`;
+    : `Invalid version number. Received "${version}", expected a string containing _only_ a finite, whole number greater than 0.`;
 }
