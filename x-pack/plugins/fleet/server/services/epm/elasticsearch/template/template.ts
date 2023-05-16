@@ -645,21 +645,16 @@ const updateExistingDataStream = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) => {
-  const dataStreamResponse = await esClient.indices.getDataStream({ name: dataStreamName });
-  const currentBackingIndex =
-    dataStreamResponse.data_streams[0].indices[
-      dataStreamResponse.data_streams[0].indices.length - 1
-    ];
+  const existingDs = await esClient.indices.get({
+    index: dataStreamName,
+  });
 
-  const currentBackingIndexData = (
-    await esClient.indices.get({
-      index: currentBackingIndex.index_name,
-    })
-  )[currentBackingIndex.index_name];
+  const existingDsConfig = Object.values(existingDs);
+  const currentBackingIndexConfig = existingDsConfig[existingDsConfig.length - 1];
 
-  const currentIndexMode = currentBackingIndexData.settings?.index?.mode;
-  // @ts-expect-error
-  const currentSourceType = currentBackingIndexData.mappings?._source?.mode;
+  const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
+  // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
+  const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
 
   let settings: IndicesIndexSettings;
   let mappings: MappingTypeMapping;
@@ -705,7 +700,7 @@ const updateExistingDataStream = async ({
   // Trigger a rollover if the index mode or source type has changed
   if (
     currentIndexMode !== settings?.index?.mode ||
-    // @ts-expect-error
+    // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
     currentSourceType !== mappings?._source?.mode
   ) {
     logger.debug(
