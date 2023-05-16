@@ -9,6 +9,7 @@
 
 import yargs from 'yargs';
 import _ from 'lodash';
+import * as fs from 'fs';
 import globby from 'globby';
 import pMap from 'p-map';
 import deepMerge from 'deepmerge';
@@ -27,10 +28,17 @@ import {
   ProviderCollection,
   readProviderSpec,
 } from '@kbn/test/src/functional_test_runner/lib';
+import * as parser from '@babel/parser';
+import type {
+  ExpressionStatement,
+  Identifier,
+  NumericLiteral,
+  ObjectExpression,
+  StringLiteral,
+  ObjectProperty,
+  CallExpression,
+} from '@babel/types';
 import { getLocalhostRealIp } from '../common/localhost_services';
-
-import runCypress from '.';
-import { renderSummaryTable } from './print_run';
 
 export default async () => {
   const { argv } = yargs(process.argv.slice(2));
@@ -86,6 +94,49 @@ export default async () => {
     _.pull(kibanaPorts, kibanaPort);
   };
 
+  const parseTestFileConfig = (
+    filePath: string
+  ): Array<Record<string, string | number>> | undefined => {
+    const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
+
+    const ast = parser.parse(testFile, {
+      sourceType: 'module',
+      plugins: ['typescript'],
+    });
+
+    const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
+      | ExpressionStatement
+      | undefined;
+
+    const callExpression = expressionStatement?.expression as CallExpression | undefined;
+
+    if (callExpression?.arguments.length === 3) {
+      const callExpressionArguments = _.find(callExpression?.arguments, [
+        'type',
+        'ObjectExpression',
+      ]) as ObjectExpression | undefined;
+
+      const callExpressionProperties = callExpressionArguments?.properties as
+        | ObjectProperty[]
+        | undefined;
+
+      const configValues = _.reduce(
+        callExpressionProperties,
+        (acc: Array<{ [key: string]: string | number }>, property) => {
+          const key = (property.key as Identifier).name;
+          const value = (property.value as NumericLiteral | StringLiteral).value;
+          if (key && value) {
+            acc.push({ [key]: value });
+          }
+          return acc;
+        },
+        []
+      );
+      return configValues.length ? configValues : undefined;
+    }
+    return undefined;
+  };
+
   // merge({
   //   files: ['../../../target/kibana-security-solution/cypress/results/*.json'],
   // }).then((report) => {
@@ -112,6 +163,7 @@ export default async () => {
       const esPort = getEsPort();
       const kibanaPort = getKibanaPort();
       const fleetServerPort = getFleetServerPort();
+      const configFromTestFile = parseTestFileConfig(filePath);
 
       const config = await readConfigFile(
         log,
@@ -226,16 +278,6 @@ export default async () => {
         .finally(() => {
           cleanupServerPorts({ esPort, kibanaPort });
         });
-      // return runCypress({ esPort, kibanaPort, filePath, index, argv })
-      //   .then((result) => {
-      //     cleanupServerPorts({ esPort, kibanaPort });
-      //     return result;
-      //   })
-      //   .catch((error) => {
-      //     cleanupServerPorts({ esPort, kibanaPort });
-      //     console.error('ERROR', error);
-      //     return error;
-      //   });
     },
     { concurrency: 4 }
   ).then((results) => {

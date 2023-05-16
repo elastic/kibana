@@ -18,3 +18,35 @@ declare namespace Cypress {
     ): Chainable<Subject>;
   }
 }
+
+declare namespace Mocha {
+  interface SuiteFunction {
+    (title: string, ftrConfig: Record<string, string | number>, fn: (this: Suite) => void): Suite;
+    (
+      title: string,
+      ftrConfig?: Record<string, string | number>,
+      config: Cypress.TestConfigOverrides,
+      fn: (this: Suite) => void
+    ): Suite;
+  }
+
+  interface ExclusiveSuiteFunction {
+    (title: string, ftrConfig: Record<string, string | number>, fn: (this: Suite) => void): Suite;
+    (
+      title: string,
+      ftrConfig?: Record<string, string | number>,
+      config: Cypress.TestConfigOverrides,
+      fn: (this: Suite) => void
+    ): Suite;
+  }
+
+  interface PendingSuiteFunction {
+    (title: string, ftrConfig: Record<string, string | number>, fn: (this: Suite) => void): Suite;
+    (
+      title: string,
+      ftrConfig?: Record<string, string | number>,
+      config: Cypress.TestConfigOverrides,
+      fn: (this: Suite) => void
+    ): Suite | void;
+  }
+}
