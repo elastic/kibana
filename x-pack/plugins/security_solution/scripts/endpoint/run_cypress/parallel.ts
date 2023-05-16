@@ -278,7 +278,7 @@ export default async () => {
           cleanupServerPorts({ esPort, kibanaPort });
         });
     },
-    { concurrency: 4 }
+    { concurrency: 2 }
   ).then((results) => {
     console.error('results', results);
     // renderSummaryTable(undefined, deepMerge.all(results));
