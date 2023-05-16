@@ -36,9 +36,7 @@ import {
   selectOs,
 } from '../../../tasks/exceptions';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
   EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT,
   LOADING_SPINNER,
@@ -56,7 +54,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       esArchiverResetKibana();
       esArchiverLoad('exceptions');
       login();
-      deleteAlertsAndRules();
       const exceptionList = getExceptionList();
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
@@ -104,8 +101,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
     });
 
     it('Add comment on a new exception, add another comment has unicode from a different user and copy to clipboard', () => {
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
-
       // User 1
       // open add exception modal
       addExceptionFlyoutFromViewerHeader();
@@ -142,7 +137,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
 
-      goToRuleDetails();
       goToExceptionsTab();
 
       // open edit exception modal
@@ -165,7 +159,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       esArchiverResetKibana();
       esArchiverLoad('auditbeat');
       login();
-      deleteAlertsAndRules();
       // create rule with exception
       createEndpointExceptionList().then((response) => {
         createRule({
@@ -198,8 +191,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
     it('Add comment on a new exception, and add another comment has unicode character from a different user', () => {
       // User 1
       // The Endpoint will populated with predefined fields
-      // when no exceptions exist, empty component shows with action to add exception
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
       // open add exception modal
       openExceptionFlyoutFromEmptyViewerPrompt();

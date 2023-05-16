@@ -38,6 +38,8 @@ import {
   MANAGE_RULES_SAVE,
   IMPORT_SHARED_EXCEPTION_LISTS_BTN,
   IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN,
+  EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU,
+  EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM,
 } from '../screens/exceptions';
 import { assertExceptionItemsExists } from './exceptions';
 
@@ -210,4 +212,23 @@ export const editExceptionLisDetails = ({
 
 export const clickOnLinkRulesByRuleRowOrderInListDetail = (ruleSwitch: number = 0) => {
   cy.get(RULE_ACTION_LINK_RULE_SWITCH).eq(ruleSwitch).find('button').click();
+};
+export const linkSharedListToRulesFromListDetails = (numberOfRules: number) => {
+  for (let i = 0; i < numberOfRules; i++) {
+    clickOnLinkRulesByRuleRowOrderInListDetail(i);
+  }
+};
+
+export const validateSharedListLinkedRules = (
+  numberOfRules: number,
+  linkedRulesNames: string[]
+) => {
+  cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).should(
+    'have.text',
+    `Linked to ${numberOfRules} rules`
+  );
+  cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).click();
+  linkedRulesNames.forEach((ruleName) => {
+    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains('a', ruleName);
+  });
 };

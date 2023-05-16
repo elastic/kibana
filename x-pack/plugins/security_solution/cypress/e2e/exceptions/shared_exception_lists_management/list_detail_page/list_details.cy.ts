@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import { getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
@@ -14,18 +15,16 @@ import { exceptionsListDetailsUrl, EXCEPTIONS_URL } from '../../../../urls/navig
 import {
   createSharedExceptionList,
   editExceptionLisDetails,
-  clickOnLinkRulesByRuleRowOrderInListDetail,
   waitForExceptionsTableToBeLoaded,
+  linkSharedListToRulesFromListDetails,
+  validateSharedListLinkedRules,
 } from '../../../../tasks/exceptions_table';
 import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
   EXCEPTION_LIST_DETAILS_LINK_RULES_BTN,
   MANAGE_RULES_SAVE,
-  EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU,
-  EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM,
 } from '../../../../screens/exceptions';
 
 const LIST_NAME = 'My exception list';
@@ -115,22 +114,14 @@ describe('Exception list detail page', () => {
     // Open Link rules flyout
     cy.get(EXCEPTION_LIST_DETAILS_LINK_RULES_BTN).click();
 
-    // Link the first Rule
-    clickOnLinkRulesByRuleRowOrderInListDetail(0);
-    // Link the second Rule
-    clickOnLinkRulesByRuleRowOrderInListDetail(1);
+    // Link the first two Rules
+    linkSharedListToRulesFromListDetails(2);
 
     cy.get(MANAGE_RULES_SAVE).first().click();
 
-    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).should(
-      'have.text',
-      'Linked to 2 rules'
-    );
-    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).click();
-    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains(
-      'a',
-      'Rule to link to shared list'
-    );
-    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains('a', 'New Rule Test');
+    const linkedRulesNames = ['Rule to link to shared list', 'New Rule Test'];
+
+    // Validate the number of linked rules as well as the Rules' names
+    validateSharedListLinkedRules(2, linkedRulesNames);
   });
 });

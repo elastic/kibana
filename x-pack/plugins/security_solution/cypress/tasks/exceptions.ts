@@ -37,6 +37,8 @@ import {
   EXCEPTION_ITEM_VIEWER_CONTAINER,
   EXCEPTION_CARD_ITEM_AFFECTED_RULES,
   EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM,
+  ADD_AND_BTN,
+  ADD_OR_BTN,
 } from '../screens/exceptions';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
@@ -225,4 +227,34 @@ export const validateExceptionItemFirstAffectedRuleNameInRulePage = (ruleName: s
   cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).click();
 
   cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM).first().should('have.text', ruleName);
+};
+
+export const addTwoAndedConditions = (
+  firstEntryField: string,
+  firstEntryFieldValue: string,
+  secondEntryField: string,
+  secondEntryFieldValue: string
+) => {
+  addExceptionEntryFieldValue(firstEntryField, 0);
+  addExceptionEntryFieldValueValue(firstEntryFieldValue, 0);
+
+  cy.get(ADD_AND_BTN).click();
+
+  addExceptionEntryFieldValue(secondEntryField, 1);
+  addExceptionEntryFieldValueValue(secondEntryFieldValue, 1);
+};
+
+export const addTwoORedConditions = (
+  firstEntryField: string,
+  firstEntryFieldValue: string,
+  secondEntryField: string,
+  secondEntryFieldValue: string
+) => {
+  addExceptionEntryFieldValue(firstEntryField, 0);
+  addExceptionEntryFieldValueValue(firstEntryFieldValue, 0);
+
+  cy.get(ADD_OR_BTN).click();
+
+  addExceptionEntryFieldValue(secondEntryField, 1);
+  addExceptionEntryFieldValueValue(secondEntryFieldValue, 1);
 };

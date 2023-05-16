@@ -6,7 +6,6 @@
  */
 
 import { EXCEPTION_ITEM_ACTIONS_BUTTON, REMOVE_EXCEPTION_BTN } from '../../../screens/rule_details';
-import { deleteAlertsAndRules } from '../../../tasks/common';
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -19,14 +18,12 @@ import {
   removeException,
 } from '../../../tasks/rule_details';
 import {
-  addExceptionEntryFieldValue,
-  addExceptionEntryFieldValueValue,
   addExceptionFlyoutItemName,
+  addTwoAndedConditions,
+  addTwoORedConditions,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 import {
-  ADD_AND_BTN,
-  ADD_OR_BTN,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -41,7 +38,6 @@ describe(
     before(() => {
       esArchiverResetKibana();
       login();
-      deleteAlertsAndRules();
       // At least create Rule with exceptions_list to be able to view created exceptions
       createRule({
         ...getNewRule(),
@@ -67,13 +63,8 @@ describe(
       // add exception item name
       addExceptionFlyoutItemName(exceptionName);
 
-      addExceptionEntryFieldValue('agent.name', 0);
-      addExceptionEntryFieldValueValue('foo', 0);
-
-      cy.get(ADD_AND_BTN).click();
-
-      addExceptionEntryFieldValue('@timestamp', 1);
-      addExceptionEntryFieldValueValue('123', 1);
+      // add  Two ANDed condition
+      addTwoAndedConditions('agent.name', 'foo', '@timestamp', '123');
 
       submitNewExceptionItem();
 
@@ -97,14 +88,8 @@ describe(
       addExceptionFlyoutItemName(exceptionName);
 
       // exception item 1
-
-      addExceptionEntryFieldValue('agent.name', 0);
-      addExceptionEntryFieldValueValue('foo', 0);
-
-      cy.get(ADD_OR_BTN).click();
-
-      addExceptionEntryFieldValue('@timestamp', 1);
-      addExceptionEntryFieldValueValue('123', 1);
+      // add  Two ORed condition
+      addTwoORedConditions('agent.name', 'foo', '@timestamp', '123');
 
       submitNewExceptionItem();
 
