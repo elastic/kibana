@@ -93,11 +93,14 @@ NOTE: You can use wildcards in field searches.  For example, `goe*dest` finds `g
 +
 **Discover** shows the top 10 values and the number of records used to calculate those values.
 
-. Drag the field into the document table, and **Discover** creates a column for the field.
+. Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
+You can also drag the field from the *Available fields* list into the document table.
++
+[role="screenshot"]
+image::images/discover-add-icon.png[How to add a field as a column in the table, width="50%"]
 
-
-. Find the `customer_first_name` and `customer_last_name` fields and drag
-them into the document table. Your table should look similar to this:
+. Find the `customer_first_name` and `customer_last_name` fields and add
+them to the document table. Your table should look similar to this:
 +
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
