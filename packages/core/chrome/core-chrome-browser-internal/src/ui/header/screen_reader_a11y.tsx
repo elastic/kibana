@@ -12,7 +12,9 @@ import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import type { AnalyticsClient, SchemaObject } from '@kbn/analytics-client';
 import type { HeaderProps } from './header';
+import { merge, of } from 'rxjs';
 
 const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/packages/core/rendering/core-rendering-server-internal/src/views/template.tsx#L34
 const SEPARATOR = ' - ';
@@ -35,7 +37,6 @@ export const ScreenReaderRouteAnnouncements: FC<{
         if (typeof breadcrumb.text === 'string') breadcrumbText.push(breadcrumb.text);
       });
       breadcrumbText.push(branding);
-
       setRouteTitle(breadcrumbText.join(SEPARATOR));
     } else {
       // Don't announce anything during loading states
@@ -78,4 +79,40 @@ export const SkipToMainContent = () => {
       })}
     </EuiSkipLink>
   );
+};
+
+interface PageTitleSchema {
+  page_title: string;
+}
+
+const pageTitleSchema: SchemaObject<PageTitleSchema> = {
+  properties: {
+    page_title: {
+      type: 'keyword',
+      _meta: { 
+        description: 'The application name taken from the screenshot reader route announcement component'
+      }
+    }
+  }
+}
+
+const trackPageTitle = (analytics: AnalyticsClient) => {
+  // analytics.registerEventType({
+  //   eventType: 'page_title_application',
+  //   schema: {
+  //     my_keyword: {
+  //       type: 'keyword',
+  //       _meta: {
+  //         description: 'Page title for screen readers'
+  //       }
+  //     }
+  //   }
+  // })
+
+  analytics.registerContextProvider({
+    name: 'page_title',
+    schema: pageTitleSchema, 
+    context$: merge(of(ScreenReaderRouteAnnouncements(breadcrumbs$: observables.breadcrumbs$, customBranding$: customBranding$, appId: appId$)),
+
+})
 };
