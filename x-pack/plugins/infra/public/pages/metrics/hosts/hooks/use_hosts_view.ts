@@ -220,6 +220,7 @@ export const useHostsView = () => {
             size: 100,
             ean: `host:${host.name}`,
             relation: 'descendants',
+            maxDistance: 3,
           },
         }
       );
