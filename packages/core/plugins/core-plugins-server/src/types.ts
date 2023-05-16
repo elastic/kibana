@@ -106,9 +106,9 @@ export interface PluginConfigDescriptor<T = any> {
    */
   exposeToBrowser?: ExposedToBrowserDescriptor<T>;
   /**
-   * List of configuration properties that will be available on the client-side plugin.
+   * List of configuration properties that can be dynamically changed via the PUT /_settings API.
    */
-  dynamicConfig?: ExposedToBrowserDescriptor<T>;
+  dynamicConfig?: DynamicConfigDescriptor<T>;
   /**
    * Schema to use to validate the plugin configuration.
    *

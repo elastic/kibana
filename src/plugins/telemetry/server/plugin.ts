@@ -165,19 +165,14 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
     });
 
-    const telemetryLabels$ = new ReplaySubject<TelemetryConfigLabels>(1);
-    this.config$
-      .pipe(
-        map(({ labels }) => labels),
-        tap((labels) =>
-          Object.entries(labels).forEach(([key, value]) => apm.setGlobalLabel(key, value))
-        )
-      )
-      .subscribe(telemetryLabels$);
-
     analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
       name: 'telemetry labels',
-      context$: telemetryLabels$.pipe(map((labels) => ({ labels }))),
+      context$: this.config$.pipe(
+        map(({ labels }) => ({ labels })),
+        tap(({ labels }) =>
+          Object.entries(labels).forEach(([key, value]) => apm.setGlobalLabel(key, value))
+        )
+      ),
       schema: {
         labels: {
           type: 'pass_through',

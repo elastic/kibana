@@ -686,14 +686,14 @@ describe('Dynamic Overrides', () => {
 
   test('throws validation error when attempted to set an override that has not been registered as dynamic', () => {
     expect(() =>
-      configService.setOverrides({ 'namespace1.key': 'another-value' })
+      configService.setDynamicConfigOverrides({ 'namespace1.key': 'another-value' })
     ).toThrowErrorMatchingInlineSnapshot(`"[namespace1.key]: not a valid dynamic option"`);
   });
 
   test('throws validation error when a registered as dynamic option is invalid', () => {
     configService.addDynamicConfigPaths('namespace1', ['key']);
     expect(() =>
-      configService.setOverrides({ 'namespace1.key': 1 })
+      configService.setDynamicConfigOverrides({ 'namespace1.key': 1 })
     ).toThrowErrorMatchingInlineSnapshot(
       `"[config validation of [namespace1].key]: expected value of type [string] but got [number]"`
     );
@@ -701,7 +701,7 @@ describe('Dynamic Overrides', () => {
 
   test('overrides the static settings with the dynamic ones', async () => {
     configService.addDynamicConfigPaths('namespace1', ['key']);
-    configService.setOverrides({ 'namespace1.key': 'another-value' });
+    configService.setDynamicConfigOverrides({ 'namespace1.key': 'another-value' });
 
     expect(
       await firstValueFrom(configService.getConfig$().pipe(map((cfg) => cfg.toRaw())))

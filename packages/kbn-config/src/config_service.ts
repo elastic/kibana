@@ -237,7 +237,7 @@ export class ConfigService {
    * These overrides are not persisted and will be discarded after restarts.
    * @param newOverrides
    */
-  public setOverrides(newOverrides: Record<string, unknown>) {
+  public setDynamicConfigOverrides(newOverrides: Record<string, unknown>) {
     const globalOverrides = cloneDeep(this.overrides$.value);
 
     const flattenedOverrides = getFlattenedObject(newOverrides);

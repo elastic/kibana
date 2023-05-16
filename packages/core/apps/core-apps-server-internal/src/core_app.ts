@@ -166,7 +166,7 @@ export class CoreAppsService {
         },
         async (context, req, res) => {
           try {
-            this.configService.setOverrides(req.body);
+            this.configService.setDynamicConfigOverrides(req.body);
           } catch (err) {
             if (err instanceof ValidationError) {
               return res.badRequest({ body: err });
