@@ -47,15 +47,7 @@ export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
   apiKey: schema.string(),
 };
-const SecretsSchema = schema.object(secretSchemaProps, {
-  validate: (secrets) => {
-    // user and password must be set together (or not at all)
-    if (secrets.apiKey) return;
-    return i18n.translate('xpack.stackConnectors.genAi.invalidUsernamePassword', {
-      defaultMessage: 'API key must be specified',
-    });
-  },
-});
+const SecretsSchema = schema.object(secretSchemaProps);
 
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
@@ -110,8 +102,8 @@ function validateConnectorTypeConfig(
     new URL(configuredUrl);
   } catch (err) {
     throw new Error(
-      i18n.translate('xpack.stackConnectors.genAi.configurationErrorNoHostname', {
-        defaultMessage: 'error configuring Generative AI action: unable to parse url: {err}',
+      i18n.translate('xpack.stackConnectors.genAi.configurationErrorApiUrl', {
+        defaultMessage: 'error configuring Generative AI action: unable to parse apiUrl: {err}',
         values: {
           err,
         },
@@ -127,6 +119,25 @@ function validateConnectorTypeConfig(
         defaultMessage: 'error configuring Generative AI action: {message}',
         values: {
           message: allowListError.message,
+        },
+      })
+    );
+  }
+
+  try {
+    if (
+      configObject.apiProvider === OpenAiProviderType.OpenAi ||
+      configObject.apiProvider === OpenAiProviderType.AzureAi
+    ) {
+      return;
+    }
+    throw new Error('API Provider is not supported');
+  } catch (err) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.genAi.configurationErrorApiProvider', {
+        defaultMessage: 'error configuring Generative AI action: invalid OpenAi Provider: {err}',
+        values: {
+          err,
         },
       })
     );
