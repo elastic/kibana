@@ -10,30 +10,10 @@ get:
   parameters:
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
-    - name: page
-      in: query
-      description: The page number to return.
-      schema:
-        type: string
-        default: "1"
+    - $ref: '../components/parameters/page_index.yaml'
       example: "1"
-    - name: perPage
-      in: query
-      description: The number of user actions to return per page.
-      schema:
-        type: string
-        default: "20"
-      example: "20"
-    - name: sortOrder
-      in: query
-      description: Determines the sort order.
-      schema:
-        type: string
-        enum:
-          - asc
-          - desc
-        default: asc
-      example: asc
+    - $ref: '../components/parameters/page_size.yaml'
+    - $ref: '../components/parameters/sort_order.yaml'
     - name: types
       in: query
       description: Determines the types of user actions to return.
