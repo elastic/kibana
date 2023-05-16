@@ -748,6 +748,7 @@ For detailed information about the 8.7.0 release, review the enhancements and bu
 === Enhancements
 Alerting::
 * Bring flapping status and settings in o11y {kibana-pull}150483[#150483]
+* RenderCustomActionsRow with named params instead of args {kibana-pull}149304[#149304]
 * Ram 145739 use bulk enable disable in UI {kibana-pull}145928[#145928]
 * Create generic retry if function {kibana-pull}145713[#145713]
 * Return rules from bulk enable {kibana-pull}145391[#145391]
@@ -776,7 +777,6 @@ APM::
 Cases::
 * Adds new column `Updated on ` in `all cases list ` table. This column can be sorted and can persist sorting options {kibana-pull}149116[#149116]
 * Redesign all cases list select modal {kibana-pull}149851[#149851]
-* RenderCustomActionsRow with named params instead of args {kibana-pull}149304[#149304]
 * Users can now click a button on Case Detail and All Cases List to copy a case's UUID to the clipboard {kibana-pull}148962[#148962]
 * Sorting, severity filter and status filter are now persisted in the URL and local storage for the all cases list {kibana-pull}148549[#148549]
 * Sorting by status, severity, and title is now allowed in the all-cases list {kibana-pull}148193[#148193]
