@@ -73,6 +73,7 @@ export interface ConfigEntry {
   type: FieldType;
   ui_restrictions: string[];
   validation_errors: string[];
+  validations?: string[];
   value: string | number | boolean | null;
 }
 
@@ -122,7 +123,7 @@ function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): Co
 
   return sortedConfig.filter(
     (configEntry) =>
-      configEntry.ui_restrictions.length <= 0 &&
+      (configEntry.ui_restrictions ?? []).length <= 0 &&
       dependenciesSatisfied(configEntry.depends_on, dependencyLookup)
   );
 }
@@ -155,7 +156,7 @@ function validIntInput(value: string | number | boolean | null): boolean {
   // reject non integers (including x.0 floats), but don't validate if empty
   return (value !== null || value !== '') &&
     (isNaN(Number(value)) ||
-      !Number.isSafeInteger(value) ||
+      !Number.isSafeInteger(Number(value)) ||
       ensureStringType(value).indexOf('.') >= 0)
     ? false
     : true;
@@ -196,6 +197,10 @@ export function dependenciesSatisfied(
   dependencies: Dependency[],
   dependencyLookup: DependencyLookup
 ): boolean {
+  if (!dependencies) {
+    return true;
+  }
+
   for (const dependency of dependencies) {
     if (dependency.value !== dependencyLookup[dependency.field]) {
       return false;
@@ -328,6 +333,7 @@ export const ConnectorConfigurationLogic = kea<
             type,
             // eslint-disable-next-line @typescript-eslint/naming-convention
             ui_restrictions,
+            validations,
             value,
           }
         ) => ({
@@ -344,7 +350,8 @@ export const ConnectorConfigurationLogic = kea<
             tooltip,
             type,
             ui_restrictions,
-            value: ensureCorrectTyping(type, value),
+            validations: validations ?? [],
+            value: display ? ensureCorrectTyping(type, value) : value, // only check type if field had a specified eui element
           },
         }),
         setLocalConfigState: (_, { configState }) => configState,

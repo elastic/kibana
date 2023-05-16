@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import { NodeRoles } from '@kbn/core-node-server';
 import { migrationStateActionMachine } from './migration_state_action_machine';
 import type { VersionedTransformer } from '../document_migrator';
 import { createContext } from './context';
@@ -42,6 +43,8 @@ export interface MigrateIndexOptions {
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
   elasticsearchClient: ElasticsearchClient;
+  /** The node roles of the Kibana instance */
+  readonly nodeRoles: NodeRoles;
 }
 
 export const migrateIndex = async ({

@@ -122,7 +122,6 @@ async function mountComponent(
     state: { columns: [], query, hideChart: false, interval: 'auto' },
     stateContainer,
     setExpandedDoc: jest.fn(),
-    updateAdHocDataViewId: jest.fn(),
     updateDataViewList: jest.fn(),
   };
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;

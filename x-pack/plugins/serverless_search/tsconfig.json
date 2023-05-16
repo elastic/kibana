@@ -19,6 +19,11 @@
     "@kbn/config-schema",
     "@kbn/enterprise-search-plugin",
     "@kbn/management-plugin",
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/doc-links",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
     "@kbn/serverless",
   ]
 }

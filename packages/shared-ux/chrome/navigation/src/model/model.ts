@@ -6,54 +6,27 @@
  * Side Public License, v 1.
  */
 
-import type { EuiSideNavItemType } from '@elastic/eui';
-import type { NavigationModelDeps } from '.';
 import { navItemSet, Platform } from '.';
-import type {
-  NavigationBucketProps,
-  NavigationProps,
-  NavItemProps,
-  PlatformId,
-  PlatformSectionConfig,
-  SolutionProperties,
-} from '../../types';
-import { createSideNavDataFactory } from './create_side_nav';
+import type { ChromeNavigationNodeViewModel, PlatformId, PlatformConfigSet } from '../../types';
+import { parseNavItems } from './create_side_nav';
 
 /**
  * @internal
  */
 export class NavigationModel {
-  private createSideNavData: (
-    parentIds: string | number | undefined,
-    navItems: Array<NavItemProps<unknown>>,
-    config?: PlatformSectionConfig | undefined
-  ) => Array<EuiSideNavItemType<unknown>>;
-
   constructor(
-    deps: NavigationModelDeps,
-    private platformConfig: NavigationProps['platformConfig'] | undefined,
-    private solutions: SolutionProperties[],
-    activeNavItemId: string | undefined
-  ) {
-    this.createSideNavData = createSideNavDataFactory(deps, activeNavItemId);
-  }
+    private platformConfig: Partial<PlatformConfigSet> | undefined,
+    private solutions: ChromeNavigationNodeViewModel[]
+  ) {}
 
-  private convertToSideNavItems(
-    id: string,
-    items: NavItemProps[] | undefined,
-    platformConfig?: PlatformSectionConfig
-  ) {
-    return items ? this.createSideNavData(id, items, platformConfig) : undefined;
-  }
-
-  public getPlatform(): Record<PlatformId, NavigationBucketProps> {
+  public getPlatform(): Record<PlatformId, ChromeNavigationNodeViewModel> {
     return {
       [Platform.Analytics]: {
         id: Platform.Analytics,
         icon: 'stats',
-        name: 'Data exploration',
-        items: this.convertToSideNavItems(
-          Platform.Analytics,
+        title: 'Data exploration',
+        items: parseNavItems(
+          [Platform.Analytics],
           navItemSet[Platform.Analytics],
           this.platformConfig?.[Platform.Analytics]
         ),
@@ -61,9 +34,9 @@ export class NavigationModel {
       [Platform.MachineLearning]: {
         id: Platform.MachineLearning,
         icon: 'indexMapping',
-        name: 'Machine learning',
-        items: this.convertToSideNavItems(
-          Platform.MachineLearning,
+        title: 'Machine learning',
+        items: parseNavItems(
+          [Platform.MachineLearning],
           navItemSet[Platform.MachineLearning],
           this.platformConfig?.[Platform.MachineLearning]
         ),
@@ -71,9 +44,9 @@ export class NavigationModel {
       [Platform.DevTools]: {
         id: Platform.DevTools,
         icon: 'editorCodeBlock',
-        name: 'Developer tools',
-        items: this.convertToSideNavItems(
-          Platform.DevTools,
+        title: 'Developer tools',
+        items: parseNavItems(
+          [Platform.DevTools],
           navItemSet[Platform.DevTools],
           this.platformConfig?.[Platform.DevTools]
         ),
@@ -81,9 +54,9 @@ export class NavigationModel {
       [Platform.Management]: {
         id: Platform.Management,
         icon: 'gear',
-        name: 'Management',
-        items: this.convertToSideNavItems(
-          Platform.Management,
+        title: 'Management',
+        items: parseNavItems(
+          [Platform.Management],
           navItemSet[Platform.Management],
           this.platformConfig?.[Platform.Management]
         ),
@@ -91,13 +64,13 @@ export class NavigationModel {
     };
   }
 
-  public getSolutions(): NavigationBucketProps[] {
+  public getSolutions(): ChromeNavigationNodeViewModel[] {
     // Allow multiple solutions' collapsible nav buckets side-by-side
     return this.solutions.map((s) => ({
       id: s.id,
-      name: s.name,
+      title: s.title,
       icon: s.icon,
-      items: this.convertToSideNavItems(s.id, s.items),
+      items: parseNavItems([s.id], s.items),
     }));
   }
 

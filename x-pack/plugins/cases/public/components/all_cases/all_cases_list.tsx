@@ -11,7 +11,12 @@ import { EuiProgress } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
-import type { CaseUI, CaseStatusWithAllStatus, FilterOptions } from '../../../common/ui/types';
+import type {
+  CaseUI,
+  CaseStatusWithAllStatus,
+  FilterOptions,
+  CasesUI,
+} from '../../../common/ui/types';
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
@@ -84,7 +89,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       isSelectorView,
       initialFilterOptions
     );
-    const [selectedCases, setSelectedCases] = useState<CaseUI[]>([]);
+    const [selectedCases, setSelectedCases] = useState<CasesUI>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
       filterOptions,

@@ -7,10 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -26,29 +24,19 @@ import { openAlertsPopover } from './open_alerts_popover';
 export const getTopNavLinks = ({
   dataView,
   navigateTo,
-  savedSearch,
   services,
   state,
   onOpenInspector,
-  searchSource,
-  onOpenSavedSearch,
   isPlainRecord,
   adHocDataViews,
-  updateDataViewList,
-  updateAdHocDataViewId,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
-  savedSearch: SavedSearch;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  searchSource: ISearchSource;
-  onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
-  updateDataViewList: (dataView: DataView[]) => void;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -81,11 +69,9 @@ export const getTopNavLinks = ({
         I18nContext: services.core.i18n.Context,
         theme$: services.core.theme.theme$,
         anchorElement,
-        searchSource: savedSearch.searchSource,
         services,
+        stateContainer: state,
         adHocDataViews,
-        updateDataViewList,
-        savedQueryId: state.appState.getState().savedQuery,
       });
     },
     testId: 'discoverAlertsButton',
@@ -116,12 +102,10 @@ export const getTopNavLinks = ({
     emphasize: true,
     run: (anchorElement: HTMLElement) => {
       onSaveSearch({
-        savedSearch,
+        savedSearch: state.savedSearchState.getState(),
         services,
-        dataView,
         navigateTo,
         state,
-        updateAdHocDataViewId,
         onClose: () => {
           anchorElement?.focus();
         },
@@ -140,7 +124,7 @@ export const getTopNavLinks = ({
     testId: 'discoverOpenButton',
     run: () =>
       showOpenSearchPanel({
-        onOpenSavedSearch,
+        onOpenSavedSearch: state.actions.onOpenSavedSearch,
         I18nContext: services.core.i18n.Context,
         theme$: services.core.theme.theme$,
         services,
@@ -158,6 +142,13 @@ export const getTopNavLinks = ({
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
       if (!services.share) return;
+      const savedSearch = state.savedSearchState.getState();
+      const sharingData = await getSharingData(
+        savedSearch.searchSource,
+        state.appState.getState(),
+        services,
+        isPlainRecord
+      );
 
       const { locator } = services;
       const appState = state.appState.getState();
@@ -192,7 +183,6 @@ export const getTopNavLinks = ({
         { absolute: true }
       );
 
-      const sharingData = await getSharingData(searchSource, appState, services);
       services.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
@@ -238,7 +228,7 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(!isPlainRecord ? [shareSearch] : []),
+    shareSearch,
     ...(services.triggersActionsUi &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
     !isPlainRecord
