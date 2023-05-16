@@ -27,6 +27,7 @@ import type {
   SOWithMetadata,
   SOWithMetadataPartial,
 } from './types';
+import { tagsToFindOptions } from './utils';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -88,21 +89,6 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
   params: SearchIn<T, SearchArgsToSOFindOptionsOptionsDefault>
 ): SavedObjectsFindOptions => {
   const { query, contentTypeId, options } = params;
-  const { included, excluded } = query.tags ?? {};
-
-  const hasReference: SavedObjectsFindOptions['hasReference'] = included
-    ? included.map((id) => ({
-        id,
-        type: 'tag',
-      }))
-    : undefined;
-
-  const hasNoReference: SavedObjectsFindOptions['hasNoReference'] = excluded
-    ? excluded.map((id) => ({
-        id,
-        type: 'tag',
-      }))
-    : undefined;
 
   return {
     type: contentTypeId,
@@ -112,8 +98,7 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
     defaultSearchOperator: 'AND',
     searchFields: options?.searchFields ?? ['description', 'title'],
     fields: options?.fields ?? ['description', 'title'],
-    hasReference,
-    hasNoReference,
+    ...tagsToFindOptions(query.tags),
   };
 };
 
@@ -197,6 +182,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   private createArgsToSoCreateOptions: CreateArgsToSoCreateOptions<Types>;
   private updateArgsToSoUpdateOptions: UpdateArgsToSoUpdateOptions<Types>;
   private searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;
+
   mSearch?: {
     savedObjectType: string;
     toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult) => Types['Item'];
