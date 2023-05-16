@@ -38,14 +38,14 @@ export function calculateHealthStatus(
   if (shouldRunTasks) {
     if (hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness)) {
       const reason = 'setting HealthStatus.Error because of expired hot timestamps';
-      logger.warn(reason);
+      logger.debug(reason);
       return { status: HealthStatus.Error, reason };
     }
   }
 
   if (hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)) {
     const reason = 'setting HealthStatus.Error because of expired cold timestamps';
-    logger.warn(reason);
+    logger.debug(reason);
     return { status: HealthStatus.Error, reason };
   }
 
