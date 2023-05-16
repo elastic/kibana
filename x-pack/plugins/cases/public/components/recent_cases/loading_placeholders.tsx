@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 const LoadingPlaceholdersComponent: React.FC<{
@@ -15,7 +15,7 @@ const LoadingPlaceholdersComponent: React.FC<{
   <>
     {[...Array(placeholders).keys()].map((_, i) => (
       <React.Fragment key={i}>
-        <EuiLoadingContent lines={lines} data-test-subj={'loadingPlaceholders'} />
+        <EuiSkeletonText lines={lines} data-test-subj={'loadingPlaceholders'} />
         {i !== placeholders - 1 && <EuiSpacer size="l" />}
       </React.Fragment>
     ))}
