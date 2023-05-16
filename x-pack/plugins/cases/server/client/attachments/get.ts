@@ -123,12 +123,12 @@ export async function find(
 
     const theComments = await attachmentService.find({
       options: {
-        page: DEFAULT_PAGE,
-        perPage: DEFAULT_PER_PAGE,
+        page: queryParams?.page ?? DEFAULT_PAGE,
+        perPage: queryParams?.perPage ?? DEFAULT_PER_PAGE,
+        ...(queryParams?.sortOrder && { sortOrder: queryParams?.sortOrder }),
         sortField: 'created_at',
         hasReference: { type: CASE_SAVED_OBJECT, id: caseID },
         filter,
-        ...queryParams,
       },
     });
 

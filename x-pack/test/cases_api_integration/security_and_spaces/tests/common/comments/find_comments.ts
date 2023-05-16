@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import {
+  CASES_URL,
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+} from '@kbn/cases-plugin/common/constants';
 import { CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -92,33 +95,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // post 5 comments of all possible types
       await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .post(INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', postedCase.id))
         .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentAlertReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentActionsReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postExternalReferenceESReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(persistableStateAttachment)
+        .send([
+          postCommentUserReq,
+          postCommentAlertReq,
+          postCommentActionsReq,
+          postExternalReferenceESReq,
+          persistableStateAttachment,
+        ])
         .expect(200);
 
       const { body: caseComments } = await supertest
