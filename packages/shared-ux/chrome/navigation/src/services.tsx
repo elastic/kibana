@@ -34,6 +34,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     basePath,
     loadingCount$: http.getLoadingCount$(),
     recentlyAccessed$: chrome.recentlyAccessed.get$(),
+    navLinks$: chrome.navLinks.getNavLinks$(),
     navigateToUrl,
     navIsOpen: true,
   };
