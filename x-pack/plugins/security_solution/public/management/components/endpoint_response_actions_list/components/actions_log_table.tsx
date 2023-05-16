@@ -313,12 +313,13 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       const actionIdsWithDetails = getActionIdsWithDetails();
       const openDetails = actionIdsWithDetails.reduce<ExpandedRowMapType>(
         (idToRowMap, actionId) => {
-          idToRowMap[actionId] = (
-            <ActionsLogExpandedTray
-              action={items.filter((item) => item.id === actionId)[0]}
-              data-test-subj={dataTestSubj}
-            />
-          );
+          const action = items.find((item) => item.id === actionId);
+          if (action) {
+            idToRowMap[actionId] = (
+              <ActionsLogExpandedTray action={action} data-test-subj={dataTestSubj} />
+            );
+          }
+
           return idToRowMap;
         },
         {}
