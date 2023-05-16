@@ -6,12 +6,17 @@
  */
 
 import type { Type } from 'io-ts';
+import { decodeOrThrow } from '../../common/api';
 
-export const bulkEncodeSOAttributes = <T>(
-  savedObjects: Array<{ attributes: T }>,
+export const bulkDecodeSOAttributes = <T>(
+  savedObjects: Array<{ id: string; attributes: T }>,
   type: Type<T>
 ) => {
+  const decodeRes = new Map<string, T>();
+
   for (const so of savedObjects) {
-    type.encode(so.attributes);
+    decodeRes.set(so.id, decodeOrThrow(type)(so.attributes));
   }
+
+  return decodeRes;
 };

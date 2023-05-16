@@ -28,7 +28,7 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type { Case, User, CaseStatuses } from '../../../common/api';
-import { caseStatuses } from '../../../common/api';
+import { decodeOrThrow, caseStatuses } from '../../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
@@ -53,7 +53,7 @@ import type {
 import {
   CaseTransformedAttributesRt,
   CasePersistedStatus,
-  PartialCaseTransformedAttributesRt,
+  getPartialCaseTransformedAttributesRt,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
@@ -71,7 +71,7 @@ import type {
   PatchCasesArgs,
 } from './types';
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
-import { bulkEncodeSOAttributes } from '../utils';
+import { bulkDecodeSOAttributes } from '../utils';
 
 export class CasesService {
   private readonly log: Logger;
@@ -275,9 +275,12 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(caseSavedObject);
-      CaseTransformedAttributesRt.encode(res.attributes);
+      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
 
-      return res;
+      return {
+        ...res,
+        attributes: decodeRes,
+      };
     } catch (error) {
       this.log.error(`Error on GET case ${caseId}: ${error}`);
       throw error;
@@ -296,11 +299,11 @@ export class CasesService {
         );
 
       const resolvedSO = transformSavedObjectToExternalModel(resolveCaseResult.saved_object);
-      CaseTransformedAttributesRt.encode(resolvedSO.attributes);
+      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(resolvedSO.attributes);
 
       return {
         ...resolveCaseResult,
-        saved_object: resolvedSO,
+        saved_object: { ...resolvedSO, attributes: decodeRes },
       };
     } catch (error) {
       this.log.error(`Error on resolve case ${caseId}: ${error}`);
@@ -318,9 +321,15 @@ export class CasesService {
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId, fields }))
       );
       const res = transformBulkResponseToExternalModel(cases);
-      bulkEncodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
+      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
 
-      return res;
+      return {
+        ...res,
+        saved_objects: res.saved_objects.map((so) => ({
+          ...so,
+          attributes: decodeRes.get(so.id) as CaseTransformedAttributes,
+        })),
+      };
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
       throw error;
@@ -339,9 +348,15 @@ export class CasesService {
       });
 
       const res = transformFindResponseToExternalModel(cases);
-      bulkEncodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
+      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
 
-      return res;
+      return {
+        ...res,
+        saved_objects: res.saved_objects.map((so) => ({
+          ...so,
+          attributes: decodeRes.get(so.id) as CaseTransformedAttributes,
+        })),
+      };
     } catch (error) {
       this.log.error(`Error on find cases: ${error}`);
       throw error;
@@ -537,7 +552,7 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(createdCase);
-      CaseTransformedAttributesRt.encode(res.attributes);
+      decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
 
       return res;
     } catch (error) {
@@ -569,9 +584,12 @@ export class CasesService {
       );
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
-      PartialCaseTransformedAttributesRt.encode(res.attributes);
+      const decodeRes = decodeOrThrow(getPartialCaseTransformedAttributesRt())(res.attributes);
 
-      return res;
+      return {
+        ...res,
+        attributes: decodeRes,
+      };
     } catch (error) {
       this.log.error(`Error on UPDATE case ${caseId}: ${error}`);
       throw error;
@@ -602,9 +620,18 @@ export class CasesService {
         });
 
       const res = transformUpdateResponsesToExternalModels(updatedCases);
-      bulkEncodeSOAttributes(res.saved_objects, PartialCaseTransformedAttributesRt);
+      const decodeRes = bulkDecodeSOAttributes(
+        res.saved_objects,
+        getPartialCaseTransformedAttributesRt()
+      );
 
-      return res;
+      return {
+        ...res,
+        saved_objects: res.saved_objects.map((so) => ({
+          ...so,
+          attributes: decodeRes.get(so.id) as CaseTransformedAttributes,
+        })),
+      };
     } catch (error) {
       this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
       throw error;

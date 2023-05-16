@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { Type } from 'io-ts';
 import { exact, partial } from 'io-ts';
 import type { CaseAttributes } from '../../../common/api';
 import { CaseAttributesRt } from '../../../common/api';
@@ -48,16 +49,16 @@ export interface CasePersistedAttributes {
   updated_by: User | null;
 }
 
-const caseTransformedAttributesProps = CaseAttributesRt.types.reduce(
-  (acc, type) => ({ ...acc, ...type.props }),
-  {}
-);
-
 export type CaseTransformedAttributes = CaseAttributes;
 export const CaseTransformedAttributesRt = CaseAttributesRt;
-export const PartialCaseTransformedAttributesRt = exact(
-  partial({ ...caseTransformedAttributesProps })
-);
+
+export const getPartialCaseTransformedAttributesRt = (): Type<Partial<CaseAttributes>> => {
+  const caseTransformedAttributesProps = CaseAttributesRt.types.reduce(
+    (acc, type) => ({ ...acc, ...type.props }),
+    {}
+  );
+  return exact(partial({ ...caseTransformedAttributesProps }));
+};
 
 export type CaseSavedObject = SavedObject<CasePersistedAttributes>;
 export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;

@@ -13,6 +13,7 @@
  * connector.id.
  */
 
+import { omit } from 'lodash';
 import type { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
 import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -44,7 +45,11 @@ import {
 import { AttachmentService } from '../attachments';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { CaseSavedObjectTransformed, CasePersistedAttributes } from '../../common/types/case';
-import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import {
+  CasePersistedSeverity,
+  CasePersistedStatus,
+  CaseTransformedAttributesRt,
+} from '../../common/types/case';
 
 const createUpdateSOResponse = ({
   connector,
@@ -95,6 +100,7 @@ const createFindSO = (
     connector?: ESCaseConnectorWithId;
     externalService?: CaseFullExternalService;
     overrides?: Partial<CasePersistedAttributes>;
+    caseId?: string;
   } = {}
 ): SavedObjectsFindResult<CasePersistedAttributes> => ({
   ...createCaseSavedObjectResponse(params),
@@ -910,10 +916,12 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
+              caseId: '1',
               connector: createESJiraConnector(),
               externalService: createExternalService(),
             }),
             createCaseSavedObjectResponse({
+              caseId: '2',
               connector: createESJiraConnector({ id: '2' }),
               externalService: createExternalService({ connector_id: '200' }),
             }),
@@ -969,14 +977,20 @@ describe('CasesService', () => {
       it('properly converts the severity field to the corresponding external value in the bulkPatch response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({ overrides: { severity: CasePersistedSeverity.LOW } }),
             createCaseSavedObjectResponse({
+              caseId: '1',
+              overrides: { severity: CasePersistedSeverity.LOW },
+            }),
+            createCaseSavedObjectResponse({
+              caseId: '2',
               overrides: { severity: CasePersistedSeverity.MEDIUM },
             }),
             createCaseSavedObjectResponse({
+              caseId: '3',
               overrides: { severity: CasePersistedSeverity.HIGH },
             }),
             createCaseSavedObjectResponse({
+              caseId: '4',
               overrides: { severity: CasePersistedSeverity.CRITICAL },
             }),
           ],
@@ -1000,11 +1014,18 @@ describe('CasesService', () => {
       it('properly converts the status field to the corresponding external value in the bulkPatch response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({ overrides: { status: CasePersistedStatus.OPEN } }),
             createCaseSavedObjectResponse({
+              caseId: '1',
+              overrides: { status: CasePersistedStatus.OPEN },
+            }),
+            createCaseSavedObjectResponse({
+              caseId: '2',
               overrides: { status: CasePersistedStatus.IN_PROGRESS },
             }),
-            createCaseSavedObjectResponse({ overrides: { status: CasePersistedStatus.CLOSED } }),
+            createCaseSavedObjectResponse({
+              caseId: '3',
+              overrides: { status: CasePersistedStatus.CLOSED },
+            }),
           ],
         });
 
@@ -1025,9 +1046,9 @@ describe('CasesService', () => {
       it('does not include total_alerts and total_comments fields in the response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({}),
-            createCaseSavedObjectResponse({}),
-            createCaseSavedObjectResponse({}),
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+            createCaseSavedObjectResponse({ caseId: '3' }),
           ],
         });
 
@@ -1415,10 +1436,13 @@ describe('CasesService', () => {
       it('includes the connector.id and connector_id field in the response', async () => {
         const findMockReturn = createSOFindResponse([
           createFindSO({
+            caseId: '1',
             connector: createESJiraConnector(),
             externalService: createExternalService(),
           }),
-          createFindSO(),
+          createFindSO({
+            caseId: '2',
+          }),
         ]);
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
@@ -1432,10 +1456,11 @@ describe('CasesService', () => {
       it('includes the saved object find response fields in the result', async () => {
         const findMockReturn = createSOFindResponse([
           createFindSO({
+            caseId: '1',
             connector: createESJiraConnector(),
             externalService: createExternalService(),
           }),
-          createFindSO(),
+          createFindSO({ caseId: '2' }),
         ]);
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
@@ -1459,8 +1484,8 @@ describe('CasesService', () => {
         'includes the properly converted "%s" severity field in the result',
         async (severity, expectedSeverity) => {
           const findMockReturn = createSOFindResponse([
-            createFindSO({ overrides: { severity } }),
-            createFindSO(),
+            createFindSO({ caseId: '1', overrides: { severity } }),
+            createFindSO({ caseId: '2' }),
           ]);
           unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
@@ -1477,8 +1502,8 @@ describe('CasesService', () => {
         'includes the properly converted "%s" status field in the result',
         async (status, expectedStatus) => {
           const findMockReturn = createSOFindResponse([
-            createFindSO({ overrides: { status } }),
-            createFindSO(),
+            createFindSO({ caseId: '1', overrides: { status } }),
+            createFindSO({ caseId: '2' }),
           ]);
           unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
@@ -1488,7 +1513,10 @@ describe('CasesService', () => {
       );
 
       it('does not include total_alerts and total_comments fields in the response', async () => {
-        const findMockReturn = createSOFindResponse([createFindSO(), createFindSO()]);
+        const findMockReturn = createSOFindResponse([
+          createFindSO({ caseId: '1' }),
+          createFindSO({ caseId: '2' }),
+        ]);
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
         const res = await service.findCases();
@@ -1503,10 +1531,12 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
+              caseId: '1',
               connector: createESJiraConnector(),
               externalService: createExternalService(),
             }),
             createCaseSavedObjectResponse({
+              caseId: '2',
               connector: createESJiraConnector({ id: '2' }),
               externalService: createExternalService({ connector_id: '200' }),
             }),
@@ -1530,15 +1560,19 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
+              caseId: '1',
               overrides: { severity: CasePersistedSeverity.LOW },
             }),
             createCaseSavedObjectResponse({
+              caseId: '2',
               overrides: { severity: CasePersistedSeverity.MEDIUM },
             }),
             createCaseSavedObjectResponse({
+              caseId: '3',
               overrides: { severity: CasePersistedSeverity.HIGH },
             }),
             createCaseSavedObjectResponse({
+              caseId: '4',
               overrides: { severity: CasePersistedSeverity.CRITICAL },
             }),
           ],
@@ -1555,12 +1589,15 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
+              caseId: '1',
               overrides: { status: CasePersistedStatus.OPEN },
             }),
             createCaseSavedObjectResponse({
+              caseId: '2',
               overrides: { status: CasePersistedStatus.IN_PROGRESS },
             }),
             createCaseSavedObjectResponse({
+              caseId: '3',
               overrides: { status: CasePersistedStatus.CLOSED },
             }),
           ],
@@ -1575,9 +1612,9 @@ describe('CasesService', () => {
       it('does not include total_alerts and total_comments fields in the response', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({}),
-            createCaseSavedObjectResponse({}),
-            createCaseSavedObjectResponse({}),
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+            createCaseSavedObjectResponse({ caseId: '3' }),
           ],
         });
 
@@ -1826,7 +1863,178 @@ describe('CasesService', () => {
     });
   });
 
-  describe.only('Encoding responses', () => {
+  describe('Encoding responses', () => {
+    const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
+      (acc, type) => ({ ...acc, ...type.props }),
+      {}
+    );
+
+    /**
+     * Status, severity, connector, and external_service
+     * are being set to a default value if missing.
+     * Decode will not throw an error as they are defined.
+     */
+    const attributesToValidateIfMissing = omit(
+      caseTransformedAttributesProps,
+      'status',
+      'severity',
+      'connector',
+      'external_service'
+    );
+
+    describe('getCase', () => {
+      it('encodes correctly', async () => {
+        unsecuredSavedObjectsClient.get.mockResolvedValue(createCaseSavedObjectResponse());
+
+        await expect(service.getCase({ id: 'a' })).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.get.mockResolvedValue({ ...theCase, attributes });
+
+          await expect(service.getCase({ id: 'a' })).rejects.toThrow(
+            `Invalid value "undefined" supplied to "${key}"`
+          );
+        }
+      );
+
+      // TODO: Unskip when all types are converted to strict
+      it.skip('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.get.mockResolvedValue({ ...theCase, attributes });
+
+        await expect(service.getCase({ id: 'a' })).resolves.toEqual({ attributes });
+      });
+    });
+
+    describe('getResolveCase', () => {
+      it('encodes correctly', async () => {
+        unsecuredSavedObjectsClient.resolve.mockResolvedValue({
+          saved_object: createCaseSavedObjectResponse(),
+          outcome: 'exactMatch',
+        });
+
+        await expect(service.getResolveCase({ id: 'a' })).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.resolve.mockResolvedValue({
+            saved_object: { ...theCase, attributes },
+            outcome: 'exactMatch',
+          });
+
+          await expect(service.getResolveCase({ id: 'a' })).rejects.toThrow(
+            `Invalid value "undefined" supplied to "${key}"`
+          );
+        }
+      );
+
+      // TODO: Unskip when all types are converted to strict
+      it.skip('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.resolve.mockResolvedValue({
+          saved_object: { ...theCase, attributes },
+          outcome: 'exactMatch',
+        });
+
+        await expect(service.getResolveCase({ id: 'a' })).resolves.toEqual({ attributes });
+      });
+    });
+
+    describe('getCases', () => {
+      it('encodes correctly', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+          ],
+        });
+
+        await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [{ ...theCase, attributes }, createCaseSavedObjectResponse()],
+          });
+
+          await expect(service.getCases({ caseIds: ['a', 'b'] })).rejects.toThrow(
+            `Invalid value "undefined" supplied to "${key}"`
+          );
+        }
+      );
+
+      // TODO: Unskip when all types are converted to strict
+      it.skip('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [{ ...theCase, attributes }],
+        });
+
+        await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.toEqual({ attributes });
+      });
+    });
+
+    describe('findCases', () => {
+      it('encodes correctly', async () => {
+        const findMockReturn = createSOFindResponse([
+          createFindSO({ caseId: '1' }),
+          createFindSO({ caseId: '2' }),
+        ]);
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        await expect(service.findCases()).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          const findMockReturn = createSOFindResponse([
+            { ...theCase, attributes, score: 0 },
+            createFindSO(),
+          ]);
+
+          unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+          await expect(service.findCases()).rejects.toThrow(
+            `Invalid value "undefined" supplied to "${key}"`
+          );
+        }
+      );
+
+      // TODO: Unskip when all types are converted to strict
+      it.skip('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        const findMockReturn = createSOFindResponse([
+          { ...theCase, attributes, score: 0 },
+          createFindSO(),
+        ]);
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        await expect(service.findCases()).resolves.toEqual({ attributes });
+      });
+    });
+
     describe('post', () => {
       it('encodes correctly', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
@@ -1837,6 +2045,140 @@ describe('CasesService', () => {
             id: '1',
           })
         ).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.create.mockResolvedValue({ ...theCase, attributes });
+
+          await expect(
+            service.postNewCase({
+              attributes: createCasePostParams({ connector: createJiraConnector() }),
+              id: '1',
+            })
+          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+        }
+      );
+
+      // TODO: Unskip when all types are converted to strict
+      it.skip('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.create.mockResolvedValue({ ...theCase, attributes });
+
+        await expect(
+          service.postNewCase({
+            attributes: createCasePostParams({ connector: createJiraConnector() }),
+            id: '1',
+          })
+        ).resolves.toEqual({ attributes });
+      });
+    });
+
+    describe('patchCase', () => {
+      it('encodes correctly', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(createUpdateSOResponse());
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes: createCaseUpdateParams({}),
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('strips out excess attributes', async () => {
+        const theCase = createUpdateSOResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.update.mockResolvedValue({ ...theCase, attributes });
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes: {},
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.toEqual({
+          attributes: {},
+          id: '1',
+          references: [],
+          type: 'cases',
+        });
+      });
+    });
+
+    describe('patchCases', () => {
+      it('encodes correctly', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+          ],
+        });
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes: createCasePostParams({
+                  connector: getNoneCaseConnector(),
+                }),
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            { ...theCase, attributes: { description: 'update desc', 'not-exists': 'not-exists' } },
+            { ...theCase, attributes: { title: 'update title' } },
+          ],
+        });
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes: { description: 'update desc' },
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+              {
+                caseId: '2',
+                updatedAttributes: { title: 'update title' },
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                title: 'update title',
+              },
+              id: '1',
+              references: [],
+              type: 'cases',
+            },
+            {
+              attributes: {
+                title: 'update title',
+              },
+              id: '1',
+              references: [],
+              type: 'cases',
+            },
+          ],
+        });
       });
     });
   });
