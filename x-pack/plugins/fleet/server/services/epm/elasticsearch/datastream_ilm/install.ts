@@ -151,6 +151,12 @@ const isDatasetIlm = (path: string, datasetName: string) => {
 };
 
 const getIlmNameForInstallation = (ilmPathDataset: IlmPathDataset) => {
-  const filename = ilmPathDataset?.path.split('/')?.pop()?.split('.')[0];
-  return `${ilmPathDataset.dataStream.type}-${ilmPathDataset.dataStream.package}.${ilmPathDataset.dataStream.path}-${filename}`;
+  const filename = ilmPathDataset?.path.split('/')?.pop()?.split('.').slice(0, -1).join('.');
+  let dataStreamPath = ilmPathDataset.dataStream.path;
+  if (ilmPathDataset.dataStream.package === 'apm') {
+    // some magic to translate service_destination_10m_metrics to service_destination_interval_metrics
+    // the same for txmetrics, servicetxmetrics and servicesummarymetrics
+    dataStreamPath = ...
+  }
+  return `${ilmPathDataset.dataStream.type}-${ilmPathDataset.dataStream.package}.${dataStreamPath}-${filename}`;
 };
