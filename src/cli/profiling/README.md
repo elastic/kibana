@@ -103,7 +103,7 @@ background plugins.
 I generated some graphs of the 
 [dependencies of all plugins together](./plugin-deps-graphviz.md)
 and
-[dependencies of each plugins individually](./plugin-deps-mermaid.md)
+[dependencies of each plugins individually](./mermaid/plugin-all-mermaid.md)
 
 In addition, as part of figuring out if plugins should be loaded, the
 plugin actually needs to be loaded, to get it's `config`
