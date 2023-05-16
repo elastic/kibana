@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 import { SavedObjectsType } from '@kbn/core/server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,
@@ -38,36 +40,50 @@ export const createDashboardSavedObjectType = ({
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
       description: { type: 'text' },
-      hits: { type: 'integer', index: false, doc_values: false },
-      kibanaSavedObjectMeta: {
-        properties: { searchSourceJSON: { type: 'text', index: false } },
-      },
-      optionsJSON: { type: 'text', index: false },
-      panelsJSON: { type: 'text', index: false },
-      refreshInterval: {
-        properties: {
-          display: { type: 'keyword', index: false, doc_values: false },
-          pause: { type: 'boolean', index: false, doc_values: false },
-          section: { type: 'integer', index: false, doc_values: false },
-          value: { type: 'integer', index: false, doc_values: false },
-        },
-      },
-      controlGroupInput: {
-        properties: {
-          controlStyle: { type: 'keyword', index: false, doc_values: false },
-          chainingSystem: { type: 'keyword', index: false, doc_values: false },
-          panelsJSON: { type: 'text', index: false },
-          ignoreParentSettingsJSON: { type: 'text', index: false },
-        },
-      },
-      timeFrom: { type: 'keyword', index: false, doc_values: false },
-      timeRestore: { type: 'boolean', index: false, doc_values: false },
-      timeTo: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
-      version: { type: 'integer' },
     },
+  },
+  schemas: {
+    '8.9.0': schema.object({
+      // General
+      title: schema.string(),
+      description: schema.string({ defaultValue: '' }),
+
+      // Search
+      kibanaSavedObjectMeta: schema.object({
+        searchSourceJSON: schema.string(),
+      }),
+
+      // Time
+      timeRestore: schema.maybe(schema.boolean()),
+      timeFrom: schema.maybe(schema.string()),
+      timeTo: schema.maybe(schema.string()),
+      refreshInterval: schema.maybe(
+        schema.object({
+          pause: schema.boolean(),
+          value: schema.number(),
+        })
+      ),
+
+      // Dashboard Content
+      controlGroupInput: schema.maybe(
+        schema.object({
+          panelsJSON: schema.string(),
+          controlStyle: schema.string(),
+          chainingSystem: schema.string(),
+          ignoreParentSettingsJSON: schema.string(),
+        })
+      ),
+      panelsJSON: schema.string({ defaultValue: '[]' }),
+      optionsJSON: schema.string({ defaultValue: '{}' }),
+
+      // Legacy
+      hits: schema.maybe(schema.number()),
+      version: schema.maybe(schema.number()),
+    }),
   },
   migrations: () => createDashboardSavedObjectTypeMigrations(migrationDeps),
 });

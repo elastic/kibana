@@ -6,6 +6,7 @@
  */
 
 import { mapValues } from 'lodash';
+import { schema } from '@kbn/config-schema';
 import type { CoreSetup, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { SavedObjectMigrationMap } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
@@ -30,15 +31,27 @@ export function setupSavedObjects(
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: {
+      dynamic: false,
       properties: {
         description: { type: 'text' },
         title: { type: 'text' },
-        version: { type: 'integer' },
-        mapStateJSON: { type: 'text' },
-        layerListJSON: { type: 'text' },
-        uiStateJSON: { type: 'text' },
-        bounds: { dynamic: false, properties: {} }, // Disable removed field
       },
+    },
+    schemas: {
+      '8.9.0': schema.object({
+        // General
+        title: schema.string(),
+        description: schema.string({ defaultValue: '' }),
+
+        // Map JSON Content
+        mapStateJSON: schema.string({ defaultValue: '{}' }),
+        layerListJSON: schema.string({ defaultValue: '[]' }),
+        uiStateJSON: schema.string({ defaultValue: '{}' }),
+
+        // Legacy
+        hits: schema.maybe(schema.number()),
+        version: schema.maybe(schema.number()),
+      }),
     },
     management: {
       icon: APP_ICON,
