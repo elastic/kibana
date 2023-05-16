@@ -150,18 +150,16 @@ export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetai
   defaultMessage: 'View all fields in table',
 });
 
-export const ENDPOINT_COMMANDS_ISOLATED = i18n.translate(
-  'xpack.securitySolution.eventDetails.responseActions.endpoint.isolate',
-  {
-    defaultMessage: 'isolated the host',
-  }
-);
-
-export const ENDPOINT_COMMANDS = {
+export const ENDPOINT_COMMANDS = Object.freeze({
   isolated: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.isolate', {
     defaultMessage: 'isolated the host',
   }),
   released: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.release', {
     defaultMessage: 'released the host',
   }),
-};
+  generic: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.viewColumnCheckboxAriaLabel', {
+      values: { command },
+      defaultMessage: 'executed command {command}',
+    }),
+});

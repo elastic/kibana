@@ -11,7 +11,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ActionsLogWithAutomatedActionsToggle } from './actions_log_with_automated_actions_toggle';
+import { AutomatedActionsFilter } from './actions_log_automated_actions_filter';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -81,9 +81,8 @@ export const ActionsLogFilters = memo(
             data-test-subj={dataTestSubj}
           />
           {responseActionsEnabled && (
-            <ActionsLogWithAutomatedActionsToggle
+            <AutomatedActionsFilter
               dataTestSubj={dataTestSubj}
-              isFlyout={isFlyout}
               onChangeWithAutomatedActionsFilter={onChangeWithAutomatedActionsFilter}
             />
           )}

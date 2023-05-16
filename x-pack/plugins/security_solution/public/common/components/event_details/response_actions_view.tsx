@@ -23,7 +23,7 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
-export const useResponseActionsTab = ({
+export const useResponseActionsView = ({
   rawEventData,
   ecsData,
 }: {
@@ -69,7 +69,7 @@ export const useResponseActionsTab = ({
     content: (
       <>
         <EuiSpacer size="s" />
-        <TabContentWrapper data-test-subj="responseActonsViewWrapper">
+        <TabContentWrapper data-test-subj="responseActionsViewWrapper">
           {isFetched && totalItemCount && automatedList?.items.length ? (
             <ResponseActionsResults
               actions={automatedList.items}

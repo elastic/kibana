@@ -15,17 +15,24 @@ interface ResponseActionsEmptyPromptProps {
 }
 
 export const ResponseActionsEmptyPrompt = ({ type }: ResponseActionsEmptyPromptProps) => {
-  const iconType = useMemo(() => {
+  const integration = useMemo(() => {
     switch (type) {
       case 'endpoint':
-        return 'logoSecurity';
+        return {
+          icon: 'logoSecurity',
+          name: 'Elastic Defend',
+        };
       case 'osquery':
-        return 'logoOsquery';
+        return {
+          icon: 'logoOsquery',
+          name: 'Osquery',
+        };
     }
   }, [type]);
+
   return (
     <EuiEmptyPrompt
-      iconType={iconType}
+      iconType={integration.icon}
       title={<h2>{PERMISSION_DENIED}</h2>}
       titleSize="xs"
       body={
@@ -34,7 +41,7 @@ export const ResponseActionsEmptyPrompt = ({ type }: ResponseActionsEmptyPromptP
           defaultMessage="To access these results, ask your administrator for {integration} Kibana
               privileges."
           values={{
-            integration: <EuiCode>{type}</EuiCode>,
+            integration: <EuiCode>{integration.name}</EuiCode>,
           }}
         />
       }

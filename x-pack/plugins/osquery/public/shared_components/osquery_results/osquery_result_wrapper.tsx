@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../common/lib/kibana';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
 import type { StartPlugins } from '../../types';
 import { queryClient } from '../../query_client';
@@ -23,12 +24,14 @@ import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
 
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
-  ({ actionId, ruleName, startDate, ecsData, canReadOsquery }) => {
+  ({ actionId, ruleName, startDate, ecsData }) => {
+    const { read } = useKibana().services.application.capabilities.osquery;
+
     const [isLive, setIsLive] = useState(false);
     const { data } = useLiveQueryDetails({
       actionId,
       isLive,
-      skip: !canReadOsquery,
+      skip: !read,
     });
 
     useLayoutEffect(() => {
@@ -66,7 +69,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
           event={ATTACHED_QUERY}
           data-test-subj={'osquery-results-comment'}
         >
-          {!canReadOsquery ? (
+          {!read ? (
             emptyPrompt
           ) : (
             <PackQueriesStatusTable

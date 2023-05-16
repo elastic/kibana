@@ -11,7 +11,7 @@ import { lastValueFrom, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { compact, map } from 'lodash';
-import type { PaginationInputPaginated } from '../../../../common/search_strategy/security_solution/response_actions/common';
+import type { LogsEndpointAction, ActionDetails } from '../../../../common/endpoint/types';
 import { Direction } from '../../../../common/search_strategy/security_solution/response_actions/types';
 import type {
   ActionResponsesRequestOptions,
@@ -37,9 +37,9 @@ export const useGetAutomatedActionList = (
   const { data } = useKibana().services;
 
   const { alertIds } = query;
-  return useQuery(
-    ['get-automated-action-list', { alertIds }],
-    async () => {
+  return useQuery({
+    queryKey: ['get-automated-action-list', { alertIds }],
+    queryFn: async () => {
       const responseData = await lastValueFrom(
         data.search.search<ActionRequestOptions, ActionRequestStrategyResponse>(
           {
@@ -49,7 +49,6 @@ export const useGetAutomatedActionList = (
               field: '@timestamp',
             },
             factoryQueryType: ResponseActionsQueries.actions,
-            pagination: generateTablePaginationOptions(0, 5),
           },
           {
             strategy: 'securitySolutionSearchStrategy',
@@ -59,26 +58,34 @@ export const useGetAutomatedActionList = (
 
       return {
         ...responseData,
-        items: compact(map(responseData.edges, (edge) => edge._source)),
+        items: compact(map(responseData.edges, '_source')),
       };
     },
-    {
-      enabled: !skip,
-      keepPreviousData: true,
-    }
-  );
+    enabled: !skip,
+    keepPreviousData: true,
+  });
 };
+
+interface GetAutomatedActionResponseListOptions {
+  skip?: boolean;
+  action: LogsEndpointAction;
+}
+
+type GetAutomatedActionResponseListResponse = Pick<
+  ActionDetails,
+  'completedAt' | 'isExpired' | 'wasSuccessful' | 'isCompleted'
+>;
 
 export const useGetAutomatedActionResponseList = (
   query: EndpointAutomatedActionResponseRequestQuery,
-  { skip = false }: GetAutomatedActionsListOptions
+  { skip = false, action: requestAction }: GetAutomatedActionResponseListOptions
 ) => {
   const { data } = useKibana().services;
   const { expiration, actionId, agent } = query;
 
-  return useQuery(
-    ['allResponsesResults', { actionId }],
-    async () => {
+  return useQuery({
+    queryKey: ['allResponsesResults', { actionId }],
+    queryFn: async (): Promise<GetAutomatedActionResponseListResponse> => {
       const responseData = await lastValueFrom(
         data.search
           .search<ActionResponsesRequestOptions, ActionResponsesRequestStrategyResponse>(
@@ -90,7 +97,6 @@ export const useGetAutomatedActionResponseList = (
                 field: '@timestamp',
               },
               factoryQueryType: ResponseActionsQueries.results,
-              pagination: generateTablePaginationOptions(0, 5),
             },
             {
               strategy: 'securitySolutionSearchStrategy',
@@ -103,9 +109,9 @@ export const useGetAutomatedActionResponseList = (
 
               // We should get just one agent id, but just in case we get more than one, we'll use the length
               const agents = Array.isArray(agent.id) ? agent.id : [agent.id];
-              const pending = agents.length - responded;
-              const expired = !expiration ? true : new Date(expiration) < new Date();
-              const isCompleted = expired || pending <= 0;
+              const agentsWithPendingActions = agents.length - responded;
+              const isExpired = !expiration ? true : new Date(expiration) < new Date();
+              const isCompleted = isExpired || agentsWithPendingActions <= 0;
 
               const aggsBuckets =
                 val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
@@ -117,7 +123,7 @@ export const useGetAutomatedActionResponseList = (
                 action_id: actionId,
                 isCompleted,
                 wasSuccessful: responded === successful,
-                expired,
+                isExpired,
               });
             })
           )
@@ -127,27 +133,63 @@ export const useGetAutomatedActionResponseList = (
 
       return {
         completedAt: action?.EndpointActions.completed_at,
-        isExpired: responseData.expired,
+        isExpired: responseData.isExpired,
         wasSuccessful: responseData.wasSuccessful,
         isCompleted: responseData.isCompleted,
-        outputs: action?.EndpointActions.data.output,
       };
     },
-    {
-      keepPreviousData: true,
-      enabled: !skip,
-    }
-  );
+    select: (response) => combineResponse(requestAction, response),
+    keepPreviousData: true,
+    enabled: !skip,
+  });
 };
-export const generateTablePaginationOptions = (
-  activePage: number,
-  limit: number
-): PaginationInputPaginated => {
-  const cursorStart = activePage * limit;
+
+const combineResponse = (
+  action: LogsEndpointAction,
+  responseData: GetAutomatedActionResponseListResponse
+): ActionDetails => {
+  const { rule } = action;
+  const { parameters, alert_id: alertId, comment, command } = action.EndpointActions.data;
+
+  // TODO use getActionsStatus() - this requires a refactor of the function to accept isExpired
+  const status = responseData?.isExpired
+    ? 'failed'
+    : responseData?.isCompleted
+    ? responseData?.wasSuccessful
+      ? 'successful'
+      : 'failed'
+    : 'pending';
 
   return {
-    activePage,
-    cursorStart,
-    querySize: limit,
+    id: action.EndpointActions.action_id,
+    agents: action.agent.id as string[],
+    parameters,
+    ...(alertId?.length ? { alertIds: alertId } : {}),
+    ...(rule
+      ? {
+          ruleId: rule.id,
+          ruleName: rule.name,
+        }
+      : {}),
+    createdBy: action.rule?.name || 'unknown',
+    comment,
+    command,
+    hosts: (action.agent.id as string[]).reduce(
+      (acc: Record<string, { name: string }>, agentId: string) => {
+        acc[agentId] = {
+          name: '',
+        };
+        return acc;
+      },
+      {}
+    ),
+    startedAt: action['@timestamp'],
+    completedAt: responseData?.completedAt,
+    isCompleted: !!responseData?.isCompleted,
+    isExpired: !!responseData?.isExpired,
+    wasSuccessful: !!responseData?.isCompleted,
+    status: status as 'pending' | 'successful' | 'failed',
+    agentState: {},
+    errors: action.error ? [action.error.message as string] : undefined,
   };
 };

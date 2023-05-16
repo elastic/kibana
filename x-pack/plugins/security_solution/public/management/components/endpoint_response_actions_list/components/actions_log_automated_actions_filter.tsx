@@ -11,28 +11,18 @@ import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { FILTER_NAMES } from '../translations';
 
 interface ActionsLogWithRuleToggleProps {
-  isFlyout: boolean;
   dataTestSubj?: string;
   onChangeWithAutomatedActionsFilter: () => void;
 }
-
-export const ActionsLogWithAutomatedActionsToggle = React.memo(
-  ({
-    dataTestSubj,
-    onChangeWithAutomatedActionsFilter,
-    isFlyout,
-  }: ActionsLogWithRuleToggleProps) => {
+export const AutomatedActionsFilter = React.memo(
+  ({ dataTestSubj, onChangeWithAutomatedActionsFilter }: ActionsLogWithRuleToggleProps) => {
     const { withAutomatedActions: withAutomatedActionsUrlParam, setUrlWithAutomatedActions } =
       useActionHistoryUrlParams();
 
     const onClick = useCallback(() => {
-      if (!isFlyout) {
-        // set and show `withAutomatedActions` URL param on history page
-        setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
-      }
+      setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
       onChangeWithAutomatedActionsFilter();
     }, [
-      isFlyout,
       onChangeWithAutomatedActionsFilter,
       setUrlWithAutomatedActions,
       withAutomatedActionsUrlParam,
@@ -50,4 +40,4 @@ export const ActionsLogWithAutomatedActionsToggle = React.memo(
   }
 );
 
-ActionsLogWithAutomatedActionsToggle.displayName = 'ActionsLogWithAutomatedActionsToggle';
+AutomatedActionsFilter.displayName = 'AutomatedActionsFilter';

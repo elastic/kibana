@@ -7,7 +7,6 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import { buildActionsQuery } from './query.all_actions.dsl';
 import type { SecuritySolutionFactory } from '../../types';
@@ -19,10 +18,6 @@ import type {
 
 export const allActions: SecuritySolutionFactory<ResponseActionsQueries.actions> = {
   buildDsl: (options: ActionRequestOptions) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-
     return buildActionsQuery(options);
   },
   parse: async (

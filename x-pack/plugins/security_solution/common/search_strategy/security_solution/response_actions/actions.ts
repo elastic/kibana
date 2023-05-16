@@ -6,10 +6,10 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { RequestOptionsPaginated } from './common';
 import type { Direction, Inspect, Maybe, ResultEdges } from './types';
+import type { RequestBasicOptions } from './types';
 
-export interface ActionRequestOptions extends RequestOptionsPaginated {
+export interface ActionRequestOptions extends RequestBasicOptions {
   alertIds: string[];
   agentId?: string;
   sort: {

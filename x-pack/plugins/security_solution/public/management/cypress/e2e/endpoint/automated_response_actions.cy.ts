@@ -72,13 +72,16 @@ describe('Automated Response Actions', () => {
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
+      // TODO find a more reliable way to check the proper output for the action type than relying on the order
+      // maybe it would make sense to add some agent details to the response, so we can then validate agent vs output
       changeAlertsFilter('event.category: "file"');
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('responseActionsViewTab').click();
       cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('responseActonsViewWrapper').within(($wrapper) => {
+      cy.getByTestSubj('responseActionsViewWrapper').within(($wrapper) => {
         cy.wrap($wrapper).each(($comment, index) => {
           if (index === 0) {
+            // TODO use translations
             cy.contains('isolate completed successfully');
           }
           if (index === 1) {

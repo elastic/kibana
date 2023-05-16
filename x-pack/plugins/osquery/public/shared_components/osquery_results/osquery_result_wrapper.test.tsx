@@ -29,6 +29,7 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const defaultPermissions = {
   osquery: {
+    read: true,
     runSavedQueries: true,
     readSavedQueries: true,
   },
@@ -44,7 +45,6 @@ const defaultProps = {
   ecsData: {
     _id: 'test',
   },
-  canReadOsquery: true,
 };
 const mockKibana = (permissionType: unknown = defaultPermissions) => {
   const mockedKibana = getMockedKibanaConfig(permissionType);

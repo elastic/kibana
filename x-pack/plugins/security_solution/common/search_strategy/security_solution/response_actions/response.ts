@@ -9,11 +9,11 @@ import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsEndpointActionResponse } from '../../../endpoint/types';
 import type { Direction, Inspect, Maybe } from './types';
-import type { RequestOptionsPaginated } from './common';
+import type { RequestBasicOptions } from './types';
 
 export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
 
-export interface ActionResponsesRequestOptions extends RequestOptionsPaginated {
+export interface ActionResponsesRequestOptions extends RequestBasicOptions {
   expiration: string;
   actionId: string;
   sort: {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { map } from 'lodash';
 import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EndpointResponseActionResults } from './endpoint_action_results';
@@ -25,14 +24,13 @@ export const ResponseActionsResults = ({
   ecsData,
 }: ResponseActionsResultsProps) => {
   const {
-    services: { osquery, application },
+    services: { osquery },
   } = useKibana();
   const { OsqueryResult } = osquery;
-  const canReadOsquery = !!application?.capabilities?.osquery?.read;
 
   return (
     <>
-      {map(actions, (action) => {
+      {actions.map((action) => {
         if (isOsquery(action)) {
           const actionId = action.action_id;
           const queryId = action.queries[0].id;
@@ -46,13 +44,15 @@ export const ResponseActionsResults = ({
               startDate={startDate}
               ruleName={ruleName}
               ecsData={ecsData}
-              canReadOsquery={canReadOsquery}
             />
           );
         }
         if (isEndpoint(action)) {
-          return <EndpointResponseActionResults action={action} />;
+          return (
+            <EndpointResponseActionResults action={action} key={action.EndpointActions.action_id} />
+          );
         }
+        return null;
       })}
     </>
   );

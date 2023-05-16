@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComment } from '@elastic/eui';
+import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React from 'react';
 import { useUserPrivileges } from '../user_privileges';
@@ -28,13 +28,12 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
   } = useUserPrivileges();
 
   const canReadEndpoint = canReadActionsLogManagement && canAccessEndpointActionsLogManagement;
-  const { data: responseData } = useGetAutomatedActionResponseList(
+  const { data: expandedAction } = useGetAutomatedActionResponseList(
     { actionId, expiration, agent },
-    { skip: !canReadEndpoint }
+    { skip: !canReadEndpoint, action }
   );
 
   const eventText = getCommentText(action.EndpointActions.data.command);
-  const expandedAction = combineAction(action, responseData);
 
   return (
     <EuiComment
@@ -44,7 +43,11 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
       data-test-subj={'endpoint-results-comment'}
     >
       {canReadEndpoint ? (
-        <ActionsLogExpandedTray action={expandedAction} />
+        expandedAction ? (
+          <ActionsLogExpandedTray action={expandedAction} />
+        ) : (
+          <EuiLoadingSpinner />
+        )
       ) : (
         <ResponseActionsEmptyPrompt type="endpoint" />
       )}
@@ -52,61 +55,12 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
   );
 };
 
-const getCommentText = (command: ResponseActionsApiCommandNames) => {
+const getCommentText = (command: ResponseActionsApiCommandNames): string => {
   if (command === 'isolate') {
     return ENDPOINT_COMMANDS.isolated;
   }
   if (command === 'unisolate') {
     return ENDPOINT_COMMANDS.released;
   }
-  return `executed command ${command}`;
-};
-
-const combineAction = (
-  action: LogsEndpointAction,
-  responseData: ReturnType<typeof useGetAutomatedActionResponseList>['data']
-) => {
-  const { rule } = action;
-  const { parameters, alert_id: alertId, comment, command } = action.EndpointActions.data;
-
-  const status = responseData?.isExpired
-    ? 'failed'
-    : responseData?.isCompleted
-    ? responseData?.wasSuccessful
-      ? 'successful'
-      : 'failed'
-    : 'pending';
-
-  return {
-    id: action.EndpointActions.action_id,
-    agents: action.agent.id as string[],
-    parameters,
-    ...(alertId?.length ? { alertIds: alertId } : {}),
-    ...(rule
-      ? {
-          ruleId: rule.id,
-          ruleName: rule.name,
-        }
-      : {}),
-    createdBy: action.rule?.name || 'unknown',
-    comment,
-    command,
-    hosts: (action.agent.id as string[]).reduce(
-      (acc: Record<string, { name: string }>, agentId: string) => {
-        acc[agentId] = {
-          name: '',
-        };
-        return acc;
-      },
-      {}
-    ),
-    startedAt: action['@timestamp'],
-    completedAt: responseData?.completedAt,
-    isCompleted: !!responseData?.isCompleted,
-    isExpired: !!responseData?.isExpired,
-    wasSuccessful: !!responseData?.isCompleted,
-    status: status as 'pending' | 'successful' | 'failed',
-    agentState: {},
-    errors: action.error ? [action.error.message as string] : undefined,
-  };
+  return ENDPOINT_COMMANDS.generic(command);
 };
