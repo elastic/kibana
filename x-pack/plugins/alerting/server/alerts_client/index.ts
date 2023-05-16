@@ -6,4 +6,5 @@
  */
 
 export { type LegacyAlertsClientParams, LegacyAlertsClient } from './legacy_alerts_client';
-export { type AADRuleData, AlertsClient } from './alerts_client';
+export { AlertsClient } from './alerts_client';
+export type { AlertRuleData } from './types';

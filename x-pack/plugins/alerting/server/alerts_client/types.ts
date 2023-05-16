@@ -16,6 +16,17 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
+export interface AlertRuleData {
+  consumer: string;
+  executionId: string;
+  id: string;
+  name: string;
+  parameters: unknown;
+  revision: number;
+  spaceId: string;
+  tags: string[];
+}
+
 export interface IAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
@@ -50,4 +61,12 @@ export interface InitializeExecutionOpts {
   ruleLabel: string;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
+}
+
+export interface TrackedAlerts<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext
+> {
+  active: Record<string, Alert<State, Context>>;
+  recovered: Record<string, Alert<State, Context>>;
 }

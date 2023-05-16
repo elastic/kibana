@@ -207,13 +207,14 @@ export class TaskRunner<
 
   private getAADRuleData(rule: SanitizedRule<Params>, spaceId: string) {
     return {
+      consumer: rule.consumer,
+      executionId: this.executionId,
       id: rule.id,
       name: rule.name,
-      tags: rule.tags,
-      consumer: rule.consumer,
-      spaceId,
-      executionId: this.executionId,
       parameters: rule.params,
+      revision: rule.revision,
+      spaceId,
+      tags: rule.tags,
     };
   }
 

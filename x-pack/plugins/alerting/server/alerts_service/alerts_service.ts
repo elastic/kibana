@@ -35,7 +35,7 @@ import {
   createConcreteWriteIndex,
   installWithTimeout,
 } from './lib';
-import { type LegacyAlertsClientParams, type AADRuleData, AlertsClient } from '../alerts_client';
+import { type LegacyAlertsClientParams, type AlertRuleData, AlertsClient } from '../alerts_client';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -51,7 +51,7 @@ interface AlertsServiceParams {
 
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
   namespace: string;
-  rule: AADRuleData;
+  rule: AlertRuleData;
 }
 interface IAlertsService {
   /**

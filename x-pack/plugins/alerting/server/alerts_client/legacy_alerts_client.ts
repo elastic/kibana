@@ -22,7 +22,12 @@ import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
-import { IAlertsClient, InitializeExecutionOpts, ProcessAndLogAlertsOpts } from './types';
+import {
+  IAlertsClient,
+  InitializeExecutionOpts,
+  ProcessAndLogAlertsOpts,
+  TrackedAlerts,
+} from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
@@ -42,10 +47,7 @@ export class LegacyAlertsClient<
   private ruleLogPrefix: string = '';
 
   // Alerts from the previous execution that are deserialized from the task state
-  private trackedAlerts: {
-    active: Record<string, Alert<State, Context>>;
-    recovered: Record<string, Alert<State, Context>>;
-  } = {
+  private trackedAlerts: TrackedAlerts<State, Context> = {
     active: {},
     recovered: {},
   };
