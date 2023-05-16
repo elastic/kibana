@@ -187,6 +187,10 @@ Some features require special configuration when running in different modes (dev
 |`12345`
 |The build SHA (typically refers to the last commit's SHA)
 
+|`buildDate`
+|`12345`
+|The date of the build (typically the date of HEAD commit)
+
 |===
 
 To use any of the references listed above in a config validation schema, they can be accessed via `schema.contextRef('{CONTEXT_REFERENCE}')`:
