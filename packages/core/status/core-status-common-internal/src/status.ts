@@ -34,7 +34,7 @@ export interface ServerVersion {
   build_hash: string;
   build_number: number;
   build_snapshot: boolean;
-  build_date: Date;
+  build_date: string;
 }
 
 export interface StatusInfo {

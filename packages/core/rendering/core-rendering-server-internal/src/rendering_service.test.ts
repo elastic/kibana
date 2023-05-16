@@ -43,6 +43,7 @@ const INJECTED_METADATA = {
       buildSha: expect.any(String),
       dist: expect.any(Boolean),
       version: expect.any(String),
+      buildDate: new Date('2023-05-15T23:12:09+0000').toISOString(),
     },
   },
 };

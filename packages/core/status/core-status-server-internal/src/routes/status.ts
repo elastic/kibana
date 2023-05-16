@@ -121,7 +121,7 @@ export const registerStatusRoute = ({
           build_hash: buildSha,
           build_number: buildNum,
           build_snapshot: SNAPSHOT_POSTFIX.test(version),
-          build_date: buildDate,
+          build_date: buildDate.toISOString(),
         },
         status: statusInfo,
         metrics: {
