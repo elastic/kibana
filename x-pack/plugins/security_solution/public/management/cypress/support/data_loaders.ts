@@ -7,6 +7,7 @@
 
 // / <reference types="cypress" />
 
+import execa from 'execa';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import { sendEndpointActionResponse } from '../../../../scripts/endpoint/agent_emulator/services/endpoint_response_actions';
 import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
@@ -207,6 +208,82 @@ export const dataLoadersForRealEndpoints = (
     ): Promise<null> => {
       const { kbnClient } = await stackServicesPromise;
       return destroyEndpointHost(kbnClient, createdHost).then(() => null);
+    },
+
+    createFileOnEndpoint: async ({
+      hostname,
+      path,
+      content,
+    }: {
+      hostname: string;
+      path: string;
+      content: string;
+    }): Promise<null> => {
+      await execa(`multipass`, ['exec', hostname, '--', 'sh', '-c', `echo ${content} > ${path}`]);
+      return null;
+    },
+
+    uploadFileToEndpoint: async ({
+      hostname,
+      srcPath,
+      destPath = '.',
+    }: {
+      hostname: string;
+      srcPath: string;
+      destPath: string;
+    }): Promise<null> => {
+      await execa(`multipass`, ['transfer', srcPath, `${hostname}:${destPath}`]);
+      return null;
+    },
+
+    installPackagesOnEndpoint: async ({
+      hostname,
+      packages,
+    }: {
+      hostname: string;
+      packages: string[];
+    }): Promise<null> => {
+      await execa(`multipass`, [
+        'exec',
+        hostname,
+        '--',
+        'sh',
+        '-c',
+        `sudo apt install -y ${packages.join(' ')}`,
+      ]);
+      return null;
+    },
+
+    readZippedFileContentOnEndpoint: async ({
+      hostname,
+      path,
+      password,
+    }: {
+      hostname: string;
+      path: string;
+      password?: string;
+    }): Promise<string> => {
+      const result = await execa(`multipass`, [
+        'exec',
+        hostname,
+        '--',
+        'sh',
+        '-c',
+        `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
+      ]);
+      return result.stdout;
+    },
+
+    stopEndpointHost: async () => {
+      const hosts = await getEndpointHosts();
+      const hostName = hosts[0].name;
+      return stopEndpointHost(hostName);
+    },
+
+    startEndpointHost: async () => {
+      const hosts = await getEndpointHosts();
+      const hostName = hosts[0].name;
+      return startEndpointHost(hostName);
     },
   });
 };
