@@ -1166,6 +1166,7 @@ describe('Alerts Service', () => {
           parameters: {
             bar: true,
           },
+          revision: 0,
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
@@ -1184,6 +1185,7 @@ describe('Alerts Service', () => {
           parameters: {
             bar: true,
           },
+          revision: 0,
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
@@ -1203,6 +1205,7 @@ describe('Alerts Service', () => {
           parameters: {
             bar: true,
           },
+          revision: 0,
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
@@ -1235,6 +1238,7 @@ describe('Alerts Service', () => {
           parameters: {
             bar: true,
           },
+          revision: 0,
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
@@ -1272,6 +1276,7 @@ describe('Alerts Service', () => {
           parameters: {
             bar: true,
           },
+          revision: 0,
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },

@@ -358,6 +358,7 @@ describe('Task Runner', () => {
         parameters: {
           bar: true,
         },
+        revision: 0,
         spaceId: 'default',
         tags: ['rule-', '-tags'],
       },
