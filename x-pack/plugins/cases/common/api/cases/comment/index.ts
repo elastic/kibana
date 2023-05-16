@@ -277,16 +277,23 @@ export const FindCommentsQueryParamsRt = rt.partial({
   /**
    * The page of objects to return
    */
-  page: NumberFromString,
+  page: rt.union([rt.number, NumberFromString]),
   /**
    * The number of objects to return for a page
    */
-  perPage: NumberFromString,
+  perPage: rt.union([rt.number, NumberFromString]),
   /**
    * Order to sort the response
    */
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 });
+
+export const FindCommentsArgsRt = rt.intersection([
+  rt.type({
+    caseID: rt.string,
+  }),
+  rt.type({ queryParams: rt.union([FindCommentsQueryParamsRt, rt.undefined]) }),
+]);
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 

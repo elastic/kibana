@@ -4,9 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+
 import type { SavedObject } from '@kbn/core/server';
 
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import type { CasesClient } from '../client';
+import type { CasesClientArgs } from '../types';
 import type {
   AlertResponse,
   Comments,
@@ -14,7 +21,22 @@ import type {
   Comment,
   CommentsFindResponse,
 } from '../../../common/api';
-import { CommentType, CommentsRt, CommentRt, CommentsFindResponseRt } from '../../../common/api';
+import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
+
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+} from '../../../common/constants';
+import {
+  FindCommentsArgsRt,
+  CommentType,
+  CommentsRt,
+  CommentRt,
+  CommentsFindResponseRt,
+  excess,
+  throwErrors,
+} from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -24,11 +46,8 @@ import {
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import type { CasesClientArgs } from '../types';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import type { CasesClient } from '../client';
-import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -98,7 +117,7 @@ export const getAllAlertsAttachToCase = async (
  * Retrieves the attachments for a case entity. This support pagination.
  */
 export async function find(
-  { caseID, queryParams }: FindCommentsArgs,
+  data: FindCommentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentsFindResponse> {
   const {
@@ -106,6 +125,21 @@ export async function find(
     logger,
     authorization,
   } = clientArgs;
+
+  const { caseID, queryParams } = pipe(
+    excess(FindCommentsArgsRt).decode(data),
+    fold(throwErrors(Boom.badRequest), identity)
+  );
+
+  if (
+    queryParams?.page &&
+    queryParams?.perPage &&
+    queryParams?.page * queryParams?.perPage > MAX_DOCS_PER_PAGE
+  ) {
+    throw Boom.badRequest(
+      'The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
+    );
+  }
 
   try {
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =

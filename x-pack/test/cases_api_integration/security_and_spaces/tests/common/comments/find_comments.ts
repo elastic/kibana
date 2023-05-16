@@ -116,7 +116,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(caseComments.comments[0].type).to.eql(CommentType.user);
     });
 
-    it('unhappy path - 400s when query is bad', async () => {
+    it('unhappy path - 400s when query is wrong type', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -131,6 +131,46 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await supertest
         .get(`${CASES_URL}/${postedCase.id}/comments/_find?perPage=true`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(400);
+    });
+
+    it('unhappy path - 400s when field is unkown', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentUserReq)
+        .expect(200);
+
+      await supertest
+        .get(`${CASES_URL}/${postedCase.id}/comments/_find?foobar=true`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(400);
+    });
+
+    it('unhappy path - 400s when total items invalid', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentUserReq)
+        .expect(200);
+
+      await supertest
+        .get(`${CASES_URL}/${postedCase.id}/comments/_find?page=2&perPage=9001`)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(400);
