@@ -47,6 +47,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",
