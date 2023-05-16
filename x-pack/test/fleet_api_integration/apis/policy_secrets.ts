@@ -395,7 +395,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should not delete used secrets on secret update', async () => {
-      // update a secret on duplicated agent policy and make sure the original secret is not deleted
       const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
       delete updatedPolicy.name;
 
