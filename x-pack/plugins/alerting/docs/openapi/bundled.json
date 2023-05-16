@@ -1097,7 +1097,7 @@
       "post": {
         "summary": "Mutes an alert.",
         "operationId": "muteAlert",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. \n",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
           "alerting"
         ],
@@ -1146,7 +1146,7 @@
       "post": {
         "summary": "Unmutes an alert.",
         "operationId": "unmuteAlert",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. \n",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
           "alerting"
         ],
@@ -2680,6 +2680,10 @@
             "type": "object",
             "description": "The parameters for the rule.",
             "additionalProperties": true
+          },
+          "revision": {
+            "type": "integer",
+            "description": "The rule revision number."
           },
           "rule_type_id": {
             "type": "string",

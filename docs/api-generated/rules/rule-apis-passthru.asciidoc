@@ -118,6 +118,7 @@ Any modifications made to this file will be overwritten.
   "enabled" : true,
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 5,
   "tags" : [ "tags", "tags" ],
   "running" : true,
   "api_key_owner" : "elastic",
@@ -414,6 +415,7 @@ Any modifications made to this file will be overwritten.
     "enabled" : true,
     "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
     "rule_type_id" : "monitoring_alert_cluster_health",
+    "revision" : 5,
     "tags" : [ "tags", "tags" ],
     "running" : true,
     "api_key_owner" : "elastic",
@@ -480,6 +482,7 @@ Any modifications made to this file will be overwritten.
     "enabled" : true,
     "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
     "rule_type_id" : "monitoring_alert_cluster_health",
+    "revision" : 5,
     "tags" : [ "tags", "tags" ],
     "running" : true,
     "api_key_owner" : "elastic",
@@ -661,6 +664,7 @@ Any modifications made to this file will be overwritten.
   "enabled" : true,
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 5,
   "tags" : [ "tags", "tags" ],
   "running" : true,
   "api_key_owner" : "elastic",
@@ -2019,6 +2023,7 @@ Any modifications made to this file will be overwritten.
   "enabled" : true,
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 5,
   "tags" : [ "tags", "tags" ],
   "running" : true,
   "api_key_owner" : "elastic",
@@ -2580,6 +2585,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">next_run (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
 <div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
+<div class="param">revision (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The rule revision number. </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the type of rule. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
 <div class="param">running (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule is running. </div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
