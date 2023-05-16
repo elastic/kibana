@@ -7,7 +7,6 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { cloneDeep } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
@@ -23,15 +22,8 @@ import {
   Rule,
   RuleSnoozeSchedule,
   RuleWithLegacyId,
-  RuleTypeRegistry,
-  RawRuleAction,
 } from '../../types';
-import {
-  validateRuleTypeParams,
-  getRuleNotifyWhenType,
-  validateMutatedRuleTypeParams,
-  convertRuleIdsToKueryNode,
-} from '../../lib';
+import { convertRuleIdsToKueryNode } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -39,11 +31,8 @@ import {
   retryIfBulkEditConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
-  injectReferencesIntoActions,
   getBulkSnoozeAttributes,
   getBulkUnsnoozeAttributes,
-  verifySnoozeScheduleLimit,
-  injectReferencesIntoParams,
 } from '../common';
 import {
   alertingAuthorizationFilterOpts,
@@ -51,26 +40,13 @@ import {
   RULE_TYPE_CHECKS_CONCURRENCY,
   API_KEY_GENERATE_CONCURRENCY,
 } from '../common/constants';
-import { getMappedParams } from '../common/mapped_params_utils';
-import {
-  getAlertFromRaw,
-  extractReferences,
-  validateActions,
-  updateMeta,
-  addGeneratedActionValues,
-  createNewAPIKeySet,
-  validateScheduleInterval,
-  validateScheduleOperation,
-} from '../lib';
+import { getAlertFromRaw, rulesUpdateFlow, RulesUpdateFlowSteps } from '../lib';
 import {
   NormalizedAlertAction,
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
-  NormalizedAlertActionWithGeneratedValues,
 } from '../types';
-
-import { migrateLegacyActions } from '../lib';
 
 export type BulkEditFields = keyof Pick<
   Rule,
@@ -131,10 +107,6 @@ type ApiKeysMap = Map<
     newApiKeyCreatedByUser?: boolean | null;
   }
 >;
-
-type ApiKeyAttributes = Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'>;
-
-type RuleType = ReturnType<RuleTypeRegistry['get']>;
 
 export interface RuleParamsModifierResult<Params> {
   modifiedParams: Params;
@@ -340,8 +312,7 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const skipped: BulkActionSkipResult[] = [];
   const errors: BulkOperationError[] = [];
-  const apiKeysMap: ApiKeysMap = new Map();
-  const username = await context.getUserName();
+  const rulesUpdateFlowSteps = rulesUpdateFlow(context);
 
   for await (const response of rulesFinder.find()) {
     await pMap(
@@ -352,11 +323,10 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
           rule,
           operations,
           paramsModifier,
-          apiKeysMap,
           rules,
           skipped,
           errors,
-          username,
+          rulesUpdateFlowSteps,
           shouldIncrementRevision,
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
@@ -366,7 +336,12 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
 
   const { result, apiKeysToInvalidate } =
     rules.length > 0
-      ? await saveBulkUpdatedRules(context, rules, apiKeysMap)
+      ? await saveBulkUpdatedRules({
+          context,
+          rules,
+          apiKeysMap: rulesUpdateFlowSteps.getApiKeysMap(),
+          cleanup: rulesUpdateFlowSteps.cleanup,
+        })
       : {
           result: { saved_objects: [] },
           apiKeysToInvalidate: [],
@@ -422,75 +397,124 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
   rule,
   operations,
   paramsModifier,
-  apiKeysMap,
   rules,
   skipped,
   errors,
-  username,
+  rulesUpdateFlowSteps,
   shouldIncrementRevision = () => true,
 }: {
   context: RulesClientContext;
   rule: SavedObjectsFindResult<RawRule>;
   operations: BulkEditOptions<Params>['operations'];
   paramsModifier: BulkEditOptions<Params>['paramsModifier'];
-  apiKeysMap: ApiKeysMap;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   skipped: BulkActionSkipResult[];
   errors: BulkOperationError[];
-  username: string | null;
+  rulesUpdateFlowSteps: RulesUpdateFlowSteps;
   shouldIncrementRevision: BulkEditOptions<Params>['shouldIncrementRevision'];
 }): Promise<void> {
   try {
-    if (rule.attributes.apiKey) {
-      apiKeysMap.set(rule.id, {
-        oldApiKey: rule.attributes.apiKey,
-        oldApiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser,
-      });
+    const {
+      prepareRuleForUpdate,
+      updateActions,
+      updateParams,
+      extractReferencesFromParamsAndActions,
+      createAPIKey,
+      updateAttributes,
+      maybeIncrementRevision,
+      validateAttributes,
+      getUpdatedAttributeAndRefsForSaving,
+      getRuleFieldsWithRefs,
+    } = rulesUpdateFlowSteps;
+
+    await prepareRuleForUpdate(rule);
+
+    if (rule.attributes.actions.length) {
+      await context.actionsAuthorization.ensureAuthorized('execute');
     }
 
-    const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
+    let hasUpdateApiKeyOperation = false;
+    let isAttributesUpdateSkipped = true;
 
-    await ensureAuthorizationForBulkUpdate(context, operations, rule);
-
-    // migrate legacy actions only for SIEM rules
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: rule.id,
-      actions: rule.attributes.actions,
-      references: rule.references,
-      attributes: rule.attributes,
-    });
-
-    if (migratedActions.hasLegacyActions) {
-      rule.attributes.actions = migratedActions.resultedActions;
-      rule.references = migratedActions.resultedReferences;
+    for (const operation of operations) {
+      // Check if the update should be skipped for the current action.
+      // If it should, save the skip reasons in attributesUpdateSkipReasons
+      // and continue to the next operation before without
+      // the `isAttributesUpdateSkipped` flag to false.
+      switch (operation.field) {
+        case 'actions': {
+          const { actions: actionsWithRefs } = getRuleFieldsWithRefs(rule.id);
+          const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(operation, {
+            actions: actionsWithRefs,
+          });
+          if (isAttributeModified) {
+            await updateActions(rule.id, { actions: modifiedAttributes.actions });
+            isAttributesUpdateSkipped = false;
+          }
+          break;
+        }
+        case 'snoozeSchedule': {
+          // Silently skip adding snooze or snooze schedules on security
+          // rules until we implement snoozing of their rules
+          if (rule.attributes.consumer === AlertConsumers.SIEM) {
+            // While the rule is technically not updated, we are still marking
+            // the rule as updated in case of snoozing, until support
+            // for snoozing is added.
+            isAttributesUpdateSkipped = false;
+            break;
+          }
+          if (operation.operation === 'set') {
+            const snoozeAttributes = getBulkSnoozeAttributes(rule.attributes, operation.value);
+            await updateAttributes(rule.id, { ...snoozeAttributes });
+          }
+          if (operation.operation === 'delete') {
+            const idsToDelete = operation.value && [...operation.value];
+            if (idsToDelete?.length === 0) {
+              rule.attributes.snoozeSchedule?.forEach((schedule) => {
+                if (schedule.id) {
+                  idsToDelete.push(schedule.id);
+                }
+              });
+            }
+            const snoozeAttributes = getBulkUnsnoozeAttributes(rule.attributes, idsToDelete);
+            await updateAttributes(rule.id, { ...snoozeAttributes });
+          }
+          isAttributesUpdateSkipped = false;
+          break;
+        }
+        case 'apiKey': {
+          hasUpdateApiKeyOperation = true;
+          isAttributesUpdateSkipped = false;
+          break;
+        }
+        default: {
+          const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+            operation,
+            rule.attributes
+          );
+          if (isAttributeModified) {
+            await updateAttributes(rule.id, { ...modifiedAttributes });
+            isAttributesUpdateSkipped = false;
+          }
+        }
+      }
     }
 
-    const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
-      await getUpdatedAttributesFromOperations(context, operations, rule, ruleType);
-
-    validateScheduleInterval(context, attributes.schedule.interval, ruleType.id, rule.id);
-
-    const params = injectReferencesIntoParams<Params, RuleTypeParams>(
-      rule.id,
-      ruleType,
-      attributes.params,
-      rule.references || []
-    );
+    const { params: paramsWithRefs } = getRuleFieldsWithRefs(rule.id);
     const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
-      ? await paramsModifier(params)
+      ? await paramsModifier(paramsWithRefs as Params)
       : {
-          modifiedParams: params,
+          modifiedParams: paramsWithRefs,
           isParamsUpdateSkipped: true,
         };
 
-    // Increment revision if params ended up being modified AND it wasn't already incremented as part of attribute update
-    if (
-      shouldIncrementRevision(ruleParams) &&
-      !isParamsUpdateSkipped &&
-      rule.attributes.revision === attributes.revision
-    ) {
-      attributes.revision += 1;
-    }
+    await updateParams(rule.id, { params: ruleParams });
+
+    await extractReferencesFromParamsAndActions(rule.id);
+
+    await createAPIKey(rule.id, { forceUpdate: hasUpdateApiKeyOperation });
+
+    await validateAttributes(rule.id);
 
     // If neither attributes nor parameters were updated, mark
     // the rule as skipped and continue to the next rule.
@@ -501,44 +525,12 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
         skip_reason: 'RULE_NOT_MODIFIED',
       });
       return;
+    } else {
+      await maybeIncrementRevision(rule.id, { shouldIncrementRevision });
     }
 
-    // validate rule params
-    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate.params);
-    const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
-      validatedAlertTypeParams,
-      rule.attributes.params,
-      ruleType.validate.params
-    );
-
-    const {
-      actions: rawAlertActions,
-      references,
-      params: updatedParams,
-    } = await extractReferences(
-      context,
-      ruleType,
-      ruleActions.actions as NormalizedAlertActionWithGeneratedValues[],
-      validatedMutatedAlertTypeParams
-    );
-
-    const { apiKeyAttributes } = await prepareApiKeys(
-      context,
-      rule,
-      ruleType,
-      apiKeysMap,
-      attributes,
-      hasUpdateApiKeyOperation,
-      username
-    );
-
-    const { updatedAttributes } = updateAttributes(
-      context,
-      attributes,
-      apiKeyAttributes,
-      updatedParams,
-      rawAlertActions,
-      username
+    const { attributes: updatedAttributes, references } = await getUpdatedAttributeAndRefsForSaving(
+      rule.id
     );
 
     rules.push({
@@ -563,254 +555,23 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
   }
 }
 
-async function ensureAuthorizationForBulkUpdate(
-  context: RulesClientContext,
-  operations: BulkEditOperation[],
-  rule: SavedObjectsFindResult<RawRule>
-): Promise<void> {
-  if (rule.attributes.actions.length === 0) {
-    return;
-  }
-
-  for (const operation of operations) {
-    const { field } = operation;
-    if (field === 'snoozeSchedule' || field === 'apiKey') {
-      try {
-        await context.actionsAuthorization.ensureAuthorized('execute');
-        break;
-      } catch (error) {
-        throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
-      }
-    }
-  }
-}
-
-async function getUpdatedAttributesFromOperations(
-  context: RulesClientContext,
-  operations: BulkEditOperation[],
-  rule: SavedObjectsFindResult<RawRule>,
-  ruleType: RuleType
-) {
-  let attributes = cloneDeep(rule.attributes);
-  let ruleActions = {
-    actions: injectReferencesIntoActions(
-      rule.id,
-      rule.attributes.actions || [],
-      rule.references || []
-    ),
-  };
-
-  let hasUpdateApiKeyOperation = false;
-  let isAttributesUpdateSkipped = true;
-
-  for (const operation of operations) {
-    // Check if the update should be skipped for the current action.
-    // If it should, save the skip reasons in attributesUpdateSkipReasons
-    // and continue to the next operation before without
-    // the `isAttributesUpdateSkipped` flag to false.
-    switch (operation.field) {
-      case 'actions': {
-        const updatedOperation = {
-          ...operation,
-          value: addGeneratedActionValues(operation.value),
-        };
-
-        try {
-          await validateActions(context, ruleType, {
-            ...attributes,
-            actions: updatedOperation.value,
-          });
-        } catch (e) {
-          // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
-          attributes = await attemptToMigrateLegacyFrequency(
-            context,
-            updatedOperation,
-            attributes,
-            ruleType
-          );
-        }
-
-        const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
-          updatedOperation,
-          ruleActions
-        );
-        if (isAttributeModified) {
-          ruleActions = modifiedAttributes;
-          isAttributesUpdateSkipped = false;
-        }
-
-        break;
-      }
-      case 'snoozeSchedule': {
-        // Silently skip adding snooze or snooze schedules on security
-        // rules until we implement snoozing of their rules
-        if (rule.attributes.consumer === AlertConsumers.SIEM) {
-          // While the rule is technically not updated, we are still marking
-          // the rule as updated in case of snoozing, until support
-          // for snoozing is added.
-          isAttributesUpdateSkipped = false;
-          break;
-        }
-        if (operation.operation === 'set') {
-          const snoozeAttributes = getBulkSnoozeAttributes(rule.attributes, operation.value);
-          try {
-            verifySnoozeScheduleLimit(snoozeAttributes);
-          } catch (error) {
-            throw Error(`Error updating rule: could not add snooze - ${error.message}`);
-          }
-          attributes = {
-            ...attributes,
-            ...snoozeAttributes,
-          };
-        }
-        if (operation.operation === 'delete') {
-          const idsToDelete = operation.value && [...operation.value];
-          if (idsToDelete?.length === 0) {
-            attributes.snoozeSchedule?.forEach((schedule) => {
-              if (schedule.id) {
-                idsToDelete.push(schedule.id);
-              }
-            });
-          }
-          attributes = {
-            ...attributes,
-            ...getBulkUnsnoozeAttributes(attributes, idsToDelete),
-          };
-        }
-        isAttributesUpdateSkipped = false;
-        break;
-      }
-      case 'apiKey': {
-        hasUpdateApiKeyOperation = true;
-        isAttributesUpdateSkipped = false;
-        break;
-      }
-      default: {
-        if (operation.field === 'schedule') {
-          validateScheduleOperation(operation.value, attributes.actions, rule.id);
-        }
-        const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
-          operation,
-          rule.attributes
-        );
-
-        if (isAttributeModified) {
-          attributes = {
-            ...attributes,
-            ...modifiedAttributes,
-          };
-          isAttributesUpdateSkipped = false;
-        }
-      }
-    }
-    // Only increment revision if update wasn't skipped and `operation.field` should result in a revision increment
-    if (
-      !isAttributesUpdateSkipped &&
-      !bulkEditFieldsToExcludeFromRevisionUpdates.has(operation.field) &&
-      rule.attributes.revision - attributes.revision === 0
-    ) {
-      attributes.revision += 1;
-    }
-  }
-  return {
-    attributes,
-    ruleActions,
-    hasUpdateApiKeyOperation,
-    isAttributesUpdateSkipped,
-  };
-}
-
-async function prepareApiKeys(
-  context: RulesClientContext,
-  rule: SavedObjectsFindResult<RawRule>,
-  ruleType: RuleType,
-  apiKeysMap: ApiKeysMap,
-  attributes: RawRule,
-  hasUpdateApiKeyOperation: boolean,
-  username: string | null
-): Promise<{ apiKeyAttributes: ApiKeyAttributes }> {
-  const apiKeyAttributes = await createNewAPIKeySet(context, {
-    id: ruleType.id,
-    ruleName: attributes.name,
-    username,
-    shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
-    errorMessage: 'Error updating rule: could not create API key',
-  });
-
-  // collect generated API keys
-  if (apiKeyAttributes.apiKey) {
-    apiKeysMap.set(rule.id, {
-      ...apiKeysMap.get(rule.id),
-      newApiKey: apiKeyAttributes.apiKey,
-      newApiKeyCreatedByUser: apiKeyAttributes.apiKeyCreatedByUser,
-    });
-  }
-
-  return {
-    apiKeyAttributes,
-  };
-}
-
-function updateAttributes(
-  context: RulesClientContext,
-  attributes: RawRule,
-  apiKeyAttributes: ApiKeyAttributes,
-  updatedParams: RuleTypeParams,
-  rawAlertActions: RawRuleAction[],
-  username: string | null
-): {
-  updatedAttributes: RawRule;
-} {
-  // get notifyWhen
-  const notifyWhen = getRuleNotifyWhenType(
-    attributes.notifyWhen ?? null,
-    attributes.throttle ?? null
-  );
-
-  const updatedAttributes = updateMeta(context, {
-    ...attributes,
-    ...apiKeyAttributes,
-    params: updatedParams as RawRule['params'],
-    actions: rawAlertActions,
-    notifyWhen,
-    updatedBy: username,
-    updatedAt: new Date().toISOString(),
-  });
-
-  // add mapped_params
-  const mappedParams = getMappedParams(updatedParams);
-
-  if (Object.keys(mappedParams).length) {
-    updatedAttributes.mapped_params = mappedParams;
-  }
-
-  return {
-    updatedAttributes,
-  };
-}
-
-async function saveBulkUpdatedRules(
-  context: RulesClientContext,
-  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>,
-  apiKeysMap: ApiKeysMap
-) {
+async function saveBulkUpdatedRules({
+  context,
+  rules,
+  apiKeysMap,
+  cleanup,
+}: {
+  context: RulesClientContext;
+  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  apiKeysMap: ApiKeysMap;
+  cleanup: () => Promise<void>;
+}) {
   const apiKeysToInvalidate: string[] = [];
   let result;
   try {
     result = await context.unsecuredSavedObjectsClient.bulkCreate(rules, { overwrite: true });
   } catch (e) {
-    // avoid unused newly generated API keys
-    if (apiKeysMap.size > 0) {
-      await bulkMarkApiKeysForInvalidation(
-        {
-          apiKeys: Array.from(apiKeysMap.values())
-            .filter((value) => value.newApiKey && !value.newApiKeyCreatedByUser)
-            .map((value) => value.newApiKey as string),
-        },
-        context.logger,
-        context.unsecuredSavedObjectsClient
-      );
-    }
+    await cleanup();
     throw e;
   }
 
@@ -830,22 +591,4 @@ async function saveBulkUpdatedRules(
   });
 
   return { result, apiKeysToInvalidate };
-}
-
-async function attemptToMigrateLegacyFrequency(
-  context: RulesClientContext,
-  operation: BulkEditOperation,
-  attributes: SavedObjectsFindResult<RawRule>['attributes'],
-  ruleType: RuleType
-) {
-  if (operation.field !== 'actions')
-    throw new Error('Can only perform frequency migration on an action operation');
-  // Try to remove the rule-level frequency params, and then validate actions
-  if (typeof attributes.notifyWhen !== 'undefined') attributes.notifyWhen = undefined;
-  if (attributes.throttle) attributes.throttle = undefined;
-  await validateActions(context, ruleType, {
-    ...attributes,
-    actions: operation.value,
-  });
-  return attributes;
 }

@@ -10,14 +10,13 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
   injectReferencesIntoParams,
   injectReferencesIntoActions,
-  getSnoozeAttributes,
   verifySnoozeScheduleLimit,
 } from '../common';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../authorization';
 import {
   RawRule,
   IntervalSchedule,
-  RuleSnoozeSchedule,
+  RuleSnooze,
   RuleNotifyWhenType,
   RuleTypeParams,
 } from '../../types';
@@ -46,14 +45,9 @@ import {
   getRuleNotifyWhenType,
 } from '../../lib';
 
-export interface RuleParamsModifierResult {
-  modifiedParams: RuleTypeParams;
-  isParamsUpdateSkipped: boolean;
-}
-
 interface EnsureAuthorizedParams {
-  action: RuleAuditAction;
-  operation: WriteOperations;
+  action?: RuleAuditAction;
+  operation?: WriteOperations;
 }
 
 interface UpdateActionParams {
@@ -65,11 +59,20 @@ interface UpdateParamsParams {
   params: RuleTypeParams;
 }
 
+interface MaybeIncrementRevisionParams {
+  shouldIncrementRevision?: (params?: RuleTypeParams) => boolean;
+}
+
+interface CreateAPIKeyParams {
+  forceUpdate?: boolean;
+}
+
 interface NewAttributes {
   name?: string;
   tags?: string[];
   schedule?: IntervalSchedule;
-  snoozeSchedule?: RuleSnoozeSchedule;
+  muteAll?: boolean;
+  snoozeSchedule?: RuleSnooze;
   throttle?: string | null;
   notifyWhen?: RuleNotifyWhenType | null;
 }
@@ -105,11 +108,38 @@ type ApiKeysMap = Map<
   }
 >;
 
-export const rulesUpdateFlow = (context: RulesClientContext) => {
+export interface RulesUpdateFlowSteps {
+  prepareRuleForUpdate: (savedObject: SavedObject<RawRule>) => Promise<void>;
+  getRuleFieldsWithRefs: (id: string) => {
+    actions: NormalizedAlertAction[];
+    params: RuleTypeParams;
+  };
+  ensureAuthorizedAndRuleTypeEnabled: (
+    id: string,
+    params?: EnsureAuthorizedParams
+  ) => Promise<void>;
+  extractReferencesFromParamsAndActions: (id: string) => Promise<void>;
+  updateActions: (id: string, updateActionParams: UpdateActionParams) => Promise<void>;
+  updateParams: (id: string, updateParamsParams: UpdateParamsParams) => Promise<void>;
+  updateAttributes: (id: string, newAttributes: NewAttributes) => Promise<void>;
+  createAPIKey: (id: string, params?: CreateAPIKeyParams) => Promise<void>;
+  maybeIncrementRevision: (id: string, params?: MaybeIncrementRevisionParams) => Promise<void>;
+  validateAttributes: (id: string) => Promise<void>;
+  getUpdatedAttributeAndRefsForSaving: (id: string) => Promise<{
+    attributes: RawRule;
+    references: SavedObjectReference[];
+  }>;
+  getApiKeysMap: () => ApiKeysMap;
+  cleanup: () => Promise<void>;
+}
+
+type RulesUpdateFlow = (context: RulesClientContext) => RulesUpdateFlowSteps;
+
+export const rulesUpdateFlow: RulesUpdateFlow = (context: RulesClientContext) => {
   let rulesUpdateState: RulesUpdateState = {};
   let apiKeysMap: ApiKeysMap = new Map();
 
-  const prepareRuleForUpdate = async (id: string, savedObject: SavedObject<RawRule>) => {
+  const prepareRuleForUpdate = async (savedObject: SavedObject<RawRule>) => {
     // Initialize injected references
     const ruleType = context.ruleTypeRegistry.get(savedObject.attributes.alertTypeId);
 
@@ -127,26 +157,26 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
     }
 
     const paramsWithRefs = injectReferencesIntoParams(
-      id,
+      savedObject.id,
       ruleType,
       savedObject.attributes.params,
       savedObject.references || []
     );
 
     const actionsWithRefs = injectReferencesIntoActions(
-      id,
+      savedObject.id,
       savedObject.attributes.actions || [],
       savedObject.references || []
     );
 
     if (savedObject.attributes.apiKey) {
-      apiKeysMap.set(id, {
+      apiKeysMap.set(savedObject.id, {
         oldApiKey: savedObject.attributes.apiKey,
         oldApiKeyCreatedByUser: savedObject.attributes.apiKeyCreatedByUser,
       });
     }
 
-    rulesUpdateState[id] = {
+    rulesUpdateState[savedObject.id] = {
       savedObject,
       updatedAttributes: savedObject.attributes,
       extractedRefs: {},
@@ -189,18 +219,33 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
   };
 
   const getRuleToUpdate = (id: string) => {
-    const rule = rulesUpdateState[id];
-    if (!rule) {
+    const ruleState = rulesUpdateState[id];
+    if (!ruleState) {
       throw new Error(
         `Rule with id ${id} not added to update flow, please add rule before updating.`
       );
     }
-    return rule;
+    return ruleState;
   };
 
-  const ensureAuthorizedAndRuleTypeEnabled = async (id: string, params: EnsureAuthorizedParams) => {
+  const getRuleFieldsWithRefs = (id: string) => {
+    const ruleState = rulesUpdateState[id];
+    if (!ruleState) {
+      throw new Error(
+        `Rule with id ${id} not added to update flow, please add rule before getting fields with ref.`
+      );
+    }
+    return ruleState.fieldsWithRefs;
+  };
+
+  const getApiKeysMap = () => apiKeysMap;
+
+  const ensureAuthorizedAndRuleTypeEnabled = async (
+    id: string,
+    params?: EnsureAuthorizedParams
+  ) => {
     const { authorization, auditLogger } = context;
-    const { action, operation } = params;
+    const { action = RuleAuditAction.UPDATE, operation = WriteOperations.Update } = params || {};
     const {
       savedObject: { attributes },
     } = getRuleToUpdate(id);
@@ -252,57 +297,7 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
     getRuleToUpdate(id).validation.hasExtractedRefs = true;
   };
 
-  const createAPIKey = async (id: string) => {
-    const {
-      savedObject: { attributes },
-      updatedAttributes,
-    } = getRuleToUpdate(id);
-
-    const username = await context.getUserName();
-
-    const apiKeyAttributes = await createNewAPIKeySet(context, {
-      id,
-      ruleName: updatedAttributes.name,
-      username,
-      shouldUpdateApiKey: attributes.enabled,
-      errorMessage: 'Error updating rule: could not create API key',
-    });
-
-    // collect generated API keys
-    if (apiKeyAttributes.apiKey) {
-      apiKeysMap.set(id, {
-        ...apiKeysMap.get(id),
-        newApiKey: apiKeyAttributes.apiKey,
-        newApiKeyCreatedByUser: apiKeyAttributes.apiKeyCreatedByUser,
-      });
-    }
-
-    await updateInternalAttributes(id, apiKeyAttributes);
-  };
-
-  const maybeIncrementRevision = async (id: string) => {
-    const {
-      savedObject: { attributes },
-      updatedAttributes,
-    } = getRuleToUpdate(id);
-
-    if (updatedAttributes.revision > attributes.revision) {
-      return;
-    }
-
-    const shouldIncrementByRoot = shouldIncrementRevisionByRoot(attributes, updatedAttributes);
-
-    const shouldIncrementByParams = shouldIncrementRevisionByParams(
-      attributes.params,
-      updatedAttributes.params
-    );
-
-    if (shouldIncrementByRoot || shouldIncrementByParams) {
-      await updateInternalAttributes(id, { revision: updatedAttributes.revision + 1 });
-    }
-  };
-
-  const updateAction = async (id: string, updateActionParams: UpdateActionParams) => {
+  const updateActions = async (id: string, updateActionParams: UpdateActionParams) => {
     const { updatedAttributes } = getRuleToUpdate(id);
     const { actions, allowMissingConnectorSecrets } = updateActionParams;
     const normalizedAlertAction = addGeneratedActionValues(actions);
@@ -370,7 +365,6 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
 
   const updateAttributes = async (id: string, newAttributes: NewAttributes) => {
     const { updatedAttributes } = getRuleToUpdate(id);
-    const { snoozeSchedule, ...rest } = newAttributes;
 
     const notifyWhen = getRuleNotifyWhenType(
       newAttributes.notifyWhen || updatedAttributes.notifyWhen || null,
@@ -378,10 +372,71 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
     );
 
     await updateInternalAttributes(id, {
-      ...rest,
-      ...(snoozeSchedule ? { ...getSnoozeAttributes(updatedAttributes, snoozeSchedule) } : {}),
+      ...newAttributes,
       notifyWhen,
     });
+  };
+
+  const createAPIKey = async (id: string, params?: CreateAPIKeyParams) => {
+    const {
+      savedObject: { attributes },
+      updatedAttributes,
+    } = getRuleToUpdate(id);
+
+    const { forceUpdate = false } = params || {};
+
+    const username = await context.getUserName();
+
+    const apiKeyAttributes = await createNewAPIKeySet(context, {
+      id,
+      ruleName: updatedAttributes.name,
+      username,
+      shouldUpdateApiKey: attributes.enabled || forceUpdate,
+      errorMessage: 'Error updating rule: could not create API key',
+    });
+
+    // collect generated API keys
+    if (apiKeyAttributes.apiKey) {
+      apiKeysMap.set(id, {
+        ...apiKeysMap.get(id),
+        newApiKey: apiKeyAttributes.apiKey,
+        newApiKeyCreatedByUser: apiKeyAttributes.apiKeyCreatedByUser,
+      });
+    }
+
+    await updateInternalAttributes(id, apiKeyAttributes);
+  };
+
+  const maybeIncrementRevision = async (id: string, params?: MaybeIncrementRevisionParams) => {
+    const {
+      savedObject: { attributes },
+      updatedAttributes,
+      validation: { hasExtractedRefs },
+    } = getRuleToUpdate(id);
+
+    const { shouldIncrementRevision = () => true } = params || {};
+
+    if (!hasExtractedRefs) {
+      throw new Error('References must be extract before incrementing revision.');
+    }
+
+    if (updatedAttributes.revision > attributes.revision) {
+      return;
+    }
+
+    if (!shouldIncrementRevision(updatedAttributes.params)) {
+      return;
+    }
+
+    const shouldIncrementByRoot = shouldIncrementRevisionByRoot(attributes, updatedAttributes);
+    const shouldIncrementByParams = shouldIncrementRevisionByParams(
+      attributes.params,
+      updatedAttributes.params
+    );
+
+    if (shouldIncrementByRoot || shouldIncrementByParams) {
+      await updateInternalAttributes(id, { revision: updatedAttributes.revision + 1 });
+    }
   };
 
   const validateAttributes = async (id: string) => {
@@ -393,22 +448,6 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
     verifySnoozeScheduleLimit(updatedAttributes);
 
     getRuleToUpdate(id).validation.hasValidatedAttributes = true;
-  };
-
-  const cleanup = async () => {
-    if (apiKeysMap.size > 0) {
-      await bulkMarkApiKeysForInvalidation(
-        {
-          apiKeys: Array.from(apiKeysMap.values())
-            .filter((value) => value.newApiKey && !value.newApiKeyCreatedByUser)
-            .map((value) => value.newApiKey as string),
-        },
-        context.logger,
-        context.unsecuredSavedObjectsClient
-      );
-    }
-    apiKeysMap = new Map();
-    rulesUpdateState = {};
   };
 
   const getUpdatedAttributeAndRefsForSaving = async (id: string) => {
@@ -427,17 +466,35 @@ export const rulesUpdateFlow = (context: RulesClientContext) => {
     };
   };
 
+  const cleanup = async () => {
+    if (apiKeysMap.size > 0) {
+      await bulkMarkApiKeysForInvalidation(
+        {
+          apiKeys: Array.from(apiKeysMap.values())
+            .filter((value) => value.newApiKey && !value.newApiKeyCreatedByUser)
+            .map((value) => value.newApiKey as string),
+        },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      );
+    }
+    apiKeysMap = new Map();
+    rulesUpdateState = {};
+  };
+
   return {
     prepareRuleForUpdate,
     ensureAuthorizedAndRuleTypeEnabled,
-    updateAction,
+    updateActions,
     updateParams,
     extractReferencesFromParamsAndActions,
     createAPIKey,
     updateAttributes,
     validateAttributes,
-    cleanup,
     getUpdatedAttributeAndRefsForSaving,
     maybeIncrementRevision,
+    getRuleFieldsWithRefs,
+    getApiKeysMap,
+    cleanup,
   };
 };

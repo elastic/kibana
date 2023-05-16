@@ -24,5 +24,6 @@ export {
   shouldIncrementRevisionByRoot,
 } from './increment_revision';
 export { rulesUpdateFlow } from './rules_update_flow';
+export type { RulesUpdateFlowSteps } from './rules_update_flow';
 export { validateScheduleInterval } from './validate_schedule_interval';
 export { validateScheduleOperation } from './validate_schedule_operation';

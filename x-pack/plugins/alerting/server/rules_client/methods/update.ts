@@ -15,7 +15,6 @@ import {
   RuleNotifyWhenType,
   IntervalSchedule,
 } from '../../types';
-import { WriteOperations } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
@@ -79,7 +78,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
   const {
     prepareRuleForUpdate,
     ensureAuthorizedAndRuleTypeEnabled,
-    updateAction,
+    updateActions,
     updateParams,
     extractReferencesFromParamsAndActions,
     createAPIKey,
@@ -90,12 +89,9 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     getUpdatedAttributeAndRefsForSaving,
   } = rulesUpdateFlow(context);
 
-  await prepareRuleForUpdate(id, alertSavedObject);
+  await prepareRuleForUpdate(alertSavedObject);
 
-  await ensureAuthorizedAndRuleTypeEnabled(id, {
-    operation: WriteOperations.Update,
-    action: RuleAuditAction.UPDATE,
-  });
+  await ensureAuthorizedAndRuleTypeEnabled(id);
 
   context.auditLogger?.log(
     ruleAuditEvent({
@@ -105,14 +101,9 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     })
   );
 
-  await updateAction(id, {
-    actions: data.actions,
-    allowMissingConnectorSecrets,
-  });
+  await updateActions(id, { actions, allowMissingConnectorSecrets });
 
-  await updateParams(id, {
-    params: data.params,
-  });
+  await updateParams(id, { params });
 
   await extractReferencesFromParamsAndActions(id);
 
@@ -120,27 +111,21 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   await updateAttributes(id, { ...restData });
 
-  await maybeIncrementRevision(id);
+  await maybeIncrementRevision(id, { shouldIncrementRevision });
 
   await validateAttributes(id);
 
-  const { attributes: updatedAttributes, references } = await getUpdatedAttributeAndRefsForSaving(
-    id
-  );
+  const { attributes, references } = await getUpdatedAttributeAndRefsForSaving(id);
 
   let updatedObject: SavedObject<RawRule>;
 
   try {
-    updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
-      'alert',
-      updatedAttributes,
-      {
-        id,
-        overwrite: true,
-        version,
-        references,
-      }
-    );
+    updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>('alert', attributes, {
+      id,
+      overwrite: true,
+      version,
+      references,
+    });
   } catch (e) {
     // Avoid unused API key
     await cleanup();
