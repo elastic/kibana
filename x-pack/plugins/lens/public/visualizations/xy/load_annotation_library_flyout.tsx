@@ -52,11 +52,6 @@ export function LoadAnnotationLibraryFlyout({
 
   return (
     <FlyoutContainer
-      onClickInside={() => {
-        if (!hasBeenClicked.current) {
-          setSelectedItem(null);
-        }
-      }}
       panelContainerRef={(el) => (containerPanelRef.current = el)}
       customFooter={
         <EuiFlyoutFooter className="lnsDimensionContainer__footer">

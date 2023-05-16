@@ -47,7 +47,6 @@ export function FlyoutContainer({
   panelContainerRef,
   children,
   customFooter,
-  onClickInside,
 }: {
   isOpen: boolean;
   handleClose: () => boolean;
@@ -57,7 +56,6 @@ export function FlyoutContainer({
   panelRef?: (el: HTMLDivElement) => void;
   panelContainerRef?: (el: HTMLDivElement) => void;
   customFooter?: React.ReactElement;
-  onClickInside?: () => void;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
@@ -97,7 +95,6 @@ export function FlyoutContainer({
         onEscapeKey={closeFlyout}
       >
         <div
-          onClick={() => onClickInside?.()}
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
