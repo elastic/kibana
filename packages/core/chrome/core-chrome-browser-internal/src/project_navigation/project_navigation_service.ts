@@ -64,17 +64,18 @@ export class ProjectNavigationService {
       getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
         return combineLatest([this.projectBreadcrumbs$, this.projectNavigation$]).pipe(
           map(([breadcrumbs, projectNavigation]) => {
-            // TODO: return the final list of breadcrumbs based on:
-            // 1. the current application path
-            // 2. the current projectNavigation
-            // 3. the current projectBreadcrumbs
+            /* TODO: point home breadcrumb to the correct place */
+            const homeBreadcrumb = createHomeBreadcrumb({ homeHref: '/' });
 
-            return [
-              /* TODO: point home breadcrumb to the correct place */
-              createHomeBreadcrumb({ homeHref: '/' }),
-              /* TODO: insert nav breadcrumbs */
-              ...breadcrumbs.breadcrumbs,
-            ];
+            if (breadcrumbs.params.absolute) {
+              return [homeBreadcrumb, ...breadcrumbs.breadcrumbs];
+            } else {
+              return [
+                homeBreadcrumb,
+                /* TODO: insert nav breadcrumbs based on projectNavigation and application path */
+                ...breadcrumbs.breadcrumbs,
+              ];
+            }
           })
         );
       },
