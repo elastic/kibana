@@ -109,9 +109,7 @@ describe('TextBasedLanguagesEditor', () => {
       expect(
         component.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
       ).not.toBe(0);
-      expect(component.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).not.toBe(
-        0
-      );
+      expect(component.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).not.toBe(0);
       expect(
         component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length
       ).not.toBe(0);
