@@ -106,15 +106,14 @@ describe('ZDT upgrades - encountering conversion failures', () => {
     typeA.modelVersions = {
       ...typeA.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: (doc) => {
               throw new Error(`error from ${doc.id}`);
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
     };
 
@@ -122,18 +121,17 @@ describe('ZDT upgrades - encountering conversion failures', () => {
     typeB.modelVersions = {
       ...typeB.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: (doc) => {
               if (doc.id === 'b-0') {
                 throw new Error(`error from ${doc.id}`);
               }
               return { document: doc };
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
     };
 

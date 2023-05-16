@@ -153,7 +153,11 @@
               },
               {
                 "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/common/mocks/mock_security_context.tsx"
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -7714,7 +7718,7 @@
                 "section": "def-common.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               },
-              ") => Promise<",
+              " & { initialNamespaces?: string[] | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -7771,7 +7775,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-public.SavedObjectsClientCommon.create.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [
@@ -7784,7 +7788,8 @@
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
                     "section": "def-common.SavedObjectsCreateOptions",
                     "text": "SavedObjectsCreateOptions"
-                  }
+                  },
+                  " & { initialNamespaces?: string[] | undefined; }"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -8386,7 +8391,11 @@
               },
               {
                 "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/common/mocks/mock_security_context.tsx"
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13741,7 +13750,7 @@
                 "section": "def-common.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               },
-              ") => Promise<",
+              " & { initialNamespaces?: string[] | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -13798,7 +13807,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-server.SavedObjectsClientCommon.create.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [
@@ -13811,7 +13820,8 @@
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
                     "section": "def-common.SavedObjectsCreateOptions",
                     "text": "SavedObjectsCreateOptions"
-                  }
+                  },
+                  " & { initialNamespaces?: string[] | undefined; }"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -14377,9 +14387,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "WriteResponseBase",
-                ">; }; helpers: ",
-                "default",
-                "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params?: ",
                 "SearchRequest",
@@ -14411,7 +14419,9 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "SearchResponse",
-                "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+                "<TDocument, TAggregations>>; }; helpers: ",
+                "default",
+                "; name: string | symbol; security: ",
                 "default",
                 "; monitoring: ",
                 "default",
@@ -15676,7 +15686,11 @@
               },
               {
                 "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/common/mocks/mock_security_context.tsx"
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -24439,7 +24453,7 @@
                 "section": "def-common.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               },
-              ") => Promise<",
+              " & { initialNamespaces?: string[] | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -24496,7 +24510,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-common.SavedObjectsClientCommon.create.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [
@@ -24509,7 +24523,8 @@
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
                     "section": "def-common.SavedObjectsCreateOptions",
                     "text": "SavedObjectsCreateOptions"
-                  }
+                  },
+                  " & { initialNamespaces?: string[] | undefined; }"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -26399,6 +26414,34 @@
           },
           {
             "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/actions.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/actions.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/index.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/index.ts"
+          },
+          {
+            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/api.ts"
           },
           {
@@ -26424,14 +26467,6 @@
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
           },
           {
             "plugin": "cases",
