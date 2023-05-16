@@ -8,7 +8,7 @@
 import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { isObject } from 'lodash';
 
@@ -22,34 +22,32 @@ import {
 } from './custom_metric/custom_metric_type_form';
 import { maxWidth } from './slo_edit_form';
 
-export function SloEditFormIndicatorSection() {
+interface SloEditFormIndicatorSectionProps {
+  isEditMode: boolean;
+}
+
+export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicatorSectionProps) {
   const { control, watch, setValue } = useFormContext<CreateSLOInput>();
-
-  const indicator = watch('indicator.type');
-
-  // Set the defaults for the form when switching between different indicators
-  useEffect(() => {
-    if (indicator === 'sli.metric.custom') {
-      setValue('indicator.params.good.metrics', [NEW_CUSTOM_METRIC]);
-      setValue('indicator.params.good.equation', 'A');
-      setValue('indicator.params.total.metrics', [NEW_CUSTOM_METRIC]);
-      setValue('indicator.params.total.equation', 'A');
-    }
-    if (indicator === 'sli.kql.custom' && isObject(watch('indicator.params.good'))) {
-      setValue('indicator.params.good', '');
-      setValue('indicator.params.total', '');
-    }
-  }, [indicator, setValue, watch]);
 
   const getIndicatorTypeForm = () => {
     switch (watch('indicator.type')) {
       case 'sli.kql.custom':
+        if (isObject(watch('indicator.params.good'))) {
+          setValue('indicator.params.good', '');
+          setValue('indicator.params.total', '');
+        }
         return <CustomKqlIndicatorTypeForm />;
       case 'sli.apm.transactionDuration':
         return <ApmLatencyIndicatorTypeForm />;
       case 'sli.apm.transactionErrorRate':
         return <ApmAvailabilityIndicatorTypeForm />;
       case 'sli.metric.custom':
+        if (!isObject(watch('indicator.params.good'))) {
+          setValue('indicator.params.good.metrics', [NEW_CUSTOM_METRIC]);
+          setValue('indicator.params.good.equation', 'A');
+          setValue('indicator.params.total.metrics', [NEW_CUSTOM_METRIC]);
+          setValue('indicator.params.total.equation', 'A');
+        }
         return <CustomMetricIndicatorTypeForm />;
       default:
         return null;
@@ -64,28 +62,30 @@ export function SloEditFormIndicatorSection() {
       style={{ maxWidth }}
       data-test-subj="sloEditFormIndicatorSection"
     >
-      <EuiFormRow
-        label={i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
-          defaultMessage: 'Choose the SLI type',
-        })}
-      >
-        <Controller
-          name="indicator.type"
-          control={control}
-          rules={{ required: true }}
-          render={({ field: { ref, ...field } }) => (
-            <EuiSelect
-              {...field}
-              required
-              data-test-subj="sloFormIndicatorTypeSelect"
-              options={SLI_OPTIONS}
+      {!isEditMode && (
+        <>
+          <EuiFormRow
+            label={i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
+              defaultMessage: 'Choose the SLI type',
+            })}
+          >
+            <Controller
+              name="indicator.type"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  required
+                  data-test-subj="sloFormIndicatorTypeSelect"
+                  options={SLI_OPTIONS}
+                />
+              )}
             />
-          )}
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="xxl" />
-
+          </EuiFormRow>
+          <EuiSpacer size="xxl" />
+        </>
+      )}
       {getIndicatorTypeForm()}
     </EuiPanel>
   );
