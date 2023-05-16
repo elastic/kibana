@@ -17,7 +17,7 @@ import { PlatformSelector } from '../platform_selector';
 interface Props {
   installCommand: CommandsByPlatform;
   isK8s: K8sMode | undefined;
-  isCSP?: CSPMode | undefined;
+  isCSP: CSPMode | undefined;
   enrollToken?: string;
   fullCopyButton?: boolean;
   isManaged?: boolean;

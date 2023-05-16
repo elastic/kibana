@@ -20,6 +20,11 @@ export type CSPMode = 'IS_LOADING' | 'IS_NOT_CSP' | 'IS_CSP_KSPM' | 'IS_CSP_CNVM
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
 
+export interface CSPObject {
+  status: CSPMode;
+  cloudformationUrl: string | undefined;
+}
+
 export interface BaseProps {
   /**
    * The user selected policy to be used. If this value is `undefined` a value must be provided for `agentPolicies`.
@@ -30,7 +35,7 @@ export interface BaseProps {
 
   isK8s?: K8sMode;
 
-  isCSP?: CSPMode;
+  isCSP?: CSPObject;
 
   /**
    * There is a step in the agent enrollment process that allows users to see the data from an integration represented in the UI

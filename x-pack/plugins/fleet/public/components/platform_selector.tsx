@@ -119,7 +119,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
         defaultMessage:
-          'We recommend against deploying CSPM within Mac as it is currently not being supported.',
+          'We recommend against deploying this integration within Mac as it is currently not being supported.',
       })}
       color="warning"
       iconType="warning"

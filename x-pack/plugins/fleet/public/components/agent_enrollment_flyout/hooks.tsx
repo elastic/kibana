@@ -16,13 +16,9 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
 } from '../../../common';
+import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../services';
 
-import type { K8sMode, CSPMode } from './types';
-
-interface CSPObject {
-  status: CSPMode;
-  cloudformationUrl: string;
-}
+import type { K8sMode, CSPObject } from './types';
 
 // Packages that requires custom elastic-agent manifest
 const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
@@ -83,16 +79,20 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
         return;
       }
 
-      const pkgArray = agentPolicy?.package_policies?.map((e) => isCSPPackage(e));
+      const cspPackageObj = agentPolicy?.package_policies?.map((pkgPolicy) =>
+        getCSPPackageType(pkgPolicy)
+      );
 
-      if (pkgArray?.includes('IS_CSP_KSPM')) {
-        setIsCSP({ status: 'IS_CSP_KSPM', cloudformationUrl: 'PlaceHolder' });
-      } else if (pkgArray?.includes('IS_CSP_CSPM')) {
-        setIsCSP({ status: 'IS_CSP_CSPM', cloudformationUrl: 'PlaceHolder' });
-      } else if (pkgArray?.includes('IS_CSP_CNVM')) {
-        setIsCSP({ status: 'IS_CSP_CNVM', cloudformationUrl: 'PlaceHolder' });
+      const cloudFormationTemplateUrl = getCloudFormationTemplateUrlFromPackagePolicy(agentPolicy);
+
+      if (cspPackageObj?.includes('IS_CSP_KSPM')) {
+        setIsCSP({ status: 'IS_CSP_KSPM', cloudformationUrl: cloudFormationTemplateUrl });
+      } else if (cspPackageObj?.includes('IS_CSP_CSPM')) {
+        setIsCSP({ status: 'IS_CSP_CSPM', cloudformationUrl: cloudFormationTemplateUrl });
+      } else if (cspPackageObj?.includes('IS_CSP_CNVM')) {
+        setIsCSP({ status: 'IS_CSP_CNVM', cloudformationUrl: cloudFormationTemplateUrl });
       } else {
-        setIsCSP({ status: 'IS_NOT_CSP', cloudformationUrl: 'PlaceHolder' });
+        setIsCSP({ status: 'IS_NOT_CSP', cloudformationUrl: cloudFormationTemplateUrl });
       }
     }
 
@@ -109,7 +109,7 @@ const isK8sPackage = (pkg: PackagePolicy) => {
   return K8S_PACKAGES.has(name);
 };
 
-const isCSPPackage = (pkg: PackagePolicy) => {
+const getCSPPackageType = (pkg: PackagePolicy) => {
   const name = pkg.package?.name as string;
   if (name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE) {
     if (

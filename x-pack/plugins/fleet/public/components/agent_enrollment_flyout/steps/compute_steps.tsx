@@ -157,7 +157,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       InstallStandaloneAgentStep({
         installCommand: standaloneInstallCommands,
         isK8s,
-        isCSP,
+        isCSP: isCSP?.status,
       })
     );
 
@@ -263,7 +263,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           apiKeyData,
           selectedApiKeyId,
           isK8s,
-          isCSP,
+          isCSP: isCSP?.status,
           enrollToken,
         })
       );
