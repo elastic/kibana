@@ -301,8 +301,7 @@ generating deep links to other apps using locators, and creating short URLs.
 
 
 |{kib-repo}blob/{branch}/src/plugins/text_based_languages/README.md[textBasedLanguages]
-|Contains the ESQL editor with the autocomplete and the autosuggest functionality (based on atlr).
-The antlr code can be found in packages/kbn-monaco/src/esql
+|The editor accepts the following properties:
 
 
 |<<uiactions-plugin>>
