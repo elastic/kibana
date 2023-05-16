@@ -22,19 +22,19 @@ import {
   EuiDataGridColumn,
   EuiDataGridRowHeightsOptions,
 } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { CellActions } from './components/cell_actions';
-import { cellPopoverRendererFactory } from './components/cell_popover_renderer';
-import { cellRendererFactory } from './components/cell_renderer';
+import { CellActions } from './cell_actions';
+import { cellPopoverRendererFactory } from './cell_popover_renderer';
+import { cellRendererFactory } from './cell_renderer';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { EmptyState } from '../../../../components/empty_state/empty_state';
-import { IndicatorsTableContext, IndicatorsTableContextValue } from './contexts/context';
+import { EmptyState } from '../../../../components/empty_state';
+import { IndicatorsTableContext, IndicatorsTableContextValue } from '../../hooks/use_table_context';
 import { IndicatorsFlyout } from '../flyout/flyout';
-import { ColumnSettingsValue } from './hooks/use_column_settings';
-import { useToolbarOptions } from './hooks/use_toolbar_options';
+import { ColumnSettingsValue } from '../../hooks/use_column_settings';
+import { useToolbarOptions } from '../../hooks/use_toolbar_options';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
-import { getFieldSchema } from '../../utils';
-import { Pagination } from '../../services';
+import { getFieldSchema } from '../../utils/get_field_schema';
+import { Pagination } from '../../services/fetch_indicators';
 import { TABLE_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
 
 export interface IndicatorsTableProps {

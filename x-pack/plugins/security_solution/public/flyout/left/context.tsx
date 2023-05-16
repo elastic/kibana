@@ -60,8 +60,9 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
   const getFieldsData = useGetFieldsData(searchHit?.fields);
 
   const contextValue = useMemo(
-    () => (id && indexName ? { eventId: id, indexName, getFieldsData } : undefined),
-    [id, indexName, getFieldsData]
+    () =>
+      id && indexName ? { eventId: id, indexName, getFieldsData, data: searchHit } : undefined,
+    [id, indexName, getFieldsData, searchHit]
   );
 
   if (loading) {

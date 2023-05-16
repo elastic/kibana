@@ -9,7 +9,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiHorizontalRule,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiSpacer,
@@ -313,7 +313,7 @@ const EventDetailsComponent: React.FC<Props> = ({
 
                 {isEnrichmentsLoading && (
                   <>
-                    <EuiLoadingContent lines={2} />
+                    <EuiSkeletonText lines={2} />
                   </>
                 )}
 
@@ -364,6 +364,7 @@ const EventDetailsComponent: React.FC<Props> = ({
             ),
             content: (
               <ThreatDetailsView
+                before={<EuiSpacer size="m" />}
                 loading={isEnrichmentsLoading}
                 enrichments={allEnrichments}
                 showInvestigationTimeEnrichments={!isEmpty(eventFields)}
