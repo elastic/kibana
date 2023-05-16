@@ -11,9 +11,7 @@ import { getOutdatedDocumentsQuery } from './outdated_documents_query';
 import { createType } from '../test_helpers/saved_object_type';
 
 const dummyModelVersion: SavedObjectsModelVersion = {
-  modelChange: {
-    type: 'expansion',
-  },
+  changes: [],
 };
 
 const dummyMigration = jest.fn();

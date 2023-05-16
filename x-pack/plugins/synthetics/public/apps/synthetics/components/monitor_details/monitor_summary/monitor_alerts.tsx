@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -42,7 +42,7 @@ export const MonitorAlerts = ({
   const selectedLocation = useSelectedLocation();
 
   if (!monitorId || !selectedLocation) {
-    return <EuiLoadingContent />;
+    return <EuiSkeletonText />;
   }
 
   return (

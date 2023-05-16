@@ -21,6 +21,23 @@
     "functions": [
       {
         "parentPluginId": "@kbn/utils",
+        "id": "def-common.buildDataPaths",
+        "type": "Function",
+        "tags": [],
+        "label": "buildDataPaths",
+        "description": [],
+        "signature": [
+          "() => string[]"
+        ],
+        "path": "packages/kbn-utils/src/path/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utils",
         "id": "def-common.concatStreamProviders",
         "type": "Function",
         "tags": [

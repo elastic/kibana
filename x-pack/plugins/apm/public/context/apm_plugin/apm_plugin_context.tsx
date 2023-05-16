@@ -14,6 +14,7 @@ import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ApmPluginSetupDeps } from '../../plugin';
 import { ConfigSchema } from '../..';
 
@@ -28,6 +29,7 @@ export interface ApmPluginContextValue {
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);
