@@ -9,6 +9,9 @@
 import Path from 'path';
 import { setTimeout } from 'timers/promises';
 
+import axios from 'axios';
+import * as Url from 'url';
+
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -19,6 +22,20 @@ import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
 import { RunTestsOptions } from './flags';
+
+export interface Indicator {
+  status: string;
+  symptom: string;
+}
+export interface Indicators {
+  disk: Indicator;
+  ilm: Indicator;
+  master_is_stable: Indicator;
+  repository_integrity: Indicator;
+  shards_availability: Indicator;
+  shards_capacity: Indicator;
+  slm: Indicator;
+}
 
 /**
  * Run servers and tests for each config
@@ -96,6 +113,37 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             if (abortCtrl.signal.aborted) {
               return;
             }
+          }
+
+          // curl --user elastic:changeme -X GET "localhost:9220/_health_report?pretty"
+          const authResponse = await axios.request({
+            url: Url.format({
+              ...config.get('servers.elasticsearch'),
+              pathname: '/_health_report',
+            }),
+            method: 'get',
+            validateStatus: () => true,
+            maxRedirects: 0,
+          });
+
+          if (authResponse.status !== 200) {
+            throw new Error(
+              `Failed to get ES health report: ${authResponse.status} ${authResponse.statusText}`
+            );
+          }
+
+          const indicators: Indicators = authResponse.data.indicators;
+          const badIndicators: Array<[string, Indicator]> = Object.entries(indicators).filter(
+            ([_, value]) => value.status !== 'green'
+          );
+
+          if (badIndicators.length > 0) {
+            badIndicators.forEach(([key, value]) =>
+              log.warning(`${key}: ${JSON.stringify(value)}`)
+            );
+            throw new Error('Elasticsearch is not healthy, aborting');
+          } else {
+            log.debug(`Elasticsearch instance is healthy`);
           }
 
           await runKibanaServer({
