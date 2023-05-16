@@ -18,7 +18,7 @@ set of helper methods and sub-directories for
 - `security` project specific functionality
 
 The `shared` directory contains fixtures, services, ... that are shared across
-`api_integration` abd `functional` tests
+`api_integration` abd `functional` tests.
 
 ```
 x-pack/test_serverless/
@@ -61,6 +61,16 @@ following namesapces:
 | observability | svlOblt                      |
 | search        | svlSearch                    |
 | security      | svlSec                       |
+
+### Adding Serverless Tests
+
+As outlined above, serverless tests are separated from stateful tests (except
+the reuse helper methods), which includes a separate base configuration. All
+tests that should run in an serverless environment have to be added here in
+`x-pack/test_serverless`.
+
+Tests in this area should be clearly designed for the serverless environment,
+particularly when it comes to timing for API requests and UI interaction.
 
 ## Run tests
 Similar to how functional tests are run in `x-pack/test`, you can point the
