@@ -12,7 +12,6 @@ import _ from 'lodash';
 import * as fs from 'fs';
 import globby from 'globby';
 import pMap from 'p-map';
-import deepMerge from 'deepmerge';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
 import {
