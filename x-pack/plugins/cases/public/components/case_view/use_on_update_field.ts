@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import type { CaseConnector } from '../../../common/api';
@@ -17,18 +17,32 @@ import { getTypedPayload } from '../../containers/utils';
 import type { OnUpdateFields } from './types';
 
 export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
-  const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase();
+  const { isLoading, mutate: updateCaseProperty } = useUpdateCase();
+  const [loadingKey, setLoadingKey] = useState<UpdateKey | null>(null);
 
   const onUpdateField = useCallback(
     ({ key, value, onSuccess, onError }: OnUpdateFields) => {
-      const callUpdate = (updateKey: UpdateKey, updateValue: UpdateByKey['updateValue']) =>
-        updateCaseProperty({
-          updateKey,
-          updateValue,
-          caseData,
-          onSuccess,
-          onError,
-        });
+      const callUpdate = (updateKey: UpdateKey, updateValue: UpdateByKey['updateValue']) => {
+        setLoadingKey(updateKey);
+
+        updateCaseProperty(
+          {
+            updateKey,
+            updateValue,
+            caseData,
+          },
+          {
+            onSuccess: () => {
+              onSuccess?.();
+              setLoadingKey(null);
+            },
+            onError: () => {
+              onError?.();
+              setLoadingKey(null);
+            },
+          }
+        );
+      };
 
       switch (key) {
         case 'title':

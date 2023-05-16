@@ -52,7 +52,8 @@ export default function ({ getService }: FtrProviderContext) {
     return createTestDefinitions(testCases, false);
   };
 
-  describe('_update', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/157452
+  describe.skip('_update', () => {
     getTestScenarios().spaces.forEach(({ spaceId }) => {
       const tests = createTests(spaceId);
       addTests(`within the ${spaceId} space`, { spaceId, tests });

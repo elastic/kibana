@@ -11,6 +11,7 @@ export interface ConnectorServerSideDefinition {
   iconPath: string;
   isBeta: boolean;
   isNative: boolean;
+  isTechPreview?: boolean;
   keywords: string[];
   name: string;
   serviceType: string;
@@ -53,7 +54,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     keywords: ['postgresql', 'sql', 'database', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.postgresql.name', {
-      defaultMessage: 'Postgresql',
+      defaultMessage: 'PostgreSQL',
     }),
     serviceType: 'postgresql',
   },
@@ -68,6 +69,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'azure_blob_storage',
   },
   {
+    iconPath: 'confluence_cloud.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['confluence', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
+      defaultMessage: 'Confluence Cloud & Server',
+    }),
+    serviceType: 'confluence',
+  },
+  {
     iconPath: 'google_cloud_storage.svg',
     isBeta: true,
     isNative: false,
@@ -76,6 +87,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'Google Cloud Storage',
     }),
     serviceType: 'google_cloud_storage',
+  },
+  {
+    iconPath: 'jira_cloud.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['jira', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
+      defaultMessage: 'Jira Cloud & Server',
+    }),
+    serviceType: 'jira',
   },
   {
     iconPath: 'network_drive.svg',
@@ -106,6 +127,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'S3',
     }),
     serviceType: 's3',
+  },
+  {
+    iconPath: 'sharepoint_online.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['sharepoint', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint.name', {
+      defaultMessage: 'Sharepoint Online & Server',
+    }),
+    serviceType: 'sharepoint',
   },
   {
     iconPath: 'custom.svg',
