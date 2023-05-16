@@ -8,7 +8,7 @@ echo '--- Setup environment vars'
 source .buildkite/scripts/common/env.sh
 source .buildkite/scripts/common/setup_node.sh
 
-BUILDKITE_TOKEN="$(vault_get secret/kibana-issues/dev/buildkite-ci buildkite_token_all_jobs)"
+BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
 export BUILDKITE_TOKEN
 
 echo '--- Install/build buildkite dependencies'
@@ -81,10 +81,10 @@ EOF
   if [[ "$CI_STATS_BUILD_ID" ]]; then
     echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
 
-    CI_STATS_TOKEN="$(vault_get secret/kibana-issues/dev/kibana_ci_stats api_token)"
+    CI_STATS_TOKEN="$(vault_get kibana_ci_stats api_token)"
     export CI_STATS_TOKEN
 
-    CI_STATS_HOST="$(vault_get secret/kibana-issues/dev/kibana_ci_stats api_host)"
+    CI_STATS_HOST="$(vault_get kibana_ci_stats api_host)"
     export CI_STATS_HOST
 
     KIBANA_CI_STATS_CONFIG=$(jq -n \
@@ -97,57 +97,57 @@ EOF
   fi
 }
 
-GITHUB_TOKEN=$(vault_get secret/kibana-issues/dev/kibanamachine github_token)
+GITHUB_TOKEN=$(vault_get kibanamachine github_token)
 export GITHUB_TOKEN
 
-KIBANA_CI_GITHUB_TOKEN=$(vault_get secret/kibana-issues/dev/kibana-ci-github github_token)
+KIBANA_CI_GITHUB_TOKEN=$(vault_get kibana-ci-github github_token)
 export KIBANA_CI_GITHUB_TOKEN
 
-KIBANA_CI_REPORTER_KEY=$(vault_get secret/kibana-issues/dev/kibanamachine-reporter value)
+KIBANA_CI_REPORTER_KEY=$(vault_get kibanamachine-reporter value)
 export KIBANA_CI_REPORTER_KEY
 
-KIBANA_DOCKER_USERNAME="$(vault_get secret/kibana-issues/dev/container-registry username)"
+KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
 export KIBANA_DOCKER_USERNAME
 
-KIBANA_DOCKER_PASSWORD="$(vault_get secret/kibana-issues/dev/container-registry password)"
+KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
 export KIBANA_DOCKER_PASSWORD
 
-EC_API_KEY="$(vault_get secret/kibana-issues/dev/kibana-ci-cloud-deploy pr_deploy_api_key)"
+EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
 export EC_API_KEY
 
-SYNTHETICS_SERVICE_USERNAME="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-credentials username)"
+SYNTHETICS_SERVICE_USERNAME="$(vault_get kibana-ci-synthetics-credentials username)"
 export SYNTHETICS_SERVICE_USERNAME
 
-SYNTHETICS_SERVICE_PASSWORD="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-credentials password)"
+SYNTHETICS_SERVICE_PASSWORD="$(vault_get kibana-ci-synthetics-credentials password)"
 export SYNTHETICS_SERVICE_PASSWORD
 
-SYNTHETICS_SERVICE_MANIFEST="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-credentials manifest)"
+SYNTHETICS_SERVICE_MANIFEST="$(vault_get kibana-ci-synthetics-credentials manifest)"
 export SYNTHETICS_SERVICE_MANIFEST
 
-SYNTHETICS_REMOTE_KIBANA_USERNAME="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials username)"
+SYNTHETICS_REMOTE_KIBANA_USERNAME="$(vault_get kibana-ci-synthetics-remote-credentials username)"
 export SYNTHETICS_REMOTE_KIBANA_USERNAME
 
-SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials password)"
+SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(vault_get kibana-ci-synthetics-remote-credentials password)"
 export SYNTHETICS_REMOTE_KIBANA_PASSWORD
 
-SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials url)"}
+SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(vault_get kibana-ci-synthetics-remote-credentials url)"}
 export SYNTHETICS_REMOTE_KIBANA_URL
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {
-  TEST_FAILURES_ES_CLOUD_ID=$(vault_get secret/kibana-issues/dev/failed_tests_reporter_es cloud_id)
+  TEST_FAILURES_ES_CLOUD_ID=$(vault_get failed_tests_reporter_es cloud_id)
   export TEST_FAILURES_ES_CLOUD_ID
 
-  TEST_FAILURES_ES_USERNAME=$(vault_get secret/kibana-issues/dev/failed_tests_reporter_es username)
+  TEST_FAILURES_ES_USERNAME=$(vault_get failed_tests_reporter_es username)
   export TEST_FAILURES_ES_USERNAME
 
-  TEST_FAILURES_ES_PASSWORD=$(vault_get secret/kibana-issues/dev/failed_tests_reporter_es password)
+  TEST_FAILURES_ES_PASSWORD=$(vault_get failed_tests_reporter_es password)
   export TEST_FAILURES_ES_PASSWORD
 }
 
 BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
 export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
-vault_get secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
+vault_get kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
