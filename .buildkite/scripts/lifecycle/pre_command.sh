@@ -8,8 +8,8 @@ echo '--- Setup environment vars'
 source .buildkite/scripts/common/env.sh
 source .buildkite/scripts/common/setup_node.sh
 
-# BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
-# export BUILDKITE_TOKEN
+BUILDKITE_TOKEN="$(vault_get secret/kibana-issues/dev/buildkite-ci buildkite_token_all_jobs)"
+export BUILDKITE_TOKEN
 
 echo '--- Install/build buildkite dependencies'
 
@@ -74,80 +74,80 @@ EOF
 }
 
 # Setup CI Stats
-# {
-#   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
-#   export CI_STATS_BUILD_ID
+{
+  CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
+  export CI_STATS_BUILD_ID
 
-#   if [[ "$CI_STATS_BUILD_ID" ]]; then
-#     echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
+  if [[ "$CI_STATS_BUILD_ID" ]]; then
+    echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
 
-#     CI_STATS_TOKEN="$(retry 5 5 vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
-#     export CI_STATS_TOKEN
+    CI_STATS_TOKEN="$(vault_get secret/kibana-issues/dev/kibana_ci_stats api_token)"
+    export CI_STATS_TOKEN
 
-#     CI_STATS_HOST="$(retry 5 5 vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
-#     export CI_STATS_HOST
+    CI_STATS_HOST="$(vault_get secret/kibana-issues/dev/kibana_ci_stats api_host)"
+    export CI_STATS_HOST
 
-#     KIBANA_CI_STATS_CONFIG=$(jq -n \
-#       --arg buildId "$CI_STATS_BUILD_ID" \
-#       --arg apiUrl "https://$CI_STATS_HOST" \
-#       --arg apiToken "$CI_STATS_TOKEN" \
-#       '{buildId: $buildId, apiUrl: $apiUrl, apiToken: $apiToken}' \
-#     )
-#     export KIBANA_CI_STATS_CONFIG
-#   fi
-# }
+    KIBANA_CI_STATS_CONFIG=$(jq -n \
+      --arg buildId "$CI_STATS_BUILD_ID" \
+      --arg apiUrl "https://$CI_STATS_HOST" \
+      --arg apiToken "$CI_STATS_TOKEN" \
+      '{buildId: $buildId, apiUrl: $apiUrl, apiToken: $apiToken}' \
+    )
+    export KIBANA_CI_STATS_CONFIG
+  fi
+}
 
-# GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
-export GITHUB_TOKEN=""
+GITHUB_TOKEN=$(vault_get secret/kibana-issues/dev/kibanamachine github_token)
+export GITHUB_TOKEN
 
-# KIBANA_CI_GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibana-ci-github)
-export KIBANA_CI_GITHUB_TOKEN=""
+KIBANA_CI_GITHUB_TOKEN=$(vault_get secret/kibana-issues/dev/kibana-ci-github github_token)
+export KIBANA_CI_GITHUB_TOKEN
 
-# KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
-export KIBANA_CI_REPORTER_KEY=""
+KIBANA_CI_REPORTER_KEY=$(vault_get secret/kibana-issues/dev/kibanamachine-reporter value)
+export KIBANA_CI_REPORTER_KEY
 
-# KIBANA_DOCKER_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/container-registry)"
-export KIBANA_DOCKER_USERNAME=""
+KIBANA_DOCKER_USERNAME="$(vault_get secret/kibana-issues/dev/container-registry username)"
+export KIBANA_DOCKER_USERNAME
 
-# KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
-export KIBANA_DOCKER_PASSWORD=""
+KIBANA_DOCKER_PASSWORD="$(vault_get secret/kibana-issues/dev/container-registry password)"
+export KIBANA_DOCKER_PASSWORD
 
-# EC_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-cloud-deploy)"
-export EC_API_KEY=""
+EC_API_KEY="$(vault_get secret/kibana-issues/dev/kibana-ci-cloud-deploy pr_deploy_api_key)"
+export EC_API_KEY
 
-# SYNTHETICS_SERVICE_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
-export SYNTHETICS_SERVICE_USERNAME=""
+SYNTHETICS_SERVICE_USERNAME="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-credentials username)"
+export SYNTHETICS_SERVICE_USERNAME
 
-# SYNTHETICS_SERVICE_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
-export SYNTHETICS_SERVICE_PASSWORD=""
+SYNTHETICS_SERVICE_PASSWORD="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-credentials password)"
+export SYNTHETICS_SERVICE_PASSWORD
 
-# SYNTHETICS_SERVICE_MANIFEST="$(retry 5 5 vault read -field=manifest secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
-export SYNTHETICS_SERVICE_MANIFEST=""
+SYNTHETICS_SERVICE_MANIFEST="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-credentials manifest)"
+export SYNTHETICS_SERVICE_MANIFEST
 
-# SYNTHETICS_REMOTE_KIBANA_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"
-export SYNTHETICS_REMOTE_KIBANA_USERNAME=""
+SYNTHETICS_REMOTE_KIBANA_USERNAME="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials username)"
+export SYNTHETICS_REMOTE_KIBANA_USERNAME
 
-# SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"
-export SYNTHETICS_REMOTE_KIBANA_PASSWORD=""
+SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials password)"
+export SYNTHETICS_REMOTE_KIBANA_PASSWORD
 
-# SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(retry 5 5 vault read -field=url secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"}
-export SYNTHETICS_REMOTE_KIBANA_URL=""
+SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(vault_get secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials url)"}
+export SYNTHETICS_REMOTE_KIBANA_URL
 
-# # Setup Failed Test Reporter Elasticsearch credentials
-# {
-#   TEST_FAILURES_ES_CLOUD_ID=$(retry 5 5 vault read -field=cloud_id secret/kibana-issues/dev/failed_tests_reporter_es)
-#   export TEST_FAILURES_ES_CLOUD_ID
+# Setup Failed Test Reporter Elasticsearch credentials
+{
+  TEST_FAILURES_ES_CLOUD_ID=$(vault_get secret/kibana-issues/dev/failed_tests_reporter_es cloud_id)
+  export TEST_FAILURES_ES_CLOUD_ID
 
-#   TEST_FAILURES_ES_USERNAME=$(retry 5 5 vault read -field=username secret/kibana-issues/dev/failed_tests_reporter_es)
-#   export TEST_FAILURES_ES_USERNAME
+  TEST_FAILURES_ES_USERNAME=$(vault_get secret/kibana-issues/dev/failed_tests_reporter_es username)
+  export TEST_FAILURES_ES_USERNAME
 
-#   TEST_FAILURES_ES_PASSWORD=$(retry 5 5 vault read -field=password secret/kibana-issues/dev/failed_tests_reporter_es)
-#   export TEST_FAILURES_ES_PASSWORD
-# }
+  TEST_FAILURES_ES_PASSWORD=$(vault_get secret/kibana-issues/dev/failed_tests_reporter_es password)
+  export TEST_FAILURES_ES_PASSWORD
+}
 
-# BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
-export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE=""
-# retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
+BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
+export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
+vault_get secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
