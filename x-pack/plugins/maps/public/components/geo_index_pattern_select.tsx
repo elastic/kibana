@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,21 +27,16 @@ interface Props {
 }
 
 export function GeoIndexPatternSelect(props: Props) {
-  const [isDataViewInvalid, setIsDataViewInvalid] = useState(false);
   const [noDataViews, setNoDataViews] = useState(false);
 
-  useEffect(() => {
-    if (!props.dataView) {
-      setIsDataViewInvalid(false);
-      return;
-    }
-
-    const hasGeoFields = props.dataView.fields.some((field) => {
-      return !indexPatterns.isNestedField(field) && props?.isGeoPointsOnly
-        ? (ES_GEO_FIELD_TYPE.GEO_POINT as string) === field.type
-        : ES_GEO_FIELD_TYPES.includes(field.type);
-    });
-    setIsDataViewInvalid(!hasGeoFields);
+  const hasGeoFields = useMemo(() => {
+    return props.dataView
+      ? props.dataView.fields.some((field) => {
+          return !indexPatterns.isNestedField(field) && props?.isGeoPointsOnly
+            ? (ES_GEO_FIELD_TYPE.GEO_POINT as string) === field.type
+            : ES_GEO_FIELD_TYPES.includes(field.type);
+        })
+      : false;
   }, [props.dataView, props?.isGeoPointsOnly]);
 
   const isMounted = useMountedState();
@@ -111,7 +106,7 @@ export function GeoIndexPatternSelect(props: Props) {
   }
 
   const IndexPatternSelect = getIndexPatternSelectComponent();
-  const error = isDataViewInvalid
+  const error = !hasGeoFields
     ? i18n.translate('xpack.maps.noGeoFieldInIndexPattern.message', {
         defaultMessage: 'Data view does not contain any geospatial fields',
       })
@@ -121,9 +116,9 @@ export function GeoIndexPatternSelect(props: Props) {
     <>
       {_renderNoIndexPatternWarning()}
 
-      <EuiFormRow label={getDataViewLabel()} isInvalid={isDataViewInvalid} error={error}>
+      <EuiFormRow label={getDataViewLabel()} isInvalid={!hasGeoFields} error={error}>
         <IndexPatternSelect
-          isInvalid={isDataViewInvalid}
+          isInvalid={!hasGeoFields}
           isDisabled={noDataViews}
           indexPatternId={props.dataView?.id ? props.dataView.id : ''}
           onChange={_onIndexPatternSelect}
