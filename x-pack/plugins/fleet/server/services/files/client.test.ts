@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
@@ -288,22 +290,71 @@ describe('When using FleetFilesClient', () => {
   });
 
   describe('#delete() method', () => {
-    it.todo('should error if `type` is not `to-host`');
+    it('should error if `type` is not `to-host`', async () => {
+      await expect(getFleetFilesInstance('from-host').delete('123')).rejects.toThrow(
+        'Method is only supported when `type` is `to-host`'
+      );
+    });
 
-    it.todo('should delete file');
+    it('should delete file', async () => {
+      const result = await getFleetFilesInstance('to-host').delete('123');
+
+      expect(result).toBeUndefined();
+      expect(esFileClientMock.delete).toHaveBeenCalledWith({ id: '123', hasContent: true });
+    });
   });
 
   describe('#doesFileHaveData() method', () => {
-    it.todo('should search data index for file id');
+    it('should search data index for file id', async () => {
+      await getFleetFilesInstance().doesFileHaveData('123');
 
-    it.todo('should return `true` if data exists');
+      expect(esClientMock.search).toHaveBeenCalledWith({
+        body: {
+          _source: false,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    bid: '123',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        index: '.fleet-file-data-foo',
+        size: 0,
+      });
+    });
 
-    it.todo('should return `false` if no data exists');
+    it('should return `true` if data exists', async () => {
+      await expect(getFleetFilesInstance().doesFileHaveData('123')).resolves.toBe(true);
+    });
+
+    it('should return `false` if no data exists', async () => {
+      (fleetFileDataIndexSearchResponse.hits.total as estypes.SearchTotalHits).value = 0;
+      fleetFileDataIndexSearchResponse.hits.hits = [];
+
+      await expect(getFleetFilesInstance().doesFileHaveData('123')).resolves.toBe(false);
+    });
   });
 
   describe('#downlaod() method', () => {
-    it.todo('should should return expected response');
+    it('should should return expected response', async () => {
+      await expect(getFleetFilesInstance().download('123')).resolves.toEqual({
+        stream: expect.any(Readable),
+        fileName: 'test.txt',
+        mimeType: 'text/plain',
+      });
+    });
 
-    it.todo('should throw an error if unable to get file record');
+    it('should throw an error if unable to get file record', async () => {
+      esFile.downloadContent.mockRejectedValue(new Error('oh oh'));
+
+      await expect(getFleetFilesInstance().download('123')).rejects.toThrow(
+        'Attempt to get download stream failed with: oh oh'
+      );
+    });
   });
 });
