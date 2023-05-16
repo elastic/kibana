@@ -82,16 +82,13 @@ export const validateResponseActionsPermissions = async (
     return;
   }
 
-  const payload = ruleUpdate as QueryRule;
-  const existingPayload = existingRule as Rule<UnifiedQueryRuleParams>;
-
-  if (!isQueryRulePayload(payload) && (!existingPayload || !isQueryRuleObject(existingPayload))) {
+  if (!isQueryRulePayload(ruleUpdate) || (existingRule && !isQueryRuleObject(existingRule))) {
     return;
   }
 
   if (
-    payload.response_actions?.length === 0 &&
-    existingPayload?.params?.responseActions?.length === 0
+    ruleUpdate.response_actions?.length === 0 &&
+    existingRule?.params?.responseActions?.length === 0
   ) {
     return;
   }
@@ -99,8 +96,8 @@ export const validateResponseActionsPermissions = async (
   const endpointAuthz = await securitySolution.getEndpointAuthz();
 
   const differences = findDifferenceInArrays<ResponseAction, RuleResponseAction>(
-    payload.response_actions,
-    existingPayload?.params?.responseActions
+    ruleUpdate.response_actions,
+    existingRule?.params?.responseActions
   );
 
   differences.forEach((action) => {
@@ -127,6 +124,6 @@ function isQueryRulePayload(rule: RuleCreateProps | RuleUpdateProps): rule is Qu
   return 'response_actions' in rule;
 }
 
-function isQueryRuleObject(rule: RuleAlertType): rule is Rule<UnifiedQueryRuleParams> {
-  return 'responseActions' in rule.params;
+function isQueryRuleObject(rule?: RuleAlertType): rule is Rule<UnifiedQueryRuleParams> {
+  return rule != null && 'params' in rule && 'responseActions' in rule?.params;
 }
