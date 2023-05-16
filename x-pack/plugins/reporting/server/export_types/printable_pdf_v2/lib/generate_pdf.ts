@@ -7,12 +7,12 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../../..';
 import type { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import type { PdfScreenshotOptions } from '../../../types';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import { getTracker } from '../../common/pdf_tracker';
 import type { TaskPayloadPDFV2 } from '../types';
+import { PdfCore } from '../../printable_pdf/lib/generate_pdf';
 
 interface PdfResult {
   buffer: Uint8Array | null;
@@ -21,7 +21,7 @@ interface PdfResult {
 }
 
 export function generatePdfObservable(
-  reporting: ReportingCore,
+  reporting: PdfCore,
   job: TaskPayloadPDFV2,
   locatorParams: LocatorParams[],
   options: Omit<PdfScreenshotOptions, 'urls'>
