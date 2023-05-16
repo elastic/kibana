@@ -208,6 +208,49 @@ describe('Endpoint Authz service', () => {
         expect(authz[auth]).toBe(false);
       });
 
+      it.each<[EndpointAuthzKeyList[number], string[]]>([
+        ['canWriteEndpointList', ['writeEndpointList']],
+        ['canReadEndpointList', ['writeEndpointList', 'readEndpointList']],
+        ['canWritePolicyManagement', ['writePolicyManagement']],
+        ['canReadPolicyManagement', ['writePolicyManagement', 'readPolicyManagement']],
+        ['canWriteActionsLogManagement', ['writeActionsLogManagement']],
+        ['canReadActionsLogManagement', ['writeActionsLogManagement', 'readActionsLogManagement']],
+        [
+          'canAccessEndpointActionsLogManagement',
+          ['writeActionsLogManagement', 'readActionsLogManagement'],
+        ],
+        ['canIsolateHost', ['writeHostIsolation']],
+        ['canUnIsolateHost', ['writeHostIsolation']],
+        ['canKillProcess', ['writeProcessOperations']],
+        ['canSuspendProcess', ['writeProcessOperations']],
+        ['canGetRunningProcesses', ['writeProcessOperations']],
+        ['canWriteExecuteOperations', ['writeExecuteOperations']],
+        ['canWriteFileOperations', ['writeFileOperations']],
+        ['canWriteTrustedApplications', ['writeTrustedApplications']],
+        ['canReadTrustedApplications', ['writeTrustedApplications', 'readTrustedApplications']],
+        ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
+        [
+          'canReadHostIsolationExceptions',
+          ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
+        ],
+        ['canWriteBlocklist', ['writeBlocklist']],
+        ['canReadBlocklist', ['writeBlocklist', 'readBlocklist']],
+        ['canWriteEventFilters', ['writeEventFilters']],
+        ['canReadEventFilters', ['writeEventFilters', 'readEventFilters']],
+        // all dependent privileges are false and so it should be false
+        ['canAccessResponseConsole', responseConsolePrivileges],
+      ])(
+        '%s should be false if `packagePrivilege.%s` is `false` and user roles is undefined',
+        (auth, privileges) => {
+          // read permission checks for write || read so we need to set both to false
+          privileges.forEach((privilege) => {
+            fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
+          });
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, undefined, true);
+          expect(authz[auth]).toBe(false);
+        }
+      );
+
       it.each(responseConsolePrivileges)(
         'canAccessResponseConsole should be true if %s for CONSOLE privileges is true',
         (responseConsolePrivilege) => {
