@@ -70,7 +70,7 @@ export function Table<T extends UserContentCommonSchema>({
   dispatch,
   entityName,
   entityNamePlural,
-  fixedTag = 'Security Solution',
+  fixedTag,
   hasUpdatedAtMetadata,
   isFetchingItems,
   items,
