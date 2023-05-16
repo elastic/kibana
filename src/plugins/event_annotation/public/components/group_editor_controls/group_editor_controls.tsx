@@ -19,6 +19,8 @@ import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../../comm
 import { AnnotationEditorControls } from '../annotation_editor_controls';
 import { AnnotationList } from './annotation_list';
 
+const ENABLE_INDIVIDUAL_ANNOTATION_EDITING = false;
+
 export const GroupEditorControls = ({
   group,
   update,
@@ -150,17 +152,19 @@ export const GroupEditorControls = ({
             }
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
-            defaultMessage: 'Annotations',
-          })}
-        >
-          <AnnotationList
-            annotations={group.annotations}
-            selectAnnotation={setSelectedAnnotation}
-            update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
-          />
-        </EuiFormRow>
+        {ENABLE_INDIVIDUAL_ANNOTATION_EDITING && (
+          <EuiFormRow
+            label={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
+              defaultMessage: 'Annotations',
+            })}
+          >
+            <AnnotationList
+              annotations={group.annotations}
+              selectAnnotation={setSelectedAnnotation}
+              update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
+            />
+          </EuiFormRow>
+        )}
       </EuiForm>
     </>
   ) : (
