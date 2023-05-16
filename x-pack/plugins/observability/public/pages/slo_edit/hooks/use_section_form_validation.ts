@@ -19,7 +19,25 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
   let isIndicatorSectionValid: boolean = false;
 
   switch (watch('indicator.type')) {
-    case 'sli.metric.custom':
+   case 'sli.metric.custom':
+      const isGoodParamsValid = () => {
+        const data = getValues(
+          'indicator.params.good'
+        ) as MetricCustomIndicatorSchema['params']['good'];
+        const isEquationValid = !getFieldState('indicator.params.good.equation').invalid;
+        const areMetricsValid = (data.metrics ?? []).every((metric) => Boolean(metric.field));
+        return isEquationValid && areMetricsValid;
+      };
+
+      const isTotalParamsValid = () => {
+        const data = getValues(
+          'indicator.params.total'
+        ) as MetricCustomIndicatorSchema['params']['total'];
+        const isEquationValid = !getFieldState('indicator.params.total.equation').invalid;
+        const areMetricsValid = (data.metrics ?? []).every((metric) => Boolean(metric.field));
+        return isEquationValid && areMetricsValid;
+      };
+
       isIndicatorSectionValid =
         (
           [
@@ -31,14 +49,8 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         (['indicator.params.index', 'indicator.params.timestampField'] as const).every(
           (field) => !!getValues(field)
         ) &&
-        (['indicator.params.good', 'indicator.params.total'] as const).every((field, index) => {
-          const indicator = getValues(
-            field
-          ) as unknown as MetricCustomIndicatorSchema['params']['good'];
-          const isValidEquation = !getFieldState(`${field}.equation`).invalid;
-          const isFieldsValid = indicator.metrics.every((metric) => Boolean(metric.field));
-          return isValidEquation && isFieldsValid;
-        });
+        isGoodParamsValid() &&
+        isTotalParamsValid();
       break;
     case 'sli.kql.custom':
       isIndicatorSectionValid =
