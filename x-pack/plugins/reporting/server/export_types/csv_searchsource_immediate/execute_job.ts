@@ -10,8 +10,9 @@ import { Writable } from 'stream';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { CsvGenerator } from '@kbn/generate-csv';
 import { getFieldFormats } from '../../services';
-import { ReportingRequestHandlerContext, RunTaskFnFactory } from '../../types';
+import { ReportingRequestHandlerContext } from '../../types';
 import { JobParamsDownloadCSV } from './types';
+import { RunTaskFnFactory } from '../csv_v2/execute_job';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was

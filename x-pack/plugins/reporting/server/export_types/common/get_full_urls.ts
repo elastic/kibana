@@ -64,12 +64,7 @@ function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
   return (job as TaskPayloadPDF).objects !== undefined;
 }
 
-export type ReportingExportTypeCore = UrlCore & PngCore;
-
-export function getFullUrls(
-  reporting: ReportingExportTypeCore,
-  job: TaskPayloadPDF | TaskPayloadPNG
-) {
+export function getFullUrls(reporting: UrlCore | PngCore, job: TaskPayloadPDF | TaskPayloadPNG) {
   const serverInfo = reporting.getServerInfo();
   const {
     kibanaServer: { protocol, hostname, port },

@@ -12,6 +12,7 @@ import { lastValueFrom } from 'rxjs';
 import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { generatePngObservable } from '../../export_types/common';
+import { PngCore } from '../../export_types/common/generate_png';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { authorizedUserPreRouting, getCounters } from '../lib';
 
@@ -44,8 +45,10 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
+      const reportingPng = reporting as unknown as PngCore;
+
       return lastValueFrom(
-        generatePngObservable(reporting, logger, {
+        generatePngObservable(reportingPng, logger, {
           layout,
           request: req,
           browserTimezone: 'America/Los_Angeles',

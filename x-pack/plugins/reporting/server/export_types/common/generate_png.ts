@@ -6,17 +6,22 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import { PngScreenshotResult, ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { ScreenshotOptions } from '@kbn/screenshotting-plugin/server';
+import {
+  PngScreenshotResult,
+  ScreenshottingStart,
+  ScreenshotOptions,
+} from '@kbn/screenshotting-plugin/server';
 import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
 import type { PngScreenshotOptions } from '../../types';
+import { ReportingConfigType, createConfig } from '../../config';
+import { ReportingServerInfo } from '../../core';
 
 interface PngResult {
   buffer: Buffer;
@@ -30,6 +35,42 @@ interface PngInternalStart {
 
 export class PngCore {
   private pluginStartDeps!: PngInternalStart;
+  private config: ReportingConfigType;
+  // will this come from the plugin setup?
+  core!: CoreSetup;
+
+  constructor(
+    core: CoreSetup,
+    logger: Logger,
+    private context: PluginInitializerContext<ReportingConfigType>
+  ) {
+    const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
+    this.config = config;
+  }
+
+  /*
+   * Gives synchronous access to the config
+   */
+  public getConfig(): ReportingConfigType {
+    return this.config;
+  }
+
+  /*
+   * Returns configurable server info
+   */
+  public getServerInfo(): ReportingServerInfo {
+    const { http } = this.core;
+    const serverInfo = http.getServerInfo();
+    return {
+      basePath: this.core.http.basePath.serverBasePath,
+      hostname: serverInfo.hostname,
+      name: serverInfo.name,
+      port: serverInfo.port,
+      uuid: this.context.env.instanceUuid,
+      protocol: serverInfo.protocol,
+    };
+  }
+
   getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
   getScreenshots(options: PngScreenshotOptions) {
     return Rx.defer(() => {
