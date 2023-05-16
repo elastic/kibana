@@ -37,22 +37,8 @@ function getDistanceAsNumber(distance: string | number): number {
 
 export function DistanceForm(props: Props) {
   const [distance, setDistance] = useState<number | string>(props.initialDistance);
-  const [isDistanceInvalid, setIsDistanceInvalid] = useState(false);
-
-  useEffect(() => {
-    const distanceAsNumber = getDistanceAsNumber(distance);
-    if (isNaN(distanceAsNumber)) {
-      setIsDistanceInvalid(true);
-      return;
-    }
-
-    if (distanceAsNumber <= 0) {
-      setIsDistanceInvalid(true);
-      return;
-    }
-
-    setIsDistanceInvalid(false);
-  }, [distance, setIsDistanceInvalid]);
+  const distanceAsNumber = getDistanceAsNumber(distance);
+  const isDistanceInvalid = isNaN(distanceAsNumber) || distanceAsNumber <= 0;
 
   return (
     <>
