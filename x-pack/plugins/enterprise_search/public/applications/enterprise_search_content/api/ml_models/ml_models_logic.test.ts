@@ -20,6 +20,7 @@ describe('MLModelsApiLogic', () => {
       const result = await getMLModels();
       expect(http.get).toHaveBeenCalledWith('/internal/ml/trained_models', {
         query: { size: 1000, with_pipelines: true },
+        version: '1',
       });
       expect(result).toEqual(mlModels);
     });
