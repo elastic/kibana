@@ -31,9 +31,6 @@ export interface ActionRequestStrategyResponse extends IEsSearchResponse {
 export interface LogsOsqueryAction {
   '@timestamp': string;
   action_id: string;
-  // TODO check agents vs agent_ids, do we need both?
-  agent_ids: string[];
-  agents: string[];
   alert_ids: string[];
   expiration: string;
   input_type: 'osquery';
