@@ -116,7 +116,9 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
       .expect(200);
 
     expect(savedObjectsClient.bulkResolve).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkResolve).toHaveBeenCalledWith(docs);
+    expect(savedObjectsClient.bulkResolve).toHaveBeenCalledWith(docs, {
+      migrationVersionCompatibility: 'compatible',
+    });
   });
 
   it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {

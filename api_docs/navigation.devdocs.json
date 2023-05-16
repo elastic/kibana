@@ -632,7 +632,7 @@
             "label": "iconSide",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | undefined"
+              "\"left\" | \"right\" | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,

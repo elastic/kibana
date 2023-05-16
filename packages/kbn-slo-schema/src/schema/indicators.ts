@@ -39,9 +39,6 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
       index: t.string,
     }),
     t.partial({
-      goodStatusCodes: t.array(
-        t.union([t.literal('2xx'), t.literal('3xx'), t.literal('4xx'), t.literal('5xx')])
-      ),
       filter: t.string,
     }),
   ]),
@@ -50,17 +47,13 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
 const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
 const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      index: t.string,
-      filter: t.string,
-      good: t.string,
-      total: t.string,
-    }),
-    t.partial({
-      timestampField: t.string,
-    }),
-  ]),
+  params: t.type({
+    index: t.string,
+    filter: t.string,
+    good: t.string,
+    total: t.string,
+    timestampField: t.string,
+  }),
 });
 
 const indicatorDataSchema = t.type({

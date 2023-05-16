@@ -98,16 +98,10 @@ export function DataTypesSelect({ seriesId, series }: Props) {
   );
 }
 
-const SELECT_DATA_TYPE_LABEL = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.selectDataType',
-  {
-    defaultMessage: 'Select data type',
-  }
-);
+const SELECT_DATA_TYPE_LABEL = i18n.translate('xpack.exploratoryView.selectDataType', {
+  defaultMessage: 'Select data type',
+});
 
-const SELECT_DATA_TYPE_TOOLTIP = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.selectDataTypeTooltip',
-  {
-    defaultMessage: 'Data type cannot be edited.',
-  }
-);
+const SELECT_DATA_TYPE_TOOLTIP = i18n.translate('xpack.exploratoryView.selectDataTypeTooltip', {
+  defaultMessage: 'Data type cannot be edited.',
+});

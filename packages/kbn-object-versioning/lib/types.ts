@@ -42,21 +42,21 @@ export interface ObjectTransforms<
   DownIn = unknown,
   DownOut = unknown
 > {
-  up: (
-    obj: UpIn,
+  up: <I = UpIn, O = UpOut>(
+    obj: I,
     version?: Version | 'latest',
     options?: {
       /** Validate the object _before_ up transform */
       validate?: boolean;
     }
-  ) => TransformReturn<UpOut>;
-  down: (
+  ) => TransformReturn<O>;
+  down: <I = DownIn, O = DownOut>(
     obj: DownIn,
     version?: Version | 'latest',
     options?: {
       /** Validate the object _before_ down transform */
       validate?: boolean;
     }
-  ) => TransformReturn<DownOut>;
+  ) => TransformReturn<O>;
   validate: (obj: any, version?: Version) => ValidationError | null;
 }

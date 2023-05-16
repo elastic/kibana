@@ -512,7 +512,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
       expect(
@@ -528,7 +528,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
     });
@@ -547,7 +547,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
       expect(
@@ -563,7 +563,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
     });
@@ -968,6 +968,27 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(['Invalid value for select type']);
     });
 
+    it('should return an error message if the value is an empty string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: '',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid value for select type']);
+    });
+
     it('should accept a select with a valid value', () => {
       const res = validatePackagePolicyConfig(
         {
@@ -1008,6 +1029,54 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       );
 
       expect(res).toBeNull();
+    });
+    it('should accept a secret ref instead of a text value for a secret field', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, id: 'secret1' },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          secret: true,
+        },
+        'secret_variable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+    it('secret refs should always have an id', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          secret: true,
+        },
+        'secret_variable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+    });
+    it('secret ref id should be a string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, id: 123 },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          secret: true,
+        },
+        'secret_variable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Secret reference is invalid, id must be a string']);
     });
   });
 });

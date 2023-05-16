@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { ExpandedDetailType } from '../../../../../common/types';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
@@ -19,7 +20,6 @@ import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
-import { dataTableSelectors } from '../../../../common/store/data_table';
 
 export interface UseDetailPanelConfig {
   entityType?: EntityType;

@@ -16,6 +16,7 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly elasticChart = this.ctx.getService('elasticChart');
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
@@ -304,12 +305,22 @@ export class DashboardExpectService extends FtrService {
     });
   }
 
+  // heatmap data
   async seriesElementCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
-    await this.retry.try(async () => {
-      const seriesElements = await this.find.allByCssSelector('.series', this.findTimeout);
-      expect(seriesElements.length).to.be(expectedCount);
-    });
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    this.log.debug(heatmapData.axes?.y[0]);
+    expect(heatmapData.axes?.y[0].labels.length).to.be(expectedCount);
+  }
+
+  async heatmapXAxisBuckets(expectedCount: number) {
+    this.log.debug(`DashboardExpect.heatmapXAxisBuckets(${expectedCount})`);
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    expect(heatmapData.axes?.x[0].labels.length).to.be(expectedCount);
+  }
+
+  async heatMapNoResults() {
+    await this.testSubjects.find('heatmapChart>emptyPlaceholder');
   }
 
   // legacy controls visualization

@@ -22,6 +22,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
     services: {
       ...mockStartServices,
+      charts: {
+        activeCursor: jest.fn(),
+      },
     },
   }),
 }));

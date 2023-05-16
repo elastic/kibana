@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import { journey, step, before, after } from '@elastic/synthetics';
+import { journey, step } from '@elastic/synthetics';
 import moment from 'moment';
 import { recordVideo } from '../record_video';
 import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
-import { loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
+import { byTestId, loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
 
-journey('Exploratory view', async ({ page, params }) => {
+journey('Step Duration series', async ({ page, params }) => {
   recordVideo(page);
 
-  before(async () => {
-    await waitForLoadingToFinish({ page });
-  });
-
-  after(async () => {
-    // eslint-disable-next-line no-console
-    console.log(await page.video()?.path());
-  });
+  page.setDefaultTimeout(TIMEOUT_60_SEC.timeout);
 
   const expUrl = createExploratoryViewUrl({
     reportType: 'kpi-over-time',
@@ -54,16 +47,16 @@ journey('Exploratory view', async ({ page, params }) => {
     });
   });
 
-  step('Open exploratory view with monitor duration', async () => {
+  step('build series with monitor duration', async () => {
     await page.waitForNavigation(TIMEOUT_60_SEC);
 
     await waitForLoadingToFinish({ page });
-    await page.click('text=browser', TIMEOUT_60_SEC);
+    await page.click('text=browser');
     await page.click('text=http');
     await page.click('[aria-label="Remove report metric"]');
     await page.click('button:has-text("Select report metric")');
     await page.click('button:has-text("Step duration")');
-    await page.click('text=Select an option: Monitor type, is selectedMonitor type >> button');
+    await page.click(byTestId('seriesBreakdown'));
     await page.click('button[role="option"]:has-text("Step name")');
     await page.click('.euiComboBox__inputWrap');
     await page.click(
@@ -71,7 +64,9 @@ journey('Exploratory view', async ({ page, params }) => {
     );
     await page.click('button[role="option"]:has-text("test-monitor - inline")');
     await page.click('button:has-text("Apply changes")');
+  });
 
+  step('Verify that changes are applied', async () => {
     await waitForLoadingToFinish({ page });
 
     await page.click('[aria-label="series color: #54b399"]');

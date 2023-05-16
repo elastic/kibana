@@ -76,7 +76,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
       },
     ];
     if (hasCasesPermissions) {
-      selectCaseModal.open({ attachments });
+      selectCaseModal.open({ getAttachments: () => attachments });
     }
   }, [actionId, agentIds, alertAttachments, hasCasesPermissions, queryId, selectCaseModal]);
 

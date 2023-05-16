@@ -156,7 +156,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                 'xpack.enterpriseSearch.content.indices.connectorScheduling.configured.description',
                 {
                   defaultMessage:
-                    'Your connector is configured and deployed. Configure a one-time sync by clicking the Sync button, or enable a recurring sync schedule. ',
+                    'Your connector is configured and deployed. Configure a one-time sync by clicking the Sync button, or enable a recurring sync schedule. The connector uses UTC as its timezone. ',
                 }
               )}
             </EuiText>

@@ -17,9 +17,12 @@ import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_csp_integration_link');
 
@@ -43,6 +46,13 @@ describe('<Benchmarks />', () => {
     );
 
     (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
+
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
@@ -80,7 +90,7 @@ describe('<Benchmarks />', () => {
     const error = new Error('message');
     renderBenchmarks(createReactQueryResponse({ status: 'error', error }));
 
-    expect(screen.getByText(error.message)).toBeInTheDocument();
+    expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
   });
 
   it('renders the benchmarks table', () => {

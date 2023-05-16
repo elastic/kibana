@@ -32,6 +32,7 @@ export const migration860 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
         },
       };
     },
+    inputType: LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
     migratedType: LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
   });
 };

@@ -56,6 +56,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   readOnly?: boolean;
 }
 
@@ -391,6 +392,7 @@ function FilterItemComponent(props: FilterItemProps) {
                 onLocalFilterCreate={onLocalFilterCreate}
                 onCancel={() => setIsPopoverOpen(false)}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                filtersForSuggestions={props.filtersForSuggestions}
               />
             </div>,
           ]}

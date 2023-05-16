@@ -26,6 +26,7 @@ import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
+import { CPULabelWithHint } from '../shared/cpu_label_with_hint';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { GetLabel } from './get_label';
 
@@ -250,18 +251,12 @@ export function TopNFunctionsTable({
     {
       field: TopNFunctionSortField.ExclusiveCPU,
       name: (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel1Exclusive', {
-              defaultMessage: 'CPU excl.',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel2Exclusive', {
-              defaultMessage: 'subfunctions',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CPULabelWithHint
+          type="self"
+          labelSize="xs"
+          labelStyle={{ fontWeight: 600 }}
+          iconSize="s"
+        />
       ),
       render: (_, { exclusiveCPU, diff }) => {
         return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
@@ -271,18 +266,12 @@ export function TopNFunctionsTable({
     {
       field: TopNFunctionSortField.InclusiveCPU,
       name: (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel1Inclusive', {
-              defaultMessage: 'CPU incl.',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel2Inclusive', {
-              defaultMessage: 'subfunctions',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CPULabelWithHint
+          type="total"
+          labelSize="xs"
+          labelStyle={{ fontWeight: 600 }}
+          iconSize="s"
+        />
       ),
       render: (_, { inclusiveCPU, diff }) => {
         return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;

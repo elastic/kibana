@@ -228,7 +228,7 @@ export default function (providerContext: FtrProviderContext) {
         return resLogsDatastream.body.data_streams[0].indices.length;
       }
 
-      it('should rollover datstream after enabling a expiremental datastream feature that need a rollover', async () => {
+      it('should rollover datstream after enabling a experimental datastream feature that need a rollover', async () => {
         expect(await getLogsDefaultBackingIndicesLength()).to.be(1);
 
         await supertest
@@ -255,6 +255,27 @@ export default function (providerContext: FtrProviderContext) {
 
         // Datastream should have been rolled over
         expect(await getLogsDefaultBackingIndicesLength()).to.be(2);
+      });
+
+      it('should allow updating a package policy with only a partial set of experimental datastream features', async () => {
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ...packagePolicyData,
+            package: {
+              ...packagePolicyData.package,
+              experimental_data_stream_features: [
+                {
+                  data_stream: logsTemplateName,
+                  features: {
+                    synthetic_source: true,
+                  },
+                },
+              ],
+            },
+          })
+          .expect(200);
       });
     });
   });

@@ -16,6 +16,10 @@ import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import useObservable from 'react-use/lib/useObservable';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
@@ -58,7 +62,25 @@ export const useDataVisualizerGridData = (
   onUpdate?: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data, security } = services;
+  const { uiSettings, data, security, executionContext } = services;
+
+  const parentExecutionContext = useObservable(executionContext?.context$);
+
+  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
+    const child: KibanaExecutionContext = {
+      type: 'visualization',
+      name: DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE,
+      id: input.id,
+    };
+
+    return {
+      ...(parentExecutionContext ? parentExecutionContext : {}),
+      child,
+    };
+  }, [parentExecutionContext, input.id]);
+
+  useExecutionContext(executionContext, embeddableExecutionContext);
+
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
@@ -236,6 +258,7 @@ export const useDataVisualizerGridData = (
         fieldsToFetch,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
+        embeddableExecutionContext,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -252,6 +275,7 @@ export const useDataVisualizerGridData = (
       lastRefresh,
       fieldsToFetch,
       browserSessionSeed,
+      embeddableExecutionContext,
     ]
   );
 

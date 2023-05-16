@@ -10,7 +10,7 @@ exports[`entity_draggable renders correctly against snapshot 1`] = `
       "value": "entity-value",
     }
   }
-  mode="hover"
+  mode="hover-down"
   triggerId="security-default-cellActions"
   visibleCellActions={5}
 >

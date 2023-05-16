@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts filtered', async () => {
-        await dashboardExpect.seriesElementCount(0);
+        await dashboardExpect.heatMapNoResults();
       });
 
       it('data tables are filtered', async () => {
@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts filtered', async () => {
-        await dashboardExpect.seriesElementCount(0);
+        await dashboardExpect.heatMapNoResults();
       });
 
       it('data tables are filtered', async () => {
@@ -212,7 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts', async () => {
-        await dashboardExpect.seriesElementCount(2);
+        await dashboardExpect.heatmapXAxisBuckets(11);
       });
 
       it('data tables', async () => {

@@ -5,23 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { EuiSpacer, EuiSteps, EuiTab, EuiTabs } from '@elastic/eui';
+import { useValues } from 'kea';
+
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSteps,
+  EuiTab,
+  EuiTabs,
+  EuiLink,
+  EuiText,
+  EuiCodeBlock,
+} from '@elastic/eui';
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
+import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
+import { docLinks } from '../../../../shared/doc_links';
 
-import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
-
+import { KibanaLogic } from '../../../../shared/kibana';
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
 import { javascriptClientEmbedSteps } from './analytics_collection_integrate_javascript_client_embed';
 import { javascriptEmbedSteps } from './analytics_collection_integrate_javascript_embed';
 import { searchUIEmbedSteps } from './analytics_collection_integrate_searchui';
+import { GenerateAnalyticsApiKeyModal } from './api_key_modal/generate_analytics_api_key_modal';
+import { GenerateApiKeyModalLogic } from './api_key_modal/generate_analytics_api_key_modal.logic';
 
 interface AnalyticsCollectionIntegrateProps {
   analyticsCollection: AnalyticsCollection;
@@ -35,17 +52,159 @@ export interface AnalyticsConfig {
   endpoint: string;
 }
 
+const CORSStep = (): EuiContainedStepProps => ({
+  title: i18n.translate(
+    'xpack.enterpriseSearch.analytics.collections.collectionsView.corsStep.title',
+    {
+      defaultMessage: 'Configure CORS',
+    }
+  ),
+  children: (
+    <>
+      <EuiText>
+        <>
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.corsStep.description',
+              {
+                defaultMessage:
+                  "You must configure CORS to allow requests from your website's domain to the Analytics API endpoint. You can do this by adding the following to your Elasticsearch configuration file:",
+              }
+            )}
+          </p>
+
+          <EuiCodeBlock language="yaml" isCopyable>
+            {`# http.cors.allow-origin: "https://my-website-domain.example"
+http.cors.allow-origin: "*"
+http.cors.enabled: true
+http.cors.allow-credentials: true
+http.cors.allow-methods: OPTIONS, POST
+http.cors.allow-headers: X-Requested-With, X-Auth-Token, Content-Type, Content-Length, Authorization, Access-Control-Allow-Headers, Accept`}
+          </EuiCodeBlock>
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.corsStep.descriptionTwo',
+              {
+                defaultMessage:
+                  "Alternatively you can use a proxy server to route analytic requests from your website's domain to the Analytics API endpoint which will allow you to avoid configuring CORS.",
+              }
+            )}
+          </p>
+          <EuiLink
+            href={docLinks.behavioralAnalyticsCORS}
+            data-telemetry-id="entSearchContent-analytics-cors-learnMoreLink"
+            external
+            target="_blank"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.corsStep.learnMoreLink',
+              {
+                defaultMessage: 'Learn more about CORS for Behavioral Analytics.',
+              }
+            )}
+          </EuiLink>
+        </>
+      </EuiText>
+    </>
+  ),
+});
+
+const apiKeyStep = (
+  openApiKeyModal: () => void,
+  navigateToUrl: typeof KibanaLogic.values.navigateToUrl
+): EuiContainedStepProps => ({
+  title: i18n.translate(
+    'xpack.enterpriseSearch.analytics.collections.collectionsView.apiKey.title',
+    {
+      defaultMessage: 'Create an API Key',
+    }
+  ),
+  children: (
+    <>
+      <EuiText>
+        <p>
+          {i18n.translate(
+            'xpack.enterpriseSearch.analytics.collectionsView.integration.apiKeyStep.apiKeyWarning',
+            {
+              defaultMessage:
+                "Elastic does not store API keys. Once generated, you'll only be able to view the key one time. Make sure you save it somewhere secure. If you lose access to it you'll need to generate a new API key from this screen.",
+            }
+          )}{' '}
+          <EuiLink
+            href={docLinks.apiKeys}
+            data-telemetry-id="entSearchContent-analytics-apiKey-learnMoreLink"
+            external
+            target="_blank"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.apiKeyStep.learnMoreLink',
+              {
+                defaultMessage: 'Learn more about API keys.',
+              }
+            )}
+          </EuiLink>
+        </p>
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconSide="left"
+            iconType="plusInCircleFilled"
+            onClick={openApiKeyModal}
+            data-telemetry-id="entSearchContent-analytics-apiKey-createApiKeyButton"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.apiKeyStep.createAPIKeyButton',
+              {
+                defaultMessage: 'Create API Key',
+              }
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconSide="left"
+            iconType="popout"
+            data-telemetry-id="entSearchContent-analytics-apiKey-viewKeysButton"
+            onClick={() =>
+              navigateToUrl('/app/management/security/api_keys', {
+                shouldNotCreateHref: true,
+              })
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.apiKeyStep.viewKeysButton',
+              {
+                defaultMessage: 'View Keys',
+              }
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  ),
+});
+
 export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionIntegrateProps> = ({
   analyticsCollection,
 }) => {
-  const [selectedTab, setSelectedTab] = React.useState<TabKey>('javascriptEmbed');
+  const [selectedTab, setSelectedTab] = useState<TabKey>('javascriptEmbed');
+  const [apiKeyModelOpen, setApiKeyModalOpen] = useState<boolean>(false);
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const { apiKey } = useValues(GenerateApiKeyModalLogic);
+  const DEFAULT_URL = 'https://localhost:9200';
+  const cloudContext = useCloudDetails();
+
+  const baseUrl =
+    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || DEFAULT_URL;
 
   const analyticsConfig: AnalyticsConfig = {
-    apiKey: '########',
+    apiKey: apiKey || '########',
     collectionName: analyticsCollection?.name,
-    endpoint: getEnterpriseSearchUrl(),
+    endpoint: baseUrl,
   };
-  const webClientSrc = `https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2/dist/umd/index.global.js`;
+  const webClientSrc = `https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2`;
 
   const tabs: Array<{
     key: TabKey;
@@ -80,9 +239,19 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
     },
   ];
 
+  const apiKeyStepGuide = apiKeyStep(() => setApiKeyModalOpen(true), navigateToUrl);
+
   const steps: Record<TabKey, EuiContainedStepProps[]> = {
-    javascriptClientEmbed: javascriptClientEmbedSteps(analyticsConfig),
-    javascriptEmbed: javascriptEmbedSteps(webClientSrc, analyticsConfig),
+    javascriptClientEmbed: [
+      apiKeyStepGuide,
+      CORSStep(),
+      ...javascriptClientEmbedSteps(analyticsConfig),
+    ],
+    javascriptEmbed: [
+      apiKeyStepGuide,
+      CORSStep(),
+      ...javascriptEmbedSteps(webClientSrc, analyticsConfig),
+    ],
     searchuiEmbed: searchUIEmbedSteps(setSelectedTab),
   };
 
@@ -104,13 +273,21 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
           'xpack.enterpriseSearch.analytics.collectionsView.integration.description',
           {
             defaultMessage:
-              'Easily install our tracker on your search application to receive in depth analytics data. No search applications required.',
+              'Easily install our tracker on your application or website to receive in-depth analytics data.',
           }
         ),
         rightSideItems: [],
       }}
     >
       <>
+        {apiKeyModelOpen ? (
+          <GenerateAnalyticsApiKeyModal
+            collectionName={analyticsCollection.name}
+            onClose={() => {
+              setApiKeyModalOpen(false);
+            }}
+          />
+        ) : null}
         <EuiTabs>
           {tabs.map((tab) => (
             <EuiTab

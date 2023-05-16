@@ -31,6 +31,7 @@ export interface DocumentCountContentProps {
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
   totalCount: number;
+  sampleProbability: number;
   windowParameters?: WindowParameters;
 }
 
@@ -41,6 +42,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   documentCountStatsSplit,
   documentCountStatsSplitLabel = '',
   totalCount,
+  sampleProbability,
   windowParameters,
 }) => {
   const [isBrushCleared, setIsBrushCleared] = useState(true);
@@ -62,7 +64,9 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     timeRangeEarliest === undefined ||
     timeRangeLatest === undefined
   ) {
-    return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
+    return totalCount !== undefined ? (
+      <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+    ) : null;
   }
 
   const chartPoints: DocumentCountChartPoint[] = Object.entries(documentCountStats.buckets).map(
@@ -98,7 +102,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
-          <TotalCountHeader totalCount={totalCount} />
+          <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
         </EuiFlexItem>
         {!isBrushCleared && (
           <EuiFlexItem grow={false}>

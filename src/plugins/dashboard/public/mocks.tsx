@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Embeddable, EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
-import { createReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public/redux_embeddables/create_redux_embeddable_tools';
+import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
+import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
 import { DashboardStart } from './plugin';
-import { DashboardContainerByValueInput, DashboardPanelState } from '../common';
-import { DashboardContainerOutput, DashboardReduxState } from './dashboard_container/types';
+import { DashboardContainerInput, DashboardPanelState } from '../common';
 import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
-import { dashboardContainerReducers } from './dashboard_container/state/dashboard_container_reducers';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -68,28 +66,15 @@ export function setupIntersectionObserverMock({
   });
 }
 
-export const mockDashboardReduxEmbeddableTools = async (
-  partialState?: Partial<DashboardReduxState>
-) => {
-  const mockDashboard = new DashboardContainer(
-    getSampleDashboardInput(partialState?.explicitInput)
-  ) as Embeddable<DashboardContainerByValueInput, DashboardContainerOutput>;
-
-  const mockReduxEmbeddableTools = createReduxEmbeddableTools<DashboardReduxState>({
-    embeddable: mockDashboard,
-    reducers: dashboardContainerReducers,
-    initialComponentState: { lastSavedInput: mockDashboard.getInput() },
-  });
-
-  return {
-    tools: mockReduxEmbeddableTools,
-    dashboardContainer: mockDashboard as DashboardContainer,
-  };
-};
+export function buildMockDashboard(overrides?: Partial<DashboardContainerInput>) {
+  const initialInput = getSampleDashboardInput(overrides);
+  const dashboardContainer = new DashboardContainer(initialInput, mockedReduxEmbeddablePackage);
+  return dashboardContainer;
+}
 
 export function getSampleDashboardInput(
-  overrides?: Partial<DashboardContainerByValueInput>
-): DashboardContainerByValueInput {
+  overrides?: Partial<DashboardContainerInput>
+): DashboardContainerInput {
   return {
     // options
     useMargins: true,

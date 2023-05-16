@@ -17,7 +17,6 @@ export const buildApmAvailabilityIndicator = (
       service: 'o11y-app',
       transactionType: 'request',
       transactionName: 'GET /flaky',
-      goodStatusCodes: ['2xx', '3xx', '4xx'],
       index: 'metrics-apm*',
       ...params,
     },
@@ -51,6 +50,7 @@ export const buildCustomKqlIndicator = (
       good: 'latency < 300',
       total: 'latency > 0',
       filter: 'labels.eventId: event-0',
+      timestampField: '@timestamp',
       ...params,
     },
   };

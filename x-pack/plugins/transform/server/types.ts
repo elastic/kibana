@@ -33,4 +33,5 @@ export interface RouteDependencies {
   license: License;
   coreStart: CoreStart;
   dataViews: DataViewsServerPluginStart;
+  security?: SecurityPluginStart;
 }

@@ -413,7 +413,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [visData.rows, metricColumn]
   );
 
-  const flatLegend = isLegendFlat(visType, splitChartDimension);
+  const flatLegend = !visParams.nestedLegend || isLegendFlat(visType, splitChartDimension);
 
   const canShowPieChart = !isEmpty && !isMetricEmpty && !isAllZeros && !hasNegative;
 
@@ -424,6 +424,32 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     : partitionVisContainerStyle;
 
   const partitionType = getPartitionType(visType);
+
+  const customLegendSort = useMemo(() => {
+    if (!showLegend || !flatLegend) {
+      return;
+    }
+    const [bucketColumn] = bucketColumns;
+    if (!bucketColumn.id) {
+      return;
+    }
+    const lookup: Record<string, number> = {};
+    visData.rows.forEach((row, i) => {
+      const category = row[bucketColumn.id!];
+      if (!(category in lookup)) {
+        lookup[category] = i;
+      }
+    });
+    return (a: SeriesIdentifier, b: SeriesIdentifier) => {
+      if (a.key == null) {
+        return 1;
+      }
+      if (b.key == null) {
+        return -1;
+      }
+      return lookup[a.key] - lookup[b.key];
+    };
+  }, [bucketColumns, flatLegend, showLegend, visData.rows]);
 
   return (
     <div css={chartContainerStyle} data-test-subj="partitionVisChart">
@@ -471,6 +497,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
+                legendSort={customLegendSort}
                 tooltip={tooltip}
                 showLegendExtra={visParams.showValuesInLegend}
                 onElementClick={([elementEvent]) => {

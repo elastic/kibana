@@ -32,6 +32,7 @@ import {
   AlertInstanceContext,
   RulesClientApi,
   RulesSettingsClientApi,
+  MaintenanceWindowClientApi,
 } from '../types';
 import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -65,6 +66,7 @@ export interface TaskRunnerContext {
   cancelAlertsOnRuleTimeout: boolean;
   usageCounter?: UsageCounter;
   getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
+  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
 }
 
 export class TaskRunnerFactory {

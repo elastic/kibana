@@ -277,6 +277,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       sessionId: currentSessionId,
       visibleFieldNames,
       allowEditDataView: true,
+      id: 'index_data_visualizer',
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDataView.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);

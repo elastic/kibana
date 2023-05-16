@@ -10,7 +10,8 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import type { KueryNode } from '@kbn/es-query';
+import type { Filter, KueryNode } from '@kbn/es-query';
+import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
@@ -77,8 +78,14 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export interface RuleActionFrequency extends SavedObjectAttributes {
+  summary: boolean;
+  notifyWhen: RuleNotifyWhenType;
+  throttle: string | null;
+}
+
 export interface AlertsFilterTimeframe extends SavedObjectAttributes {
-  days: Array<1 | 2 | 3 | 4 | 5 | 6 | 7>;
+  days: IsoWeekday[];
   timezone: string;
   hours: {
     start: string;
@@ -87,12 +94,15 @@ export interface AlertsFilterTimeframe extends SavedObjectAttributes {
 }
 
 export interface AlertsFilter extends SavedObjectAttributes {
-  query: null | {
+  query?: {
     kql: string;
+    filters: Filter[];
     dsl?: string; // This fields is generated in the code by using "kql", therefore it's not optional but defined as optional to avoid modifying a lot of files in different plugins
   };
-  timeframe: null | AlertsFilterTimeframe;
+  timeframe?: AlertsFilterTimeframe;
 }
+
+export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
 export interface RuleAction {
   uuid?: string;
@@ -100,11 +110,7 @@ export interface RuleAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
-  frequency?: {
-    summary: boolean;
-    notifyWhen: RuleNotifyWhenType;
-    throttle: string | null;
-  };
+  frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
 }
 
@@ -168,6 +174,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
+  apiKeyCreatedByUser?: boolean | null;
   throttle?: string | null;
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
@@ -185,10 +192,11 @@ export interface Rule<Params extends RuleTypeParams = never> {
 }
 
 export interface SanitizedAlertsFilter extends AlertsFilter {
-  query: null | {
+  query?: {
     kql: string;
+    filters: Filter[];
   };
-  timeframe: null | AlertsFilterTimeframe;
+  timeframe?: AlertsFilterTimeframe;
 }
 
 export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {

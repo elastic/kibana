@@ -46,6 +46,10 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import {
@@ -53,13 +57,11 @@ import {
   LazySyntheticsPolicyEditExtension,
 } from './legacy_uptime/components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from './legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension';
-import { uptimeOverviewNavigatorParams } from './apps/locators/overview';
 import {
   uptimeAlertTypeInitializers,
   legacyAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
-import { monitorDetailNavigatorParams } from './apps/locators/monitor_detail';
-import { editMonitorNavigatorParams } from './apps/locators/edit_monitor';
+import { locators } from './apps/locators';
 import { setStartServices } from './kibana_services';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 
@@ -68,6 +70,7 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
@@ -82,6 +85,7 @@ export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
@@ -133,9 +137,9 @@ export class UptimePlugin
       return UptimeDataHelper(coreStart);
     };
 
-    plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
-    plugins.share.url.locators.create(monitorDetailNavigatorParams);
-    plugins.share.url.locators.create(editMonitorNavigatorParams);
+    locators.forEach((locator) => {
+      plugins.share.url.locators.create(locator);
+    });
 
     plugins.observability.dashboard.register({
       appName: 'uptime',
@@ -209,11 +213,7 @@ export class UptimePlugin
       id: 'synthetics',
       euiIconType: 'logoObservability',
       order: 8400,
-      title:
-        PLUGIN.SYNTHETICS +
-        i18n.translate('xpack.synthetics.overview.headingBeta', {
-          defaultMessage: ' (beta)',
-        }),
+      title: PLUGIN.SYNTHETICS,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: appKeywords,
       deepLinks: [],
@@ -275,7 +275,7 @@ function registerUptimeRoutesWithNavigation(
   core: CoreSetup<ClientPluginsStart, unknown>,
   plugins: ClientPluginsSetup
 ) {
-  plugins.observability.navigation.registerSections(
+  plugins.observabilityShared.navigation.registerSections(
     from(core.getStartServices()).pipe(
       map(([coreStart]) => {
         if (coreStart.application.capabilities.uptime.show) {
@@ -309,7 +309,7 @@ function registerUptimeRoutesWithNavigation(
                   path: OVERVIEW_ROUTE,
                   matchFullPath: false,
                   ignoreTrailingSlash: true,
-                  isBetaFeature: true,
+                  isNewFeature: true,
                 },
               ],
             },

@@ -7,8 +7,6 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { LoadWhenInViewProps } from './load_when_in_view/load_when_in_view';
-import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
 import type {
   FieldValueSuggestionsProps,
   FieldValueSelectionProps,
@@ -17,27 +15,7 @@ import type { DatePickerProps } from './date_picker';
 import type { FilterValueLabelProps } from './filter_value_label/filter_value_label';
 import type { SelectableUrlListProps } from './exploratory_view/components/url_search/selectable_url_list';
 import type { ExploratoryViewPageProps } from './exploratory_view';
-export type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-
-const CoreVitalsLazy = lazy(() => import('./core_web_vitals'));
-
-export function getCoreVitalsComponent(props: CoreVitalProps) {
-  return (
-    <Suspense fallback={null}>
-      <CoreVitalsLazy {...props} />
-    </Suspense>
-  );
-}
-
-const HeaderMenuPortalLazy = lazy(() => import('./header_menu_portal'));
-
-export function HeaderMenuPortal(props: HeaderMenuPortalProps) {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <HeaderMenuPortalLazy {...props} />
-    </Suspense>
-  );
-}
+export type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 
 const FieldValueSelectionLazy = lazy(
   () => import('./field_value_suggestions/field_value_selection')
@@ -99,16 +77,6 @@ export function DatePicker(props: DatePickerProps) {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <DatePickerLazy {...props} />
-    </Suspense>
-  );
-}
-
-const LoadWhenInViewLazy = lazy(() => import('./load_when_in_view/load_when_in_view'));
-
-export function LoadWhenInView(props: LoadWhenInViewProps) {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <LoadWhenInViewLazy {...props} />
     </Suspense>
   );
 }

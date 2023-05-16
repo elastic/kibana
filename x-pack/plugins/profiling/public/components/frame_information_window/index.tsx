@@ -7,10 +7,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FrameSymbolStatus, getFrameSymbolStatus } from '../../../common/profiling';
 import { FrameInformationPanel } from './frame_information_panel';
 import { getImpactRows } from './get_impact_rows';
 import { getInformationRows } from './get_information_rows';
 import { KeyValueList } from './key_value_list';
+import { MissingSymbolsCallout } from './missing_symbols_callout';
 
 export interface Props {
   frame?: {
@@ -40,6 +42,12 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
       </FrameInformationPanel>
     );
   }
+
+  const symbolStatus = getFrameSymbolStatus({
+    sourceFilename: frame.sourceFileName,
+    sourceLine: frame.sourceLine,
+    exeFileName: frame.exeFileName,
+  });
 
   const {
     fileID,
@@ -76,6 +84,11 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
         <EuiFlexItem>
           <KeyValueList rows={informationRows} />
         </EuiFlexItem>
+        {symbolStatus !== FrameSymbolStatus.SYMBOLIZED && (
+          <EuiFlexItem>
+            <MissingSymbolsCallout frameType={frame.frameType} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>

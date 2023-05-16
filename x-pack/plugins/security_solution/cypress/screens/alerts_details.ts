@@ -42,6 +42,9 @@ export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-sub
 
 export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj="alertStatus"]';
 
+export const EVENT_DETAILS_ALERT_STATUS_POPOVER =
+  '[data-test-subj="event-details-alertStatusPopover"]';
+
 const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
 export const TABLE_CELL = '.euiTableRowCell';
@@ -67,8 +70,6 @@ export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
 export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-button"]';
 
 export const OVERVIEW_TAB = '[data-test-subj="overviewTab"]';
-
-export const SUMMARY_VIEW_PREVALENCE_CELL = `${SUMMARY_VIEW} [data-test-subj='alert-prevalence']`;
 
 export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;
 

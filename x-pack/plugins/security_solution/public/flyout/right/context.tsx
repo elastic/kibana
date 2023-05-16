@@ -19,6 +19,7 @@ import { SecurityPageName } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import type { RightPanelProps } from '.';
+import type { GetFieldsData } from '../../common/hooks/use_get_fields_data';
 import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
 
 export interface RightPanelContext {
@@ -30,6 +31,10 @@ export interface RightPanelContext {
    * Name of the index used in the parent's page
    */
   indexName: string;
+  /**
+   * Maintain backwards compatibility // TODO remove when possible
+   */
+  scopeId: string;
   /**
    * An object containing fields by type
    */
@@ -47,9 +52,13 @@ export interface RightPanelContext {
    */
   searchHit: SearchHit<object> | undefined;
   /**
+   *
+   */
+  refetchFlyoutData: () => Promise<void>;
+  /**
    * Retrieves searchHit values for the provided field
    */
-  getFieldsData: (field: string) => unknown | unknown[];
+  getFieldsData: GetFieldsData;
 }
 
 export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);
@@ -61,7 +70,12 @@ export type RightPanelProviderProps = {
   children: React.ReactNode;
 } & Partial<RightPanelProps['params']>;
 
-export const RightPanelProvider = ({ id, indexName, children }: RightPanelProviderProps) => {
+export const RightPanelProvider = ({
+  id,
+  indexName,
+  scopeId,
+  children,
+}: RightPanelProviderProps) => {
   const currentSpaceId = useSpaceId();
   const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
   const [{ pageName }] = useRouteSpy();
@@ -70,7 +84,7 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject] =
+  const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetchFlyoutData] =
     useTimelineEventsDetails({
       indexName: eventIndex,
       eventId: id ?? '',
@@ -81,24 +95,28 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
 
   const contextValue = useMemo(
     () =>
-      id && indexName
+      id && indexName && scopeId
         ? {
             eventId: id,
             indexName,
+            scopeId,
             browserFields: sourcererDataView.browserFields,
             dataAsNestedObject: dataAsNestedObject as unknown as Ecs,
             dataFormattedForFieldBrowser,
             searchHit: searchHit as SearchHit<object>,
+            refetchFlyoutData,
             getFieldsData,
           }
         : undefined,
     [
       id,
       indexName,
+      scopeId,
       sourcererDataView.browserFields,
       dataAsNestedObject,
       dataFormattedForFieldBrowser,
       searchHit,
+      refetchFlyoutData,
       getFieldsData,
     ]
   );

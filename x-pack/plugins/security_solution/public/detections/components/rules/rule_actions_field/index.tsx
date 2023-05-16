@@ -6,28 +6,83 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { RuleAction, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type {
+  ActionVariables,
+  NotifyWhenSelectOptions,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  RuleAction,
+  RuleActionAlertsFilterProperty,
+  RuleActionParam,
+} from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
-import { FORM_ERRORS_TITLE } from './translations';
+import {
+  FORM_CUSTOM_FREQUENCY_OPTION,
+  FORM_ERRORS_TITLE,
+  FORM_ON_ACTIVE_ALERT_OPTION,
+  FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+  FORM_SUMMARY_BODY_MESSAGE,
+} from './translations';
+
+const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
+  {
+    isSummaryOption: true,
+    isForEachAlertOption: true,
+    value: {
+      value: 'onActiveAlert',
+      inputDisplay: FORM_ON_ACTIVE_ALERT_OPTION,
+      'data-test-subj': 'onActiveAlert',
+      dropdownDisplay: (
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              defaultMessage="Per rule run"
+              id="xpack.securitySolution.detectionEngine.ruleNotifyWhen.onActiveAlert.label"
+            />
+          </p>
+        </EuiText>
+      ),
+    },
+  },
+  {
+    isSummaryOption: true,
+    isForEachAlertOption: false,
+    value: {
+      value: 'onThrottleInterval',
+      inputDisplay: FORM_CUSTOM_FREQUENCY_OPTION,
+      'data-test-subj': 'onThrottleInterval',
+      dropdownDisplay: (
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              defaultMessage="Custom frequency"
+              id="xpack.securitySolution.detectionEngine.ruleNotifyWhen.onThrottleInterval.label"
+            />
+          </p>
+        </EuiText>
+      ),
+    },
+  },
+];
 
 interface Props {
   field: FieldHook;
   messageVariables: ActionVariables;
+  summaryMessageVariables: ActionVariables;
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
-const DEFAULT_ACTION_MESSAGE =
-  'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
 
 const FieldErrorsContainer = styled.div`
   p {
@@ -56,7 +111,11 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
+export const RuleActionsField: React.FC<Props> = ({
+  field,
+  messageVariables,
+  summaryMessageVariables,
+}) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
@@ -131,28 +190,77 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     [field, isInitializingAction]
   );
 
+  const setActionAlertsFilterProperty = useCallback(
+    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
+      field.setValue((prevValue: RuleAction[]) => {
+        const updatedActions = [...prevValue];
+        const { alertsFilter, ...rest } = updatedActions[index];
+        const updatedAlertsFilter = { ...alertsFilter };
+
+        if (value) {
+          updatedAlertsFilter[key] = value;
+        } else {
+          delete updatedAlertsFilter[key];
+        }
+
+        updatedActions[index] = {
+          ...rest,
+          ...(!isEmpty(updatedAlertsFilter) ? { alertsFilter: updatedAlertsFilter } : {}),
+        };
+        return updatedActions;
+      });
+    },
+    [field]
+  );
+
+  const setActionFrequency = useCallback(
+    (key: string, value: RuleActionParam, index: number) => {
+      field.setValue((prevValue: RuleAction[]) => {
+        const updatedActions = [...prevValue];
+        updatedActions[index] = {
+          ...updatedActions[index],
+          frequency: {
+            ...(updatedActions[index].frequency ?? NOTIFICATION_DEFAULT_FREQUENCY),
+            [key]: value,
+          },
+        };
+        return updatedActions;
+      });
+    },
+    [field]
+  );
+
   const actionForm = useMemo(
     () =>
       getActionForm({
         actions,
         messageVariables,
+        summaryMessageVariables,
         defaultActionGroupId: DEFAULT_ACTION_GROUP_ID,
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
-        setActionFrequencyProperty: () => {},
+        setActionFrequencyProperty: setActionFrequency,
+        setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
-        defaultActionMessage: DEFAULT_ACTION_MESSAGE,
+        defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+        defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
-        hideNotifyWhen: true,
+        hasSummary: true,
+        notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
+        defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
+        showActionAlertsFilter: true,
       }),
     [
       actions,
       getActionForm,
       messageVariables,
+      summaryMessageVariables,
+      setActionFrequency,
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,
+      setActionAlertsFilterProperty,
     ]
   );
 

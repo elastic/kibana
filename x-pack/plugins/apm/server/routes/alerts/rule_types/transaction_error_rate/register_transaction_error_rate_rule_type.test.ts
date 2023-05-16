@@ -107,17 +107,21 @@ describe('Transaction error rate alert', () => {
       },
     });
 
-    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+    const params = {
+      threshold: 10,
+      windowSize: 5,
+      windowUnit: 'm',
+    };
 
     await executor({ params });
 
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
     expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'apm.transaction_error_rate_foo_type-foo_env-foo'
+      'foo_env-foo_type-foo'
     );
     expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'apm.transaction_error_rate_bar_type-bar_env-bar'
+      'bar_env-bar_type-bar'
     );
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -125,12 +129,300 @@ describe('Transaction error rate alert', () => {
       transactionType: 'type-foo',
       environment: 'env-foo',
       reason:
-        'Failed transactions is 10% in the last 5 mins for foo. Alert when > 10%.',
+        'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
       threshold: 10,
       triggerValue: '10',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+    });
+  });
+
+  it('sends alert when rule is configured with group by on transaction.name', async () => {
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
+
+    registerTransactionErrorRateRuleType({
+      ...dependencies,
+    });
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
+        },
+      },
+      aggregations: {
+        series: {
+          buckets: [
+            {
+              key: ['foo', 'env-foo', 'type-foo', 'tx-name-foo'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 10,
+                  },
+                ],
+              },
+            },
+            {
+              key: ['bar', 'env-bar', 'type-bar', 'tx-name-bar'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+
+    const params = {
+      threshold: 10,
+      windowSize: 5,
+      windowUnit: 'm',
+      groupBy: [
+        'service.name',
+        'service.environment',
+        'transaction.type',
+        'transaction.name',
+      ],
+    };
+
+    await executor({ params });
+
+    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+
+    expect(services.alertFactory.create).toHaveBeenCalledWith(
+      'foo_env-foo_type-foo_tx-name-foo'
+    );
+    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
+      'bar_env-bar_type-bar_tx-name-bar'
+    );
+
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'foo',
+      transactionType: 'type-foo',
+      environment: 'env-foo',
+      reason:
+        'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo, name: tx-name-foo. Alert when > 10%.',
+      threshold: 10,
+      triggerValue: '10',
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+      transactionName: 'tx-name-foo',
+    });
+  });
+
+  it('sends alert when rule is configured with preselected group by', async () => {
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
+
+    registerTransactionErrorRateRuleType({
+      ...dependencies,
+    });
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
+        },
+      },
+      aggregations: {
+        series: {
+          buckets: [
+            {
+              key: ['foo', 'env-foo', 'type-foo'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 10,
+                  },
+                ],
+              },
+            },
+            {
+              key: ['bar', 'env-bar', 'type-bar'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+
+    const params = {
+      threshold: 10,
+      windowSize: 5,
+      windowUnit: 'm',
+      groupBy: ['service.name', 'service.environment', 'transaction.type'],
+    };
+
+    await executor({ params });
+
+    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+
+    expect(services.alertFactory.create).toHaveBeenCalledWith(
+      'foo_env-foo_type-foo'
+    );
+    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
+      'bar_env-bar_type-bar'
+    );
+
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'foo',
+      transactionType: 'type-foo',
+      environment: 'env-foo',
+      reason:
+        'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
+      threshold: 10,
+      triggerValue: '10',
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+    });
+  });
+
+  it('sends alert when service.environment field does not exist in the source', async () => {
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
+
+    registerTransactionErrorRateRuleType({
+      ...dependencies,
+    });
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
+        },
+      },
+      aggregations: {
+        series: {
+          buckets: [
+            {
+              key: ['foo', 'ENVIRONMENT_NOT_DEFINED', 'type-foo'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 10,
+                  },
+                ],
+              },
+            },
+            {
+              key: ['bar', 'ENVIRONMENT_NOT_DEFINED', 'type-bar'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+
+    const params = {
+      threshold: 10,
+      windowSize: 5,
+      windowUnit: 'm',
+      groupBy: ['service.name', 'service.environment', 'transaction.type'],
+    };
+
+    await executor({ params });
+
+    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+
+    expect(services.alertFactory.create).toHaveBeenCalledWith(
+      'foo_ENVIRONMENT_NOT_DEFINED_type-foo'
+    );
+    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
+      'bar_ENVIRONMENT_NOT_DEFINED_type-bar'
+    );
+
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'foo',
+      transactionType: 'type-foo',
+      environment: 'Not defined',
+      reason:
+        'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
+      threshold: 10,
+      triggerValue: '10',
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_ALL',
     });
   });
 });

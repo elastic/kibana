@@ -96,7 +96,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the `execute` endpoint response action
    */
-  responseActionExecuteEnabled: false,
+  responseActionExecuteEnabled: true,
+
+  /**
+   * Enables the `upload` endpoint response action
+   */
+  responseActionUploadEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -123,6 +128,12 @@ export const allowedExperimentalValues = Object.freeze({
    *
    **/
   alertsPageFiltersEnabled: true,
+
+  /*
+   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   *
+   **/
+  newUserDetailsFlyout: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

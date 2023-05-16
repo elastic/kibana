@@ -9,13 +9,25 @@ import type { ThreeWayDiffOutcome } from './three_way_diff_outcome';
 import type { ThreeWayMergeOutcome } from './three_way_merge_outcome';
 
 /**
+ * A symbol that represents a missing value and used when a base version of a
+ * rule is not available. We need a mechanism that helps us distinguish two
+ * situations:
+ * - the base version is found, and its value is `undefined` or `null`
+ * - the base version is not found
+ *
+ */
+export const MissingVersion = Symbol('MissingVersion');
+export type MissingVersion = typeof MissingVersion;
+
+/**
  * Three versions of a value to pass to a diff algorithm.
  */
 export interface ThreeVersionsOf<TValue> {
   /**
    * Corresponds to the stock version of the currently installed prebuilt rule.
+   * This field is optional because the base version is not always available in the package.
    */
-  base_version: TValue;
+  base_version: TValue | MissingVersion;
 
   /**
    * Corresponds exactly to the currently installed prebuilt rule:

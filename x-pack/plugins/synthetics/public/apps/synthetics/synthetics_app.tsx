@@ -16,7 +16,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { InspectorContextProvider } from '@kbn/observability-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { SyntheticsAppProps } from './contexts';
 
 import {
@@ -91,6 +91,7 @@ const Application = (props: SyntheticsAppProps) => {
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
+                observabilityShared: startPlugins.observabilityShared,
                 exploratoryView: startPlugins.exploratoryView,
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,

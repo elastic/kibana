@@ -39,6 +39,7 @@ export function registerEndpointSuggestionsRoutes(
     {
       path: SUGGESTIONS_ROUTE,
       validate: EndpointSuggestionsSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
       { any: ['canWriteEventFilters'] },

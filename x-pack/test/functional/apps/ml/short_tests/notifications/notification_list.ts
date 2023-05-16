@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const failConfig = { jobId: 'fq_fail', spaceId: undefined };
 
-  describe('Notifications list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/154578
+  describe.skip('Notifications list', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');

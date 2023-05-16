@@ -7,6 +7,8 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
+import { throttlingFormatter } from './browser/formatters';
+import { LegacyConfigKey } from '../constants/monitor_management';
 import { replaceStringWithParams } from './formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
 import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
@@ -26,6 +28,7 @@ export const formatSyntheticsPolicy = (
   config: Partial<
     MonitorFields & {
       location_name: string;
+      location_id: string;
       'monitor.project.name': string;
       'monitor.project.id': string;
     }
@@ -68,6 +71,12 @@ export const formatSyntheticsPolicy = (
       }
     }
   });
+
+  // TODO: remove this once we remove legacy support
+  const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
+  if (throttling) {
+    throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+  }
 
   return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };
 };

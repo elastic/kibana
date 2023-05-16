@@ -9,13 +9,15 @@ import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
@@ -40,6 +42,15 @@ import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/docu
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
+import { useSavedSearchInitial } from '../../services/discover_state_provider';
+
+const containerStyles = css`
+  position: relative;
+`;
+
+const progressStyle = css`
+  z-index: 2;
+`;
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -62,19 +73,17 @@ export const onResize = (
 function DiscoverDocumentsComponent({
   dataView,
   onAddFilter,
-  savedSearch,
   stateContainer,
   onFieldEdited,
 }: {
   dataView: DataView;
-  navigateTo: (url: string) => void;
   onAddFilter?: DocViewFilterFn;
-  savedSearch: SavedSearch;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
+  const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
     (state) => {
@@ -181,7 +190,7 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
@@ -251,6 +260,9 @@ function DiscoverDocumentsComponent({
             />
           </div>
         </>
+      )}
+      {isDataLoading && (
+        <EuiProgress size="xs" color="accent" position="absolute" css={progressStyle} />
       )}
     </EuiFlexItem>
   );

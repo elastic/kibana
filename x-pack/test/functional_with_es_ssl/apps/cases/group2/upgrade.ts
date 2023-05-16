@@ -86,7 +86,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the description correctly', async () => {
         const desc = await find.byCssSelector(
-          '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await desc.getVisibleText()).equal(`Testing upgrade! Let's see how it goes.`);
@@ -112,7 +112,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the first comment correctly', async () => {
         const comment = await find.byCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await comment.getVisibleText()).equal(`This is interesting. I am curious also.`);
@@ -127,7 +127,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the second comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         const secondComment = comments[1];
 
@@ -140,7 +140,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the third comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         const thirdComment = comments[2];
 
@@ -200,7 +200,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the fourth comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
 
         const thirdComment = comments[3];

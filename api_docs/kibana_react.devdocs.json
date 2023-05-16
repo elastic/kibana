@@ -1269,18 +1269,6 @@
             "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
           },
           {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
           },
@@ -1315,6 +1303,18 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
             "plugin": "ml",
@@ -1375,18 +1375,6 @@
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
           },
           {
             "plugin": "indexLifecycleManagement",
@@ -1403,6 +1391,18 @@
           {
             "plugin": "indexLifecycleManagement",
             "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
           },
           {
             "plugin": "synthetics",
@@ -2538,7 +2538,7 @@
               {
                 "parentPluginId": "kibanaReact",
                 "id": "def-public.KibanaReactOverlays.openFlyout.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
@@ -3480,7 +3480,7 @@
         "label": "POSITIONS",
         "description": [],
         "signature": [
-          "(\"none\" | \"right\" | \"left\" | \"center\")[]"
+          "(\"none\" | \"left\" | \"right\" | \"center\")[]"
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
@@ -3526,7 +3526,7 @@
           "EuiButtonPropsForAnchor",
           "> & ",
           "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"right\" | \"left\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"left\" | \"right\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,

@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -21,6 +22,20 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { NormalizedAlertAction } from '../types';
+import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
+import { migrateLegacyActions } from '../lib';
+import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
+
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
+(migrateLegacyActions as jest.Mock).mockResolvedValue({
+  hasLegacyActions: false,
+  resultedActions: [],
+  resultedReferences: [],
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -47,6 +62,9 @@ const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
+const isAuthenticationTypeApiKeyMock = jest.fn();
+const getAuthenticationApiKeyMock = jest.fn();
+
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -64,6 +82,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
+  getAuthenticationAPIKey: getAuthenticationApiKeyMock,
 };
 const paramsModifier = jest.fn();
 
@@ -104,6 +124,7 @@ describe('bulkEdit()', () => {
     attributes: {
       ...existingRule.attributes,
       apiKey: MOCK_API_KEY,
+      apiKeyCreatedByUser: false,
     },
   };
 
@@ -189,7 +210,12 @@ describe('bulkEdit()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
+
+    (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
   });
 
   describe('tags operations', () => {
@@ -580,6 +606,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyCreatedByUser: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -662,6 +689,9 @@ describe('bulkEdit()', () => {
         },
         producer: 'alerts',
         getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       const existingAction = {
         frequency: {
@@ -676,7 +706,8 @@ describe('bulkEdit()', () => {
         alertsFilter: {
           query: {
             kql: 'name:test',
-            dsl: '{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}',
+            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+            filters: [],
           },
           timeframe: {
             days: [1],
@@ -695,7 +726,7 @@ describe('bulkEdit()', () => {
         id: '2',
         params: {},
         uuid: '222',
-        alertsFilter: { query: { kql: 'test:1', dsl: 'test' } },
+        alertsFilter: { query: { kql: 'test:1', dsl: 'test', filters: [] } },
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -714,8 +745,7 @@ describe('bulkEdit()', () => {
                   actionRef: 'action_1',
                   uuid: '222',
                   alertsFilter: {
-                    query: { kql: 'test:1', dsl: 'test' },
-                    timeframe: null,
+                    query: { kql: 'test:1', dsl: 'test', filters: [] },
                   },
                 },
               ],
@@ -772,15 +802,16 @@ describe('bulkEdit()', () => {
                   uuid: '222',
                   alertsFilter: {
                     query: {
-                      dsl: '{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}',
+                      dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
                       kql: 'test:1',
+                      filters: [],
                     },
-                    timeframe: null,
                   },
                 },
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyCreatedByUser: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -804,8 +835,8 @@ describe('bulkEdit()', () => {
               query: {
                 dsl: 'test',
                 kql: 'test:1',
+                filters: [],
               },
-              timeframe: null,
             },
           },
         ],
@@ -2070,6 +2101,142 @@ describe('bulkEdit()', () => {
       });
       expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my rule name');
     });
+
+    describe('set by the user when authenticated using api keys', () => {
+      beforeEach(() => {
+        isAuthenticationTypeApiKeyMock.mockReturnValue(true);
+        getAuthenticationApiKeyMock.mockReturnValue({
+          apiKeysEnabled: true,
+          result: { api_key: '111' },
+        });
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [
+            {
+              ...existingDecryptedRule,
+              attributes: {
+                ...existingDecryptedRule.attributes,
+                enabled: true,
+                apiKeyCreatedByUser: true,
+              },
+            },
+          ],
+        });
+      });
+
+      test('should not call bulkMarkApiKeysForInvalidation', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+
+        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+
+      test('should call bulkMarkApiKeysForInvalidation with empty array if bulkCreate failed', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
+          throw new Error('Fail');
+        });
+
+        await expect(
+          rulesClient.bulkEdit({
+            filter: 'alert.attributes.tags: "APM"',
+            operations: [
+              {
+                field: 'tags',
+                operation: 'add',
+                value: ['test-1'],
+              },
+            ],
+          })
+        ).rejects.toThrow('Fail');
+
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+          { apiKeys: [] },
+          expect.any(Object),
+          expect.any(Object)
+        );
+      });
+
+      test('should call bulkMarkApiKeysForInvalidation with empty array if SO update failed', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: '1',
+              type: 'alert',
+              attributes: {
+                enabled: true,
+                tags: ['foo'],
+                alertTypeId: 'myType',
+                schedule: { interval: '1m' },
+                consumer: 'myApp',
+                scheduledTaskId: 'task-123',
+                params: { index: ['test-index-*'] },
+                throttle: null,
+                notifyWhen: null,
+                actions: [],
+              },
+              references: [],
+              version: '123',
+              error: {
+                error: 'test failure',
+                statusCode: 500,
+                message: 'test failure',
+              },
+            },
+          ],
+        });
+
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+
+        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+
+      test('should not call get apiKey if rule is disabled', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+        expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalledWith();
+      });
+
+      test('should return error in rule errors if key is not generated', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+        expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledWith(
+          'Alerting: myType/my rule name-user-created'
+        );
+      });
+    });
   });
 
   describe('params validation', () => {
@@ -2190,6 +2357,67 @@ describe('bulkEdit()', () => {
       expect(result.rules).toHaveLength(0);
       expect(result.errors[0].message).toBe(
         'Error updating rule: the interval is less than the allowed minimum interval of 3m'
+      );
+    });
+
+    test('should not update saved object and return error if schedule interval is shorter than any action frequency in the rule', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test',
+                  frequency: { notifyWhen: 'onThrottleInterval', summary: false, throttle: '5m' },
+                  group: 'default',
+                  params: {},
+                  uuid: '111',
+                },
+                {
+                  actionRef: 'action_1',
+                  actionTypeId: '',
+                  frequency: { notifyWhen: 'onThrottleInterval', summary: true, throttle: '10s' },
+                  group: 'default',
+                  params: {},
+                  uuid: '100',
+                },
+              ],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'action_1',
+                type: 'action',
+                id: '2',
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ] as any,
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '10m' },
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.rules).toHaveLength(0);
+      expect(result.errors[0].message).toBe(
+        `Error updating rule with ID "${existingDecryptedRule.id}": the interval 10m is longer than the action frequencies`
       );
     });
   });
@@ -2345,6 +2573,55 @@ describe('bulkEdit()', () => {
       });
 
       expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions', async () => {
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRule1, enabledRule2, siemRule1, siemRule2] };
+          },
+        });
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'tags',
+            operation: 'set',
+            value: ['test-tag'],
+          },
+        ],
+      });
+
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(4);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: enabledRule1.attributes,
+        ruleId: enabledRule1.id,
+        actions: [],
+        references: [],
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: enabledRule2.attributes,
+        ruleId: enabledRule2.id,
+        actions: [],
+        references: [],
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
+        ruleId: siemRule1.id,
+        actions: [],
+        references: [],
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
+        ruleId: siemRule2.id,
+        actions: [],
+        references: [],
+      });
     });
   });
 });

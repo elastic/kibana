@@ -48,9 +48,9 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           chrome: { docTitle },
           i18n: i18nDep,
           docLinks,
-          savedObjects,
           application,
           executionContext,
+          settings,
         } = coreStart;
 
         docTitle.change(pluginName);
@@ -66,10 +66,10 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           toasts: notifications.toasts,
           http,
           uiSettings,
+          settings,
           docLinks,
           setBreadcrumbs,
           theme: charts.theme,
-          savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
           history,

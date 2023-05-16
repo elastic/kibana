@@ -15,9 +15,6 @@ export interface GetPrebuiltRulesStatusResponseBody {
 }
 
 export interface PrebuiltRulesStatusStats {
-  /** Total number of existing (known) prebuilt rules */
-  num_prebuilt_rules_total: number;
-
   /** Number of installed prebuilt rules */
   num_prebuilt_rules_installed: number;
 

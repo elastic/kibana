@@ -826,7 +826,8 @@ describe('LayerPanel', () => {
       const dragDropElement = instance
         .find('[data-test-subj="lnsGroup"] DragDrop')
         .first()
-        .find('.lnsLayerPanel__dimension');
+        .find('.lnsLayerPanel__dimension')
+        .first();
 
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
@@ -906,7 +907,7 @@ describe('LayerPanel', () => {
 
       const updatedDragDropElement = instance
         .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
-        .at(2);
+        .last();
 
       updatedDragDropElement.simulate('dragOver');
       updatedDragDropElement.simulate('drop');

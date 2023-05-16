@@ -13,14 +13,17 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { pluginServices } from '../../services';
 import { ControlGroupEditor } from './control_group_editor';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
+import {
+  ControlGroupContainer,
+  ControlGroupContainerContext,
+  setFlyoutRef,
+} from '../embeddable/control_group_container';
 
 export function openEditControlGroupFlyout(this: ControlGroupContainer) {
   const {
     overlays: { openFlyout, openConfirm },
     theme: { theme$ },
   } = pluginServices.getServices();
-  const ReduxWrapper = this.getReduxEmbeddableTools().Wrapper;
 
   const onDeleteAll = (ref: OverlayRef) => {
     openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
@@ -37,7 +40,7 @@ export function openEditControlGroupFlyout(this: ControlGroupContainer) {
 
   const flyoutInstance = openFlyout(
     toMountPoint(
-      <ReduxWrapper>
+      <ControlGroupContainerContext.Provider value={this}>
         <ControlGroupEditor
           initialInput={this.getInput()}
           updateInput={(changes) => this.updateInput(changes)}
@@ -45,7 +48,7 @@ export function openEditControlGroupFlyout(this: ControlGroupContainer) {
           onDeleteAll={() => onDeleteAll(flyoutInstance)}
           onClose={() => flyoutInstance.close()}
         />
-      </ReduxWrapper>,
+      </ControlGroupContainerContext.Provider>,
       { theme$ }
     ),
     {

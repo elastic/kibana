@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import type {
   ActionDetails,
@@ -39,14 +39,6 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
       [action.outputs, agentId]
     );
 
-    const isTruncatedFile = useMemo<boolean>(
-      () =>
-        (outputContent?.output_file_stderr_truncated ||
-          outputContent?.output_file_stdout_truncated) ??
-        false,
-      [outputContent]
-    );
-
     return (
       <>
         <EuiFlexItem>
@@ -54,10 +46,10 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
             action={action}
             buttonTitle={EXECUTE_FILE_LINK_TITLE}
             canAccessFileDownloadLink={canAccessFileDownloadLink}
-            isTruncatedFile={isTruncatedFile}
             data-test-subj={`${dataTestSubj}-getExecuteLink`}
             textSize={textSize}
           />
+          <EuiSpacer size="xxl" />
         </EuiFlexItem>
         {outputContent && (
           <ExecuteActionHostResponseOutput

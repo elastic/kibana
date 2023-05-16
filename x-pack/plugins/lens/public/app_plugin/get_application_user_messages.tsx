@@ -36,7 +36,7 @@ export const getApplicationUserMessages = ({
   visualization: VisualizationState | undefined;
   visualizationMap: VisualizationMap;
   activeDatasource: Datasource | null | undefined;
-  activeDatasourceState: { state: unknown } | null;
+  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
   dataViews: DataViewsState;
   core: CoreStart;
 }): UserMessage[] => {

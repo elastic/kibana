@@ -12,7 +12,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { CheckSetup } from './components/check_setup';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
 import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
@@ -23,6 +23,7 @@ import { Services } from './services';
 import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 import { ProfilingHeaderActionMenu } from './components/profiling_header_action_menu';
 import { RouterErrorBoundary } from './routing/router_error_boundary';
+import { LicenseProvider } from './components/contexts/license/license_context';
 
 interface Props {
   profilingFetchServices: Services;
@@ -86,17 +87,21 @@ function App({
               <RouterErrorBoundary>
                 <TimeRangeContextProvider>
                   <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                    <CheckSetup>
-                      <RedirectWithDefaultDateRange>
-                        <RouteBreadcrumbsContextProvider>
-                          <RouteRenderer />
-                        </RouteBreadcrumbsContextProvider>
-                      </RedirectWithDefaultDateRange>
-                    </CheckSetup>
-                    <MountProfilingActionMenu
-                      setHeaderActionMenu={setHeaderActionMenu}
-                      theme$={theme$}
-                    />
+                    <LicenseProvider>
+                      <>
+                        <CheckSetup>
+                          <RedirectWithDefaultDateRange>
+                            <RouteBreadcrumbsContextProvider>
+                              <RouteRenderer />
+                            </RouteBreadcrumbsContextProvider>
+                          </RedirectWithDefaultDateRange>
+                        </CheckSetup>
+                        <MountProfilingActionMenu
+                          setHeaderActionMenu={setHeaderActionMenu}
+                          theme$={theme$}
+                        />
+                      </>
+                    </LicenseProvider>
                   </ProfilingDependenciesContextProvider>
                 </TimeRangeContextProvider>
               </RouterErrorBoundary>

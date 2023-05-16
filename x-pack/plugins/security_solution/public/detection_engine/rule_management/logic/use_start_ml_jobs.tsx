@@ -43,7 +43,7 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
           }
 
           const latestTimestampMs = job.latestTimestampMs ?? 0;
-          await enableDatafeed(job, latestTimestampMs, true);
+          await enableDatafeed(job, latestTimestampMs);
         })
       );
       refetchJobs();

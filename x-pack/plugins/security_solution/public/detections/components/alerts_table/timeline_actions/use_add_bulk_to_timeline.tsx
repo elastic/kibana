@@ -11,8 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { dataTableActions, TableId, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { CustomBulkAction } from '../../../../../common/types';
-import { TableId } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
@@ -28,10 +28,10 @@ import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
-import { tableDefaults } from '../../../../common/store/data_table/defaults';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import type { Direction } from '../../../../../common/search_strategy';
-import { setEventsLoading, setSelected } from '../../../../common/store/data_table/actions';
+
+const { setEventsLoading, setSelected } = dataTableActions;
 
 export interface UseAddBulkToTimelineActionProps {
   /* filters being passed to the Alert/events table */

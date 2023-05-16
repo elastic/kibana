@@ -23,6 +23,7 @@ import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { RunExpressionsExample } from './run_expressions';
 import { RenderExpressionsExample } from './render_expressions';
 import { ActionsExpressionsExample } from './actions_and_expressions';
@@ -33,10 +34,14 @@ interface Props {
   inspector: InspectorStart;
   actions: UiActionsStart;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
 }
 
-const ExpressionsExplorer = ({ expressions, inspector, actions, uiSettings }: Props) => {
-  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
+const ExpressionsExplorer = ({ expressions, inspector, actions, uiSettings, settings }: Props) => {
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+    uiSettings,
+    settings,
+  });
   return (
     <KibanaReactContextProvider>
       <EuiPage>

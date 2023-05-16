@@ -5,20 +5,41 @@
  * 2.0.
  */
 
+import type { AttachmentService } from '../../../services';
 import { CommentType } from '../../../../common/api';
 import type { CommentRequest, CommentRequestAlertType } from '../../../../common/api';
-import { MAX_ALERTS_PER_CASE } from '../../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../../common/constants';
 import { isCommentRequestTypeAlert } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 
 export class AlertLimiter extends BaseLimiter {
-  constructor() {
+  constructor(private readonly attachmentService: AttachmentService) {
     super({
       limit: MAX_ALERTS_PER_CASE,
       attachmentType: CommentType.alert,
       attachmentNoun: 'alerts',
       field: 'alertId',
     });
+  }
+
+  public async countOfItemsWithinCase(caseId: string): Promise<number> {
+    const limitAggregation = {
+      limiter: {
+        value_count: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+        },
+      },
+    };
+
+    const itemsAttachedToCase = await this.attachmentService.executeCaseAggregations<{
+      limiter: { value: number };
+    }>({
+      caseId,
+      aggregations: limitAggregation,
+      attachmentType: CommentType.alert,
+    });
+
+    return itemsAttachedToCase?.limiter?.value ?? 0;
   }
 
   public countOfItemsInRequest(requests: CommentRequest[]): number {

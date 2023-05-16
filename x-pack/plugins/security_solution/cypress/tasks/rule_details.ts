@@ -29,6 +29,8 @@ import {
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
   BACK_TO_RULES_TABLE,
+  EXCEPTIONS_TAB_EXPIRED_FILTER,
+  EXCEPTIONS_TAB_ACTIVE_FILTER,
 } from '../screens/rule_details';
 import {
   addExceptionConditions,
@@ -103,6 +105,11 @@ export const goToAlertsTab = () => {
 export const goToExceptionsTab = () => {
   cy.get(EXCEPTIONS_TAB).should('exist');
   cy.get(EXCEPTIONS_TAB).click();
+};
+
+export const viewExpiredExceptionItems = () => {
+  cy.get(EXCEPTIONS_TAB_EXPIRED_FILTER).click();
+  cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
 };
 
 export const goToEndpointExceptionsTab = () => {

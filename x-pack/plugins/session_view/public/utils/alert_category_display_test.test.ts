@@ -21,24 +21,22 @@ describe('getAlertCategoryDisplayText(alert, category)', () => {
 
   it('should display rule name when alert category is process', () => {
     expect(getAlertCategoryDisplayText(mockAlerts[0], ProcessEventAlertCategory.process)).toEqual(
-      undefined
+      ''
     );
   });
 
   it('should display rule name when alert category is undefined', () => {
-    expect(getAlertCategoryDisplayText(mockAlerts[0], undefined)).toEqual(undefined);
+    expect(getAlertCategoryDisplayText(mockAlerts[0], undefined)).toEqual('');
   });
 
   it('should display rule name when file path is undefined', () => {
     const fileAlert = { ...mockFileAlert, file: {} };
-    expect(getAlertCategoryDisplayText(fileAlert, ProcessEventAlertCategory.file)).toEqual(
-      undefined
-    );
+    expect(getAlertCategoryDisplayText(fileAlert, ProcessEventAlertCategory.file)).toEqual('');
   });
   it('should display rule name when destination address is undefined and alert category is network', () => {
     const networkAlert = { ...mockNetworkAlert, destination: undefined };
     expect(getAlertCategoryDisplayText(networkAlert, ProcessEventAlertCategory.network)).toEqual(
-      undefined
+      ''
     );
   });
 });

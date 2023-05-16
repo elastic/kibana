@@ -9,33 +9,35 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
 import { CoreVersionedRoute } from './core_versioned_route';
-import { Method, VersionedRouterRoute } from './types';
+import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
+
+/** @internal */
+interface Dependencies {
+  router: IRouter;
+  defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
+  /** Whether Kibana is running in a dev environment */
+  isDev?: boolean;
+}
 
 export class CoreVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<CoreVersionedRoute>();
-  public static from({
-    router,
-    validateResponses,
-  }: {
-    router: IRouter;
-    validateResponses?: boolean;
-  }) {
-    return new CoreVersionedRouter(router, validateResponses);
+  public static from({ router, defaultHandlerResolutionStrategy, isDev }: Dependencies) {
+    return new CoreVersionedRouter(router, defaultHandlerResolutionStrategy, isDev);
   }
   private constructor(
-    private readonly router: IRouter,
-    private readonly validateResponses: boolean = false
+    public readonly router: IRouter,
+    public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
+    public readonly isDev: boolean = false
   ) {}
 
   private registerVersionedRoute =
     (routeMethod: Method) =>
     (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
       const route = CoreVersionedRoute.from({
-        router: this.router,
+        router: this,
         method: routeMethod,
         path: options.path,
         options,
-        validateResponses: this.validateResponses,
       });
       this.routes.add(route);
       return route;

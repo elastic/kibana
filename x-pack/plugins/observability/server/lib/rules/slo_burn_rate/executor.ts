@@ -17,6 +17,7 @@ import { ExecutorType } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { IBasePath } from '@kbn/core/server';
 
+import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
 import { Duration, toDurationUnit } from '../../../domain/models';
 import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
 import { computeBurnRate } from '../../../domain/services';
@@ -125,6 +126,8 @@ export const getRuleExecutor = ({
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_THRESHOLD]: params.burnRateThreshold,
           [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
         },
       });
 

@@ -40,18 +40,18 @@ describe('getMissingSignificantTerms', () => {
     );
 
     expect(transformed).toEqual({
-      docCount: 1738,
+      docCount: 1981,
       group: [
         {
+          docCount: 1981,
           duplicate: 1,
-          fieldName: 'url',
-          fieldValue: 'login.php',
-          docCount: 1738,
-          pValue: 0.010770456205312423,
+          fieldName: 'user',
+          fieldValue: 'Peter',
+          pValue: 2.62555579103777e-21,
         },
       ],
-      id: '368426784',
-      pValue: 0.010770456205312423,
+      id: '817080373',
+      pValue: 2.62555579103777e-21,
     });
   });
 });

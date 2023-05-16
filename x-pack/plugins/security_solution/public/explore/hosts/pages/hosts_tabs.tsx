@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { HostsTabsProps } from './types';
 import { HostsTableType } from '../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
@@ -22,7 +23,6 @@ import {
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from './navigation';
-import { TableId } from '../../../../common/types';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 
 export const HostsTabs = React.memo<HostsTabsProps>(

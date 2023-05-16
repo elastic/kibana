@@ -32,7 +32,7 @@ const renderRoutes = (routes: React.ReactElement) => {
     logViews: {
       client: {},
     },
-    observability: {
+    observabilityShared: {
       navigation: {
         PageTemplate: KibanaPageTemplate,
       },

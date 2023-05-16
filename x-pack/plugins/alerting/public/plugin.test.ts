@@ -7,16 +7,24 @@
 
 import { AlertingPublicPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
+import {
+  createManagementSectionMock,
+  managementPluginMock,
+} from '@kbn/management-plugin/public/mocks';
 
-jest.mock('./alert_api', () => ({
+jest.mock('./services/alert_api', () => ({
   loadRule: jest.fn(),
   loadRuleType: jest.fn(),
 }));
 
+const mockInitializerContext = coreMock.createPluginInitializerContext();
+const management = managementPluginMock.createSetupContract();
+const mockSection = createManagementSectionMock();
+
 describe('Alerting Public Plugin', () => {
   describe('start()', () => {
     it(`should fallback to the viewInAppRelativeUrl part of the rule object if navigation isn't registered`, async () => {
-      const { loadRule, loadRuleType } = jest.requireMock('./alert_api');
+      const { loadRule, loadRuleType } = jest.requireMock('./services/alert_api');
       loadRule.mockResolvedValue({
         alertTypeId: 'foo',
         consumer: 'abc',
@@ -24,8 +32,11 @@ describe('Alerting Public Plugin', () => {
       });
       loadRuleType.mockResolvedValue({});
 
-      const plugin = new AlertingPublicPlugin();
-      plugin.setup();
+      mockSection.registerApp = jest.fn();
+      management.sections.section.insightsAndAlerting = mockSection;
+
+      const plugin = new AlertingPublicPlugin(mockInitializerContext);
+      plugin.setup(coreMock.createSetup(), { management });
       const pluginStart = plugin.start(coreMock.createStart());
 
       const navigationPath = await pluginStart.getNavigation('123');

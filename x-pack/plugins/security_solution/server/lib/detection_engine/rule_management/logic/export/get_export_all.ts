@@ -17,9 +17,6 @@ import { transformAlertsToRules, transformRuleToExportableFormat } from '../../u
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
-// eslint-disable-next-line no-restricted-imports
-import { legacyGetBulkRuleActionsSavedObject } from '../../../rule_actions_legacy';
-
 export const getExportAll = async (
   rulesClient: RulesClient,
   exceptionsClient: ExceptionListClient | undefined,
@@ -35,15 +32,8 @@ export const getExportAll = async (
   actionConnectors: string;
 }> => {
   const ruleAlertTypes = await getNonPackagedRules({ rulesClient });
-  const alertIds = ruleAlertTypes.map((rule) => rule.id);
+  const rules = transformAlertsToRules(ruleAlertTypes);
 
-  // Gather actions
-  const legacyActions = await legacyGetBulkRuleActionsSavedObject({
-    alertIds,
-    savedObjectsClient,
-    logger,
-  });
-  const rules = transformAlertsToRules(ruleAlertTypes, legacyActions);
   const exportRules = rules.map((r) => transformRuleToExportableFormat(r));
 
   // Gather exceptions

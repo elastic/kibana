@@ -15,21 +15,21 @@ import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './form
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 const throttlingFormatter: Formatter = (fields) => {
-  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return false;
+  const value = fields[ConfigKey.THROTTLING_CONFIG];
+  const defaultThrottling = DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG].value;
+
+  const thValue = value?.value;
+
+  if (!thValue || !defaultThrottling) return false;
+
+  if (thValue?.download === '0' && thValue?.upload === '0' && thValue?.latency === '0')
+    return false;
+  if (value?.label === 'no-throttling') return false;
 
   return {
-    download: parseInt(
-      fields[ConfigKey.DOWNLOAD_SPEED] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.DOWNLOAD_SPEED],
-      10
-    ),
-    upload: parseInt(
-      fields[ConfigKey.UPLOAD_SPEED] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.UPLOAD_SPEED],
-      10
-    ),
-    latency: parseInt(
-      fields[ConfigKey.LATENCY] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.LATENCY],
-      10
-    ),
+    download: Number(thValue?.download ?? defaultThrottling.download),
+    upload: Number(thValue?.upload ?? defaultThrottling.upload),
+    latency: Number(thValue?.latency ?? defaultThrottling.latency),
   };
 };
 
@@ -41,7 +41,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
-  [ConfigKey.PARAMS]: stringToObjectFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: stringToObjectFormatter,
   ...commonFormatters,
   ...tlsFormatters,

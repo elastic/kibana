@@ -6,6 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
+import { MissingVersion } from './three_way_diff';
 
 /**
  * Result of comparing three versions of a value against each other.
@@ -29,13 +30,24 @@ export enum ThreeWayDiffOutcome {
 }
 
 export const determineDiffOutcome = <TValue>(
-  baseVersion: TValue,
+  baseVersion: TValue | MissingVersion,
   currentVersion: TValue,
   targetVersion: TValue
 ): ThreeWayDiffOutcome => {
   const baseEqlCurrent = isEqual(baseVersion, currentVersion);
   const baseEqlTarget = isEqual(baseVersion, targetVersion);
   const currentEqlTarget = isEqual(currentVersion, targetVersion);
+
+  if (baseVersion === MissingVersion) {
+    /**
+     * We couldn't find the base version of the rule in the package so further
+     * version comparison is not possible. We assume that the rule is not
+     * customized and the value can be updated if there's an update.
+     */
+    return currentEqlTarget
+      ? ThreeWayDiffOutcome.StockValueNoUpdate
+      : ThreeWayDiffOutcome.StockValueCanUpdate;
+  }
 
   if (baseEqlCurrent) {
     return currentEqlTarget

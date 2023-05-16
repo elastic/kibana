@@ -55,6 +55,7 @@ const resolveLegacyReference = async (
     .create(
       {
         id: `log-view-${logViewId}`,
+        name: logViewAttributes.name,
         title: indices,
         timeFieldName: TIMESTAMP_FIELD,
         allowNoIndex: true,

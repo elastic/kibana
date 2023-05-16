@@ -9,6 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
@@ -29,10 +30,10 @@ import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createEditModeActionDefinition } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
-import { DashboardContainer } from './dashboard_container';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
+import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
 import { pluginServices } from '../../services/plugin_services';
 import { ApplicationStart } from '@kbn/core-application-browser';
+import { DashboardContainer } from './dashboard_container';
 
 const theme = coreMock.createStart().theme;
 let application: ApplicationStart | undefined;
@@ -47,7 +48,7 @@ beforeEach(() => {
 });
 
 test('DashboardContainer initializes embeddables', (done) => {
-  const initialInput = getSampleDashboardInput({
+  const container = buildMockDashboard({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Sam', id: '123' },
@@ -55,7 +56,6 @@ test('DashboardContainer initializes embeddables', (done) => {
       }),
     },
   });
-  const container = new DashboardContainer(initialInput);
 
   const subscription = container.getOutput$().subscribe((output) => {
     if (container.getOutput().embeddableLoaded['123']) {
@@ -76,8 +76,7 @@ test('DashboardContainer initializes embeddables', (done) => {
 });
 
 test('DashboardContainer.addNewEmbeddable', async () => {
-  const container = new DashboardContainer(getSampleDashboardInput());
-  await container.untilInitialized();
+  const container = buildMockDashboard();
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
@@ -99,7 +98,8 @@ test('DashboardContainer.addNewEmbeddable', async () => {
 
 test('DashboardContainer.replacePanel', (done) => {
   const ID = '123';
-  const initialInput = getSampleDashboardInput({
+
+  const container = buildMockDashboard({
     panels: {
       [ID]: getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Sam', id: ID },
@@ -107,8 +107,6 @@ test('DashboardContainer.replacePanel', (done) => {
       }),
     },
   });
-
-  const container = new DashboardContainer(initialInput);
   let counter = 0;
 
   const subscription = container.getInput$().subscribe(
@@ -141,7 +139,7 @@ test('DashboardContainer.replacePanel', (done) => {
 });
 
 test('Container view mode change propagates to existing children', async () => {
-  const initialInput = getSampleDashboardInput({
+  const container = buildMockDashboard({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Sam', id: '123' },
@@ -149,8 +147,6 @@ test('Container view mode change propagates to existing children', async () => {
       }),
     },
   });
-  const container = new DashboardContainer(initialInput);
-  await container.untilInitialized();
 
   const embeddable = await container.untilEmbeddableLoaded('123');
   expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
@@ -159,8 +155,7 @@ test('Container view mode change propagates to existing children', async () => {
 });
 
 test('Container view mode change propagates to new children', async () => {
-  const container = new DashboardContainer(getSampleDashboardInput());
-  await container.untilInitialized();
+  const container = buildMockDashboard();
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -179,9 +174,10 @@ test('Container view mode change propagates to new children', async () => {
 test('searchSessionId propagates to children', async () => {
   const searchSessionId1 = 'searchSessionId1';
   const container = new DashboardContainer(
-    getSampleDashboardInput({ searchSessionId: searchSessionId1 })
+    getSampleDashboardInput(),
+    mockedReduxEmbeddablePackage,
+    searchSessionId1
   );
-  await container.untilInitialized();
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -191,11 +187,6 @@ test('searchSessionId propagates to children', async () => {
   });
 
   expect(embeddable.getInput().searchSessionId).toBe(searchSessionId1);
-
-  const searchSessionId2 = 'searchSessionId2';
-  container.updateInput({ searchSessionId: searchSessionId2 });
-
-  expect(embeddable.getInput().searchSessionId).toBe(searchSessionId2);
 });
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
@@ -205,9 +196,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   uiActionsSetup.registerAction(editModeAction);
   uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
 
-  const initialInput = getSampleDashboardInput({ viewMode: ViewMode.VIEW });
-  const container = new DashboardContainer(initialInput);
-  await container.untilInitialized();
+  const container = buildMockDashboard({ viewMode: ViewMode.VIEW });
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

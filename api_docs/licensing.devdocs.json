@@ -833,6 +833,10 @@
             {
               "plugin": "watcher",
               "path": "x-pack/plugins/watcher/public/plugin.ts"
+            },
+            {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
             }
           ]
         },
@@ -2157,6 +2161,10 @@
             {
               "plugin": "mapsEms",
               "path": "src/plugins/maps_ems/server/index.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/handlers/action/create_action_service.ts"
             },
             {
               "plugin": "painlessLab",

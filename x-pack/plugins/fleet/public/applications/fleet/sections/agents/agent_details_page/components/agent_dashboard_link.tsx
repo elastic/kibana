@@ -10,21 +10,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useGetPackageInfoByKeyQuery, useKibanaLink, useLink } from '../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useLink, useDashboardLocator } from '../../../../hooks';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID,
+  DASHBOARD_LOCATORS_IDS,
 } from '../../../../../../../common/constants';
 
 function useAgentDashboardLink(agent: Agent) {
   const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
 
   const isInstalled = data?.item.status === 'installed';
+  const dashboardLocator = useDashboardLocator();
 
-  const dashboardLink = useKibanaLink(`/dashboard/${FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID}`);
-  const query = `_a=(query:(language:kuery,query:'elastic_agent.id:${agent.id}'))`;
-  const link = `${dashboardLink}?${query}`;
+  const link = dashboardLocator?.getRedirectUrl({
+    dashboardId: DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS,
+    query: {
+      language: 'kuery',
+      query: `elastic_agent.id:${agent.id}`,
+    },
+  });
 
   return {
     isLoading,
@@ -50,7 +55,12 @@ export const AgentDashboardLink: React.FunctionComponent<{
     !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
 
   const button = (
-    <EuiButtonCompressed {...buttonArgs} isLoading={isLoading} color="primary">
+    <EuiButtonCompressed
+      {...buttonArgs}
+      isLoading={isLoading}
+      color="primary"
+      iconType="dashboardApp"
+    >
       <FormattedMessage
         data-test-subj="agentDetails.viewMoreMetricsButton"
         id="xpack.fleet.agentDetails.viewDashboardButtonLabel"

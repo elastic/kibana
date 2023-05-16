@@ -7,13 +7,19 @@
 
 import type { Filter } from '@kbn/es-query';
 import type {
+  ControlInputTransform,
+  ControlPanelState,
+  OptionsListEmbeddableInput,
+} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import type {
   ControlGroupInput,
-  controlGroupInputBuilder,
+  ControlGroupInputBuilder,
   ControlGroupOutput,
   ControlGroupContainer,
   ControlGroupRendererProps,
 } from '@kbn/controls-plugin/public';
-import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -21,7 +27,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
-import { withSuspense } from '@kbn/shared-ux-utility';
+import type { ControlGroupCreationOptions } from '@kbn/controls-plugin/public/control_group/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterGroupProps, FilterItemObj } from './types';
@@ -30,18 +36,17 @@ import { APP_ID } from '../../../../common/constants';
 import './index.scss';
 import { FilterGroupLoading } from './loading';
 import { withSpaceId } from '../with_space_id';
-import { NUM_OF_CONTROLS } from './config';
 import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
 import { useViewEditMode } from './hooks/use_view_edit_mode';
 import { FilterGroupContextMenu } from './context_menu';
-import { AddControl, DiscardChanges, SaveControls } from './buttons';
+import { AddControl, SaveControls } from './buttons';
 import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
-
-type ControlGroupBuilder = typeof controlGroupInputBuilder;
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
+import { NUM_OF_CONTROLS } from './config';
+import { TEST_IDS } from './constants';
+import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
+import { convertToBuildEsQuery } from '../../lib/kuery';
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -62,7 +67,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     timeRange,
     filters,
     query,
-    chainingSystem = 'HIERARCHICAL',
+    chainingSystem,
     initialControls,
     spaceId,
     onInit,
@@ -114,6 +119,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       return;
     }
     try {
+      if (!Array.isArray(param)) {
+        throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
+      }
       const storedControlGroupInput = getStoredControlInput();
       if (storedControlGroupInput) {
         const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
@@ -142,18 +150,47 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     return cleanup;
   }, []);
 
-  useEffect(() => {
-    controlGroup?.updateInput({
-      timeRange,
+  const { filters: validatedFilters, query: validatedQuery } = useMemo(() => {
+    const [_, kqlError] = convertToBuildEsQuery({
+      config: {},
+      queries: query ? [query] : [],
+      filters: filters ?? [],
+      indexPattern: { fields: [], title: '' },
+    });
+
+    // we only need to handle kqlError because control group can handle Lucene error
+    if (kqlError) {
+      /*
+       * Based on the behaviour from other components,
+       * ignore all filters and queries if there is some error
+       * in the input filters and queries
+       *
+       * */
+      return {
+        filters: [],
+        query: undefined,
+      };
+    }
+    return {
       filters,
       query,
+    };
+  }, [filters, query]);
+
+  useEffect(() => {
+    controlGroup?.updateInput({
+      filters: validatedFilters,
+      query: validatedQuery,
+      timeRange,
       chainingSystem,
     });
-  }, [timeRange, filters, query, chainingSystem, controlGroup]);
+  }, [timeRange, chainingSystem, controlGroup, validatedQuery, validatedFilters]);
 
   const handleInputUpdates = useCallback(
     (newInput: ControlGroupInput) => {
-      if (isEqual(getStoredControlInput(), newInput)) return;
+      if (isEqual(getStoredControlInput(), newInput)) {
+        return;
+      }
       if (!isEqual(newInput.panels, getStoredControlInput()?.panels) && !isViewMode) {
         setHasPendingChanges(true);
       }
@@ -162,7 +199,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     [setControlGroupInputUpdates, getStoredControlInput, isViewMode, setHasPendingChanges]
   );
 
-  const handleFilterUpdates = useCallback(
+  const handleOutputFilterUpdates = useCallback(
     ({ filters: newFilters }: ControlGroupOutput) => {
       if (isEqual(currentFiltersRef.current, newFilters)) return;
       if (onFilterChange) onFilterChange(newFilters ?? []);
@@ -172,8 +209,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const debouncedFilterUpdates = useMemo(
-    () => debounce(handleFilterUpdates, 500),
-    [handleFilterUpdates]
+    () => debounce(handleOutputFilterUpdates, 500),
+    [handleOutputFilterUpdates]
   );
 
   useEffect(() => {
@@ -196,6 +233,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const onControlGroupLoadHandler = useCallback(
     (controlGroupContainer: ControlGroupContainer) => {
+      if (!controlGroupContainer) return;
       if (onInit) onInit(controlGroupContainer);
       setControlGroup(controlGroupContainer);
     },
@@ -212,8 +250,10 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
      *
      * */
 
-    const localInitialControls = cloneDeep(initialControls);
-    const resultControls = cloneDeep(initialControls);
+    const localInitialControls = cloneDeep(initialControls).filter(
+      (control) => control.persist === true
+    );
+    let resultControls = [] as FilterItemObj[];
 
     let overridingControls = initialUrlParam;
     if (!initialUrlParam || initialUrlParam.length === 0) {
@@ -231,40 +271,28 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
     // if initialUrlParam Exists... replace localInitialControls with what was provided in the Url
     if (overridingControls && !urlDataApplied.current) {
-      let maxInitialControlIdx = Math.max(
-        localInitialControls.length - 1,
-        (overridingControls?.length ?? 1) - 1
-      );
-      for (let counter = overridingControls.length - 1; counter >= 0; counter--) {
-        const urlControl = overridingControls[counter];
-        const idx = localInitialControls.findIndex(
-          (item) => item.fieldName === urlControl.fieldName
-        );
+      if (localInitialControls.length > 0) {
+        localInitialControls.forEach((persistControl) => {
+          const doesPersistControlAlreadyExist = overridingControls?.some(
+            (control) => control.fieldName === persistControl.fieldName
+          );
 
-        if (idx !== -1) {
-          // if index found, replace that with what was provided in the Url
-          resultControls[idx] = {
-            ...localInitialControls[idx],
-            fieldName: urlControl.fieldName,
-            title: urlControl.title ?? urlControl.fieldName,
-            selectedOptions: urlControl.selectedOptions ?? [],
-            existsSelected: urlControl.existsSelected ?? false,
-            exclude: urlControl.exclude ?? false,
-          };
-        } else {
-          // if url param is not available in initialControl, start replacing the last slot in the
-          // initial Control with the last `not found` element in the Url Param
-          //
-          resultControls[maxInitialControlIdx] = {
-            fieldName: urlControl.fieldName,
-            selectedOptions: urlControl.selectedOptions ?? [],
-            title: urlControl.title ?? urlControl.fieldName,
-            existsSelected: urlControl.existsSelected ?? false,
-            exclude: urlControl.exclude ?? false,
-          };
-          maxInitialControlIdx--;
-        }
+          if (!doesPersistControlAlreadyExist) {
+            resultControls.push(persistControl);
+          }
+        });
       }
+
+      resultControls = [
+        ...resultControls,
+        ...overridingControls.map((item) => ({
+          fieldName: item.fieldName,
+          title: item.title,
+          selectedOptions: item.selectedOptions ?? [],
+          existsSelected: item.existsSelected ?? false,
+          exclude: item.exclude,
+        })),
+      ];
     }
 
     return resultControls;
@@ -273,7 +301,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
       defaultInput: Partial<ControlGroupInput>,
-      { addOptionsListControl }: ControlGroupBuilder
+      { addOptionsListControl }: ControlGroupInputBuilder
     ) => {
       const initialInput: Partial<ControlGroupInput> = {
         ...defaultInput,
@@ -306,6 +334,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       return {
         initialInput,
         settings: {
+          fieldFilterPredicate: (f) => f.type !== 'number',
           showAddButton: false,
           staticDataViewId: dataViewId ?? '',
           editorConfig: {
@@ -314,7 +343,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             hideAdditionalSettings: true,
           },
         },
-      };
+      } as ControlGroupCreationOptions;
     },
     [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
   );
@@ -333,13 +362,75 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
 
-  const saveChangesHandler = useCallback(() => {
+  const upsertPersistableControls = useCallback(async () => {
+    const persistableControls = initialControls.filter((control) => control.persist === true);
+    if (persistableControls.length > 0) {
+      const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
+        ControlPanelState<OptionsListEmbeddableInput>
+      >;
+      const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
+      let filterControlsDeleted = false;
+      for (const control of persistableControls) {
+        const controlExists = currentPanels.some(
+          (currControl) => control.fieldName === currControl.explicitInput.fieldName
+        );
+        if (!controlExists) {
+          // delete current controls
+          if (!filterControlsDeleted) {
+            controlGroup?.updateInput({ panels: {} });
+            filterControlsDeleted = true;
+          }
+
+          // add persitable controls
+          await controlGroup?.addOptionsListControl({
+            title: control.title,
+            hideExclude: true,
+            hideSort: true,
+            hidePanelTitles: true,
+            placeholder: '',
+            // option List controls will handle an invalid dataview
+            // & display an appropriate message
+            dataViewId: dataViewId ?? '',
+            selectedOptions: control.selectedOptions,
+            ...control,
+          });
+        }
+      }
+
+      for (const panel of orderedPanels) {
+        if (panel.explicitInput.fieldName)
+          await controlGroup?.addOptionsListControl({
+            selectedOptions: [],
+            fieldName: panel.explicitInput.fieldName,
+            dataViewId: dataViewId ?? '',
+            ...panel.explicitInput,
+          });
+      }
+    }
+  }, [controlGroup, dataViewId, initialControls]);
+
+  const saveChangesHandler = useCallback(async () => {
+    await upsertPersistableControls();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
-  }, [switchToViewMode]);
+  }, [switchToViewMode, upsertPersistableControls]);
+
+  const newControlInputTranform: ControlInputTransform = (newInput, controlType) => {
+    // for any new controls, we want to avoid
+    // default placeholder
+    if (controlType === OPTIONS_LIST_CONTROL) {
+      return {
+        ...newInput,
+        placeholder: '',
+      };
+    }
+    return newInput;
+  };
 
   const addControlsHandler = useCallback(() => {
-    controlGroup?.openAddDataControlFlyout();
+    controlGroup?.openAddDataControlFlyout({
+      controlInputTransform: newControlInputTranform,
+    });
   }, [controlGroup]);
 
   return (
@@ -358,31 +449,34 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         openPendingChangesPopover,
         closePendingChangesPopover,
         setShowFiltersChangedBanner,
+        saveChangesHandler,
+        discardChangesHandler,
       }}
     >
       <FilterWrapper className="filter-group__wrapper">
         <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
           {Array.isArray(initialUrlParam) ? (
-            <EuiFlexItem grow={true} data-test-subj="filter_group__items">
+            <EuiFlexItem grow={true} data-test-subj={TEST_IDS.FILTER_CONTROLS}>
               <ControlGroupRenderer
-                onLoadComplete={onControlGroupLoadHandler}
+                ref={onControlGroupLoadHandler}
                 getCreationOptions={getCreationOptions}
               />
               {!controlGroup ? <FilterGroupLoading /> : null}
             </EuiFlexItem>
           ) : null}
-          {!isViewMode &&
-          (Object.keys(controlGroupInputUpdates?.panels ?? {}).length > NUM_OF_CONTROLS.MIN ||
-            Object.keys(controlGroupInputUpdates?.panels ?? {}).length < NUM_OF_CONTROLS.MAX) ? (
+          {!isViewMode && !showFiltersChangedBanner ? (
             <>
               <EuiFlexItem grow={false}>
-                <AddControl onClick={addControlsHandler} />
+                <AddControl
+                  onClick={addControlsHandler}
+                  isDisabled={
+                    controlGroupInputUpdates &&
+                    Object.values(controlGroupInputUpdates.panels).length >= NUM_OF_CONTROLS.MAX
+                  }
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SaveControls onClick={saveChangesHandler} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DiscardChanges onClick={discardChangesHandler} />
               </EuiFlexItem>
             </>
           ) : null}
@@ -393,7 +487,10 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         {showFiltersChangedBanner ? (
           <>
             <EuiSpacer size="l" />
-            <FiltersChangedBanner />
+            <FiltersChangedBanner
+              saveChangesHandler={saveChangesHandler}
+              discardChangesHandler={discardChangesHandler}
+            />
           </>
         ) : null}
       </FilterWrapper>

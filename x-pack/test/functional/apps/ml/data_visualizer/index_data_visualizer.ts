@@ -140,7 +140,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  describe('index based', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/137032
+  // Failing: See https://github.com/elastic/kibana/issues/154452
+  describe.skip('index based', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

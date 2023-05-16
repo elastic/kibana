@@ -6,26 +6,64 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-
-jest.mock('axios', () => jest.fn());
-
+import { CoreStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { ServiceConfig } from '../../common/config';
 import axios from 'axios';
 import { LocationStatus, PublicLocations } from '../../common/runtime_types';
+import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
+const licenseMock: LicenseGetResponse = {
+  license: {
+    status: 'active',
+    uid: '1d34eb9f-e66f-47d1-8d24-cd60d187587a',
+    type: 'trial',
+    issue_date: '2022-05-05T14:25:00.732Z',
+    issue_date_in_millis: 165176070074432,
+    expiry_date: '2022-06-04T14:25:00.732Z',
+    expiry_date_in_millis: 165435270073332,
+    max_nodes: 1000,
+    max_resource_units: null,
+    issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+    issuer: 'elasticsearch',
+    start_date_in_millis: -1,
+  },
+};
+
+jest.mock('axios', () => jest.fn());
 jest.mock('@kbn/server-http-tools', () => ({
+  ...jest.requireActual('@kbn/server-http-tools'),
   SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
 }));
+
+const mockCoreStart = coreMock.createStart() as CoreStart;
+
+mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+  license: {
+    status: 'active',
+    uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+    type: 'platinum',
+    issue_date: '2022-11-29T00:00:00.000Z',
+    issue_date_in_millis: 1669680000000,
+    expiry_date: '2024-12-31T23:59:59.999Z',
+    expiry_date_in_millis: 1735689599999,
+    max_nodes: 100,
+    max_resource_units: null,
+    issued_to: 'Elastic - INTERNAL (development environments)',
+    issuer: 'API',
+    start_date_in_millis: 1669680000000,
+  },
+});
 
 describe('getHttpsAgent', () => {
   it('does not use certs if basic auth is set', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { username: 'u', password: 'p' },
-      { isDev: true } as UptimeServerSetup
+      { isDev: true, coreStart: mockCoreStart } as UptimeServerSetup
     );
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
     expect(result).not.toHaveProperty('cert');
@@ -36,7 +74,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: true } as UptimeServerSetup
+      { isDev: true, coreStart: mockCoreStart } as UptimeServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://example.com');
@@ -47,7 +85,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false } as UptimeServerSetup
+      { isDev: false, coreStart: mockCoreStart } as UptimeServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
@@ -58,7 +96,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false } as UptimeServerSetup
+      { isDev: false, coreStart: mockCoreStart } as UptimeServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
@@ -77,7 +115,7 @@ describe('checkAccountAccessStatus', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, stackVersion: '8.4' } as UptimeServerSetup
+      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as UptimeServerSetup
     );
 
     apiClient.locations = [
@@ -110,6 +148,7 @@ describe('checkAccountAccessStatus', () => {
 describe('callAPI', () => {
   beforeEach(() => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();
+    jest.clearAllMocks();
   });
 
   afterEach(() => jest.restoreAllMocks());
@@ -134,6 +173,7 @@ describe('callAPI', () => {
     const apiClient = new ServiceAPIClient(logger, config, {
       isDev: true,
       stackVersion: '8.7.0',
+      coreStart: mockCoreStart,
     } as UptimeServerSetup);
 
     const spy = jest.spyOn(apiClient, 'callServiceEndpoint');
@@ -145,6 +185,7 @@ describe('callAPI', () => {
     await apiClient.callAPI('POST', {
       monitors: testMonitors,
       output,
+      license: licenseMock.license,
     });
 
     expect(spy).toHaveBeenCalledTimes(3);
@@ -154,11 +195,11 @@ describe('callAPI', () => {
       1,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central')
         ),
         output,
+        license: licenseMock.license,
       },
       'POST',
       devUrl
@@ -168,11 +209,11 @@ describe('callAPI', () => {
       2,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central_qa')
         ),
         output,
+        license: licenseMock.license,
       },
       'POST',
       'https://qa.service.elstc.co'
@@ -182,11 +223,11 @@ describe('callAPI', () => {
       3,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central_staging')
         ),
         output,
+        license: licenseMock.license,
       },
       'POST',
       'https://qa.service.stg.co'
@@ -194,7 +235,14 @@ describe('callAPI', () => {
 
     expect(axiosSpy).toHaveBeenCalledTimes(3);
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: { monitors: request1, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+      },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
         'x-kibana-version': '8.7.0',
@@ -207,7 +255,14 @@ describe('callAPI', () => {
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(2, {
-      data: { monitors: request2, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request2,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+      },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
         'x-kibana-version': '8.7.0',
@@ -220,7 +275,14 @@ describe('callAPI', () => {
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(3, {
-      data: { monitors: request3, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request3,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+      },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
         'x-kibana-version': '8.7.0',
@@ -240,15 +302,15 @@ describe('callAPI', () => {
     });
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
-      'Successfully called service location https://service.dev with method POST with 4 monitors '
+      'Successfully called service location https://service.devundefined with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       4,
-      'Successfully called service location https://qa.service.elstc.co with method POST with 4 monitors '
+      'Successfully called service location https://qa.service.elstc.coundefined with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       6,
-      'Successfully called service location https://qa.service.stg.co with method POST with 1 monitors '
+      'Successfully called service location https://qa.service.stg.coundefined with method POST with 1 monitors'
     );
   });
 
@@ -273,9 +335,9 @@ describe('callAPI', () => {
       {
         isDev: true,
         stackVersion: '8.7.0',
+        coreStart: mockCoreStart,
       } as UptimeServerSetup
     );
-
     apiClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
@@ -283,10 +345,18 @@ describe('callAPI', () => {
     await apiClient.callAPI('POST', {
       monitors: testMonitors,
       output,
+      license: licenseMock.license,
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: { monitors: request1, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+      },
       headers: {
         'x-kibana-version': '8.7.0',
       },
@@ -300,6 +370,118 @@ describe('callAPI', () => {
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
+    });
+  });
+
+  it('Calls the `/run` endpoint when calling `runOnce`', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    const apiClient = new ServiceAPIClient(
+      logger,
+      {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+        tls: { certificate: 'test-certificate', key: 'test-key' } as any,
+      },
+      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+    );
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await apiClient.runOnce({
+      monitors: testMonitors,
+      output,
+      license: licenseMock.license,
+    });
+
+    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+      },
+      headers: {
+        'x-kibana-version': '8.7.0',
+      },
+      httpsAgent: expect.objectContaining({
+        options: {
+          rejectUnauthorized: true,
+          path: null,
+          cert: 'test-certificate',
+          key: 'test-key',
+        },
+      }),
+      method: 'POST',
+      url: 'https://service.dev/run',
+    });
+  });
+
+  it('Calls the `/monitors/sync` endpoint when calling `syncMonitors`', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    const apiClient = new ServiceAPIClient(
+      logger,
+      {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+        tls: { certificate: 'test-certificate', key: 'test-key' } as any,
+      },
+      {
+        isDev: true,
+        stackVersion: '8.7.0',
+        cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
+      } as UptimeServerSetup
+    );
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await apiClient.syncMonitors({
+      monitors: testMonitors,
+      output,
+      license: licenseMock.license,
+    });
+
+    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+        cloud_id: 'test-id',
+        deployment_id: 'deployment-id',
+      },
+      headers: {
+        'x-kibana-version': '8.7.0',
+      },
+      httpsAgent: expect.objectContaining({
+        options: {
+          rejectUnauthorized: true,
+          path: null,
+          cert: 'test-certificate',
+          key: 'test-key',
+        },
+      }),
+      method: 'PUT',
+      url: 'https://service.dev/monitors/sync',
     });
   });
 });

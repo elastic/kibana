@@ -26,6 +26,7 @@ import {
   mockDeprecationService,
   mockDocLinksService,
   mockCustomBrandingService,
+  mockUserSettingsService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -113,6 +114,7 @@ test('sets up services on "setup"', async () => {
   expect(mockDeprecationService.setup).not.toHaveBeenCalled();
   expect(mockDocLinksService.setup).not.toHaveBeenCalled();
   expect(mockCustomBrandingService.setup).not.toHaveBeenCalled();
+  expect(mockUserSettingsService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -130,6 +132,7 @@ test('sets up services on "setup"', async () => {
   expect(mockDeprecationService.setup).toHaveBeenCalledTimes(1);
   expect(mockDocLinksService.setup).toHaveBeenCalledTimes(1);
   expect(mockCustomBrandingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockUserSettingsService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {

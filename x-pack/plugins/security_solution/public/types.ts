@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BehaviorSubject, Observable } from 'rxjs';
+
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -33,6 +35,7 @@ import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CloudDefendPluginStart } from '@kbn/cloud-defend-plugin/public';
 import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
@@ -45,6 +48,7 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -61,8 +65,13 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
+import type { NavigationLink } from './common/links';
+
 import type { TelemetryClientStart } from './common/lib/telemetry';
+import type { Dashboards } from './dashboards';
+
 export interface SetupPlugins {
+  cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
@@ -94,6 +103,7 @@ export interface StartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
+  cloud?: CloudStart;
   cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
@@ -122,14 +132,18 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
+    isSidebarEnabled$: BehaviorSubject<boolean>;
     telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
+
+export interface PluginStart {
+  getNavLinks$: () => Observable<NavigationLink[]>;
+  setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
+}
 
 export interface AppObservableLibs {
   kibana: CoreStart;
@@ -139,34 +153,36 @@ export type InspectResponse = Inspect & { response: string[] };
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
-  alerts: Detections;
-  rules: Rules;
-  exceptions: Exceptions;
   [CASES_SUB_PLUGIN_KEY]: Cases;
-  explore: Explore;
-  kubernetes: Kubernetes;
-  overview: Overview;
-  timelines: Timelines;
-  management: Management;
-  landingPages: LandingPages;
+  alerts: Detections;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
+  dashboards: Dashboards;
+  exceptions: Exceptions;
+  explore: Explore;
+  kubernetes: Kubernetes;
+  landingPages: LandingPages;
+  management: Management;
+  overview: Overview;
+  rules: Rules;
   threatIntelligence: ThreatIntelligence;
+  timelines: Timelines;
 }
 
 // TODO: find a better way to defined these types
 export interface StartedSubPlugins {
-  alerts: ReturnType<Detections['start']>;
-  rules: ReturnType<Rules['start']>;
-  exceptions: ReturnType<Exceptions['start']>;
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  explore: ReturnType<Explore['start']>;
-  kubernetes: ReturnType<Kubernetes['start']>;
-  overview: ReturnType<Overview['start']>;
-  timelines: ReturnType<Timelines['start']>;
-  management: ReturnType<Management['start']>;
-  landingPages: ReturnType<LandingPages['start']>;
+  alerts: ReturnType<Detections['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
+  dashboards: ReturnType<Dashboards['start']>;
+  exceptions: ReturnType<Exceptions['start']>;
+  explore: ReturnType<Explore['start']>;
+  kubernetes: ReturnType<Kubernetes['start']>;
+  landingPages: ReturnType<LandingPages['start']>;
+  management: ReturnType<Management['start']>;
+  overview: ReturnType<Overview['start']>;
+  rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
+  timelines: ReturnType<Timelines['start']>;
 }

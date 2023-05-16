@@ -24,6 +24,7 @@ import type {
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 
+import { RANDOM_SAMPLER_SEED } from '../../common/constants';
 import {
   addSignificantTermsAction,
   addSignificantTermsGroupAction,
@@ -34,6 +35,7 @@ import {
   pingAction,
   resetAllAction,
   resetErrorsAction,
+  resetGroupsAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
@@ -93,6 +95,7 @@ export const defineExplainLogRateSpikesRoute = (
         logDebugMessage('Starting analysis.');
 
         const groupingEnabled = !!request.body.grouping;
+        const sampleProbability = request.body.sampleProbability ?? 1;
 
         const controller = new AbortController();
         const abortSignal = controller.signal;
@@ -176,6 +179,11 @@ export const defineExplainLogRateSpikesRoute = (
               push(resetErrorsAction());
             }
 
+            if (request.body.overrides?.regroupOnly) {
+              logDebugMessage('Reset Groups.');
+              push(resetGroupsAction());
+            }
+
             if (request.body.overrides?.loaded) {
               logDebugMessage(`Set 'loaded' override to '${request.body.overrides?.loaded}'.`);
               loaded = request.body.overrides?.loaded;
@@ -189,7 +197,6 @@ export const defineExplainLogRateSpikesRoute = (
               [];
             let fieldCandidatesCount = fieldCandidates.length;
 
-            let sampleProbability = 1;
             let totalDocCount = 0;
 
             if (!request.body.overrides?.remainingFieldCandidates) {
@@ -211,7 +218,6 @@ export const defineExplainLogRateSpikesRoute = (
                 const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
                 fieldCandidates.push(...indexInfo.fieldCandidates);
                 fieldCandidatesCount = fieldCandidates.length;
-                sampleProbability = indexInfo.sampleProbability;
                 totalDocCount = indexInfo.totalDocCount;
               } catch (e) {
                 if (!isRequestAbortedError(e)) {
@@ -382,7 +388,8 @@ export const defineExplainLogRateSpikesRoute = (
                   -1,
                   undefined,
                   abortSignal,
-                  sampleProbability
+                  sampleProbability,
+                  RANDOM_SAMPLER_SEED
                 )) as [NumericChartData]
               )[0];
             } catch (e) {
@@ -511,7 +518,8 @@ export const defineExplainLogRateSpikesRoute = (
                             -1,
                             undefined,
                             abortSignal,
-                            sampleProbability
+                            sampleProbability,
+                            RANDOM_SAMPLER_SEED
                           )) as [NumericChartData]
                         )[0];
                       } catch (e) {
@@ -569,7 +577,11 @@ export const defineExplainLogRateSpikesRoute = (
             logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
 
             // time series filtered by fields
-            if (significantTerms.length > 0 && overallTimeSeries !== undefined) {
+            if (
+              significantTerms.length > 0 &&
+              overallTimeSeries !== undefined &&
+              !request.body.overrides?.regroupOnly
+            ) {
               const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
                 if (shouldStop) {
                   logDebugMessage('shouldStop abort fetching field/value histograms.');
@@ -607,7 +619,8 @@ export const defineExplainLogRateSpikesRoute = (
                         -1,
                         undefined,
                         abortSignal,
-                        sampleProbability
+                        sampleProbability,
+                        RANDOM_SAMPLER_SEED
                       )) as [NumericChartData]
                     )[0];
                   } catch (e) {

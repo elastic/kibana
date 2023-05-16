@@ -292,5 +292,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check no error state
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
     });
+
+    it('should reset all histogram state when resetting the saved search', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      const savedSearch = 'histogram state';
+      await PageObjects.discover.saveSearch(savedSearch);
+      await PageObjects.discover.chooseBreakdownField('extension.keyword');
+      await PageObjects.discover.setChartInterval('Second');
+      let requestData = await testSubjects.getAttribute(
+        'unifiedHistogramChart',
+        'data-request-data'
+      );
+      expect(JSON.parse(requestData)).to.eql({
+        dataViewId: 'long-window-logstash-*',
+        timeField: '@timestamp',
+        timeInterval: 's',
+        breakdownField: 'extension.keyword',
+      });
+      await PageObjects.discover.toggleChartVisibility();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.clickResetSavedSearchButton();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      requestData = await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data');
+      expect(JSON.parse(requestData)).to.eql({
+        dataViewId: 'long-window-logstash-*',
+        timeField: '@timestamp',
+        timeInterval: 'auto',
+      });
+    });
   });
 }

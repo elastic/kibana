@@ -33,7 +33,7 @@ const createSLOParamsSchema = t.type({
       budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
     }),
-    t.partial({ settings: optionalSettingsSchema, tags: tagsSchema }),
+    t.partial({ id: sloIdSchema, settings: optionalSettingsSchema, tags: tagsSchema }),
   ]),
 });
 
@@ -54,7 +54,7 @@ const getSLOParamsSchema = t.type({
 });
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
-const sortBySchema = t.union([t.literal('name'), t.literal('indicatorType')]);
+const sortBySchema = t.union([t.literal('creationTime'), t.literal('indicatorType')]);
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({

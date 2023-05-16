@@ -10,7 +10,7 @@ import { useCallback, useRef } from 'react';
 
 import { EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
-import { useDashboardContainerContext } from '../../dashboard_container_context';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
 
 type DashboardRenderPerformanceTracker = DashboardRenderPerformanceStats & {
@@ -30,7 +30,7 @@ const getDefaultPerformanceTracker: () => DashboardRenderPerformanceTracker = ()
 });
 
 export const useDashboardPerformanceTracker = ({ panelCount }: { panelCount: number }) => {
-  const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
   // reset performance tracker on each render.
   const performanceRefs = useRef<DashboardRenderPerformanceTracker>(getDefaultPerformanceTracker());
@@ -52,11 +52,11 @@ export const useDashboardPerformanceTracker = ({ panelCount }: { panelCount: num
         performanceRefs.current.doneCount++;
         if (performanceRefs.current.doneCount === panelCount) {
           performanceRefs.current.panelsRenderDoneTime = performance.now();
-          dashboardContainer.reportPerformanceMetrics(performanceRefs.current);
+          dashboard.reportPerformanceMetrics(performanceRefs.current);
         }
       }
     },
-    [dashboardContainer, panelCount]
+    [dashboard, panelCount]
   );
 
   return { onPanelStatusChange };

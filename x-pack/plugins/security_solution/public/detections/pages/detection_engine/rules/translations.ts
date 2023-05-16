@@ -553,6 +553,13 @@ export const COLUMN_ENABLE = i18n.translate(
   }
 );
 
+export const COLUMN_SNOOZE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.snoozeTitle',
+  {
+    defaultMessage: 'Notify',
+  }
+);
+
 export const COLUMN_INDEXING_TIMES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.indexingTimes',
   {

@@ -5,87 +5,38 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import type { CasePostRequest } from '../../common/api';
 import { postCase } from './api';
 import * as i18n from './translations';
-import type { Case } from './types';
-import { useToasts } from '../common/lib/kibana';
-interface NewCaseState {
-  isLoading: boolean;
-  isError: boolean;
+import { useCasesToast } from '../common/use_cases_toast';
+import type { ServerError } from '../types';
+import { casesMutationsKeys } from './constants';
+import { useRefreshCases } from '../components/all_cases/use_on_refresh_cases';
+
+interface MutationArgs {
+  request: CasePostRequest;
 }
-type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
 
-const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
-  switch (action.type) {
-    case 'FETCH_INIT':
-      return {
-        ...state,
-        isLoading: true,
-        isError: false,
-      };
-    case 'FETCH_SUCCESS':
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-      };
-    case 'FETCH_FAILURE':
-      return {
-        ...state,
-        isLoading: false,
-        isError: true,
-      };
-    default:
-      return state;
-  }
-};
-export interface UsePostCase extends NewCaseState {
-  postCase: (data: CasePostRequest) => Promise<Case | undefined>;
-}
-export const usePostCase = (): UsePostCase => {
-  const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
-    isError: false,
-  });
-  const toasts = useToasts();
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
+export const usePostCase = () => {
+  const { showErrorToast } = useCasesToast();
+  const refreshCases = useRefreshCases();
 
-  const postMyCase = useCallback(async (data: CasePostRequest) => {
-    try {
-      isCancelledRef.current = false;
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-
-      dispatch({ type: 'FETCH_INIT' });
-      const response = await postCase(data, abortCtrlRef.current.signal);
-
-      if (!isCancelledRef.current) {
-        dispatch({ type: 'FETCH_SUCCESS' });
-      }
-      return response;
-    } catch (error) {
-      if (!isCancelledRef.current) {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
-        }
-        dispatch({ type: 'FETCH_FAILURE' });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(
-    () => () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
+  return useMutation(
+    ({ request }: MutationArgs) => {
+      const abortCtrlRef = new AbortController();
+      return postCase(request, abortCtrlRef.signal);
     },
-    []
+    {
+      mutationKey: casesMutationsKeys.createCase,
+      onSuccess: () => {
+        refreshCases();
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_CREATING_CASE });
+      },
+    }
   );
-  return { ...state, postCase: postMyCase };
 };
+
+export type UsePostCase = ReturnType<typeof usePostCase>;

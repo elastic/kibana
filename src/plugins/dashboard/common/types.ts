@@ -10,7 +10,7 @@ import { EmbeddableInput, EmbeddableStateWithType } from '@kbn/embeddable-plugin
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
 import { SavedDashboardPanel } from './dashboard_saved_object/types';
-import { DashboardContainerByValueInput, DashboardPanelState } from './dashboard_container/types';
+import { DashboardContainerInput, DashboardPanelState } from './dashboard_container/types';
 
 export interface DashboardOptions {
   hidePanelTitles: boolean;
@@ -32,7 +32,7 @@ export interface DashboardCapabilities {
  * For BWC reasons, dashboard state is stored with panels as an array instead of a map
  */
 export type SharedDashboardState = Partial<
-  Omit<DashboardContainerByValueInput, 'panels'> & { panels: SavedDashboardPanel[] }
+  Omit<DashboardContainerInput, 'panels'> & { panels: SavedDashboardPanel[] }
 >;
 
 /**

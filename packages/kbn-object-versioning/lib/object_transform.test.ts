@@ -9,12 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { initTransform } from './object_transform';
 
-import type {
-  ObjectMigrationDefinition,
-  ObjectTransforms,
-  Version,
-  VersionableObject,
-} from './types';
+import type { ObjectMigrationDefinition, Version, VersionableObject } from './types';
 
 interface FooV1 {
   fullName: string;
@@ -58,7 +53,7 @@ const fooMigrationDef: ObjectMigrationDefinition = {
 
 const setup = <UpIn = unknown, UpOut = unknown, DownIn = unknown, DownOut = unknown>(
   browserVersion: Version
-): ObjectTransforms<UpIn, UpOut, DownIn, DownOut> => {
+) => {
   const transformsFactory = initTransform<UpIn, UpOut, DownIn, DownOut>(browserVersion);
   return transformsFactory(fooMigrationDef);
 };

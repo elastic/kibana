@@ -62,6 +62,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
       filter: '',
       good: '',
       total: '',
+      timestampField: '',
     },
   },
   timeWindow: {

@@ -270,7 +270,7 @@
     {
       "groupName": "TTY Output",
       "matchPackageNames": ["xterm", "byte-size", "@types/byte-size"],
-      "reviewers": ["team:awp-viz"],
+      "reviewers": ["team:sec-cloudnative-integrations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
       "enabled": true,

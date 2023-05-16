@@ -77,7 +77,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={() => selectCaseModal.open({ attachments })}
+                  onClick={() => selectCaseModal.open({ getAttachments: () => attachments })}
                   data-test-subj="case-fixture-attach-to-existing-case"
                 >
                   {'Attach to an existing case'}

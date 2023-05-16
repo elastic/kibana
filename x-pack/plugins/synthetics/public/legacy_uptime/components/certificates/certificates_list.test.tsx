@@ -29,9 +29,7 @@ describe('CertificateList', () => {
       />
     );
 
-    expect(
-      getByText('No Certificates found. Note: Certificates are only visible for Heartbeat 7.8+')
-    ).toBeInTheDocument();
+    expect(getByText('No Certificates found.')).toBeInTheDocument();
   });
 
   it('renders certificates list', () => {

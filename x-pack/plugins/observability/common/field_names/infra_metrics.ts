@@ -9,3 +9,6 @@ export const SYSTEM_CPU_PERCENTAGE_FIELD = 'system.cpu.total.norm.pct';
 export const SYSTEM_MEMORY_PERCENTAGE_FIELD = 'system.memory.used.pct';
 export const DOCKER_CPU_PERCENTAGE_FIELD = 'docker.cpu.total.pct';
 export const K8S_POD_CPU_PERCENTAGE_FIELD = 'kubernetes.pod.cpu.usage.node.pct';
+
+export const SLO_ID_FIELD = 'slo.id';
+export const SLO_REVISION_FIELD = 'slo.revision';

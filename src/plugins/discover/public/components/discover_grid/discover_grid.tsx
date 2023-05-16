@@ -14,7 +14,6 @@ import {
   EuiDataGridRefProps,
   EuiDataGridSorting,
   EuiIcon,
-  EuiLink,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -30,24 +29,23 @@ import type { Filter } from '@kbn/es-query';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getShouldShowFieldHandler } from '@kbn/unified-doc-viewer-plugin/public';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  MAX_DOC_FIELDS_DISPLAYED,
-  SAMPLE_SIZE_SETTING,
-  SHOW_MULTIFIELDS,
-} from '../../../common';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { ValueToStringConverter } from '../../types';
-import { getDisplayedColumns } from '../../utils/columns';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getDefaultRowsPerPage, getRowsPerPageOptions } from '../../utils/rows_per_page';
-import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
 } from './discover_grid_columns';
 import { DiscoverGridContext } from './discover_grid_context';
+import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
+import { getDisplayedColumns } from '../../utils/columns';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_MULTIFIELDS,
+} from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -137,6 +135,10 @@ export interface DiscoverGridProps {
    * Determines whether the time columns should be displayed (legacy settings)
    */
   showTimeCol: boolean;
+  /**
+   * Determines whether the full screen button should be displayed
+   */
+  showFullScreenButton?: boolean;
   /**
    * Manage user sorting control
    */
@@ -230,6 +232,7 @@ export const DiscoverGrid = ({
   setExpandedDoc,
   settings,
   showTimeCol,
+  showFullScreenButton = true,
   sort,
   useNewFieldsApi,
   isSortEnabled = true,
@@ -512,14 +515,16 @@ export const DiscoverGrid = ({
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showFullScreenSelector: showFullScreenButton,
           }
         : {
             ...toolbarVisibilityDefaults,
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showFullScreenSelector: showFullScreenButton,
           },
-    [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
+    [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 
   const rowHeightsOptions = useRowHeightsOptions({
@@ -613,23 +618,10 @@ export const DiscoverGrid = ({
         {showDisclaimer && (
           <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
             <FormattedMessage
-              id="discover.gridSampleSize.description"
-              defaultMessage="You're viewing the first {sampleSize} documents that match your search. To change this value, go to {advancedSettingsLink}."
+              id="discover.gridSampleSize.limitDescription"
+              defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
               values={{
                 sampleSize,
-                advancedSettingsLink: (
-                  <EuiLink
-                    href={services.addBasePath(
-                      `/app/management/kibana/settings?query=${SAMPLE_SIZE_SETTING}`
-                    )}
-                    data-test-subj="discoverTableSampleSizeSettingsLink"
-                  >
-                    <FormattedMessage
-                      id="discover.gridSampleSize.advancedSettingsLinkLabel"
-                      defaultMessage="Advanced Settings"
-                    />
-                  </EuiLink>
-                ),
               }}
             />
           </p>

@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
-import { LicensingCallout } from '../../../enterprise_search_content/components/shared/licensing_callout/licensing_callout';
+import { LicensingCallout } from '../../../shared/licensing_callout/licensing_callout';
 
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 

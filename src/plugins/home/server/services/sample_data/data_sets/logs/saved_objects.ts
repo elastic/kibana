@@ -18,6 +18,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '8.0.0',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.visitorsMapTitle', {
         defaultMessage: '[Logs] Visitors Map',
@@ -47,6 +48,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.14.0',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.heatmapTitle', {
         defaultMessage: '[Logs] Unique Destination Heatmap',
@@ -89,6 +91,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.14.0',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.bytesDistributionTitle', {
         defaultMessage: '[Logs] Bytes distribution',
@@ -399,6 +402,7 @@ export const getSavedObjects = (): SavedObject[] => [
     ],
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '8.7.0',
+    managed: false,
   },
   {
     id: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389',
@@ -407,6 +411,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.9.3',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.discoverTitle', {
         defaultMessage: '[Logs] Visits',

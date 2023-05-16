@@ -6,10 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID,
-} from '@kbn/fleet-plugin/common/constants/epm';
+import { FLEET_ELASTIC_AGENT_PACKAGE } from '@kbn/fleet-plugin/common/constants/epm';
+
+import { DASHBOARD_LOCATORS_IDS } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -47,10 +46,10 @@ export default function (providerContext: FtrProviderContext) {
     it('Install elastic agent details dashboard with the correct id', async () => {
       const resDashboard = await kibanaServer.savedObjects.get({
         type: 'dashboard',
-        id: FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID,
+        id: DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS,
       });
 
-      expect(resDashboard.id).to.eql(FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID);
+      expect(resDashboard.id).to.eql(DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS);
     });
 
     after(async () => {

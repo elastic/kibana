@@ -8,7 +8,7 @@
 
 import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
-import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
+import { DEFAULT_DATA_TEST_SUBJ, REORDER_ITEM_HEIGHT } from '../constants';
 
 /**
  * Reorder state
@@ -54,7 +54,7 @@ export const ReorderContext = React.createContext<ReorderContextState>({
   reorderState: {
     reorderedItems: [],
     direction: '-',
-    draggingHeight: 40,
+    draggingHeight: REORDER_ITEM_HEIGHT,
     isReorderOn: false,
     groupId: '',
   },
@@ -66,6 +66,7 @@ export const ReorderContext = React.createContext<ReorderContextState>({
  * @param id
  * @param children
  * @param className
+ * @param draggingHeight
  * @param dataTestSubj
  * @constructor
  */
@@ -73,17 +74,19 @@ export function ReorderProvider({
   id,
   children,
   className,
+  draggingHeight = REORDER_ITEM_HEIGHT,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
 }: {
   id: string;
   children: React.ReactNode;
   className?: string;
+  draggingHeight?: number;
   dataTestSubj?: string;
 }) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
     reorderedItems: [],
     direction: '-',
-    draggingHeight: 40,
+    draggingHeight,
     isReorderOn: false,
     groupId: id,
   });

@@ -19,7 +19,7 @@ export interface ChartProps {
 
 export interface Props {
   chartProps: ChartProps;
-  comparator: Comparator;
+  comparator: Comparator | string;
   id: string;
   threshold: number;
   title: string;

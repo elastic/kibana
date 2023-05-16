@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import {
-  checkForDuplicateTitle,
   SavedObjectSaveModalOrigin,
   OnSaveProps,
   showSaveModal,
@@ -24,14 +23,13 @@ import {
   getMapsCapabilities,
   getIsAllowByValueEmbeddables,
   getInspector,
-  getSavedObjectsClient,
   getCoreOverlays,
   getSavedObjectsTagging,
   getPresentationUtilContext,
 } from '../../kibana_services';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import { SavedMap } from './saved_map';
-import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
+import { checkForDuplicateTitle } from '../../content_management';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -180,13 +178,11 @@ export function getTopNavConfig({
                   title: props.newTitle,
                   copyOnSave: props.newCopyOnSave,
                   lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
-                  getEsType: () => MAP_SAVED_OBJECT_TYPE,
-                  getDisplayName: getMapEmbeddableDisplayName,
+                  isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+                  getDisplayName: () => MAP_EMBEDDABLE_NAME,
+                  onTitleDuplicate: props.onTitleDuplicate,
                 },
-                props.isTitleDuplicateConfirmed,
-                props.onTitleDuplicate,
                 {
-                  savedObjectsClient: getSavedObjectsClient(),
                   overlays: getCoreOverlays(),
                 }
               );

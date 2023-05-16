@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { HostInfo, PendingActionsResponse } from '../../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from '../types';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useGetEndpointDetails } from '../../../hooks';
@@ -53,12 +52,10 @@ export const EndpointStatusActionResult = memo<
     queryKey: [queryKey, endpointId],
   });
 
-  const pendingIsolationActions = useMemo<
-    Pick<
-      Required<EndpointHostIsolationStatusProps['pendingActions']>,
-      'pendingIsolate' | 'pendingUnIsolate'
-    >
-  >(() => {
+  const pendingIsolationActions = useMemo<{
+    pendingIsolate: number;
+    pendingUnIsolate: number;
+  }>(() => {
     if (endpointPendingActions?.data.length) {
       const pendingActions = endpointPendingActions.data[0].pending_actions;
 

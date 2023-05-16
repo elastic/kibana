@@ -6,7 +6,7 @@
  */
 import { v1 as uuidv1 } from 'uuid';
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/api';
 
 import { flattenCaseSavedObject } from '../../common/utils';
 import { mockCases } from '../../mocks';
@@ -16,7 +16,7 @@ import { find } from './find';
 describe('find', () => {
   describe('constructSearch', () => {
     const clientArgs = createCasesClientMockArgs();
-    const casesMap = new Map<string, CaseResponse>(
+    const casesMap = new Map<string, Case>(
       mockCases.map((obj) => {
         return [obj.id, flattenCaseSavedObject({ savedObject: obj, totalComment: 2 })];
       })
@@ -61,6 +61,36 @@ describe('find', () => {
 
       expect(call.caseOptions.search).toBe(search);
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
+    });
+  });
+
+  describe('searchFields errors', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('invalid searchFields with array', async () => {
+      const searchFields = ['foobar'];
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ searchFields });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
+    });
+
+    it('invalid searchFields with single string', async () => {
+      const searchFields = 'foobar';
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ searchFields });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
     });
   });
 });

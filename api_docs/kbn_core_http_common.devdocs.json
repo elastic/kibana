@@ -90,16 +90,32 @@
         "type": "Type",
         "tags": [
           "note",
+          "note",
           "experimental"
         ],
         "label": "ApiVersion",
         "description": [
-          "\nA Kibana HTTP API version"
+          "\nA Kibana HTTP API version\n"
         ],
         "signature": [
-          "`${number}`"
+          "string"
         ],
         "path": "packages/core/http/core-http-common/src/versioning.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "type": "string",
+        "tags": [],
+        "label": "X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "description": [],
+        "signature": [
+          "\"x-elastic-internal-origin\""
+        ],
+        "path": "packages/core/http/core-http-common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -9,7 +9,7 @@ import type {
   CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
@@ -47,6 +47,7 @@ import type {
   CreateRulesProps,
   ExportDocumentsProps,
   FetchRuleProps,
+  FetchRuleSnoozingProps,
   FetchRulesProps,
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
@@ -56,6 +57,8 @@ import type {
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
   Rule,
+  RulesSnoozeSettingsBatchResponse,
+  RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
 import { convertRulesFilterToKQL } from '../logic/utils';
@@ -183,6 +186,45 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
     query: { id },
     signal,
   });
+
+/**
+ * Fetch rule snooze settings for each provided ruleId
+ *
+ * @param ids Rule IDs (not rule_id)
+ * @param signal to cancel request
+ *
+ * @returns An error if response is not OK
+ */
+export const fetchRulesSnoozeSettings = async ({
+  ids,
+  signal,
+}: FetchRuleSnoozingProps): Promise<RulesSnoozeSettingsMap> => {
+  const response = await KibanaServices.get().http.fetch<RulesSnoozeSettingsBatchResponse>(
+    INTERNAL_ALERTING_API_FIND_RULES_PATH,
+    {
+      method: 'GET',
+      query: {
+        filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
+        fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
+        per_page: ids.length,
+      },
+      signal,
+    }
+  );
+
+  return response.data?.reduce((result, { id, ...snoozeSettings }) => {
+    result[id] = {
+      muteAll: snoozeSettings.mute_all ?? false,
+      activeSnoozes: snoozeSettings.active_snoozes ?? [],
+      isSnoozedUntil: snoozeSettings.is_snoozed_until
+        ? new Date(snoozeSettings.is_snoozed_until)
+        : undefined,
+      snoozeSchedule: snoozeSettings.snooze_schedule,
+    };
+
+    return result;
+  }, {} as RulesSnoozeSettingsMap);
+};
 
 export interface BulkActionSummary {
   failed: number;

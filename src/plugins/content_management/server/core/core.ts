@@ -28,7 +28,7 @@ export interface CoreApi {
 
 export interface CoreInitializerContext {
   logger: Logger;
-  eventStream: EventStreamService;
+  eventStream?: EventStreamService;
 }
 
 export interface CoreSetup {
@@ -63,14 +63,20 @@ export class Core {
   }
 
   private setupEventStream() {
+    const eventStream = this.ctx.eventStream;
+
     // TODO: This should be cleaned up and support added for all CRUD events.
-    this.eventBus.on('deleteItemSuccess', (event) => {
-      this.ctx.eventStream.addEvent({
-        // TODO: add "subject" field to event
-        predicate: ['delete'],
-        // TODO: the `.contentId` should be easily available on most events.
-        object: [event.contentTypeId, (event as any).contentId],
+    // The work is tracked here: https://github.com/elastic/kibana/issues/153258
+    // and here: https://github.com/elastic/kibana/issues/153260
+    if (eventStream) {
+      this.eventBus.on('deleteItemSuccess', (event) => {
+        eventStream.addEvent({
+          // TODO: add "subject" field to event
+          predicate: ['delete'],
+          // TODO: the `.contentId` should be easily available on most events.
+          object: [event.contentTypeId, (event as any).contentId],
+        });
       });
-    });
+    }
   }
 }

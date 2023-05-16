@@ -25,6 +25,80 @@ describe('Enterprise Search Analytics API', () => {
   let mockRouter: MockRouter;
   const mockClient = {};
 
+  describe('GET /internal/enterprise_search/analytics/collections', () => {
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/analytics/collections',
+      });
+
+      const mockDataPlugin = {
+        indexPatterns: {
+          dataViewsServiceFactory: jest.fn(),
+        },
+      };
+
+      const mockedSavedObjects = {
+        getScopedClient: jest.fn(),
+      };
+
+      registerAnalyticsRoutes({
+        ...mockDependencies,
+        data: mockDataPlugin as unknown as DataPluginStart,
+        savedObjects: mockedSavedObjects as unknown as SavedObjectsServiceStart,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fetches a defined analytics collections', async () => {
+      const mockData: AnalyticsCollection[] = [
+        {
+          events_datastream: 'logs-elastic_analytics.events-example',
+          name: 'my_collection',
+        },
+        {
+          events_datastream: 'logs-elastic_analytics.events-example2',
+          name: 'my_collection2',
+        },
+        {
+          events_datastream: 'logs-elastic_analytics.events-example2',
+          name: 'my_collection3',
+        },
+      ];
+
+      (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() => {
+        return Promise.resolve(mockData);
+      });
+      await mockRouter.callRoute({});
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: mockData,
+      });
+    });
+
+    it('passes the query string to the fetch function', async () => {
+      await mockRouter.callRoute({ query: { query: 'my_collection2' } });
+
+      expect(fetchAnalyticsCollections).toHaveBeenCalledWith(mockClient, 'my_collection2*');
+    });
+
+    it('returns an empty obj when fetchAnalyticsCollections returns not found error', async () => {
+      (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() => {
+        throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
+      });
+      await mockRouter.callRoute({});
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: [],
+      });
+    });
+  });
+
   describe('GET /internal/enterprise_search/analytics/collections/{id}', () => {
     beforeEach(() => {
       const context = {

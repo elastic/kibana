@@ -16,6 +16,7 @@ describe('engines field_capabilities', () => {
   const mockClient = {
     asCurrentUser: {
       fieldCaps: jest.fn(),
+      indices: { exists: jest.fn() },
     },
     asInternalUser: {},
   };
@@ -44,6 +45,7 @@ describe('engines field_capabilities', () => {
         indices: ['index-001'],
       };
 
+      mockClient.asCurrentUser.indices.exists.mockResolvedValueOnce(true);
       mockClient.asCurrentUser.fieldCaps.mockResolvedValueOnce(fieldCapsResponse);
       await expect(
         fetchEngineFieldCapabilities(mockClient as unknown as IScopedClusterClient, mockEngine)
@@ -72,6 +74,7 @@ describe('engines field_capabilities', () => {
         fields: '*',
         include_unmapped: true,
         index: ['index-001'],
+        filters: '-metadata',
       });
     });
   });

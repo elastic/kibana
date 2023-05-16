@@ -7,26 +7,30 @@
 import moment from 'moment';
 import React from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { convertTo, TopAlert } from '@kbn/observability-plugin/public';
+import { convertTo } from '@kbn/observability-plugin/public';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import DateMath from '@kbn/datemath';
-import { useAlertsHistory } from '../../../../../hooks/use_alerts_history';
+import { useAlertsHistory } from '@kbn/observability-alert-details';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
 import { PartialRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
 
-const LogsHistoryChart = ({
-  rule,
-  alert,
-}: {
-  rule: Rule<PartialRuleParams>;
-  alert: TopAlert<Record<string, any>>;
-}) => {
+const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
+  const { http, notifications } = useKibanaContextForPlugin().services;
   // Show the Logs History Chart ONLY if we have one criteria
   // So always pull the first criteria
   const criteria = rule.params.criteria[0];
@@ -40,14 +44,33 @@ const LogsHistoryChart = ({
     lte: DateMath.parse(dateRange.to, { roundUp: true })!.valueOf(),
   };
 
-  const { alertsHistory } = useAlertsHistory({
+  const {
+    data: { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts },
+    isLoading,
+    isError,
+  } = useAlertsHistory({
+    http,
     featureIds: [AlertConsumers.LOGS],
     ruleId: rule.id,
     dateRange,
   });
+
+  if (isError) {
+    notifications?.toasts.addDanger({
+      title: i18n.translate('xpack.infra.alertDetails.logsAlertHistoryChart.error.toastTitle', {
+        defaultMessage: 'Logs alerts history chart error',
+      }),
+      text: i18n.translate(
+        'xpack.infra.alertDetails.logsAlertHistoryChart.error.toastDescription',
+        {
+          defaultMessage: `An error occurred when fetching logs alert history chart data`,
+        }
+      ),
+    });
+  }
   const alertHistoryAnnotations =
-    alertsHistory?.histogramTriggeredAlerts
-      .filter((annotation) => annotation.doc_count > 0)
+    histogramTriggeredAlerts
+      ?.filter((annotation) => annotation.doc_count > 0)
       .map((annotation) => {
         return {
           dataValue: annotation.key,
@@ -84,7 +107,9 @@ const LogsHistoryChart = ({
             <EuiFlexItem grow={false}>
               <EuiText color="danger">
                 <EuiTitle size="s">
-                  <h3>{alertsHistory?.totalTriggeredAlerts || '-'}</h3>
+                  <h3>
+                    {isLoading ? <EuiLoadingSpinner size="s" /> : totalTriggeredAlerts || '-'}
+                  </h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>
@@ -102,13 +127,17 @@ const LogsHistoryChart = ({
             <EuiText>
               <EuiTitle size="s">
                 <h3>
-                  {alertsHistory?.avgTimeToRecoverUS
-                    ? convertTo({
-                        unit: 'minutes',
-                        microseconds: alertsHistory?.avgTimeToRecoverUS,
-                        extended: true,
-                      }).formatted
-                    : '-'}
+                  {isLoading ? (
+                    <EuiLoadingSpinner size="s" />
+                  ) : avgTimeToRecoverUS ? (
+                    convertTo({
+                      unit: 'minutes',
+                      microseconds: avgTimeToRecoverUS,
+                      extended: true,
+                    }).formatted
+                  ) : (
+                    '-'
+                  )}
                 </h3>
               </EuiTitle>
             </EuiText>

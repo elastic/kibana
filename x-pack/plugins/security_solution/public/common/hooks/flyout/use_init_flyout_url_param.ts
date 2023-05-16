@@ -9,13 +9,16 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useDispatch } from 'react-redux';
 
-import { TableId } from '../../../../common/types';
+import {
+  dataTableSelectors,
+  TableId,
+  tableDefaults,
+  dataTableActions,
+} from '@kbn/securitysolution-data-table';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
 import type { FlyoutUrlState } from './types';
-import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import { useShallowEqualSelector } from '../use_selector';
-import { tableDefaults } from '../../store/data_table/defaults';
 
 export const useInitFlyoutFromUrlParam = () => {
   const [urlDetails, setUrlDetails] = useState<FlyoutUrlState | null>(null);
@@ -36,16 +39,28 @@ export const useInitFlyoutFromUrlParam = () => {
   }, []);
 
   const loadExpandedDetailFromUrl = useCallback(() => {
-    const { initialized, isLoading, totalCount } = dataTableCurrent;
+    const { initialized, isLoading, totalCount, additionalFilters } = dataTableCurrent;
     const isTableLoaded = initialized && !isLoading && totalCount > 0;
-    if (urlDetails && isTableLoaded) {
-      updateHasLoadedUrlDetails(true);
-      dispatch(
-        dataTableActions.toggleDetailPanel({
-          id: TableId.alertsOnAlertsPage,
-          ...urlDetails,
-        })
-      );
+    if (urlDetails) {
+      if (!additionalFilters || !additionalFilters.showBuildingBlockAlerts) {
+        // We want to show building block alerts when loading the flyout in case the alert is a building block alert
+        dispatch(
+          dataTableActions.updateShowBuildingBlockAlertsFilter({
+            id: TableId.alertsOnAlertsPage,
+            showBuildingBlockAlerts: true,
+          })
+        );
+      }
+
+      if (isTableLoaded) {
+        updateHasLoadedUrlDetails(true);
+        dispatch(
+          dataTableActions.toggleDetailPanel({
+            id: TableId.alertsOnAlertsPage,
+            ...urlDetails,
+          })
+        );
+      }
     }
   }, [dataTableCurrent, dispatch, urlDetails]);
 

@@ -123,6 +123,7 @@ export const registerFindRoute = (
         filter: query.filter,
         aggs,
         namespaces,
+        migrationVersionCompatibility: 'compatible',
       });
 
       return res.ok({ body: result });

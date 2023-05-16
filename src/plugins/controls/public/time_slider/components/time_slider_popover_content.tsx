@@ -8,13 +8,12 @@
 
 import React, { Ref } from 'react';
 import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
-import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
-import { timeSliderReducers } from '../time_slider_reducers';
-import { TimeSliderReduxState } from '../types';
+
 import { getIsAnchored } from '../time_slider_selectors';
 import { TimeSliderStrings } from './time_slider_strings';
+import { useTimeSlider } from '../embeddable/time_slider_embeddable';
+import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
+import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
 
 interface Props {
   value: [number, number];
@@ -41,13 +40,8 @@ export function TimeSliderPopoverContent(props: Props) {
           };
         });
 
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setIsAnchored },
-  } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
-  const dispatch = useEmbeddableDispatch();
-  const isAnchored = select(getIsAnchored);
+  const timeSlider = useTimeSlider();
+  const isAnchored = timeSlider.select(getIsAnchored);
   const rangeInput = isAnchored ? (
     <TimeSliderAnchoredRange
       value={props.value}
@@ -88,7 +82,7 @@ export function TimeSliderPopoverContent(props: Props) {
               if (nextIsAnchored) {
                 props.onChange([props.timeRangeMin, props.value[1]]);
               }
-              dispatch(setIsAnchored({ isAnchored: nextIsAnchored }));
+              timeSlider.dispatch.setIsAnchored({ isAnchored: nextIsAnchored });
             }}
             aria-label={anchorStartToggleButtonLabel}
             data-test-subj="timeSlider__anchorStartToggleButton"

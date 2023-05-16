@@ -14,7 +14,11 @@ import {
   isSummaryAction,
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
+  getSummaryActionTimeBounds,
 } from './rule_action_helper';
+
+const now = '2021-05-13T12:33:37.000Z';
+Date.now = jest.fn().mockReturnValue(new Date(now));
 
 const mockOldAction: RuleAction = {
   id: '1',
@@ -307,6 +311,62 @@ describe('rule_action_helper', () => {
           frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
         })
       ).toBe(false);
+    });
+  });
+
+  describe('getSummaryActionTimeBounds', () => {
+    test('returns undefined start and end action is not summary action', () => {
+      expect(getSummaryActionTimeBounds(mockAction, { interval: '1m' }, null)).toEqual({
+        start: undefined,
+        end: undefined,
+      });
+    });
+
+    test('returns start and end for summary action with throttle', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        mockSummaryAction,
+        { interval: '1m' },
+        null
+      );
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620822817000);
+      // start is end - throttle interval (1d)
+      expect(start).toEqual(new Date('2021-05-12T12:33:37.000Z').valueOf());
+    });
+
+    test('returns start and end for summary action without throttle with previousStartedAt', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        {
+          ...mockSummaryAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
+        { interval: '1m' },
+        new Date('2021-05-13T12:31:57.000Z')
+      );
+
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620909117000);
+      // start is previous started at time
+      expect(start).toEqual(new Date('2021-05-13T12:31:57.000Z').valueOf());
+    });
+
+    test('returns start and end for summary action without throttle without previousStartedAt', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        {
+          ...mockSummaryAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
+        { interval: '1m' },
+        null
+      );
+
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620909157000);
+      // start is end - schedule interval (1m)
+      expect(start).toEqual(new Date('2021-05-13T12:32:37.000Z').valueOf());
     });
   });
 });

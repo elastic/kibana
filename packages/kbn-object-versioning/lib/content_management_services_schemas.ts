@@ -103,6 +103,20 @@ const searchSchemas = getOptionalInOutSchemas({
   ),
 });
 
+// Schema to validate the "msearch" service objects
+const mSearchSchemas = schema.maybe(
+  schema.object({
+    out: schema.maybe(
+      schema.object(
+        {
+          result: schema.maybe(versionableObjectSchema),
+        },
+        { unknowns: 'forbid' }
+      )
+    ),
+  })
+);
+
 export const serviceDefinitionSchema = schema.object(
   {
     get: getSchemas,
@@ -111,6 +125,7 @@ export const serviceDefinitionSchema = schema.object(
     update: createSchemas,
     delete: getSchemas,
     search: searchSchemas,
+    mSearch: mSearchSchemas,
   },
   { unknowns: 'forbid' }
 );

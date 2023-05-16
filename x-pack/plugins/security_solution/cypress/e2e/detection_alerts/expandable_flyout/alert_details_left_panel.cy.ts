@@ -100,9 +100,7 @@ describe.skip('Alert details expandable flyout left panel', { testIsolation: fal
     it('should display content when switching buttons', () => {
       openVisualizeTab();
       openSessionView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_CONTENT)
-        .should('be.visible')
-        .and('have.text', 'Session view');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_CONTENT).should('be.visible');
 
       openGraphAnalyzer();
       cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');

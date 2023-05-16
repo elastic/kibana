@@ -133,6 +133,7 @@ export const config: PluginConfigDescriptor = {
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+      testSecretsIndex: schema.maybe(schema.string()),
     }),
     packageVerification: schema.object({
       gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -158,6 +159,15 @@ export const config: PluginConfigDescriptor = {
         }
       },
     }),
+
+    internal: schema.maybe(
+      schema.object({
+        disableILMPolicies: schema.boolean({
+          defaultValue: false,
+        }),
+      })
+    ),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 };
 

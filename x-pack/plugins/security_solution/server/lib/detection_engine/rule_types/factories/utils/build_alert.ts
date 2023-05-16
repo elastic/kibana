@@ -34,6 +34,8 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_URL,
+  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
   SPACE_IDS,
@@ -43,6 +45,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
+import { getAlertDetailsUrl } from '../../../../../../common/utils/alert_detail_path';
 import type { BaseSignalHit, SimpleHit } from '../../types';
 import type { ThresholdResult } from '../../threshold/types';
 import {
@@ -51,7 +54,7 @@ import {
   isWrappedDetectionAlert,
   isWrappedSignalHit,
 } from '../../utils/utils';
-import { SERVER_APP_ID } from '../../../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../../../../../../common/constants';
 import type { SearchTypes } from '../../../../telemetry/types';
 import {
   ALERT_ANCESTORS,
@@ -137,6 +140,8 @@ export const buildAlert = (
   spaceId: string | null | undefined,
   reason: string,
   indicesToQuery: string[],
+  alertUuid: string,
+  publicBaseUrl: string | undefined,
   alertTimestampOverride: Date | undefined,
   overrides?: {
     nameOverride: string;
@@ -180,8 +185,18 @@ export const buildAlert = (
     primaryTimestamp: TIMESTAMP,
   });
 
+  const timestamp = alertTimestampOverride?.toISOString() ?? new Date().toISOString();
+
+  const alertUrl = getAlertDetailsUrl({
+    alertId: alertUuid,
+    index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+    timestamp,
+    basePath: publicBaseUrl,
+    spaceId,
+  });
+
   return {
-    [TIMESTAMP]: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
+    [TIMESTAMP]: timestamp,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [EVENT_KIND]: 'signal',
     [ALERT_ORIGINAL_TIME]: originalTime?.toISOString(),
@@ -229,6 +244,8 @@ export const buildAlert = (
     [ALERT_RULE_UPDATED_BY]: updatedBy ?? '',
     [ALERT_RULE_UUID]: completeRule.alertId,
     [ALERT_RULE_VERSION]: params.version,
+    [ALERT_URL]: alertUrl,
+    [ALERT_UUID]: alertUuid,
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
     // These fields don't exist in the mappings, but leaving here for now to limit changes to the alert building logic
     'kibana.alert.rule.risk_score': params.riskScore,

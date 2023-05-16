@@ -5,84 +5,23 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
+import React from 'react';
+import { EuiEmptyPrompt, EuiTitle, EuiLink } from '@elastic/eui';
 import { useEnablement } from '../../../../hooks/use_enablement';
-import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const EnablementEmptyState = () => {
-  const { error, enablement, enableSynthetics, loading } = useEnablement();
-  const [shouldFocusEnablementButton, setShouldFocusEnablementButton] = useState(false);
-  const [isEnabling, setIsEnabling] = useState(false);
-  const { isEnabled, canEnable } = enablement;
-  const isEnabledRef = useRef(isEnabled);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!isEnabled && isEnabledRef.current === true) {
-      /* shift focus to enable button when enable toggle disappears. Prevent
-       * focus loss on the page */
-      setShouldFocusEnablementButton(true);
-    }
-    isEnabledRef.current = Boolean(isEnabled);
-  }, [isEnabled]);
-
-  useEffect(() => {
-    if (isEnabling && isEnabled) {
-      setIsEnabling(false);
-      kibanaService.toasts.addSuccess({
-        title: labels.SYNTHETICS_ENABLE_SUCCESS,
-        toastLifeTimeMs: 3000,
-      });
-    } else if (isEnabling && error) {
-      setIsEnabling(false);
-      kibanaService.toasts.addSuccess({
-        title: labels.SYNTHETICS_DISABLE_SUCCESS,
-        toastLifeTimeMs: 3000,
-      });
-    }
-  }, [isEnabled, isEnabling, error]);
-
-  const handleEnableSynthetics = () => {
-    enableSynthetics();
-    setIsEnabling(true);
-  };
-
-  useEffect(() => {
-    if (shouldFocusEnablementButton) {
-      buttonRef.current?.focus();
-    }
-  }, [shouldFocusEnablementButton]);
+  const { enablement, loading } = useEnablement();
+  const { isEnabled } = enablement;
 
   return !isEnabled && !loading ? (
     <EuiEmptyPrompt
-      title={
-        <h2>
-          {canEnable
-            ? labels.MONITOR_MANAGEMENT_ENABLEMENT_LABEL
-            : labels.MONITOR_MANAGEMENT_DISABLED_LABEL}
-        </h2>
-      }
+      title={<h2>{labels.SYNTHETICS_APP_ENABLEMENT_TITLE}</h2>}
       body={
-        <p>
-          {canEnable
-            ? labels.MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE
-            : labels.MONITOR_MANAGEMENT_DISABLED_MESSAGE}
-        </p>
-      }
-      actions={
-        canEnable ? (
-          <EuiButton
-            color="primary"
-            fill
-            onClick={handleEnableSynthetics}
-            data-test-subj="syntheticsEnableButton"
-            buttonRef={buttonRef}
-          >
-            {labels.MONITOR_MANAGEMENT_ENABLEMENT_BTN_LABEL}
-          </EuiButton>
-        ) : null
+        <>
+          <p>{labels.MONITOR_MANAGEMENT_DISABLED_MESSAGE}</p>
+          <p>{labels.MONITOR_MANAGEMENT_CONTACT_ADMINISTRATOR}</p>
+        </>
       }
       footer={
         <>
@@ -91,7 +30,7 @@ export const EnablementEmptyState = () => {
           </EuiTitle>
           <EuiLink
             data-test-subj="syntheticsEnablementEmptyStateLink"
-            href="https://docs.google.com/document/d/1hkzFibu9LggPWXQqfbAd0mMlV75wCME7_BebXlEH-oI"
+            href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started-ui.html#uptime-set-up-prereq"
             target="_blank"
           >
             {labels.DOCS_LABEL}

@@ -5,19 +5,35 @@
  * 2.0.
  */
 
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiInMemoryTable,
+  EuiSearchBarProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useToggle from 'react-use/lib/useToggle';
+import { debounce } from 'lodash';
+import { Query } from '@elastic/eui';
+import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
+import { AddMetadataFilterButton } from './add_metadata_filter_button';
 
 interface Row {
   name: string;
   value: string | string[] | undefined;
 }
 
-interface Props {
+export interface Props {
   rows: Row[];
+  loading: boolean;
+}
+
+interface SearchErrorType {
+  message: string;
 }
 
 /**
@@ -31,8 +47,65 @@ const VALUE_LABEL = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadat
   defaultMessage: 'Value',
 });
 
+/**
+ * Component translations
+ */
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.infra.hostsViewPage.hostDetail.metadata.searchForMetadata',
+  {
+    defaultMessage: 'Search for metadata…',
+  }
+);
+
+const NO_METADATA_FOUND = i18n.translate(
+  'xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound',
+  {
+    defaultMessage: 'No metadata found.',
+  }
+);
+
+const LOADING = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.loading', {
+  defaultMessage: 'Loading...',
+});
+
 export const Table = (props: Props) => {
-  const { rows } = props;
+  const { rows, loading } = props;
+  const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
+  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+
+  const debouncedSearchOnChange = useMemo(
+    () =>
+      debounce<(queryText: string) => void>((queryText) => {
+        setHostFlyoutOpen({ metadataSearch: String(queryText) ?? '' });
+      }, 500),
+    [setHostFlyoutOpen]
+  );
+
+  const searchBarOnChange = useCallback(
+    ({ queryText, error }) => {
+      if (error) {
+        setSearchError(error);
+      } else {
+        setSearchError(null);
+        debouncedSearchOnChange(queryText);
+      }
+    },
+    [debouncedSearchOnChange]
+  );
+
+  const search: EuiSearchBarProps = {
+    onChange: searchBarOnChange,
+    box: {
+      'data-test-subj': 'infraHostMetadataSearchBarInput',
+      incremental: true,
+      schema: true,
+      placeholder: SEARCH_PLACEHOLDER,
+    },
+    query: hostFlyoutOpen.metadataSearch
+      ? Query.parse(hostFlyoutOpen.metadataSearch)
+      : Query.MATCH_ALL,
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -45,21 +118,41 @@ export const Table = (props: Props) => {
       {
         field: 'value',
         name: VALUE_LABEL,
-        width: '65%',
+        width: '55%',
         sortable: false,
         render: (_name: string, item: Row) => <ExpandableContent values={item.value} />,
+      },
+      {
+        field: 'value',
+        name: 'Actions',
+        sortable: false,
+        showOnHover: true,
+        render: (_name: string, item: Row) => {
+          return <AddMetadataFilterButton item={item} />;
+        },
       },
     ],
     []
   );
 
   return (
-    <EuiBasicTable
+    <EuiInMemoryTable
       data-test-subj="infraMetadataTable"
       tableLayout={'fixed'}
       responsive={false}
       columns={columns}
       items={rows}
+      rowProps={{ className: 'euiTableRow-hasActions' }}
+      search={search}
+      loading={loading}
+      error={searchError ? `${searchError.message}` : ''}
+      message={
+        loading ? (
+          <div data-test-subj="infraHostMetadataLoading">{LOADING}</div>
+        ) : (
+          <div data-test-subj="infraHostMetadataNoData">{NO_METADATA_FOUND}</div>
+        )
+      }
     />
   );
 };

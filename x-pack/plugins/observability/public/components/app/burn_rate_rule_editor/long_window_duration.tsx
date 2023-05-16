@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
 
@@ -57,7 +50,9 @@ export function LongWindowDuration({
             step={1}
             value={String(durationValue)}
             onChange={onDurationValueChange}
-            aria-label={valueLabel}
+            aria-label={i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
+              defaultMessage: 'Lookback period in hours',
+            })}
             data-test-subj="durationValueInput"
           />
         </EuiFlexItem>
@@ -71,9 +66,7 @@ const getRowLabel = (shortWindowDuration: Duration) => (
     {i18n.translate('xpack.observability.slo.rules.longWindow.rowLabel', {
       defaultMessage: 'Lookback period (hours)',
     })}{' '}
-    <EuiToolTip position="top" content={getTooltipText(shortWindowDuration)}>
-      <EuiIcon tabIndex={0} type="iInCircle" />
-    </EuiToolTip>
+    <EuiIconTip position="top" content={getTooltipText(shortWindowDuration)} />
   </>
 );
 
@@ -83,7 +76,3 @@ const getTooltipText = (shortWindowDuration: Duration) =>
       'Lookback period over which the burn rate is computed. A shorter lookback period of {shortWindowDuration} minutes (1/12 the lookback period) will be used for faster recovery',
     values: { shortWindowDuration: toMinutes(shortWindowDuration) },
   });
-
-const valueLabel = i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
-  defaultMessage: 'Enter the lookback period in hours',
-});

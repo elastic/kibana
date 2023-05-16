@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectAttributes } from '@kbn/core/types';
+import type { ErrorType } from '@kbn/ml-error-utils';
 import type { Datafeed, Job } from './anomaly_detection_jobs';
-import type { ErrorType } from '../util/errors';
 
 export interface ModuleJob {
   id: string;

@@ -7,9 +7,11 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
@@ -21,12 +23,14 @@ export interface Props {
 }
 
 export function SloListItems({ sloList, loading, error }: Props) {
-  const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse } =
-    useFetchHistoricalSummary({ sloIds: sloList.map((slo) => slo.id) });
+  const sloIds = sloList.map((slo) => slo.id);
 
-  const { data: activeAlertsBySlo } = useFetchActiveAlerts({
-    sloIds: sloList.map((slo) => slo.id),
-  });
+  const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIds });
+  const { data: rulesBySlo } = useFetchRulesForSlo({ sloIds });
+  const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse } =
+    useFetchHistoricalSummary({ sloIds });
+
+  const { mutate: deleteSlo } = useDeleteSlo();
 
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
@@ -35,15 +39,21 @@ export function SloListItems({ sloList, loading, error }: Props) {
     return <SloListError />;
   }
 
+  const handleDelete = (slo: SLOWithSummaryResponse) => {
+    deleteSlo({ id: slo.id, name: slo.name });
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {sloList.map((slo) => (
         <EuiFlexItem key={slo.id}>
           <SloListItem
-            slo={slo}
+            activeAlerts={activeAlertsBySlo[slo.id]}
+            rules={rulesBySlo?.[slo.id]}
             historicalSummary={sloHistoricalSummaryResponse?.[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
-            activeAlerts={activeAlertsBySlo[slo.id]}
+            slo={slo}
+            onConfirmDelete={handleDelete}
           />
         </EuiFlexItem>
       ))}

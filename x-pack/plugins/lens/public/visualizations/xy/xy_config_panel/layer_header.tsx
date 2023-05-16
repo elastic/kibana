@@ -7,9 +7,17 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiPopover,
+  EuiSelectable,
+  EuiText,
+  EuiPopoverTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
+import { css } from '@emotion/react';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
@@ -71,6 +79,7 @@ function AnnotationLayerHeaderContent({
   layerId,
   onChangeIndexPattern,
 }: VisualizationLayerHeaderContentProps<State>) {
+  const { euiTheme } = useEuiTheme();
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });
@@ -78,6 +87,25 @@ function AnnotationLayerHeaderContent({
   const layer = state.layers[layerIndex] as XYAnnotationLayerConfig;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
 
+  const extraIconLabelProps = !layer.ignoreGlobalFilters
+    ? {}
+    : {
+        icon: {
+          component: (
+            <EuiIcon
+              type={'filterIgnore'}
+              color={euiTheme.colors.disabledText}
+              css={css`
+                margin-top: 15px;
+              `}
+            />
+          ),
+          tooltipValue: i18n.translate('xpack.lens.layerPanel.ignoreGlobalFilters', {
+            defaultMessage: 'Ignore global filters',
+          }),
+          'data-test-subj': 'lnsChangeIndexPatternIgnoringFilters',
+        },
+      };
   return (
     <ChangeIndexPattern
       data-test-subj="indexPattern-switcher"
@@ -87,6 +115,7 @@ function AnnotationLayerHeaderContent({
         'data-test-subj': 'lns_layerIndexPatternLabel',
         size: 's',
         fontWeight: 'normal',
+        ...extraIconLabelProps,
       }}
       indexPatternId={layer.indexPatternId}
       indexPatternRefs={frame.dataViews.indexPatternRefs}

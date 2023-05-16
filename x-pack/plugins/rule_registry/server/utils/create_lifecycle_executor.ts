@@ -43,6 +43,7 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_FLAPPING,
+  ALERT_MAINTENANCE_WINDOW_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
@@ -131,6 +132,7 @@ export const createLifecycleExecutor =
       services: { alertFactory, shouldWriteAlerts },
       state: previousState,
       flappingSettings,
+      maintenanceWindowIds,
       rule,
     } = options;
 
@@ -299,6 +301,9 @@ export const createLifecycleExecutor =
           [VERSION]: ruleDataClient.kibanaVersion,
           [ALERT_FLAPPING]: flapping,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
+          ...(isNew && maintenanceWindowIds?.length
+            ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
+            : {}),
         };
 
         return {

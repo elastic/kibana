@@ -12,7 +12,12 @@ import { PieChartTypes } from '../../../common/constants';
 import { PieVisualizationState } from '../..';
 import { VisualizationLayerSettingsProps } from '../../types';
 
-export function LayerSettings(props: VisualizationLayerSettingsProps<PieVisualizationState>) {
+export function LayerSettings(
+  props: VisualizationLayerSettingsProps<PieVisualizationState> & { section: 'data' | 'appearance' }
+) {
+  if (props.section === 'appearance') {
+    return null;
+  }
   if (props.state.shape === PieChartTypes.MOSAIC) {
     return null;
   }
@@ -24,29 +29,33 @@ export function LayerSettings(props: VisualizationLayerSettingsProps<PieVisualiz
   }
 
   return (
-    <>
-      <EuiFormRow>
-        <EuiSwitch
-          label={i18n.translate('xpack.lens.pieChart.multipleMetrics', {
-            defaultMessage: 'Multiple metrics',
-          })}
-          compressed={true}
-          checked={Boolean(currentLayer.allowMultipleMetrics)}
-          onChange={() => {
-            props.setState({
-              ...props.state,
-              layers: props.state.layers.map((layer) =>
-                layer.layerId !== props.layerId
-                  ? layer
-                  : {
-                      ...layer,
-                      allowMultipleMetrics: !layer.allowMultipleMetrics,
-                    }
-              ),
-            });
-          }}
-        />
-      </EuiFormRow>
-    </>
+    <EuiFormRow
+      display="columnCompressedSwitch"
+      label={i18n.translate('xpack.lens.pieChart.multipleMetrics', {
+        defaultMessage: 'Multiple metrics',
+      })}
+    >
+      <EuiSwitch
+        label={i18n.translate('xpack.lens.pieChart.multipleMetrics', {
+          defaultMessage: 'Multiple metrics',
+        })}
+        compressed
+        showLabel={false}
+        checked={Boolean(currentLayer.allowMultipleMetrics)}
+        onChange={() => {
+          props.setState({
+            ...props.state,
+            layers: props.state.layers.map((layer) =>
+              layer.layerId !== props.layerId
+                ? layer
+                : {
+                    ...layer,
+                    allowMultipleMetrics: !layer.allowMultipleMetrics,
+                  }
+            ),
+          });
+        }}
+      />
+    </EuiFormRow>
   );
 }

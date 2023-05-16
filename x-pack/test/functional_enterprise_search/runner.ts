@@ -35,12 +35,8 @@ export async function runEnterpriseSearchTests(
   await withEnterpriseSearch(context, (runnerEnv) =>
     withProcRunner(log, async (procs) => {
       await procs.run('cypress', {
-        cmd: 'sh',
-        args: [
-          `${resolve(__dirname, '../../plugins/enterprise_search/cypress.sh')}`,
-          `${cypressCommand}`,
-          'as',
-        ],
+        cmd: '../../../node_modules/.bin/cypress',
+        args: [cypressCommand, '--config-file', './cypress.config.ts', '--browser', 'chrome'],
         cwd: resolve(__dirname, '../../plugins/enterprise_search'),
         env: {
           FORCE_COLOR: '1',

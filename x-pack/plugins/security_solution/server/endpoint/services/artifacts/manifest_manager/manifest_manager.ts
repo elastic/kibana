@@ -8,7 +8,7 @@
 import pMap from 'p-map';
 import semver from 'semver';
 import type LRU from 'lru-cache';
-import { isEqual, isEmpty, keyBy } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -365,11 +365,15 @@ export class ManifestManager {
     }
 
     if (fleetArtifacts) {
-      const fleetArtfactsByIdentifier = keyBy(fleetArtifacts, 'identifier');
+      const fleetArtfactsByIdentifier: { [key: string]: InternalArtifactCompleteSchema } = {};
+      fleetArtifacts.forEach((fleetArtifact) => {
+        fleetArtfactsByIdentifier[getArtifactId(fleetArtifact)] = fleetArtifact;
+      });
       artifactsToCreate.forEach((artifact) => {
-        const fleetArtifact = fleetArtfactsByIdentifier[artifact.identifier];
-        if (!fleetArtifact) return;
         const artifactId = getArtifactId(artifact);
+        const fleetArtifact = fleetArtfactsByIdentifier[artifactId];
+
+        if (!fleetArtifact) return;
         // Cache the compressed body of the artifact
         this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
         newManifest.replaceArtifact(fleetArtifact);

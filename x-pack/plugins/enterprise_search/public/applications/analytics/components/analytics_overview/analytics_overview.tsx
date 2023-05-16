@@ -13,12 +13,12 @@ import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { KibanaLogic } from '../../../shared/kibana';
+import { LicensingLogic } from '../../../shared/licensing';
 import {
   LicensingCallout,
   LICENSING_FEATURE,
-} from '../../../enterprise_search_content/components/shared/licensing_callout/licensing_callout';
-import { KibanaLogic } from '../../../shared/kibana';
-import { LicensingLogic } from '../../../shared/licensing';
+} from '../../../shared/licensing_callout/licensing_callout';
 import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
@@ -28,8 +28,9 @@ import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
 import { AnalyticsOverviewEmptyPage } from './analytics_overview_empty_page';
 
 export const AnalyticsOverview: React.FC = () => {
-  const { fetchAnalyticsCollections } = useActions(AnalyticsCollectionsLogic);
-  const { analyticsCollections, isLoading, hasNoAnalyticsCollections } =
+  const { fetchAnalyticsCollections, searchAnalyticsCollections } =
+    useActions(AnalyticsCollectionsLogic);
+  const { analyticsCollections, hasNoAnalyticsCollections, isFetching, isSearching } =
     useValues(AnalyticsCollectionsLogic);
 
   const { isCloud } = useValues(KibanaLogic);
@@ -46,7 +47,7 @@ export const AnalyticsOverview: React.FC = () => {
     <EnterpriseSearchAnalyticsPageTemplate
       pageChrome={[]}
       restrictWidth
-      isLoading={isLoading && !isGated}
+      isLoading={isFetching && !isGated}
       pageViewTelemetry="Analytics Collections Overview"
       pageHeader={{
         description: i18n.translate(
@@ -66,13 +67,17 @@ export const AnalyticsOverview: React.FC = () => {
         <EuiFlexItem>
           <LicensingCallout feature={LICENSING_FEATURE.ANALYTICS} />
         </EuiFlexItem>
-      ) : hasNoAnalyticsCollections ? (
+      ) : hasNoAnalyticsCollections && !isSearching ? (
         <>
           <EuiSpacer size="l" />
           <AnalyticsOverviewEmptyPage />
         </>
       ) : (
-        <AnalyticsCollectionTable collections={analyticsCollections} />
+        <AnalyticsCollectionTable
+          collections={analyticsCollections}
+          isSearching={isSearching}
+          onSearch={searchAnalyticsCollections}
+        />
       )}
     </EnterpriseSearchAnalyticsPageTemplate>
   );

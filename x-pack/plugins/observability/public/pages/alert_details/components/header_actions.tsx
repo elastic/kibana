@@ -62,7 +62,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
 
   const handleAddToCase = () => {
     setIsPopoverOpen(false);
-    selectCaseModal.open({ attachments });
+    selectCaseModal.open({ getAttachments: () => attachments });
   };
 
   const handleViewRuleDetails = () => {

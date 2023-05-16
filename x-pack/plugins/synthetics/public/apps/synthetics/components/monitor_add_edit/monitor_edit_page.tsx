@@ -10,13 +10,14 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
+import { useTrackPageview, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { EditMonitorNotFound } from './edit_monitor_not_found';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
+import { AlertingCallout } from '../common/alerting_callout/alerting_callout';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
 import { LocationsLoadingError } from './locations_loading_error';
@@ -84,18 +85,24 @@ export const MonitorEditPage: React.FC = () => {
   }
 
   return data && locationsLoaded && !loading && !error ? (
-    <MonitorForm defaultValues={data?.attributes} readOnly={isReadOnly}>
-      <MonitorSteps
-        stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
-        isEditFlow={true}
-        readOnly={isReadOnly}
-        projectId={projectId}
+    <>
+      <AlertingCallout
+        isAlertingEnabled={data.attributes[ConfigKey.ALERT_CONFIG]?.status?.enabled}
       />
-      <MonitorDetailsLinkPortal
-        configId={data?.attributes[ConfigKey.CONFIG_ID]}
-        name={data?.attributes.name}
-      />
-    </MonitorForm>
+      <MonitorForm defaultValues={data?.attributes} readOnly={isReadOnly}>
+        <MonitorSteps
+          stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
+          isEditFlow={true}
+          readOnly={isReadOnly}
+          projectId={projectId}
+        />
+        <MonitorDetailsLinkPortal
+          configId={data?.attributes[ConfigKey.CONFIG_ID]}
+          name={data?.attributes.name}
+          updateUrl={false}
+        />
+      </MonitorForm>
+    </>
   ) : (
     <LoadingState />
   );

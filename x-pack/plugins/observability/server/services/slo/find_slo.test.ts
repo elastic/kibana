@@ -33,7 +33,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortField.Name, direction: SortDirection.Asc },
+        { field: SortField.CreationTime, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
 
@@ -98,7 +98,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortField.Name, direction: SortDirection.Asc },
+        { field: SortField.CreationTime, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -112,7 +112,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'Availability' },
-        { field: SortField.Name, direction: SortDirection.Asc },
+        { field: SortField.CreationTime, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -126,7 +126,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { indicatorTypes: ['sli.kql.custom'] },
-        { field: SortField.Name, direction: SortDirection.Asc },
+        { field: SortField.CreationTime, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -140,7 +140,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'My SLO*' },
-        { field: SortField.Name, direction: SortDirection.Asc },
+        { field: SortField.CreationTime, direction: SortDirection.Asc },
         { page: 2, perPage: 100 }
       );
     });
@@ -154,7 +154,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortField.Name, direction: SortDirection.Asc },
+        { field: SortField.CreationTime, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -168,7 +168,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortField.Name, direction: SortDirection.Asc },
+        { field: SortField.CreationTime, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });

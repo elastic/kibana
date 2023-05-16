@@ -192,7 +192,10 @@ const generateCommonArguments = (
     legendPosition: layer.legendPosition || Position.Right,
     maxLegendLines: layer.legendMaxLines ?? 1,
     legendSize: layer.legendSize,
-    nestedLegend: !!layer.nestedLegend,
+    nestedLegend:
+      layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+        ? Boolean(layer.nestedLegend)
+        : false,
     truncateLegend:
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
     palette: generatePaletteAstArguments(paletteService, state.palette),

@@ -24,7 +24,7 @@ export const ANALYZE_GRAPH_ID = 'analyze_graph';
  */
 export const AnalyzeGraph: FC = () => {
   const { eventId } = useLeftPanelContext();
-  const scopeId = 'fly-out';
+  const scopeId = 'flyout'; // TO-DO: update to use context
   const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
     isActiveTimeline(scopeId)
   );

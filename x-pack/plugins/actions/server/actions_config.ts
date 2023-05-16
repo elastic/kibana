@@ -53,6 +53,7 @@ export interface ActionsConfigurationUtilities {
     addresses: string[],
     options?: ValidateEmailAddressesOptions
   ): string | undefined;
+  enableFooterInEmail: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -215,5 +216,6 @@ export function getActionsConfigurationUtilities(
         DEFAULT_MAX_ATTEMPTS
       );
     },
+    enableFooterInEmail: () => config.enableFooterInEmail,
   };
 }

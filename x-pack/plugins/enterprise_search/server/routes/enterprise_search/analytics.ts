@@ -12,9 +12,11 @@ import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { i18n } from '@kbn/i18n';
 
+import { AnalyticsEventsExist } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from '../../lib/analytics/add_analytics_collection';
-import { analyticsEventsIndexExists } from '../../lib/analytics/analytics_events_index_exists';
+import { analyticsEventsExist } from '../../lib/analytics/analytics_events_exist';
+import { createApiKey } from '../../lib/analytics/create_api_key';
 import { deleteAnalyticsCollectionById } from '../../lib/analytics/delete_analytics_collection';
 import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
 import { RouteDependencies } from '../../plugin';
@@ -49,12 +51,25 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/analytics/collections',
-      validate: {},
+      validate: {
+        query: schema.object({
+          query: schema.maybe(schema.string()),
+        }),
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const collections = await fetchAnalyticsCollections(client);
-      return response.ok({ body: collections });
+      try {
+        const query = request.query.query && request.query.query + '*';
+        const collections = await fetchAnalyticsCollections(client, query);
+        return response.ok({ body: collections });
+      } catch (error) {
+        if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND) {
+          return response.ok({ body: [] });
+        }
+
+        throw error;
+      }
     })
   );
 
@@ -81,6 +96,32 @@ export function registerAnalyticsRoutes({
 
         throw error;
       }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/analytics/collections/{name}/api_key',
+      validate: {
+        body: schema.object({
+          keyName: schema.string(),
+        }),
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const collectionName = decodeURIComponent(request.params.name);
+      const { keyName } = request.body;
+      const { client } = (await context.core).elasticsearch;
+
+      const apiKey = await createApiKey(client, collectionName, keyName);
+
+      return response.ok({
+        body: { apiKey },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 
@@ -154,7 +195,7 @@ export function registerAnalyticsRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/analytics/events/{name}/exists',
+      path: '/internal/enterprise_search/analytics/collection/{name}/events/exist',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -164,13 +205,11 @@ export function registerAnalyticsRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
-      const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.name);
+      const eventsIndexExists = await analyticsEventsExist(client, request.params.name);
 
-      if (!eventsIndexExists) {
-        return response.ok({ body: { exists: false } });
-      }
+      const body: AnalyticsEventsExist = { exists: eventsIndexExists };
 
-      return response.ok({ body: { exists: true } });
+      return response.ok({ body });
     })
   );
 }

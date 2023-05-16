@@ -23,10 +23,6 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.JOURNEY_ID,
   ConfigKey.PROJECT_ID,
   ConfigKey.METADATA,
-  ConfigKey.UPLOAD_SPEED,
-  ConfigKey.DOWNLOAD_SPEED,
-  ConfigKey.LATENCY,
-  ConfigKey.IS_THROTTLING_ENABLED,
   ConfigKey.REVISION,
   ConfigKey.CUSTOM_HEARTBEAT_ID,
   ConfigKey.FORM_MONITOR_TYPE,
@@ -36,19 +32,13 @@ const UI_KEYS_TO_SKIP = [
   'secrets',
 ];
 
-const uiToHeartbeatKeyMap = {
-  throttling: ConfigKey.THROTTLING_CONFIG,
-};
-
-type YamlKeys = keyof typeof uiToHeartbeatKeyMap;
-
 export const formatMonitorConfigFields = (
   configKeys: ConfigKey[],
   config: Partial<MonitorFields>,
   logger: Logger,
   params: Record<string, string>
 ) => {
-  const formattedMonitor = {} as Record<ConfigKey | YamlKeys, any>;
+  const formattedMonitor = {} as Record<ConfigKey, any>;
 
   configKeys.forEach((key) => {
     if (!UI_KEYS_TO_SKIP.includes(key)) {
@@ -84,13 +74,6 @@ export const formatMonitorConfigFields = (
     ) as unknown as Array<keyof TLSFields>;
     sslKeys.forEach((key) => (formattedMonitor[key] = null));
   }
-
-  Object.keys(uiToHeartbeatKeyMap).forEach((key) => {
-    const hbKey = key as YamlKeys;
-    const configKey = uiToHeartbeatKeyMap[hbKey];
-    formattedMonitor[hbKey] = formattedMonitor[configKey];
-    delete formattedMonitor[configKey];
-  });
 
   return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;
 };

@@ -64,6 +64,19 @@ export interface TelemetryEvent {
     id?: string;
     kind?: string;
   };
+  kubernetes?: {
+    audit?: {
+      user?: {
+        username?: string;
+        groups?: string[];
+      };
+      impersonated_user?: {
+        username?: string;
+        groups?: string[];
+      };
+      pod?: SearchTypes;
+    };
+  };
 }
 
 // EP Policy Response

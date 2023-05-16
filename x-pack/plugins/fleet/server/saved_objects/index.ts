@@ -21,6 +21,8 @@ import {
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INGEST_SAVED_OBJECT_INDEX,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -54,10 +56,9 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
-import {
-  migratePackagePolicyToV870,
-  migratePackagePolicyToV880,
-} from './migrations/security_solution';
+import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
+import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
 
 /*
  * Saved object types and mappings
@@ -69,6 +70,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -89,6 +91,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
     name: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -121,6 +124,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             enabled: { type: 'boolean' },
           },
         },
+        is_protected: { type: 'boolean' },
       },
     },
     migrations: {
@@ -128,10 +132,12 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '7.12.0': migrateAgentPolicyToV7120,
       '8.4.0': migrateAgentPolicyToV840,
       '8.5.0': migrateAgentPolicyToV850,
+      '8.9.0': migrateAgentPolicyToV890,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
     name: OUTPUT_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -156,6 +162,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
           properties: {},
         },
+        allow_edit: { enabled: false },
       },
     },
     migrations: {
@@ -165,6 +172,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
     name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -194,6 +202,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false,
           properties: {},
         },
+        secret_references: { properties: { id: { type: 'keyword' } } },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
@@ -220,6 +229,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
     name: PACKAGES_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -243,6 +253,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             id: { type: 'keyword' },
             type: { type: 'keyword' },
             version: { type: 'keyword' },
+            deferred: { type: 'boolean' },
           },
         },
         installed_kibana: {
@@ -287,6 +298,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {
     name: ASSETS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -306,6 +318,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE]: {
     name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -319,6 +332,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE]: {
     name: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -335,6 +349,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [FLEET_SERVER_HOST_SAVED_OBJECT_TYPE]: {
     name: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -352,6 +367,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [FLEET_PROXY_SAVED_OBJECT_TYPE]: {
     name: FLEET_PROXY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -371,6 +387,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE]: {
     name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
     management: {
@@ -379,6 +396,23 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     mappings: {
       dynamic: false,
       properties: {},
+    },
+  },
+  [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: {
+    name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      dynamic: false,
+      properties: {
+        created_at: { type: 'date' },
+        policy_id: { type: 'keyword' },
+        token_plain: { type: 'keyword' },
+      },
     },
   },
 });
@@ -415,5 +449,9 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['passphrase']),
+  });
+  encryptedSavedObjects.registerType({
+    type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['token']),
   });
 }

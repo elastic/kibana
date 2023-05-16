@@ -7,8 +7,9 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Defer } from './kibana_migrator_utils';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
@@ -16,7 +17,7 @@ import type {
   CheckUnknownDocumentsState,
   CleanupUnknownAndExcluded,
   CleanupUnknownAndExcludedWaitForTaskState,
-  CloneTempToSource,
+  CloneTempToTarget,
   CreateNewTargetState,
   CreateReindexTempState,
   InitState,
@@ -68,7 +69,12 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
+export const nextActionMap = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  readyToReindex: Defer<void>,
+  doneReindexing: Defer<void>
+) => {
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
@@ -135,6 +141,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         indexName: state.tempIndex,
         mappings: state.tempIndexMappings,
       }),
+    READY_TO_REINDEX_SYNC: () => Actions.synchronizeMigrators(readyToReindex),
     REINDEX_SOURCE_TO_TEMP_OPEN_PIT: (state: ReindexSourceToTempOpenPit) =>
       Actions.openPit({ client, index: state.sourceIndex.value }),
     REINDEX_SOURCE_TO_TEMP_READ: (state: ReindexSourceToTempRead) =>
@@ -167,9 +174,10 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
          */
         refresh: false,
       }),
+    DONE_REINDEXING_SYNC: () => Actions.synchronizeMigrators(doneReindexing),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock({ client, index: state.tempIndex }),
-    CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
+    CLONE_TEMP_TO_TARGET: (state: CloneTempToTarget) =>
       Actions.cloneIndex({ client, source: state.tempIndex, target: state.targetIndex }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, index: state.targetIndex }),
@@ -192,12 +200,13 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         taskId: state.updateTargetMappingsTaskId,
         timeout: '60s',
       }),
-    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsMeta) =>
-      Actions.updateMappings({
+    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsMeta) => {
+      return Actions.updateMappings({
         client,
         index: state.targetIndex,
-        mappings: omit(state.targetIndexMappings, 'properties'),
-      }),
+        mappings: omit(state.targetIndexMappings, ['properties']), // properties already updated on a previous step
+      });
+    },
     CHECK_VERSION_INDEX_READY_ACTIONS: () => Actions.noop,
     OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
       Actions.openPit({ client, index: state.targetIndex }),
@@ -257,8 +266,13 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   };
 };
 
-export const next = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
-  const map = nextActionMap(client, transformRawDocs);
+export const next = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  readyToReindex: Defer<void>,
+  doneReindexing: Defer<void>
+) => {
+  const map = nextActionMap(client, transformRawDocs, readyToReindex, doneReindexing);
   return (state: State) => {
     const delay = createDelayFn(state);
 

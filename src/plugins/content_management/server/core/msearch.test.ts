@@ -13,6 +13,9 @@ import { createMockedStorage } from './mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { StorageContext } from '.';
 
+const SEARCH_LISTING_LIMIT = 100;
+const SEARCH_PER_PAGE = 10;
+
 const setup = () => {
   const contentRegistry = new ContentRegistry(new EventBus());
 
@@ -50,6 +53,10 @@ const setup = () => {
   const mSearchService = new MSearchService({
     getSavedObjectsClient: async () => savedObjectsClient,
     contentRegistry,
+    getConfig: {
+      listingLimit: async () => SEARCH_LISTING_LIMIT,
+      perPage: async () => SEARCH_PER_PAGE,
+    },
   });
 
   return { mSearchService, savedObjectsClient, contentRegistry };
@@ -94,7 +101,7 @@ test('should cross-content search using saved objects api', async () => {
     saved_objects: [soResultFoo, soResultBar],
     total: 2,
     page: 1,
-    per_page: 10,
+    per_page: SEARCH_PER_PAGE,
   });
 
   const result = await mSearchService.search(
@@ -104,6 +111,10 @@ test('should cross-content search using saved objects api', async () => {
     ],
     {
       text: 'search text',
+      tags: {
+        excluded: ['excluded-tag'],
+        included: ['included-tag'],
+      },
     }
   );
 
@@ -112,6 +123,20 @@ test('should cross-content search using saved objects api', async () => {
     search: 'search text',
     searchFields: ['title^3', 'description', 'special-foo-field', 'special-bar-field'],
     type: ['foo-type', 'bar-type'],
+    page: 1,
+    perPage: SEARCH_PER_PAGE,
+    hasNoReference: [
+      {
+        id: 'excluded-tag',
+        type: 'tag',
+      },
+    ],
+    hasReference: [
+      {
+        id: 'included-tag',
+        type: 'tag',
+      },
+    ],
   });
 
   expect(result).toEqual({
@@ -160,4 +185,99 @@ test('should error if content is registered, but no mSearch support', async () =
       }
     )
   ).rejects.toThrowErrorMatchingInlineSnapshot(`"Content type foo2 does not support mSearch"`);
+});
+
+test('should paginate using cursor', async () => {
+  const { savedObjectsClient, mSearchService } = setup();
+
+  const soResultFoo = {
+    id: 'fooid',
+    score: 0,
+    type: 'foo-type',
+    references: [],
+    attributes: {
+      title: 'foo',
+    },
+  };
+
+  savedObjectsClient.find.mockResolvedValueOnce({
+    saved_objects: Array(5).fill(soResultFoo),
+    total: 7,
+    page: 1,
+    per_page: 5,
+  });
+
+  const result1 = await mSearchService.search(
+    [
+      { contentTypeId: 'foo', ctx: mockStorageContext() },
+      { contentTypeId: 'bar', ctx: mockStorageContext() },
+    ],
+    {
+      text: 'search text',
+      limit: 5,
+    }
+  );
+
+  expect(savedObjectsClient.find).toHaveBeenCalledWith({
+    defaultSearchOperator: 'AND',
+    search: 'search text',
+    searchFields: ['title^3', 'description', 'special-foo-field', 'special-bar-field'],
+    type: ['foo-type', 'bar-type'],
+    page: 1,
+    perPage: 5,
+  });
+
+  expect(result1).toEqual({
+    hits: Array(5).fill({ itemFoo: soResultFoo }),
+    pagination: {
+      total: 7,
+      cursor: '2',
+    },
+  });
+
+  savedObjectsClient.find.mockResolvedValueOnce({
+    saved_objects: Array(2).fill(soResultFoo),
+    total: 7,
+    page: 2,
+    per_page: 5,
+  });
+
+  const result2 = await mSearchService.search(
+    [
+      { contentTypeId: 'foo', ctx: mockStorageContext() },
+      { contentTypeId: 'bar', ctx: mockStorageContext() },
+    ],
+    {
+      text: 'search text',
+      limit: 5,
+      cursor: result1.pagination.cursor,
+    }
+  );
+
+  expect(result2).toEqual({
+    hits: Array(2).fill({ itemFoo: soResultFoo }),
+    pagination: {
+      total: 7,
+    },
+  });
+});
+
+test('should error if outside of pagination limit', async () => {
+  const { mSearchService } = setup();
+  await expect(
+    mSearchService.search(
+      [
+        { contentTypeId: 'foo', ctx: mockStorageContext() },
+        { contentTypeId: 'bar', ctx: mockStorageContext() },
+      ],
+
+      {
+        text: 'search text',
+        cursor: '11',
+        limit: 10,
+      }
+    )
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Requested page 11 with 10 items per page exceeds the maximum allowed limit of ${SEARCH_LISTING_LIMIT} items"`
+  );
 });

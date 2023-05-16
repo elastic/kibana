@@ -208,7 +208,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+          ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"filtersForSuggestions\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -216,7 +216,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+          ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"filtersForSuggestions\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -238,7 +238,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+              ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"filtersForSuggestions\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -246,7 +246,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+              ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"filtersForSuggestions\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -359,7 +359,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "{ indexPatterns?: ",
+              "{ isClearable?: boolean | undefined; placeholder?: string | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; indexPatterns?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -367,7 +367,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined; placeholder?: string | undefined; query?: ",
+              "[] | undefined; query?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -385,7 +385,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; dataTestSubj?: string | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; timeHistory?: ",
+              "[] | undefined; dataTestSubj?: string | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -393,7 +393,15 @@
                 "section": "def-public.TimeHistoryContract",
                 "text": "TimeHistoryContract"
               },
-              " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
+              " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; filtersForSuggestions?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
               "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; savedQuery?: ",
               {
@@ -451,7 +459,7 @@
                 "section": "def-public.SavedQuery",
                 "text": "SavedQuery"
               },
-              ") => void) | undefined; onClearSavedQuery?: (() => void) | undefined; onRefresh?: ((payload: { dateRange: ",
+              ") => void) | undefined; onTimeRangeChange?: ((payload: { dateRange: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -459,7 +467,15 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; }) => void) | undefined; indicateNoData?: boolean | undefined; isClearable?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; displayStyle?: \"inPage\" | \"detached\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
+              "; }) => void) | undefined; onClearSavedQuery?: (() => void) | undefined; onRefresh?: ((payload: { dateRange: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              "; }) => void) | undefined; onRefreshChange?: (((options: { isPaused: boolean; refreshInterval: number; }) => void) & ((options: { isPaused: boolean; refreshInterval: number; }) => void)) | undefined; indicateNoData?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; disableQueryLanguageSwitcher?: boolean | undefined; displayStyle?: \"inPage\" | \"detached\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -471,7 +487,7 @@
               "OnSaveTextLanguageQueryProps",
               ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
-              " | undefined; isScreenshotMode?: boolean | undefined; onFiltersUpdated?: ((filters: ",
+              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; onFiltersUpdated?: ((filters: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -479,7 +495,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]) => void) | undefined; onRefreshChange?: ((options: { isPaused: boolean; refreshInterval: number; }) => void) | undefined; }"
+              "[]) => void) | undefined; }"
             ],
             "path": "src/plugins/unified_search/public/search_bar/index.tsx",
             "deprecated": false,
@@ -1086,6 +1102,29 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.filtersForSuggestions",
+            "type": "Array",
+            "tags": [],
+            "label": "filtersForSuggestions",
+            "description": [
+              "adds additional filters to be used for suggestions"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
             "deprecated": false,
@@ -1924,6 +1963,29 @@
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QueryStringInputProps.filtersForSuggestions",
+            "type": "Array",
+            "tags": [],
+            "label": "filtersForSuggestions",
+            "description": [
+              "\nAdd additional filters used for suggestions"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1957,9 +2019,9 @@
           "Omit",
           "<Omit<",
           "EuiComboBoxProps",
-          "<any>, \"options\" | \"onChange\" | \"isLoading\" | \"selectedOptions\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
+          "<any>, \"options\" | \"selectedOptions\" | \"onChange\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
           "EuiComboBoxProps",
-          "<any>, \"options\" | \"onChange\" | \"isLoading\" | \"selectedOptions\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
+          "<any>, \"options\" | \"selectedOptions\" | \"onChange\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
         ],
         "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx",
         "deprecated": false,
