@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useWaterfallContext } from '..';
 import { MarkerItems } from '../context/waterfall_chart';
