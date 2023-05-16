@@ -39,9 +39,9 @@ export class ServerlessSearchPlugin
 
   public start(
     core: CoreStart,
-    _startDeps: ServerlessSearchPluginStartDependencies
+    { serverless }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    core.chrome.project.setSideNavComponent(createComponent(core));
+    serverless.setSideNavComponent(createComponent(core));
     return {};
   }
 
