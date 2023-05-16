@@ -14,6 +14,13 @@ export const arrayToJsonFormatter: FormatterFn = (fields, key) => {
   return value.length ? JSON.stringify(value) : null;
 };
 
+export const objectToJsonFormatter: FormatterFn = (fields, fieldKey) => {
+  const value = (fields[fieldKey] as Record<string, any>) ?? {};
+  if (Object.keys(value).length === 0) return null;
+
+  return JSON.stringify(value);
+};
+
 // only add tls settings if they are enabled by the user and isEnabled is true
 export const tlsValueToYamlFormatter: FormatterFn = (fields, key) => {
   if (fields[ConfigKey.METADATA]?.is_tls_enabled) {

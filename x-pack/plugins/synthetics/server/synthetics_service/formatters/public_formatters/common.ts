@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { arrayToJsonFormatter, secondsToCronFormatter } from '../formatting_utils';
+import { secondsToCronFormatter } from '../formatting_utils';
 import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
 import {
   CommonFields,
@@ -39,7 +39,6 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.CONFIG_ID]: null,
   [ConfigKey.NAMESPACE]: null,
   [ConfigKey.REVISION]: null,
-  [ConfigKey.MONITOR_SOURCE_TYPE]: null,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
   [ConfigKey.JOURNEY_ID]: null,
   [ConfigKey.PROJECT_ID]: null,
@@ -47,12 +46,6 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.CONFIG_HASH]: null,
   [ConfigKey.MONITOR_QUERY_ID]: null,
-  [ConfigKey.PARAMS]: null,
-  [ConfigKey.SCHEDULE]: (fields) =>
-    JSON.stringify(
-      `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`
-    ),
-  [ConfigKey.TAGS]: arrayToJsonFormatter,
   [ConfigKey.TIMEOUT]: secondsToCronFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,

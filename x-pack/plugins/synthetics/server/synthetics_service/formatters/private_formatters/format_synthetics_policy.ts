@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import { ConfigKey, DataStream, MonitorFields } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
-import { replaceStringWithParams } from './formatting_utils';
+import { replaceStringWithParams } from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
