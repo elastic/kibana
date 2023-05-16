@@ -47,7 +47,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.tines',
           '.torq',
           '.opsgenie',
-          '.genAi',
+          '.gen-ai',
         ].sort()
       );
     });
