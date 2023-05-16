@@ -4378,6 +4378,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/infra-forge@link:x-pack/packages/kbn-infra-forge":
+  version "0.0.0"
+  uid ""
+
 "@kbn/infra-plugin@link:x-pack/plugins/infra":
   version "0.0.0"
   uid ""
