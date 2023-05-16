@@ -44,18 +44,23 @@ export function InstallElasticAgent() {
   const { data: installShipperSetup } = useFetcher((callApi) => {
     return callApi(
       'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
-      { params: { body: { name: wizardState.datasetName } } }
+      {
+        params: {
+          body: {
+            name: wizardState.datasetName,
+            state: {
+              datasetName: wizardState.datasetName,
+              customConfigurations: wizardState.customConfigurations,
+              logFilePaths: wizardState.logFilePaths,
+            },
+          },
+        },
+      }
     );
   }, []);
 
   const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
   const esHost = installShipperSetup?.esHost;
-
-  // const { services } = useKibana<{ cloud?: CloudSetup }>();
-  // const isCloudEnabled = !!services?.cloud?.isCloudEnabled;
-  // const baseUrl = services?.cloud?.baseUrl;
-  // console.log(services);
-  // console.log(services.http?.getServerInfo());
 
   const elasticAgentYaml = getElasticAgentYaml({
     esHost,
@@ -63,20 +68,15 @@ export function InstallElasticAgent() {
     logfileId: 'custom-logs-abcdefgh',
     logfileNamespace: 'default',
     logfileStreams: [
-      {
-        id: 'logs-onboarding-demo-app',
-        dataset: 'demo1',
-        path: '/home/oliver/github/logs-onboarding-demo-app/combined.log',
-      },
+      ...wizardState.logFilePaths.map((path) => ({
+        id: `logs-onboarding-${wizardState.datasetName}`,
+        dataset: wizardState.datasetName,
+        path,
+      })),
       // {
-      //   id: 'logfileStream-abcd1234',
-      //   dataset: 'nginxaccess',
-      //   path: '/var/log/nginx/access.log',
-      // },
-      // {
-      //   id: 'logfileStream-efgh5678',
-      //   dataset: 'nginxerror',
-      //   path: '/var/log/nginx/error.log',
+      //   id: 'logs-onboarding-demo-app',
+      //   dataset: 'demo1',
+      //   path: '/home/oliver/github/logs-onboarding-demo-app/combined.log',
       // },
     ],
   });

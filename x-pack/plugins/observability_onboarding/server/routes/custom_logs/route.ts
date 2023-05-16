@@ -11,6 +11,7 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getESHosts } from './get_es_hosts';
 import { getKibanaUrl } from './get_kibana_url';
 import { createShipperApiKey } from './create_shipper_api_key';
+import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
 
 const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint:
@@ -19,6 +20,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   params: t.type({
     body: t.type({
       name: t.string,
+      state: t.record(t.string, t.unknown),
     }),
   }),
   async handler(resources): Promise<{
@@ -31,10 +33,11 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const {
       context,
       params: {
-        body: { name },
+        body: { name, state },
       },
       core,
       plugins,
+      request,
     } = resources;
     const coreStart = await core.start();
     const scriptDownloadUrl = getKibanaUrl(
@@ -57,6 +60,11 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       esClient: coreStart.elasticsearch.client.asInternalUser as Client,
     });
 
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    saveObservabilityOnboardingState({
+      savedObjectsClient,
+      observabilityOnboardingState: { apiKeyId, state },
+    });
     return {
       apiKeyId, // key the status off this
       apiKeyEncoded,

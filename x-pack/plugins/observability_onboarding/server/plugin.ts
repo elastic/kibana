@@ -23,6 +23,7 @@ import {
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
 import { ObservabilityOnboardingConfig } from '.';
+import { observabilityOnboardingState } from './saved_objects/observability_onboarding_status';
 
 export class ObservabilityOnboardingPlugin
   implements
@@ -47,6 +48,8 @@ export class ObservabilityOnboardingPlugin
   ) {
     this.logger.debug('observability_onboarding: Setup');
 
+    core.savedObjects.registerType(observabilityOnboardingState);
+
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -59,19 +62,6 @@ export class ObservabilityOnboardingPlugin
           }),
       };
     }) as ObservabilityOnboardingRouteHandlerResources['plugins'];
-
-    // const router = core.http.createRouter();
-    // router.get(
-    //   { path: '/api/observability_onboarding/dev', validate: false },
-    //   async (context, req, res) => {
-    //     const coreContext = await context.core;
-    //     const esHosts = getESHosts({
-    //       cloudSetup: plugins.cloud,
-    //       esClient: coreContext.elasticsearch.client.asCurrentUser as Client,
-    //     });
-    //     return res.ok({ body: { esHosts } });
-    //   }
-    // );
 
     registerRoutes({
       core,
