@@ -28,7 +28,7 @@ export const isPathValid = (path: string[] | string, source: SignalSource): bool
 
   return pathAsArray.every((_, index, array) => {
     const newPath = [...array].splice(0, index + 1);
-    // _.get when won't retrieve value of flattened key 'a.b' when receives path ['a', 'b'].
+    // _.get won't retrieve value of flattened key 'a.b' when receives path ['a', 'b'].
     // so we would try to call _.get with dot-notation path if array path results in undefined
     const valueToCheck = get(newPath, source) ?? get(newPath.join('.'), source);
     return valueToCheck === undefined || isPlainObject(valueToCheck);
