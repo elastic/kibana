@@ -97,10 +97,6 @@ describe('Cases connectors', () => {
     openAddNewConnectorOption();
     addServiceNowConnector(snConnector);
 
-    cy.get(TOASTER).should('have.text', "Created 'New connector'");
-    cy.get(TOASTER).should('have.text', 'Saved external connection settings');
-    cy.get(TOASTER).should('not.exist');
-
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
 

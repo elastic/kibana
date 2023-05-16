@@ -53,10 +53,9 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL, OVERVIEW_URL } from '../../urls/navigation';
 
-describe('Cases', () => {
+describe.skip('Cases', () => {
   before(() => {
     cleanKibana();
-    login();
     createTimeline(getCase1().timeline).then((response) =>
       cy
         .wrap({

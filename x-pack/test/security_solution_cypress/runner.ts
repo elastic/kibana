@@ -36,6 +36,7 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
   await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
 
   await withProcRunner(log, async (procs) => {
+    // TODO: use Cypress module API wrapper to make it easier to run Cypress programmatically
     await procs.run('cypress', {
       cmd: 'yarn',
       args: [command],
@@ -46,6 +47,7 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
         CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+        ...(config.get('kbnTestServer.env')?.cypress?.env || {}),
         ...process.env,
         ...envVars,
       },

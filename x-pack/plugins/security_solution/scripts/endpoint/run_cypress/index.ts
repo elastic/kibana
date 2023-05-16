@@ -28,7 +28,8 @@ export default async (
     argv: process.argv.slice(2),
   }
 ) => {
-  console.error('process.argv', process.env);
+  console.error('process.argv', process.argv);
+  console.error('process.env', process.env);
   console.error('params', singleSpecPath);
 
   const yargsData = yargs(argv);
@@ -103,14 +104,12 @@ export default async (
   console.error('esArchiver.archives', ftrConfig.get('esArchiver.archives'));
 
   const lifecycle = new Lifecycle(log);
-  const dockerServers = new DockerServersService(ftrConfig.get('dockerServers'), log, lifecycle);
 
   const providers = new ProviderCollection(log, [
     ...readProviderSpec('Service', {
       lifecycle: () => lifecycle,
       log: () => log,
       config: () => ftrConfig,
-      dockerServers: () => dockerServers,
     }),
     ...readProviderSpec('Service', ftrConfig.get('services')),
   ]);
@@ -138,15 +137,7 @@ export default async (
     procs,
     config: ftrConfig,
     installDir: options?.installDir,
-    extraKbnOpts: options?.installDir
-      ? [`--server.port=${kibanaPort}`, `--elasticsearch.hosts=http://localhost:${esPort}`]
-      : [
-          '--dev',
-          '--no-dev-config',
-          '--no-dev-credentials',
-          `--server.port=${kibanaPort}`,
-          `--elasticsearch.hosts=http://localhost:${esPort}`,
-        ],
+    extraKbnOpts: options?.installDir ? [] : ['--dev', '--no-dev-config', '--no-dev-credentials'],
   });
 
   await providers.loadAll();
@@ -175,19 +166,21 @@ export default async (
     },
   };
 
-  const ftrConfigIndex = argv?.indexOf('--ftr-config-file');
+  const cypressArgv = argv;
+
+  const ftrConfigIndex = cypressArgv?.indexOf('--ftr-config-file');
   if (ftrConfigIndex !== -1) {
-    argv.splice(ftrConfigIndex, 2);
+    cypressArgv.splice(ftrConfigIndex, 2);
   }
 
-  if (yargs.parse(argv)._.includes('open')) {
+  if (yargs.parse(cypressArgv)._.includes('open')) {
     return cypress.open({
       configFile: require.resolve(`../../../${yargsData.argv.configFile}`),
       ...commonCypressConfig,
     });
   }
 
-  const runOptions = await cypress.cli.parseRunArguments(argv);
+  const runOptions = await cypress.cli.parseRunArguments(cypressArgv);
   console.log('runOptions', runOptions);
   return cypress.run(
     deepMerge.all([

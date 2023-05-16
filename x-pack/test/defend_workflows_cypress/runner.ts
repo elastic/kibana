@@ -26,6 +26,7 @@ async function withFleetAgent(
 
   const elasticUrl = Url.format(config.get('servers.elasticsearch'));
   const kibanaUrl = Url.format(config.get('servers.kibana'));
+  const fleetServerUrl = Url.format(config.get('servers.fleetserver'));
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
 
@@ -33,6 +34,7 @@ async function withFleetAgent(
     log,
     elasticUrl,
     kibanaUrl,
+    fleetServerUrl,
     username,
     password,
     version: await getLatestAvailableAgentVersion(kbnClient),
@@ -72,6 +74,8 @@ function startDefendWorkflowsCypress(
 ) {
   const log = context.getService('log');
   const config = context.getService('config');
+  const fleetServerUrl = Url.format(config.get('servers.fleetserver'));
+
   return withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
@@ -95,6 +99,7 @@ function startDefendWorkflowsCypress(
         CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
+        CYPRESS_FLEET_SERVER_URL: fleetServerUrl,
         CYPRESS_KIBANA_URL: Url.format({
           protocol: config.get('servers.kibana.protocol'),
           hostname: config.get('servers.kibana.hostname'),

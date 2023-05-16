@@ -192,6 +192,7 @@ export const schema = Joi.object()
         elasticsearch: urlPartsSchema({
           requiredKeys: ['port'],
         }),
+        fleetserver: urlPartsSchema(),
       })
       .default(),
 
@@ -264,7 +265,6 @@ export const schema = Joi.object()
     esArchiver: Joi.object()
       .keys({
         baseDirectory: Joi.string().optional(),
-        archives: Joi.array().items(Joi.string()).optional(),
       })
       .default(),
 

@@ -64,9 +64,7 @@ const testCase: TestCaseWithoutTimeline = {
 describe('Cases privileges', () => {
   before(() => {
     cleanKibana();
-    login();
     createUsersAndRoles(usersToCreate, rolesToCreate);
-    visitSecuritySolution();
   });
 
   after(() => {
@@ -75,6 +73,7 @@ describe('Cases privileges', () => {
 
   beforeEach(() => {
     login();
+    visitSecuritySolution();
     deleteCases();
   });
 
