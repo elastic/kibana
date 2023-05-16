@@ -80,16 +80,6 @@ const languageId = (language: string) => {
 let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
-// export function TextBasedLanguagesEditor({
-//   query,
-//   onTextLangQueryChange,
-//   onTextLangQuerySubmit,
-//   expandCodeEditor,
-//   isCodeEditorExpanded,
-//   errors,
-//   isDisabled,
-//   isDarkMode,
-// }: TextBasedLanguagesEditorProps) {
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
   onTextLangQueryChange,
@@ -385,13 +375,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               content={
                 isWordWrapped
                   ? i18n.translate(
-                      'textBasedLanguages.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                      'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                       {
                         defaultMessage: 'Disable word wrap',
                       }
                     )
                   : i18n.translate(
-                      'textBasedLanguages.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                      'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                       {
                         defaultMessage: 'Enable word wrap',
                       }
@@ -405,13 +395,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 aria-label={
                   isWordWrapped
                     ? i18n.translate(
-                        'textBasedLanguages.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                        'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                         {
                           defaultMessage: 'Disable word wrap',
                         }
                       )
                     : i18n.translate(
-                        'textBasedLanguages.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                        'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                         {
                           defaultMessage: 'Enable word wrap',
                         }
@@ -433,7 +423,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(
-                    'textBasedLanguages.query.textBasedLanguagesEditor.minimizeTooltip',
+                    'textBasedEditor.query.textBasedLanguagesEditor.minimizeTooltip',
                     {
                       defaultMessage: 'Compact query editor',
                     }
@@ -443,7 +433,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     iconType="minimize"
                     color="text"
                     aria-label={i18n.translate(
-                      'textBasedLanguages.query.textBasedLanguagesEditor.MinimizeEditor',
+                      'textBasedEditor.query.textBasedLanguagesEditor.MinimizeEditor',
                       {
                         defaultMessage: 'Minimize editor',
                       }
@@ -464,7 +454,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     color: 'text',
                     'data-test-subj': 'unifiedTextLangEditor-documentation',
                     'aria-label': i18n.translate(
-                      'textBasedLanguages.query.textBasedLanguagesEditor.documentationLabel',
+                      'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
                       {
                         defaultMessage: 'Documentation',
                       }
@@ -499,7 +489,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         data-test-subj="unifiedTextLangEditor-inline-lines-badge"
                       >
                         {i18n.translate(
-                          'textBasedLanguages.query.textBasedLanguagesEditor.lineCount',
+                          'textBasedEditor.query.textBasedLanguagesEditor.lineCount',
                           {
                             defaultMessage: '{count} {count, plural, one {line} other {lines}}',
                             values: { count: lines },
@@ -557,7 +547,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(
-                    'textBasedLanguages.query.textBasedLanguagesEditor.expandTooltip',
+                    'textBasedEditor.query.textBasedLanguagesEditor.expandTooltip',
                     {
                       defaultMessage: 'Expand query editor',
                     }
@@ -586,7 +576,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     display: 'empty',
                     'data-test-subj': 'unifiedTextLangEditor-inline-documentation',
                     'aria-label': i18n.translate(
-                      'textBasedLanguages.query.textBasedLanguagesEditor.documentationLabel',
+                      'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
                       {
                         defaultMessage: 'Documentation',
                       }

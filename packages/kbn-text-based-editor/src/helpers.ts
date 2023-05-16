@@ -90,7 +90,7 @@ export const getDocumentationSections = async (language: string) => {
       aggregateFunctions,
     } = await import('./sql_documentation_sections');
     groups.push({
-      label: i18n.translate('textBasedLanguages.query.textBasedLanguagesEditor.howItWorks', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.howItWorks', {
         defaultMessage: 'How it works',
       }),
       items: [],
