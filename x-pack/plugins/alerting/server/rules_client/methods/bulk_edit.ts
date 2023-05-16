@@ -25,7 +25,6 @@ import {
   RuleWithLegacyId,
   RuleTypeRegistry,
   RawRuleAction,
-  RuleNotifyWhen,
 } from '../../types';
 import {
   validateRuleTypeParams,
@@ -34,7 +33,6 @@ import {
   convertRuleIdsToKueryNode,
 } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { parseDuration } from '../../../common/parse_duration';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
@@ -61,6 +59,8 @@ import {
   updateMeta,
   addGeneratedActionValues,
   createNewAPIKeySet,
+  validateScheduleInterval,
+  validateScheduleOperation,
 } from '../lib';
 import {
   NormalizedAlertAction,
@@ -718,57 +718,6 @@ async function getUpdatedAttributesFromOperations(
     hasUpdateApiKeyOperation,
     isAttributesUpdateSkipped,
   };
-}
-
-function validateScheduleInterval(
-  context: RulesClientContext,
-  scheduleInterval: string,
-  ruleTypeId: string,
-  ruleId: string
-): void {
-  if (!scheduleInterval) {
-    return;
-  }
-  const isIntervalInvalid = parseDuration(scheduleInterval) < context.minimumScheduleIntervalInMs;
-  if (isIntervalInvalid && context.minimumScheduleInterval.enforce) {
-    throw Error(
-      `Error updating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
-    );
-  } else if (isIntervalInvalid && !context.minimumScheduleInterval.enforce) {
-    context.logger.warn(
-      `Rule schedule interval (${scheduleInterval}) for "${ruleTypeId}" rule type with ID "${ruleId}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
-    );
-  }
-}
-
-/**
- * Validate that updated schedule interval is not longer than any of the existing action frequencies
- * @param schedule Schedule interval that user tries to set
- * @param actions Rule actions
- */
-function validateScheduleOperation(
-  schedule: RawRule['schedule'],
-  actions: RawRule['actions'],
-  ruleId: string
-): void {
-  const scheduleInterval = parseDuration(schedule.interval);
-  const actionsWithInvalidThrottles = [];
-
-  for (const action of actions) {
-    // check for actions throttled shorter than the rule schedule
-    if (
-      action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
-      parseDuration(action.frequency.throttle!) < scheduleInterval
-    ) {
-      actionsWithInvalidThrottles.push(action);
-    }
-  }
-
-  if (actionsWithInvalidThrottles.length > 0) {
-    throw Error(
-      `Error updating rule with ID "${ruleId}": the interval ${schedule.interval} is longer than the action frequencies`
-    );
-  }
 }
 
 async function prepareApiKeys(

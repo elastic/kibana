@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 import type { ShouldIncrementRevision } from './bulk_edit';
@@ -16,24 +15,11 @@ import {
   RuleNotifyWhenType,
   IntervalSchedule,
 } from '../../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { parseDuration } from '../../../common/parse_duration';
+import { WriteOperations } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { getMappedParams } from '../common/mapped_params_utils';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
-import {
-  validateActions,
-  extractReferences,
-  updateMeta,
-  getPartialRuleFromRaw,
-  addGeneratedActionValues,
-  incrementRevision,
-  createNewAPIKeySet,
-  migrateLegacyActions,
-} from '../lib';
+import { getPartialRuleFromRaw, rulesUpdateFlow } from '../lib';
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
@@ -87,23 +73,29 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
   }
 
-  try {
-    await context.authorization.ensureAuthorized({
-      ruleTypeId: alertSavedObject.attributes.alertTypeId,
-      consumer: alertSavedObject.attributes.consumer,
-      operation: WriteOperations.Update,
-      entity: AlertingAuthorizationEntity.Rule,
-    });
-  } catch (error) {
-    context.auditLogger?.log(
-      ruleAuditEvent({
-        action: RuleAuditAction.UPDATE,
-        savedObject: { type: 'alert', id },
-        error,
-      })
-    );
-    throw error;
-  }
+  const { attributes: originalAttributes, version } = alertSavedObject;
+  const { actions, params, ...restData } = data;
+
+  const {
+    prepareRuleForUpdate,
+    ensureAuthorizedAndRuleTypeEnabled,
+    updateAction,
+    updateParams,
+    extractReferencesFromParamsAndActions,
+    createAPIKey,
+    updateAttributes,
+    maybeIncrementRevision,
+    validateAttributes,
+    cleanup,
+    getUpdatedAttributeAndRefsForSaving,
+  } = rulesUpdateFlow(context);
+
+  await prepareRuleForUpdate(id, alertSavedObject);
+
+  await ensureAuthorizedAndRuleTypeEnabled(id, {
+    operation: WriteOperations.Update,
+    action: RuleAuditAction.UPDATE,
+  });
 
   context.auditLogger?.log(
     ruleAuditEvent({
@@ -113,35 +105,63 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     })
   );
 
-  context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
-
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: id,
-    attributes: alertSavedObject.attributes,
+  await updateAction(id, {
+    actions: data.actions,
+    allowMissingConnectorSecrets,
   });
 
-  const updateResult = await updateAlert<Params>(
+  await updateParams(id, {
+    params: data.params,
+  });
+
+  await extractReferencesFromParamsAndActions(id);
+
+  await createAPIKey(id);
+
+  await updateAttributes(id, { ...restData });
+
+  await maybeIncrementRevision(id);
+
+  await validateAttributes(id);
+
+  const { attributes: updatedAttributes, references } = await getUpdatedAttributeAndRefsForSaving(
+    id
+  );
+
+  let updatedObject: SavedObject<RawRule>;
+
+  try {
+    updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
+      'alert',
+      updatedAttributes,
+      {
+        id,
+        overwrite: true,
+        version,
+        references,
+      }
+    );
+  } catch (e) {
+    // Avoid unused API key
+    await cleanup();
+    throw e;
+  }
+
+  const ruleType = context.ruleTypeRegistry.get(originalAttributes.alertTypeId);
+
+  const updateResult = getPartialRuleFromRaw(
     context,
-    { id, data, allowMissingConnectorSecrets, shouldIncrementRevision },
-    migratedActions.hasLegacyActions
-      ? {
-          ...alertSavedObject,
-          attributes: {
-            ...alertSavedObject.attributes,
-            notifyWhen: undefined,
-            throttle: undefined,
-          },
-        }
-      : alertSavedObject
+    id,
+    ruleType,
+    updatedObject.attributes,
+    updatedObject.references,
+    false,
+    true
   );
 
   await Promise.all([
     alertSavedObject.attributes.apiKey && !alertSavedObject.attributes.apiKeyCreatedByUser
-      ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [alertSavedObject.attributes.apiKey] },
-          context.logger,
-          context.unsecuredSavedObjectsClient
-        )
+      ? cleanup()
       : null,
     (async () => {
       if (
@@ -167,129 +187,5 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     })(),
   ]);
 
-  return updateResult;
-}
-
-async function updateAlert<Params extends RuleTypeParams>(
-  context: RulesClientContext,
-  {
-    id,
-    data: initialData,
-    allowMissingConnectorSecrets,
-    shouldIncrementRevision = () => true,
-  }: UpdateOptions<Params>,
-  currentRule: SavedObject<RawRule>
-): Promise<PartialRule<Params>> {
-  const { attributes, version } = currentRule;
-  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
-
-  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
-
-  // Validate
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
-  await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
-
-  // Throw error if schedule interval is less than the minimum and we are enforcing it
-  const intervalInMs = parseDuration(data.schedule.interval);
-  if (
-    intervalInMs < context.minimumScheduleIntervalInMs &&
-    context.minimumScheduleInterval.enforce
-  ) {
-    throw Boom.badRequest(
-      `Error updating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
-    );
-  }
-
-  // Extract saved object references for this rule
-  const {
-    references,
-    params: updatedParams,
-    actions,
-  } = await extractReferences(context, ruleType, data.actions, validatedAlertTypeParams);
-
-  const username = await context.getUserName();
-
-  const apiKeyAttributes = await createNewAPIKeySet(context, {
-    id: ruleType.id,
-    ruleName: data.name,
-    username,
-    shouldUpdateApiKey: attributes.enabled,
-    errorMessage: 'Error updating rule: could not create API key',
-  });
-  const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
-
-  // Increment revision if applicable field has changed
-  const revision = shouldIncrementRevision(updatedParams)
-    ? incrementRevision<Params>(
-        currentRule,
-        { id, data, allowMissingConnectorSecrets },
-        updatedParams
-      )
-    : currentRule.attributes.revision;
-
-  let updatedObject: SavedObject<RawRule>;
-  const createAttributes = updateMeta(context, {
-    ...attributes,
-    ...data,
-    ...apiKeyAttributes,
-    params: updatedParams as RawRule['params'],
-    actions,
-    notifyWhen,
-    revision,
-    updatedBy: username,
-    updatedAt: new Date().toISOString(),
-  });
-
-  const mappedParams = getMappedParams(updatedParams);
-
-  if (Object.keys(mappedParams).length) {
-    createAttributes.mapped_params = mappedParams;
-  }
-
-  try {
-    updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
-      'alert',
-      createAttributes,
-      {
-        id,
-        overwrite: true,
-        version,
-        references,
-      }
-    );
-  } catch (e) {
-    // Avoid unused API key
-    await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys:
-          createAttributes.apiKey && !createAttributes.apiKeyCreatedByUser
-            ? [createAttributes.apiKey]
-            : [],
-      },
-      context.logger,
-      context.unsecuredSavedObjectsClient
-    );
-
-    throw e;
-  }
-
-  // Log warning if schedule interval is less than the minimum but we're not enforcing it
-  if (
-    intervalInMs < context.minimumScheduleIntervalInMs &&
-    !context.minimumScheduleInterval.enforce
-  ) {
-    context.logger.warn(
-      `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
-    );
-  }
-
-  return getPartialRuleFromRaw(
-    context,
-    id,
-    ruleType,
-    updatedObject.attributes,
-    updatedObject.references,
-    false,
-    true
-  );
+  return updateResult as PartialRule<Params>;
 }

@@ -18,4 +18,11 @@ export { recoverRuleAlerts } from './recover_rule_alerts';
 export { migrateLegacyActions } from './siem_legacy_actions/migrate_legacy_actions';
 export { formatLegacyActions } from './siem_legacy_actions/format_legacy_actions';
 export { addGeneratedActionValues } from './add_generated_action_values';
-export { incrementRevision } from './increment_revision';
+export {
+  incrementRevision,
+  shouldIncrementRevisionByParams,
+  shouldIncrementRevisionByRoot,
+} from './increment_revision';
+export { rulesUpdateFlow } from './rules_update_flow';
+export { validateScheduleInterval } from './validate_schedule_interval';
+export { validateScheduleOperation } from './validate_schedule_operation';

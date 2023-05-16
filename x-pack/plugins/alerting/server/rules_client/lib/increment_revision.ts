@@ -36,3 +36,35 @@ export function incrementRevision<Params extends RuleTypeParams>(
   }
   return currentRule.attributes.revision;
 }
+
+export const shouldIncrementRevisionByRoot = (
+  currentAttributes: Partial<RawRule>,
+  updatedAttributes: Partial<RawRule>
+) => {
+  for (const [field, value] of Object.entries(updatedAttributes).filter(
+    ([key]) => key !== 'params'
+  )) {
+    if (
+      !fieldsToExcludeFromRevisionUpdates.has(field) &&
+      !isEqual(value, get(currentAttributes, field))
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const shouldIncrementRevisionByParams = (
+  currentParams: RuleTypeParams,
+  updatedParams: RuleTypeParams
+) => {
+  for (const [field, value] of Object.entries(updatedParams)) {
+    if (
+      !fieldsToExcludeFromRevisionUpdates.has(field) &&
+      !isEqual(value, get(currentParams, field))
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
