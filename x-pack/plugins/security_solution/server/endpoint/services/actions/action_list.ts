@@ -301,7 +301,7 @@ const getActionDetailsList = async ({
       isCompleted,
       completedAt,
       wasSuccessful,
-      errors,
+      errors: action.error?.message ? [action.error.message] : errors,
       agentState,
       isExpired,
       status,

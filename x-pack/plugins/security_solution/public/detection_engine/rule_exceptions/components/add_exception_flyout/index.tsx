@@ -20,7 +20,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiFlexGroup,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
@@ -80,7 +80,6 @@ export interface AddExceptionFlyoutProps {
   sharedListToAddTo?: ExceptionListSchema[];
   onCancel: (didRuleChange: boolean) => void;
   onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
-  isNonTimeline?: boolean;
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
@@ -114,7 +113,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   sharedListToAddTo,
   onCancel,
   onConfirm,
-  isNonTimeline = false,
 }: AddExceptionFlyoutProps) {
   const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
@@ -462,13 +460,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, [listType]);
 
   return (
-    <EuiFlyout
-      ownFocus
-      maskProps={{ style: isNonTimeline === false ? 'z-index: 5000' : 'z-index: 1000' }} // For an edge case to display above the timeline flyout
-      size="l"
-      onClose={handleCloseFlyout}
-      data-test-subj="addExceptionFlyout"
-    >
+    <EuiFlyout size="l" onClose={handleCloseFlyout} data-test-subj="addExceptionFlyout">
       <FlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="exceptionFlyoutTitle">{addExceptionMessage}</h2>
@@ -476,9 +468,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         <EuiSpacer size="m" />
       </FlyoutHeader>
 
-      {isLoading && <EuiLoadingContent data-test-subj="loadingAddExceptionFlyout" lines={4} />}
-      {!isLoading && (
-        <FlyoutBodySection className="builder-section">
+      <FlyoutBodySection className="builder-section">
+        <EuiSkeletonText data-test-subj="loadingAddExceptionFlyout" lines={4} isLoading={isLoading}>
           {errorSubmitting != null && (
             <>
               <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
@@ -564,8 +555,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               />
             </>
           )}
-        </FlyoutBodySection>
-      )}
+        </EuiSkeletonText>
+      </FlyoutBodySection>
       <EuiFlyoutFooter>
         <FlyoutFooterGroup justifyContent="spaceBetween">
           <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleCloseFlyout}>

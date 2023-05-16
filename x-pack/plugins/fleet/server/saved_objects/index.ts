@@ -22,6 +22,7 @@ import {
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -57,6 +58,7 @@ import {
 } from './migrations/to_v8_6_0';
 import { migratePackagePolicyToV870 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
+import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
 
 /*
  * Saved object types and mappings
@@ -122,6 +124,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             enabled: { type: 'boolean' },
           },
         },
+        is_protected: { type: 'boolean' },
       },
     },
     migrations: {
@@ -129,6 +132,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '7.12.0': migrateAgentPolicyToV7120,
       '8.4.0': migrateAgentPolicyToV840,
       '8.5.0': migrateAgentPolicyToV850,
+      '8.9.0': migrateAgentPolicyToV890,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -158,6 +162,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
           properties: {},
         },
+        allow_edit: { enabled: false },
       },
     },
     migrations: {
@@ -197,6 +202,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false,
           properties: {},
         },
+        secret_references: { properties: { id: { type: 'keyword' } } },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
@@ -392,6 +398,23 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       properties: {},
     },
   },
+  [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: {
+    name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      dynamic: false,
+      properties: {
+        created_at: { type: 'date' },
+        policy_id: { type: 'keyword' },
+        token_plain: { type: 'keyword' },
+      },
+    },
+  },
 });
 
 export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
@@ -426,5 +449,9 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['passphrase']),
+  });
+  encryptedSavedObjects.registerType({
+    type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['token']),
   });
 }

@@ -15,12 +15,6 @@ import { useAuthz } from '../../../../../../hooks/use_authz';
 
 import { TableRowActions } from './table_row_actions';
 
-jest.mock('../../../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-}));
-
 jest.mock('../../../../../../services/experimental_features');
 jest.mock('../../../../../../hooks/use_authz');
 
@@ -44,7 +38,8 @@ function renderTableRowActions({
       onReassignClick={jest.fn()}
       onRequestDiagnosticsClick={jest.fn()}
       onUnenrollClick={jest.fn()}
-      onUpgradeClick={jest.fn}
+      onUpgradeClick={jest.fn()}
+      onGetUninstallCommandClick={jest.fn()}
     />
   );
 
@@ -85,7 +80,7 @@ describe('TableRowActions', () => {
         diagnosticFileUploadEnabled: false,
       } as any);
       const res = renderAndGetDiagnosticsButton({
-        agent: {} as Agent,
+        agent: { active: true } as Agent,
         agentPolicy: {} as AgentPolicy,
       });
       expect(res).toBe(null);
@@ -94,6 +89,7 @@ describe('TableRowActions', () => {
     it('should render an active action button if agent version >= 8.7', async () => {
       const res = renderAndGetDiagnosticsButton({
         agent: {
+          active: true,
           status: 'online',
           local_metadata: { elastic: { agent: { version: '8.8.0' } } },
         } as any,
@@ -107,6 +103,7 @@ describe('TableRowActions', () => {
     it('should render an active action button if agent version >= 8.7 and policy is_managed', async () => {
       const res = renderAndGetDiagnosticsButton({
         agent: {
+          active: true,
           status: 'online',
           local_metadata: { elastic: { agent: { version: '8.8.0' } } },
         } as any,
@@ -122,6 +119,7 @@ describe('TableRowActions', () => {
     it('should render a disabled action button if agent version < 8.7', async () => {
       const res = renderAndGetDiagnosticsButton({
         agent: {
+          active: true,
           status: 'online',
           local_metadata: { elastic: { agent: { version: '8.6.0' } } },
         } as any,

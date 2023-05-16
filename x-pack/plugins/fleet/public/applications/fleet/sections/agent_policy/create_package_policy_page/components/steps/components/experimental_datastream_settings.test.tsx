@@ -14,19 +14,6 @@ import type { RegistryDataStream } from '../../../../../../../../../common/types
 
 import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 
-jest.mock('../../../../../../../../hooks', () => {
-  return {
-    ...jest.requireActual('../../../../../../../../hooks'),
-    FleetStatusProvider: (props: any) => {
-      return props.children;
-    },
-    useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
-    sendGetStatus: jest
-      .fn()
-      .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
-  };
-});
-
 describe('ExperimentDatastreamSettings', () => {
   describe('Synthetic source', () => {
     it('should be enabled an not checked by default', () => {

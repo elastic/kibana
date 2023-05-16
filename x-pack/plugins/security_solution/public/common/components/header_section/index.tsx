@@ -68,9 +68,10 @@ export interface HeaderSectionProps extends HeaderProps {
   toggleQuery?: (status: boolean) => void;
   toggleStatus?: boolean;
   title: string | React.ReactNode;
-  inspectTitle?: string;
+  inspectTitle?: React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
+  tooltipTitle?: string;
 }
 
 export const getHeaderAlignment = ({
@@ -111,6 +112,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   toggleQuery,
   toggleStatus = true,
   tooltip,
+  tooltipTitle,
 }) => {
   const toggle = useCallback(() => {
     if (toggleQuery) {
@@ -174,6 +176,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                               {' '}
                               <EuiIconTip
                                 color="subdued"
+                                title={tooltipTitle}
                                 content={tooltip}
                                 size="l"
                                 type="iInCircle"
@@ -193,7 +196,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                       queryId={id}
                       multiple={inspectMultiple}
                       showInspectButton={showInspectButton}
-                      title={inspectTitle != null ? inspectTitle : title}
+                      title={inspectTitle ?? title}
                     />
                   </EuiFlexItem>
                 )}

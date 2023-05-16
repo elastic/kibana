@@ -197,6 +197,41 @@ describe('getSharingData', () => {
     `);
   });
 
+  test('fields do not have prepended timeField for text based languages', async () => {
+    const index = { ...dataViewMock } as DataView;
+    index.timeFieldName = 'cool-timefield';
+
+    const searchSourceMock = createSearchSourceMock({ index });
+    const result = await getSharingData(
+      searchSourceMock,
+      {
+        columns: [
+          'cool-field-1',
+          'cool-field-2',
+          'cool-field-3',
+          'cool-field-4',
+          'cool-field-5',
+          'cool-field-6',
+        ],
+      },
+      services,
+      true
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          "cool-field-1",
+          "cool-field-2",
+          "cool-field-3",
+          "cool-field-4",
+          "cool-field-5",
+          "cool-field-6",
+        ],
+        "getSearchSource": [Function],
+      }
+    `);
+  });
+
   test('fields conditionally do not have prepended timeField', async () => {
     services.uiSettings = {
       get: (key: string) => {

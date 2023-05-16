@@ -99,7 +99,7 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
-            "name": "External Incident",
+            "name": "External incident",
             "render": [Function],
             "width": undefined,
           },
@@ -232,7 +232,7 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
-            "name": "External Incident",
+            "name": "External incident",
             "render": [Function],
             "width": undefined,
           },
@@ -316,7 +316,7 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
-            "name": "External Incident",
+            "name": "External incident",
             "render": [Function],
             "width": undefined,
           },
@@ -395,7 +395,7 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
-            "name": "External Incident",
+            "name": "External incident",
             "render": [Function],
             "width": undefined,
           },
@@ -479,7 +479,7 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
-            "name": "External Incident",
+            "name": "External incident",
             "render": [Function],
             "width": undefined,
           },
@@ -638,7 +638,7 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
-            "name": "External Incident",
+            "name": "External incident",
             "render": [Function],
             "width": undefined,
           },

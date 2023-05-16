@@ -37,7 +37,7 @@ describe('backgroundTaskUtilizationRoute', () => {
     jest.resetAllMocks();
   });
 
-  it('registers the route', async () => {
+  it('registers internal and public route', async () => {
     const router = httpServiceMock.createRouter();
     backgroundTaskUtilizationRoute({
       router,
@@ -51,11 +51,15 @@ describe('backgroundTaskUtilizationRoute', () => {
       usageCounter: mockUsageCounter,
     });
 
-    const [config] = router.get.mock.calls[0];
+    const [config1] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(
+    expect(config1.path).toMatchInlineSnapshot(
       `"/internal/task_manager/_background_task_utilization"`
     );
+
+    const [config2] = router.get.mock.calls[1];
+
+    expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
   });
 
   it('checks user privileges and increments usage counter when API is accessed', async () => {
