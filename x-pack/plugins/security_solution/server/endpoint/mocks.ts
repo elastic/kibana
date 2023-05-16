@@ -55,7 +55,10 @@ import type { ManifestManager } from './services/artifacts/manifest_manager/mani
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import type { EndpointAppContext } from './types';
 import type { SecuritySolutionRequestHandlerContext } from '../types';
-import { parseExperimentalConfigValue } from '../../common/experimental_features';
+import {
+  allowedExperimentalValues,
+  parseExperimentalConfigValue,
+} from '../../common/experimental_features';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
@@ -95,13 +98,21 @@ export const createMockEndpointAppContextService = (
   return {
     start: jest.fn(),
     stop: jest.fn(),
-    getExperimentalFeatures: jest.fn(),
+    experimentalFeatures: {
+      ...allowedExperimentalValues,
+    },
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
     getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
-    getEndpointAuthz: jest.fn(getEndpointAuthzInitialStateMock),
+    getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
     getActionCreateService: jest.fn().mockReturnValue(createActionCreateServiceMock()),
+    getFleetFilesClient: jest.fn(async (_) => createFleetFilesClientMock()),
+    setup: jest.fn(),
+    getLicenseService: jest.fn(),
+    getFeatureUsageService: jest.fn(),
+    getExceptionListsClient: jest.fn(),
+    getMessageSigningService: jest.fn(),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 

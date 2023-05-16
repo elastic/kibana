@@ -16,10 +16,12 @@ import type { FleetFile } from './types';
 import type { HostUploadedFileMetadata } from './types';
 
 export const createFleetFilesClientMock = (): jest.Mocked<FleetFileClientInterface> => {
+  const fleetFile = createFleetFileMock();
+
   return {
-    get: jest.fn(async (_) => createFleetFileMock()),
-    create: jest.fn(async (_, agents) => Object.assign(createFleetFileMock(), { agents })),
-    update: jest.fn(async (_, __) => createFleetFileMock()),
+    get: jest.fn(async (_) => fleetFile),
+    create: jest.fn(async (_, agents) => Object.assign(fleetFile, { agents })),
+    update: jest.fn(async (_, __) => fleetFile),
     delete: jest.fn(),
     doesFileHaveData: jest.fn().mockReturnValue(Promise.resolve(true)),
     download: jest.fn(async (_) => {
