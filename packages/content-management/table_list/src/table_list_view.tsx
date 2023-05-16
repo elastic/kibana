@@ -242,35 +242,35 @@ const tableColumnMetadata = {
 } as const;
 
 function TableListViewComp<T extends UserContentCommonSchema>({
-  tableListTitle,
-  tableListDescription,
+  additionalRightSideActions = [],
+  children,
+  contentEditor = { enabled: false },
+  createItem,
+  customTableColumn,
+  deleteItems,
+  editItem,
+  emptyPrompt,
   entityName,
   entityNamePlural,
-  initialFilter: initialQuery,
+  findItems,
+  fixedTag,
+  getDetailViewLink,
   headingId,
+  id: listingId = 'userContent',
+  initialFilter: initialQuery,
   initialPageSize,
   listingLimit,
-  urlStateEnabled = true,
-  customTableColumn,
-  emptyPrompt,
-  rowItemActions,
-  findItems,
-  createItem,
-  editItem,
-  deleteItems,
-  getDetailViewLink,
   onClickTitle,
-  id: listingId = 'userContent',
-  contentEditor = { enabled: false },
-  children,
+  pageSectionPadding = 'm',
+  restrictPageSectionWidth = true,
+  rowItemActions,
+  tableListDescription,
+  tableListTitle,
+  tagReferences,
   titleColumnName,
-  additionalRightSideActions = [],
+  urlStateEnabled = true,
   withoutPageTemplateWrapper,
   withPageTemplateHeader = true,
-  restrictPageSectionWidth = true,
-  pageSectionPadding = 'm',
-  fixedTag,
-  tagReferences,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -975,27 +975,28 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         {/* Table of items */}
         <div data-test-subj={testSubjectState}>
           <Table<T>
+            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+            clearTagSelection={clearTagSelection}
+            deleteItems={deleteItems}
             dispatch={dispatch}
-            items={items}
-            isFetchingItems={isFetchingItems}
-            searchQuery={searchQuery}
-            tableColumns={tableColumns}
-            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
-            tableSort={tableSort}
-            pagination={pagination}
-            selectedIds={selectedIds}
             entityName={entityName}
             entityNamePlural={entityNamePlural}
-            tagsToTableItemMap={tagsToTableItemMap}
-            deleteItems={deleteItems}
-            tableCaption={tableListTitle}
-            tableItemsRowActions={tableItemsRowActions}
+            fixedTag={fixedTag}
+            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            isFetchingItems={isFetchingItems}
+            items={items}
+            onSortChange={onSortChange}
             onTableChange={onTableChange}
             onTableSearchChange={onTableSearchChange}
-            onSortChange={onSortChange}
-            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
-            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
-            clearTagSelection={clearTagSelection}
+            pagination={pagination}
+            searchQuery={searchQuery}
+            selectedIds={selectedIds}
+            tableCaption={tableListTitle}
+            tableColumns={tableColumns}
+            tableItemsRowActions={tableItemsRowActions}
+            tableSort={tableSort}
+            tagsToTableItemMap={tagsToTableItemMap}
           />
 
           {/* Delete modal */}

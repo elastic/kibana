@@ -43,7 +43,7 @@ export const useTagFilterPanel = ({
   query,
   tagsToTableItemMap,
   getTagList,
-  fixedTag = 'Security Solution',
+  fixedTag,
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
 }: Params) => {

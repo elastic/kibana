@@ -157,7 +157,7 @@ export function Table<T extends UserContentCommonSchema>({
   } = useTagFilterPanel({
     query: searchQuery.query,
     getTagList: getTagListing,
-    fixedTag: 'Security Solution',
+    fixedTag,
     tagsToTableItemMap,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
