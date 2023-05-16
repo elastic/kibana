@@ -11,7 +11,7 @@ import { encode } from '@kbn/rison';
 import moment from 'moment';
 
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
 import { TimeRange } from '../../../../../../common/time';
 import {
