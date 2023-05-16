@@ -80,6 +80,7 @@ export const OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN =
 
 export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
 export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
+export const MESSAGE = '[data-test-subj="formatted-field-message"]';
 
 export const REASON =
   '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.reason"]';
@@ -164,6 +165,8 @@ export const SHOW_TOP_N_CLOSE_BUTTON = '[data-test-subj="close"]';
 export const ALERTS_HISTOGRAM_LEGEND =
   '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
 
+export const ALERTS_HISTOGRAM_SERIES = '[data-ech-series-name]';
+
 export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
 
 export const LEGEND_ACTIONS = {
@@ -173,6 +176,8 @@ export const LEGEND_ACTIONS = {
   FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterOut"]`,
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
+
+export const TREND_CHART_LEGEND = '[data-test-subj="draggable-legend"]';
 
 export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
 
