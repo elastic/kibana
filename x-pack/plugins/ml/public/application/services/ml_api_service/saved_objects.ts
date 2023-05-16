@@ -60,7 +60,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       method: 'GET',
       query: { simulate },
-      version: '1',
+      version: '2023-05-15',
     });
   },
   initSavedObjects(simulate: boolean = false) {

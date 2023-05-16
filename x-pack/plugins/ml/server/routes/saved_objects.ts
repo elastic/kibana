@@ -46,7 +46,7 @@ export function savedObjectsRoutes(
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-05-15',
         validate: false,
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, response, mlSavedObjectService }) => {
@@ -88,7 +88,7 @@ export function savedObjectsRoutes(
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-05-15',
         validate: {
           request: {
             query: syncJobObjects,
