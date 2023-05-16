@@ -273,7 +273,9 @@ export class RuleTypeRegistry {
         stateSchemaByVersion: {
           1: schema.object({
             // TODO expand any
-            alertTypeState: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+            alertTypeState: schema.maybe(
+              schema.recordOf(schema.string(), schema.maybe(schema.any()))
+            ),
             // TODO expand any
             alertInstances: schema.maybe(schema.recordOf(schema.string(), schema.any())),
             // TODO expand any

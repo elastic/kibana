@@ -52,7 +52,7 @@ function registerActionsTelemetryTask(
           error_messages: schema.maybe(schema.recordOf(schema.string(), schema.any())),
           runs: schema.number(),
           count_total: schema.number(),
-          count_by_type: schema.number(),
+          count_by_type: schema.recordOf(schema.string(), schema.number()),
           count_active_total: schema.number(),
           count_active_by_type: schema.number(),
           count_active_alert_history_connectors: schema.number(),
