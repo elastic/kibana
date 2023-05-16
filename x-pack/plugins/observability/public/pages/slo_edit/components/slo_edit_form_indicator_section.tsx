@@ -25,7 +25,7 @@ import { maxWidth } from './slo_edit_form';
 export function SloEditFormIndicatorSection() {
   const { control, watch, setValue } = useFormContext<CreateSLOInput>();
 
-  const indicator = useWatch({ control, name: 'indicator.type' });
+  const indicator = watch('indicator.type');
 
   // Set the defaults for the form when switching between different indicators
   useEffect(() => {
