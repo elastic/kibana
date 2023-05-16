@@ -1293,7 +1293,7 @@ describe('migration actions', () => {
         query: { match_all: {} },
         batchSize: 1, // small batch size so we don't exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSize: 500, // set a small size to force the error
+        maxResponseSizeBytes: 500, // set a small size to force the error
       });
       const rightResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
 
@@ -1305,7 +1305,7 @@ describe('migration actions', () => {
         query: { match_all: {} },
         batchSize: 10, // a bigger batch will exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSize: 500, // set a small size to force the error
+        maxResponseSizeBytes: 500, // set a small size to force the error
       });
       const leftResponse = (await readWithPitTask()) as Either.Left<EsResponseTooLargeError>;
 
