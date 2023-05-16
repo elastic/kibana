@@ -131,39 +131,6 @@ test('pushes new config when reloading and config at path has changed', async ()
   expect(Object.keys(valuesReceived[1])).toEqual(['key']);
 });
 
-test('setOverride extends the config', async () => {
-  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
-
-  const configService = new RawConfigService([configFile]);
-
-  configService.loadConfig();
-
-  expect(await firstValueFrom(configService.getConfig$())).toStrictEqual({ key: 'value' });
-
-  configService.setOverride({ 'some.other.key': 'value' });
-
-  expect(await firstValueFrom(configService.getConfig$())).toStrictEqual({
-    key: 'value',
-    'some.other.key': 'value',
-  });
-});
-
-test('setOverride overrides the config', async () => {
-  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
-
-  const configService = new RawConfigService([configFile]);
-
-  configService.loadConfig();
-
-  expect(await firstValueFrom(configService.getConfig$())).toStrictEqual({ key: 'value' });
-
-  configService.setOverride({ key: 'another-value' });
-
-  expect(await firstValueFrom(configService.getConfig$())).toStrictEqual({
-    key: 'another-value',
-  });
-});
-
 test('completes config observables when stopped', (done) => {
   expect.assertions(0);
 
