@@ -8,7 +8,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
   Chart,
@@ -31,7 +30,6 @@ import type {
   RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { FORMATS_UI_SETTINGS, type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
@@ -41,104 +39,18 @@ import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
-import {
-  getPaletteService,
-  getThemeService,
-  getFormatService,
-  getUiSettingsService,
-} from '../services';
-import { getCurrencyCode } from './currency_codes';
+import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorLightestShade;
-
-function getFormatId(serializedFieldFormat: SerializedFieldFormat | undefined): string | undefined {
-  if (serializedFieldFormat?.id === 'suffix') {
-    return `${serializedFieldFormat.params?.id || ''}`;
-  }
-  if (/bitd/.test(`${serializedFieldFormat?.params?.pattern || ''}`)) {
-    return 'bit';
-  }
-  return serializedFieldFormat?.id;
-}
 
 const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId = getFormatId(serializedFieldFormat) || 'number';
-
-  if (
-    !['number', 'currency', 'percent', 'bytes', 'bit', 'duration', 'string', 'null'].includes(
-      formatId
-    )
-  ) {
-    throw new Error(
-      i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
-        defaultMessage: 'Metric visualization expression - Unsupported column format: "{id}"',
-        values: {
-          id: formatId,
-        },
-      })
-    );
-  }
-
-  // this formats are coming when formula is empty
-  if (formatId === 'string') {
-    return getFormatService().deserialize(serializedFieldFormat).getConverterFor('text');
-  }
-
-  if (formatId === 'duration') {
-    const formatter = getFormatService().deserialize({
-      ...serializedFieldFormat,
-      params: {
-        ...serializedFieldFormat!.params,
-        outputFormat: 'humanizePrecise',
-        outputPrecision: 1,
-        useShortSuffix: true,
-      },
-    });
-    return formatter.getConverterFor('text');
-  }
-
-  const uiSettings = getUiSettingsService();
-
-  const locale = uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE) || 'en';
-
-  const intlOptions: Intl.NumberFormatOptions = {
-    maximumFractionDigits: 2,
-  };
-
-  if (['number', 'currency', 'percent'].includes(formatId)) {
-    intlOptions.notation = 'compact';
-  }
-
-  if (formatId === 'currency') {
-    const currentNumeralLang = numeral.language();
-    numeral.language(locale);
-
-    const {
-      currency: { symbol: currencySymbol },
-      // @ts-expect-error
-    } = numeral.languageData();
-
-    // restore previous value
-    numeral.language(currentNumeralLang);
-
-    intlOptions.currency = getCurrencyCode(locale, currencySymbol);
-    intlOptions.style = 'currency';
-  }
-
-  if (formatId === 'percent') {
-    intlOptions.style = 'percent';
-  }
-
-  return ['bit', 'bytes'].includes(formatId)
-    ? (rawValue: number) => {
-        return numeral(rawValue).format(`0,0[.]00 ${formatId === 'bytes' ? 'b' : 'bitd'}`);
-      }
-    : new Intl.NumberFormat(locale, intlOptions).format;
+  const formatter = getFormatService().deserialize(serializedFieldFormat);
+  return formatter.convert.bind(formatter);
 };
 
 const getColor = (
