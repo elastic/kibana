@@ -11,7 +11,7 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import { ReportingConfig } from '../..';
+import { ReportingCore } from '../..';
 import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
@@ -24,14 +24,17 @@ function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
   return (job as TaskPayloadPDF).objects !== undefined;
 }
 
-export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskPayloadPNG) {
-  const [basePath, protocol, hostname, port] = [
-    config.kbnConfig.get('server', 'basePath'),
-    config.get('kibanaServer', 'protocol'),
-    config.get('kibanaServer', 'hostname'),
-    config.get('kibanaServer', 'port'),
-  ] as string[];
-  const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
+export function getFullUrls(reporting: ReportingCore, job: TaskPayloadPDF | TaskPayloadPNG) {
+  const serverInfo = reporting.getServerInfo();
+  const {
+    kibanaServer: { protocol, hostname, port },
+  } = reporting.getConfig();
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    basePath: serverInfo.basePath,
+    protocol: protocol ?? serverInfo.protocol,
+    hostname: hostname ?? serverInfo.hostname,
+    port: port ?? serverInfo.port,
+  });
 
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];

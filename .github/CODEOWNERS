@@ -19,7 +19,6 @@ x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
-packages/kbn-alerts @elastic/security-solution
 packages/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
@@ -578,7 +577,7 @@ packages/kbn-server-route-repository @elastic/apm-ui
 x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_observability @elastic/appex-sharedux
 packages/serverless/project_switcher @elastic/appex-sharedux
-x-pack/plugins/serverless_search @elastic/appex-sharedux
+x-pack/plugins/serverless_search @elastic/enterprise-search-frontend
 x-pack/plugins/serverless_security @elastic/security-solution
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
@@ -1002,8 +1001,6 @@ x-pack/test/observability_functional @elastic/actionable-observability
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
 # Security Solution
-/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
-/x-pack/test/security_solution_endpoint/ @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
@@ -1183,7 +1180,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
