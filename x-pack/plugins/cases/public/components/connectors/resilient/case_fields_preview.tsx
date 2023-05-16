@@ -54,8 +54,8 @@ const ResilientFieldsComponent: React.FunctionComponent<
             {
               title: i18n.SEVERITY_LABEL,
               description:
-                (severity ?? []).find((severityObj) => severityObj.id.toString() === severityCode)
-                  ?.name ?? '',
+                severity?.find((severityObj) => severityObj.id.toString() === severityCode)?.name ??
+                '',
             },
           ]
         : []),

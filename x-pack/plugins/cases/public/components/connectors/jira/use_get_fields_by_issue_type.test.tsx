@@ -102,7 +102,7 @@ describe('useGetFieldsByIssueType', () => {
     expect(addError).toHaveBeenCalled();
   });
 
-  it('shows a toast error message when the response contains an error', async () => {
+  it('calls addError when the getFieldsByIssueType api returns successfully but contains an error', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getFieldsByIssueType');
     spyOnGetCases.mockResolvedValue({
       status: 'error',

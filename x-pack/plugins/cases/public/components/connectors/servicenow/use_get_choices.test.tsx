@@ -80,7 +80,7 @@ describe('useGetChoices', () => {
     expect(spy).not.toHaveBeenCalledWith();
   });
 
-  it('shows a toast error message when an error occurs in the response', async () => {
+  it('calls addError when the getChoices api throws an error', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getChoices');
     spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
@@ -103,7 +103,7 @@ describe('useGetChoices', () => {
     expect(addError).toHaveBeenCalled();
   });
 
-  it('shows a toast error message when the response contains an error', async () => {
+  it('calls addError when the getChoices api returns successfully but contains an error', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getChoices');
     spyOnGetCases.mockResolvedValue({
       status: 'error',

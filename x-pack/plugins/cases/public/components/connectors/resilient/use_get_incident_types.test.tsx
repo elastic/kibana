@@ -61,7 +61,7 @@ describe('useGetIncidentTypes', () => {
     expect(spy).not.toHaveBeenCalledWith();
   });
 
-  it('shows a toast error message when an error occurs in the response', async () => {
+  it('calls addError when the getIncidentTypes api throws an error', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getIncidentTypes');
     spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
@@ -83,7 +83,7 @@ describe('useGetIncidentTypes', () => {
     expect(addError).toHaveBeenCalled();
   });
 
-  it('shows a toast error message when the response contains an error', async () => {
+  it('calls addError when the getIncidentTypes api returns successfully but contains an error', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getIncidentTypes');
     spyOnGetCases.mockResolvedValue({
       status: 'error',
