@@ -7,8 +7,6 @@
 
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 
-import { FilesClient } from '@kbn/files-plugin/public';
-import { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { getDatatable } from '../common/expressions/datatable/datatable';
 import { datatableColumn } from '../common/expressions/datatable/datatable_column';
 import { mapToColumns } from '../common/expressions/map_to_columns/map_to_columns';
