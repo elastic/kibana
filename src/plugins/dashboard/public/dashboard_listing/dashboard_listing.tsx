@@ -80,7 +80,7 @@ export type DashboardListingProps = PropsWithChildren<{
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
   tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
-  fixedTag?: string
+  fixedTag?: string;
 }>;
 
 export const DashboardListing = ({
@@ -93,7 +93,7 @@ export const DashboardListing = ({
   restrictPageSectionWidth = true,
   pageSectionPadding = 'm',
   tagReferences,
-  fixedTag
+  fixedTag,
 }: DashboardListingProps) => {
   const {
     application,
