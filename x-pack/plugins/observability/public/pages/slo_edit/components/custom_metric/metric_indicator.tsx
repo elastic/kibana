@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -83,6 +83,15 @@ export function MetricIndicator({
   const equation = watch(`indicator.params.${type}.equation`);
   const indexPattern = watch('indicator.params.index');
 
+  // Without this, the hidden fields for metric.name and metric.aggregation will
+  // not be included in the JSON when the form is submitted.
+  useEffect(() => {
+    metrics.forEach((metric, index) => {
+      setValue(`indicator.params.${type}.metrics.${index}.name`, metric.name);
+      setValue(`indicator.params.${type}.metrics.${index}.aggregation`, metric.aggregation);
+    });
+  }, [metrics, setValue, type]);
+
   const disableAdd = metrics?.length === MAX_VARIABLES;
   const disableDelete = metrics?.length === 1;
 
@@ -126,26 +135,6 @@ export function MetricIndicator({
           >
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem>
-                <Controller
-                  name={`indicator.params.${type}.metrics.${index}.name`}
-                  shouldUnregister
-                  defaultValue=""
-                  rules={{ required: true }}
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <input {...field} type="hidden" />
-                  )}
-                />
-                <Controller
-                  name={`indicator.params.${type}.metrics.${index}.aggregation`}
-                  shouldUnregister
-                  defaultValue="sum"
-                  rules={{ required: true }}
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <input {...field} type="hidden" />
-                  )}
-                />
                 <Controller
                   name={`indicator.params.${type}.metrics.${index}.field`}
                   shouldUnregister
