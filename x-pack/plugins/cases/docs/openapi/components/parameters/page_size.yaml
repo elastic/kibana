@@ -1,6 +1,6 @@
 in: query
 name: perPage
-description: The number of items to return
+description: The number of items to return.
 required: false
 schema:
   type: integer

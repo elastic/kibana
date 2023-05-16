@@ -1,5 +1,6 @@
 in: query
 name: page
+description: The page number to return.
 required: false
 schema:
   type: integer

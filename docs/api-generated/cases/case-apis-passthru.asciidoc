@@ -462,9 +462,9 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of user actions to return per page. default: 20 </div><div class="param">sortOrder (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">sortOrder (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: asc </div><div class="param">types (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div><div class="param">types (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the types of user actions to return. default: null </div>
     </div>  <!-- field-items -->
@@ -554,11 +554,11 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">page (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  default: 1 </div><div class="param">perPage (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return default: 20 </div><div class="param">sortOrder (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">sortOrder (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div>
     </div>  <!-- field-items -->
 
 
@@ -734,7 +734,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of cases to return per page. default: 20 </div><div class="param">reporters (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">reporters (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by the user name of the reporter. default: null </div><div class="param">search (optional)</div>
 
@@ -2994,7 +2994,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="search_fields"><code>search_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
+    <div class='model-description'>The fields to perform the <code>simple_query_string</code> parsed query against.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
