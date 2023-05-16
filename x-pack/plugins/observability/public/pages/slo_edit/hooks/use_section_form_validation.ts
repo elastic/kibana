@@ -19,7 +19,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
   let isIndicatorSectionValid: boolean = false;
 
   switch (watch('indicator.type')) {
-   case 'sli.metric.custom':
+    case 'sli.metric.custom':
       const isGoodParamsValid = () => {
         const data = getValues(
           'indicator.params.good'
