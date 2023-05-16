@@ -19,6 +19,8 @@ export const FIELD_INPUT_PARENT =
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 
+export const EXCEPTION_FLYOUT_LOADING_SPINNER = '[data-test-subj="loadingAddExceptionFlyout"]';
+
 export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
 
 export const VALUES_INPUT =

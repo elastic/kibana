@@ -35,6 +35,8 @@ import {
   EXCEPTION_ITEM_COMMENT_COPY_BTN,
   VALUES_MATCH_INCLUDED_INPUT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
+  EXCEPTION_CARD_ITEM_AFFECTED_RULES,
+  EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM,
 } from '../screens/exceptions';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
@@ -213,4 +215,14 @@ export const clickCopyCommentToClipboard = () => {
     cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
   });
   cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER).first().find(EXCEPTION_ITEM_COMMENT_COPY_BTN).click();
+};
+
+export const validateExceptionItemAffectsTheCorrectRulesInRulePage = (rulesCount: number) => {
+  cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', rulesCount);
+  cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).should('have.text', `Affects ${rulesCount} rule`);
+};
+export const validateExceptionItemFirstAffectedRuleNameInRulePage = (ruleName: string) => {
+  cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).click();
+
+  cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM).first().should('have.text', ruleName);
 };

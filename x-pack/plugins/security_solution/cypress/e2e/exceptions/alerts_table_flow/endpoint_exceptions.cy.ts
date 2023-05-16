@@ -9,7 +9,7 @@ import {
   goToClosedAlertsOnRuleDetailsPage,
   openAddEndpointExceptionFromFirstAlert,
 } from '../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { cleanKibana } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
@@ -18,11 +18,7 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   addExceptionFlyoutItemName,
@@ -44,10 +40,10 @@ import {
 describe('Endpoint Exceptions workflows from Alert', () => {
   const expectedNumberOfAlerts = 1;
   before(() => {
-    esArchiverResetKibana();
+    cleanKibana();
     esArchiverLoad('endpoint');
     login();
-    deleteAlertsAndRules();
+    // cleanKibana();
     createRule(getEndpointRule());
   });
   beforeEach(() => {
@@ -72,9 +68,6 @@ describe('Endpoint Exceptions workflows from Alert', () => {
       .eq(0)
       .should('have.text', 'file.Ext.code_signature');
 
-    // The Endpoint will populated with predefined fields
-    openAddEndpointExceptionFromFirstAlert();
-
     selectCloseSingleAlerts();
     addExceptionFlyoutItemName('Sample Exception');
     submitNewExceptionItem();
@@ -85,7 +78,6 @@ describe('Endpoint Exceptions workflows from Alert', () => {
 
     // Closed alert should appear in table
     goToClosedAlertsOnRuleDetailsPage();
-    cy.get(ALERTS_COUNT).should('exist');
     cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
 
     // Endpoint Exception will move to Endpoint List under Exception tab of rule
@@ -97,11 +89,13 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     // when removing exception and again, no more exist, empty screen shows again
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
+    goToAlertsTab();
+
     // load more docs
     esArchiverLoad('endpoint');
 
     // now that there are no more exceptions, the docs should match and populate alerts
-    goToAlertsTab();
+
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 

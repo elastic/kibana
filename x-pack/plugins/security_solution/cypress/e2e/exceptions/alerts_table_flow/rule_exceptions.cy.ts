@@ -22,12 +22,10 @@ import {
   addExceptionFlyoutItemName,
   selectBulkCloseAlerts,
   submitNewExceptionItem,
+  validateExceptionItemFirstAffectedRuleNameInRulePage,
+  validateExceptionItemAffectsTheCorrectRulesInRulePage,
 } from '../../../tasks/exceptions';
-import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   goToAlertsTab,
@@ -37,13 +35,8 @@ import {
 } from '../../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
-import {
-  EXCEPTION_CARD_ITEM_AFFECTED_RULES,
-  EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
-  NO_EXCEPTIONS_EXIST_PROMPT,
-} from '../../../screens/exceptions';
+import { postDataView, deleteAlertsAndRules, cleanKibana } from '../../../tasks/common';
+import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe('Rule Exceptions workflows from Alert', () => {
@@ -51,7 +44,7 @@ describe('Rule Exceptions workflows from Alert', () => {
   const ITEM_NAME = 'Sample Exception List Item';
   const newRule = getNewRule();
   before(() => {
-    esArchiverResetKibana();
+    cleanKibana();
     esArchiverLoad('exceptions');
     login();
     postDataView('exceptions-*');
@@ -104,15 +97,9 @@ describe('Rule Exceptions workflows from Alert', () => {
     // to show that said exception now starts to show up again
     goToExceptionsTab();
 
-    // Validate that the exception is affecting the correct rule
-    // displays existing exception items
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-
-    cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).should('have.text', 'Affects 1 rule');
-
-    cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).click();
-
-    cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM).first().should('have.text', newRule.name);
+    // Validate the exception is affecting the correct rule count and name
+    validateExceptionItemAffectsTheCorrectRulesInRulePage(1);
+    validateExceptionItemFirstAffectedRuleNameInRulePage(newRule.name);
 
     // when removing exception and again, no more exist, empty screen shows again
     removeException();
