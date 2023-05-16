@@ -116,6 +116,7 @@ export interface TableListViewTableProps<
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
   tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
+  fixedTag?: string;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
