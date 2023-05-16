@@ -38,7 +38,6 @@ x-pack/test_serverless/
 │  │  ├─ search
 │  │  ├─ security
 ├─ shared
-│  ├─ fixtures
 │  ├─ services
 │  ├─ types
 ```
