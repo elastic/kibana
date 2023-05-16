@@ -460,6 +460,7 @@ components:
             - transactionType
             - transactionName
             - index
+            - threshold
           properties:
             service:
               description: The APM service name
@@ -485,6 +486,10 @@ components:
               description: The index used by APM metrics
               type: string
               example: metrics-apm*,apm*
+            threshold:
+              description: The latency threshold in milliseconds
+              type: number
+              example: 250
         type:
           description: The type of indicator.
           type: string
