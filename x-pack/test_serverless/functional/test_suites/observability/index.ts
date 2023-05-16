@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability UI', function () {
-    this.tags(['serverless']);
-
     loadTestFile(require.resolve('./landing_page'));
   });
 }
