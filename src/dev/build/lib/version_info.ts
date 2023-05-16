@@ -36,8 +36,12 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
     ? (await execa('git', ['rev-parse', 'HEAD'], { cwd: REPO_ROOT })).stdout
     : process.env.GIT_COMMIT || process.env.BUILDKITE_COMMIT || '';
 
-  // TODO: git command for date of head commit
-  const buildDate = gitExists ? new Date().toISOString() : new Date().toISOString();
+  // Use the date of HEAD commit if available
+  const buildDate = gitExists
+    ? new Date(
+        (await execa('git', ['show', '-s', '--format=%cI', buildSha], { cwd: REPO_ROOT })).stdout
+      ).toISOString()
+    : new Date().toISOString();
 
   return {
     buildSha,
