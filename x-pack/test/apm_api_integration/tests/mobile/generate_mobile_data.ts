@@ -7,6 +7,8 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
+export const SERVICE_VERSIONS = ['2.3', '1.2', '1.1'];
+
 export async function generateMobileData({
   start,
   end,
@@ -22,7 +24,7 @@ export async function generateMobileData({
       environment: 'production',
       agentName: 'android/java',
     })
-    .mobileDevice({ serviceVersion: '2.3' })
+    .mobileDevice({ serviceVersion: SERVICE_VERSIONS[0] })
     .deviceInfo({
       manufacturer: 'Samsung',
       modelIdentifier: 'SM-G973F',
@@ -52,7 +54,7 @@ export async function generateMobileData({
       environment: 'production',
       agentName: 'android/java',
     })
-    .mobileDevice({ serviceVersion: '1.2' })
+    .mobileDevice({ serviceVersion: SERVICE_VERSIONS[1] })
     .deviceInfo({
       manufacturer: 'Samsung',
       modelIdentifier: 'SM-G930F',
@@ -89,7 +91,7 @@ export async function generateMobileData({
       environment: 'production',
       agentName: 'android/java',
     })
-    .mobileDevice({ serviceVersion: '1.1' })
+    .mobileDevice({ serviceVersion: SERVICE_VERSIONS[2] })
     .deviceInfo({
       manufacturer: 'Huawei',
       modelIdentifier: 'HUAWEI P2-0000',
@@ -222,6 +224,7 @@ export async function generateMobileData({
         return [
           galaxy10
             .transaction('Start View - View Appearing', 'Android Activity')
+            .errors(galaxy10.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(500)
             .success()
@@ -265,6 +268,7 @@ export async function generateMobileData({
             ),
           huaweiP2
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
+            .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(20)
             .success()
@@ -292,6 +296,7 @@ export async function generateMobileData({
             ),
           galaxy7
             .transaction('Start View - View Appearing', 'Android Activity')
+            .errors(galaxy7.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(20)
             .success()

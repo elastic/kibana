@@ -17,6 +17,7 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -31,7 +32,7 @@ import { sampleDocNoSortIdWithTimestamp } from '../../__mocks__/es_results';
 import { buildAlert, buildParent, buildAncestors, additionalAlertFields } from './build_alert';
 import type { Ancestor, SignalSourceHit } from '../../types';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import { SERVER_APP_ID } from '../../../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../../../../../../common/constants';
 import { EVENT_DATASET } from '../../../../../../common/cti/constants';
 import {
   ALERT_ANCESTORS,
@@ -48,6 +49,9 @@ type SignalDoc = SignalSourceHit & {
 };
 
 const SPACE_ID = 'space';
+const reason = 'alert reasonable reason';
+const publicBaseUrl = 'testKibanaBasePath.com';
+const alertUuid = 'test-uuid';
 
 describe('buildAlert', () => {
   beforeEach(() => {
@@ -58,7 +62,6 @@ describe('buildAlert', () => {
     const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
-    const reason = 'alert reasonable reason';
     const alert = {
       ...buildAlert(
         [doc],
@@ -66,11 +69,14 @@ describe('buildAlert', () => {
         SPACE_ID,
         reason,
         completeRule.ruleParams.index as string[],
+        alertUuid,
+        publicBaseUrl,
         undefined
       ),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert[TIMESTAMP];
+    const expectedAlertUrl = `${publicBaseUrl}/s/${SPACE_ID}/app/security/alerts/redirect/${alertUuid}?index=${DEFAULT_ALERTS_INDEX}-${SPACE_ID}&timestamp=${timestamp}`;
     const expected = {
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
@@ -222,6 +228,8 @@ describe('buildAlert', () => {
         timeline_title: 'some-timeline-title',
       }),
       [ALERT_DEPTH]: 1,
+      [ALERT_URL]: expectedAlertUrl,
+      [ALERT_UUID]: alertUuid,
     };
     expect(alert).toEqual(expected);
   });
@@ -239,7 +247,6 @@ describe('buildAlert', () => {
       },
     };
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
-    const reason = 'alert reasonable reason';
     const alert = {
       ...buildAlert(
         [doc],
@@ -247,12 +254,14 @@ describe('buildAlert', () => {
         SPACE_ID,
         reason,
         completeRule.ruleParams.index as string[],
+        alertUuid,
+        publicBaseUrl,
         undefined
       ),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert[TIMESTAMP];
-
+    const expectedAlertUrl = `${publicBaseUrl}/s/${SPACE_ID}/app/security/alerts/redirect/${alertUuid}?index=${DEFAULT_ALERTS_INDEX}-${SPACE_ID}&timestamp=${timestamp}`;
     const expected = {
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
@@ -410,6 +419,8 @@ describe('buildAlert', () => {
         timeline_title: 'some-timeline-title',
       }),
       [ALERT_DEPTH]: 1,
+      [ALERT_URL]: expectedAlertUrl,
+      [ALERT_UUID]: alertUuid,
     };
     expect(alert).toEqual(expected);
   });

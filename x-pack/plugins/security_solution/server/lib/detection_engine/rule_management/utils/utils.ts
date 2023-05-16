@@ -6,6 +6,7 @@
  */
 
 import { partition } from 'lodash/fp';
+import { differenceWith, isEqual } from 'lodash';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -370,6 +371,7 @@ export const convertAlertSuppressionToCamel = (
     ? {
         groupBy: input.group_by,
         duration: input.duration,
+        missingFieldsStrategy: input.missing_fields_strategy,
       }
     : undefined;
 
@@ -380,5 +382,20 @@ export const convertAlertSuppressionToSnake = (
     ? {
         group_by: input.groupBy,
         duration: input.duration,
+        missing_fields_strategy: input.missingFieldsStrategy,
       }
     : undefined;
+
+export const findDifferenceInArrays = <T1, T2>(
+  arr1: T1[] = [],
+  arr2: T2[] = []
+): Array<T1 | T2> => {
+  if (arr1.length === 0) {
+    return arr2;
+  }
+
+  if (arr2.length === 0) {
+    return arr1;
+  }
+  return differenceWith(arr1, arr2, isEqual);
+};

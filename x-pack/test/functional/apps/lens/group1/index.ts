@@ -37,7 +37,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     };
     let indexPatternString: string;
     before(async () => {
-      await log.debug('Starting lens before method');
+      log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
       await kibanaServer.savedObjects.cleanStandardList();
       try {
@@ -74,16 +74,9 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     if (config.get('esTestCluster.ccs')) {
       loadTestFile(require.resolve('./smokescreen'));
     } else {
-      loadTestFile(require.resolve('./smokescreen'));
-      loadTestFile(require.resolve('./ad_hoc_data_view'));
-      loadTestFile(require.resolve('./partition'));
-      loadTestFile(require.resolve('./persistent_context'));
-      loadTestFile(require.resolve('./table_dashboard'));
-      loadTestFile(require.resolve('./table'));
-      loadTestFile(require.resolve('./text_based_languages'));
-      loadTestFile(require.resolve('./fields_list'));
-      loadTestFile(require.resolve('./layer_actions'));
-      loadTestFile(require.resolve('./field_formatters'));
+      // total run time ~16 min
+      loadTestFile(require.resolve('./smokescreen')); // 12m 12s
+      loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
     }
   });
 };

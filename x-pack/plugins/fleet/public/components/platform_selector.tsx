@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiText,
@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PLATFORM_TYPE } from '../hooks';
+import { type PLATFORM_TYPE } from '../hooks';
 import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
@@ -60,15 +60,23 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   fullCopyButton,
   onCopy,
 }) => {
-  const { platform, setPlatform } = usePlatform();
+  const getInitialPlatform = useCallback(() => {
+    if (hasK8sIntegration) return 'kubernetes';
 
-  useEffect(() => {
-    setPlatform(hasK8sIntegration ? 'kubernetes' : 'linux');
-  }, [hasK8sIntegration, setPlatform]);
+    return 'linux';
+  }, [hasK8sIntegration]);
+
+  const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
-  const useReduce = hasFleetServer || (!isManaged && !hasK8sIntegration);
+  const isReduced = hasFleetServer || (!isManaged && !hasK8sIntegration);
+
+  const getPlatformOptions = useCallback(() => {
+    const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
+
+    return platformOptions;
+  }, [isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -116,7 +124,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       <>
         {!hasK8sIntegrationMultiPage && (
           <EuiButtonGroup
-            options={useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
+            options={getPlatformOptions()}
             idSelected={platform}
             onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
             legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {

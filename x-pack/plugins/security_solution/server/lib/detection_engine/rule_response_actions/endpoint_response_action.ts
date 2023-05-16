@@ -15,13 +15,15 @@ export const endpointResponseAction = (
   endpointAppContextService: EndpointAppContextService,
   { alertIds, agentIds, ruleId, ruleName }: AlertsWithAgentType
 ) =>
-  each(agentIds, (agent) =>
-    endpointAppContextService.getActionCreateService().createAction({
-      endpoint_ids: [agent],
-      alert_ids: alertIds,
-      comment: responseAction.params.comment,
-      command: responseAction.params.command,
-      rule_id: ruleId,
-      rule_name: ruleName,
-    })
+  Promise.all(
+    each(agentIds, async (agent) =>
+      endpointAppContextService.getActionCreateService().createActionFromAlert({
+        endpoint_ids: [agent],
+        alert_ids: alertIds,
+        comment: responseAction.params.comment,
+        command: responseAction.params.command,
+        rule_id: ruleId,
+        rule_name: ruleName,
+      })
+    )
   );

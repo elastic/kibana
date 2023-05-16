@@ -40,6 +40,8 @@ export const archiveMaintenanceWindowRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForMaintenanceWindow();
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const { id } = req.params;
         const { archive } = req.body;

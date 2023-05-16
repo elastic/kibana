@@ -31,6 +31,9 @@
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -44,6 +44,10 @@ export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange
   defaultMessage: 'Exec user change',
 });
 
+export const COLLAPSE_ALL = i18n.translate('xpack.sessionView.collapseAll', {
+  defaultMessage: 'Collapse all',
+});
+
 export interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
@@ -263,7 +267,7 @@ export function ProcessTreeNode({
   const shouldRenderChildren = isSessionLeader || (childrenExpanded && children?.length > 0);
   const childrenTreeDepth = depth + 1;
 
-  const showUserEscalation = !isSessionLeader && !!user?.name && user.name !== parent?.user?.name;
+  const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent?.user?.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'desktop' : 'gear';
   const iconTestSubj = hasExec
@@ -303,12 +307,11 @@ export function ProcessTreeNode({
               <Nbsp />
               <b css={styles.darkText}>{userName}</b>
               <Nbsp />
-              <EuiButtonIcon
-                size="xs"
-                iconType="fold"
-                onClick={handleCollapseProcessTree}
-                css={styles.jumpToTop}
-              />
+              <span css={styles.jumpToTop}>
+                <EuiToolTip title={COLLAPSE_ALL}>
+                  <EuiButtonIcon size="xs" iconType="fold" onClick={handleCollapseProcessTree} />
+                </EuiToolTip>
+              </span>
             </span>
           ) : (
             <>
@@ -344,7 +347,7 @@ export function ProcessTreeNode({
               css={buttonStyles.userChangedButton}
               aria-label={EXEC_USER_CHANGE}
             >
-              {EXEC_USER_CHANGE} :<span>{user.name}</span>
+              {EXEC_USER_CHANGE} ({userName})
             </EuiButton>
           )}
           {!isSessionLeader && children.length > 0 && (

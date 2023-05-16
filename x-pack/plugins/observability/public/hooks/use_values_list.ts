@@ -10,8 +10,8 @@ import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { ESFilter } from '@kbn/es-types';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
+import { TRANSACTION_URL } from '@kbn/observability-shared-plugin/common';
 import { createEsParams, useEsSearch } from './use_es_search';
-import { TRANSACTION_URL } from '../components/shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
 
 export interface Props {
   sourceField: string;

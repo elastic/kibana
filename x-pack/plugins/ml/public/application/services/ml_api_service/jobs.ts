@@ -368,8 +368,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   ) {
     const body = JSON.stringify({ jobId, snapshotId, replay, end, calendarEvents });
     return httpService.http<{
-      total: number;
-      categories: Array<{ count?: number; category: Category }>;
+      success: boolean;
     }>({
       path: `${ML_BASE_PATH}/jobs/revert_model_snapshot`,
       method: 'POST',
@@ -379,10 +378,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   datafeedPreview(datafeedId?: string, job?: Job, datafeed?: Datafeed) {
     const body = JSON.stringify({ datafeedId, job, datafeed });
-    return httpService.http<{
-      total: number;
-      categories: Array<{ count?: number; category: Category }>;
-    }>({
+    return httpService.http<unknown[]>({
       path: `${ML_BASE_PATH}/jobs/datafeed_preview`,
       method: 'POST',
       body,

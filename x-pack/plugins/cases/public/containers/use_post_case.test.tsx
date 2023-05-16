@@ -35,11 +35,6 @@ describe('usePostCase', () => {
     owner: SECURITY_SOLUTION_OWNER,
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   const addError = jest.fn();

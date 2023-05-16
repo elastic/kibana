@@ -17,10 +17,12 @@ import { TriggersAndActionsUiServices } from '../../..';
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
 export function AlertsSearchBar({
   appName,
+  disableQueryLanguageSwitcher = false,
   featureIds,
   query,
   filters,
   onQueryChange,
+  onQuerySubmit,
   onFiltersUpdated,
   rangeFrom,
   rangeTo,
@@ -39,9 +41,20 @@ export function AlertsSearchBar({
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { value: dataView, loading, error } = useAlertDataView(featureIds);
 
-  const onQuerySubmit = useCallback(
+  const onSearchQuerySubmit = useCallback(
     ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
-      onQueryChange({
+      onQuerySubmit({
+        dateRange,
+        query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
+      });
+      setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
+    },
+    [onQuerySubmit, setQueryLanguage]
+  );
+
+  const onSearchQueryChange = useCallback(
+    ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
+      onQueryChange?.({
         dateRange,
         query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
       });
@@ -50,7 +63,7 @@ export function AlertsSearchBar({
     [onQueryChange, setQueryLanguage]
   );
   const onRefresh = ({ dateRange }: { dateRange: TimeRange }) => {
-    onQueryChange({
+    onQuerySubmit({
       dateRange,
     });
   };
@@ -58,6 +71,7 @@ export function AlertsSearchBar({
   return (
     <SearchBar
       appName={appName}
+      disableQueryLanguageSwitcher={disableQueryLanguageSwitcher}
       indexPatterns={loading || error ? NO_INDEX_PATTERNS : [dataView!]}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
@@ -66,13 +80,15 @@ export function AlertsSearchBar({
       dateRangeTo={rangeTo}
       displayStyle="inPage"
       showFilterBar={showFilterBar}
-      onQuerySubmit={onQuerySubmit}
+      onQuerySubmit={onSearchQuerySubmit}
       onFiltersUpdated={onFiltersUpdated}
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
+      showQueryInput={true}
+      showSaveQuery={true}
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
-      onQueryChange={onQuerySubmit}
+      onQueryChange={onSearchQueryChange}
     />
   );
 }

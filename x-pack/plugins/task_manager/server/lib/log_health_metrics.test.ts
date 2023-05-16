@@ -422,7 +422,6 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
         value: {
           max_workers: 10,
           poll_interval: 3000,
-          max_poll_inactivity_cycles: 10,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
           monitored_stats_running_average_window: 50,

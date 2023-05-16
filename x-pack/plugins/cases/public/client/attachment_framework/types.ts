@@ -11,7 +11,7 @@ import type {
   CommentRequestExternalReferenceType,
   CommentRequestPersistableStateType,
 } from '../../../common/api';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 
 export enum AttachmentActionType {
   BUTTON = 'button',
@@ -48,7 +48,7 @@ export interface AttachmentViewObject<Props = {}> {
 }
 
 export interface CommonAttachmentViewProps {
-  caseData: Pick<Case, 'id' | 'title'>;
+  caseData: Pick<CaseUI, 'id' | 'title'>;
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {

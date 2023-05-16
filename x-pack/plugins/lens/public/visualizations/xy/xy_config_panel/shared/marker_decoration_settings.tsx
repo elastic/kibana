@@ -9,15 +9,14 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { IconPosition } from '@kbn/expression-xy-plugin/common';
+import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 import { YAxisMode } from '../../types';
 
-import { TooltipWrapper } from '../../../../shared_components';
-import {
-  hasIcon,
-  IconSelect,
-  IconSet,
-} from '../../../../shared_components/icon_select/icon_select';
 import { idPrefix } from '../dimension_editor';
+
+export function hasIcon(icon: string | undefined): icon is string {
+  return icon != null && icon !== 'empty';
+}
 
 interface LabelConfigurationOptions {
   isHorizontal: boolean;
@@ -184,37 +183,6 @@ export function TextDecorationSetting<Icon extends string = string>({
         />
         {children?.(selectedVisibleOption)}
       </div>
-    </EuiFormRow>
-  );
-}
-
-export function IconSelectSetting<Icon extends string = string>({
-  currentConfig,
-  setConfig,
-  customIconSet,
-  defaultIcon = 'empty',
-}: {
-  currentConfig?: MarkerDecorationConfig<Icon>;
-  setConfig: (config: MarkerDecorationConfig<Icon>) => void;
-  customIconSet: IconSet<Icon>;
-  defaultIcon?: string;
-}) {
-  return (
-    <EuiFormRow
-      display="columnCompressed"
-      fullWidth
-      label={i18n.translate('xpack.lens.xyChart.lineMarker.icon', {
-        defaultMessage: 'Icon decoration',
-      })}
-    >
-      <IconSelect
-        defaultIcon={defaultIcon}
-        customIconSet={customIconSet}
-        value={currentConfig?.icon}
-        onChange={(newIcon) => {
-          setConfig({ icon: newIcon });
-        }}
-      />
     </EuiFormRow>
   );
 }

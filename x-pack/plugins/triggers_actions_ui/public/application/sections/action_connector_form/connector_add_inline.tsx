@@ -65,6 +65,7 @@ export const AddConnectorInline = ({
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
   const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
+  const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((subtype) => subtype.id);
   const connectorDropdownErrors = useMemo(
     () => [`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`],
     [actionTypeRegistered.actionTypeTitle]
@@ -90,7 +91,12 @@ export const AddConnectorInline = ({
   );
 
   useEffect(() => {
-    const filteredConnectors = getValidConnectors(connectors, actionItem, actionTypesIndex);
+    const filteredConnectors = getValidConnectors(
+      connectors,
+      actionItem,
+      actionTypesIndex,
+      allowGroupConnector
+    );
 
     if (filteredConnectors.length > 0) {
       setHasConnectors(true);
@@ -134,6 +140,7 @@ export const AddConnectorInline = ({
         actionTypeRegistered={actionTypeRegistered}
         connectors={connectors}
         onConnectorSelected={onSelectConnector}
+        allowGroupConnector={allowGroupConnector}
       />
     </EuiFormRow>
   );

@@ -109,6 +109,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "endpoint:user-artifact",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "file-upload-telemetry",
                 },
               },
@@ -260,12 +265,11 @@ describe('createInitialState', () => {
         "tempIndexMappings": Object {
           "dynamic": false,
           "properties": Object {
-            "migrationVersion": Object {
-              "dynamic": "true",
-              "type": "object",
-            },
             "type": Object {
               "type": "keyword",
+            },
+            "typeMigrationVersion": Object {
+              "type": "version",
             },
           },
         },

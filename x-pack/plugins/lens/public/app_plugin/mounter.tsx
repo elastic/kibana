@@ -58,6 +58,7 @@ import {
   LENS_SHARE_STATE_ACTION,
   MainHistoryLocationState,
 } from '../../common/locator/locator';
+import { SavedObjectIndexStore } from '../persistence';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -123,9 +124,10 @@ export async function getLensServices(
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
+    settings: coreStart.settings,
     application: coreStart.application,
     notifications: coreStart.notifications,
-    savedObjectsClient: coreStart.savedObjects.client,
+    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement.client),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
@@ -181,7 +183,7 @@ export async function mountApp(
     locator
   );
 
-  const { stateTransfer, data } = lensServices;
+  const { stateTransfer, data, savedObjectStore } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -372,6 +374,7 @@ export async function mountApp(
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
             theme$={core.theme.theme$}
             coreStart={coreStart}
+            savedObjectStore={savedObjectStore}
           />
         </Provider>
       );

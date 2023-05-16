@@ -12,6 +12,9 @@ export interface AlertsGroupingAggregation {
   unitsCount?: {
     value?: NumberOrNull;
   };
+  description?: {
+    buckets?: GenericBuckets[];
+  };
   severitiesSubAggregation?: {
     buckets?: GenericBuckets[];
   };

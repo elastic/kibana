@@ -127,6 +127,14 @@ export const mockCore: () => Partial<CoreStart> = () => {
       get: getSetting,
       get$: setSetting$,
     },
+    settings: {
+      client: {
+        ...defaultCore.settings.client,
+        get: getSetting,
+        get$: setSetting$,
+      },
+      globalClient: defaultCore.settings.globalClient,
+    },
     usageCollection: {
       reportUiCounter: () => {},
     },
@@ -175,6 +183,7 @@ export function MockKibanaProvider<ExtraCore>({
         <UptimeStartupPluginsContextProvider
           data={(coreOptions as any).data}
           observability={(coreOptions as any).observability}
+          observabilityShared={(coreOptions as any).observabilityShared}
           exploratoryView={(coreOptions as any).exploratoryView}
         >
           <EuiThemeProvider darkMode={false}>

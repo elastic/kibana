@@ -23,6 +23,6 @@ export default {
   },
 };
 
-export const Emtpy: Story<void> = () => {
+export const Empty: Story<void> = () => {
   return <Grouping {...mockGroupingProps} />;
 };

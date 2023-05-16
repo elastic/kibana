@@ -20,7 +20,7 @@ export interface AnalyticsCollectionDataViewLogicValues {
   dataView: DataView | null;
 }
 
-interface AnalyticsCollectionDataViewLogicActions {
+export interface AnalyticsCollectionDataViewLogicActions {
   fetchedAnalyticsCollection: FetchAnalyticsCollectionActions['apiSuccess'];
   setDataView(dataView: DataView): { dataView: DataView };
 }

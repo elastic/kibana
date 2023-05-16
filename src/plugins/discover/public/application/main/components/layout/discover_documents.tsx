@@ -17,8 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { DataTableRecord } from '../../../../types';
+import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -40,9 +39,11 @@ import { DocTableInfinite } from '../../../../components/doc_table/doc_table_inf
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
+import { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
+import { useSavedSearchInitial } from '../../services/discover_state_provider';
 
 const containerStyles = css`
   position: relative;
@@ -73,19 +74,17 @@ export const onResize = (
 function DiscoverDocumentsComponent({
   dataView,
   onAddFilter,
-  savedSearch,
   stateContainer,
   onFieldEdited,
 }: {
   dataView: DataView;
-  navigateTo: (url: string) => void;
   onAddFilter?: DocViewFilterFn;
-  savedSearch: SavedSearch;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
+  const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
     (state) => {

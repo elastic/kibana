@@ -28,6 +28,7 @@ const apiServiceMock: jest.Mocked<GuidedOnboardingPluginStart> = {
     isGuidePanelOpen$: new BehaviorSubject(false),
     isLoading$: new BehaviorSubject(false),
     getGuideConfig: jest.fn(),
+    isEnabled: true,
   },
 };
 

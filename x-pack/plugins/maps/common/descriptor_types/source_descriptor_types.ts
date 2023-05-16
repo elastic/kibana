@@ -183,4 +183,4 @@ export type TableSourceDescriptor = {
   term: string;
 };
 
-export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;
+export type JoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;

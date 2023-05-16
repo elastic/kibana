@@ -17,6 +17,7 @@ import {
   validateStringValuesForCondition,
   getSelectorsAndResponsesFromYaml,
   validateMaxSelectorsAndResponses,
+  validateBlockRestrictions,
 } from '../../common/utils';
 import * as i18n from './translations';
 import { ViewDeps, SelectorConditionsMap, SelectorCondition } from '../../types';
@@ -45,6 +46,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     const { selectors, responses } = getSelectorsAndResponsesFromYaml(value);
 
     errors.push(...validateMaxSelectorsAndResponses(selectors, responses));
+    errors.push(...validateBlockRestrictions(selectors, responses));
 
     // validate selectors
     selectors.forEach((selector) => {
@@ -61,7 +63,11 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     // validate responses
     responses.forEach((response) => {
       // for now we force 'alert' action if 'block' action added.
-      if (response.actions.includes('block') && !response.actions.includes('alert')) {
+      if (
+        response.actions &&
+        response.actions.includes('block') &&
+        !response.actions.includes('alert')
+      ) {
         errors.push(i18n.errorAlertActionRequired);
       }
     });
@@ -70,6 +76,8 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   }, []);
 
   useEffect(() => {
+    if (!show) return;
+
     // for on mount
     const otherErrors = validateAdditional(configuration);
     if (otherErrors.length !== additionalErrors.length) {
@@ -103,11 +111,19 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     return () => {
       listener.dispose();
     };
-  }, [editorErrors, onChange, policy, additionalErrors.length, validateAdditional, configuration]);
+  }, [
+    editorErrors,
+    onChange,
+    policy,
+    additionalErrors.length,
+    validateAdditional,
+    configuration,
+    show,
+  ]);
 
   const onYamlChange = useCallback(
     (value) => {
-      if (input?.vars) {
+      if (show && input?.vars) {
         input.vars.configuration.value = value;
 
         const errs = validateAdditional(value);
@@ -119,7 +135,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         });
       }
     },
-    [editorErrors.length, input?.vars, onChange, policy, validateAdditional]
+    [editorErrors.length, input?.vars, onChange, policy, show, validateAdditional]
   );
 
   return (
