@@ -224,6 +224,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           mapping: {
             total_fields: {
+              ignore_malformed: `true`,
               limit: '10000',
             },
           },
@@ -236,6 +237,7 @@ export default function (providerContext: FtrProviderContext) {
         dynamic: true,
         properties: {
           '@timestamp': {
+            ignore_malformed: false,
             type: 'date',
           },
           data_stream: {
