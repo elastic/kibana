@@ -126,7 +126,7 @@ export function SloEditForm({ slo }: Props) {
     if (!isValid) {
       return;
     }
-    const values = createProcessedValues();
+    const values = transformValuesToCreateSLOInput(getValues());
     try {
       await copyTextToClipboard(JSON.stringify(values, null, 2));
       notifications.toasts.add({
