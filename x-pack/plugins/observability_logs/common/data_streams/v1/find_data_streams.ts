@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { dataStreamRT } from '../types';
-import { sortDirectionRT } from './common';
+import { sortOrderRT } from './common';
 
 export const findDataStreamsResponseRT = rt.type({
   items: rt.array(dataStreamRT),
@@ -16,7 +16,7 @@ export const findDataStreamsResponseRT = rt.type({
 export const findDataStreamsRequestQueryRT = rt.partial({
   datasetQuery: rt.string,
   type: rt.literal('log'),
-  sortDirection: sortDirectionRT,
+  sortOrder: sortOrderRT,
   uncategorisedOnly: rt.boolean,
 });
 

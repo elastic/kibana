@@ -20,4 +20,4 @@ export const getDataStreamsUrl = (search = {}) => {
   return [DATA_STREAMS_URL, querySearch].filter(Boolean).join('/');
 };
 
-export const sortDirectionRT = rt.union([rt.literal('asc'), rt.literal('desc')]);
+export const sortOrderRT = rt.union([rt.literal('asc'), rt.literal('desc')]);

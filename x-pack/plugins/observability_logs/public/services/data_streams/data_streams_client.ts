@@ -67,7 +67,7 @@ export class DataStreamsClient implements IDataStreamsClient {
 
 const mockIntegrationsResponse = {
   total: 11,
-  pageAfter: [],
+  // searchAfter: [],
   items: [
     {
       name: 'kubernetes',

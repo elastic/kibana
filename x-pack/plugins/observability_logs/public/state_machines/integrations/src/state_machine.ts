@@ -8,6 +8,7 @@
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { actions, assign, createMachine } from 'xstate';
 import { IDataStreamsClient } from '../../../services/data_streams';
+import { DEFAULT_CONTEXT } from './defaults';
 import {
   DefaultIntegrationsContext,
   IntegrationsContext,
@@ -15,16 +16,10 @@ import {
   IntegrationTypestate,
 } from './types';
 
-const defaultContext = {
-  integrations: null,
-  error: null,
-  page: [],
-};
-
 export const createPureIntegrationsStateMachine = (
-  initialContext: DefaultIntegrationsContext = defaultContext
+  initialContext: DefaultIntegrationsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAJlmcyAFgCsAZiVrZa6QHY1ATk66ANCACeMgGxlOVjfq27ZKlbOkBfD2bSYc+YlIyeiJcCBooVgAZAHkAQQARZAA5AHEAfQBlAFUAYVyAUQKE4q5eJBBBYVFUcSkEAA4lBrIVY107dV0VBs5pM0sEaTayK2lODSUlCd1VYy8fDCw8GvIQsIjo+KS09IAxOOQo0p5xKpFAupklaSUyWSVuqwMrTgU1PoHEd0UVaQaetIrPZdN1VAsQL5lgESGtQuFUFAALJEbBgLaJFIZHL5IolBJlM5CC5iCr1FwGMhqFQvQzqexWFRWL4ILRqWy6Ma6JpTYydCFQ-yrYLwiIotEYnYZA5HE7lATEmpXBAAWhUdyM9hUnNmGjaBhZzXZnB6E00sgMNIMnm8kKWQsCcLCbFiiXSSJiACUCukUgAVAqpT1xP3IGLJTKEirnJVkmRA+56Pq9Xqgs0shQqVqMhrSaRqHQPBoAgX2laOkXOiCsTIFOKe3IACV9yQDQZDYYjUYV1UucYQVmcVKBnAaCm0BgBKhZY3uBgLDU5udBRhtiz85dhlYRUD2uAI9DY3tdCRbbeDofDkdO0cVfdA9Xzk7IY9UCjzWlkVgaLPz0jIszqC4zjuB+KheLaqBEBAcDiIKm6kESvakg+iAqnIdzUto2gNAWfT0iy6HWso+acAYBhKORSiDmopYbjCQRUDQFwMMwkBISStT9nmDSUg8ChjlYUyzMyFhoeM7LWh8i6vAClp0dCwrrDuHGxqhQz5roZBAmOnJ2Po1qyL++bKJaGi4VMAIdOBtrwQxTo7uKYCqfekhoZyVJuGyuEfMMaiiYMOiKKCwIKN+y5tFYCkOluynsbeyFcepriyKMRZNBoZGPEZYlDEJtgTDSOnAkJSjRQhDkRHuB7xT2nHKkClFUg8fyyDJbQ-rlPFzuorhvO4eGyBBHhAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAJlmcyAFgCsAZiVrZa6QHY1ATk66ANCACeMgGxlOVjfq27ZKlbOkBfD2bSYc+YlIyeiJcCBooVgAZAHkAQQARZAA5AHEAfQBlAFUAYVyAUQKE4q5eJBBBYVFUcSkEAA4lBrIVY107dV0VBs5pM0sEaTayK2lODSUlCd1VYy8fDCw8GvIQsIjo+KS09IAxOOQo0p5xKpFAupklaSUyWSVuqwMrTgU1PoHEd0UVaQaetIrPZdN1VAsQL5lgESGtQuFUFAALJEbBgLaJFIZHL5IolBJlM5CC5iCr1FwGMhqFQvQzqexWFRWL4ILRqWy6Ma6JpTYydCFQ-yrYLwiIotEYnYZA5HE7lATEmpXBAAWhUdyM9hUnNmGjaBhZzXZnB6E00sgMNIMnm8kKWQsCcLCbFiiXSSJiACUCukUgAVAqpT1xP3IGLJTKEirnJVkmRA+56Pq9Xqgs0shQqVqMhrSaRqHQPBoAgX2laOkXOiCsTIFOKe3IACV9yQDQZDYYjUYV1UucYQ6tkZHzRYasn0BgBKhZKvHrQaBiURf+8k4BgMpb85dhZAgYAARkQqABjCKZMC4bDHgAWNbrDeb-sDwdD4cjp2jir7oHq+bI+k4JQrAaboZz0Fo3A0NRuk3aFhT3Q8TzPC8r1vCRYHQfAwDIXAADNMGwAAKD5OAASlYQVtyCBCj1QU9EXPS8b27Sov1JH9vhpWxmhmAwLTUBdZBnSlHmaMddHzcZNE0WCHR3dYESgPZcAIeg2G9V0EhbNsX07d95VY3t2MkGRDBaMdVAUPMtFkYCWUk-9VC0bV5DzfMVC8W1UCIPd4AqSiYVIIkjNqfsVTkO5qW0bQGgLPp6RnWybDeKCYNtALhSoGgLgYZhIGCklQo4oZ-kpB4FDHKwplmZkLEQcKJjIa0PhA14AUtWSqKdRSCtjYrrN0YdgPHV4rAnOR7L-JRLQ0WKpgBDoPPSstAu6sVUTAXrvxM1VOSpSCYri4Y1FqwYdEUUFgQUYDc26OxOtWys9wgLbjPqVwhysUdpLXR4hLqoYqtsCYaSBBpgSqpQHvgg9aPoqBGNQ16ip2gSh1zJkpmtZ4miqsCgNsUH1CTaY11kaGKwUiJlNU-LPxC5UgWmqkHj+WRWraBpJpaC11FcN53Di8nPKAA */
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
       context: initialContext,
@@ -46,7 +41,7 @@ export const createPureIntegrationsStateMachine = (
           on: {
             LOADING_SUCCEEDED: {
               target: 'loaded',
-              actions: 'storeIntegrations',
+              actions: ['storeSearch', 'storeIntegrations'],
             },
             LOADING_FAILED: {
               target: 'loadingFailed',
@@ -72,8 +67,35 @@ export const createPureIntegrationsStateMachine = (
         loaded: {
           entry: 'notifyLoadingSucceeded',
           on: {
-            LOAD_MORE_INTEGRATIONS: 'loadingMore',
-            SEARCH_INTEGRATIONS: 'loading',
+            LOAD_MORE_INTEGRATIONS: 'checkingMoreIntegrationsAvailability',
+            SEARCH_INTEGRATIONS: {
+              target: 'debouncingSearch',
+              actions: 'storeSearch',
+            },
+          },
+        },
+        checkingMoreIntegrationsAvailability: {
+          always: [
+            {
+              cond: 'hasMoreIntegrations',
+              target: 'loadingMore',
+            },
+            {
+              target: 'loaded',
+            },
+          ],
+        },
+        debouncingSearch: {
+          on: {
+            SEARCH_INTEGRATIONS: {
+              target: 'debouncingSearch',
+              actions: 'storeSearch',
+            },
+          },
+          after: {
+            500: {
+              target: 'loading',
+            },
           },
         },
         loadingFailed: {
@@ -91,25 +113,30 @@ export const createPureIntegrationsStateMachine = (
         notifyLoadingStarted: actions.pure(() => undefined),
         notifyLoadingSucceeded: actions.pure(() => undefined),
         notifyLoadingFailed: actions.pure(() => undefined),
-        storeIntegrations: assign((_context, event) =>
+        storeSearch: assign((context, event) => ({
+          // Store search from search event
+          ...('search' in event && { search: event.search }),
+          // Store search from response
+          ...('data' in event && {
+            search: {
+              ...context.search,
+              searchAfter: event.data.searchAfter,
+            },
+          }),
+        })),
+        storeIntegrations: assign((context, event) =>
           'data' in event
             ? {
                 integrations: event.data.items,
                 total: event.data.total,
-                search: {
-                  pageAfter: event.data.pageAfter,
-                },
               }
             : {}
         ),
         appendIntegrations: assign((context, event) =>
           'data' in event
             ? {
-                integrations: context.integrations?.concat(event.data.items),
+                integrations: context.integrations?.concat(event.data.items) ?? [],
                 total: event.data.total,
-                search: {
-                  pageAfter: event.data.pageAfter,
-                },
               }
             : {}
         ),
@@ -120,6 +147,9 @@ export const createPureIntegrationsStateMachine = (
               }
             : {}
         ),
+      },
+      guards: {
+        hasMoreIntegrations: (context) => Boolean(context.search.searchAfter),
       },
     }
   );
@@ -136,11 +166,11 @@ export const createIntegrationStateMachine = ({
   createPureIntegrationsStateMachine(initialContext).withConfig({
     actions: {},
     services: {
-      loadIntegrations: (_context, event) =>
+      loadIntegrations: (context, event) =>
         from(
           'search' in event
-            ? dataStreamsClient.findIntegrations(event.search)
-            : dataStreamsClient.findIntegrations()
+            ? dataStreamsClient.findIntegrations({ ...context.search, ...event.search })
+            : dataStreamsClient.findIntegrations(context.search)
         ).pipe(
           map(
             (data): IntegrationsEvent => ({

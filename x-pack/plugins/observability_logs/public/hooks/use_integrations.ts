@@ -29,6 +29,7 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   );
 
   const integrations = useSelector(integrationsStateService, (state) => state.context.integrations);
+  const search = useSelector(integrationsStateService, (state) => state.context.search);
 
   const error = useSelector(integrationsStateService, (state) => state.context.error);
 
@@ -36,7 +37,10 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
     state.matches('uninitialized')
   );
 
-  const isLoading = useSelector(integrationsStateService, (state) => state.matches('loading'));
+  const isLoading = useSelector(
+    integrationsStateService,
+    (state) => state.matches('debouncingSearch') || state.matches('loading')
+  );
   const isLoadingMore = useSelector(integrationsStateService, (state) =>
     state.matches('loadingMore')
   );
@@ -45,7 +49,7 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
     state.matches('loadingFailed')
   );
 
-  const search: SearchIntegrations = useCallback(
+  const searchIntegrations: SearchIntegrations = useCallback(
     (searchParams) =>
       integrationsStateService.send({
         type: 'SEARCH_INTEGRATIONS',
@@ -74,9 +78,10 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
 
     // Data
     integrations,
+    search,
 
     // Actions
-    search,
+    searchIntegrations,
     loadMore,
   };
 };

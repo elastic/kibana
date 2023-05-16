@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PageAfter, FindIntegrationsResponse } from '../../../../common/latest';
+import { FindIntegrationsResponse, FindIntegrationsRequestQuery } from '../../../../common/latest';
 import { Integration } from '../../../../common/data_streams';
 
 export interface DefaultIntegrationsContext {
   integrations: Integration[] | null;
   error: Error | null;
-  search?: {
-    pageAfter?: PageAfter;
-  };
+  search: FindIntegrationsRequestQuery;
+  total?: number;
 }
 
 export interface IntegrationsSearchParams {
-  name: string;
-  sortDirection: 'asc' | 'desc';
+  name?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type IntegrationTypestate =
@@ -40,6 +39,14 @@ export type IntegrationTypestate =
   | {
       value: 'loadingMore';
       context: DefaultIntegrationsContext;
+    }
+  | {
+      value: 'debouncingSearch';
+      context: DefaultIntegrationsContext;
+    }
+  | {
+      value: 'checkingMoreIntegrationsAvailability';
+      context: DefaultIntegrationsContext;
     };
 
 export type IntegrationsContext = IntegrationTypestate['context'];
@@ -55,7 +62,6 @@ export type IntegrationsEvent =
     }
   | {
       type: 'RELOAD_INTEGRATIONS';
-      search: IntegrationsSearchParams;
     }
   | {
       type: 'LOAD_MORE_INTEGRATIONS';
