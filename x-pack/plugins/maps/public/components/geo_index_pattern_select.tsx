@@ -42,7 +42,7 @@ export function GeoIndexPatternSelect(props: Props) {
         : ES_GEO_FIELD_TYPES.includes(field.type);
     });
     setIsDataViewInvalid(!hasGeoFields);
-  }, [props.dataView, props?.isGeoPointsOnly, setIsDataViewInvalid]);
+  }, [props.dataView, props?.isGeoPointsOnly]);
 
   const isMounted = useMountedState();
   const dataViewIdRef = useRef<string | undefined>();
