@@ -27,7 +27,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         freq: 2, // weekly
       },
     };
-    after(() => objectRemover.removeAll());
+    afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -143,6 +143,14 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
           },
         })
         .expect(200);
+
+      objectRemover.add(
+        space1,
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
 
       const { body: finish } = await supertest
         .post(

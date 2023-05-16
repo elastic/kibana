@@ -33,7 +33,6 @@ export default function activeMaintenanceWindowTests({ getService }: FtrProvider
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        afterEach(() => objectRemover.removeAll());
         it('should handle get active maintenance window request appropriately', async () => {
           // Create 2 active and 1 inactive maintenance window
           const { body: createdMaintenanceWindow1 } = await supertest
