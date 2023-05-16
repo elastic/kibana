@@ -14,3 +14,9 @@
   type: date
   description: >
     Event timestamp.
+- name: 'some_field'
+  type: keyword
+  dimension: true
+- name: 'some_metric_field'
+  type: integer
+  metric_type: gauge

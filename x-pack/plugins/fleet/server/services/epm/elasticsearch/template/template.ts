@@ -650,7 +650,7 @@ const updateExistingDataStream = async ({
   });
 
   const existingDsConfig = Object.values(existingDs);
-  const currentBackingIndexConfig = existingDsConfig[existingDsConfig.length - 1];
+  const currentBackingIndexConfig = existingDsConfig.at(-1);
 
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
   // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
@@ -703,7 +703,7 @@ const updateExistingDataStream = async ({
     // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
     currentSourceType !== mappings?._source?.mode
   ) {
-    logger.debug(
+    logger.info(
       `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
     );
     await rolloverDataStream(dataStreamName, esClient);
