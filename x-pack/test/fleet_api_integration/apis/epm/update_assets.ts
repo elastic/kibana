@@ -223,8 +223,8 @@ export default function (providerContext: FtrProviderContext) {
             name: 'reference2',
           },
           mapping: {
+            ignore_malformed: `true`,
             total_fields: {
-              ignore_malformed: `true`,
               limit: '10000',
             },
           },
