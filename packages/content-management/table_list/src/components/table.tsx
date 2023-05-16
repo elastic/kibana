@@ -46,46 +46,54 @@ type TagManagementProps = Pick<
 >;
 
 interface Props<T extends UserContentCommonSchema> extends State<T>, TagManagementProps {
+  clearTagSelection: () => void;
+  deleteItems: TableListViewProps<T>['deleteItems'];
   dispatch: Dispatch<Action<T>>;
   entityName: string;
   entityNamePlural: string;
-  isFetchingItems: boolean;
-  tableCaption: string;
-  tableColumns: Array<EuiBasicTableColumn<T>>;
+  fixedTag?: string;
   hasUpdatedAtMetadata: boolean;
-  deleteItems: TableListViewProps<T>['deleteItems'];
-  tableItemsRowActions: TableItemsRowActions;
+  isFetchingItems: boolean;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
-  clearTagSelection: () => void;
+  tableCaption: string;
+  tableColumns: Array<EuiBasicTableColumn<T>>;
+  tableItemsRowActions: TableItemsRowActions;
 }
 
 export function Table<T extends UserContentCommonSchema>({
-  dispatch,
-  items,
-  isFetchingItems,
-  searchQuery,
-  selectedIds,
-  pagination,
-  tableColumns,
-  tableSort,
-  hasUpdatedAtMetadata,
-  entityName,
-  entityNamePlural,
-  tagsToTableItemMap,
-  tableItemsRowActions,
-  deleteItems,
-  tableCaption,
-  onTableChange,
-  onTableSearchChange,
-  onSortChange,
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
+  deleteItems,
+  dispatch,
+  entityName,
+  entityNamePlural,
   fixedTag = 'Security Solution',
+  hasUpdatedAtMetadata,
+  isFetchingItems,
+  items,
+  onSortChange,
+  onTableChange,
+  onTableSearchChange,
+  pagination,
+  searchQuery,
+  selectedIds,
+  tableCaption,
+  tableColumns,
+  tableItemsRowActions,
+  tableSort,
+  tagsToTableItemMap,
 }: Props<T>) {
   const { getTagList } = useServices();
+  const getTagListing = useCallback(() => {
+    let tags = getTagList();
+    if (fixedTag) {
+      tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
+    }
+    return tags;
+  }, [fixedTag, getTagList]);
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -148,13 +156,7 @@ export function Table<T extends UserContentCommonSchema>({
     totalActiveFilters,
   } = useTagFilterPanel({
     query: searchQuery.query,
-    getTagList: useCallback(() => {
-      let tags = getTagList();
-      if (fixedTag) {
-        tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
-      }
-      return tags;
-    }, [fixedTag, getTagList]),
+    getTagList: getTagListing,
     fixedTag: 'Security Solution',
     tagsToTableItemMap,
     addOrRemoveExcludeTagFilter,

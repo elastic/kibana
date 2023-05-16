@@ -29,6 +29,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
+import { noop } from 'lodash';
 import { useServices } from '../services';
 import type { TagOptionItem } from './use_tag_filter_panel';
 
@@ -46,25 +47,25 @@ const saveBtnWrapperCSS = css`
 interface Props {
   clearTagSelection: () => void;
   closePopover: () => void;
-  isPopoverOpen: boolean;
+  disableActions?: boolean;
   isInUse: boolean;
-  options: TagOptionItem[];
-  totalActiveFilters: number;
+  isPopoverOpen: boolean;
   onFilterButtonClick: () => void;
   onSelectChange: (updatedOptions: TagOptionItem[]) => void;
-  disableActions?: boolean;
+  options: TagOptionItem[];
+  totalActiveFilters: number;
 }
 
 export const TagFilterPanel: FC<Props> = ({
-  isPopoverOpen,
+  clearTagSelection,
+  closePopover,
+  disableActions,
   isInUse,
-  options,
-  totalActiveFilters,
+  isPopoverOpen,
   onFilterButtonClick,
   onSelectChange,
-  closePopover,
-  clearTagSelection,
-  disableActions,
+  options,
+  totalActiveFilters,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
@@ -151,7 +152,7 @@ export const TagFilterPanel: FC<Props> = ({
           renderOption={(option) => option.view}
           emptyMessage="There aren't any tags"
           noMatchesMessage="No tag matches the search"
-          onChange={!disableActions ? onSelectChange : null}
+          onChange={!disableActions ? onSelectChange : noop}
           data-test-subj="tagSelectableList"
           {...searchProps}
         >

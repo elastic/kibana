@@ -72,28 +72,28 @@ const toTableListViewSavedObject = (
 };
 
 export type DashboardListingProps = PropsWithChildren<{
-  initialFilter?: string;
-  useSessionStorageIntegration?: boolean;
-  goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
+  fixedTag?: string;
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
-  withPageTemplateHeader?: boolean;
-  restrictPageSectionWidth?: boolean;
+  goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
+  initialFilter?: string;
   pageSectionPadding?: EuiPaddingSize;
+  restrictPageSectionWidth?: boolean;
   tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
-  fixedTag?: string
+  useSessionStorageIntegration?: boolean;
+  withPageTemplateHeader?: boolean;
 }>;
 
 export const DashboardListing = ({
   children,
-  initialFilter,
-  goToDashboard,
+  fixedTag,
   getDashboardUrl,
+  goToDashboard,
+  initialFilter,
+  pageSectionPadding = 'm',
+  restrictPageSectionWidth = true,
+  tagReferences,
   useSessionStorageIntegration,
   withPageTemplateHeader = true,
-  restrictPageSectionWidth = true,
-  pageSectionPadding = 'm',
-  tagReferences,
-  fixedTag
 }: DashboardListingProps) => {
   const {
     application,
