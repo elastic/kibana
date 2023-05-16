@@ -239,8 +239,11 @@ export function getRuleType(
         conditions: humanFn,
       };
       const actionContext = addMessages(name, baseContext, params);
-      const alert = alertFactory.create(alertId);
-      alert.scheduleActions(ActionGroupId, actionContext);
+      // TODO: Undo this change
+      for (let i = 0; i < 1000; i++) {
+        const alert = alertFactory.create(`${alertId}-${i}`);
+        alert.scheduleActions(ActionGroupId, actionContext);
+      }
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 

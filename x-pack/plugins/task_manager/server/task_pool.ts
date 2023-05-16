@@ -20,6 +20,7 @@ import { TaskManagerStat } from './task_events';
 interface Opts {
   maxWorkers$: Observable<number>;
   logger: Logger;
+  shareWorkers: boolean;
 }
 
 export enum TaskPoolRunResult {
@@ -43,6 +44,7 @@ export class TaskPool {
   private tasksInPool = new Map<string, TaskRunner>();
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
+  private readonly shareWorkers: boolean;
 
   /**
    * Creates an instance of TaskPool.
@@ -54,6 +56,7 @@ export class TaskPool {
    */
   constructor(opts: Opts) {
     this.logger = opts.logger;
+    this.shareWorkers = opts.shareWorkers;
     opts.maxWorkers$.subscribe((maxWorkers) => {
       this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
       this.maxWorkers = maxWorkers;
@@ -68,7 +71,11 @@ export class TaskPool {
    * Gets how many workers are currently in use.
    */
   public get occupiedWorkers() {
-    return this.tasksInPool.size;
+    let count = 0;
+    for (const [, runner] of Array.from(this.tasksInPool)) {
+      count += this.shareWorkers ? runner.definition.workerCost : 1;
+    }
+    return count;
   }
 
   /**
@@ -108,10 +115,9 @@ export class TaskPool {
    * @returns {Promise<boolean>}
    */
   public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
-    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
-    if (tasksToRun.length) {
+    if (tasks.length) {
       await Promise.all(
-        tasksToRun
+        tasks
           .filter(
             (taskRunner) =>
               !Array.from(this.tasksInPool.keys()).some((executionId: string) =>
@@ -142,12 +148,7 @@ export class TaskPool {
       );
     }
 
-    if (leftOverTasks.length) {
-      if (this.availableWorkers) {
-        return this.run(leftOverTasks);
-      }
-      return TaskPoolRunResult.RanOutOfCapacity;
-    } else if (!this.availableWorkers) {
+    if (!this.availableWorkers) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
@@ -216,11 +217,6 @@ export class TaskPool {
       this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
     }
   }
-}
-
-function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
-  const listInCount = list.splice(0, count);
-  return [listInCount, list];
 }
 
 function durationAsString(duration: Duration): string {

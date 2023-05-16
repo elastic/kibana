@@ -65,6 +65,7 @@ export interface TaskRegisterDefinition {
    * The default value, if not given, is 0.
    */
   maxConcurrency?: number;
+  workerCost?: number;
 }
 
 /**

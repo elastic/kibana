@@ -121,6 +121,7 @@ export class TaskPollingLifecycle {
     this.pool = new TaskPool({
       logger,
       maxWorkers$: maxWorkersConfiguration$,
+      shareWorkers: config.share_workers,
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -142,6 +143,7 @@ export class TaskPollingLifecycle {
               0
             )
           : this.pool.availableWorkers,
+      shareWorkers: config.share_workers,
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);

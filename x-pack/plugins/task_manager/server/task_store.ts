@@ -391,7 +391,7 @@ export class TaskStore {
     }
   }
 
-  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  public async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
