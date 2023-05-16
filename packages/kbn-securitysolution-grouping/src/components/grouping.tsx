@@ -221,7 +221,7 @@ const GroupingComponent = <T,>({
           <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
         )}
         {groupCount > 0 ? (
-          <>
+          <span data-test-subj={`grouping-level-${groupingLevel}`}>
             {groupPanels}
             {groupCount > 0 && (
               <>
@@ -246,7 +246,7 @@ const GroupingComponent = <T,>({
                 />
               </>
             )}
-          </>
+          </span>
         ) : (
           <EmptyGroupingComponent />
         )}
