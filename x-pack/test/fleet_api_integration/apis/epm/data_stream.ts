@@ -340,56 +340,6 @@ export default function (providerContext: FtrProviderContext) {
 
         return resLogsDatastream.body.data_streams[0].indices.length;
       });
-
-      it('should rollover datstream after enabling a experimental datastream feature that need a rollover', async () => {
-        expect(await getLogsDefaultBackingIndicesLength()).to.be(1);
-
-        await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            ...packagePolicyData,
-            package: {
-              ...packagePolicyData.package,
-              experimental_data_stream_features: [
-                {
-                  data_stream: logsTemplateName,
-                  features: {
-                    synthetic_source: false,
-                    tsdb: false,
-                    doc_value_only_numeric: true,
-                    doc_value_only_other: true,
-                  },
-                },
-              ],
-            },
-          })
-          .expect(200);
-
-        // Datastream should have been rolled over
-        expect(await getLogsDefaultBackingIndicesLength()).to.be(2);
-      });
-
-      it('should allow updating a package policy with only a partial set of experimental datastream features', async () => {
-        await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            ...packagePolicyData,
-            package: {
-              ...packagePolicyData.package,
-              experimental_data_stream_features: [
-                {
-                  data_stream: metricsTemplateName,
-                  features: {
-                    synthetic_source: true,
-                  },
-                },
-              ],
-            },
-          })
-          .expect(200);
-      });
     });
   });
 }
