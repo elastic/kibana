@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
+import type { Agent, ListWithKuery, AgentSOAttributes } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';

@@ -36,7 +36,6 @@ import type {
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
   AgentPolicy,
-  AgentPolicySOAttributes,
   FullAgentPolicy,
   ListWithKuery,
   NewPackagePolicy,
@@ -71,6 +70,8 @@ import {
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
+
+import type { AgentPolicySOAttributes } from '../types';
 
 import {
   elasticAgentStandaloneManifest,
@@ -398,7 +399,10 @@ class AgentPolicyService {
     const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
     let agentPoliciesSO;
     try {
-      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({ ...baseFindParams, filter });
+      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+        ...baseFindParams,
+        filter,
+      });
     } catch (e) {
       const isBadRequest = e.output?.statusCode === 400;
       const isKQLSyntaxError = e.message?.startsWith('KQLSyntaxError');

@@ -18,10 +18,10 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 import type {
-  AgentPolicySOAttributes,
   Installation,
   OutputSOAttributes,
   PackagePolicySOAttributes,
+  AgentPolicySOAttributes,
 } from '../types';
 
 import { useDockerRegistry } from './helpers';

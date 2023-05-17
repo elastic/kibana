@@ -37,7 +37,9 @@ function savedObjectToFleetProxy(so: SavedObject<FleetProxySOAttributes>): Fleet
 }
 
 function fleetProxyDataToSOAttribute(data: NewFleetProxy): FleetProxySOAttributes;
-function fleetProxyDataToSOAttribute(data: Partial<NewFleetProxy>): Partial<FleetProxySOAttributes>;
+function fleetProxyDataToSOAttribute(
+  data: Partial<NewFleetProxy>
+): Partial<FleetProxySOAttributes>;
 function fleetProxyDataToSOAttribute(
   data: Partial<NewFleetProxy> | NewFleetProxy
 ): Partial<FleetProxySOAttributes> | Partial<FleetProxySOAttributes> {

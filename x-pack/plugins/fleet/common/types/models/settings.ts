@@ -18,4 +18,5 @@ export interface Settings extends BaseSettings {
   preconfigured_fields?: Array<'fleet_server_hosts'>;
 }
 
+// TODO: Remove deprecated type
 export interface SettingsSOAttributes extends BaseSettings, SavedObjectAttributes {}
