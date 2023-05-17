@@ -98,8 +98,8 @@ export function registerConnectorTypes({
   actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
-  actions.registerType(getGenerativeAiConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
+  actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
 }

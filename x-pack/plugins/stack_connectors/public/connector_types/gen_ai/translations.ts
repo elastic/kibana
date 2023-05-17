@@ -60,3 +60,23 @@ export const BODY_REQUIRED = i18n.translate(
     defaultMessage: 'Body is required.',
   }
 );
+export const BODY_INVALID = i18n.translate(
+  'xpack.stackConnectors.security.genAi.params.error.invalidBodyText',
+  {
+    defaultMessage: 'Body does not have a valid JSON format.',
+  }
+);
+
+export const ACTION_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.security.genAi.params.error.requiredActionText',
+  {
+    defaultMessage: 'Action is required.',
+  }
+);
+
+export const INVALID_ACTION = i18n.translate(
+  'xpack.stackConnectors.security.genAi.params.error.invalidActionText',
+  {
+    defaultMessage: 'Invalid action name.',
+  }
+);
