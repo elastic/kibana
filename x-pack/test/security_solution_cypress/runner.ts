@@ -29,7 +29,7 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
   command: string,
   envVars?: Record<string, string>
 ) {
-  const log = getService('log');
+  // const log = getService('log');
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
@@ -41,13 +41,8 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
     CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
     CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-    // ...(config.get('kbnTestServer.env')?.cypress?.env || {}),
-    // ...process.env,
     ...envVars,
     baseUrl: Url.format(config.get('servers.kibana')),
-    e2e: {
-      baseUrl: Url.format(config.get('servers.kibana')),
-    },
     BASE_URL: Url.format(config.get('servers.kibana')),
     ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),

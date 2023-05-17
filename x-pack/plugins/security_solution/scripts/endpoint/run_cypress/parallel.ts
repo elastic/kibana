@@ -14,7 +14,8 @@ import globby from 'globby';
 import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
-import cypress from 'cypress';
+// import cypress from 'cypress';
+import execa from 'execa';
 
 import {
   FunctionalTestRunner,
@@ -253,7 +254,7 @@ export default async () => {
 
       console.error('options', options, kibanaPort);
 
-      const shutdownEs = await runElasticsearch({
+      await runElasticsearch({
         config,
         log,
         name: `ftr-${esPort}`,
@@ -277,6 +278,67 @@ export default async () => {
 
       const customEnv = await functionalTestRunner.run();
 
+      console.error('customEnv', customEnv);
+
+      // const child = execa.node(require.resolve('./subprocess'));
+
+      // const child = await execa('node', [require.resolve('./subprocess')]);
+
+      // console.error('child', child);
+
+      const subprocess = execa('node', [require.resolve('./subprocess')], {
+        extendEnv: true,
+        env: {
+          ...customEnv,
+          CYPRESS_SPEC: filePath,
+          CYPRESS_CONFIG_FILE: argv.configFile,
+        },
+      });
+      console.error('subprocess', subprocess);
+      subprocess.stdout.pipe(process.stdout);
+
+      try {
+        const { stdout } = await subprocess;
+        console.log('child output:', stdout);
+      } catch (error) {
+        console.error('child failed:', error);
+      }
+
+      // child.on('message', (msg) => {
+      //   console.log('The message between IPC channel, in app.js\n', msg);
+      //   // resolve(msg);
+      // });
+
+      // console.error('child', process.argv, require.resolve('.'), child);
+
+      // console.error({
+      //   spec: filePath,
+      //   headed: true,
+      //   configFile: argv.configFile,
+      //   config: {
+      //     env: customEnv,
+      //     baseUrl: `http://localhost:${kibanaPort}`,
+      //   },
+      // });
+
+      // child.send({
+      //   spec: filePath,
+      //   headed: true,
+      //   configFile: argv.configFile,
+      //   config: {
+      //     env: customEnv,
+      //     baseUrl: `http://localhost:${kibanaPort}`,
+      //   },
+      // });
+
+      // return new Promise((resolve) => {
+      // child.on('message', (msg) => {
+      //   console.log('The message between IPC channel, in app.js\n', msg);
+      //   resolve(msg);
+      // });
+      //   setTimeout(() => resolve({}), 1000000);
+      // });
+
       // return cypress.open({
       //   spec: filePath,
       //   headed: true,
@@ -286,24 +348,25 @@ export default async () => {
       //     baseUrl: `http://localhost:${kibanaPort}`,
       //   },
       // });
-      return cypress
-        .run({
-          browser: 'chrome'
-          spec: filePath,
-          headed: true,
-          configFile: argv.configFile,
-          config: {
-            env: customEnv,
-            baseUrl: `http://localhost:${kibanaPort}`,
-          },
-        })
-        .finally(() => {
-          cleanupServerPorts({ esPort, kibanaPort });
-        });
+      // return cypress
+      //   .run({
+      //     browser: 'chrome',
+      //     spec: filePath,
+      //     headed: true,
+      //     configFile: argv.configFile,
+      //     config: {
+      //       env: customEnv,
+      //       baseUrl: `http://localhost:${kibanaPort}`,
+      //     },
+      //   })
+      //   .finally(() => {
+      //     cleanupServerPorts({ esPort, kibanaPort });
+      //   });
     },
-    { concurrency: 1 }
+    { concurrency: 2 }
   ).then((results) => {
-    renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
+    console.error('results', results);
+    // renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
     process.exit(_.some(results, (result) => result > 0) ? 1 : 0);
   });
   // ).then(() => {
