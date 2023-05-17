@@ -105,19 +105,46 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         })
       );
 
-      const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        startServices.savedObjects,
-        request
-      );
-      const sourceSpaceId = getSpacesService().getSpaceId(request);
-      const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
-        objects,
-        includeReferences,
-        overwrite,
-        createNewCopies,
-        compatibilityMode,
-      });
-      return response.ok({ body: copyResponse });
+      try {
+        const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+          startServices.savedObjects,
+          request
+        );
+        const sourceSpaceId = getSpacesService().getSpaceId(request);
+        const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
+          objects,
+          includeReferences,
+          overwrite,
+          createNewCopies,
+          compatibilityMode,
+        });
+        return response.ok({ body: copyResponse });
+      } catch (e) {
+        if (e.type === 'object-fetch-error' && e.attributes?.objects) {
+          // console.log(`ERROR: ${JSON.stringify(e)}`);
+          // Option 1:
+          // {
+          //   "statusCode": 404,
+          //   "error": "Not Found",
+          //   "message": "Error fetching objects to export"
+          // }
+          // return response.notFound({ body: { message: e.message } });
+
+          // Option 2:
+          // {
+          //   "statusCode": 404,
+          //   "error": "Not Found",
+          //   "message": "Saved objects not found [dashboard/7adfa750-4c81-11e8-b3d7-01146121b73e,dashboard/7adfa750-4c81-11e8-b3d7-01146121b73f,dashboard/7adfa750-4c81-11e8-b3d7-01146121b73g]"
+          // }
+          const message =
+            'Saved objects not found [' +
+            e.attributes.objects
+              ?.map((object: { type: string; id: string }) => object.type + '/' + object.id)
+              .join(',') +
+            ']';
+          return response.notFound({ body: { message } });
+        } else throw e;
+      }
     })
   );
 
