@@ -70,7 +70,7 @@ describe('Automated Response Actions', () => {
       toggleRuleOffAndOn(ruleName);
     });
 
-    it.only('should display endpoint automated response action in event details flyout ', () => {
+    it('should display endpoint automated response action in event details flyout ', () => {
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
