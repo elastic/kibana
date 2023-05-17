@@ -73,7 +73,7 @@ export class AssetDetailsEmbeddable extends Embeddable<AssetDetailsEmbeddableInp
             <LazyAssetDetailsWrapper
               currentTimeRange={this.input.currentTimeRange}
               node={this.input.node}
-              // nodeType={this.input.nodeType}
+              nodeType={this.input.nodeType}
               showActionsColumn={this.input.showActionsColumn}
               closeFlyout={this.input.closeFlyout}
               renderedTabsSet={this.input.renderedTabsSet}

@@ -42,6 +42,7 @@ export interface Tab {
 
 export interface AssetDetailsProps {
   node: HostNodeRow;
+  nodeType: InventoryItemType;
   closeFlyout: () => void;
   renderedTabsSet: React.MutableRefObject<Set<TabIds>>;
   currentTimeRange: {
@@ -63,6 +64,7 @@ export interface AssetDetailsProps {
   showActionsColumn?: boolean;
 }
 
+// Setting host as default as it will be the only supported type for now
 const NODE_TYPE = 'host' as InventoryItemType;
 
 export const AssetDetails = ({
@@ -77,6 +79,7 @@ export const AssetDetails = ({
   showInFlyout,
   links,
   showActionsColumn,
+  nodeType = NODE_TYPE,
 }: AssetDetailsProps) => {
   const { euiTheme } = useEuiTheme();
   const [selectedTabId, setSelectedTabId] = useState('metadata');
@@ -118,7 +121,7 @@ export const AssetDetails = ({
           margin-right: ${euiTheme.size.l};
         `}
       >
-        <LinkToUptime nodeType={NODE_TYPE} node={node} />
+        <LinkToUptime nodeType={nodeType} node={node} />
       </EuiFlexItem>
     ),
   };
@@ -149,7 +152,7 @@ export const AssetDetails = ({
             <Metadata
               currentTimeRange={currentTimeRange}
               node={node}
-              nodeType={NODE_TYPE}
+              nodeType={nodeType}
               showActionsColumn={showActionsColumn}
               persistMetadataSearchToUrlState={persistMetadataSearchToUrlState}
             />
@@ -159,7 +162,7 @@ export const AssetDetails = ({
           <div hidden={(hostFlyoutOpen?.selectedTabId ?? selectedTabId) !== FlyoutTabIds.PROCESSES}>
             <Processes
               node={node}
-              nodeType={NODE_TYPE}
+              nodeType={nodeType}
               currentTime={currentTimeRange.to}
               hostFlyoutOpen={hostFlyoutOpen}
               setHostFlyoutOpen={setHostFlyoutOpen}
@@ -197,7 +200,7 @@ export const AssetDetails = ({
             <Metadata
               currentTimeRange={currentTimeRange}
               node={node}
-              nodeType={NODE_TYPE}
+              nodeType={nodeType}
               showActionsColumn={showActionsColumn}
               persistMetadataSearchToUrlState={persistMetadataSearchToUrlState}
             />
@@ -207,7 +210,7 @@ export const AssetDetails = ({
           <div hidden={(hostFlyoutOpen?.selectedTabId ?? selectedTabId) !== FlyoutTabIds.PROCESSES}>
             <Processes
               node={node}
-              nodeType={NODE_TYPE}
+              nodeType={nodeType}
               currentTime={currentTimeRange.to}
               hostFlyoutOpen={hostFlyoutOpen}
               setHostFlyoutOpen={setHostFlyoutOpen}

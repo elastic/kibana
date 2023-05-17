@@ -41,6 +41,7 @@ export default {
       diskLatency: 0.15291777273162221,
       memoryTotal: 34359738368,
     },
+    nodeType: 'host',
     closeFlyout: () => {},
     onTabClick: () => {},
     renderedTabsSet: { current: new Set(['metadata']) },
