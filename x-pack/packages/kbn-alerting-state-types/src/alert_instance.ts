@@ -6,10 +6,9 @@
  */
 
 import * as t from 'io-ts';
-import { DateFromString } from './date_from_string';
 
 const actionSchema = t.type({
-  date: DateFromString,
+  date: t.string,
 });
 
 export const throttledActionSchema = t.record(t.string, actionSchema);
@@ -21,7 +20,7 @@ const lastScheduledActionsSchema = t.intersection([
   }),
   t.type({
     group: t.string,
-    date: DateFromString,
+    date: t.string,
   }),
   t.partial({ actions: throttledActionSchema }),
 ]);

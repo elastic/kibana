@@ -266,6 +266,36 @@ export class RuleTypeRegistry {
       /** stripping the typing is required in order to store the RuleTypes in a Map */
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
+
+    const rawAlertInstanceSchema = schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          meta: schema.maybe(
+            schema.object({
+              lastScheduledActions: schema.maybe(
+                schema.object({
+                  subgroup: schema.maybe(schema.string()),
+                  group: schema.string(),
+                  date: schema.string(),
+                  actions: schema.maybe(
+                    schema.recordOf(schema.string(), schema.object({ date: schema.string() }))
+                  ),
+                })
+              ),
+              flappingHistory: schema.maybe(schema.arrayOf(schema.boolean())),
+              flapping: schema.maybe(schema.boolean()),
+              maintenanceWindowIds: schema.maybe(schema.arrayOf(schema.string())),
+              pendingRecoveredCount: schema.maybe(schema.number()),
+              uuid: schema.maybe(schema.string()),
+            })
+          ),
+          // TODO expand any
+          state: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        })
+      )
+    );
+
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
@@ -276,13 +306,12 @@ export class RuleTypeRegistry {
             alertTypeState: schema.maybe(
               schema.recordOf(schema.string(), schema.maybe(schema.any()))
             ),
-            // TODO expand any
-            alertInstances: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-            // TODO expand any
-            alertRecoveredInstances: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+            alertInstances: rawAlertInstanceSchema,
+            alertRecoveredInstances: rawAlertInstanceSchema,
             previousStartedAt: schema.maybe(schema.nullable(schema.string())),
-            // TODO expand any
-            summaryActions: schema.maybe(schema.any()),
+            summaryActions: schema.maybe(
+              schema.recordOf(schema.string(), schema.object({ date: schema.string() }))
+            ),
           }),
         },
         createTaskRunner: (context: RunContext) =>

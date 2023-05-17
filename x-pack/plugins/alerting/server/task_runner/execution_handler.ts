@@ -243,7 +243,7 @@ export class ExecutionHandler<
           });
 
           if (isActionOnInterval(action)) {
-            throttledSummaryActions[action.uuid!] = { date: new Date() };
+            throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
           }
 
           logActions.push({

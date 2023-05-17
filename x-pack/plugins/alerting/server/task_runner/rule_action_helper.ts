@@ -58,7 +58,7 @@ export const isSummaryActionThrottled = ({
     logger.debug(`Action'${action?.actionTypeId}:${action?.id}', has an invalid throttle interval`);
   }
 
-  const throttled = throttledAction.date.getTime() + throttleMills > Date.now();
+  const throttled = new Date(throttledAction.date).getTime() + throttleMills > Date.now();
 
   if (throttled) {
     logger.debug(

@@ -50,7 +50,10 @@ describe('createAlertFactory()', () => {
   test('reuses existing alerts', () => {
     const alert = new Alert('1', {
       state: { foo: true },
-      meta: { lastScheduledActions: { group: 'default', date: new Date() }, uuid: 'uuid-previous' },
+      meta: {
+        lastScheduledActions: { group: 'default', date: new Date().toISOString() },
+        uuid: 'uuid-previous',
+      },
     });
     const alertFactory = createAlertFactory({
       alerts: {
@@ -67,7 +70,7 @@ describe('createAlertFactory()', () => {
         uuid: 'uuid-previous',
         flappingHistory: [],
         lastScheduledActions: {
-          date: expect.any(Date),
+          date: expect.any(String),
           group: 'default',
         },
       },

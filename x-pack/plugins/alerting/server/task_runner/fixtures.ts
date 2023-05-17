@@ -368,7 +368,7 @@ export const generateAlertInstance = (
     meta: {
       uuid: expect.any(String),
       lastScheduledActions: {
-        date: new Date(DATE_1970),
+        date: new Date(DATE_1970).toISOString(),
         group: 'default',
         ...(actions && { actions }),
       },

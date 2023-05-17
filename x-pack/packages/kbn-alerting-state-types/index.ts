@@ -15,8 +15,6 @@ export type {
 } from './src/alert_instance';
 export { rawAlertInstance } from './src/alert_instance';
 
-export { DateFromString } from './src/date_from_string';
-
 export type { TrackedLifecycleAlertState, WrappedLifecycleRuleState } from './src/lifecycle_state';
 export { wrappedStateRt } from './src/lifecycle_state';
 
