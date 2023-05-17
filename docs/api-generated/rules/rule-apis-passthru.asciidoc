@@ -144,33 +144,12 @@ Any modifications made to this file will be overwritten.
           "start" : "08:00",
           "end" : "17:00"
         },
-        "timezone" : "UTC",
+        "timezone" : "Europe/Madrid",
         "days" : [ 1, 2, 3, 4, 5 ]
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        }, {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        } ],
-        "dsl" : "dsl"
+        "filters" : [ "{}", "{}" ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -191,33 +170,12 @@ Any modifications made to this file will be overwritten.
           "start" : "08:00",
           "end" : "17:00"
         },
-        "timezone" : "UTC",
+        "timezone" : "Europe/Madrid",
         "days" : [ 1, 2, 3, 4, 5 ]
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        }, {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        } ],
-        "dsl" : "dsl"
+        "filters" : [ "{}", "{}" ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -510,33 +468,12 @@ Any modifications made to this file will be overwritten.
             "start" : "08:00",
             "end" : "17:00"
           },
-          "timezone" : "UTC",
+          "timezone" : "Europe/Madrid",
           "days" : [ 1, 2, 3, 4, 5 ]
         },
         "query" : {
           "kql" : "kql",
-          "filters" : [ {
-            "meta" : {
-              "key" : ""
-            },
-            "query" : {
-              "key" : ""
-            },
-            "state$" : {
-              "store" : "store"
-            }
-          }, {
-            "meta" : {
-              "key" : ""
-            },
-            "query" : {
-              "key" : ""
-            },
-            "state$" : {
-              "store" : "store"
-            }
-          } ],
-          "dsl" : "dsl"
+          "filters" : [ "{}", "{}" ]
         }
       },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -557,33 +494,12 @@ Any modifications made to this file will be overwritten.
             "start" : "08:00",
             "end" : "17:00"
           },
-          "timezone" : "UTC",
+          "timezone" : "Europe/Madrid",
           "days" : [ 1, 2, 3, 4, 5 ]
         },
         "query" : {
           "kql" : "kql",
-          "filters" : [ {
-            "meta" : {
-              "key" : ""
-            },
-            "query" : {
-              "key" : ""
-            },
-            "state$" : {
-              "store" : "store"
-            }
-          }, {
-            "meta" : {
-              "key" : ""
-            },
-            "query" : {
-              "key" : ""
-            },
-            "state$" : {
-              "store" : "store"
-            }
-          } ],
-          "dsl" : "dsl"
+          "filters" : [ "{}", "{}" ]
         }
       },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -646,33 +562,12 @@ Any modifications made to this file will be overwritten.
             "start" : "08:00",
             "end" : "17:00"
           },
-          "timezone" : "UTC",
+          "timezone" : "Europe/Madrid",
           "days" : [ 1, 2, 3, 4, 5 ]
         },
         "query" : {
           "kql" : "kql",
-          "filters" : [ {
-            "meta" : {
-              "key" : ""
-            },
-            "query" : {
-              "key" : ""
-            },
-            "state$" : {
-              "store" : "store"
-            }
-          }, {
-            "meta" : {
-              "key" : ""
-            },
-            "query" : {
-              "key" : ""
-            },
-            "state$" : {
-              "store" : "store"
-            }
-          } ],
-          "dsl" : "dsl"
+          "filters" : [ "{}", "{}" ]
         }
       },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -693,33 +588,12 @@ Any modifications made to this file will be overwritten.
             "start" : "08:00",
             "end" : "17:00"
           },
-          "timezone" : "UTC",
+          "timezone" : "Europe/Madrid",
           "days" : [ 1, 2, 3, 4, 5 ]
         },
         "query" : {
           "kql" : "kql",
-          "filters" : [ {
-            "meta" : {
-              "key" : ""
-            },
-            "query" : {
-              "key" : ""
-            },
-            "state$" : {
-              "store" : "store"
-            }
-          }, {
-            "meta" : {
-              "key" : ""
-            },
-            "query" : {
-              "key" : ""
-            },
-            "state$" : {
-              "store" : "store"
-            }
-          } ],
-          "dsl" : "dsl"
+          "filters" : [ "{}", "{}" ]
         }
       },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -897,33 +771,12 @@ Any modifications made to this file will be overwritten.
           "start" : "08:00",
           "end" : "17:00"
         },
-        "timezone" : "UTC",
+        "timezone" : "Europe/Madrid",
         "days" : [ 1, 2, 3, 4, 5 ]
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        }, {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        } ],
-        "dsl" : "dsl"
+        "filters" : [ "{}", "{}" ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -944,33 +797,12 @@ Any modifications made to this file will be overwritten.
           "start" : "08:00",
           "end" : "17:00"
         },
-        "timezone" : "UTC",
+        "timezone" : "Europe/Madrid",
         "days" : [ 1, 2, 3, 4, 5 ]
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        }, {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        } ],
-        "dsl" : "dsl"
+        "filters" : [ "{}", "{}" ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -2325,33 +2157,12 @@ Any modifications made to this file will be overwritten.
           "start" : "08:00",
           "end" : "17:00"
         },
-        "timezone" : "UTC",
+        "timezone" : "Europe/Madrid",
         "days" : [ 1, 2, 3, 4, 5 ]
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        }, {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        } ],
-        "dsl" : "dsl"
+        "filters" : [ "{}", "{}" ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -2372,33 +2183,12 @@ Any modifications made to this file will be overwritten.
           "start" : "08:00",
           "end" : "17:00"
         },
-        "timezone" : "UTC",
+        "timezone" : "Europe/Madrid",
         "days" : [ 1, 2, 3, 4, 5 ]
       },
       "query" : {
         "kql" : "kql",
-        "filters" : [ {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        }, {
-          "meta" : {
-            "key" : ""
-          },
-          "query" : {
-            "key" : ""
-          },
-          "state$" : {
-            "store" : "store"
-          }
-        } ],
-        "dsl" : "dsl"
+        "filters" : [ "{}", "{}" ]
       }
     },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
@@ -2451,8 +2241,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter"><code>actions_inner_alerts_filter</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_query"><code>actions_inner_alerts_filter_query</code> - </a></li>
-    <li><a href="#actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a></li>
-    <li><a href="#actions_inner_alerts_filter_query_filters_inner_state_"><code>actions_inner_alerts_filter_query_filters_inner_state_</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_timeframe"><code>actions_inner_alerts_filter_timeframe</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_timeframe_hours"><code>actions_inner_alerts_filter_timeframe_hours</code> - </a></li>
     <li><a href="#actions_inner_frequency"><code>actions_inner_frequency</code> - </a></li>
@@ -2592,7 +2380,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="actions_inner_alerts_filter"><code>actions_inner_alerts_filter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>Conditions that affect whether actions run when an alert occurs. If you specify multiple conditions, all conditions must be met for the actions to run. For example, if an alert occurs within the specified time frame and matches the query, its actions run.</div>
+    <div class='model-description'>Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.</div>
     <div class="field-items">
       <div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query">actions_inner_alerts_filter_query</a></span>  </div>
 <div class="param">timeframe (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_timeframe">actions_inner_alerts_filter_timeframe</a></span>  </div>
@@ -2600,41 +2388,24 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="actions_inner_alerts_filter_query"><code>actions_inner_alerts_filter_query</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>Defines a KQL query or filter that limits which alerts generate actions.</div>
+    <div class='model-description'>Defines a query filter that determines whether the action runs.</div>
     <div class="field-items">
-      <div class="param">dsl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A filter written in Elasticsearch Query Domain Specific Language (DSL). </div>
-<div class="param">kql (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A filter written in Kibana Query Language (KQL). </div>
-<div class="param">filters (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner">array[actions_inner_alerts_filter_query_filters_inner]</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">meta (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span>  </div>
-<div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span>  </div>
-<div class="param">stateDollar (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner_state_">actions_inner_alerts_filter_query_filters_inner_state_</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="actions_inner_alerts_filter_query_filters_inner_state_"><code>actions_inner_alerts_filter_query_filters_inner_state_</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">store (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">kql (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A filter written in Kibana Query Language (KQL). </div>
+<div class="param">filters (optional)</div><div class="param-desc"><span class="param-type"><a href="#object">array[Object]</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="actions_inner_alerts_filter_timeframe"><code>actions_inner_alerts_filter_timeframe</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>Defines a period that limits which alerts generate actions.</div>
+    <div class='model-description'>Defines a period that limits whether the action runs.</div>
     <div class="field-items">
-      <div class="param">days (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> An array of numbers that represent days of the week. For example, <code>1</code> represents Monday. </div>
+      <div class="param">days (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> Defines the days of the week that the action can run, represented as an array of numbers. For example, <code>1</code> represents Monday. An empty array is equivalent to specifying all the days of the week. </div>
 <div class="param">hours (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_timeframe_hours">actions_inner_alerts_filter_timeframe_hours</a></span>  </div>
-<div class="param">timezone (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The time zone for the <code>hours</code> values. </div>
+<div class="param">timezone (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ISO time zone for the <code>hours</code> values. Values such as <code>UTC</code> and <code>UTC+1</code> also work but lack built-in daylight savings time support and are not recommended. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="actions_inner_alerts_filter_timeframe_hours"><code>actions_inner_alerts_filter_timeframe_hours</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
+    <div class='model-description'>Defines the range of time in a day that the action can run. If the <code>start</code> value is <code>00:00</code> and the <code>end</code> value is <code>24:00</code>, actions be generated all day.</div>
     <div class="field-items">
       <div class="param">end (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The end of the time frame in 24-hour notation (<code>hh:mm</code>). </div>
 <div class="param">start (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The start of the time frame in 24-hour notation (<code>hh:mm</code>). </div>
