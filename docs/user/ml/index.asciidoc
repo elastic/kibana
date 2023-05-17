@@ -1,5 +1,5 @@
 [role="xpack"]
-[[xpack-ml]]
+[id="xpack-ml",canonical-url="https://www.elastic.co/guide/en/kibana/current/xpack-ml.html"]
 = {ml-cap}
 
 [partintro]
@@ -99,7 +99,7 @@ image::user/ml/images/classification.png[{classification-cap} results in {kib}]
 For more information about the {dfanalytics} feature, see
 {ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].
 
-[[xpack-ml-aiops]]
+[id="xpack-ml-aiops",canonical-url="https://www.elastic.co/guide/en/kibana/current/xpack-ml-aiops.html"]
 == AIOps Labs
 
 AIOps Labs is a part of {ml-app} in {kib} which provides features that use 
