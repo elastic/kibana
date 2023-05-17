@@ -291,6 +291,25 @@ export class RuleTypeRegistry {
             })
           ),
           // TODO expand any
+          //
+          // Places using alert state:
+          // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
+          // x-pack/examples/alerting_example/server/alert_types/astros.ts
+          // x-pack/plugins/alerting/server/lib/get_alerts_for_notification.ts
+          // x-pack/plugins/alerting/server/lib/process_alerts.ts
+          // x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts
+          // x-pack/plugins/monitoring/server/alerts/base_rule.ts
+          // x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts
+          // x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts
+          // x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/notifications/schedule_notification_actions.ts
+          // x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts
+          // x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts
+          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts
+          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts
+          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts
+          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
+          // x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts
+          // x-pack/test/functional_with_es_ssl/plugins/alerts/server/plugin.ts
           state: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         })
       )
@@ -303,6 +322,22 @@ export class RuleTypeRegistry {
         stateSchemaByVersion: {
           1: schema.object({
             // TODO expand any
+            //
+            // Places using rule state:
+            // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
+            // x-pack/examples/alerting_example/server/alert_types/astros.ts
+            // x-pack/plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor.ts
+            // x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts
+            // x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts
+            // x-pack/plugins/stack_alerts/server/rule_types/geo_containment/geo_containment.ts
+            // x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts
+            // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts
+            // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts
+            // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
+            // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts
+            // x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
+            // x-pack/test/rule_registry/spaces_only/tests/trial/get_summarized_alerts.ts
+            // x-pack/test/rule_registry/spaces_only/tests/trial/lifecycle_executor.ts
             alertTypeState: schema.maybe(
               schema.recordOf(schema.string(), schema.maybe(schema.any()))
             ),
