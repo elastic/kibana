@@ -30,8 +30,16 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [fields.startDate.path, fields.endDate.path] });
 
-    const { selected: startDate, utcOffset } = getSelected(form, fields.startDate.path, timezone);
-    const { selected: endDate } = getSelected(form, fields.endDate.path, timezone);
+    const { selected: startDate, utcOffset: startOffset } = getSelected(
+      form,
+      fields.startDate.path,
+      timezone
+    );
+    const { selected: endDate, utcOffset: endOffset } = getSelected(
+      form,
+      fields.endDate.path,
+      timezone
+    );
 
     const onStartDateChange = useCallback(
       (currentDate: Moment | null) => {
@@ -70,7 +78,7 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
                 aria-label="Start date"
                 showTimeSelect={showTimeSelect}
                 minDate={today}
-                utcOffset={utcOffset}
+                utcOffset={startOffset}
               />
             }
             endDateControl={
@@ -82,7 +90,7 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
                 aria-label="End date"
                 showTimeSelect={showTimeSelect}
                 minDate={today}
-                utcOffset={utcOffset}
+                utcOffset={endOffset}
               />
             }
             fullWidth
