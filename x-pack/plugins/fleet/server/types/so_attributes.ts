@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Definitions for SO attributes. They mirror the types defined under /common/types/models
 import type { agentPolicyStatuses } from '../../common/constants';
 import type {
   MonitoringType,
