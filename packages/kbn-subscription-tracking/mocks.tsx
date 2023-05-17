@@ -19,7 +19,7 @@ const analyticsClientMockInst = analyticsClientMock.create();
 export const MockSubscriptionTrackingProvider: FC = ({ children }) => {
   return (
     <SubscriptionTrackingProvider
-      navigateToApp={() => {}}
+      navigateToApp={jest.fn()}
       analyticsClient={analyticsClientMockInst}
     >
       {children}
