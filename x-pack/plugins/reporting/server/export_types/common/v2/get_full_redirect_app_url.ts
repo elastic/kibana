@@ -6,15 +6,11 @@
  */
 
 import { format } from 'url';
-import { ReportingCore } from '../../..';
 import { buildKibanaPath } from '../../../../common/build_kibana_path';
 import { getRedirectAppPath } from '../../../../common/constants';
+import { PdfCore } from '../../printable_pdf/types';
 
-export function getFullRedirectAppUrl(
-  reporting: ReportingCore,
-  spaceId?: string,
-  forceNow?: string
-) {
+export function getFullRedirectAppUrl(reporting: PdfCore, spaceId?: string, forceNow?: string) {
   const {
     kibanaServer: { protocol, hostname, port },
   } = reporting.getConfig();

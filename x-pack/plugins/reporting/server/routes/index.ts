@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ReportingCore } from '..';
+import { PngCore } from '../export_types/png/types';
 import { registerDeprecationsRoutes } from './deprecations/deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';
 import {
@@ -17,7 +18,7 @@ import { registerJobInfoRoutes } from './management';
 
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDeprecationsRoutes(reporting, logger);
-  registerDiagnosticRoutes(reporting, logger);
+  registerDiagnosticRoutes(reporting as unknown as PngCore, logger);
   registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
   registerJobGenerationRoutes(reporting, logger);
   registerJobInfoRoutes(reporting);

@@ -13,17 +13,28 @@ import { getExportType as getTypePng } from '../export_types/png';
 import { getExportType as getTypePngV2 } from '../export_types/png_v2';
 import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
 import { getExportType as getTypePrintablePdfV2 } from '../export_types/printable_pdf_v2';
+import { ExportTypeDefinitionCsv } from '../export_types/csv_v2/types';
+import { ExportTypeDefinitionPng } from '../export_types/png/types';
+import { ExportTypeDefinitionPdf } from '../export_types/printable_pdf/types';
 
-import { CreateJobFn, ExportTypeDefinition } from '../types';
+export type ExportTypeDefinition =
+  | ExportTypeDefinitionPdf
+  | ExportTypeDefinitionCsv
+  | ExportTypeDefinitionPng;
 
 type GetCallbackFn = (item: ExportTypeDefinition) => boolean;
 
 export class ExportTypesRegistry {
-  private _map: Map<string, ExportTypeDefinition> = new Map();
+  private _map: Map<
+    string,
+    ExportTypeDefinitionPdf | ExportTypeDefinitionCsv | ExportTypeDefinitionPng
+  > = new Map();
 
   constructor() {}
 
-  register(item: ExportTypeDefinition): void {
+  register(
+    item: ExportTypeDefinitionPdf & ExportTypeDefinitionCsv & ExportTypeDefinitionPng
+  ): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
     }
@@ -84,19 +95,18 @@ export class ExportTypesRegistry {
  */
 export function getExportTypesRegistry(): ExportTypesRegistry {
   const registry = new ExportTypesRegistry();
-  type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
-  type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
-  const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
-    getTypeCsv,
-    getTypeCsvFromSavedObject,
-    getTypeCsvFromSavedObjectImmediate,
-    getTypePng,
-    getTypePngV2,
-    getTypePrintablePdf,
-    getTypePrintablePdfV2,
-  ];
-  getTypeFns.forEach((getType) => {
-    registry.register(getType());
-  });
+
+  // issues with jobparams for gettypes
+  // JobParamsCsv
+  registry.register(getTypeCsv());
+  registry.register(getTypeCsvFromSavedObject());
+  // does not need to move out of reporting plugin
+  registry.register(getTypeCsvFromSavedObjectImmediate());
+  // does not need to move out of reporting plugin
+  registry.register(getTypePng());
+  registry.register(getTypePngV2());
+  // does not need to move out of the reporting plugin
+  registry.register(getTypePrintablePdf());
+  registry.register(getTypePrintablePdfV2());
   return registry;
 }

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ReportingCore } from '../../..';
 import { ReportingConfigType } from '../../../config';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
+import { PdfCore } from '../../printable_pdf/types';
 import { getFullRedirectAppUrl } from './get_full_redirect_app_url';
 
 describe('getFullRedirectAppUrl', () => {
-  let reporting: ReportingCore;
+  let reporting: PdfCore;
   beforeEach(async () => {
     reporting = await createMockReportingCore(createMockConfigSchema());
     reporting.getConfig = jest.fn(() => ({ kibanaServer: {} } as unknown as ReportingConfigType));

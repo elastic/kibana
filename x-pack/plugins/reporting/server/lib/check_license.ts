@@ -6,8 +6,7 @@
  */
 
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { ExportTypeDefinition } from '../types';
-import { ExportTypesRegistry } from './export_types_registry';
+import { ExportTypesRegistry, ExportTypeDefinition } from './export_types_registry';
 
 export interface LicenseCheckResult {
   showLinks: boolean;

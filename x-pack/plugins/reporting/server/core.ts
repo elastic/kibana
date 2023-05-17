@@ -97,15 +97,17 @@ export interface ReportingServerInfo {
  */
 export class ReportingCore {
   private packageInfo: PackageInfo;
-  private pluginSetupDeps?: ReportingInternalSetup;
-  private pluginStartDeps?: ReportingInternalStart;
+  public pluginSetupDeps?: ReportingInternalSetup;
+  public pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
-  private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
+  // public for PngCore
+  public deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
-  private config: ReportingConfigType;
+  // public for PngCore
+  public config: ReportingConfigType;
   private executing: Set<string>;
 
   public getContract: () => ReportingSetup;
@@ -113,9 +115,12 @@ export class ReportingCore {
   private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
 
   constructor(
-    private core: CoreSetup,
-    private logger: Logger,
-    private context: PluginInitializerContext<ReportingConfigType>
+    // public for PngCore
+    public core: CoreSetup,
+    // public for PngCore
+    public logger: Logger,
+    // public for PngCore
+    public context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.packageInfo = context.env.packageInfo;
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);

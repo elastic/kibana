@@ -10,10 +10,12 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import { RunTaskFn, RunTaskFnFactory } from '../../types';
+import { RunTaskFn } from '../../types';
 import { decryptJobHeaders, generatePngObservable } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
-import { TaskPayloadPNGV2 } from './types';
+import { PngCore } from '../png/types';
+import { PdfCore } from '../printable_pdf/types';
+import { RunTaskFnFactory, TaskPayloadPNGV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
   function executeJobFactoryFn(reporting, parentLogger) {
@@ -25,16 +27,18 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
       let apmGeneratePng: { end: () => void } | null | undefined;
 
       const jobLogger = parentLogger.get(`execute:${jobId}`);
+      const reportingPdf = reporting as unknown as PdfCore;
+      const reportingPng = reporting as unknown as PngCore;
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         mergeMap((headers) => {
-          const url = getFullRedirectAppUrl(reporting, job.spaceId, job.forceNow);
+          const url = getFullRedirectAppUrl(reportingPdf, job.spaceId, job.forceNow);
           const [locatorParams] = job.locatorParams;
 
           apmGetAssets?.end();
           apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
-          return generatePngObservable(reporting, jobLogger, {
+          return generatePngObservable(reportingPng, jobLogger, {
             headers,
             browserTimezone: job.browserTimezone,
             layout: { ...job.layout, id: 'preserve_layout' },

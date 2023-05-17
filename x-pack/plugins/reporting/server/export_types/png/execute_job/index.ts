@@ -10,9 +10,9 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
-import { RunTaskFn, RunTaskFnFactory } from '../../../types';
+import { RunTaskFn } from '../../../types';
 import { decryptJobHeaders, generatePngObservable, getFullUrls } from '../../common';
-import { TaskPayloadPNG } from '../types';
+import { RunTaskFnFactory, TaskPayloadPNG } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
   function executeJobFactoryFn(reporting, parentLogger) {

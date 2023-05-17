@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CreateJobFn, CreateJobFnFactory } from '../../../types';
+import { CreateJobFn } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../types';
+import { CreateJobFnFactory, JobParamsPDFDeprecated, TaskPayloadPDF } from '../types';
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsPDFDeprecated, TaskPayloadPDF>

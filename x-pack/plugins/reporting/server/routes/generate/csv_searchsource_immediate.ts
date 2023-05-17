@@ -13,6 +13,7 @@ import type { ReportingCore } from '../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
+import { CsvCore } from '../../export_types/csv_v2/types';
 import { PassThroughStream } from '../../lib';
 import { authorizedUserPreRouting, getCounters } from '../lib';
 
@@ -46,6 +47,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if deprecated config is turned off
   const kibanaAccessControlTags = useKibanaAccessControl ? ['access:downloadCsv'] : [];
 
+  const reportingCsv = reporting as unknown as CsvCore;
   // This API calls run the SearchSourceImmediate export type's runTaskFn directly
   router.post(
     {
@@ -73,7 +75,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE);
-        const runTaskFn = runTaskFnFactory(reporting, logger);
+        const runTaskFn = runTaskFnFactory(reportingCsv, logger);
         const stream = new PassThroughStream();
         const eventLog = reporting.getEventLogger({
           jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,

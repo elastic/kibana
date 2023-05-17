@@ -45,7 +45,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
-        if (!context.reporting) {
+        if (!context) {
           return handleUnavailable(res);
         }
 
@@ -83,7 +83,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
-        if (!context.reporting) {
+        if (!context) {
           return handleUnavailable(res);
         }
 
@@ -122,7 +122,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
-        if (!context.reporting) {
+        if (!context) {
           return res.custom({ statusCode: 503 });
         }
 
@@ -157,7 +157,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
-        if (!context.reporting) {
+        if (!context) {
           return handleUnavailable(res);
         }
 
@@ -207,7 +207,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
-        if (!context.reporting) {
+        if (!context) {
           return handleUnavailable(res);
         }
 

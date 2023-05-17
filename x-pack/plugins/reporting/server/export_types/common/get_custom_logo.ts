@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Headers, Logger } from '@kbn/core/server';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '@kbn/reporting-common';
-import { ReportingCore } from '../..';
+import { Headers, Logger } from '@kbn/core/server';
+import { LogoCore } from './types';
 
 export const getCustomLogo = async (
-  reporting: ReportingCore,
+  reporting: LogoCore,
   headers: Headers,
   spaceId: string | undefined,
   logger: Logger

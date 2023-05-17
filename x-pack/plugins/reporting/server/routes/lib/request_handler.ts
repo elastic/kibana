@@ -116,7 +116,7 @@ export class RequestHandler {
     counters: Counters
   ) {
     // ensure the async dependencies are loaded
-    if (!this.context.reporting) {
+    if (!this.context) {
       return handleUnavailable(this.res);
     }
 

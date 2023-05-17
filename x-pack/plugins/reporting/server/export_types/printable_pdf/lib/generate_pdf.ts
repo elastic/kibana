@@ -7,10 +7,10 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { ReportingCore } from '../../..';
-import { PdfScreenshotOptions } from '../../../types';
-import type { PdfMetrics } from '../../../../common/types';
 import { getTracker } from '../../common/pdf_tracker';
+import type { PdfMetrics } from '../../../../common/types';
+import { PdfScreenshotOptions } from '../../../types';
+import { PdfCore } from '../types';
 
 interface PdfResult {
   buffer: Uint8Array | null;
@@ -19,7 +19,7 @@ interface PdfResult {
 }
 
 export function generatePdfObservable(
-  reporting: ReportingCore,
+  reporting: PdfCore,
   options: PdfScreenshotOptions
 ): Rx.Observable<PdfResult> {
   const tracker = getTracker();

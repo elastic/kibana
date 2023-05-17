@@ -7,6 +7,7 @@
 
 import type { Ensure, SerializableRecord } from '@kbn/utility-types';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import type { LocatorPublic } from '../../public/shared_imports';
 import { LocatorParams } from './url';
 
 export type JobId = string;
@@ -40,6 +41,8 @@ export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
+  locator: LocatorPublic<SerializableRecord>;
+  locatorParams: LocatorParams[];
 }
 
 /**
@@ -49,4 +52,6 @@ export interface BasePayloadV2 extends BaseParamsV2 {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
+  locator: LocatorPublic<SerializableRecord>;
+  locatorParams: LocatorParams[];
 }

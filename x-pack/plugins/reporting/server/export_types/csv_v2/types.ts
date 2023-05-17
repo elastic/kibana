@@ -4,63 +4,50 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreSetup } from '@kbn/core-lifecycle-server';
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
 import {
-  ScreenshottingStart,
-  PdfScreenshotResult,
-  ScreenshotOptions,
-} from '@kbn/screenshotting-plugin/server';
-import * as Rx from 'rxjs';
-import {
-  Logger,
-  IBasePath,
-  SavedObjectsServiceStart,
-  UiSettingsServiceStart,
   CoreKibanaRequest,
+  CoreSetup,
   FakeRawRequest,
+  IBasePath,
+  IClusterClient,
   KibanaRequest,
-  Headers,
+  PluginInitializerContext,
   SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+  Headers,
+  UiSettingsServiceStart,
+  Logger,
 } from '@kbn/core/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { switchMap } from 'rxjs';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../common/constants';
-import { ReportingConfigType, createConfig } from '../../config';
-import { ReportingServerInfo } from '../../core';
-import { CreateJobFn, PdfScreenshotOptions, RunTaskFn } from '../../types';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+import { BasePayloadV2, ReportSource } from '../../../common/types';
+import { createConfig, ReportingConfigType } from '../../config';
+import { CreateJobFn } from '../../types';
+import { CreateJobFnFactory, RunTaskFnFactory } from './execute_job';
 
-export type {
-  JobParamsPDFDeprecated,
-  TaskPayloadPDF,
-} from '../../../common/types/export_types/printable_pdf';
-
-export type CreateJobFnFactory<CreateJobFnType> = (
-  reporting: PdfCore,
-  logger: Logger
-) => CreateJobFnType;
-
-export type RunTaskFnFactory<RunTaskFnType> = (reporting: PdfCore, logger: Logger) => RunTaskFnType;
-
-interface PdfCoreSetup {
+export interface CsvCoreSetup {
   basePath: Pick<IBasePath, 'set'>;
-  logger: Logger;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
-interface PdfCoreStart {
+export interface CsvCoreStart {
   savedObjects: SavedObjectsServiceStart;
+  data: DataPluginStart;
+  esClient: IClusterClient;
+  discover: DiscoverServerPluginStart;
   uiSettings: UiSettingsServiceStart;
-  screenshotting: ScreenshottingStart;
 }
 
-export class PdfCore {
-  pluginSetupDeps?: PdfCoreSetup;
-  pluginStartDeps?: PdfCoreStart;
+export class CsvCore {
+  pluginSetupDeps?: CsvCoreSetup;
+  pluginStartDeps?: CsvCoreStart;
   config: ReportingConfigType;
-  readonly pluginStart$ = new Rx.ReplaySubject<PdfCoreStart>(); // observe async background startDeps
+  readonly pluginStart$ = new Rx.ReplaySubject<CsvCoreStart>(); // observe async background startDeps
 
   constructor(
     public core: CoreSetup,
@@ -92,6 +79,21 @@ export class PdfCore {
     return await Rx.firstValueFrom(this.pluginStart$);
   }
 
+  public async getDataViewsService(request: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    const savedObjectsClient = savedObjects.getScopedClient(request);
+    const { indexPatterns } = await this.getDataService();
+    const { asCurrentUser: esClient } = (await this.getEsClient()).asScoped(request);
+    const dataViews = await indexPatterns.dataViewsServiceFactory(savedObjectsClient, esClient);
+
+    return dataViews;
+  }
+
+  public async getDataService() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.data;
+  }
+
   /*
    * Gives synchronous access to the config
    */
@@ -99,39 +101,6 @@ export class PdfCore {
     return this.config;
   }
 
-  /*
-   * Returns configurable server info
-   */
-  public getServerInfo(): ReportingServerInfo {
-    const { http } = this.core;
-    const serverInfo = http.getServerInfo();
-    return {
-      basePath: this.core.http.basePath.serverBasePath,
-      hostname: serverInfo.hostname,
-      name: serverInfo.name,
-      port: serverInfo.port,
-      uuid: this.context.env.instanceUuid,
-      protocol: serverInfo.protocol,
-    };
-  }
-
-  getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
-  getScreenshots(options: PdfScreenshotOptions) {
-    return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshots({
-          ...options,
-          urls: options.urls.map((url) =>
-            typeof url === 'string'
-              ? url
-              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          ),
-        } as ScreenshotOptions);
-      })
-    );
-  }
-
-  // for get_custom_logo
   public getFakeRequest(
     headers: Headers,
     spaceId: string | undefined,
@@ -164,15 +133,20 @@ export class PdfCore {
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 
-  public async getSavedObjectsClient(request: KibanaRequest) {
-    const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
-  }
-
   public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;
+  }
+
+  public async getEsClient() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.esClient;
+  }
+
+  public async getSavedObjectsClient(request: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
@@ -190,7 +164,7 @@ export class PdfCore {
   }
 }
 
-export interface ExportTypeDefinitionPdf<
+export interface ExportTypeDefinitionCsv<
   CreateJobFnType = CreateJobFn | null,
   RunTaskFnType = RunTaskFn
 > {
@@ -199,7 +173,28 @@ export interface ExportTypeDefinitionPdf<
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
+
+export type BasePayloadCsv = BasePayloadV2;
+
+export interface ReportTaskParamsCsv<JobPayloadType = BasePayloadCsv> {
+  id: string;
+  index: string;
+  payload: JobPayloadType;
+  created_at: ReportSource['created_at'];
+  created_by: ReportSource['created_by'];
+  jobtype: ReportSource['jobtype'];
+  attempts: ReportSource['attempts'];
+  meta: ReportSource['meta'];
+}
+
+// default fn type for RunTaskFnFactory
+export type RunTaskFn<TaskPayloadType = BasePayloadCsv> = (
+  jobId: string,
+  payload: ReportTaskParamsCsv<TaskPayloadType>['payload'],
+  cancellationToken: CancellationToken,
+  stream: Writable
+) => Promise<TaskRunResult>;

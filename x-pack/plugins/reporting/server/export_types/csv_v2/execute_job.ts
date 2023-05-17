@@ -5,13 +5,22 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { CsvGenerator } from '@kbn/generate-csv';
 import type { TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import { getFieldFormats } from '../../services';
-import type { RunTaskFn, RunTaskFnFactory } from '../../types';
+import type { RunTaskFn } from '../../types';
 import { decryptJobHeaders } from '../common';
+import { CsvCore } from './types';
+
+export type RunTaskFnFactory<RunTaskFnType> = (reporting: CsvCore, logger: Logger) => RunTaskFnType;
 
 type RunTaskFnType = RunTaskFn<TaskPayloadCsvFromSavedObject>;
+
+export type CreateJobFnFactory<CreateJobFnType> = (
+  reporting: CsvCore,
+  logger: Logger
+) => CreateJobFnType;
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _logger) => {
   const config = reporting.getConfig();

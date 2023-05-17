@@ -8,8 +8,9 @@
 import { CsvGenerator } from '@kbn/generate-csv';
 import { TaskPayloadCSV } from './types';
 import { getFieldFormats } from '../../services';
-import { RunTaskFn, RunTaskFnFactory } from '../../types';
+import { RunTaskFn } from '../../types';
 import { decryptJobHeaders } from '../common';
+import { RunTaskFnFactory } from '../csv_v2/execute_job';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   reporting,

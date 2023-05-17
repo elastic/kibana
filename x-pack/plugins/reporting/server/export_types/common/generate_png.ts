@@ -9,10 +9,10 @@ import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../..';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
 import type { PngScreenshotOptions } from '../../types';
+import { PngCore } from '../png/types';
 
 interface PngResult {
   buffer: Buffer;
@@ -21,7 +21,7 @@ interface PngResult {
 }
 
 export function generatePngObservable(
-  reporting: ReportingCore,
+  reporting: PngCore,
   logger: Logger,
   options: Omit<PngScreenshotOptions, 'format'>
 ): Rx.Observable<PngResult> {
