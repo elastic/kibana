@@ -170,9 +170,9 @@ describe('calculateRiskScores()', () => {
         expect.objectContaining({
           riskiestInputs: expect.arrayContaining([
             expect.objectContaining({
-              _id: expect.any(String),
-              _index: expect.any(String),
-              sort: [expect.any(Number)],
+              id: expect.any(String),
+              index: expect.any(String),
+              riskScore: expect.any(Number),
             }),
           ]),
         })

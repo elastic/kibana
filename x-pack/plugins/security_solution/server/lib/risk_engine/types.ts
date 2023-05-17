@@ -48,9 +48,9 @@ export interface GetScoresResponse {
 }
 
 export interface SimpleRiskInput {
-  _id: string;
-  _index: string;
-  sort: [number];
+  id: string;
+  index: string;
+  riskScore: string | number | undefined;
 }
 
 export type RiskInput = Ecs;

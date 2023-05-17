@@ -60,9 +60,9 @@ const bucketToResponse = ({
   otherScore: bucket.risk_details.value.other_score,
   notes: bucket.risk_details.value.notes,
   riskiestInputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
-    _id: riskInput._id,
-    _index: riskInput._index,
-    sort: riskInput.sort,
+    id: riskInput._id,
+    index: riskInput._index,
+    riskScore: riskInput.sort?.[0] ?? undefined,
   })),
 });
 
@@ -156,16 +156,9 @@ const buildIdentifierTypeAggregation = ({
       },
       aggs: {
         riskiest_inputs: {
-          // TODO top_metrics would be faster if enrichInputs is false
           top_hits: {
-            size: 30,
-            sort: [
-              {
-                [ALERT_RISK_SCORE]: {
-                  order: 'desc',
-                },
-              },
-            ],
+            size: 10,
+            sort: { [ALERT_RISK_SCORE]: 'desc' },
             _source: false,
           },
         },
