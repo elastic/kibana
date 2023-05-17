@@ -16,6 +16,7 @@ import {
   createResultSchema,
   searchOptionsSchemas,
 } from '@kbn/content-management-utils';
+import { serializedFieldFormatSchema, fieldSpecSchema } from '../../schemas';
 
 const dataViewAttributesSchema = schema.object(
   {
@@ -29,13 +30,9 @@ const dataViewAttributesSchema = schema.object(
         })
       )
     ),
-    // fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
-    fields: schema.maybe(schema.any()),
+    fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
     typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    // fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
-    // fieldFormats: schema.maybe(schema.any()),
-    fieldFormatMap: schema.maybe(schema.any()),
-    /*
+    fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
     fieldAttrs: schema.maybe(
       schema.recordOf(
         schema.string(),
@@ -45,25 +42,30 @@ const dataViewAttributesSchema = schema.object(
         })
       )
     ),
-    */
-    fieldAttrs: schema.maybe(schema.any()),
     allowNoIndex: schema.maybe(schema.boolean()),
-    // runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
     runtimeFieldMap: schema.maybe(schema.any()),
     name: schema.maybe(schema.string()),
-    // todo
-    // version: schema.maybe(schema.string()),
   },
   { unknowns: 'forbid' }
 );
 
 const dataViewSavedObjectSchema = savedObjectSchema(dataViewAttributesSchema);
 
-const searchOptionsSchema = schema.object(searchOptionsSchemas);
-
 const dataViewCreateOptionsSchema = schema.object({
   id: createOptionsSchemas.id,
   initialNamespaces: createOptionsSchemas.initialNamespaces,
+});
+
+const dataViewSearchOptionsSchema = schema.object({
+  searchFields: searchOptionsSchemas.searchFields,
+  fields: searchOptionsSchemas.fields,
+});
+
+const dataViewUpdateOptionsSchema = schema.object({
+  version: updateOptionsSchema.version,
+  refresh: updateOptionsSchema.refresh,
+  upsert: updateOptionsSchema.upsert(dataViewAttributesSchema),
+  retryOnConflict: updateOptionsSchema.retryOnConflict,
 });
 
 // Content management service definition.
@@ -94,13 +96,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        // todo
-        schema: schema.object({
-          version: updateOptionsSchema.version,
-          refresh: updateOptionsSchema.refresh,
-          upsert: updateOptionsSchema.upsert(dataViewAttributesSchema),
-          retryOnConflict: updateOptionsSchema.retryOnConflict,
-        }),
+        schema: dataViewUpdateOptionsSchema,
       },
       data: {
         schema: dataViewAttributesSchema,
@@ -110,8 +106,7 @@ export const serviceDefinition: ServicesDefinition = {
   search: {
     in: {
       options: {
-        // todo
-        schema: searchOptionsSchema,
+        schema: dataViewSearchOptionsSchema,
       },
     },
   },
