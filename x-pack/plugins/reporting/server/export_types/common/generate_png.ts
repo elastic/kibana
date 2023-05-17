@@ -20,7 +20,7 @@ interface PngResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options?: PngScreenshotOptions) => Rx.Observable<CaptureResult>;
+type GetScreenshotsFn = (options: PngScreenshotOptions) => Rx.Observable<CaptureResult>;
 
 export function generatePngObservable(
   getScreenshots: GetScreenshotsFn,

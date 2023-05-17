@@ -40,7 +40,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
           return generatePdfObservable(
             reporting.getConfig(),
             reporting.getServerInfo(),
-            reporting.getScreenshots(),
+            reporting.getScreenshots,
             job,
             locatorParams,
             {
