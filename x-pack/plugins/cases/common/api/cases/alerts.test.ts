@@ -10,51 +10,40 @@ import { AlertResponseRt } from './alerts';
 describe('Alerts', () => {
   describe('AlertResponseRt', () => {
     it('has expected attributes in request', () => {
-      const query = AlertResponseRt.decode([{ id: '1', index: '2', attached_at: '3' }]);
+      const defaultRequest = [
+        { id: '1', index: '2', attached_at: '3' }
+      ];
+
+      const query = AlertResponseRt.decode(defaultRequest);
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: [
-          {
-            id: '1',
-            index: '2',
-            attached_at: '3',
-          },
-        ],
+        right: defaultRequest,
       });
     });
 
     it('multiple attributes in request', () => {
-      const query = AlertResponseRt.decode([
+      const defaultRequest = [
         { id: '1', index: '2', attached_at: '3' },
         { id: '2', index: '3', attached_at: '4' },
-      ]);
+      ];
+      const query = AlertResponseRt.decode(defaultRequest);
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: [
-          {
-            id: '1',
-            index: '2',
-            attached_at: '3',
-          },
-          { id: '2', index: '3', attached_at: '4' },
-        ],
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = AlertResponseRt.decode([{ id: '1', index: '2', attached_at: '3', foo: 'bar' }]);
+      const defaultRequest = [
+        { id: '1', index: '2', attached_at: '3' }
+      ];
+      const query = AlertResponseRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: [
-          {
-            id: '1',
-            index: '2',
-            attached_at: '3',
-          },
-        ],
+        right: defaultRequest,
       });
     });
   });

@@ -16,7 +16,6 @@ import {
 } from './configure';
 
 describe('configure', () => {
-
   const serviceNow = {
     id: 'servicenow-1',
     name: 'SN 1',
@@ -165,7 +164,10 @@ describe('configure', () => {
     });
 
     it('removes foo:bar attributes from mappings', () => {
-      const query = CaseConfigureResponseRt.decode({ ...defaultRequest, mappings: [{...defaultRequest.mappings[0], foo: 'bar' }]});
+      const query = CaseConfigureResponseRt.decode({
+        ...defaultRequest,
+        mappings: [{ ...defaultRequest.mappings[0], foo: 'bar' }],
+      });
 
       expect(query).toMatchObject({
         _tag: 'Right',

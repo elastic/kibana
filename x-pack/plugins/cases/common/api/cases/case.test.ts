@@ -438,7 +438,10 @@ describe('Case', () => {
     });
 
     it('removes foo:bar attributes from cases', () => {
-      const query = CasesFindResponseRt.decode({ ...defaultRequest, cases: [{...basicCase, foo: 'bar'}]});
+      const query = CasesFindResponseRt.decode({
+        ...defaultRequest,
+        cases: [{ ...basicCase, foo: 'bar' }],
+      });
 
       expect(query).toMatchObject({
         _tag: 'Right',

@@ -67,18 +67,16 @@ describe('find', () => {
       const search = 'sample_text';
       const findRequest = createCasesClientMockFindRequest({ search });
       // @ts-expect-error
-      await find({...findRequest, foo: 'bar'}, clientArgs);
+      await find({ ...findRequest, foo: 'bar' }, clientArgs);
 
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 
-
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalledWith(
-        expect.not.objectContaining(
-          {
-            caseOptions: {...call.caseOptions}, 
-            foo: 'bar',
-          }),
-        );
+        expect.not.objectContaining({
+          caseOptions: { ...call.caseOptions },
+          foo: 'bar',
+        })
+      );
     });
   });
 
