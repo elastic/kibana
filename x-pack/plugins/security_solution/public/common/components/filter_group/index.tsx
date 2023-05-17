@@ -27,7 +27,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
-import type { ControlGroupCreationOptions } from '@kbn/controls-plugin/public/control_group/types';
+import type {
+  ControlGroupCreationOptions,
+  FieldFilterPredicate,
+} from '@kbn/controls-plugin/public/control_group/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterGroupProps, FilterItemObj } from './types';
@@ -298,6 +301,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     return resultControls;
   }, [initialUrlParam, initialControls, getStoredControlInput]);
 
+  const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
+
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
       defaultInput: Partial<ControlGroupInput>,
@@ -334,7 +339,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       return {
         initialInput,
         settings: {
-          fieldFilterPredicate: (f) => f.type !== 'number',
           showAddButton: false,
           staticDataViewId: dataViewId ?? '',
           editorConfig: {
@@ -343,9 +347,18 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             hideAdditionalSettings: true,
           },
         },
+        fieldFilterPredicate,
       } as ControlGroupCreationOptions;
     },
-    [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
+    [
+      dataViewId,
+      timeRange,
+      filters,
+      chainingSystem,
+      query,
+      selectControlsWithPriority,
+      fieldFilterPredicate,
+    ]
   );
 
   useFilterUpdatesToUrlSync({

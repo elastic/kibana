@@ -36,6 +36,7 @@ import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
 import { ImmutableSourceProperty, OnSourceChangeArgs } from '../../classes/sources/source';
 import { IField } from '../../classes/fields/field';
 import { isLayerGroup } from '../../classes/layers/layer_group';
+import { isSpatialJoin } from '../../classes/joins/is_spatial_join';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -112,7 +113,7 @@ export class EditLayerPanel extends Component<Props, State> {
     }
 
     const vectorLayer = this.props.selectedLayer as IVectorLayer;
-    if (!vectorLayer.showJoinEditor() || vectorLayer.getLeftJoinFields === undefined) {
+    if (!vectorLayer.getSource().supportsJoins() || vectorLayer.getLeftJoinFields === undefined) {
       return;
     }
 
@@ -184,7 +185,7 @@ export class EditLayerPanel extends Component<Props, State> {
       return;
     }
     const vectorLayer = this.props.selectedLayer as IVectorLayer;
-    if (!vectorLayer.showJoinEditor()) {
+    if (!vectorLayer.getSource().supportsJoins()) {
       return null;
     }
 
@@ -244,12 +245,12 @@ export class EditLayerPanel extends Component<Props, State> {
     }
 
     const descriptor = this.props.selectedLayer.getDescriptor() as VectorLayerDescriptor;
-    const numberOfJoins = descriptor.joins ? descriptor.joins.length : 0;
     return isLayerGroup(this.props.selectedLayer)
       ? null
       : this.props.selectedLayer.renderSourceSettingsEditor({
           currentLayerType: this.props.selectedLayer.getType(),
-          numberOfJoins,
+          hasSpatialJoins: (descriptor.joins ?? []).some(isSpatialJoin),
+          numberOfJoins: descriptor.joins ? descriptor.joins.length : 0,
           onChange: this._onSourceChange,
           onStyleDescriptorChange: this.props.updateStyleDescriptor,
           style: this.props.selectedLayer.getStyleForEditing(),
