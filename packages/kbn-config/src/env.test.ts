@@ -62,7 +62,7 @@ test('correctly creates default environment in prod distributable mode.', () => 
       distributable: true,
       number: 100,
       sha: 'feature-v1-build-sha',
-      date: '2023-05-15T23:12:09+0000',
+      date: BUILD_DATE,
     },
   };
 
@@ -85,7 +85,7 @@ test('correctly creates default environment in prod non-distributable mode.', ()
       distributable: false,
       number: 100,
       sha: 'feature-v1-build-sha',
-      date: '2023-05-15T23:12:09+0000',
+      date: BUILD_DATE,
     },
   };
 
@@ -108,7 +108,7 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
       distributable: false,
       number: 100,
       sha: 'feature-v1-build-sha',
-      date: '2023-05-15T23:12:09+0000',
+      date: BUILD_DATE,
     },
   };
 
@@ -142,7 +142,7 @@ test('correctly creates environment with constructor.', () => {
         distributable: true,
         number: 100,
         sha: 'feature-v1-build-sha',
-        date: '2023-05-15T23:12:09+0000',
+        date: BUILD_DATE,
       },
     },
     getEnvOptions({
