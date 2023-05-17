@@ -122,6 +122,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    getJobs$(obj?: { jobId?: string }) {
+      const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
+      return httpService.http$<{ count: number; jobs: Job[] }>({
+        path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors${jobId}`,
+        version: '1',
+      });
+    },
+
     getJobStats(obj: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
       return httpService.http<{ jobs: JobStats[]; count: number }>({
