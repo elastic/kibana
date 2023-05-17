@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { PolicyFormHeader } from './policy_form_header';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
 
 export interface PolicyDetailsFormProps {
@@ -13,6 +14,10 @@ export interface PolicyDetailsFormProps {
 }
 
 export const PolicyDetailsForm = memo<PolicyDetailsFormProps>((props) => {
-  return <div>{'PolicyDetailsForm placeholder'}</div>;
+  return (
+    <div>
+      <PolicyFormHeader />
+    </div>
+  );
 });
 PolicyDetailsForm.displayName = 'PolicyDetailsForm';
