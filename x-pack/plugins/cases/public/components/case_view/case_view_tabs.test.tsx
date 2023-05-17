@@ -48,6 +48,11 @@ export const caseProps: CaseViewTabsProps = {
   activeTab: CASE_VIEW_PAGE_TABS.ACTIVITY,
 };
 
+export const casePropsWithAlerts: CaseViewTabsProps = {
+  ...caseProps,
+  caseData: { ...caseData, totalAlerts: 3 },
+};
+
 describe('CaseViewTabs', () => {
   let appMockRenderer: AppMockRenderer;
   const data = { total: 3 };
@@ -122,6 +127,33 @@ describe('CaseViewTabs', () => {
     expect(
       (await screen.findByTestId('case-view-files-stats-badge')).getAttribute('class')
     ).not.toMatch(/accent/);
+  });
+
+  it('shows the alerts tab with the correct count and colour', async () => {
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+    );
+
+    const badge = await screen.findByTestId('case-view-alerts-stats-badge');
+
+    expect(badge.getAttribute('class')).toMatch(/accent/);
+    expect(badge).toHaveTextContent('3');
+  });
+
+  it('the alerts tab count has a different colour if the tab is not active', async () => {
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.FILES} />
+    );
+
+    expect(
+      (await screen.findByTestId('case-view-alerts-stats-badge')).getAttribute('class')
+    ).not.toMatch(/accent/);
+  });
+
+  it('the alerts tab count should not be displayed when the total alerts is equal to zero', async () => {
+    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
+
+    expect(screen.queryByTestId('case-view-alerts-stats-badge')).not.toBeInTheDocument();
   });
 
   it('navigates to the activity tab when the activity tab is clicked', async () => {

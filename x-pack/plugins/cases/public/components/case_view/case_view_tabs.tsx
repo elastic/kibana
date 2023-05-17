@@ -15,8 +15,6 @@ import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translatio
 import { ACTIVITY_TAB, ALERTS_TAB, FILES_TAB } from './translations';
 import type { CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
-import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useCasesFeatures } from '../../common/use_cases_features';
 
 const ExperimentalBadge = styled(EuiBetaBadge)`
   margin-left: 5px;
@@ -51,25 +49,25 @@ const FilesTab = ({
 const AlertsTab = ({
   activeTab,
   totalAlerts,
-  isLoading,
   isExperimental,
 }: {
   activeTab: string;
   totalAlerts: number | undefined;
-  isLoading: boolean;
   isExperimental: boolean;
 }) => (
   <>
     {ALERTS_TAB}
-    {!isLoading && (
-      <StyledNotificationBadge
-        data-test-subj="case-view-files-stats-badge"
-        color={activeTab === CASE_VIEW_PAGE_TABS.ALERTS ? 'accent' : 'subdued'}
-      >
-        {totalAlerts || 0}
-      </StyledNotificationBadge>
-    )}
-    {!isLoading && isExperimental && (
+    {totalAlerts
+      ? totalAlerts > 0 && (
+          <StyledNotificationBadge
+            data-test-subj="case-view-alerts-stats-badge"
+            color={activeTab === CASE_VIEW_PAGE_TABS.ALERTS ? 'accent' : 'subdued'}
+          >
+            {totalAlerts}
+          </StyledNotificationBadge>
+        )
+      : null}
+    {isExperimental && (
       <ExperimentalBadge
         label={EXPERIMENTAL_LABEL}
         size="s"
@@ -92,15 +90,10 @@ export interface CaseViewTabsProps {
 
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
   const { features } = useCasesContext();
-  const { metricsFeatures } = useCasesFeatures();
   const { navigateToCaseView } = useCaseViewNavigation();
-  const { data: fileStatsData, isLoading: isFileLoading } = useGetCaseFileStats({
+  const { data: fileStatsData, isLoading } = useGetCaseFileStats({
     caseId: caseData.id,
   });
-  const { data: alertStatsData, isLoading: isAlertLoading } = useGetCaseMetrics(
-    caseData.id,
-    metricsFeatures
-  );
 
   const tabs = useMemo(
     () => [
@@ -114,9 +107,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
               id: CASE_VIEW_PAGE_TABS.ALERTS,
               name: (
                 <AlertsTab
-                  isLoading={isAlertLoading}
                   isExperimental={features.alerts.isExperimental}
-                  totalAlerts={alertStatsData?.metrics.alerts?.count}
+                  totalAlerts={caseData.totalAlerts}
                   activeTab={activeTab}
                 />
               ),
@@ -126,18 +118,17 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       {
         id: CASE_VIEW_PAGE_TABS.FILES,
         name: (
-          <FilesTab isLoading={isFileLoading} fileStatsData={fileStatsData} activeTab={activeTab} />
+          <FilesTab isLoading={isLoading} fileStatsData={fileStatsData} activeTab={activeTab} />
         ),
       },
     ],
     [
-      activeTab,
-      fileStatsData,
-      alertStatsData,
-      isFileLoading,
-      isAlertLoading,
       features.alerts.enabled,
       features.alerts.isExperimental,
+      caseData.totalAlerts,
+      activeTab,
+      isLoading,
+      fileStatsData,
     ]
   );
 
