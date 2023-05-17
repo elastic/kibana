@@ -8,11 +8,11 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
-import { SecurityPageName } from '../../app/types';
-import type { NavLinkItem } from '../../common/components/navigation/types';
-import { TestProviders } from '../../common/mock';
+import { SecurityPageName } from '../../../app/types';
+import type { NavLinkItem } from '../navigation/types';
+import { TestProviders } from '../../mock';
 import { LandingLinksImages, LandingImageCards } from './landing_links_images';
-import * as telemetry from '../../common/lib/telemetry';
+import * as telemetry from '../../lib/telemetry';
 
 const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
@@ -29,7 +29,7 @@ const BETA_NAV_ITEM: NavLinkItem = {
   isBeta: true,
 };
 
-jest.mock('../../common/lib/kibana/kibana_react', () => {
+jest.mock('../../lib/kibana/kibana_react', () => {
   return {
     useKibana: jest.fn().mockReturnValue({
       services: {
