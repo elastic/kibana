@@ -12,7 +12,7 @@ import { LogsSection } from './sections/logs/logs_section';
 import { MetricsSection } from './sections/metrics/metrics_section';
 import { UptimeSection } from './sections/uptime/uptime_section';
 import { UXSection } from './sections/ux/ux_section';
-import { HasDataMap } from '../../../context/has_data_context';
+import { HasDataMap } from '../../../context/has_data_context/has_data_context';
 import type { BucketSize } from '../helpers/calculate_bucket_size';
 
 interface Props {

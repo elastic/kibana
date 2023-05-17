@@ -9,13 +9,13 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { registerDataHandler, unregisterDataHandler } from '../services/data_handler';
-import { useHasData } from '../hooks/use_has_data';
-import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
+import { registerDataHandler, unregisterDataHandler } from './data_handler';
+import { useHasData } from '../../hooks/use_has_data';
+import { HasData, ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 import { HasDataContextProvider } from './has_data_context';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { ApmIndicesConfig } from '../../common/typings';
+import { ApmIndicesConfig } from '../../../common/typings';
 import { act } from '@testing-library/react';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;

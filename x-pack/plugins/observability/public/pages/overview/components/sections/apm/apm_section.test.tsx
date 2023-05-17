@@ -14,7 +14,7 @@ import { APMSection } from './apm_section';
 import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../../hooks/use_plugin_context';
-import { HasDataContextValue } from '../../../../../context/has_data_context';
+import { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
 import { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';

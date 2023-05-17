@@ -18,13 +18,13 @@ import {
   INFRA_METRICS_APP,
   UPTIME_APP,
   UX_APP,
-} from './constants';
-import { getDataHandler } from '../services/data_handler';
-import { useDatePickerContext } from '../hooks/use_date_picker_context';
-import { getObservabilityAlerts } from '../services/get_observability_alerts';
-import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
-import { ApmIndicesConfig } from '../../common/typings';
-import { ObservabilityAppServices } from '../application/types';
+} from '../constants';
+import { getDataHandler } from './data_handler';
+import { useDatePickerContext } from '../../hooks/use_date_picker_context';
+import { getObservabilityAlerts } from './get_observability_alerts';
+import { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
+import { ApmIndicesConfig } from '../../../common/typings';
+import { ObservabilityAppServices } from '../../application/types';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
