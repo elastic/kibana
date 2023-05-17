@@ -57,15 +57,15 @@ interface PdfCoreStart {
 }
 
 export class PdfCore {
-  private pluginSetupDeps?: PdfCoreSetup;
-  private pluginStartDeps?: PdfCoreStart;
-  private config: ReportingConfigType;
-  private readonly pluginStart$ = new Rx.ReplaySubject<PdfCoreStart>(); // observe async background startDeps
+  pluginSetupDeps?: PdfCoreSetup;
+  pluginStartDeps?: PdfCoreStart;
+  config: ReportingConfigType;
+  readonly pluginStart$ = new Rx.ReplaySubject<PdfCoreStart>(); // observe async background startDeps
 
   constructor(
-    private core: CoreSetup,
-    private logger: Logger,
-    private context: PluginInitializerContext<ReportingConfigType>
+    public core: CoreSetup,
+    public logger: Logger,
+    public context: PluginInitializerContext<ReportingConfigType>
   ) {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
@@ -164,7 +164,7 @@ export class PdfCore {
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
+  public async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }

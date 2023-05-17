@@ -38,31 +38,29 @@ export type CreateJobFnFactory<CreateJobFnType> = (
 export type RunTaskFnFactory<RunTaskFnType> = (reporting: PngCore, logger: Logger) => RunTaskFnType;
 
 interface PngInternalSetup {
-  router: IRouter<CustomRequestHandlerContext<{}>>;
+  router?: IRouter<CustomRequestHandlerContext<{}>>;
   docLinks: DocLinksServiceSetup;
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   logger: Logger;
   usageCounter?: UsageCounter;
 }
 
 interface PngInternalStart {
-  screenshotting: ScreenshottingStart;
-  security: SecurityPluginStart;
+  screenshotting?: ScreenshottingStart;
+  security?: SecurityPluginStart;
 }
 
 export class PngCore {
-  logger: Logger;
-  private config: ReportingConfigType;
-  core!: CoreSetup;
-  router!: IRouter<CustomRequestHandlerContext<{}>>;
+  config: ReportingConfigType;
+  router?: IRouter<CustomRequestHandlerContext<{}>>;
   deprecatedAllowedRoles: false | string[];
-  private pluginSetupDeps?: PngInternalSetup;
-  private pluginStartDeps?: PngInternalStart;
+  pluginSetupDeps?: PngInternalSetup;
+  pluginStartDeps?: PngInternalStart;
 
   constructor(
-    core: CoreSetup,
-    logger: Logger,
-    private context: PluginInitializerContext<ReportingConfigType>
+    public core: CoreSetup,
+    public logger: Logger,
+    public context: PluginInitializerContext<ReportingConfigType>
   ) {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
@@ -109,7 +107,7 @@ export class PngCore {
   getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
   getScreenshots(options: PngScreenshotOptions) {
     return Rx.defer(() => {
-      return this.getPluginStartDeps().screenshotting.getScreenshots({
+      return this.getPluginStartDeps().screenshotting!.getScreenshots({
         ...options,
         urls: options.urls.map((url) =>
           typeof url === 'string'

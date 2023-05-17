@@ -13,8 +13,6 @@ import { getExportType as getTypePng } from '../export_types/png';
 import { getExportType as getTypePngV2 } from '../export_types/png_v2';
 import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
 import { getExportType as getTypePrintablePdfV2 } from '../export_types/printable_pdf_v2';
-
-import { CreateJobFn } from '../types';
 import { ExportTypeDefinitionCsv } from '../export_types/csv_v2/types';
 import { ExportTypeDefinitionPng } from '../export_types/png/types';
 import { ExportTypeDefinitionPdf } from '../export_types/printable_pdf/types';
@@ -92,8 +90,6 @@ export class ExportTypesRegistry {
  */
 export function getExportTypesRegistry(): ExportTypesRegistry {
   const registry = new ExportTypesRegistry();
-  type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
-  type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
   registry.register(getTypeCsv());
   registry.register(getTypeCsvFromSavedObject());
   registry.register(getTypeCsvFromSavedObjectImmediate());

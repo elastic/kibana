@@ -41,15 +41,15 @@ export interface CsvCoreStart {
 }
 
 export class CsvCore {
-  private pluginSetupDeps?: CsvCoreSetup;
-  private pluginStartDeps?: CsvCoreStart;
-  private config: ReportingConfigType;
-  private readonly pluginStart$ = new Rx.ReplaySubject<CsvCoreStart>(); // observe async background startDeps
+  pluginSetupDeps?: CsvCoreSetup;
+  pluginStartDeps?: CsvCoreStart;
+  config: ReportingConfigType;
+  readonly pluginStart$ = new Rx.ReplaySubject<CsvCoreStart>(); // observe async background startDeps
 
   constructor(
-    private core: CoreSetup,
-    private logger: Logger,
-    private context: PluginInitializerContext<ReportingConfigType>
+    public core: CoreSetup,
+    public logger: Logger,
+    public context: PluginInitializerContext<ReportingConfigType>
   ) {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
@@ -141,7 +141,7 @@ export class CsvCore {
     return startDeps.esClient;
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
+  public async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }

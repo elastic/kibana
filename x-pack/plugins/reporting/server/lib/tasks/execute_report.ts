@@ -31,12 +31,13 @@ import type { ReportingCore } from '../..';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
-import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
+import type { BasePayload, RunTaskFn } from '../../types';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
+import { ExportTypeDefinition } from '../export_types_registry';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
