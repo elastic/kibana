@@ -20,7 +20,7 @@ const HOSTS_CHART: Omit<Props, 'loading' | 'value'> = {
   toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.tooltip', {
     defaultMessage: 'The number of hosts returned by your current search criteria.',
   }),
-  ['data-test-subj']: 'hostsView-metricsTrend-hosts',
+  ['data-test-subj']: 'hostsViewKPI-hostsCount',
 };
 
 export const HostsTile = () => {
