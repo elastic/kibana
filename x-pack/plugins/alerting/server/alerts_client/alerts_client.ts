@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
-import { chunk, flatMap, keys, merge } from 'lodash';
+import { chunk, flatMap, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
@@ -20,13 +20,13 @@ import { LegacyAlertsClient } from './legacy_alerts_client';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
 import {
-  AlertRuleData,
+  type AlertRule,
   IAlertsClient,
   InitializeExecutionOpts,
   ProcessAndLogAlertsOpts,
   TrackedAlerts,
 } from './types';
-import { Alert as LegacyAlert } from '../alert/alert';
+import { buildNewAlert, buildOngoingAlert, buildRecoveredAlert, formatRule } from './lib';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -58,6 +58,8 @@ export class AlertsClient<
     data: Record<string, Alert & AlertData>;
   };
 
+  private rule: AlertRule = {};
+
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
       LegacyState,
@@ -66,6 +68,7 @@ export class AlertsClient<
       RecoveryActionGroupId
     >({ logger: this.options.logger, ruleType: this.options.ruleType });
     this.fetchedAlerts = { indices: {}, data: {} };
+    this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
@@ -193,15 +196,29 @@ export class AlertsClient<
       // See if there's an existing alert document
       if (this.fetchedAlerts.data.hasOwnProperty(id)) {
         activeAlertsToIndex.push(
-          this.updateOngoingAlert(
-            this.fetchedAlerts.data[id],
-            activeAlerts[id],
-            'active',
-            currentTime
-          )
+          buildOngoingAlert<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >({
+            alert: this.fetchedAlerts.data[id],
+            legacyAlert: activeAlerts[id],
+            rule: this.rule,
+            timestamp: currentTime,
+          })
         );
       } else {
-        activeAlertsToIndex.push(this.buildNewAlert(id, activeAlerts[id], 'active', currentTime));
+        activeAlertsToIndex.push(
+          buildNewAlert<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >({ legacyAlert: activeAlerts[id], rule: this.rule, timestamp: currentTime })
+        );
       }
     }
 
@@ -211,12 +228,18 @@ export class AlertsClient<
       // If there is not, log an error because there should be
       if (this.fetchedAlerts.data.hasOwnProperty(id)) {
         recoveredAlertsToIndex.push(
-          this.recoverAlert(
-            this.fetchedAlerts.data[id],
-            recoveredAlerts[id],
-            'recovered',
-            currentTime
-          )
+          buildRecoveredAlert<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >({
+            alert: this.fetchedAlerts.data[id],
+            legacyAlert: recoveredAlerts[id],
+            rule: this.rule,
+            timestamp: currentTime,
+          })
         );
       } else {
         this.options.logger.warn(
@@ -259,107 +282,5 @@ export class AlertsClient<
 
   public setFlapping(flappingSettings: RulesSettingsFlappingProperties) {
     return this.legacyAlertsClient.setFlapping(flappingSettings);
-  }
-
-  private formatRule(rule: AlertRuleData) {
-    return {
-      kibana: {
-        alert: {
-          rule: {
-            category: this.options.ruleType.name,
-            consumer: rule.consumer,
-            execution: {
-              uuid: rule.executionId,
-            },
-            name: rule.name,
-            parameters: rule.parameters,
-            producer: this.options.ruleType.producer,
-            revision: rule.revision,
-            rule_type_id: this.options.ruleType.id,
-            tags: rule.tags,
-            uuid: rule.id,
-          },
-        },
-        space_ids: [rule.spaceId],
-      },
-    };
-  }
-
-  private buildNewAlert(
-    id: string,
-    legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>,
-    status: string,
-    currentTime: string
-  ): Alert & AlertData {
-    return merge(
-      {
-        '@timestamp': currentTime,
-        kibana: {
-          alert: {
-            action_group: legacyAlert.getScheduledActionOptions()?.actionGroup,
-            ...(legacyAlert.getState().duration
-              ? { duration: { us: legacyAlert.getState().duration } }
-              : {}),
-            flapping: legacyAlert.getFlapping(),
-            flapping_history: legacyAlert.getFlappingHistory(),
-            instance: {
-              id,
-            },
-            maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
-            ...(legacyAlert.getState().start ? { start: legacyAlert.getState().start } : {}),
-            status,
-            uuid: legacyAlert.getUuid(),
-          },
-        },
-      },
-      this.formatRule(this.options.rule)
-    ) as Alert & AlertData;
-  }
-
-  private updateOngoingAlert(
-    alert: Alert & AlertData,
-    legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>,
-    status: string,
-    currentTime: string
-  ): Alert & AlertData {
-    return merge(alert, {
-      '@timestamp': currentTime,
-      kibana: {
-        alert: {
-          action_group: legacyAlert.getScheduledActionOptions()?.actionGroup,
-          ...(legacyAlert.getState().duration
-            ? { duration: { us: legacyAlert.getState().duration } }
-            : {}),
-          ...(legacyAlert.getState().end ? { end: legacyAlert.getState().end } : {}),
-          flapping: legacyAlert.getFlapping(),
-          flapping_history: legacyAlert.getFlappingHistory(),
-          maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
-          status,
-        },
-      },
-    });
-  }
-
-  private recoverAlert(
-    alert: Alert & AlertData,
-    legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>,
-    status: string,
-    currentTime: string
-  ): Alert & AlertData {
-    return merge(alert, {
-      '@timestamp': currentTime,
-      kibana: {
-        alert: {
-          ...(legacyAlert.getState().duration
-            ? { duration: { us: legacyAlert.getState().duration } }
-            : {}),
-          ...(legacyAlert.getState().end ? { end: legacyAlert.getState().end } : {}),
-          flapping: legacyAlert.getFlapping(),
-          flapping_history: legacyAlert.getFlappingHistory(),
-          maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
-          status,
-        },
-      },
-    });
   }
 }

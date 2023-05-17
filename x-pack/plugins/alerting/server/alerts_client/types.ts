@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Alert } from '../alert/alert';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import { Alert as LegacyAlert } from '../alert/alert';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -27,6 +28,15 @@ export interface AlertRuleData {
   tags: string[];
 }
 
+export interface AlertRule {
+  kibana?: {
+    alert: {
+      rule: Alert['kibana']['alert']['rule'];
+    };
+    space_ids: Alert['kibana']['space_ids'];
+  };
+}
+
 export interface IAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
@@ -39,7 +49,7 @@ export interface IAlertsClient<
   processAndLogAlerts(opts: ProcessAndLogAlertsOpts): void;
   getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
-  ): Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
+  ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   getAlertsToSerialize(): Promise<{
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
@@ -67,6 +77,6 @@ export interface TrackedAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext
 > {
-  active: Record<string, Alert<State, Context>>;
-  recovered: Record<string, Alert<State, Context>>;
+  active: Record<string, LegacyAlert<State, Context>>;
+  recovered: Record<string, LegacyAlert<State, Context>>;
 }
