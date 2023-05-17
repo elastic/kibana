@@ -19,6 +19,7 @@ export const PostMessageSubActionParamsSchema = schema.object({
   channels: schema.arrayOf(schema.string(), { maxSize: 1 }),
   text: schema.string({ minLength: 1 }),
 });
+
 export const PostMessageParamsSchema = schema.object({
   subAction: schema.literal('postMessage'),
   subActionParams: PostMessageSubActionParamsSchema,

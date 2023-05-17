@@ -17,8 +17,567 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SOContentStorage",
+        "type": "Class",
+        "tags": [],
+        "label": "SOContentStorage",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.SOContentStorage",
+            "text": "SOContentStorage"
+          },
+          "<Types> implements ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "server",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-server.ContentStorage",
+            "text": "ContentStorage"
+          },
+          "<Types[\"Item\"], Types[\"PartialItem\"], ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "server",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-server.MSearchConfig",
+            "text": "MSearchConfig"
+          },
+          "<Types[\"Item\"], Types[\"Attributes\"]>>"
+        ],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorage.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    savedObjectType,\n    cmServicesDefinition,\n    createArgsToSoCreateOptions,\n    updateArgsToSoUpdateOptions,\n    searchArgsToSOFindOptions,\n    enableMSearch,\n  }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-management-utils",
+                    "scope": "common",
+                    "docId": "kibKbnContentManagementUtilsPluginApi",
+                    "section": "def-common.SOContentStorageConstrutorParams",
+                    "text": "SOContentStorageConstrutorParams"
+                  },
+                  "<Types>"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorage.mSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "{ savedObjectType: string; toItemResult: (ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", savedObject: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindResult",
+                "text": "SavedObjectsFindResult"
+              },
+              "<unknown>) => Types[\"Item\"]; } | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorage.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string) => Promise<Types[\"GetOut\"]>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.get.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorage.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [],
+            "signature": [
+              "() => Promise<never>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorage.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", data: Types[\"Attributes\"], options: Types[\"CreateOptions\"]) => Promise<Types[\"CreateOut\"]>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.create.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "Types[\"Attributes\"]"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.create.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Types[\"CreateOptions\"]"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorage.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string, data: Types[\"Attributes\"], options: Types[\"UpdateOptions\"]) => Promise<Types[\"UpdateOut\"]>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.update.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.update.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "Types[\"Attributes\"]"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.update.$4",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Types[\"UpdateOptions\"]"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorage.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string) => Promise<Types[\"DeleteOut\"]>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.delete.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorage.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", query: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchQuery",
+                "text": "SearchQuery"
+              },
+              ", options?: Types[\"SearchOptions\"]) => Promise<Types[\"SearchOut\"]>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.search.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.SearchQuery",
+                    "text": "SearchQuery"
+                  }
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.SOContentStorage.search.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Types[\"SearchOptions\"]"
+                ],
+                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.createArgsToSoCreateOptionsDefault",
+        "type": "Function",
+        "tags": [],
+        "label": "createArgsToSoCreateOptionsDefault",
+        "description": [],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsCreateOptions",
+            "text": "SavedObjectsCreateOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsCreateOptions",
+            "text": "SavedObjectsCreateOptions"
+          }
+        ],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.createArgsToSoCreateOptionsDefault.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              }
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/content-management-utils",
         "id": "def-common.createResultSchema",
@@ -314,9 +873,585 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.searchArgsToSOFindOptionsDefault",
+        "type": "Function",
+        "tags": [],
+        "label": "searchArgsToSOFindOptionsDefault",
+        "description": [],
+        "signature": [
+          "<T extends string>(params: ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.SearchIn",
+            "text": "SearchIn"
+          },
+          "<T, ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.SearchArgsToSOFindOptionsOptionsDefault",
+            "text": "SearchArgsToSOFindOptionsOptionsDefault"
+          },
+          ">) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptions",
+            "text": "SavedObjectsFindOptions"
+          }
+        ],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.searchArgsToSOFindOptionsDefault.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchIn",
+                "text": "SearchIn"
+              },
+              "<T, ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SearchArgsToSOFindOptionsOptionsDefault",
+                "text": "SearchArgsToSOFindOptionsOptionsDefault"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.tagsToFindOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "tagsToFindOptions",
+        "description": [],
+        "signature": [
+          "({ included, excluded, }?: { included?: string[] | undefined; excluded?: string[] | undefined; }) => { hasReference: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
+          "[] | undefined; hasNoReference: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "packages/kbn-content-management-utils/src/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.tagsToFindOptions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  included,\n  excluded,\n}",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/src/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.tagsToFindOptions.$1.included",
+                "type": "Array",
+                "tags": [],
+                "label": "included",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/kbn-content-management-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.tagsToFindOptions.$1.excluded",
+                "type": "Array",
+                "tags": [],
+                "label": "excluded",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/kbn-content-management-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.updateArgsToSoUpdateOptionsDefault",
+        "type": "Function",
+        "tags": [],
+        "label": "updateArgsToSoUpdateOptionsDefault",
+        "description": [],
+        "signature": [
+          "<Types extends ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.CMCrudTypes",
+            "text": "CMCrudTypes"
+          },
+          ">(params: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsUpdateOptions",
+            "text": "SavedObjectsUpdateOptions"
+          },
+          "<Types[\"Attributes\"]>) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsUpdateOptions",
+            "text": "SavedObjectsUpdateOptions"
+          },
+          "<Types[\"Attributes\"]>"
+        ],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.updateArgsToSoUpdateOptionsDefault.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
+              "<Types[\"Attributes\"]>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.CMCrudTypes",
+        "type": "Interface",
+        "tags": [],
+        "label": "CMCrudTypes",
+        "description": [],
+        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.Attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "Attributes",
+            "description": [
+              "\nSaved object attributes"
+            ],
+            "signature": [
+              "object"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.Item",
+            "type": "Object",
+            "tags": [],
+            "label": "Item",
+            "description": [
+              "\nComplete saved object"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<object>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.PartialItem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "PartialItem",
+            "description": [
+              "\nPartial saved object, used as output for update"
+            ],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<object>, \"references\" | \"attributes\"> & { attributes: object; references: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined; }"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.GetIn",
+            "type": "Object",
+            "tags": [],
+            "label": "GetIn",
+            "description": [
+              "\nGet item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<string, object>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.GetOut",
+            "type": "Object",
+            "tags": [],
+            "label": "GetOut",
+            "description": [
+              "\nGet item result"
+            ],
+            "signature": [
+              "{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<object>; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.CreateIn",
+            "type": "Object",
+            "tags": [],
+            "label": "CreateIn",
+            "description": [
+              "\nCreate item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.CreateIn",
+                "text": "CreateIn"
+              },
+              "<string, object, object>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.CreateOut",
+            "type": "Object",
+            "tags": [],
+            "label": "CreateOut",
+            "description": [
+              "\nCreate item result"
+            ],
+            "signature": [
+              "{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<object>; }"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.CreateOptions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "CreateOptions",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "object"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.SearchIn",
+            "type": "Object",
+            "tags": [],
+            "label": "SearchIn",
+            "description": [
+              "\nSearch item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchIn",
+                "text": "SearchIn"
+              },
+              "<string, object>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.SearchOut",
+            "type": "Object",
+            "tags": [],
+            "label": "SearchOut",
+            "description": [
+              "\nSearch item result"
+            ],
+            "signature": [
+              "{ hits: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<object>[]; pagination: { total: number; cursor?: string | undefined; }; }"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.SearchOptions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "SearchOptions",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "object"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.UpdateIn",
+            "type": "Object",
+            "tags": [],
+            "label": "UpdateIn",
+            "description": [
+              "\nUpdate item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.UpdateIn",
+                "text": "UpdateIn"
+              },
+              "<string, object, object>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.UpdateOut",
+            "type": "Object",
+            "tags": [],
+            "label": "UpdateOut",
+            "description": [
+              "\nUpdate item result"
+            ],
+            "signature": [
+              "{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadataPartial",
+                "text": "SOWithMetadataPartial"
+              },
+              "<object>; }"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.UpdateOptions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "UpdateOptions",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "object"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.DeleteIn",
+            "type": "Object",
+            "tags": [],
+            "label": "DeleteIn",
+            "description": [
+              "\nDelete item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteIn",
+                "text": "DeleteIn"
+              },
+              "<string, object>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CMCrudTypes.DeleteOut",
+            "type": "Object",
+            "tags": [],
+            "label": "DeleteOut",
+            "description": [
+              "\nDelete item result"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteResult",
+                "text": "DeleteResult"
+              }
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/content-management-utils",
         "id": "def-common.ContentManagementCrudTypes",
@@ -343,6 +1478,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.Attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "Attributes",
+            "description": [],
+            "signature": [
+              "Attributes"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/content-management-utils",
             "id": "def-common.ContentManagementCrudTypes.Item",
@@ -620,7 +1769,15 @@
               "\nUpdate item result"
             ],
             "signature": [
-              "{ item: PartialItem<Attributes>; }"
+              "{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadataPartial",
+                "text": "SOWithMetadataPartial"
+              },
+              "<Attributes>; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1307,6 +2464,215 @@
       },
       {
         "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SearchArgsToSOFindOptionsOptionsDefault",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchArgsToSOFindOptionsOptionsDefault",
+        "description": [],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SearchArgsToSOFindOptionsOptionsDefault.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SearchArgsToSOFindOptionsOptionsDefault.searchFields",
+            "type": "Array",
+            "tags": [],
+            "label": "searchFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.ServicesDefinitionSet",
+        "type": "Interface",
+        "tags": [],
+        "label": "ServicesDefinitionSet",
+        "description": [],
+        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ServicesDefinitionSet.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[version: number]: ServicesDefinition",
+            "description": [],
+            "signature": [
+              "[version: number]:  ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ServicesDefinition",
+                "text": "ServicesDefinition"
+              }
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SOContentStorageConstrutorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SOContentStorageConstrutorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.SOContentStorageConstrutorParams",
+            "text": "SOContentStorageConstrutorParams"
+          },
+          "<Types>"
+        ],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.savedObjectType",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.cmServicesDefinition",
+            "type": "Object",
+            "tags": [],
+            "label": "cmServicesDefinition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.ServicesDefinitionSet",
+                "text": "ServicesDefinitionSet"
+              }
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.createArgsToSoCreateOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "createArgsToSoCreateOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.CreateArgsToSoCreateOptions",
+                "text": "CreateArgsToSoCreateOptions"
+              },
+              "<Types> | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.updateArgsToSoUpdateOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "updateArgsToSoUpdateOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.UpdateArgsToSoUpdateOptions",
+                "text": "UpdateArgsToSoUpdateOptions"
+              },
+              "<Types> | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.searchArgsToSOFindOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "searchArgsToSOFindOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SearchArgsToSOFindOptions",
+                "text": "SearchArgsToSOFindOptions"
+              },
+              "<Types> | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.enableMSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableMSearch",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
         "id": "def-common.SOWithMetadata",
         "type": "Interface",
         "tags": [],
@@ -1477,6 +2843,45 @@
     "misc": [
       {
         "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.CreateArgsToSoCreateOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateArgsToSoCreateOptions",
+        "description": [],
+        "signature": [
+          "(params: Types[\"CreateOptions\"]) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsCreateOptions",
+            "text": "SavedObjectsCreateOptions"
+          }
+        ],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.CreateArgsToSoCreateOptions.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Types[\"CreateOptions\"]"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
         "id": "def-common.GetResultSO",
         "type": "Type",
         "tags": [],
@@ -1490,6 +2895,116 @@
         "path": "packages/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SearchArgsToSOFindOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchArgsToSOFindOptions",
+        "description": [],
+        "signature": [
+          "(params: Types[\"SearchIn\"]) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptions",
+            "text": "SavedObjectsFindOptions"
+          }
+        ],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SearchArgsToSOFindOptions.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Types[\"SearchIn\"]"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SOWithMetadataPartial",
+        "type": "Type",
+        "tags": [],
+        "label": "SOWithMetadataPartial",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.SOWithMetadata",
+            "text": "SOWithMetadata"
+          },
+          "<Attributes>, \"references\" | \"attributes\"> & { attributes: Partial<Attributes>; references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.UpdateArgsToSoUpdateOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateArgsToSoUpdateOptions",
+        "description": [],
+        "signature": [
+          "(params: Types[\"UpdateOptions\"]) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsUpdateOptions",
+            "text": "SavedObjectsUpdateOptions"
+          },
+          "<Types[\"Attributes\"]>"
+        ],
+        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.UpdateArgsToSoUpdateOptions.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Types[\"UpdateOptions\"]"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
