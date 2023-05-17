@@ -233,6 +233,7 @@ async function attemptToCreateCommand(
         firefoxOptions.set('moz:firefoxOptions', {
           prefs: { 'devtools.console.stdout.content': true },
         });
+        firefoxOptions.addArguments('--host').addArguments('::1');
         firefoxOptions.setPreference('browser.download.folderList', 2);
         firefoxOptions.setPreference('browser.download.manager.showWhenStarting', false);
         firefoxOptions.setPreference('browser.download.dir', downloadDir);
@@ -240,6 +241,40 @@ async function attemptToCreateCommand(
           'browser.helperApps.neverAsk.saveToDisk',
           'application/comma-separated-values, text/csv, text/plain'
         );
+
+        firefoxOptions.setPreference('network.http.pipelining', true);
+        firefoxOptions.setPreference('network.http.proxy.pipelining', true);
+        firefoxOptions.setPreference('network.http.pipelining.maxrequests', 8);
+        firefoxOptions.setPreference('content.notify.interval', 500000);
+        firefoxOptions.setPreference('content.notify.ontimer', true);
+        firefoxOptions.setPreference('content.switch.threshold', 250000);
+        firefoxOptions.setPreference('browser.cache.memory.capacity', 65536); // Increase the cache capacity.
+        firefoxOptions.setPreference('browser.startup.homepage', 'about:blank');
+        firefoxOptions.setPreference('reader.parse-on-load.enabled', false); // Disable reader, we won't need that.
+        firefoxOptions.setPreference('browser.pocket.enabled', false); // Duck pocket too!
+        firefoxOptions.setPreference('loop.enabled', false);
+        firefoxOptions.setPreference('browser.chrome.toolbar_style', 1); // Text on Toolbar instead of icons
+        firefoxOptions.setPreference('browser.display.show_image_placeholders', false); // Don't show thumbnails on not loaded images.
+        firefoxOptions.setPreference('browser.display.use_document_colors', false); // Don't show document colors.
+        firefoxOptions.setPreference('browser.display.use_document_fonts', 0); // Don't load document fonts.
+        firefoxOptions.setPreference('browser.display.use_system_colors', true); // Use system colors.
+        firefoxOptions.setPreference('browser.formfill.enable', false); // Autofill on forms disabled.
+        firefoxOptions.setPreference('browser.helperApps.deleteTempFileOnExit', true); // Delete temprorary files.
+        firefoxOptions.setPreference('browser.shell.checkDefaultBrowser', false);
+        firefoxOptions.setPreference('browser.startup.homepage', 'about:blank');
+        firefoxOptions.setPreference('browser.startup.page', 0); // blank
+        firefoxOptions.setPreference('browser.tabs.forceHide', true); // Disable tabs, We won't need that.
+        firefoxOptions.setPreference('browser.urlbar.autoFill', false); // Disable autofill on URL bar.
+        firefoxOptions.setPreference('browser.urlbar.autocomplete.enabled', false); // Disable autocomplete on URL bar.
+        firefoxOptions.setPreference('browser.urlbar.showPopup', false); // Disable list of URLs when typing on URL bar.
+        firefoxOptions.setPreference('browser.urlbar.showSearch', false); // Disable search bar.
+        firefoxOptions.setPreference('extensions.checkCompatibility', false); // Addon update disabled
+        firefoxOptions.setPreference('extensions.checkUpdateSecurity', false);
+        firefoxOptions.setPreference('extensions.update.autoUpdateEnabled', false);
+        firefoxOptions.setPreference('extensions.update.enabled', false);
+        firefoxOptions.setPreference('general.startup.browser', false);
+        firefoxOptions.setPreference('plugin.default_plugin_disabled', false);
+        firefoxOptions.setPreference('permissions.default.image', 2);
         firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
@@ -284,13 +319,15 @@ async function attemptToCreateCommand(
                 return [];
               }
 
-              const [, level, message] = match;
-              return [
-                {
-                  level,
-                  message: message.trim(),
-                },
-              ];
+              return [];
+
+              // const [, level, message] = match;
+              // return [
+              //   {
+              //     level,
+              //     message: message.trim(),
+              //   },
+              // ];
             })
           ),
         };
