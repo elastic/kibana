@@ -9,6 +9,7 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registrationServicesMock } from '../../mocks';
+import { SUB_ACTION } from '../../../common/gen_ai/constants';
 
 const ACTION_TYPE_ID = '.gen-ai';
 let actionTypeModel: ActionTypeModel;
@@ -26,29 +27,56 @@ describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.selectMessage).toBe('Send a request to Generative AI');
-    expect(actionTypeModel.actionTypeTitle).toBe('Generative AI data');
+    expect(actionTypeModel.actionTypeTitle).toBe('Generative AI');
   });
 });
 
 describe('gen ai action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
-      body: 'message {test}',
+      subAction: SUB_ACTION.RUN,
+      subActionParams: { body: '{"message": "test"}' },
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: [] },
+      errors: { body: [], subAction: [] },
     });
   });
 
-  test('params validation fails when body is not valid', async () => {
+  test('params validation fails when body is not an object', async () => {
     const actionParams = {
-      body: '',
+      subAction: SUB_ACTION.RUN,
+      subActionParams: { body: 'message {test}' },
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: { body: ['Body does not have a valid JSON format.'], subAction: [] },
+    });
+  });
+
+  test('params validation fails when subAction is missing', async () => {
+    const actionParams = {
+      subActionParams: { body: '{"message": "test"}' },
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        body: [],
+        subAction: ['Action is required.'],
+      },
+    });
+  });
+
+  test('params validation fails when subActionParams is missing', async () => {
+    const actionParams = {
+      subAction: SUB_ACTION.RUN,
+      subActionParams: {},
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         body: ['Body is required.'],
+        subAction: [],
       },
     });
   });

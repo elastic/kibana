@@ -29,7 +29,6 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
-    console.log('GEN AI CONNECTOR SERVER!!!!!');
 
     this.registerSubActions();
   }

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { GeneralConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
+import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
 import { GEN_AI_CONNECTOR_ID, GEN_AI_TITLE } from '../../../common/gen_ai/constants';
 import { GenAiConfigSchema, GenAiSecretsSchema } from '../../../common/gen_ai/schema';
 import { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
@@ -25,8 +29,36 @@ export const getConnectorType = (): SubActionConnectorType<GenAiConfig, GenAiSec
     config: GenAiConfigSchema,
     secrets: GenAiSecretsSchema,
   },
-  validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
+  validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [GeneralConnectorFeatureId],
   minimumLicenseRequired: 'platinum' as const,
   renderParameterTemplates,
 });
+
+export const configValidator = (
+  configObject: GenAiConfig,
+  validatorServices: ValidatorServices
+) => {
+  try {
+    assertURL(configObject.apiUrl);
+    urlAllowListValidator('apiUrl')(configObject, validatorServices);
+
+    if (
+      configObject.apiProvider !== OpenAiProviderType.OpenAi &&
+      configObject.apiProvider !== OpenAiProviderType.AzureAi
+    ) {
+      throw new Error('API Provider is not supported');
+    }
+
+    return configObject;
+  } catch (err) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.genAi.configurationErrorApiProvider', {
+        defaultMessage: 'Error configuring Generative AI action: {err}',
+        values: {
+          err,
+        },
+      })
+    );
+  }
+};

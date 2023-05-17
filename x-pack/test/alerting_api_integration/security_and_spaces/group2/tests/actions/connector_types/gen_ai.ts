@@ -13,13 +13,33 @@ import {
 } from '@kbn/actions-simulators-plugin/server/gen_ai_simulation';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-const goodUrl = 'https://some.non.existent.com'; // added to allowedHosts in the config for tests
-const badUrl = 'https://any-other.com'; // added to allowedHosts in the config for tests
+const connectorTypeId = '.gen-ai';
+const name = 'A genAi action';
+const secrets = {
+  apiKey: 'genAiApiKey',
+};
+
+const defaultConfig = { apiProvider: 'OpenAI' };
 
 // eslint-disable-next-line import/no-default-export
 export default function genAiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+
+  const createConnector = async (apiUrl: string) => {
+    const { body } = await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name,
+        connector_type_id: connectorTypeId,
+        config: { ...defaultConfig, apiUrl },
+        secrets,
+      })
+      .expect(200);
+
+    return body.id;
+  };
 
   describe('GenAi', () => {
     describe('action creation', () => {
@@ -29,10 +49,10 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           config: configService.get('kbnTestServer.serverArgs'),
         },
       });
-      let simulatorUrl: string;
+      const config = { ...defaultConfig, apiUrl: '' };
 
       before(async () => {
-        simulatorUrl = await simulator.start();
+        config.apiUrl = await simulator.start();
       });
 
       after(() => {
@@ -44,15 +64,10 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A GenAi action',
-            connector_type_id: '.gen-ai',
-            config: {
-              apiUrl: simulatorUrl,
-              apiProvider: 'OpenAI',
-            },
-            secrets: {
-              apiKey: '123',
-            },
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets,
           })
           .expect(200);
 
@@ -60,13 +75,10 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           id: createdAction.id,
           is_preconfigured: false,
           is_deprecated: false,
-          name: 'A GenAi action',
-          connector_type_id: '.gen-ai',
+          name,
+          connector_type_id: connectorTypeId,
           is_missing_secrets: false,
-          config: {
-            apiUrl: simulatorUrl,
-            apiProvider: 'OpenAI',
-          },
+          config,
         });
       });
 
@@ -78,7 +90,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             name: 'A GenAi action',
             connector_type_id: '.gen-ai',
             config: {
-              apiUrl: goodUrl,
+              apiUrl: config.apiUrl,
             },
             secrets: {
               apiKey: '123',
@@ -94,19 +106,16 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             });
           });
       });
+
       it('should return 400 Bad Request when creating the connector without the apiUrl', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A GenAi action',
-            connector_type_id: '.gen-ai',
-            config: {
-              apiProvider: 'OpenAI',
-            },
-            secrets: {
-              apiKey: '123',
-            },
+            name,
+            connector_type_id: connectorTypeId,
+            config: defaultConfig,
+            secrets,
           })
           .expect(400)
           .then((resp: any) => {
@@ -124,22 +133,21 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A GenAi action',
-            connector_type_id: '.gen-ai',
+            name,
+            connector_type_id: connectorTypeId,
             config: {
-              apiUrl: badUrl,
-              apiProvider: 'OpenAI',
+              ...defaultConfig,
+              apiUrl: 'http://genAi.mynonexistent.com',
             },
-            secrets: {
-              apiKey: '123',
-            },
+            secrets,
           })
           .expect(400)
           .then((resp: any) => {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: error configuring Generative AI action: target url "${badUrl}" is not added to the Kibana config xpack.actions.allowedHosts`,
+              message:
+                'error validating action type config: Error configuring Generative AI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -149,12 +157,9 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A GenAi action',
-            connector_type_id: '.gen-ai',
-            config: {
-              apiUrl: simulatorUrl,
-              apiProvider: 'OpenAI',
-            },
+            name,
+            connector_type_id: connectorTypeId,
+            config,
           })
           .expect(400)
           .then((resp: any) => {
@@ -169,104 +174,143 @@ export default function genAiTest({ getService }: FtrProviderContext) {
     });
 
     describe('executor', () => {
-      describe('successful response simulator', () => {
+      describe('validation', () => {
         const simulator = new GenAiSimulator({
           proxy: {
             config: configService.get('kbnTestServer.serverArgs'),
           },
         });
-        let simulatorUrl: string;
         let genAiActionId: string;
 
         before(async () => {
-          simulatorUrl = await simulator.start();
-          genAiActionId = await createConnector(simulatorUrl);
+          const apiUrl = await simulator.start();
+          genAiActionId = await createConnector(apiUrl);
         });
 
         after(() => {
           simulator.close();
         });
 
-        it('should send a stringified JSON object', async () => {
-          const { body } = await supertest
-            .post(`/api/actions/connector/${genAiActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                body: '{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Hello world"}]}',
-              },
-            })
-            .expect(200);
-
-          expect(simulator.requestData).to.eql({
-            model: 'gpt-3.5-turbo',
-            messages: [{ role: 'user', content: 'Hello world' }],
-          });
-          expect(body).to.eql({
-            status: 'ok',
-            connector_id: genAiActionId,
-            data: genAiSuccessResponse,
-          });
-        });
-      });
-
-      describe('error response simulator', () => {
-        const simulator = new GenAiSimulator({
-          returnError: true,
-          proxy: {
-            config: configService.get('kbnTestServer.serverArgs'),
-          },
-        });
-
-        let simulatorUrl: string;
-        let genAiActionId: string;
-
-        before(async () => {
-          simulatorUrl = await simulator.start();
-          genAiActionId = await createConnector(simulatorUrl);
-        });
-
-        after(() => {
-          simulator.close();
-        });
-
-        it('should return a failure when error happens', async () => {
+        it('should fail when the params is empty', async () => {
           const { body } = await supertest
             .post(`/api/actions/connector/${genAiActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {},
+            });
+          expect(200);
+
+          expect(body).to.eql({
+            status: 'error',
+            connector_id: genAiActionId,
+            message:
+              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            retry: false,
+          });
+        });
+
+        it('should fail when the subAction is invalid', async () => {
+          const { body } = await supertest
+            .post(`/api/actions/connector/${genAiActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: { subAction: 'invalidAction' },
             })
             .expect(200);
 
           expect(body).to.eql({
-            status: 'error',
-            message: 'error calling Generative AI, invalid response',
             connector_id: genAiActionId,
-            service_message: '[422] Unprocessable Entity',
+            status: 'error',
+            retry: true,
+            message: 'an error occurred while running the action',
+            service_message: `Sub action "invalidAction" is not registered. Connector id: ${genAiActionId}. Connector name: Generative AI. Connector type: .gen-ai`,
           });
         });
       });
 
-      const createConnector = async (url: string) => {
-        const { body } = await supertest
-          .post('/api/actions/connector')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'An GenAi simulator',
-            connector_type_id: '.gen-ai',
-            config: {
-              apiUrl: url,
-              apiProvider: 'OpenAI',
+      describe('execution', () => {
+        describe('successful response simulator', () => {
+          const simulator = new GenAiSimulator({
+            proxy: {
+              config: configService.get('kbnTestServer.serverArgs'),
             },
-            secrets: {
-              apiKey: '123',
-            },
-          })
-          .expect(200);
+          });
+          let apiUrl: string;
+          let genAiActionId: string;
 
-        return body.id;
-      };
+          before(async () => {
+            apiUrl = await simulator.start();
+            genAiActionId = await createConnector(apiUrl);
+          });
+
+          after(() => {
+            simulator.close();
+          });
+
+          it('should send a stringified JSON object', async () => {
+            const { body } = await supertest
+              .post(`/api/actions/connector/${genAiActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'test',
+                  subActionParams: {
+                    body: '{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Hello world"}]}',
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql({
+              model: 'gpt-3.5-turbo',
+              messages: [{ role: 'user', content: 'Hello world' }],
+            });
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: genAiActionId,
+              data: genAiSuccessResponse,
+            });
+          });
+        });
+
+        describe('error response simulator', () => {
+          const simulator = new GenAiSimulator({
+            returnError: true,
+            proxy: {
+              config: configService.get('kbnTestServer.serverArgs'),
+            },
+          });
+
+          let genAiActionId: string;
+
+          before(async () => {
+            const apiUrl = await simulator.start();
+            genAiActionId = await createConnector(apiUrl);
+          });
+
+          after(() => {
+            simulator.close();
+          });
+
+          it('should return a failure when error happens', async () => {
+            const { body } = await supertest
+              .post(`/api/actions/connector/${genAiActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {},
+              })
+              .expect(200);
+
+            expect(body).to.eql({
+              status: 'error',
+              connector_id: genAiActionId,
+              message:
+                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              retry: false,
+            });
+          });
+        });
+      });
     });
   });
 }

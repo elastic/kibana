@@ -31,8 +31,6 @@ const GenerativeAiParamsFields: React.FunctionComponent<
 
   useEffect(() => {
     if (!subActionParams) {
-      const params = subActionParams?.body ? { body: subActionParams.body } : undefined;
-      editAction('subActionParams', params, index);
       editAction('subActionParams', {}, index);
     }
   }, [editAction, index, subActionParams]);

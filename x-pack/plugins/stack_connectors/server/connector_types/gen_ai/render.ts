@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set/fp';
 import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
-import { cloneDeep } from 'lodash';
 import { SUB_ACTION } from '../../../common/gen_ai/constants';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
   params,
   variables
 ) => {
-  if (params?.subAction !== SUB_ACTION.RUN) return params;
+  if (params?.subAction !== SUB_ACTION.RUN && params?.subAction !== SUB_ACTION.TEST) return params;
 
-  const paramsCopy = cloneDeep(params);
-  console.log('PARAMS', paramsCopy);
-
-  console.log('Da body', params.subActionParams.body);
-
-  set('subActionParams', paramsCopy, {
-    body: renderMustacheString(params.subActionParams.body, variables, 'json'),
-  });
-
-  return paramsCopy;
+  return {
+    ...params,
+    subActionParams: {
+      ...params.subActionParams,
+      body: renderMustacheString(params.subActionParams.body as string, variables, 'json'),
+    },
+  };
 };
