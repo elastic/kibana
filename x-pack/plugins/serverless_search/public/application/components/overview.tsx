@@ -26,6 +26,7 @@ import { InstallClientPanel } from './overview_panels/install_client';
 import { OverviewPanel } from './overview_panels/overview_panel';
 import './overview.scss';
 import { IngestData } from './overview_panels/ingest_data';
+import { SelectClientPanel } from './overview_panels/select_client';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
@@ -68,6 +69,14 @@ export const ElasticsearchOverview = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+        <SelectClientPanel
+          setSelectedLanguage={setSelectedLanguage}
+          languages={languageDefinitions}
+          selectedLanguage={selectedLanguage}
+        />
+      </EuiPageTemplate.Section>
+
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <InstallClientPanel language={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
       </EuiPageTemplate.Section>
