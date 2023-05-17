@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { clearQuery, enterQuery, navigateToIndicatorsTablePage } from '../tasks/indicators';
 import {
   ADD_INTEGRATIONS_BUTTON,
   BREADCRUMBS,
@@ -30,7 +31,6 @@ import {
   INDICATORS_TABLE_INDICATOR_NAME_COLUMN_HEADER,
   INDICATORS_TABLE_INDICATOR_TYPE_CELL,
   INDICATORS_TABLE_INDICATOR_TYPE_COLUMN_HEADER,
-  INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON,
   INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER,
   INDICATORS_TABLE_ROW_CELL,
   INSPECTOR_BUTTON,
@@ -39,12 +39,18 @@ import {
   QUERY_INPUT,
   TABLE_CONTROLS,
   TIME_RANGE_PICKER,
-  TOGGLE_FLYOUT_BUTTON,
   REFRESH_BUTTON,
 } from '../screens/indicators';
 import { login } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { selectRange } from '../tasks/select_range';
+import {
+  closeFlyout,
+  navigateToFlyoutJsonTab,
+  navigateToFlyoutTableTab,
+  openFlyout,
+} from '../tasks/common';
+import { INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON } from '../screens/timeline';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
@@ -59,9 +65,6 @@ describe('Invalid Indicators', () => {
   describe('verify the grid loads even with missing fields', () => {
     before(() => {
       esArchiverLoad('threat_intelligence/invalid_indicators_data');
-    });
-
-    beforeEach(() => {
       cy.visit(THREAT_INTELLIGENCE);
       selectRange();
     });
@@ -113,9 +116,6 @@ describe('Invalid Indicators', () => {
   describe('verify the grid loads even with missing mappings and missing fields', () => {
     before(() => {
       esArchiverLoad('threat_intelligence/missing_mappings_indicators_data');
-    });
-
-    beforeEach(() => {
       cy.visit(THREAT_INTELLIGENCE);
       selectRange();
     });
@@ -156,10 +156,9 @@ describe('Indicators', () => {
     });
   });
 
-  describe('Indicators page basics', () => {
-    beforeEach(() => {
+  describe('Indicators page basics', { testIsolation: false }, () => {
+    before(() => {
       cy.visit(THREAT_INTELLIGENCE);
-
       selectRange();
     });
 
@@ -191,46 +190,46 @@ describe('Indicators', () => {
       // Just to know that the data is loaded. This will be replaced with some better mechanism.
       cy.get(TABLE_CONTROLS).should('contain.text', 'Showing 1-25 of');
 
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
+      openFlyout(1);
 
       cy.get(FLYOUT_TITLE).should('contain', 'Indicator details');
 
       cy.get(FLYOUT_TABS).should('exist').children().should('have.length', 3);
 
       cy.get(FLYOUT_TABS).should('exist');
-      cy.get(`${FLYOUT_TABS} button:nth-child(2)`).click();
+      navigateToFlyoutTableTab();
 
       cy.get(FLYOUT_TABLE).should('exist').and('contain.text', 'threat.indicator.type');
 
-      cy.get(`${FLYOUT_TABS} button:nth-child(3)`).click();
+      navigateToFlyoutJsonTab();
       cy.get(FLYOUT_JSON).should('exist').and('contain.text', 'threat.indicator.type');
+
+      closeFlyout();
     });
   });
 
-  describe('Indicator page search', () => {
-    beforeEach(() => {
+  describe('Indicator page search', { testIsolation: false }, () => {
+    before(() => {
       cy.visit(THREAT_INTELLIGENCE);
-
       selectRange();
     });
 
     it('should narrow the results to url indicators when respective KQL search is executed', () => {
-      cy.get(QUERY_INPUT).should('exist').focus().type('threat.indicator.type: "url"{enter}');
+      enterQuery('threat.indicator.type: "url"{enter}');
 
       // Check if query results are narrowed after search
       cy.get(INDICATOR_TYPE_CELL).should('not.contain.text', 'file');
 
-      cy.get(QUERY_INPUT)
-        .should('exist')
-        .focus()
-        .clear()
-        .type('threat.indicator.type: "file"{enter}');
+      clearQuery();
+      enterQuery('threat.indicator.type: "file"{enter}');
 
       cy.get(INDICATOR_TYPE_CELL).should('not.contain.text', 'url');
+
+      clearQuery();
     });
 
     it('should go to the 2nd page', () => {
-      cy.get('[data-test-subj="pagination-button-1"]').click();
+      navigateToIndicatorsTablePage(1);
 
       cy.get(TABLE_CONTROLS).should('contain.text', 'Showing 26-50 of');
     });
@@ -257,7 +256,6 @@ describe('Indicators', () => {
       before(() => {
         // Contradictory filter set
         cy.visit(URL_WITH_CONTRADICTORY_FILTERS);
-
         selectRange();
       });
 
@@ -283,7 +281,6 @@ describe('Indicators', () => {
   describe('Field browser', () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);
-
       selectRange();
     });
 
@@ -299,7 +296,6 @@ describe('Indicators', () => {
   describe('Request inspector', () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);
-
       selectRange();
     });
 
@@ -315,7 +311,6 @@ describe('Indicators', () => {
   describe('Add integrations', () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);
-
       selectRange();
     });
 

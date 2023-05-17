@@ -1308,6 +1308,104 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             }
           });
         });
+
+        it('should not fire summary actions during maintenance window', async () => {
+          const { body: window } = await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              title: 'test-maintenance-window-1',
+              duration: 60 * 60 * 1000, // 1 hr
+              r_rule: {
+                dtstart: moment.utc().toISOString(),
+                tzid: 'UTC',
+                freq: 0, // yearly
+                count: 1,
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, window.id, 'rules/maintenance_window', 'alerting', true);
+
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'Test conn',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+
+          const { body: createdRule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.always-firing-alert-as-data',
+                schedule: { interval: '24h' },
+                throttle: undefined,
+                notify_when: undefined,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference: 'test',
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {
+                      index: ES_TEST_INDEX_NAME,
+                      reference: 'test',
+                      message: '',
+                    },
+                    frequency: {
+                      summary: true,
+                      throttle: null,
+                      notify_when: 'onActiveAlert',
+                    },
+                  },
+                ],
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+          // get the events we're expecting
+          await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: createdRule.id,
+              provider: 'alerting',
+              actions: new Map([
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
+                ['active-instance', { equal: 2 }],
+              ]),
+            });
+          });
+
+          // Try to get actions, should fail
+          let hasActions = false;
+          try {
+            await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: createdRule.id,
+              provider: 'alerting',
+              actions: new Map([['execute-action', { equal: 1 }]]),
+            });
+            hasActions = true;
+          } catch (e) {
+            hasActions = false;
+          }
+
+          expect(hasActions).eql(false);
+        });
       });
     }
   });

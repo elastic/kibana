@@ -8,10 +8,12 @@
 import { EuiEmptyPrompt, EuiPageSection, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useKibana } from '../common/hooks/use_kibana';
 
-export const SubscriptionNotAllowed = () => {
-  const { application } = useKibana().services;
+export const SubscriptionNotAllowed = ({
+  licenseManagementLocator,
+}: {
+  licenseManagementLocator?: string;
+}) => {
   return (
     <EuiPageSection color="danger" alignment="center">
       <EuiEmptyPrompt
@@ -25,26 +27,31 @@ export const SubscriptionNotAllowed = () => {
           </h2>
         }
         body={
-          <p>
-            <FormattedMessage
-              id="xpack.csp.subscriptionNotAllowed.promptDescription"
-              defaultMessage="To use these cloud security features, you must {link}."
-              values={{
-                link: (
-                  <EuiLink
-                    href={application.getUrlForApp('management', {
-                      path: 'stack/license_management/home',
-                    })}
-                  >
-                    <FormattedMessage
-                      id="xpack.csp.subscriptionNotAllowed.promptLinkText"
-                      defaultMessage="start a trial or upgrade your subscription"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
+          licenseManagementLocator ? (
+            <p data-test-subj={'has_locator'}>
+              <FormattedMessage
+                id="xpack.csp.subscriptionNotAllowed.promptDescription"
+                defaultMessage="To use these cloud security features, you must {link}."
+                values={{
+                  link: (
+                    <EuiLink href={licenseManagementLocator}>
+                      <FormattedMessage
+                        id="xpack.csp.subscriptionNotAllowed.promptLinkText"
+                        defaultMessage="start a trial or upgrade your subscription"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          ) : (
+            <p data-test-subj={'no_locator'}>
+              <FormattedMessage
+                id="xpack.csp.subscriptionNotAllowed.promptDescriptionNoLocator"
+                defaultMessage="Contact your administrator to change your license."
+              />
+            </p>
+          )
         }
       />
     </EuiPageSection>

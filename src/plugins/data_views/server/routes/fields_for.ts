@@ -23,14 +23,14 @@ import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies
  * 2. A JSON-stringified array of field names
  * 3. A single field name (not comma-separated)
  * @returns an array of field names
- * @param metaFields
+ * @param fields
  */
-export const parseMetaFields = (metaFields: string | string[]): string[] => {
-  if (Array.isArray(metaFields)) return metaFields;
+export const parseFields = (fields: string | string[]): string[] => {
+  if (Array.isArray(fields)) return fields;
   try {
-    return JSON.parse(metaFields);
+    return JSON.parse(fields);
   } catch (e) {
-    if (!metaFields.includes(',')) return [metaFields];
+    if (!fields.includes(',')) return [fields];
     throw new Error(
       'metaFields should be an array of field names, a JSON-stringified array of field names, or a single field name'
     );
@@ -60,7 +60,7 @@ const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
     rollup_index: schema.maybe(schema.string()),
     allow_no_index: schema.maybe(schema.boolean()),
     include_unmapped: schema.maybe(schema.boolean()),
-    fields: schema.maybe(schema.arrayOf(schema.string())),
+    fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   }),
   // not available to get request
   body: schema.maybe(schema.object({ index_filter: schema.any() })),
@@ -81,8 +81,10 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   const indexFilter = request.body?.index_filter;
 
   let parsedFields: string[] = [];
+  let parsedMetaFields: string[] = [];
   try {
-    parsedFields = parseMetaFields(metaFields);
+    parsedMetaFields = parseFields(metaFields);
+    parsedFields = parseFields(request.query.fields ?? []);
   } catch (error) {
     return response.badRequest();
   }
@@ -90,7 +92,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   try {
     const { fields, indices } = await indexPatterns.getFieldsForWildcard({
       pattern,
-      metaFields: parsedFields,
+      metaFields: parsedMetaFields,
       type,
       rollupIndex,
       fieldCapsOptions: {
@@ -98,7 +100,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
         includeUnmapped,
       },
       indexFilter,
-      fields: request.query.fields,
+      ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
     });
 
     return response.ok({
