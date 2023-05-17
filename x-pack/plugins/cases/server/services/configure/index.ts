@@ -14,7 +14,12 @@ import type {
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import type { ConfigurationAttributes, User } from '../../../common/api';
+import type { ConfigurationAttributes } from '../../../common/api';
+import {
+  ConfigurationPartialAttributesRt,
+  decodeOrThrow,
+  ConfigurationAttributesRt,
+} from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
@@ -45,11 +50,9 @@ export class CaseConfigureService {
   }: DeleteCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to DELETE case configure ${configurationId}`);
-      return await unsecuredSavedObjectsClient.delete(
-        CASE_CONFIGURE_SAVED_OBJECT,
-        configurationId,
-        { refresh }
-      );
+      await unsecuredSavedObjectsClient.delete(CASE_CONFIGURE_SAVED_OBJECT, configurationId, {
+        refresh,
+      });
     } catch (error) {
       this.log.debug(`Error on DELETE case configure ${configurationId}: ${error}`);
       throw error;
@@ -67,7 +70,7 @@ export class CaseConfigureService {
         configurationId
       );
 
-      return transformToExternalModel(configuration);
+      return transformToExternalAndValidate(configuration);
     } catch (error) {
       this.log.debug(`Error on GET case configuration ${configurationId}: ${error}`);
       throw error;
@@ -89,7 +92,16 @@ export class CaseConfigureService {
         type: CASE_CONFIGURE_SAVED_OBJECT,
       });
 
-      return transformFindResponseToExternalModel(findResp);
+      const transformedConfigs = transformFindResponseToExternalModel(findResp);
+
+      const validatedConfigs: ConfigurationSavedObjectTransformed[] = [];
+      for (const config of transformedConfigs.saved_objects) {
+        const validatedAttributes = decodeOrThrow(ConfigurationAttributesRt)(config.attributes);
+
+        validatedConfigs.push(Object.assign(config, { attributes: validatedAttributes }));
+      }
+
+      return Object.assign(transformedConfigs, { saved_objects: validatedConfigs });
     } catch (error) {
       this.log.debug(`Attempting to find all case configuration`);
       throw error;
@@ -111,7 +123,7 @@ export class CaseConfigureService {
         { id, references: esConfigInfo.referenceHandler.build(), refresh }
       );
 
-      return transformToExternalModel(createdConfig);
+      return transformToExternalAndValidate(createdConfig);
     } catch (error) {
       this.log.debug(`Error on POST a new case configuration: ${error}`);
       throw error;
@@ -144,13 +156,30 @@ export class CaseConfigureService {
           }
         );
 
-      return transformUpdateResponseToExternalModel(updatedConfiguration);
+      const transformedConfig = transformUpdateResponseToExternalModel(updatedConfiguration);
+
+      const validatedAttributes = decodeOrThrow(ConfigurationPartialAttributesRt)(
+        transformedConfig.attributes
+      );
+
+      return Object.assign(transformedConfig, { attributes: validatedAttributes });
     } catch (error) {
       this.log.debug(`Error on UPDATE case configuration ${configurationId}: ${error}`);
       throw error;
     }
   }
 }
+
+const transformToExternalAndValidate = (
+  configuration: SavedObject<ConfigurePersistedAttributes>
+) => {
+  const transformedConfig = transformToExternalModel(configuration);
+  const validatedAttributes = decodeOrThrow(ConfigurationAttributesRt)(
+    transformedConfig.attributes
+  );
+
+  return Object.assign(transformedConfig, { attributes: validatedAttributes });
+};
 
 function transformUpdateResponseToExternalModel(
   updatedConfiguration: SavedObjectsUpdateResponse<ConfigurePersistedAttributes>
@@ -167,38 +196,14 @@ function transformUpdateResponseToExternalModel(
     Omit<ConfigurationTransformedAttributes, 'connector'>
   >;
 
-  const response = {
+  return {
     ...updatedConfiguration,
     attributes: {
-      ...(attributes.closure_type !== undefined && { closure_type: attributes.closure_type }),
-      ...(attributes.created_at !== undefined && { created_at: attributes.created_at }),
-      ...(attributes.created_by !== undefined && {
-        created_by: getUserFields(attributes.created_by),
-      }),
-      ...(attributes.owner !== undefined && { owner: attributes.owner }),
-      ...(attributes.updated_at !== undefined && { updated_at: attributes.updated_at }),
-      ...(attributes.updated_by !== undefined && {
-        updated_by: getUserFields(attributes.updated_by),
-      }),
-      ...(transformedConnector !== undefined && { connector: transformedConnector }),
+      ...attributes,
+      ...(transformedConnector && { connector: transformedConnector }),
     },
   };
-
-  return response;
 }
-
-const getUserFields = (user?: User | null): User | undefined => {
-  if (!user) {
-    return;
-  }
-
-  return {
-    email: user.email,
-    full_name: user.full_name,
-    profile_uid: user.profile_uid,
-    username: user.username,
-  };
-};
 
 function transformToExternalModel(
   configuration: SavedObject<ConfigurePersistedAttributes>
@@ -214,12 +219,7 @@ function transformToExternalModel(
   return {
     ...configuration,
     attributes: {
-      closure_type: castedAttributes.closure_type,
-      created_at: castedAttributes.created_at,
-      created_by: castedAttributes.created_by,
-      owner: castedAttributes.owner,
-      updated_at: castedAttributes.updated_at,
-      updated_by: castedAttributes.updated_by,
+      ...castedAttributes,
       connector,
     },
   };

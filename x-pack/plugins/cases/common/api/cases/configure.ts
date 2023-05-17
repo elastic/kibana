@@ -6,9 +6,10 @@
  */
 
 import * as rt from 'io-ts';
+import { CaseConnectorRt } from '../connectors/connector';
+import { ConnectorMappingsRt } from '../connectors/mappings';
 
 import { UserRt } from '../user';
-import { CaseConnectorRt, ConnectorMappingsRt } from '../connectors';
 
 const ClosureTypeRt = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
@@ -39,14 +40,26 @@ export const ConfigurationPatchRequestRt = rt.intersection([
   rt.type({ version: rt.string }),
 ]);
 
-const ConfigurationAttributesRt = rt.intersection([
+const ConfigurationActivityFieldsRt = rt.type({
+  created_at: rt.string,
+  created_by: UserRt,
+  updated_at: rt.union([rt.string, rt.null]),
+  updated_by: rt.union([UserRt, rt.null]),
+});
+
+export const ConfigurationPartialAttributesRt = rt.intersection([
+  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.props)),
+  rt.exact(rt.partial(ConfigurationActivityFieldsRt.props)),
+  rt.exact(
+    rt.partial({
+      owner: rt.string,
+    })
+  ),
+]);
+
+export const ConfigurationAttributesRt = rt.intersection([
   CasesConfigureBasicRt,
-  rt.type({
-    created_at: rt.string,
-    created_by: UserRt,
-    updated_at: rt.union([rt.string, rt.null]),
-    updated_by: rt.union([UserRt, rt.null]),
-  }),
+  ConfigurationActivityFieldsRt,
 ]);
 
 export const ConfigurationRt = rt.intersection([
