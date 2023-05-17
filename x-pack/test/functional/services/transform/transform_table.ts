@@ -472,6 +472,21 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
+    public async assertTransformRowActionMissing(
+      transformId: string,
+      action: TransformRowActionName
+    ) {
+      const selector = `transformAction${action}`;
+      await retry.tryForTime(60 * 1000, async () => {
+        await this.refreshTransformList();
+
+        await this.ensureTransformActionsMenuOpen(transformId);
+
+        await testSubjects.missingOrFail(selector, { timeout: 1000 });
+        await this.ensureTransformActionsMenuClosed();
+      });
+    }
+
     public async assertTransformRowActionEnabled(
       transformId: string,
       action: TransformRowActionName,
