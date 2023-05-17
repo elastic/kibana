@@ -96,13 +96,14 @@ export const validateResponseActionsPermissions = async (
 
   const endpointAuthz = await securitySolution.getEndpointAuthz();
 
-  const differences = xorWith<ResponseAction | RuleResponseAction>(
+  // finds elements that are not included in both arrays
+  const symmetricDifference = xorWith<ResponseAction | RuleResponseAction>(
     ruleUpdate.response_actions,
     existingRule?.params?.responseActions,
     isEqual
   );
 
-  differences.forEach((action) => {
+  symmetricDifference.forEach((action) => {
     if (!('command' in action?.params)) {
       return;
     }
