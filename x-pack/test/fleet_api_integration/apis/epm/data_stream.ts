@@ -338,7 +338,7 @@ export default function (providerContext: FtrProviderContext) {
           { meta: true }
         );
 
-        return resLogsDatastream.body.data_streams[0].indices.length;
+        expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
       });
     });
   });
