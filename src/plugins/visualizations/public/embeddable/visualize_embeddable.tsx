@@ -49,6 +49,7 @@ import {
   getExecutionContext,
   getExpressions,
   getTheme,
+  getTypes,
   getUiActions,
 } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
@@ -170,10 +171,13 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
 
     if (this.attributeService) {
+      const visType = getTypes().get(vis.type.name);
+      const readOnly = Boolean(visType.hidden);
       const isByValue = !this.inputIsRefType(initialInput);
-      const editable =
-        capabilities.visualizeSave ||
-        (isByValue && capabilities.dashboardSave && capabilities.visualizeOpen);
+      const editable = readOnly
+        ? false
+        : capabilities.visualizeSave ||
+          (isByValue && capabilities.dashboardSave && capabilities.visualizeOpen);
       this.updateOutput({ ...this.getOutput(), editable });
     }
 
