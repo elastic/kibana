@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { ImmutableCache } from '../../../../common/immutable_cache';
 import { DefaultIntegrationsContext } from './types';
 
 export const DEFAULT_DATA_STREAMS_TYPE = 'logs';
 
 export const DEFAULT_CONTEXT: DefaultIntegrationsContext = {
+  cache: new ImmutableCache(),
   integrations: null,
   error: null,
   search: {
