@@ -6,7 +6,10 @@
  */
 
 import _ from 'lodash';
-import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from './alert_type';
+import type {
+  GeoContainmentAlertInstanceContext,
+  GeoContainmentAlertInstanceState,
+} from '../types';
 
 export function getAlertId(entityName: string, boundaryName: unknown) {
   return `${entityName}-${boundaryName}`;
@@ -38,12 +41,12 @@ function getAlertContext({
   isRecovered,
 }: {
   entityName: string;
-  containment: GeoContainmentInstanceState;
+  containment: GeoContainmentAlertInstanceState;
   shapesIdsNamesMap?: Record<string, unknown>;
   windowEnd: Date;
   isRecovered: boolean;
-}): GeoContainmentInstanceContext {
-  const context: GeoContainmentInstanceContext = {
+}): GeoContainmentAlertInstanceContext {
+  const context: GeoContainmentAlertInstanceContext = {
     entityId: entityName,
     entityDateTime: containment.dateInShape || null,
     entityDocumentId: containment.docId,
@@ -61,10 +64,10 @@ function getAlertContext({
 
 export function getContainedAlertContext(args: {
   entityName: string;
-  containment: GeoContainmentInstanceState;
+  containment: GeoContainmentAlertInstanceState;
   shapesIdsNamesMap: Record<string, unknown>;
   windowEnd: Date;
-}): GeoContainmentInstanceContext {
+}): GeoContainmentAlertInstanceContext {
   return getAlertContext({ ...args, isRecovered: false });
 }
 
@@ -75,16 +78,16 @@ export function getRecoveredAlertContext({
   windowEnd,
 }: {
   alertId: string;
-  activeEntities: Map<string, GeoContainmentInstanceState[]>;
-  inactiveEntities: Map<string, GeoContainmentInstanceState[]>;
+  activeEntities: Map<string, GeoContainmentAlertInstanceState[]>;
+  inactiveEntities: Map<string, GeoContainmentAlertInstanceState[]>;
   windowEnd: Date;
-}): GeoContainmentInstanceContext | null {
+}): GeoContainmentAlertInstanceContext | null {
   const { entityName } = splitAlertId(alertId);
 
   // recovered alert's latest entity location is either:
   // 1) activeEntities - entity moved from one boundary to another boundary
   // 2) inactiveEntities - entity moved from one boundary to outside all boundaries
-  let containment: GeoContainmentInstanceState | undefined;
+  let containment: GeoContainmentAlertInstanceState | undefined;
   if (activeEntities.has(entityName) && activeEntities.get(entityName)?.length) {
     containment = _.orderBy(activeEntities.get(entityName), ['dateInShape'], ['desc'])[0];
   } else if (inactiveEntities.has(entityName) && inactiveEntities.get(entityName)?.length) {
