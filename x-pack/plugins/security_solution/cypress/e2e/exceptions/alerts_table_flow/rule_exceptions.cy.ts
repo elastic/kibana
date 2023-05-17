@@ -114,7 +114,6 @@ describe('Rule Exceptions workflows from Alert', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(ALERTS_COUNT).should('exist');
     cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
   });
 });

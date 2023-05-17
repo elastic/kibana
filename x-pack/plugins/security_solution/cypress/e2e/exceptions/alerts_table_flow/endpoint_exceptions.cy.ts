@@ -7,9 +7,9 @@
 
 import {
   goToClosedAlertsOnRuleDetailsPage,
+  goToOpenedAlertsOnRuleDetailsPage,
   openAddEndpointExceptionFromFirstAlert,
 } from '../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
@@ -47,7 +47,6 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     esArchiverResetKibana();
     esArchiverLoad('endpoint');
     login();
-    deleteAlertsAndRules();
     createRule(getEndpointRule());
   });
   beforeEach(() => {
@@ -58,6 +57,7 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   });
   after(() => {
     esArchiverUnload('endpoint');
+    esArchiverUnload('endpoint_2');
   });
 
   it('Should be able to create and close single Endpoint exception from overflow menu', () => {
@@ -94,15 +94,14 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     // when removing exception and again, no more exist, empty screen shows again
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
-    goToAlertsTab();
     // load more docs
-    esArchiverLoad('endpoint');
+    esArchiverLoad('endpoint_2');
 
-    // now that there are no more exceptions, the docs should match and populate alerts
+    goToAlertsTab();
+    goToOpenedAlertsOnRuleDetailsPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(ALERTS_COUNT).should('exist');
     cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
   });
 });
