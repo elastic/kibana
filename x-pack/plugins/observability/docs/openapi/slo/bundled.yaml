@@ -51,6 +51,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
+        '409':
+          description: Conflict - The SLO id already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     get:
@@ -454,6 +460,7 @@ components:
             - transactionType
             - transactionName
             - index
+            - threshold
           properties:
             service:
               description: The APM service name
@@ -479,6 +486,10 @@ components:
               description: The index used by APM metrics
               type: string
               example: metrics-apm*,apm*
+            threshold:
+              description: The latency threshold in milliseconds
+              type: number
+              example: 250
         type:
           description: The type of indicator.
           type: string
@@ -503,22 +514,18 @@ components:
       title: Calendar aligned time window definition
       required:
         - duration
-        - calendar
+        - isCalendar
       description: Defines properties for calendar aligned time window
       type: object
       properties:
         duration:
-          description: the duration formatted as {duration}{unit}
+          description: the duration formatted as {duration}{unit}, accept '1w' (weekly calendar) or '1M' (monthly calendar) only
           type: string
           example: 1M
-        calendar:
-          description: Defines the calendar start date
-          type: object
-          properties:
-            startTime:
-              description: The start date to use.
-              type: string
-              example: '2022-01-01T08:00:00.000Z'
+        isCalendar:
+          description: Indicates a calendar aligned time window
+          type: boolean
+          example: true
     budgeting_method:
       title: Budgeting method
       type: string
@@ -694,6 +701,10 @@ components:
         - budgetingMethod
         - objective
       properties:
+        id:
+          description: A unique identifier for the SLO. Must be between 8 and 36 chars
+          type: string
+          example: my-super-slo-id
         name:
           description: A name for the SLO.
           type: string
