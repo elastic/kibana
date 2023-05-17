@@ -16,20 +16,28 @@ import { useBasicDataFromDetailsData } from '../../../timelines/components/side_
 import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
+import { ShareButton } from './share_button';
 
 /**
  * Document details flyout right section header
  */
 export const HeaderTitle: FC = memo(() => {
   const { dataFormattedForFieldBrowser } = useRightPanelContext();
-  const { isAlert, ruleName, timestamp } = useBasicDataFromDetailsData(
+  const { isAlert, ruleName, timestamp, alertUrl } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
 
   return (
     <>
       <EuiTitle size="s" data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
-        <h4>{isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}</h4>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <h4>{isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}</h4>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {isAlert && alertUrl && <ShareButton alertUrl={alertUrl} />}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiTitle>
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}

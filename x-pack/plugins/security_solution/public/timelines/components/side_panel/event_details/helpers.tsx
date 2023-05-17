@@ -12,15 +12,17 @@ import { getFieldValue } from '../../../../detections/components/host_isolation/
 import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 
 export interface GetBasicDataFromDetailsData {
-  alertId: string;
   agentId?: string;
-  isAlert: boolean;
+  alertId: string;
+  alertUrl?: string;
+  data: TimelineEventsDetailsItem[] | null;
   hostName: string;
-  userName: string;
+  indexName?: string;
+  isAlert: boolean;
+  ruleDescription: string;
   ruleName: string;
   timestamp: string;
-  data: TimelineEventsDetailsItem[] | null;
-  ruleDescription: string;
+  userName: string;
 }
 
 export const useBasicDataFromDetailsData = (
@@ -39,6 +41,16 @@ export const useBasicDataFromDetailsData = (
   );
 
   const alertId = useMemo(() => getFieldValue({ category: '_id', field: '_id' }, data), [data]);
+
+  const indexName = useMemo(
+    () => getFieldValue({ category: '_index', field: '_index' }, data),
+    [data]
+  );
+
+  const alertUrl = useMemo(
+    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.url' }, data),
+    [data]
+  );
 
   const agentId = useMemo(
     () => getFieldValue({ category: 'agent', field: 'agent.id' }, data),
@@ -62,17 +74,31 @@ export const useBasicDataFromDetailsData = (
 
   return useMemo(
     () => ({
-      alertId,
       agentId,
-      isAlert,
+      alertId,
+      alertUrl,
+      data,
       hostName,
-      userName,
+      indexName,
+      isAlert,
+      ruleDescription,
       ruleName,
       timestamp,
-      data,
-      ruleDescription,
+      userName,
     }),
-    [agentId, alertId, hostName, isAlert, ruleName, timestamp, userName, data, ruleDescription]
+    [
+      agentId,
+      alertId,
+      alertUrl,
+      data,
+      hostName,
+      indexName,
+      isAlert,
+      ruleDescription,
+      ruleName,
+      timestamp,
+      userName,
+    ]
   );
 };
 
