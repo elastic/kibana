@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IdentifierType } from '../types';
 import {
   DEFAULT_MAX_RISK_SCORE_IDENTIFIER_BUCKETS,
   RISK_SCORES_URL,
@@ -70,7 +69,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
           maxIdentifierBuckets,
           range,
           weights,
-          identifierType: identifierType as IdentifierType, // TODO
+          identifierType,
         });
 
         return response.ok({ body: result });
