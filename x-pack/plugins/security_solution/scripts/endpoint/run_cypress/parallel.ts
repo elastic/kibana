@@ -15,7 +15,6 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
-import deepMerge from 'deepmerge';
 import {
   FunctionalTestRunner,
   readConfigFile,
@@ -40,7 +39,6 @@ import type {
   CallExpression,
 } from '@babel/types';
 import { getLocalhostRealIp } from '../common/localhost_services';
-import { renderSummaryTable } from './print_run';
 
 export default async () => {
   const { argv } = yargs(process.argv.slice(2));
