@@ -28,20 +28,20 @@ export default async (
     argv: process.argv.slice(2),
   }
 ) => {
-  console.error('process.argv', process.argv);
-  console.error('process.env', process.env);
-  console.error('params', singleSpecPath);
+  // console.error('process.argv', process.argv);
+  // console.error('process.env', process.env);
+  // console.error('params', singleSpecPath);
 
   const yargsData = yargs(argv);
 
-  console.error(
-    'argv',
-    argv,
-    yargsData.argv,
-    require.resolve(`../../../${yargsData.argv.configFile}`)
-  );
+  // console.error(
+  //   'argv',
+  //   argv,
+  //   yargsData.argv,
+  //   require.resolve(`../../../${yargsData.argv.configFile}`)
+  // );
 
-  console.error('argv.ftrConfigFile', yargsData.argv.ftrConfigFile);
+  // console.error('argv.ftrConfigFile', yargsData.argv.ftrConfigFile);
   // console.error('process.argv', argv);
   // console.error('argv', argv);
 
@@ -50,7 +50,7 @@ export default async (
   // console.log('process.env.CYPRESS_THREAD;', process.env.CYPRESS_THREAD);
 
   const log = new ToolingLog({
-    level: 'debug',
+    level: 'info',
     writeTo: process.stdout,
   });
 
