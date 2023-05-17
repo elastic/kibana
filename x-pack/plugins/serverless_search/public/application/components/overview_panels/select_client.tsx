@@ -23,7 +23,7 @@ import React from 'react';
 import { PLUGIN_ID } from '../../../../common';
 
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { LanguageDefinition, Languages } from '../languages/types';
+import { LanguageDefinition } from '../languages/types';
 import { OverviewPanel } from './overview_panel';
 import { docLinks } from '../../../../common/doc_links';
 interface SelectClientProps {
