@@ -46,7 +46,6 @@ export interface UsageStats {
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
   'observability:apmAgentExplorerView': boolean;
-  'observability:profilingElasticsearchPlugin': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -141,6 +140,7 @@ export interface UsageStats {
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
   'metrics:allowCheckingForFailedShards': boolean;
+  'observability:syntheticsThrottlingEnabled': boolean;
   'observability:apmLabsButton': boolean;
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;

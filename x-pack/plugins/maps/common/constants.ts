@@ -69,13 +69,16 @@ export enum SOURCE_TYPES {
   ES_GEO_LINE = 'ES_GEO_LINE',
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
-  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
   ES_ML_ANOMALIES = 'ML_ANOMALIES',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
+
+  // join sources
+  ES_DISTANCE_SOURCE = 'ES_DISTANCE_SOURCE',
+  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
   TABLE_SOURCE = 'TABLE_SOURCE',
 }
 
@@ -335,6 +338,7 @@ export enum WIZARD_ID {
   MVT_VECTOR = 'mvtVector',
   WMS_LAYER = 'wmsLayer',
   TMS_LAYER = 'tmsLayer',
+  SPATIAL_JOIN = 'spatialJoin',
 }
 
 export enum MASK_OPERATOR {

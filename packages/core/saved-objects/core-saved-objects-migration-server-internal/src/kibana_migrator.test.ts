@@ -558,10 +558,12 @@ const mockOptions = () => {
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnNonMigratorNodes: false,
       },
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
+    nodeRoles: { backgroundTasks: true, ui: true, migrator: true },
   };
   return options;
 };
