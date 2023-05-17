@@ -14,7 +14,7 @@ interface BaseFleetProxy {
   is_preconfigured: boolean;
 }
 
-// HTTP interface definition for this type is declared in server/types/interfaces
+// SO definition for this type is declared in server/types/interfaces
 export interface NewFleetProxy extends BaseFleetProxy {
   proxy_headers?: Record<string, string | number | boolean> | null;
 }

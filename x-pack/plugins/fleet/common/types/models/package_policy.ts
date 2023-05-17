@@ -92,7 +92,7 @@ export interface UpdatePackagePolicy extends NewPackagePolicy {
   version?: string;
 }
 
-// HTTP interface definition for this type is declared in server/types/interfaces
+// SO definition for this type is declared in server/types/interfaces
 export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
   inputs: PackagePolicyInput[];

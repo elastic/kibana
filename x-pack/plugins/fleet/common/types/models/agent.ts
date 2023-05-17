@@ -80,7 +80,7 @@ export interface AgentMetadata {
   [x: string]: any;
 }
 
-// HTTP interface definition for this type is declared in server/types/interfaces
+// SO definition for this type is declared in server/types/interfaces
 interface AgentBase {
   type: AgentType;
   active: boolean;

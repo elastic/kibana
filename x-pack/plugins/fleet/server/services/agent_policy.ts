@@ -36,6 +36,7 @@ import type {
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
   AgentPolicy,
+  AgentPolicySOAttributes,
   FullAgentPolicy,
   ListWithKuery,
   NewPackagePolicy,
@@ -70,8 +71,6 @@ import {
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
-
-import type { AgentPolicySOAttributes } from '../types';
 
 import {
   elasticAgentStandaloneManifest,

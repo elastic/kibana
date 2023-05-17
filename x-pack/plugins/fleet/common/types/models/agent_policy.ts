@@ -36,7 +36,7 @@ export interface NewAgentPolicy {
   is_protected?: boolean;
 }
 
-// HTTP interface definition for this type is declared in server/types/interfaces
+// SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// HTTP interface definition for this type is declared in server/types/interfaces
+// SO definition for this type is declared in server/types/interfaces
 export interface NewFleetServerHost {
   name: string;
   host_urls: string[];
