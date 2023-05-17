@@ -126,7 +126,7 @@ All monitor status alerts for the Synthetics app that are active at the time of 
 [%collapsible]
 ====
 *Details* +
-All Synthetics errors that are in-progress for private locations at the time the stack is upgrading will be resolved. A new error state will take its place, refer to {kibana-pull}156324[#156324].
+All Synthetics errors that are in progress for private locations at the time the stack is upgrading will be resolved. A new error state will take its place. Refer to {kibana-pull}156324[#156324].
 ====
 // end::notable-breaking-changes[]
 
