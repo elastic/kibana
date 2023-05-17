@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getNewSavedSearch, SavedSearch, saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
@@ -109,7 +109,7 @@ export function getSavedSearchContainer({
 }: {
   services: DiscoverServices;
 }): DiscoverSavedSearchContainer {
-  const initialSavedSearch = getNewSavedSearch(services.data);
+  const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
@@ -130,7 +130,7 @@ export function getSavedSearchContainer({
   const newSavedSearch = async (nextDataView: DataView | undefined) => {
     addLog('[savedSearch] new', { nextDataView });
     const dataView = nextDataView ?? getState().searchSource.getField('index');
-    const nextSavedSearch = await getNewSavedSearch(services.data);
+    const nextSavedSearch = services.savedSearch.getNew();
     nextSavedSearch.searchSource.setField('index', dataView);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
     const nextSavedSearchToSet = updateSavedSearch({
@@ -146,12 +146,7 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
     updateSavedSearch({ savedSearch: nextSavedSearch, services }, true);
 
-    const id = await saveSavedSearch(
-      nextSavedSearch,
-      saveOptions || {},
-      services.core.savedObjects.client,
-      services.savedObjectsTagging
-    );
+    const id = await services.savedSearch.save(nextSavedSearch, saveOptions || {});
 
     if (id) {
       set(nextSavedSearch);

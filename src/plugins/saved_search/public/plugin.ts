@@ -10,7 +10,12 @@ import { CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getSavedSearch, saveSavedSearch, SaveSavedSearchOptions } from './services/saved_searches';
+import {
+  getSavedSearch,
+  saveSavedSearch,
+  SaveSavedSearchOptions,
+  getNewSavedSearch,
+} from './services/saved_searches';
 import { SavedSearch } from '../common/types';
 
 /**
@@ -24,7 +29,7 @@ export interface SavedSearchPublicPluginSetup {}
  */
 export interface SavedSearchPublicPluginStart {
   get: (savedSearchId: string) => ReturnType<typeof getSavedSearch>;
-  getNew: () => ReturnType<typeof getSavedSearch>;
+  getNew: () => ReturnType<typeof getNewSavedSearch>;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
@@ -72,18 +77,10 @@ export class SavedSearchPublicPlugin
           savedObjectsTagging: savedObjectsTagging?.getTaggingApi(),
         });
       },
-      getNew: () => {
-        return getSavedSearch(undefined, {
-          search: data.search,
-          savedObjectsClient: core.savedObjects.client,
-          spaces,
-          savedObjectsTagging: savedObjectsTagging?.getTaggingApi(),
-        });
-      },
+      getNew: () => getNewSavedSearch({ search: data.search }),
       save: (savedSearch, options = {}) => {
         return saveSavedSearch(
           savedSearch,
-          // todo limit options
           options,
           core.savedObjects.client,
           savedObjectsTagging?.getTaggingApi()

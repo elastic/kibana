@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch, throwErrorOnSavedSearchUrlConflict } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getFieldsFormats, getSavedSearch } from './services';
 import { BaseVisType } from './vis_types';
@@ -49,7 +49,8 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
     }
 
     // todo
-    await throwErrorOnSavedSearchUrlConflict(savedSearch);
+    // why is this error outside of try/catch?
+    // await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
     if (savedSearch?.searchSource) {
       inputSearchSource.setParent(savedSearch.searchSource);

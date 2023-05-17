@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
-import { SavedSearch, throwErrorOnSavedSearchUrlConflict } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import {
@@ -46,9 +46,12 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
       // skip this catch block
     }
 
+    /*
+    todo why is this outside try/catch?
     if (savedSearch) {
       await throwErrorOnSavedSearchUrlConflict(savedSearch);
     }
+    */
   }
 
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {

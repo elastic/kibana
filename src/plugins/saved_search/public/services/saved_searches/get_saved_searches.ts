@@ -12,6 +12,7 @@ import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-p
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { SavedSearchAttributes } from '../../../common';
 import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
@@ -24,7 +25,15 @@ interface GetSavedSearchDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
-const findSavedSearch = async (
+const getSavedSearchUrlConflictMessage = async (savedSearch: SavedSearch) =>
+  i18n.translate('savedSearch.legacyURLConflict.errorMessage', {
+    defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+    values: {
+      json: savedSearch.sharingSavedObjectProps?.errorJSON,
+    },
+  });
+
+export const getSavedSearch = async (
   savedSearchId: string,
   { search, savedObjectsClient, spaces, savedObjectsTagging }: GetSavedSearchDependencies
 ) => {
@@ -52,7 +61,7 @@ const findSavedSearch = async (
     ? savedObjectsTagging.ui.getTagIdsFromReferences(savedSearch.references)
     : undefined;
 
-  return fromSavedSearchAttributes(
+  const returnVal = fromSavedSearchAttributes(
     savedSearchId,
     savedSearch.attributes,
     tags,
@@ -71,9 +80,13 @@ const findSavedSearch = async (
           : undefined,
     }
   );
-};
 
-/** @public **/
+  if (returnVal.sharingSavedObjectProps?.errorJSON) {
+    throw new Error(await getSavedSearchUrlConflictMessage(returnVal));
+  }
+
+  return returnVal;
+};
 
 /**
  * Returns a new saved search
@@ -87,16 +100,3 @@ export const getNewSavedSearch = ({
 }): SavedSearch => ({
   searchSource: search.searchSource.createEmpty(),
 });
-/**
- * Returns a persisted or a new saved search
- * @param savedSearchId - when undefined a new saved search is returned
- * @param dependencies
- */
-export const getSavedSearch = async (
-  savedSearchId: string | undefined,
-  dependencies: GetSavedSearchDependencies
-) => {
-  return savedSearchId
-    ? findSavedSearch(savedSearchId, dependencies)
-    : getNewSavedSearch(dependencies);
-};

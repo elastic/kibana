@@ -37,15 +37,6 @@ jest.mock('../../vis_async', () => ({
 }));
 const { createVisAsync } = jest.requireMock('../../vis_async');
 
-jest.mock('@kbn/saved-search-plugin/public', () => ({
-  getSavedSearch: jest.fn().mockResolvedValue({
-    id: 'savedSearch',
-    title: 'savedSearchTitle',
-    searchSource: {},
-  }),
-  throwErrorOnSavedSearchUrlConflict: jest.fn(),
-}));
-
 let savedVisMock: VisSavedObject;
 
 describe('getVisualizationInstance', () => {

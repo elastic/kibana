@@ -13,11 +13,6 @@ export type { SavedSearch, SaveSavedSearchOptions } from './services/saved_searc
 export {
   getSavedSearchFullPathUrl, // - move to method
   getSavedSearchUrl,
-  getSavedSearchUrlConflictMessage,
-  throwErrorOnSavedSearchUrlConflict,
-  saveSavedSearch,
-  // todo this next
-  getNewSavedSearch,
 } from './services/saved_searches';
 
 export { VIEW_MODE } from '../common';
