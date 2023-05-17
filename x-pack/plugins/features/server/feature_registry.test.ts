@@ -1964,8 +1964,16 @@ describe('FeatureRegistry', () => {
             ui: ['ui_a'],
           },
           {
+            requiredClusterPrivileges: ['monitor', 'manage'],
+            ui: ['ui_a'],
+          },
+          {
             requiredClusterPrivileges: [],
-            requiredRoles: ['some_role'],
+            requiredIndexPrivileges: {
+              foo: ['read'],
+              bar: ['all'],
+              baz: ['view_index_metadata'],
+            },
             ui: ['ui_b'],
           },
         ],
