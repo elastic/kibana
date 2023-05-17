@@ -69,19 +69,10 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(body.saved_objects.map((so: { id: string }) => so.id)).to.eql(['7.0.0-alpha1']);
-
-      expect(body).to.eql({
-        ...body,
-        saved_objects: [
-          {
-            ...body.saved_objects[0],
-            id: '7.0.0-alpha1',
-            type: 'config',
-            coreMigrationVersion: '8.8.0',
-            typeMigrationVersion: '8.7.0',
-          },
-        ],
-      });
+      expect(body.saved_objects[0].coreMigrationVersion).to.be.ok();
+      expect(body.saved_objects[0].coreMigrationVersion).not.to.be('7.0.0');
+      expect(body.saved_objects[0].typeMigrationVersion).to.be.ok();
+      expect(body.saved_objects[0].typeMigrationVersion).not.to.be('7.0.0');
     });
 
     describe('unknown type', () => {

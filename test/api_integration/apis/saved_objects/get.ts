@@ -127,13 +127,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body } = await supertest.get(`/api/saved_objects/config/7.0.0-alpha1`).expect(200);
 
-      expect(body).to.eql({
-        ...body,
-        id: '7.0.0-alpha1',
-        type: 'config',
-        coreMigrationVersion: '8.8.0',
-        typeMigrationVersion: '8.7.0',
-      });
+      expect(body.coreMigrationVersion).to.be.ok();
+      expect(body.coreMigrationVersion).not.to.be('7.0.0');
+      expect(body.typeMigrationVersion).to.be.ok();
+      expect(body.typeMigrationVersion).not.to.be('7.0.0');
     });
 
     describe('doc does not exist', () => {

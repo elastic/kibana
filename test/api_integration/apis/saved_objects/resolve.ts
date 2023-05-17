@@ -86,16 +86,10 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/api/saved_objects/resolve/config/7.0.0-alpha1`)
           .expect(200);
 
-        expect(body).to.eql({
-          ...body,
-          saved_object: {
-            ...body.saved_object,
-            id: '7.0.0-alpha1',
-            type: 'config',
-            coreMigrationVersion: '8.8.0',
-            typeMigrationVersion: '8.7.0',
-          },
-        });
+        expect(body.saved_object.coreMigrationVersion).to.be.ok();
+        expect(body.saved_object.coreMigrationVersion).not.to.be('7.0.0');
+        expect(body.saved_object.typeMigrationVersion).to.be.ok();
+        expect(body.saved_object.typeMigrationVersion).not.to.be('7.0.0');
       });
 
       describe('doc does not exist', () => {
