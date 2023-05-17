@@ -22,8 +22,6 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
-export const DATE_9999 = '9999-12-31T12:34:56.789Z';
-
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/lib/config_api', () => ({
@@ -110,12 +108,21 @@ describe('rule_details', () => {
     });
 
     it('renders the API key owner badge when user can manage API keys', () => {
-      const rule = mockRule();
-      expect(
-        shallow(
-          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        ).find(<EuiBadge>{rule.apiKeyOwner}</EuiBadge>)
-      ).toBeTruthy();
+      const rule = mockRule({ apiKeyOwner: 'elastic' });
+      const wrapper = mountWithIntl(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+      );
+      expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe('elastic');
+    });
+
+    it('renders the user-managed icon when apiKeyCreatedByUser is true', async () => {
+      const rule = mockRule({ apiKeyOwner: 'elastic', apiKeyCreatedByUser: true });
+      const wrapper = mountWithIntl(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+      );
+      expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe(
+        'elastic Info'
+      );
     });
 
     it(`doesn't render the API key owner badge when user can't manage API keys`, () => {
@@ -819,6 +826,7 @@ describe('rule_details', () => {
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
       revision: 0,
+      apiKeyCreatedByUser: false,
       ...overloads,
     };
   }

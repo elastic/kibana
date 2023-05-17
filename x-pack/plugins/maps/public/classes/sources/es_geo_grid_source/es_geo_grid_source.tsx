@@ -7,6 +7,7 @@
 
 import React, { ReactElement } from 'react';
 
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -15,6 +16,7 @@ import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import { DataView } from '@kbn/data-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -32,7 +34,6 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
 import { AbstractESAggSource } from '../es_agg_source';
@@ -205,7 +206,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     }
   }
 
-  showJoinEditor(): boolean {
+  supportsJoins(): boolean {
     return false;
   }
 
@@ -354,14 +355,26 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         : this.getId();
       const esResponse: estypes.SearchResponse<unknown> = await this._runEsQuery({
         requestId,
-        requestName: `${layerName} (${requestCount})`,
+        requestName: i18n.translate('xpack.maps.source.esGrid.compositeInspector.requestName', {
+          defaultMessage: '{layerName} {bucketsName} composite request ({requestCount})',
+          values: {
+            bucketsName: this.getBucketsName(),
+            layerName,
+            requestCount,
+          },
+        }),
         searchSource,
         registerCancelCallback,
         requestDescription: i18n.translate(
           'xpack.maps.source.esGrid.compositeInspectorDescription',
           {
-            defaultMessage: 'Elasticsearch geo grid aggregation request: {requestId}',
-            values: { requestId },
+            defaultMessage:
+              'Get {bucketsName} from data view: {dataViewName}, geospatial field: {geoFieldName}',
+            values: {
+              bucketsName: this.getBucketsName(),
+              dataViewName: indexPattern.getName(),
+              geoFieldName: this._descriptor.geoField,
+            },
           }
         ),
         searchSessionId,
@@ -437,11 +450,23 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: i18n.translate('xpack.maps.source.esGrid.inspector.requestName', {
+        defaultMessage: '{layerName} {bucketsName} request',
+        values: {
+          bucketsName: this.getBucketsName(),
+          layerName,
+        },
+      }),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-        defaultMessage: 'Elasticsearch geo grid aggregation request',
+      requestDescription: i18n.translate('xpack.maps.source.esGrid.inspector.requestDescription', {
+        defaultMessage:
+          'Get {bucketsName} from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        values: {
+          bucketsName: this.getBucketsName(),
+          dataViewName: indexPattern.getName(),
+          geoFieldName: this._descriptor.geoField,
+        },
       }),
       searchSessionId,
       executionContext: mergeExecutionContext(
@@ -552,21 +577,23 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const params = new URLSearchParams();
-    params.set('geometryFieldName', this._descriptor.geoField);
-    params.set('index', dataView.getIndexPattern());
-    params.set('gridPrecision', this._getGeoGridPrecisionResolutionDelta().toString());
-    params.set('hasLabels', hasLabels.toString());
-    params.set('buffer', buffer.toString());
-    params.set('requestBody', encodeMvtResponseBody(searchSource.getSearchRequestBody()));
-    params.set('renderAs', this._descriptor.requestType);
-    params.set('token', refreshToken);
-    const executionContextId = getExecutionContextId(requestMeta.executionContext);
-    if (executionContextId) {
-      params.set('executionContextId', executionContextId);
-    }
-
-    return `${mvtUrlServicePath}?${params.toString()}`;
+    const tileUrlParams = getTileUrlParams({
+      geometryFieldName: this._descriptor.geoField,
+      index: dataView.getIndexPattern(),
+      gridPrecision: this._getGeoGridPrecisionResolutionDelta(),
+      hasLabels,
+      buffer,
+      requestBody: _.pick(searchSource.getSearchRequestBody(), [
+        'aggs',
+        'fields',
+        'query',
+        'runtime_mappings',
+      ]),
+      renderAs: this._descriptor.requestType,
+      token: refreshToken,
+      executionContextId: getExecutionContextId(requestMeta.executionContext),
+    });
+    return `${mvtUrlServicePath}?${tileUrlParams}`;
   }
 
   isFilterByMapBounds(): boolean {
