@@ -39,10 +39,8 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
 
   const isLoading = useSelector(
     integrationsStateService,
-    (state) => state.matches('debouncingSearch') || state.matches('loading')
-  );
-  const isLoadingMore = useSelector(integrationsStateService, (state) =>
-    state.matches('loadingMore')
+    (state) =>
+      state.matches('loading') || state.matches('loadingMore') || state.matches('debouncingSearch')
   );
 
   const hasFailedLoading = useSelector(integrationsStateService, (state) =>
@@ -74,7 +72,6 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
     // Loading states
     isUninitialized,
     isLoading,
-    isLoadingMore,
 
     // Data
     integrations,

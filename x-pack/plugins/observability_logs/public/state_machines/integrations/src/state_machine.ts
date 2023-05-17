@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { catchError, from, map, of, throwError } from 'rxjs';
+import { catchError, from, map, of } from 'rxjs';
 import { actions, assign, createMachine } from 'xstate';
 import { IDataStreamsClient } from '../../../services/data_streams';
 import { DEFAULT_CONTEXT } from './defaults';
@@ -19,7 +19,7 @@ import {
 export const createPureIntegrationsStateMachine = (
   initialContext: DefaultIntegrationsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAJlmcyAFgCsAZiVrZa6QHY1ATk66ANCACeMgGxlOVjfq27ZKlbOkBfD2bSYc+YlIyeiJcCBooVgAZAHkAQQARZAA5AHEAfQBlAFUAYVyAUQKE4q5eJBBBYVFUcSkEAA4lBrIVY107dV0VBs5pM0sEaTayK2lODSUlCd1VYy8fDCw8GvIQsIjo+KS09IAxOOQo0p5xKpFAupklaSUyWSVuqwMrTgU1PoHEd0UVaQaetIrPZdN1VAsQL5lgESGtQuFUFAALJEbBgLaJFIZHL5IolBJlM5CC5iCr1FwGMhqFQvQzqexWFRWL4ILRqWy6Ma6JpTYydCFQ-yrYLwiIotEYnYZA5HE7lATEmpXBAAWhUdyM9hUnNmGjaBhZzXZnB6E00sgMNIMnm8kKWQsCcLCbFiiXSSJiACUCukUgAVAqpT1xP3IGLJTKEirnJVk77-MgNWT2AwfXqgs0s4YqZRWJQPBoNHQFgEC+0rR0i50QViZApxT25AASvuSAaDIbDEajCuqlzjCHVsjI0i0zST+gMAJULJVsl0rQaBnzzX+8k4BgMZb8FdhZAAxgALMD7gDWYtRYEFu9IcQAbrgCPRcAAjJ8icwcU7RxX90D1FVuVGbU+lHNQPmGNRmQsGRwLITd1BcZx3GkUcVG3aFhSPE9z0RcUr3LGFbwfJ9X3fdBP3YaR5UqX9SX-RAkypVD9AaYFniaPMWXkYdOHHDRnmmDpGQwh09wgMAXyIKh9wiTIwFwbAj1retGxbf1A2DUNw0jb9exJWoB1HMh9D4qwGm6Wc9BaNwNDUbpRJvcgJKkmS5IUpTD1YCRYHQfAwDIXAADNMGwAAKNpOAASlYa8iOcyTpNQWTEXkxSjx7Wi+3oyRECsXRpFaRk8yUa0OKUaDBkAnMemXAs1wUTdHPiqsESgPZH3oNhvVdBJW3bLSu10miYz-XKhkMFok1UBRUK0ZMGizHQTNULRtXkVC0K8W1UCICT4AqOLViJbLDIY1U5BsRkOjm8C+npWdkxsN47Ic20jsrKgaAuBhmEgE6DOVVCl3ufNOCTErZkqxAVXGdlrTTTlwZpdD3sI4V1jagHY3OuaFyBCdXnyww5CzYzSvUI0pgBDpUcWHcWsxi80WxsaAM5KlbO0IsIIemDWXGEzOSsBRzIaPQ2isZqMfhf6f1O5VXGHEXx00aZl2cLM81sCYaQJ9ipmlytsLPZmCIZ1Z706sjGAo1mcvqPQFwqvpOSBcquP57V4ItOR00tTdwaN8TErc1KPKPe2zvGtQmPFpkpjKqcKqUKyKtsPX1D0PjOA3WRg6CJnEQ6p85f0nHxqBUqqQeP5ZAsxlwbJloLXUVw3ncO78+2oA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAJk4BmMgoCcnWQA4FGjQDYFAdlkKANCACeiALTTlGzmumcD6gCwrdK2QF9vZtJg4+MSkZPREuBA0UKwAMgDyAIIAIsgAcgDiAPoAygCqAMIFAKLFyWVcvEgggsKiqOJSCFq2rm0ArO0aTrrtutIaZpYI0gpK0r0qLpycurKunNIGvv4YWHj15OGR0XFJqZlZAGKJyLEVPOK1IiGNMqoGZANtstJLTm+DFjIqSs6u8iMujmLk6KxAAXWwRIWwiUVQUAAskRsGA9il0tl8kVSuVkpUrkIbmJqk15rIyLIPO43px2gpXEZTN8EAo6WR9ANOAtXL1ehpwZCgpswnDosjUeiDtkTmcLlUBET6ncEFYDLYPCp2rMnPT9K52kNELz2hzRpNfvIVK5pO1BWthSFyAQIPQ0QkUllEfEAErFLLpAAqxQyPsSgeQ8TSOQJ1WuytJiE0tk5C1kBgU7Q8+iNCBtrkpDi8ahN-PtgQ2TrILrdrByxUSPoKAAkA2lg6Hw5Ho7HFXVbomEMmOQppGmM1ngczhozdGQXCpi9y+V1y1CRQBjAAWYA3AGtxSiwELKzDEgA3XAEei4ABG15E5g4lzjSoHoCaVi18-ktqmugWMYjFzN4506Bx2lGeZdFmNo10dGEyG3XcDwRCVjwdU9SAvK8b3vRh0CfdhpAVGo3xJD9EF6SlXA0LN1EzbNNFzeQCxgtoYKpFcDDtPwIUw6FQggMBbyIKgN2iHIwFwbBtzrBsm1bIMQzDCMoxjF8+2JBpBysJQxlkXQDA8bpFi0OZp2saRvw8AxugGKZtXceCsPIYTRPEyTpNkrdWAkWB0HwMAyFwAAzTBsAACm1TgAEpWBPQS3JEsTUAkhEpJk7dezI-sKMkKj2gLbV5mpOjs0s1VfjIRRDEXV52iMLoVBcpLRR2BEjlwtg-Q9ZI2w7VTuw00j43fAqRm0WwDH6QwJg0WR5A0VwQLHZQZi1KDeVg1xfD41AiGE+BqkSzZCTynTKNVMclCMRYsxmwDDFkXMrE0JReQMOyGtkRqtGWPjTqrKgaBuBhmEgc7tJVN4jCeOzfgBUYjBm165FsTMDF5eRZiLFRpFakVtnhKAoYTK63nkJ46TkGaFH0IwvmGDwau1KZVEZTMGsJqticPVEyfGz9qptIqjEMp7gJZKl9IURbsbUIzFh5xCazAQX8uF007r-R7aql4Y+hTc0s0tBwARV0JkP3fmMIrJKcOvO8H0IjXLomiZOGUKZ1C+xjgWYlkFjIWjGT1BbzYGS3ko8tKvKyrc3ZVentfaUqAPKqc0f0MhtS5nijLULofEBgSibFTruogJPBwmOXKVmgCOlojwQJmMg6Icew5mx7oS98IA */
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
       context: initialContext,
@@ -40,8 +40,8 @@ export const createPureIntegrationsStateMachine = (
           },
           on: {
             LOADING_SUCCEEDED: {
-              target: 'loaded',
-              actions: ['storeSearch', 'storeIntegrations'],
+              target: 'idle',
+              actions: ['storeSearch', 'storeIntegrations', 'storeInCache'],
             },
             LOADING_FAILED: {
               target: 'loadingFailed',
@@ -51,11 +51,11 @@ export const createPureIntegrationsStateMachine = (
         },
         loadingMore: {
           invoke: {
-            src: 'loadMoreIntegrations',
+            src: 'loadIntegrations',
           },
           on: {
             LOADING_SUCCEEDED: {
-              target: 'loaded',
+              target: 'idle',
               actions: 'appendIntegrations',
             },
             LOADING_FAILED: {
@@ -64,7 +64,7 @@ export const createPureIntegrationsStateMachine = (
             },
           },
         },
-        loaded: {
+        idle: {
           entry: 'notifyLoadingSucceeded',
           on: {
             LOAD_MORE_INTEGRATIONS: 'checkingMoreIntegrationsAvailability',
@@ -81,7 +81,7 @@ export const createPureIntegrationsStateMachine = (
               target: 'loadingMore',
             },
             {
-              target: 'loaded',
+              target: 'idle',
             },
           ],
         },
@@ -132,6 +132,13 @@ export const createPureIntegrationsStateMachine = (
               }
             : {}
         ),
+        storeInCache: assign((context, event) => {
+          if (event.type !== 'LOADING_SUCCEEDED') return {};
+
+          return {
+            cache: context.cache.set(context.search, event.data),
+          };
+        }),
         appendIntegrations: assign((context, event) =>
           'data' in event
             ? {
@@ -166,11 +173,14 @@ export const createIntegrationStateMachine = ({
   createPureIntegrationsStateMachine(initialContext).withConfig({
     actions: {},
     services: {
-      loadIntegrations: (context, event) =>
-        from(
-          'search' in event
-            ? dataStreamsClient.findIntegrations({ ...context.search, ...event.search })
-            : dataStreamsClient.findIntegrations(context.search)
+      loadIntegrations: (context, event) => {
+        const searchParams =
+          'search' in event ? { ...context.search, ...event.search } : context.search;
+
+        return from(
+          context.cache.has(searchParams)
+            ? Promise.resolve(context.cache.get(searchParams))
+            : dataStreamsClient.findIntegrations(searchParams)
         ).pipe(
           map(
             (data): IntegrationsEvent => ({
@@ -184,25 +194,7 @@ export const createIntegrationStateMachine = ({
               error,
             })
           )
-        ),
-      loadMoreIntegrations: (context) =>
-        from(
-          'search' in context
-            ? dataStreamsClient.findIntegrations(context.search)
-            : throwError(() => new Error('Failed to load more integration'))
-        ).pipe(
-          map(
-            (data): IntegrationsEvent => ({
-              type: 'LOADING_SUCCEEDED',
-              data,
-            })
-          ),
-          catchError((error) =>
-            of<IntegrationsEvent>({
-              type: 'LOADING_FAILED',
-              error,
-            })
-          )
-        ),
+        );
+      },
     },
   });

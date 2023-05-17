@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { FindDataStreamsError, FindIntegrationsError } from '../../../common/data_streams/errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   FindDataStreamsRequestQuery,
@@ -30,16 +31,18 @@ export class DataStreamsClient implements IDataStreamsClient {
   ): Promise<FindIntegrationsResponse> {
     const search = decodeOrThrow(
       findIntegrationsRequestQueryRT,
-      (message: string) => new Error(`Failed to decode integrations search param: ${message}"`)
+      (message: string) =>
+        new FindIntegrationsError(`Failed to decode integrations search param: ${message}"`)
     )(params);
 
     const response = this.http.get(getIntegrationsUrl(search)).catch((error) => {
-      throw new Error(`Failed to fetch integrations": ${error}`);
+      throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
     });
 
     const data = decodeOrThrow(
       findIntegrationsResponseRT,
-      (message: string) => new Error(`Failed to decode integrations response: ${message}"`)
+      (message: string) =>
+        new FindIntegrationsError(`Failed to decode integrations response: ${message}"`)
     )(mockIntegrationsResponse); // TODO: switch with response
 
     return data;
@@ -50,16 +53,18 @@ export class DataStreamsClient implements IDataStreamsClient {
   ): Promise<FindDataStreamsResponse> {
     const search = decodeOrThrow(
       findDataStreamsRequestQueryRT,
-      (message: string) => new Error(`Failed to decode data streams search param: ${message}"`)
+      (message: string) =>
+        new FindDataStreamsError(`Failed to decode data streams search param: ${message}"`)
     )(params);
 
     const response = await this.http.get(getDataStreamsUrl(search)).catch((error) => {
-      throw new Error(`Failed to fetch data streams": ${error}`);
+      throw new FindDataStreamsError(`Failed to fetch data streams": ${error}`);
     });
 
     const data = decodeOrThrow(
       findDataStreamsResponseRT,
-      (message: string) => new Error(`Failed to decode data streams response: ${message}"`)
+      (message: string) =>
+        new FindDataStreamsError(`Failed to decode data streams response: ${message}"`)
     )(response);
 
     return data;
@@ -68,7 +73,7 @@ export class DataStreamsClient implements IDataStreamsClient {
 
 const mockIntegrationsResponse = {
   total: 11,
-  // searchAfter: undefined,
+  searchAfter: ['system'],
   items: [
     {
       name: 'kubernetes',
