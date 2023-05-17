@@ -7,8 +7,8 @@
 
 import type {
   Logger,
-  SavedObject,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 
@@ -23,7 +23,11 @@ import type {
   ConnectorMappingsSavedObjectTransformed,
   ConnectorMappingsTransformed,
 } from '../../common/types/connector_mappings';
-import type { ConnectorMappings, ConnectorMappingsAttributes } from '../../../common/api';
+import {
+  ConnectorMappingsRt,
+  decodeOrThrow,
+  ConnectorMappingsPartialRt,
+} from '../../../common/api';
 
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}
@@ -31,7 +35,7 @@ export class ConnectorMappingsService {
   public async find({
     unsecuredSavedObjectsClient,
     options,
-  }: FindConnectorMappingsArgs): Promise<SavedObjectsFindResponse<ConnectorMappings>> {
+  }: FindConnectorMappingsArgs): Promise<SavedObjectsFindResponse<ConnectorMappingsTransformed>> {
     try {
       this.log.debug(`Attempting to find all connector mappings`);
       const connectorMappings =
@@ -40,7 +44,15 @@ export class ConnectorMappingsService {
           type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
         });
 
-      return transformFindResponseToExternalModel(connectorMappings);
+      const validatedMappings: Array<SavedObjectsFindResult<ConnectorMappingsTransformed>> = [];
+
+      for (const mapping of connectorMappings.saved_objects) {
+        const validatedMapping = decodeOrThrow(ConnectorMappingsRt)(mapping.attributes);
+
+        validatedMappings.push(Object.assign(mapping, { attributes: validatedMapping }));
+      }
+
+      return Object.assign(connectorMappings, { saved_objects: validatedMappings });
     } catch (error) {
       this.log.error(`Attempting to find all connector mappings: ${error}`);
       throw error;
@@ -65,7 +77,9 @@ export class ConnectorMappingsService {
           }
         );
 
-      return transformToExternalModel(connectorMappings);
+      const validatedAttributes = decodeOrThrow(ConnectorMappingsRt)(connectorMappings.attributes);
+
+      return Object.assign(connectorMappings, { attributes: validatedAttributes });
     } catch (error) {
       this.log.error(`Error on POST a new connector mappings: ${error}`);
       throw error;
@@ -94,58 +108,14 @@ export class ConnectorMappingsService {
           }
         );
 
-      return transformUpdateResponseToExternalModel(updatedMappings);
+      const validatedAttributes = decodeOrThrow(ConnectorMappingsPartialRt)(
+        updatedMappings.attributes
+      );
+
+      return Object.assign(updatedMappings, { attributes: validatedAttributes });
     } catch (error) {
       this.log.error(`Error on UPDATE connector mappings ${mappingId}: ${error}`);
       throw error;
     }
   }
 }
-
-const transformToExternalModel = (
-  so: SavedObject<ConnectorMappingsPersistedAttributes>
-): ConnectorMappingsSavedObjectTransformed => {
-  const attributes = so.attributes as ConnectorMappings;
-
-  return {
-    ...so,
-    attributes: {
-      mappings: getMappings(attributes.mappings),
-      owner: attributes.owner,
-    },
-  };
-};
-
-const getMappings = (mappings: ConnectorMappingsAttributes[]) => {
-  return mappings.map((mapping) => ({
-    action_type: mapping.action_type,
-    source: mapping.source,
-    target: mapping.target,
-  }));
-};
-
-const transformFindResponseToExternalModel = (
-  response: SavedObjectsFindResponse<ConnectorMappingsPersistedAttributes>
-): SavedObjectsFindResponse<ConnectorMappings> => {
-  return {
-    ...response,
-    saved_objects: response.saved_objects.map((so) => ({
-      ...so,
-      ...transformToExternalModel(so),
-    })),
-  };
-};
-
-const transformUpdateResponseToExternalModel = (
-  response: SavedObjectsUpdateResponse<ConnectorMappingsPersistedAttributes>
-): SavedObjectsUpdateResponse<ConnectorMappingsTransformed> => {
-  const attributes = response.attributes as Partial<ConnectorMappingsTransformed>;
-
-  return {
-    ...response,
-    attributes: {
-      ...(attributes.mappings !== undefined && { mappings: attributes.mappings }),
-      ...(attributes.owner !== undefined && { owner: attributes.owner }),
-    },
-  };
-};
