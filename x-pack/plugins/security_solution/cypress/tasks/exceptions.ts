@@ -39,6 +39,11 @@ import {
   EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM,
   ADD_AND_BTN,
   ADD_OR_BTN,
+  RULE_ACTION_LINK_RULE_SWITCH,
+  LINK_TO_SHARED_LIST_RADIO,
+  EXCEPTION_ITEM_HEADER_ACTION_MENU,
+  EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT,
+  EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE,
 } from '../screens/exceptions';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
@@ -257,4 +262,28 @@ export const addTwoORedConditions = (
 
   addExceptionEntryFieldValue(secondEntryField, 1);
   addExceptionEntryFieldValueValue(secondEntryFieldValue, 1);
+};
+
+export const linkFirstRuleOnExceptionFlyout = () => {
+  cy.get(RULE_ACTION_LINK_RULE_SWITCH).find('button').click();
+};
+
+export const linkFirstSharedListOnExceptionFlyout = () => {
+  cy.get(LINK_TO_SHARED_LIST_RADIO).click();
+  cy.get(RULE_ACTION_LINK_RULE_SWITCH).find('button').click();
+};
+
+export const editFirstExceptionItemInListDetailPage = () => {
+  // Click on the first exception overflow menu items
+  cy.get(EXCEPTION_ITEM_HEADER_ACTION_MENU).click();
+
+  // Open the edit modal
+  cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT).click();
+};
+export const deleteFirstExceptionItemInListDetailPage = () => {
+  // Click on the first exception overflow menu items
+  cy.get(EXCEPTION_ITEM_HEADER_ACTION_MENU).click();
+
+  // Delete exception
+  cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE).click();
 };

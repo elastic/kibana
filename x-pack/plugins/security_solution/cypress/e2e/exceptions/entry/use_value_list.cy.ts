@@ -36,7 +36,6 @@ import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import {
   CLOSE_ALERTS_CHECKBOX,
   EXCEPTIONS_TABLE_MODAL,
-  EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -127,6 +126,5 @@ describe('Use Value list in exception entry', () => {
 
     // Toast should be shown because of exception reference
     cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
-    cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
   });
 });

@@ -40,6 +40,7 @@ import {
   IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN,
   EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU,
   EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM,
+  MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
 } from '../screens/exceptions';
 import { assertExceptionItemsExists } from './exceptions';
 
@@ -231,4 +232,11 @@ export const validateSharedListLinkedRules = (
   linkedRulesNames.forEach((ruleName) => {
     cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains('a', ruleName);
   });
+};
+
+export const addExceptionListFromSharedExceptionListHeaderMenu = () => {
+  // Click on "Create shared exception list" button on the header
+  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
+  // Click on "Create exception item"
+  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
 };

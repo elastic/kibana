@@ -16,29 +16,27 @@ import {
   addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
+  linkFirstRuleOnExceptionFlyout,
+  linkFirstSharedListOnExceptionFlyout,
+  editFirstExceptionItemInListDetailPage,
   submitEditedExceptionItem,
   submitNewExceptionItem,
+  deleteFirstExceptionItemInListDetailPage,
 } from '../../../tasks/exceptions';
 import { DETECTIONS_RULE_MANAGEMENT_URL, EXCEPTIONS_URL } from '../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
-  MANAGE_EXCEPTION_CREATE_BUTTON_MENU,
-  MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
-  RULE_ACTION_LINK_RULE_SWITCH,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
-  LINK_TO_SHARED_LIST_RADIO,
-  EXCEPTION_ITEM_HEADER_ACTION_MENU,
-  EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT,
   EXECPTION_ITEM_CARD_HEADER_TITLE,
-  EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE,
   EMPTY_EXCEPTIONS_VIEWER,
 } from '../../../screens/exceptions';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { goToExceptionsTab } from '../../../tasks/rule_details';
 import {
+  addExceptionListFromSharedExceptionListHeaderMenu,
   createSharedExceptionList,
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
@@ -72,9 +70,8 @@ describe('Add, edit and delete exception', () => {
   describe('Add, Edit and delete Exception item', () => {
     it('should create exception item from Shared Exception List page and linked to a Rule', () => {
       // Click on "Create shared exception list" button on the header
-      cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
       // Click on "Create exception item"
-      cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
+      addExceptionListFromSharedExceptionListHeaderMenu();
 
       // Add exception item name
       addExceptionFlyoutItemName(exceptionName);
@@ -86,7 +83,7 @@ describe('Add, edit and delete exception', () => {
       cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
 
       // select rule
-      cy.get(RULE_ACTION_LINK_RULE_SWITCH).find('button').click();
+      linkFirstRuleOnExceptionFlyout();
 
       // should  be able to submit
       cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
@@ -119,9 +116,8 @@ describe('Add, edit and delete exception', () => {
       visitWithoutDateRange(EXCEPTIONS_URL);
 
       // Click on "Create shared exception list" button on the header
-      cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
       // Click on "Create exception item"
-      cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
+      addExceptionListFromSharedExceptionListHeaderMenu();
 
       // Add exception item name
       addExceptionFlyoutItemName(exceptionName);
@@ -129,9 +125,8 @@ describe('Add, edit and delete exception', () => {
       // Add Condition
       editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
 
-      // select rule
-      cy.get(LINK_TO_SHARED_LIST_RADIO).click();
-      cy.get(RULE_ACTION_LINK_RULE_SWITCH).find('button').click();
+      // select shared list radio option and select the first one
+      linkFirstSharedListOnExceptionFlyout();
 
       submitNewExceptionItem();
 
@@ -139,11 +134,8 @@ describe('Add, edit and delete exception', () => {
       findSharedExceptionListItemsByName(`${EXCEPTION_LIST_NAME}`, [exceptionName]);
 
       // Click on the first exception overflow menu items
-      cy.get(EXCEPTION_ITEM_HEADER_ACTION_MENU).click();
-
       // Open the edit modal
-      cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT).click();
-
+      editFirstExceptionItemInListDetailPage();
       // edit exception item name
       editExceptionFlyoutItemName(exceptionNameEdited);
 
@@ -154,10 +146,8 @@ describe('Add, edit and delete exception', () => {
       cy.get(EXECPTION_ITEM_CARD_HEADER_TITLE).should('have.text', exceptionNameEdited);
 
       // Click on the first exception overflow menu items
-      cy.get(EXCEPTION_ITEM_HEADER_ACTION_MENU).click();
-
-      // Delete exception
-      cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE).click();
+      // delete the exception
+      deleteFirstExceptionItemInListDetailPage();
 
       cy.get(EMPTY_EXCEPTIONS_VIEWER).should('exist');
     });
