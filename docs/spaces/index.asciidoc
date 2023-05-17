@@ -1,5 +1,5 @@
 [role="xpack"]
-[[xpack-spaces]]
+[id="xpack-spaces",canonical-url="https://www.elastic.co/guide/en/kibana/current/xpack-spaces.html"]
 == Spaces
 
 Spaces enable you to organize your dashboards and other saved

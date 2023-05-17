@@ -1,5 +1,5 @@
 [role="xpack"]
-[[index-lifecycle-policies]]
+[id="index-lifecycle-policies",canonical-url="https://www.elastic.co/guide/en/elasticsearch/reference/current/index-lifecycle-management.html"]
 == Index Lifecycle Policies
 
 If you're working with time series data, you don't want to continually dump

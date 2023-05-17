@@ -1,4 +1,4 @@
-[[managing-licenses]]
+[id="managing-licenses",canonical-url="https://www.elastic.co/guide/en/kibana/current/managing-licenses.html"]
 == License Management
 
 When you install the default distribution of {kib}, you receive free features

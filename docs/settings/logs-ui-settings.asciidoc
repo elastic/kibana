@@ -1,5 +1,5 @@
 [role="xpack"]
-[[logs-ui-settings-kb]]
+[id="logs-ui-settings-kb",canonical-url="https://www.elastic.co/guide/en/kibana/current/logs-ui-settings-kb.html"]
 === Logs settings in {kib}
 ++++
 <titleabbrev>Logs settings</titleabbrev>

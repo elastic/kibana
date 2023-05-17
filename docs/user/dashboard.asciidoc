@@ -1,4 +1,4 @@
-[[dashboard]]
+[id="dashboard",canonical-url="https://www.elastic.co/guide/en/kibana/current/dashboard.html"]
 = Dashboard
 
 [partintro]

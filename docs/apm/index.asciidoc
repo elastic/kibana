@@ -6,7 +6,7 @@ ifeval::[{branch} == 7.x]
 endif::[]
 
 [role="xpack"]
-[[xpack-apm]]
+[id="xpack-apm",canonical-url="https://www.elastic.co/guide/en/apm/guide/current/apm-overview.html"]
 = APM
 
 [partintro]

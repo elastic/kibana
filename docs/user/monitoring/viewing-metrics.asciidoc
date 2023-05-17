@@ -1,5 +1,5 @@
 [role="xpack"]
-[[monitoring-data]]
+[id="monitoring-data",canonical-url="https://www.elastic.co/guide/en/kibana/current/monitoring-data.html"]
 = View monitoring data in {kib}
 ++++
 <titleabbrev>View monitoring data</titleabbrev>

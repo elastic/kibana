@@ -1,4 +1,4 @@
-[[tutorial-build-dashboard]]
+[id="tutorial-build-dashboard",canonical-url="https://www.elastic.co/guide/en/kibana/current/get-started.html"]
 == Build your own dashboard
 
 Want to load some data into Kibana and build a dashboard? This tutorial shows you how to:

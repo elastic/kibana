@@ -1,5 +1,5 @@
 [role="xpack"]
-[[xpack-grokdebugger]]
+[id="xpack-grokdebugger",canonical-url="https://www.elastic.co/guide/en/kibana/current/xpack-grokdebugger.html"]
 == Debugging grok expressions
 
 You can build and debug grok patterns in the {kib} *Grok Debugger*

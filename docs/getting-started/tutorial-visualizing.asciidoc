@@ -1,4 +1,4 @@
-[[tutorial-visualizing]]
+[id="tutorial-visualizing",canonical-url="https://www.elastic.co/guide/en/kibana/current/get-started.html"]
 === Visualize your data
 
 In *Visualize*, you can shape your data using a variety

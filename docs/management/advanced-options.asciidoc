@@ -1,4 +1,4 @@
-[[advanced-options]]
+[id="advanced-options",canonical-url="https://www.elastic.co/guide/en/kibana/current/advanced-options.html"]
 == Advanced Settings
 
 The *Advanced Settings* UI enables you to edit settings that control the

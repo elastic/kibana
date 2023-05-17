@@ -1,4 +1,4 @@
-[[tutorial-sample-data]]
+[id="tutorial-sample-data",canonical-url="https://www.elastic.co/guide/en/kibana/current/get-started.html"]
 == Explore {kib} using sample data
 
 Ready to get some hands-on experience with Kibana?

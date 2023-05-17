@@ -1,6 +1,6 @@
 [chapter]
 [role="xpack"]
-[[xpack-logs]]
+[id="xpack-logs",canonical-url="https://www.elastic.co/guide/en/observability/current/monitor-logs.html"]
 = Logs
 
 The Logs app in Kibana enables you to explore logs for common servers, containers, and services.

@@ -1,5 +1,5 @@
 [role="xpack"]
-[[xpack-monitoring]]
+[id="xpack-monitoring",canonical-url="https://www.elastic.co/guide/en/kibana/current/xpack-monitoring.html"]
 = Stack Monitoring
 
 [partintro]

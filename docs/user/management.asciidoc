@@ -1,4 +1,4 @@
-[[management]]
+[id="management",canonical-url="https://www.elastic.co/guide/en/kibana/current/management.html"]
 = Stack Management
 
 [partintro]

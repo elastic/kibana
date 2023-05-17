@@ -1,4 +1,4 @@
-[[kuery-query]]
+[id="kuery-query",canonical-url="https://www.elastic.co/guide/en/kibana/current/kuery-query.html"]
 === Kibana Query Language
 
 The Kibana Query Language (KQL) makes it easy to find

@@ -1,5 +1,5 @@
 [role="xpack"]
-[[infrastructure-ui-settings-kb]]
+[id="infrastructure-ui-settings-kb",canonical-url="https://www.elastic.co/guide/en/kibana/current/infrastructure-ui-settings-kb.html"]
 === Metrics settings in {kib}
 ++++
 <titleabbrev>Metrics settings</titleabbrev>
