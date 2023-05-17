@@ -19,7 +19,7 @@ export const PolicyFormAttackSurfaceReduction = memo<PolicyFormAttackSurfaceRedu
     return (
       <PolicyFormRowLayout
         label={'Attack surface reduction'}
-        all={<AttackSurfaceReductionForm />}
+        windows={<AttackSurfaceReductionForm />}
       />
     );
   }

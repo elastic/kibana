@@ -9,14 +9,15 @@ import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { FeatureNotSupported } from './feature_not_supported';
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .formRowLabel {
-    width: 25%;
+    width: 170px;
   }
 
   .formRowValue {
-    width: 25%;
+    width: calc((100% - 170px) / 3);
   }
 `;
 
@@ -46,13 +47,13 @@ export const PolicyFormRowLayout = memo<PolicyFormRowLayoutProps>(
         ) : (
           <>
             <EuiFlexItem grow={false} className="formRowValue">
-              {windows}
+              {windows ?? <FeatureNotSupported />}
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="formRowValue">
-              {macos}
+              {macos ?? <FeatureNotSupported />}
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="formRowValue">
-              {linux}
+              {linux ?? <FeatureNotSupported />}
             </EuiFlexItem>
           </>
         )}

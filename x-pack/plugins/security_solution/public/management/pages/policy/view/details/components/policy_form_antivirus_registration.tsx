@@ -20,8 +20,6 @@ export const PolicyFormAntivirusRegistration = memo<PolicyFormAntivirusRegistrat
       <PolicyFormRowLayout
         label={'Register as antivirus'}
         windows={<AntivirusRegistrationForm />}
-        linux={<div>{'not applicable'}</div>}
-        macos={<div>{'not applicable'}</div>}
       />
     );
   }

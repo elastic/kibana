@@ -18,8 +18,10 @@ import { PolicyFormHeader } from './policy_form_header';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
 
 const FormContainer = styled.div`
+  margin-bottom: ${({ theme: { eui } }) => eui.euiSizeXXL};
+
   .policyFormRow + .policyFormRow {
-    margin-top: ${({ theme: { eui } }) => eui.euiSizeL};
+    margin-top: ${({ theme: { eui } }) => eui.euiSizeXL};
   }
 `;
 
