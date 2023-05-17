@@ -2570,8 +2570,14 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "api_key_created_by_user": {
+            "type": "boolean",
+            "description": "Indicates whether the API key that is associated with the rule was created by the user.",
+            "example": false
+          },
           "api_key_owner": {
             "type": "string",
+            "description": "The owner of the API key that is associated with the rule and used to run background tasks.\n",
             "nullable": true,
             "example": "elastic"
           },
@@ -3038,7 +3044,8 @@
             "warning": null,
             "outcome": "succeeded"
           },
-          "next_run": "2022-12-13T22:34:44.314Z"
+          "next_run": "2022-12-13T22:34:44.314Z",
+          "api_key_created_by_user": false
         }
       },
       "update_rule_request": {
@@ -3155,7 +3162,8 @@
             "warning": null,
             "outcome": "succeeded"
           },
-          "next_run": "2023-01-31T23:49:42.432Z"
+          "next_run": "2023-01-31T23:49:42.432Z",
+          "api_key_created_by_user": false
         }
       },
       "create_rule_request": {
@@ -3222,6 +3230,7 @@
               }
             }
           ],
+          "api_key_created_by_user": false,
           "api_key_owner": "elastic",
           "consumer": "alerts",
           "created_at": "2022-06-08T17:20:31.632Z",
@@ -3341,7 +3350,8 @@
                 "warning": null,
                 "outcome": "succeeded"
               },
-              "next_run": "2022-12-06T01:45:23.912Z"
+              "next_run": "2022-12-06T01:45:23.912Z",
+              "api_key_created_by_user": false
             }
           ]
         }

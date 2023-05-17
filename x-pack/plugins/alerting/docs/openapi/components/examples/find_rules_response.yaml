@@ -59,3 +59,4 @@ value:
         warning: null
         outcome: succeeded
       next_run: '2022-12-06T01:45:23.912Z'
+      api_key_created_by_user: false
