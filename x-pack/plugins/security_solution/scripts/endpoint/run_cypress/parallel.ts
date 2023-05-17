@@ -40,7 +40,8 @@ import type {
   ObjectProperty,
   CallExpression,
 } from '@babel/types';
-import { renderSummaryTable } from './print_run';
+// import pRetry from 'p-retry';
+// import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../common/localhost_services';
 
 export default async () => {
@@ -348,20 +349,48 @@ export default async () => {
       //     baseUrl: `http://localhost:${kibanaPort}`,
       //   },
       // });
-      // return cypress
-      //   .run({
-      //     browser: 'chrome',
-      //     spec: filePath,
-      //     headed: true,
-      //     configFile: argv.configFile,
-      //     config: {
-      //       env: customEnv,
-      //       baseUrl: `http://localhost:${kibanaPort}`,
-      //     },
-      //   })
-      //   .finally(() => {
-      //     cleanupServerPorts({ esPort, kibanaPort });
-      //   });
+
+      cleanupServerPorts({ esPort, kibanaPort });
+
+      // return pRetry(
+      //   () =>
+      //     cypress
+      //       .run({
+      //         browser: 'chrome',
+      //         spec: filePath,
+      //         headed: true,
+      //         configFile: argv.configFile,
+      //         config: {
+      //           env: customEnv,
+      //           baseUrl: `http://localhost:${kibanaPort}`,
+      //         },
+      //       })
+      //       .then((results) => {
+      //         if (results.status === 'finished') {
+      //           _.forEach(results.runs, (run) => {
+      //             _.forEach(run.tests, (test) => {
+      //               _.forEach(test.attempts, (attempt) => {
+      //                 if (
+      //                   attempt.state === 'failed' &&
+      //                   attempt.error &&
+      //                   attempt.error.name !== 'AssertionError'
+      //                 ) {
+      //                   throw new Error(
+      //                     `Non AssertionError in ${filePath}, retrying test. Error message: ${attempt.error.message}`
+      //                   );
+      //                 }
+      //               });
+      //             });
+      //           });
+      //         }
+      //         return results;
+      //       }),
+      //   {
+      //     retries: 1,
+      //   }
+      // ).finally(() => {
+      //   cleanupServerPorts({ esPort, kibanaPort });
+      // });
     },
     { concurrency: 2 }
   ).then((results) => {
@@ -369,13 +398,4 @@ export default async () => {
     // renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
     process.exit(_.some(results, (result) => result > 0) ? 1 : 0);
   });
-  // ).then(() => {
-  //   merge({
-  //     files: ['../../../target/kibana-security-solution/cypress/results/*.json'],
-  //   }).then((report) => {
-  //     const reporter = new Spec({ stats: report.stats, on: () => {} });
-  //     reporter.epilogue();
-  //     process.exit();
-  //   });
-  // });
 };
