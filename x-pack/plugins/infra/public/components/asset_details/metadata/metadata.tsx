@@ -11,19 +11,19 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import { MetricsTimeInput } from '../../../pages/metrics/metric_detail/hooks/use_metrics_time';
+import type { MetricsTimeInput } from '../../../pages/metrics/metric_detail/hooks/use_metrics_time';
 import { useMetadata } from '../../../pages/metrics/metric_detail/hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
-import { HostNodeRow } from '../types';
+import type { HostNodeRow } from '../types';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
   setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
 }
 
-export interface TabProps {
+export interface MetadataProps {
   currentTimeRange: MetricsTimeInput;
   node: HostNodeRow;
   nodeType: InventoryItemType;
@@ -37,7 +37,7 @@ export const Metadata = ({
   nodeType,
   showActionsColumn,
   persistMetadataSearchToUrlState,
-}: TabProps) => {
+}: MetadataProps) => {
   const nodeId = node.name;
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();

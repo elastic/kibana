@@ -11,23 +11,14 @@ import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { CoreProviders } from '../../../apps/common_providers';
 import { InfraClientStartDeps, InfraClientStartExports } from '../../../types';
 import { LazyMetadataWrapper } from './lazy_metadata_wrapper';
-import type { HostNodeRow } from '../types';
-import type { MetricsTimeInput } from '../../../pages/metrics/metric_detail/hooks/use_metrics_time';
-import { MetadataSearchUrlState } from './metadata';
+import type { MetadataProps } from './metadata';
 
 export const METADATA_EMBEDDABLE = 'METADATA_EMBEDDABLE';
 
-export interface MetadataEmbeddableInput extends EmbeddableInput {
-  currentTimeRange: MetricsTimeInput;
-  node: HostNodeRow;
-  nodeType: InventoryItemType;
-  showActionsColumn: boolean;
-  persistMetadataSearchToUrlState: MetadataSearchUrlState;
-}
+export interface MetadataEmbeddableInput extends EmbeddableInput, MetadataProps {}
 
 export class MetadataEmbeddable extends Embeddable<MetadataEmbeddableInput> {
   public readonly type = METADATA_EMBEDDABLE;

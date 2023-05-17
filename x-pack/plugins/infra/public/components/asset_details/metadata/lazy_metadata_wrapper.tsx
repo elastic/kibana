@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { TabProps } from './metadata';
+import type { MetadataProps } from './metadata';
 
 const Metadata = React.lazy(() => import('./metadata'));
 
-export const LazyMetadataWrapper = (props: TabProps) => (
+export const LazyMetadataWrapper = (props: MetadataProps) => (
   <React.Suspense fallback={<div />}>
     <Metadata {...props} />
   </React.Suspense>

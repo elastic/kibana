@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Metadata, TabProps } from './metadata';
+import { Metadata, MetadataProps } from './metadata';
 
 import { useMetadata } from '../../../pages/metrics/metric_detail/hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -17,7 +17,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 jest.mock('../../../containers/metrics_source');
 jest.mock('../../../pages/metrics/metric_detail/hooks/use_metadata');
 
-const metadataProps: TabProps = {
+const metadataProps: MetadataProps = {
   currentTimeRange: {
     from: 1679316685686,
     to: 1679585836087,
