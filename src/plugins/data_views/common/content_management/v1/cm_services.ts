@@ -30,7 +30,7 @@ const dataViewAttributesSchema = schema.object(
         })
       )
     ),
-    fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
+    fields: schema.maybe(schema.arrayOf(fieldSpecSchema)),
     typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
     fieldAttrs: schema.maybe(
