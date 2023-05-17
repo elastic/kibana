@@ -7,7 +7,7 @@
  */
 
 import Semver from 'semver';
-import {
+import type {
   SavedObjectMigrationFn,
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
