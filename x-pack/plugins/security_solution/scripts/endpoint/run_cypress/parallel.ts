@@ -141,20 +141,8 @@ export default async () => {
     return undefined;
   };
 
-  // merge({
-  //   files: ['../../../target/kibana-security-solution/cypress/results/*.json'],
-  // }).then((report) => {
-  //   console.error('report', report);
-  //   const reporter = new Spec({ stats: report.stats, on: () => {}, once: () => {} });
-  //   reporter.epilogue();
-  //   renderSummaryTable(undefined, report);
-  //   process.exit();
-  // });
-
-  // renderSummaryTable(undefined, deepMerge.all(results));
-
   const log = new ToolingLog({
-    level: 'debug',
+    level: 'info',
     writeTo: process.stdout,
   });
 
@@ -338,16 +326,6 @@ export default async () => {
       //   resolve(msg);
       // });
       //   setTimeout(() => resolve({}), 1000000);
-      // });
-
-      // return cypress.open({
-      //   spec: filePath,
-      //   headed: true,
-      //   configFile: argv.configFile,
-      //   config: {
-      //     env: customEnv,
-      //     baseUrl: `http://localhost:${kibanaPort}`,
-      //   },
       // });
 
       cleanupServerPorts({ esPort, kibanaPort });

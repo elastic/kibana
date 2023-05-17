@@ -8,16 +8,15 @@
 const cypress = require('cypress');
 const process = require('process');
 
-console.log('processID in child2 ', process.pid, process.env);
-
-console.log(process.argv);
+console.log('subprocess.ts', process.argv);
 
 cypress.run({
   spec: process.env.CYPRESS_SPEC,
   browser: 'chrome',
-  headed: true,
+  headed: false,
   configFile: process.env.CYPRESS_CONFIG_FILE,
   config: {
+    numTestsKeptInMemory: 0,
     env: {
       FORCE_COLOR: process.env.FORCE_COLOR,
       CYPRESS_BASE_URL: process.env.CYPRESS_BASE_URL,
