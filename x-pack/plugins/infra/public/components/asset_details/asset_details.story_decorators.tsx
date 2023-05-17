@@ -7,18 +7,15 @@
 
 import type { StoryContext } from '@storybook/react';
 import React from 'react';
-// This should be fixed when the component is moved as embeddable
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { useParameter } from '@storybook/addons';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SourceProvider } from '../../../../../../containers/metrics_source';
+import { SourceProvider } from '../../containers/metrics_source';
 
 export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.ReactNode>(
   wrappedStory: () => StoryFnReactReturnType,
   _storyContext: StoryContext
 ) => {
-  const processes = {
+  const processesResponse = {
     processList: [
       {
         cpu: 0.02466666666666667,
@@ -47,7 +44,7 @@ export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.R
         state: 'running',
         user: 'test_user',
         command:
-          '/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container -childID 20 -isForBrowser -prefsLen 29966 -prefMapSize 241364 -jsInitLen 240056 -sbStartup -sbAppPath /Applications/Firefox.app -sbLevel 3 -sbAllowAudio -parentBuildID 20230424110519 -appDir /Applications/Firefox.app/Contents/Resources/browser -profile /Users/test_user/Library/Application Support/Firefox/Profiles/rqulcocl.default-release {c336b12a-302b-46a0-9c9d-d9f1a22b24b9} 757 gecko-crash-server-pipe.757 org.mozilla.machname.1351433086 tab',
+          '/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container -childID 20 -isForBrowser -prefsLen 29966 -prefMapSize 241364 -jsInitLen 240056 -sbStartup -sbAppPath /Applications/Firefox.app -sbLevel 3 -sbAllowAudio -parentBuildID 20230424110519 -appDir /Applications/Firefox.app/Contents/Resources/browser -profile /Users/test_user/Library/Application Support/Firefox/Profiles/rqulcocl.default-release {c336b12a-aaaa-aaaa-aaaa-d9f1a22b24b9} 757 gecko-crash-server-pipe.757 org.mozilla.machname.1351433086 tab',
       },
       {
         cpu: 0.0030000000000000005,
@@ -118,23 +115,74 @@ export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.R
         command: '/Applications/Visual Studio Code.app/Contents/MacOS/Electron',
       },
     ],
+    summary: { running: 366, total: 366 },
   };
 
-  const summary = { summary: { running: 366, total: 366 } };
-
-  const contentTypes = {
-    processesAndSummary: { ...processes, ...summary, loading: false },
-    onlyProcesses: { ...processes, summary: {}, loading: false },
-    onlySummary: { ...summary, processList: [] },
-    loading: { loading: true },
-    noData: { loading: false, summary: {}, processList: [] },
+  const metadataResponse = {
+    id: 'host1',
+    name: 'host1',
+    info: {
+      cloud: {
+        availability_zone: 'us-central1-c',
+        instance: {
+          name: 'host2',
+          id: '1234567891234567896',
+        },
+        provider: 'gcp',
+        service: {
+          name: 'GCE',
+        },
+        machine: {
+          type: 'e2-machine',
+        },
+        project: {
+          id: 'some-project',
+        },
+        account: {
+          id: 'some-project',
+        },
+      },
+      agent: {
+        name: 'host2',
+        id: '1a3s3f5g-2222-aaaa-1d35-fd34133t241',
+        ephemeral_id: 'fdaf43q5-rwe3-ee22-6666-fdsfhwy34535',
+        type: 'metricbeat',
+        version: '8.8.0',
+      },
+      host: {
+        hostname: 'host2',
+        os: {
+          build: '1111.1111',
+          kernel: '10.0.1111.1111 (WinBuild.160101.0800)',
+          name: 'Windows Server 2019 Datacenter',
+          family: 'windows',
+          type: 'windows',
+          version: '10.0',
+          platform: 'windows',
+        },
+        ip: ['as98::111r:aab2s:w123:v00s', '192.168.0.25'],
+        name: 'host2',
+        id: '1245t34f-aaaa-6666-1111-5555666777722',
+        mac: ['66-66-0A-66-00-66'],
+        architecture: 'x86_64',
+      },
+    },
+    features: [],
   };
-
-  const initialProcesses = useParameter<{ contentType: keyof typeof contentTypes }>('show', {
-    contentType: 'processesAndSummary',
-  })!;
 
   const mockServices = {
+    application: {
+      currentAppId$: { title: 'infra', subscribe: () => {} },
+      navigateToUrl: () => {},
+    },
+    dataViews: { create: () => {} },
+    data: {
+      query: {
+        filterManager: { filterManagerService: { addFilters: () => {}, removeFilter: () => {} } },
+      },
+    },
+    notifications: { toasts: { add: () => {}, toastsService: { addSuccess: () => {} } } },
+    telemetry: () => {},
     http: {
       basePath: {
         prepend: (_: string) => '',
@@ -142,11 +190,23 @@ export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.R
       patch: () => {},
       fetch: async (path: string) => {
         switch (path) {
+          case '/api/infra/metadata':
+            return metadataResponse;
           case '/api/metrics/process_list':
-            return contentTypes[initialProcesses?.contentType];
+            return { ...processesResponse, loading: false };
           default:
             return {};
         }
+      },
+    },
+    share: {
+      url: {
+        locators: {
+          get: () => ({
+            navigate: () =>
+              `https://kibana:8080/base-path/app/uptime/?search=host.name: "host1" OR host.ip: "192.168.0.1" OR monitor.ip: "192.168.0.1"`,
+          }),
+        },
       },
     },
   };
