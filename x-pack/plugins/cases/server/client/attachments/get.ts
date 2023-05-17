@@ -132,9 +132,10 @@ export async function find(
   );
 
   if (
-    queryParams?.page &&
-    queryParams?.perPage &&
-    queryParams?.page * queryParams?.perPage > MAX_DOCS_PER_PAGE
+    typeof queryParams?.page === 'number' &&
+    typeof queryParams?.perPage === 'number' &&
+    (queryParams?.perPage > MAX_DOCS_PER_PAGE ||
+      queryParams?.page * queryParams?.perPage > MAX_DOCS_PER_PAGE)
   ) {
     throw Boom.badRequest(
       'The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
