@@ -1,4 +1,4 @@
-[[whats-new]]
+[id="whats-new",canonical-url="https://www.elastic.co/guide/en/kibana/current/whats-new.html"]
 == What's new in {minor-version}
 
 Here are the highlights of what's new and improved in {minor-version}.

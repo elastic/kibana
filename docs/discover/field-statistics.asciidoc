@@ -1,4 +1,4 @@
-[[show-field-statistics]]
+[id="show-field-statistics",canonical-url="https://www.elastic.co/guide/en/kibana/current/show-field-statistics.html"]
 == View field statistics
 
 beta::[]

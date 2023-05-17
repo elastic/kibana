@@ -1,4 +1,4 @@
-[[document-explorer]]
+[id="document-explorer",canonical-url="https://www.elastic.co/guide/en/kibana/current/document-explorer.html"]
 == Explore your documents
 
 

@@ -1,4 +1,4 @@
-[[discover]]
+[id="discover",canonical-url="https://www.elastic.co/guide/en/kibana/current/discover.html"]
 = Discover
 
 [partintro]
