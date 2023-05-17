@@ -8,43 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectReference } from '@kbn/core/server';
-import {
-  RuleType,
-  RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleParamsAndRefs,
-  RuleTypeParams,
-} from '@kbn/alerting-plugin/server';
-import { Query } from '@kbn/data-plugin/common/query';
+import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import { getGeoContainmentExecutor } from './geo_containment';
-
-export const ActionGroupId = 'Tracked entity contained';
-export const RecoveryActionGroupId = 'notGeoContained';
-
-export const GEO_CONTAINMENT_ID = '.geo-containment';
-export interface GeoContainmentParams extends RuleTypeParams {
-  index: string;
-  indexId: string;
-  geoField: string;
-  entity: string;
-  dateField: string;
-  boundaryType: string;
-  boundaryIndexTitle: string;
-  boundaryIndexId: string;
-  boundaryGeoField: string;
-  boundaryNameField?: string;
-  indexQuery?: Query;
-  boundaryIndexQuery?: Query;
-}
-export type GeoContainmentExtractedParams = Omit<
-  GeoContainmentParams,
-  'indexId' | 'boundaryIndexId'
-> & {
-  indexRefName: string;
-  boundaryIndexRefName: string;
-};
+import type {
+  GeoContainmentRuleType,
+  GeoContainmentExtractedRuleParams,
+  GeoContainmentRuleParams,
+} from './types';
+import { executor } from './executor';
+import { ActionGroupId, RecoveryActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 
 const actionVariables = {
   context: [
@@ -132,40 +104,8 @@ export const ParamsSchema = schema.object({
   boundaryIndexQuery: schema.maybe(schema.any({})),
 });
 
-export interface GeoContainmentState extends RuleTypeState {
-  shapesFilters: Record<string, unknown>;
-  shapesIdsNamesMap: Record<string, unknown>;
-  prevLocationMap: Record<string, unknown>;
-}
-export interface GeoContainmentInstanceState extends AlertInstanceState {
-  location: number[];
-  shapeLocationId: string;
-  dateInShape: string | null;
-  docId: string;
-}
-export interface GeoContainmentInstanceContext extends AlertInstanceContext {
-  entityId: string;
-  entityDateTime: string | null;
-  entityDocumentId: string;
-  detectionDateTime: string;
-  entityLocation: string;
-  // recovered alerts are not contained in boundary so context does not include boundary state
-  containingBoundaryId?: string;
-  containingBoundaryName?: unknown;
-}
-
-export type GeoContainmentAlertType = RuleType<
-  GeoContainmentParams,
-  GeoContainmentExtractedParams,
-  GeoContainmentState,
-  GeoContainmentInstanceState,
-  GeoContainmentInstanceContext,
-  typeof ActionGroupId,
-  typeof RecoveryActionGroupId
->;
-
-export function extractEntityAndBoundaryReferences(params: GeoContainmentParams): {
-  params: GeoContainmentExtractedParams;
+export function extractEntityAndBoundaryReferences(params: GeoContainmentRuleParams): {
+  params: GeoContainmentExtractedRuleParams;
   references: SavedObjectReference[];
 } {
   const { indexId, boundaryIndexId, ...otherParams } = params;
@@ -194,9 +134,9 @@ export function extractEntityAndBoundaryReferences(params: GeoContainmentParams)
 }
 
 export function injectEntityAndBoundaryIds(
-  params: GeoContainmentExtractedParams,
+  params: GeoContainmentExtractedRuleParams,
   references: SavedObjectReference[]
-): GeoContainmentParams {
+): GeoContainmentRuleParams {
   const { indexRefName, boundaryIndexRefName, ...otherParams } = params;
   const { id: indexId = null } = references.find((ref) => ref.name === indexRefName) || {};
   const { id: boundaryIndexId = null } =
@@ -211,10 +151,10 @@ export function injectEntityAndBoundaryIds(
     ...otherParams,
     indexId,
     boundaryIndexId,
-  } as GeoContainmentParams;
+  } as GeoContainmentRuleParams;
 }
 
-export function getAlertType(): GeoContainmentAlertType {
+export function getRuleType(): GeoContainmentRuleType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
     defaultMessage: 'Tracking containment',
   });
@@ -238,7 +178,7 @@ export function getAlertType(): GeoContainmentAlertType {
     },
     doesSetRecoveryContext: true,
     defaultActionGroupId: ActionGroupId,
-    executor: getGeoContainmentExecutor(),
+    executor,
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,
@@ -248,12 +188,12 @@ export function getAlertType(): GeoContainmentAlertType {
     isExportable: true,
     useSavedObjectReferences: {
       extractReferences: (
-        params: GeoContainmentParams
-      ): RuleParamsAndRefs<GeoContainmentExtractedParams> => {
+        params: GeoContainmentRuleParams
+      ): RuleParamsAndRefs<GeoContainmentExtractedRuleParams> => {
         return extractEntityAndBoundaryReferences(params);
       },
       injectReferences: (
-        params: GeoContainmentExtractedParams,
+        params: GeoContainmentExtractedRuleParams,
         references: SavedObjectReference[]
       ) => {
         return injectEntityAndBoundaryIds(params, references);

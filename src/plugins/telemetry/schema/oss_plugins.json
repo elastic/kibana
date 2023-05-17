@@ -9136,13 +9136,13 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInspectEsQueries": {
+        "observability:syntheticsThrottlingEnabled": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
         },
-        "observability:syntheticsThrottlingEnabled": {
+        "observability:enableInspectEsQueries": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
