@@ -13,7 +13,6 @@ import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { registerEvents as registerSubscriptionTrackingEvents } from '@kbn/subscription-tracking';
 import { trackClicks } from './track_clicks';
 import { getSessionId } from './get_session_id';
 import { createLogger } from './logger';
@@ -39,7 +38,6 @@ export class AnalyticsService {
 
     this.registerBuildInfoAnalyticsContext(core);
     registerPerformanceMetricEventType(this.analyticsClient);
-    registerSubscriptionTrackingEvents(this.analyticsClient);
 
     // We may eventually move the following to the client's package since they are not Kibana-specific
     // and can benefit other consumers of the client.
