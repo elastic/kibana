@@ -50,7 +50,7 @@ export function checkAdditiveOnlyChange(
       `Removing mapped properties is disallowed >8.8. Found the following properties in current mappings but not in next mappings:
 ${props}
 
-Reach out to the #kibana-core team if you have any questions.`
+Reach out to the Kibana core team if you have any questions.`
     );
   }
 
