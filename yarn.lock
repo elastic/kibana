@@ -4558,6 +4558,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/maps-vector-tile-utils@link:x-pack/packages/maps/vector_tile_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-agg-utils@link:x-pack/packages/ml/agg_utils":
   version "0.0.0"
   uid ""

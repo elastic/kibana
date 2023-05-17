@@ -121,6 +121,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/ml-anomaly-utils",
     "@kbn/infra-forge",
-    "@kbn/observability-shared-plugin"
+    "@kbn/observability-shared-plugin",
+    "@kbn/maps-vector-tile-utils"
   ]
 }
