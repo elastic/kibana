@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
+import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
@@ -30,7 +30,14 @@ export const renderApp = async (
   coreStart: CoreStart,
   history: ScopedHistory
 ) => {
-  const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
+  const {
+    featureCatalogue,
+    chrome,
+    dataViewsService: dataViews,
+    trackUiMetric,
+    share,
+  } = getServices();
+  const getDiscoverLocator = () => share.url.locators.get('DISCOVER_APP_LOCATOR');
 
   // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
   const directories = featureCatalogue.get();
@@ -45,7 +52,9 @@ export const renderApp = async (
       <RedirectAppLinks application={coreStart.application}>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...coreStart }}>
-            <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>
+            <SampleDataTabKibanaProvider
+              {...{ coreStart, dataViews, trackUiMetric, getDiscoverLocator }}
+            >
               <HomeApp directories={directories} solutions={solutions} />
             </SampleDataTabKibanaProvider>
           </KibanaContextProvider>

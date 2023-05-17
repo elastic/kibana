@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SampleDataTab } from './src/sample_data_tab';
-export { SampleDataTabKibanaProvider, SampleDataTabProvider } from './src/services';
-export {
-  DATA_TEST_SUBJ_DEMO_ENV_BUTTON,
-  DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
-  DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION,
-} from './src/constants';
-export type { LargeDataSetParams } from './src/services';
+// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-extraneous-dependencies
+require('@babel/register')({
+  extensions: ['.ts', '.js'],
+  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
+});
+
+require('./generate_large_dataset');
