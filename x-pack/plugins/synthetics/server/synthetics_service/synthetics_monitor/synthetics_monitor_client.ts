@@ -25,13 +25,13 @@ import {
   mixParamsWithGlobalParams,
 } from '../formatters/format_configs';
 import {
-  MonitorFields,
-  SyntheticsMonitorWithId,
-  HeartbeatConfig,
-  PrivateLocation,
   EncryptedSyntheticsMonitor,
-  SyntheticsMonitorWithSecrets,
+  HeartbeatConfig,
+  MonitorFields,
   MonitorServiceLocation,
+  PrivateLocation,
+  SyntheticsMonitorWithId,
+  SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 
@@ -57,19 +57,11 @@ export class SyntheticsMonitorClient {
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
 
     for (const monitorObj of monitors) {
-      const { monitor, id } = monitorObj;
-      const config = {
-        monitor,
-        configId: id,
-        params: paramsBySpace[spaceId],
-      };
-
-      const { str: paramsString, params } = mixParamsWithGlobalParams(
-        paramsBySpace[spaceId],
-        monitor
+      const { formattedConfig, params, config } = await this.formatConfigWithParams(
+        monitorObj,
+        spaceId,
+        paramsBySpace
       );
-
-      const formattedConfig = formatHeartbeatRequest(config, paramsString);
 
       const { privateLocations, publicLocations } = this.parseLocations(formattedConfig);
       if (privateLocations.length > 0) {
@@ -348,5 +340,62 @@ export class SyntheticsMonitorClient {
     }
 
     return heartbeatConfigs;
+  }
+
+  async formatConfigWithParams(
+    monitorObj: { monitor: MonitorFields; id: string },
+    spaceId: string,
+    paramsBySpace: Record<string, Record<string, string>>
+  ) {
+    const { monitor, id } = monitorObj;
+    const config = {
+      monitor,
+      configId: id,
+      params: paramsBySpace[spaceId],
+    };
+
+    const { str: paramsString, params } = mixParamsWithGlobalParams(
+      paramsBySpace[spaceId],
+      monitor
+    );
+
+    const formattedConfig = formatHeartbeatRequest(config, paramsString);
+    return { formattedConfig, params, config };
+  }
+
+  async inspectMonitor(
+    monitorObj: { monitor: MonitorFields; id: string },
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract,
+    allPrivateLocations: PrivateLocation[],
+    spaceId: string,
+    canSave: boolean
+  ) {
+    const privateConfigs: PrivateConfig[] = [];
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId, canSave });
+
+    const { formattedConfig, params, config } = await this.formatConfigWithParams(
+      monitorObj,
+      spaceId,
+      paramsBySpace
+    );
+
+    const { privateLocations, publicLocations } = this.parseLocations(formattedConfig);
+    if (privateLocations.length > 0) {
+      privateConfigs.push({ config: formattedConfig, globalParams: params });
+    }
+
+    const publicPromise = this.syntheticsService.inspectConfig(
+      publicLocations.length > 0 ? config : undefined
+    );
+    const privatePromise = this.privateLocationAPI.inspectPackagePolicy({
+      privateConfig: privateConfigs?.[0],
+      savedObjectsClient,
+      allPrivateLocations,
+      spaceId,
+    });
+
+    const [publicConfigs, privateConfig] = await Promise.all([publicPromise, privatePromise]);
+    return { publicConfigs, privateConfig };
   }
 }

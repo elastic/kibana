@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiSteps, EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
+import { InspectMonitorPortal } from './inspect_monitor_portal';
 import { ConfigKey, FormMonitorType, StepMap } from '../types';
 import { AdvancedConfig } from '../advanced';
 import { MonitorTypePortal } from './monitor_type_portal';
@@ -54,6 +55,7 @@ export const MonitorSteps = ({
       )}
       <AdvancedConfig readOnly={readOnly} />
       <MonitorTypePortal monitorType={type} />
+      <InspectMonitorPortal />
     </>
   );
 };

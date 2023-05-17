@@ -299,6 +299,24 @@ export class SyntheticsService {
     };
   }
 
+  async inspectConfig(config?: ConfigData) {
+    if (!config) {
+      return null;
+    }
+    const monitors = this.formatConfigs(config);
+    const license = await this.getLicense();
+
+    const output = await this.getOutput();
+    if (output) {
+      return await this.apiClient.inspect({
+        monitors,
+        output,
+        license,
+      });
+    }
+    return null;
+  }
+
   async addConfigs(configs: ConfigData[]) {
     try {
       if (configs.length === 0) {
@@ -568,7 +586,13 @@ export class SyntheticsService {
     >;
   }
 
-  async getSyntheticsParams({ spaceId }: { spaceId?: string } = {}) {
+  async getSyntheticsParams({
+    spaceId,
+    canSave = true,
+  }: { spaceId?: string; canSave?: boolean } = {}) {
+    if (!canSave) {
+      return Object.create(null);
+    }
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
     const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);

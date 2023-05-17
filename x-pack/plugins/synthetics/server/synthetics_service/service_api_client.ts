@@ -81,24 +81,34 @@ export class ServiceAPIClient {
     return baseHttpsAgent;
   }
 
+  async inspect(data: ServiceData) {
+    const { result } = await this.callAPI('INSPECT', data);
+    return result as InspectResultData[];
+  }
+
   async post(data: ServiceData) {
-    return this.callAPI('POST', data);
+    const { pushErrors } = await this.callAPI('POST', data);
+    return pushErrors;
   }
 
   async put(data: ServiceData) {
-    return this.callAPI('PUT', data);
+    const { pushErrors } = await this.callAPI('PUT', data);
+    return pushErrors;
   }
 
   async delete(data: ServiceData) {
-    return this.callAPI('DELETE', data);
+    const { pushErrors } = await this.callAPI('DELETE', data);
+    return pushErrors;
   }
 
   async runOnce(data: ServiceData) {
-    return this.callAPI('POST', { ...data, endpoint: 'runOnce' });
+    const { pushErrors } = await this.callAPI('POST', { ...data, endpoint: 'runOnce' });
+    return pushErrors;
   }
 
   async syncMonitors(data: ServiceData) {
-    return this.callAPI('PUT', { ...data, endpoint: 'sync' });
+    const { pushErrors } = await this.callAPI('PUT', { ...data, endpoint: 'sync' });
+    return pushErrors;
   }
 
   addVersionHeader(req: AxiosRequestConfig) {
@@ -142,12 +152,12 @@ export class ServiceAPIClient {
   }
 
   async callAPI(
-    method: 'POST' | 'PUT' | 'DELETE',
+    method: 'POST' | 'PUT' | 'DELETE' | 'INSPECT',
     { monitors: allMonitors, output, endpoint, isEdit, license }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
-      return;
+      return { result: [] as InspectResultData[], pushErrors: [] };
     }
 
     const pushErrors: ServiceLocationErrors = [];
@@ -167,10 +177,12 @@ export class ServiceAPIClient {
         promises.push(
           rxjsFrom(promise).pipe(
             tap((result) => {
-              this.logger.debug(result.data);
-              this.logger.debug(
-                `Successfully called service location ${url}${result.request?.path} with method ${method} with ${locMonitors.length} monitors`
-              );
+              if ('request' in result) {
+                this.logger.debug(result.data);
+                this.logger.debug(
+                  `Successfully called service location ${url}${result.request?.path} with method ${method} with ${locMonitors.length} monitors`
+                );
+              }
             }),
             catchError((err: AxiosError<{ reason: string; status: number }>) => {
               pushErrors.push({ locationId: id, error: err.response?.data! });
@@ -195,21 +207,17 @@ export class ServiceAPIClient {
       }
     });
 
-    await forkJoin(promises).toPromise();
+    const result = await forkJoin(promises).toPromise();
 
-    return pushErrors;
+    return { pushErrors, result };
   }
 
   async callServiceEndpoint(
-    { monitors, output, endpoint = 'monitors', isEdit, license }: ServiceData,
-    method: 'POST' | 'PUT' | 'DELETE',
+    serviceData: ServiceData,
+    method: 'POST' | 'PUT' | 'DELETE' | 'INSPECT',
     baseUrl: string
   ) {
-    // don't need to pass locations to heartbeat
-    const monitorsStreams = monitors.map(({ locations, ...rest }) =>
-      convertToDataStreamFormat(rest)
-    );
-
+    const { endpoint = 'monitors' } = serviceData;
     let url = baseUrl;
     switch (endpoint) {
       case 'monitors':
@@ -225,23 +233,40 @@ export class ServiceAPIClient {
 
     const authHeader = this.authorization ? { Authorization: this.authorization } : undefined;
 
+    const data = this.getRequestData(serviceData);
+
+    if (method === 'INSPECT') {
+      return data;
+    }
+
     return axios(
       this.addVersionHeader({
         method,
         url,
-        data: {
-          monitors: monitorsStreams,
-          output,
-          stack_version: this.stackVersion,
-          is_edit: isEdit,
-          license_level: license.type,
-          license_issued_to: license.issued_to,
-          deployment_id: this.server.cloud?.deploymentId,
-          cloud_id: this.server.cloud?.cloudId,
-        },
+        data,
         headers: authHeader,
         httpsAgent: this.getHttpsAgent(baseUrl),
       })
     );
   }
+
+  getRequestData({ monitors, output, isEdit, license }: ServiceData) {
+    // don't need to pass locations to heartbeat
+    const monitorsStreams = monitors.map(({ locations, ...rest }) =>
+      convertToDataStreamFormat(rest)
+    );
+
+    return {
+      monitors: monitorsStreams,
+      output,
+      stack_version: this.stackVersion,
+      is_edit: isEdit,
+      license_level: license.type,
+      license_issued_to: license.issued_to,
+      deployment_id: this.server.cloud?.deploymentId,
+      cloud_id: this.server.cloud?.cloudId,
+    };
+  }
 }
+// type of return type of getRequestData of ServiceAPIClient
+export type InspectResultData = ReturnType<ServiceAPIClient['getRequestData']>;

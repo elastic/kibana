@@ -445,6 +445,45 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     };
   }
 
+  public async inspect(
+    soClient: SavedObjectsClientContract,
+    packagePolicy: NewPackagePolicyWithId
+  ): Promise<NewPackagePolicy> {
+    if (!packagePolicy.id) {
+      packagePolicy.id = SavedObjectsUtils.generateId();
+    }
+
+    const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
+    const packagePolicyId = packagePolicy.id ?? uuidv4();
+    const agentPolicyId = packagePolicy.policy_id;
+
+    let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
+    const { id, ...pkgPolicyWithoutId } = packagePolicy;
+
+    let elasticsearch: PackagePolicy['elasticsearch'];
+    if (packagePolicy.package) {
+      const pkgInfo = packageInfos.get(
+        `${packagePolicy.package.name}-${packagePolicy.package.version}`
+      );
+
+      inputs = pkgInfo
+        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs)
+        : inputs;
+
+      elasticsearch = pkgInfo?.elasticsearch;
+    }
+
+    return {
+      ...pkgPolicyWithoutId,
+      ...(packagePolicy.package
+        ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+        : {}),
+      inputs,
+      elasticsearch,
+      policy_id: agentPolicyId,
+    };
+  }
+
   public async get(
     soClient: SavedObjectsClientContract,
     id: string
