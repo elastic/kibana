@@ -33,7 +33,7 @@ export const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
 
   // on small screen isOpen hides the nav,
   // on larger screen isOpen makes it smaller
-  const DOCKED_BREAKPOINT = 'xs' as const;
+  const DOCKED_BREAKPOINT = 's' as const;
   const isCollapsible = useIsWithinMinBreakpoint(DOCKED_BREAKPOINT);
   const isVisible = isCollapsible ? true : isOpen;
   const isCollapsed = isCollapsible ? !isOpen : false;
