@@ -172,7 +172,7 @@ export class ServiceAPIClient {
         promises.push(
           rxjsFrom(promise).pipe(
             tap((result) => {
-              if ('request' in result) {
+              if ('status' in result || 'request' in result) {
                 this.logger.debug(result.data);
                 this.logger.debug(
                   `Successfully called service location ${url}${result.request?.path} with method ${method} with ${locMonitors.length} monitors`
