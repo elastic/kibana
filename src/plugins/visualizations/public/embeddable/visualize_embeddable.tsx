@@ -62,7 +62,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: DataView[];
   editPath: string;
   editUrl: string;
-  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
+  capabilities: { visualizeSave: boolean; dashboardSave: boolean; visualizeOpen: boolean };
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -171,7 +171,9 @@ export class VisualizeEmbeddable
 
     if (this.attributeService) {
       const isByValue = !this.inputIsRefType(initialInput);
-      const editable = capabilities.visualizeSave || (isByValue && capabilities.dashboardSave);
+      const editable =
+        capabilities.visualizeSave ||
+        (isByValue && capabilities.dashboardSave && capabilities.visualizeOpen);
       this.updateOutput({ ...this.getOutput(), editable });
     }
 

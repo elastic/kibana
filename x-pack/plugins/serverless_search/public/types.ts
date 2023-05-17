@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import {
   EnterpriseSearchPublicSetup,
   EnterpriseSearchPublicStart,
 } from '@kbn/enterprise-search-plugin/public';
+import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}

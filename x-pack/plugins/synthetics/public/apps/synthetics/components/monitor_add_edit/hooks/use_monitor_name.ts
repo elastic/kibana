@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
 import { syntheticsMonitorType } from '../../../../../../common/types/saved_objects';

@@ -12,7 +12,8 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
+  EuiSkeletonRectangle,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -106,7 +107,7 @@ export const LastTestRunComponent = ({
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: monitor?.id!,
+                configId: monitor?.[ConfigKey.CONFIG_ID]!,
                 locationId: selectedLocation!.id,
                 stateId: latestPing.state?.id!,
               })}
@@ -168,12 +169,12 @@ const PanelHeader = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
           <EuiFlexItem>
-            <EuiLoadingContent css={{ width: 52 }} lines={1} />
+            <EuiSkeletonRectangle width="52px" height="20px" />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <EuiLoadingContent lines={1} />
+            <EuiSkeletonText lines={1} />
           </EuiFlexItem>
-          <EuiFlexItem>{isBrowserMonitor ? <EuiLoadingContent lines={1} /> : null}</EuiFlexItem>
+          <EuiFlexItem>{isBrowserMonitor ? <EuiSkeletonText lines={1} /> : null}</EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
