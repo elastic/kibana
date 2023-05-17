@@ -13,12 +13,14 @@ export const findDataStreamsResponseRT = rt.type({
   items: rt.array(dataStreamRT),
 });
 
-export const findDataStreamsRequestQueryRT = rt.partial({
-  datasetQuery: rt.string,
-  type: rt.literal('log'),
-  sortOrder: sortOrderRT,
-  uncategorisedOnly: rt.boolean,
-});
+export const findDataStreamsRequestQueryRT = rt.exact(
+  rt.partial({
+    datasetQuery: rt.string,
+    type: rt.literal('log'),
+    sortOrder: sortOrderRT,
+    uncategorisedOnly: rt.boolean,
+  })
+);
 
 export type FindDataStreamsRequestQuery = rt.TypeOf<typeof findDataStreamsRequestQueryRT>;
 export type FindDataStreamsResponse = rt.TypeOf<typeof findDataStreamsResponseRT>;

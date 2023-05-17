@@ -18,7 +18,7 @@ export interface DefaultIntegrationsContext {
 
 export interface IntegrationsSearchParams {
   name?: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type IntegrationTypestate =
