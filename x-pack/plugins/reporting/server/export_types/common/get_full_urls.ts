@@ -14,9 +14,8 @@ import {
 } from 'url';
 import { createConfig, ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
-import { TaskPayloadPNG } from '../png/types';
+import { PngCore, TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
-import { PngCore } from './generate_png';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
 
