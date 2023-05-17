@@ -9,6 +9,8 @@
 import React from 'react';
 import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '..';
 import { useUiSetting } from '../ui_settings';
 import type { Props } from './code_editor';
 
@@ -54,7 +56,9 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
-  const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const { services } = useKibana();
+  const darkMode = services.theme?.theme$ ? useObservable(services.theme?.theme$)?.darkMode : false;
+
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
