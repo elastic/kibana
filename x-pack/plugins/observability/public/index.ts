@@ -52,7 +52,6 @@ export {
   HeaderMenuPortal,
   FieldValueSuggestions,
   FieldValueSelection,
-  FilterValueLabel,
   DatePicker,
   LoadWhenInView,
   ObservabilityAlertSearchBar,
