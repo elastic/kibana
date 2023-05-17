@@ -18,13 +18,14 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import {
-  ENTITY_PANEL_TEST_ID,
   ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID,
   ENTITY_PANEL_HEADER_TEST_ID,
+  ENTITY_PANEL_HEADER_LEFT_SECTION_TEST_ID,
+  ENTITY_PANEL_HEADER_RIGHT_SECTION_TEST_ID,
   ENTITY_PANEL_CONTENT_TEST_ID,
 } from './test_ids';
 
-const HeaderActionsWrapper = styled(EuiFlexItem)`
+const PanelHeaderRightSectionWrapper = styled(EuiFlexItem)`
   margin-right: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
@@ -49,11 +50,11 @@ export interface EntityPanelProps {
    * Boolean to allow the component to be expanded or collapsed on first render
    */
   expanded?: boolean;
-  /* 
+  /** 
   Optional content and actions to be displayed on the right side of header
   */
-  headerActions?: React.ReactNode;
-  /* 
+  headerContent?: React.ReactNode;
+  /** 
   Data test subject string for testing
   */
   ['data-test-subj']?: string;
@@ -68,8 +69,8 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
   children,
   expandable = false,
   expanded = false,
-  headerActions,
-  'data-test-subj': dataTestSub = ENTITY_PANEL_TEST_ID,
+  headerContent,
+  'data-test-subj': dataTestSub,
 }) => {
   const [toggleStatus, setToggleStatus] = useState(expanded);
   const toggleQuery = useCallback(() => {
@@ -91,10 +92,14 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
     [toggleStatus, toggleQuery]
   );
 
-  const panelHeader = useMemo(() => {
-    return (
-      <EuiFlexGroup justifyContent="spaceBetween" data-test-subj={ENTITY_PANEL_HEADER_TEST_ID}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+  const headerLeftSection = useMemo(
+    () => (
+      <EuiFlexItem>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          data-test-subj={ENTITY_PANEL_HEADER_LEFT_SECTION_TEST_ID}
+        >
           <EuiFlexItem grow={false}>{expandable && children && toggleIcon}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <IconWrapper type={iconType} />
@@ -105,10 +110,23 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {headerActions && <HeaderActionsWrapper grow={false}>{headerActions}</HeaderActionsWrapper>}
-      </EuiFlexGroup>
-    );
-  }, [title, children, toggleIcon, expandable, iconType, headerActions]);
+      </EuiFlexItem>
+    ),
+    [title, children, toggleIcon, expandable, iconType]
+  );
+
+  const headerRightSection = useMemo(
+    () =>
+      headerContent && (
+        <PanelHeaderRightSectionWrapper
+          grow={false}
+          data-test-subj={ENTITY_PANEL_HEADER_RIGHT_SECTION_TEST_ID}
+        >
+          {headerContent}
+        </PanelHeaderRightSectionWrapper>
+      ),
+    [headerContent]
+  );
 
   const showContent = useMemo(() => {
     if (!children) {
@@ -119,8 +137,16 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
 
   return (
     <EuiSplitPanel.Outer grow hasBorder data-test-subj={dataTestSub}>
-      <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize={'xs'}>
-        {panelHeader}
+      <EuiSplitPanel.Inner
+        grow={false}
+        color="subdued"
+        paddingSize={'xs'}
+        data-test-subj={ENTITY_PANEL_HEADER_TEST_ID}
+      >
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          {headerLeftSection}
+          {headerRightSection}
+        </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       {showContent && (
         <EuiSplitPanel.Inner paddingSize="none">

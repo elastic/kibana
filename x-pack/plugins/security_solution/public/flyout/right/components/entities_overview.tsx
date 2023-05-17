@@ -12,6 +12,8 @@ import { useRightPanelContext } from '../context';
 import {
   ENTITIES_HEADER_TEST_ID,
   ENTITIES_CONTENT_TEST_ID,
+  ENTITIES_HOST_CONTENT_TEST_ID,
+  ENTITIES_USER_CONTENT_TEST_ID,
   ENTITIES_VIEW_ALL_BUTTON_TEST_ID,
 } from './test_ids';
 import { ENTITIES_TITLE, ENTITIES_TEXT, VIEW_ALL } from './translations';
@@ -58,14 +60,22 @@ export const EntitiesOverview: React.FC = () => {
       <EuiFlexGroup data-test-subj={ENTITIES_CONTENT_TEST_ID} direction="column" gutterSize="s">
         {userName && (
           <EuiFlexItem>
-            <EntityPanel title={userName} iconType={USER_ICON}>
+            <EntityPanel
+              title={userName}
+              iconType={USER_ICON}
+              data-test-subj={ENTITIES_USER_CONTENT_TEST_ID}
+            >
               <UserEntityOverview userName={userName} />
             </EntityPanel>
           </EuiFlexItem>
         )}
         {hostName && (
           <EuiFlexItem>
-            <EntityPanel title={hostName} iconType={HOST_ICON}>
+            <EntityPanel
+              title={hostName}
+              iconType={HOST_ICON}
+              data-test-subj={ENTITIES_HOST_CONTENT_TEST_ID}
+            >
               <HostEntityOverview hostName={hostName} />
             </EntityPanel>
           </EuiFlexItem>

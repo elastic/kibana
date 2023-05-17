@@ -14,7 +14,7 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
-import { useHostsRelatedUsers } from '../../../common/containers/related_entities/related_users';
+import { useHostRelatedUsers } from '../../../common/containers/related_entities/related_users';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import {
   HOST_DETAILS_TEST_ID,
@@ -75,7 +75,7 @@ jest.mock('../../../explore/hosts/containers/hosts/details');
 const mockUseHostDetails = useHostDetails as jest.Mock;
 
 jest.mock('../../../common/containers/related_entities/related_users');
-const mockUseHostsRelatedUsers = useHostsRelatedUsers as jest.Mock;
+const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
 
 jest.mock('../../../explore/containers/risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
@@ -108,15 +108,12 @@ const mockRiskScoreResponse = {
   isLicenseValid: true,
 };
 
-const mockRelatedUsersResponse = [
-  false,
-  {
-    inspect: jest.fn(),
-    refetch: jest.fn(),
-    relatedUsers: [{ user: 'test user', ip: ['100.XXX.XXX'], risk: RiskSeverity.low }],
-  },
-];
-
+const mockRelatedUsersResponse = {
+  inspect: jest.fn(),
+  refetch: jest.fn(),
+  relatedUsers: [{ user: 'test user', ip: ['100.XXX.XXX'], risk: RiskSeverity.low }],
+  loading: false,
+};
 describe('<HostDetails />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -219,10 +216,11 @@ describe('<HostDetails />', () => {
     });
 
     it('should render empty table if no related user is returned', () => {
-      mockUseHostsRelatedUsers.mockReturnValue([
-        false,
-        { ...mockRelatedUsersResponse, relatedUsers: [] },
-      ]);
+      mockUseHostsRelatedUsers.mockReturnValue({
+        ...mockRelatedUsersResponse,
+        relatedUsers: [],
+        loading: false,
+      });
 
       const { getByTestId } = render(
         <TestProviders>

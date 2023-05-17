@@ -13,6 +13,7 @@ export const buildRelatedUsersQuery = ({
   defaultIndex,
   from,
 }: HostsRelatedUsersRequestOptions): ISearchRequestParams => {
+  const now = new Date();
   const filter = [
     { term: { 'host.name': hostName } },
     { term: { 'event.category': 'authentication' } },
@@ -21,6 +22,7 @@ export const buildRelatedUsersQuery = ({
       range: {
         '@timestamp': {
           gt: from,
+          lte: now.toISOString(),
           format: 'strict_date_optional_time',
         },
       },

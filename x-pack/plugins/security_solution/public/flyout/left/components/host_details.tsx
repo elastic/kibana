@@ -36,7 +36,6 @@ import {
   CellActionsMode,
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
-
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -44,7 +43,7 @@ import { scoreIntervalToDateTime } from '../../../common/components/ml/score/sco
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
-import { useHostsRelatedUsers } from '../../../common/containers/related_entities/related_users';
+import { useHostRelatedUsers } from '../../../common/containers/related_entities/related_users';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HOST_DETAILS_TEST_ID, HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID } from './test_ids';
@@ -75,6 +74,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();
+  // create a unique, but stable (across re-renders) query id
   const hostDetailsQueryId = useMemo(() => `${HOST_DETAILS_ID}-${uuid()}`, []);
   const relatedUsersQueryId = useMemo(() => `${RELATED_USERS_ID}-${uuid()}`, []);
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
@@ -101,13 +101,16 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
     skip: selectedPatterns.length === 0,
   });
 
-  const [
-    isRelatedUsersLoading,
-    { inspect: inspectRelatedUsers, relatedUsers, totalCount, refetch: refetchRelatedUsers },
-  ] = useHostsRelatedUsers({
+  const {
+    loading: isRelatedUsersLoading,
+    inspect: inspectRelatedUsers,
+    relatedUsers,
+    totalCount,
+    refetch: refetchRelatedUsers,
+  } = useHostRelatedUsers({
     hostName,
     indexNames: selectedPatterns,
-    from: timestamp, // related hosts are hosts this host has successfully authenticated onto AFTER alert time
+    from: timestamp, // related users are users who were successfully authenticated onto this host AFTER alert time
     skip: selectedPatterns.length === 0,
   });
 
@@ -209,7 +212,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
         iconType={'storage'}
         expandable={true}
         expanded={true}
-        headerActions={relatedUsersCount}
+        headerContent={relatedUsersCount}
         data-test-subj={HOST_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">

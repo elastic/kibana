@@ -12,26 +12,27 @@ import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/se
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import { useSearchStrategy } from '../../use_search_strategy';
 
-export interface HostsRelatedUsersArgs {
+export interface UseHostRelatedUsersResult {
   inspect: InspectResponse;
   totalCount: number;
   relatedUsers: RelatedUser[];
   refetch: inputsModel.Refetch;
+  loading: boolean;
 }
 
-interface UseHostsRelatedUsers {
+interface UseHostRelatedUsersParam {
   hostName: string;
   indexNames: string[];
   from: string;
   skip?: boolean;
 }
 
-export const useHostsRelatedUsers = ({
+export const useHostRelatedUsers = ({
   hostName,
   indexNames,
   from,
   skip = false,
-}: UseHostsRelatedUsers): [boolean, HostsRelatedUsersArgs] => {
+}: UseHostRelatedUsersParam): UseHostRelatedUsersResult => {
   const {
     loading,
     result: response,
@@ -50,12 +51,13 @@ export const useHostsRelatedUsers = ({
 
   const hostRelatedUsersResponse = useMemo(
     () => ({
+      inspect,
       totalCount: response.totalCount,
       relatedUsers: response.relatedUsers,
-      inspect,
       refetch,
+      loading,
     }),
-    [inspect, refetch, response.totalCount, response.relatedUsers]
+    [inspect, refetch, response.totalCount, response.relatedUsers, loading]
   );
 
   const hostRelatedUsersRequest = useMemo(
@@ -74,5 +76,5 @@ export const useHostsRelatedUsers = ({
     }
   }, [hostRelatedUsersRequest, search, skip]);
 
-  return [loading, hostRelatedUsersResponse];
+  return hostRelatedUsersResponse;
 };

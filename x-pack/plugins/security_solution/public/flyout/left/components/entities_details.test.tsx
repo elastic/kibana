@@ -49,7 +49,37 @@ describe('<EntitiesDetails />', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <LeftFlyoutContext.Provider
-          value={{ ...mockContextValue, getFieldsData: (fieldName) => [] }}
+          value={{
+            ...mockContextValue,
+            getFieldsData: (fieldName) =>
+              fieldName === '@timestamp' ? ['2022-07-25T08:20:18.966Z'] : [],
+          }}
+        >
+          <EntitiesDetails />
+        </LeftFlyoutContext.Provider>
+      </TestProviders>
+    );
+    expect(queryByTestId(USER_DETAILS_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(HOST_DETAILS_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('does not render user and host details if @timestamp is not available', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <LeftFlyoutContext.Provider
+          value={{
+            ...mockContextValue,
+            getFieldsData: (fieldName) => {
+              switch (fieldName) {
+                case 'host.name':
+                  return ['host1'];
+                case 'user.name':
+                  return ['user1'];
+                default:
+                  return [];
+              }
+            },
+          }}
         >
           <EntitiesDetails />
         </LeftFlyoutContext.Provider>

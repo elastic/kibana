@@ -10,7 +10,8 @@ import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import {
   ENTITIES_HEADER_TEST_ID,
-  ENTITY_PANEL_TEST_ID,
+  ENTITIES_USER_CONTENT_TEST_ID,
+  ENTITIES_HOST_CONTENT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
 } from './test_ids';
@@ -25,7 +26,7 @@ describe('<EntitiesOverview />', () => {
       getFieldsData: mockGetFieldsData,
     } as unknown as RightPanelContext;
 
-    const { getByTestId, queryByText, getAllByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <RightPanelContext.Provider value={contextValue}>
           <EntitiesOverview />
@@ -33,11 +34,8 @@ describe('<EntitiesOverview />', () => {
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_HEADER_TEST_ID)).toHaveTextContent('Entities');
-    expect(getAllByTestId(ENTITY_PANEL_TEST_ID)).toHaveLength(2);
-    expect(queryByText('user1')).toBeInTheDocument();
-    expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
-    expect(queryByText('host1')).toBeInTheDocument();
-    expect(getByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_USER_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_HOST_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should only render user when host name is null', () => {
@@ -46,7 +44,7 @@ describe('<EntitiesOverview />', () => {
       getFieldsData: (field: string) => (field === 'user.name' ? 'user1' : null),
     } as unknown as RightPanelContext;
 
-    const { queryByTestId, queryByText, getAllByTestId } = render(
+    const { queryByTestId, queryByText, getByTestId } = render(
       <TestProviders>
         <RightPanelContext.Provider value={contextValue}>
           <EntitiesOverview />
@@ -54,8 +52,8 @@ describe('<EntitiesOverview />', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
-    expect(getAllByTestId(ENTITY_PANEL_TEST_ID)).toHaveLength(1);
+    expect(getByTestId(ENTITIES_USER_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_HOST_CONTENT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText('user1')).toBeInTheDocument();
     expect(queryByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
   });
@@ -66,7 +64,7 @@ describe('<EntitiesOverview />', () => {
       getFieldsData: (field: string) => (field === 'host.name' ? 'host1' : null),
     } as unknown as RightPanelContext;
 
-    const { queryByTestId, queryByText, getAllByTestId } = render(
+    const { queryByTestId, queryByText, getByTestId } = render(
       <TestProviders>
         <RightPanelContext.Provider value={contextValue}>
           <EntitiesOverview />
@@ -74,8 +72,8 @@ describe('<EntitiesOverview />', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
-    expect(getAllByTestId(ENTITY_PANEL_TEST_ID)).toHaveLength(1);
+    expect(getByTestId(ENTITIES_HOST_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_USER_CONTENT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText('host1')).toBeInTheDocument();
     expect(queryByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
   });
@@ -95,6 +93,8 @@ describe('<EntitiesOverview />', () => {
     );
 
     expect(queryByTestId(ENTITIES_HEADER_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_HOST_CONTENT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_USER_CONTENT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should not render if eventId is null', () => {

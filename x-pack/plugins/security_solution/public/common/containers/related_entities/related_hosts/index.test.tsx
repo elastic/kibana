@@ -6,7 +6,7 @@
  */
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
-import { useUsersRelatedHosts } from '.';
+import { useUserRelatedHosts } from '.';
 import { useSearchStrategy } from '../../use_search_strategy';
 
 jest.mock('../../use_search_strategy', () => ({
@@ -22,13 +22,22 @@ const defaultProps = {
   skip: false,
 };
 
+const mockResult = {
+  inspect: {},
+  totalCount: 1,
+  relatedHosts: [{ host: 'test host', ip: '100.000.XX' }],
+  loading: false,
+  refetch: jest.fn(),
+};
+
 describe('useUsersRelatedHosts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSearchStrategy.mockReturnValue({
       loading: false,
       result: {
-        overviewNetwork: {},
+        totalCount: mockResult.totalCount,
+        relatedHosts: mockResult.relatedHosts,
       },
       search: mockSearch,
       refetch: jest.fn(),
@@ -37,11 +46,12 @@ describe('useUsersRelatedHosts', () => {
   });
 
   it('runs search', () => {
-    renderHook(() => useUsersRelatedHosts(defaultProps), {
+    const { result } = renderHook(() => useUserRelatedHosts(defaultProps), {
       wrapper: TestProviders,
     });
 
     expect(mockSearch).toHaveBeenCalled();
+    expect(JSON.stringify(result.current)).toEqual(JSON.stringify(mockResult)); // serialize result for array comparison
   });
 
   it('does not run search when skip = true', () => {
@@ -49,7 +59,7 @@ describe('useUsersRelatedHosts', () => {
       ...defaultProps,
       skip: true,
     };
-    renderHook(() => useUsersRelatedHosts(props), {
+    renderHook(() => useUserRelatedHosts(props), {
       wrapper: TestProviders,
     });
 
@@ -59,7 +69,7 @@ describe('useUsersRelatedHosts', () => {
     const props = {
       ...defaultProps,
     };
-    const { rerender } = renderHook(() => useUsersRelatedHosts(props), {
+    const { rerender } = renderHook(() => useUserRelatedHosts(props), {
       wrapper: TestProviders,
     });
     props.skip = true;
