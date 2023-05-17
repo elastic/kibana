@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   AreaSeries,
   Chart,
@@ -16,37 +16,24 @@ import {
   Axis,
 } from '@elastic/charts';
 import {
+  EuiButton,
   Comparators,
-  EuiSuperDatePicker,
-  EuiCallOut,
-  OnTimeChangeProps,
   EuiTableSortingType,
   Criteria,
   EuiButtonIcon,
-  EuiSpacer,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiTableFieldDataColumnType,
   EuiFormRow,
   EuiScreenReaderOnly,
   htmlIdGenerator,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
 } from '@elastic/eui';
-import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useMlKibana } from '../../contexts/kibana';
+import { WindowParameters } from '@kbn/aiops-utils';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { getDataDriftType, useFetchDataDriftResult } from './use_data_drift_result';
 import { NUMERIC_TYPE_LABEL } from './constants';
-import {
-  Histogram,
-  ComparisionHistogram,
-  Feature,
-  FETCH_STATUS,
-  DataDriftField,
-  TimeRange,
-} from './types';
+import { Histogram, ComparisionHistogram, Feature, DataDriftField } from './types';
 
 const formatSignificanceLevel = (significanceLevel: number) => {
   if (significanceLevel < 1e-6) {
@@ -71,10 +58,10 @@ export const DataViewSelector = ({
 }) => {
   return (
     <EuiFormRow label={`Select ${type} data view`} id={idPrefix}>
-      <DataViewPicker
-        trigger={{ label: dataView ? dataView.getName() : 'Pick data view' }}
-        onChangeDataView={onChangeDataView}
-      />
+      {/* <DataViewPicker*/}
+      {/*  trigger={{ label: dataView ? dataView.getName() : 'Pick data view' }}*/}
+      {/*  onChangeDataView={onChangeDataView}*/}
+      {/* />*/}
     </EuiFormRow>
   );
 };
@@ -149,20 +136,24 @@ const DataDriftChart = ({
 };
 
 // Data drift view
-export const DataDriftView = () => {
+export const DataDriftView = ({
+  windowParameters,
+  dataView,
+}: {
+  windowParameters?: WindowParameters;
+  dataView: DataView;
+}) => {
   const {
-    services: {
-      data: { dataViews },
-    },
-  } = useMlKibana();
+    data: { dataViews },
+  } = useAiopsAppContext();
 
   const [tempTimeRanges, setTempTimeRanges] = useState({
     reference: { start: 'now-30m', end: 'now' },
     production: { start: 'now-30m', end: 'now' },
   });
 
-  const [referenceDataView, setReferenceDataView] = useState<DataView | undefined>();
-  const [productionDataView, setProductionDataView] = useState<DataView | undefined>();
+  const [referenceDataView, setReferenceDataView] = useState<DataView | undefined>(dataView);
+  const [productionDataView, setProductionDataView] = useState<DataView | undefined>(dataView);
   const [fetchInfo, setFetchIno] = useState<
     | {
         fields: DataDriftField[];
@@ -173,108 +164,95 @@ export const DataDriftView = () => {
     | undefined
   >();
 
-  const updateDataView = async (type: 'reference' | 'production', newDataViewId: string) => {
-    const dataView = await dataViews.get(newDataViewId);
-
-    if (type === 'reference') setReferenceDataView(dataView);
-    if (type === 'production') setProductionDataView(dataView);
-  };
-
-  const updateFieldsAndTime = () => {
+  const updateFieldsAndTime = useCallback(() => {
     const mergedFields: DataDriftField[] = [];
-
-    [referenceDataView, productionDataView].forEach((dv) => {
-      if (dv) {
-        mergedFields.push(
-          ...dv.fields
-            .filter(
-              (f) =>
-                f.aggregatable === true &&
-                // @ts-ignore metadata does exist
-                f.spec.metadata_field! !== true &&
-                getDataDriftType(f.type) !== 'unsupported' &&
-                mergedFields.findIndex((merged) => merged.field === f.name) === -1
-            )
-            .map((f) => ({
-              field: f.name,
-              type: getDataDriftType(f.type),
-              displayName: f.displayName,
-            }))
-        );
-      }
+    if (dataView) {
+      mergedFields.push(
+        ...dataView.fields
+          .filter(
+            (f) =>
+              f.aggregatable === true &&
+              // @ts-ignore metadata does exist
+              f.spec.metadata_field! !== true &&
+              getDataDriftType(f.type) !== 'unsupported' &&
+              mergedFields.findIndex((merged) => merged.field === f.name) === -1
+          )
+          .map((f) => ({
+            field: f.name,
+            type: getDataDriftType(f.type),
+            displayName: f.displayName,
+          }))
+      );
+    }
+    setFetchIno({
+      fields: mergedFields,
+      referenceDataView: dataView,
+      productionDataView: dataView,
+      timeRanges: {
+        reference: { start: windowParameters?.baselineMin, end: windowParameters?.baselineMax },
+        production: { start: windowParameters?.deviationMin, end: windowParameters?.deviationMax },
+      },
     });
-    if (referenceDataView && productionDataView) {
-      setFetchIno({
-        fields: mergedFields,
-        productionDataView,
-        referenceDataView,
-        timeRanges: tempTimeRanges,
-      });
-    }
-  };
-
-  const onTimeChange = (type: 'reference' | 'production', e: OnTimeChangeProps) => {
-    const { start, end } = e;
-    if (type === 'reference') {
-      setTempTimeRanges({ ...tempTimeRanges, reference: { start, end } });
-    } else {
-      setTempTimeRanges({ ...tempTimeRanges, production: { start, end } });
-    }
-  };
+  }, [dataView, windowParameters]);
   const result = useFetchDataDriftResult(fetchInfo);
+  console.log(`--@@result`, result);
   const dataFromResult = result.data;
 
   return (
     <div>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <DataViewSelector
-            type="reference"
-            onChangeDataView={(newDataViewId) => updateDataView('reference', newDataViewId)}
-            dataView={referenceDataView}
-          />
-          <EuiSpacer size="m" />
+      <EuiButton disabled={!dataView || !windowParameters} onClick={updateFieldsAndTime}>
+        Analyze
+      </EuiButton>
 
-          <EuiSuperDatePicker
-            width="restricted"
-            onTimeChange={(ts) => onTimeChange('reference', ts)}
-            start={tempTimeRanges.reference.start}
-            end={tempTimeRanges.reference.end}
-            showUpdateButton={false}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <DataViewSelector
-            type="production"
-            onChangeDataView={(newDataViewId) => updateDataView('production', newDataViewId)}
-            dataView={productionDataView}
-          />
-          <EuiSpacer size="m" />
-          <EuiSuperDatePicker
-            width="restricted"
-            onTimeChange={(ts) => onTimeChange('production', ts)}
-            start={tempTimeRanges.production.start}
-            end={tempTimeRanges.production.end}
-            showUpdateButton={false}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiButton
-              disabled={!referenceDataView || !productionDataView}
-              onClick={updateFieldsAndTime}
-            >
-              Analyze
-            </EuiButton>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {/* <EuiFlexGroup>*/}
+      {/*  <EuiFlexItem>*/}
+      {/*    <DataViewSelector*/}
+      {/*      type="reference"*/}
+      {/*      onChangeDataView={(newDataViewId) => updateDataView('reference', newDataViewId)}*/}
+      {/*      dataView={referenceDataView}*/}
+      {/*    />*/}
+      {/*    <EuiSpacer size="m" />*/}
 
-      <EuiSpacer size="m" />
-      {result.status === FETCH_STATUS.NOT_INITIATED ? (
-        <EuiCallOut>Pick a reference data view and production data view to detect drift</EuiCallOut>
-      ) : null}
-      {result.status === FETCH_STATUS.LOADING ? 'Loading' : null}
+      {/*    <EuiSuperDatePicker*/}
+      {/*      width="restricted"*/}
+      {/*      onTimeChange={(ts) => onTimeChange('reference', ts)}*/}
+      {/*      start={tempTimeRanges.reference.start}*/}
+      {/*      end={tempTimeRanges.reference.end}*/}
+      {/*      showUpdateButton={false}*/}
+      {/*    />*/}
+      {/*  </EuiFlexItem>*/}
+      {/*  <EuiFlexItem>*/}
+      {/*    <DataViewSelector*/}
+      {/*      type="production"*/}
+      {/*      onChangeDataView={(newDataViewId) => updateDataView('production', newDataViewId)}*/}
+      {/*      dataView={productionDataView}*/}
+      {/*    />*/}
+      {/*    <EuiSpacer size="m" />*/}
+      {/*    <EuiSuperDatePicker*/}
+      {/*      width="restricted"*/}
+      {/*      onTimeChange={(ts) => onTimeChange('production', ts)}*/}
+      {/*      start={tempTimeRanges.production.start}*/}
+      {/*      end={tempTimeRanges.production.end}*/}
+      {/*      showUpdateButton={false}*/}
+      {/*    />*/}
+      {/*  </EuiFlexItem>*/}
+      {/*  <EuiFlexItem grow={false}>*/}
+      {/*    <EuiFormRow hasEmptyLabelSpace>*/}
+      {/*      <EuiButton*/}
+      {/*        disabled={!referenceDataView || !productionDataView}*/}
+      {/*        onClick={updateFieldsAndTime}*/}
+      {/*      >*/}
+      {/*        Analyze*/}
+      {/*      </EuiButton>*/}
+      {/*    </EuiFormRow>*/}
+      {/*  </EuiFlexItem>*/}
+      {/* </EuiFlexGroup>*/}
+
+      {/* <EuiSpacer size="m" />*/}
+      {/* {result.status === FETCH_STATUS.NOT_INITIATED ? (*/}
+      {/*  <EuiCallOut>Pick a reference data view and production data view to detect drift</EuiCallOut>*/}
+      {/* ) : null}*/}
+      {/* {result.status === FETCH_STATUS.LOADING ? 'Loading' : null}*/}
       {dataFromResult ? <DataDriftOverviewTable data={dataFromResult} /> : null}
     </div>
   );

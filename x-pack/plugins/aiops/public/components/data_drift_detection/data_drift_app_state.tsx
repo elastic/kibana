@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { FC } from 'react';
+import { pick } from 'lodash';
+
+import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { UrlStateProvider } from '@kbn/ml-url-state';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+
+import { DataDriftDetectionPage } from './data_drift_page';
+import { SpikeAnalysisTableRowStateProvider } from '../spike_analysis_table/spike_analysis_table_row_provider';
+import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { DataSourceContext } from '../../hooks/use_data_source';
+import { AIOPS_STORAGE_KEYS } from '../../types/storage';
+
+const localStorage = new Storage(window.localStorage);
+
+export interface DataDriftDetectionAppStateProps {
+  /** The data view to analyze. */
+  dataView: DataView;
+  /** The saved search to analyze. */
+  savedSearch: SavedSearch | null;
+  /** App dependencies */
+  appDependencies: AiopsAppDependencies;
+}
+
+export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = ({
+  dataView,
+  savedSearch,
+  appDependencies,
+}) => {
+  if (!dataView) return null;
+
+  const datePickerDeps = {
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
+  return (
+    <AiopsAppContext.Provider value={appDependencies}>
+      <UrlStateProvider>
+        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <SpikeAnalysisTableRowStateProvider>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <DataDriftDetectionPage />
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </SpikeAnalysisTableRowStateProvider>
+        </DataSourceContext.Provider>
+      </UrlStateProvider>
+    </AiopsAppContext.Provider>
+  );
+};

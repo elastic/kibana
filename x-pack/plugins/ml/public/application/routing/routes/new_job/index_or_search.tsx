@@ -180,6 +180,26 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
+export const dataDriftIndexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_data_drift',
+  path: createPath('data_drift_index_select'),
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
+  render: (props, deps) => (
+    <PageWrapper
+      {...props}
+      nextStepPath={createPath(ML_PAGES.DATA_DRIFT)}
+      deps={deps}
+      mode={MODE.DATAVISUALIZER}
+    />
+  ),
+  breadcrumbs: getExplainLogRateSpikesBreadcrumbs(navigateToPath, basePath),
+});
+
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
   const {
     services: {

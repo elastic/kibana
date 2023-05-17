@@ -207,8 +207,8 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           },
           {
             id: 'data_drift',
-            pathId: ML_PAGES.DATA_DRIFT,
-            name: i18n.translate('xpack.ml.navMenu.trainedModelsText', {
+            pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.dataDriftText', {
               defaultMessage: 'Data Drift',
             }),
             disabled: disableLinks,

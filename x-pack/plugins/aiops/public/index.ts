@@ -22,4 +22,5 @@ export {
   ExplainLogRateSpikes,
   LogCategorization,
   ChangePointDetection,
+  DataDrift,
 } from './shared_lazy_components';

@@ -11,7 +11,8 @@ import { lastValueFrom } from 'rxjs';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useMlKibana } from '../../contexts/kibana';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   NUMERIC_TYPE_LABEL,
   CATEGORICAL_TYPE_LABEL,
@@ -113,9 +114,7 @@ export const computeChi2PValue = (
 };
 
 export const useDataSearch = () => {
-  const {
-    services: { data },
-  } = useMlKibana();
+  const { data } = useAiopsAppContext();
 
   return useCallback(
     async (esSearchRequestParams: IKibanaSearchRequest['params'], abortSignal?: AbortSignal) => {
@@ -280,6 +279,12 @@ export const useFetchDataDriftResult = ({
   productionDataView?: DataView;
   timeRanges?: { reference: TimeRange; production: TimeRange };
 } = {}) => {
+  console.log(`--@@useFetchDataDriftResult`, {
+    fields,
+    referenceDataView,
+    productionDataView,
+    timeRanges,
+  });
   const dataSearch = useDataSearch();
   const [result, setResult] = useState<Result<Feature[]>>({
     data: undefined,
@@ -291,7 +296,10 @@ export const useFetchDataDriftResult = ({
     let controller: AbortController = new AbortController();
 
     const doFetchEsRequest = async function () {
+      console.log(`--@@doFetchEsRequest called`);
       controller.abort();
+
+      setResult({ data: undefined, status: FETCH_STATUS.NOT_INITIATED, error: undefined });
 
       controller = new AbortController();
 
@@ -308,11 +316,15 @@ export const useFetchDataDriftResult = ({
       const productionDatetimeField = productionDataView?.timeFieldName;
 
       let refRangeFilter;
-      if (referenceDatetimeField !== undefined && timeRanges?.reference) {
+      if (
+        referenceDatetimeField !== undefined &&
+        timeRanges?.reference &&
+        isPopulatedObject(timeRanges?.reference, ['start', 'end'])
+      ) {
         refRangeFilter = {
           range: {
             [referenceDatetimeField]: {
-              gte: timeRanges?.reference.start,
+              gte: timeRanges.reference.start,
               lte: timeRanges.reference.end,
             },
           },
@@ -374,7 +386,11 @@ export const useFetchDataDriftResult = ({
         }
 
         let prodRangeFilter;
-        if (productionDatetimeField !== undefined && timeRanges?.production) {
+        if (
+          productionDatetimeField !== undefined &&
+          timeRanges?.production &&
+          isPopulatedObject(timeRanges?.production, ['start', 'end'])
+        ) {
           prodRangeFilter = {
             range: {
               [productionDatetimeField]: {
@@ -596,7 +612,8 @@ export const useFetchDataDriftResult = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataSearch,
-    JSON.stringify(fields, timeRanges),
+    timeRanges,
+    JSON.stringify(fields),
     referenceDataView?.id,
     productionDataView?.id,
   ]);

@@ -9,12 +9,13 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DataDriftView } from '../../../model_management/data_drift_detection/data_drift_view';
+import { parse } from 'query-string';
+import { checkBasicLicense } from '../../../license';
+import { DataDriftWithDocCountPage } from '../../../aiops/data_drift';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
 
@@ -42,14 +43,18 @@ export const dataDriftRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context } = useResolver(
-    undefined,
-    undefined,
+    index,
+    savedSearchId,
     deps.config,
     deps.dataViewsContract,
     deps.getSavedSearchDeps,
-    basicResolvers(deps)
+    {
+      checkBasicLicense,
+    }
   );
+
   return (
     <PageLoader context={context}>
       <MlPageHeader>
@@ -62,7 +67,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      <DataDriftView />
+      <DataDriftWithDocCountPage />
     </PageLoader>
   );
 };
