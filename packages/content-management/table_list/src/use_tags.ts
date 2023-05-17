@@ -17,10 +17,12 @@ export function useTags({
   query,
   updateQuery,
   items,
+  fixedTagReferences,
 }: {
   query: Query;
   updateQuery: (query: Query) => void;
   items: UserContentCommonSchema[];
+  fixedTagReferences?: Tag[] | null;
 }) {
   // Return a map of tag.id to an array of saved object ids having that tag
   // { 'abc-123': ['saved_object_id_1', 'saved_object_id_2', ...] }
@@ -78,13 +80,23 @@ export function useTags({
   );
 
   const removeTagFromIncludeClause = useMemo(
-    () => updateTagClauseGetter((q, tag) => q.removeOrFieldValue('tag', tag.name)),
-    [updateTagClauseGetter]
+    () =>
+      updateTagClauseGetter((q, tag) =>
+        fixedTagReferences?.find((ref) => ref.name === tag.name)
+          ? q
+          : q.removeOrFieldValue('tag', tag.name)
+      ),
+    [fixedTagReferences, updateTagClauseGetter]
   );
 
   const addTagToExcludeClause = useMemo(
-    () => updateTagClauseGetter((q, tag) => q.addOrFieldValue('tag', tag.name, false, 'eq')),
-    [updateTagClauseGetter]
+    () =>
+      updateTagClauseGetter((q, tag) =>
+        fixedTagReferences?.find((ref) => ref.name === tag.name)
+          ? q
+          : q.addOrFieldValue('tag', tag.name, false, 'eq')
+      ),
+    [fixedTagReferences, updateTagClauseGetter]
   );
 
   const removeTagFromExcludeClause = useMemo(
@@ -112,8 +124,8 @@ export function useTags({
     [
       hasTagInExclude,
       hasTagInInclude,
-      removeTagFromExcludeClause,
       addTagToIncludeClause,
+      removeTagFromExcludeClause,
       removeTagFromIncludeClause,
     ]
   );
@@ -138,8 +150,8 @@ export function useTags({
     [
       hasTagInInclude,
       hasTagInExclude,
-      removeTagFromIncludeClause,
       addTagToExcludeClause,
+      removeTagFromIncludeClause,
       removeTagFromExcludeClause,
     ]
   );

@@ -34,18 +34,18 @@ export interface Params {
   query: Query | null;
   tagsToTableItemMap: { [tagId: string]: string[] };
   getTagList: () => Tag[];
-  fixedTag?: string;
   addOrRemoveIncludeTagFilter: (tag: Tag) => void;
   addOrRemoveExcludeTagFilter: (tag: Tag) => void;
+  fixedTagReferences?: Tag[] | null;
 }
 
 export const useTagFilterPanel = ({
   query,
   tagsToTableItemMap,
   getTagList,
-  fixedTag,
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
+  fixedTagReferences,
 }: Params) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // When the panel is "in use" it means that it is opened and the user is interacting with it.
@@ -54,25 +54,27 @@ export const useTagFilterPanel = ({
   // "isInUse" state which disable the transition.
   const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
-  const [tagSelection, setTagSelection] = useState<TagSelection>(
-    fixedTag ? { [fixedTag]: 'include' } : {}
-  );
+  const [tagSelection, setTagSelection] = useState<TagSelection>({});
   const totalActiveFilters = Object.keys(tagSelection).length;
 
   const onSelectChange = useCallback(
     (updatedOptions: TagOptionItem[]) => {
       // Note: see data flow comment in useEffect() below
       const diff = updatedOptions.find((item, index) => item.checked !== options[index].checked);
+
+      if (fixedTagReferences?.find((ref) => ref.name === diff?.tag.name)) {
+        return;
+      }
       if (diff) {
         addOrRemoveIncludeTagFilter(diff.tag);
       }
     },
-    [options, addOrRemoveIncludeTagFilter]
+    [fixedTagReferences, options, addOrRemoveIncludeTagFilter]
   );
 
   const onOptionClick = useCallback(
     (tag: Tag) => (e: MouseEvent) => {
-      if (fixedTag) {
+      if (fixedTagReferences?.find((ref) => ref.name === tag.name)) {
         return;
       }
       const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
@@ -83,7 +85,7 @@ export const useTagFilterPanel = ({
         addOrRemoveIncludeTagFilter(tag);
       }
     },
-    [fixedTag, addOrRemoveExcludeTagFilter, addOrRemoveIncludeTagFilter]
+    [addOrRemoveExcludeTagFilter, addOrRemoveIncludeTagFilter, fixedTagReferences]
   );
 
   const updateTagList = useCallback(() => {
@@ -136,9 +138,6 @@ export const useTagFilterPanel = ({
   }, []);
 
   useEffect(() => {
-    if (fixedTag) {
-      return;
-    }
     /**
      * Data flow for tag filter panel state:
      * When we click (or Ctrl + click) on a tag in the filter panel:
@@ -170,7 +169,7 @@ export const useTagFilterPanel = ({
 
       setTagSelection(updatedTagSelection);
     }
-  }, [fixedTag, query]);
+  }, [query]);
 
   useEffect(() => {
     if (isPopoverOpen) {

@@ -8,6 +8,7 @@
 
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import React, { PropsWithChildren, useCallback, useState } from 'react';
+import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
 
 import {
   TableListView,
@@ -72,28 +73,30 @@ const toTableListViewSavedObject = (
 };
 
 export type DashboardListingProps = PropsWithChildren<{
-  fixedTag?: string;
+  disableCreateDashboardButton?: boolean;
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
   goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
   initialFilter?: string;
   pageSectionPadding?: EuiPaddingSize;
   restrictPageSectionWidth?: boolean;
-  tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
+  fixedTagReferences?: Tag[] | null;
   useSessionStorageIntegration?: boolean;
   withPageTemplateHeader?: boolean;
+  urlStateEnabled?: boolean;
 }>;
 
 export const DashboardListing = ({
   children,
-  fixedTag,
+  disableCreateDashboardButton,
   getDashboardUrl,
   goToDashboard,
   initialFilter,
   pageSectionPadding = 'm',
   restrictPageSectionWidth = true,
-  tagReferences,
+  fixedTagReferences,
   useSessionStorageIntegration,
   withPageTemplateHeader = true,
+  urlStateEnabled,
 }: DashboardListingProps) => {
   const {
     application,
@@ -209,6 +212,7 @@ export const DashboardListing = ({
   const emptyPrompt = (
     <DashboardListingEmptyPrompt
       createItem={createItem}
+      disableCreateDashboardButton={disableCreateDashboardButton}
       goToDashboard={goToDashboard}
       unsavedDashboardIds={unsavedDashboardIds}
       setUnsavedDashboardIds={setUnsavedDashboardIds}
@@ -253,12 +257,12 @@ export const DashboardListing = ({
           listingLimit={listingLimit}
           emptyPrompt={emptyPrompt}
           findItems={fetchItems}
-          tagReferences={tagReferences}
+          fixedTagReferences={fixedTagReferences}
           id="dashboard"
           withPageTemplateHeader={withPageTemplateHeader}
           restrictPageSectionWidth={restrictPageSectionWidth}
           pageSectionPadding={pageSectionPadding}
-          fixedTag={fixedTag}
+          urlStateEnabled={urlStateEnabled}
         >
           <>
             {children}

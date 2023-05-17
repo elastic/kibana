@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -60,14 +60,31 @@ export const DashboardsLandingPage = () => {
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const getHref = (id: string) =>
-    `${getSecuritySolutionUrl({
-      deepLinkId: SecurityPageName.dashboards,
-      path: id,
-    })}`;
+  const getSecuritySolutionDashboardUrl = useCallback(
+    (id: string) =>
+      `${getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.dashboards,
+        path: id,
+      })}`,
+    [getSecuritySolutionUrl]
+  );
+  const { isLoading: loadingCreateDashboardUrl, url: createDashboardUrl } =
+    useCreateSecurityDashboardLink();
+
+  const getHref = useCallback(
+    (id: string | undefined) => (id ? getSecuritySolutionDashboardUrl(id) : createDashboardUrl),
+    [createDashboardUrl, getSecuritySolutionDashboardUrl]
+  );
+
+  const goToDashboard = useCallback(
+    (dashboardId: string | undefined) => {
+      track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
+      navigateTo({ url: getHref(dashboardId) });
+    },
+    [getHref, navigateTo]
+  );
 
   const securityTags = useSecurityTags();
-  const tagReferences = securityTags?.map((tag) => ({ id: tag.id, type: 'tag' }));
 
   return (
     <SecuritySolutionPageWrapper noPadding>
@@ -84,20 +101,15 @@ export const DashboardsLandingPage = () => {
       {canReadDashboard && (
         <>
           <DashboardListingTable
-            goToDashboard={(dashboardId) => {
-              if (dashboardId) {
-                track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
-                navigateTo({ url: getHref(dashboardId) });
-              }
-            }}
-            getDashboardUrl={(id, timeRestore) => {
-              return getHref(id);
-            }}
-            withPageTemplateHeader={false}
-            restrictPageSectionWidth={false}
+            disableCreateDashboardButton={loadingCreateDashboardUrl}
+            getDashboardUrl={getSecuritySolutionDashboardUrl}
+            goToDashboard={goToDashboard}
             pageSectionPadding="none"
-            tagReferences={tagReferences}
-            fixedTag={SECURITY_TAG_NAME}
+            restrictPageSectionWidth={false}
+            fixedTagReferences={securityTags}
+            withPageTemplateHeader={false}
+            initialFilter={`tag:("${SECURITY_TAG_NAME}")`}
+            urlStateEnabled={false}
           >
             <EuiTitle size="xxxs">
               <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>

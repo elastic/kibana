@@ -29,7 +29,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { noop } from 'lodash';
 import { useServices } from '../services';
 import type { TagOptionItem } from './use_tag_filter_panel';
 
@@ -152,7 +151,7 @@ export const TagFilterPanel: FC<Props> = ({
           renderOption={(option) => option.view}
           emptyMessage="There aren't any tags"
           noMatchesMessage="No tag matches the search"
-          onChange={!disableActions ? onSelectChange : noop}
+          onChange={onSelectChange}
           data-test-subj="tagSelectableList"
           {...searchProps}
         >
@@ -165,51 +164,50 @@ export const TagFilterPanel: FC<Props> = ({
             );
           }}
         </EuiSelectable>
-        {!disableActions && (
-          <EuiPopoverFooter paddingSize="m">
-            <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <EuiTextColor color="dimgrey">
-                    {i18n.translate(
-                      'contentManagement.tableList.tagFilterPanel.modifierKeyHelpText',
-                      {
-                        defaultMessage: '{modifierKeyPrefix} + click exclude',
-                        values: {
-                          modifierKeyPrefix,
-                        },
-                      }
-                    )}
-                  </EuiTextColor>
-                </EuiText>
-              </EuiFlexItem>
 
-              <EuiFlexItem css={saveBtnWrapperCSS}>
-                <EuiButton onClick={closePopover}>Save</EuiButton>
-              </EuiFlexItem>
+        <EuiPopoverFooter paddingSize="m">
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText size="xs">
+                <EuiTextColor color="dimgrey">
+                  {i18n.translate(
+                    'contentManagement.tableList.tagFilterPanel.modifierKeyHelpText',
+                    {
+                      defaultMessage: '{modifierKeyPrefix} + click exclude',
+                      values: {
+                        modifierKeyPrefix,
+                      },
+                    }
+                  )}
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
 
-              <EuiFlexItem>
-                <RedirectAppLinks
-                  coreStart={{
-                    application: {
-                      navigateToUrl,
-                      currentAppId$,
-                    },
-                  }}
-                >
-                  <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
-                    {i18n.translate(
-                      'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
-                      {
-                        defaultMessage: 'Manage tags',
-                      }
-                    )}
-                  </EuiLink>
-                </RedirectAppLinks>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopoverFooter>
-        )}
+            <EuiFlexItem css={saveBtnWrapperCSS}>
+              <EuiButton onClick={closePopover}>Save</EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <RedirectAppLinks
+                coreStart={{
+                  application: {
+                    navigateToUrl,
+                    currentAppId$,
+                  },
+                }}
+              >
+                <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
+                  {i18n.translate(
+                    'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
+                    {
+                      defaultMessage: 'Manage tags',
+                    }
+                  )}
+                </EuiLink>
+              </RedirectAppLinks>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverFooter>
       </EuiPopover>
     </>
   );

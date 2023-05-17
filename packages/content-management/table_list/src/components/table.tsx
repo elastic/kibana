@@ -28,7 +28,7 @@ import type {
   Props as TableListViewProps,
   UserContentCommonSchema,
 } from '../table_list_view';
-import type { TableItemsRowActions } from '../types';
+import type { TableItemsRowActions, Tag } from '../types';
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
@@ -60,6 +60,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
   tableItemsRowActions: TableItemsRowActions;
+  fixedTagReferences?: Tag[] | null;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -85,15 +86,9 @@ export function Table<T extends UserContentCommonSchema>({
   tableItemsRowActions,
   tableSort,
   tagsToTableItemMap,
+  fixedTagReferences,
 }: Props<T>) {
   const { getTagList } = useServices();
-  const getTagListing = useCallback(() => {
-    let tags = getTagList();
-    if (fixedTag) {
-      tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
-    }
-    return tags;
-  }, [fixedTag, getTagList]);
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -156,11 +151,11 @@ export function Table<T extends UserContentCommonSchema>({
     totalActiveFilters,
   } = useTagFilterPanel({
     query: searchQuery.query,
-    getTagList: getTagListing,
-    fixedTag,
+    getTagList,
     tagsToTableItemMap,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
+    fixedTagReferences,
   });
 
   const tableSortSelectFilter = useMemo<SearchFilterConfig>(() => {
@@ -182,7 +177,7 @@ export function Table<T extends UserContentCommonSchema>({
     return {
       type: 'custom_component',
       component: () => {
-        const disableActions = fixedTag != null;
+        const disableActions = fixedTagReferences != null;
         return (
           <TagFilterPanel
             isPopoverOpen={isPopoverOpen}
@@ -199,6 +194,7 @@ export function Table<T extends UserContentCommonSchema>({
       },
     };
   }, [
+    fixedTagReferences,
     isPopoverOpen,
     isInUse,
     closePopover,
@@ -207,7 +203,6 @@ export function Table<T extends UserContentCommonSchema>({
     onFilterButtonClick,
     onSelectChange,
     clearTagSelection,
-    fixedTag,
   ]);
 
   const searchFilters = useMemo(() => {

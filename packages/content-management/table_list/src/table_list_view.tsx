@@ -43,7 +43,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
-import { RowActions, TableItemsRowActions } from './types';
+import { RowActions, TableItemsRowActions, Tag } from './types';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -108,8 +108,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   contentEditor?: ContentEditorConfig;
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
-  tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
-  fixedTag?: string;
+  fixedTagReferences?: Tag[] | null;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -183,7 +182,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     }
   });
 
-  // For backward compability with the Dashboard app we will support both "s" and "title" passed
+  // For backward compatibility with the Dashboard app we will support both "s" and "title" passed
   // in the query params. We might want to stop supporting both in a future release (v9.0?)
   stateFromURL.s = sanitizedParams.s ?? sanitizedParams.title;
 
@@ -241,6 +240,20 @@ const tableColumnMetadata = {
   },
 } as const;
 
+const appendQuery = (q: Query, tagName: string) => {
+  return q.addOrFieldValue('tag', tagName, true, 'eq');
+};
+
+const getDefaultQuery = (initialQuery: string, fixedTagReferences: Tag[] | null | undefined) => {
+  const query = new Query(Ast.create([]), undefined, initialQuery);
+
+  return (
+    fixedTagReferences?.reduce((q, ref) => {
+      return appendQuery(q, ref.name);
+    }, query) ?? query
+  );
+};
+
 function TableListViewComp<T extends UserContentCommonSchema>({
   additionalRightSideActions = [],
   children,
@@ -253,7 +266,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   entityName,
   entityNamePlural,
   findItems,
-  fixedTag,
   getDetailViewLink,
   headingId,
   id: listingId = 'userContent',
@@ -266,7 +278,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   rowItemActions,
   tableListDescription,
   tableListTitle,
-  tagReferences,
+  fixedTagReferences,
   titleColumnName,
   urlStateEnabled = true,
   withoutPageTemplateWrapper,
@@ -303,14 +315,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     getTagList,
   } = useServices();
 
-  const getTagListing = useCallback(() => {
-    let tags = getTagList();
-    if (fixedTag) {
-      tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
-    }
-    return tags;
-  }, [fixedTag, getTagList]);
-
   const openContentEditor = useOpenContentEditor();
 
   const isInRouterContext = useInRouterContext();
@@ -342,7 +346,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       selectedIds: [],
       searchQuery:
         initialQuery !== undefined
-          ? { text: initialQuery, query: new Query(Ast.create([]), undefined, initialQuery) }
+          ? { text: initialQuery, query: getDefaultQuery(initialQuery, fixedTagReferences) }
           : { text: '', query: new Query(Ast.create([]), undefined, '') },
       pagination: {
         pageIndex: 0,
@@ -355,7 +359,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         direction: 'asc',
       },
     }),
-    [initialPageSize, initialQuery]
+    [fixedTagReferences, initialPageSize, initialQuery]
   );
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -395,12 +399,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         ? await searchQueryParser(searchQuery.text)
         : {
             searchQuery: searchQuery.text,
-            references: tagReferences ?? undefined,
+            references: undefined,
             referencesToExclude: undefined,
           };
 
       const response = await findItems(searchQueryParsed, {
-        references: tagReferences ?? references,
+        references,
         referencesToExclude,
       });
 
@@ -422,7 +426,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, tagReferences, findItems]);
+  }, [searchQueryParser, searchQuery.text, findItems]);
 
   const updateQuery = useCallback(
     (query: Query) => {
@@ -448,6 +452,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     query: searchQuery.query,
     updateQuery,
     items,
+    fixedTagReferences,
   });
 
   const inspectItem = useCallback(
@@ -832,7 +837,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         termMatch = searchTerm;
 
         if (references?.length || referencesToExclude?.length) {
-          const allTags = getTagListing();
+          const allTags = getTagList();
 
           if (references?.length) {
             references.forEach(({ id: refId }) => {
@@ -888,7 +893,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     updateQueryFromURL(urlState.s);
     updateSortFromURL(urlState.sort);
-  }, [urlState, searchQueryParser, getTagListing, urlStateEnabled]);
+  }, [urlState, searchQueryParser, urlStateEnabled, getTagList]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -982,7 +987,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             dispatch={dispatch}
             entityName={entityName}
             entityNamePlural={entityNamePlural}
-            fixedTag={fixedTag}
             hasUpdatedAtMetadata={hasUpdatedAtMetadata}
             isFetchingItems={isFetchingItems}
             items={items}
@@ -997,6 +1001,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             tableItemsRowActions={tableItemsRowActions}
             tableSort={tableSort}
             tagsToTableItemMap={tagsToTableItemMap}
+            fixedTagReferences={fixedTagReferences}
           />
 
           {/* Delete modal */}

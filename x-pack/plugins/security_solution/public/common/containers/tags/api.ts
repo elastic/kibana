@@ -6,9 +6,13 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { Tag } from '@kbn/saved-objects-tagging-plugin/public';
 import type { TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
+
+export interface Tag {
+  id: string;
+  attributes: TagAttributes;
+}
 
 export const getTagsByName = (
   { http, tagName }: { http: HttpSetup; tagName: string },
