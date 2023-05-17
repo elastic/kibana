@@ -35,6 +35,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
+  writeAccess: true,
   handler: async ({
     request,
     response,
