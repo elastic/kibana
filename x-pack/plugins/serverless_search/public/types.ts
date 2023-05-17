@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  EnterpriseSearchPublicSetup,
-  EnterpriseSearchPublicStart,
-} from '@kbn/enterprise-search-plugin/public';
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
@@ -19,13 +15,11 @@ export interface ServerlessSearchPluginSetup {}
 export interface ServerlessSearchPluginStart {}
 
 export interface ServerlessSearchPluginSetupDependencies {
-  enterpriseSearch: EnterpriseSearchPublicSetup;
   management: ManagementSetup;
   serverless: ServerlessPluginSetup;
 }
 
 export interface ServerlessSearchPluginStartDependencies {
-  enterpriseSearch: EnterpriseSearchPublicStart;
   management: ManagementStart;
   serverless: ServerlessPluginStart;
 }
