@@ -8,12 +8,15 @@
 import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EndpointResponseActionResults } from './endpoint_action_results';
-import type { LogsEndpointAction } from '../../../../common/endpoint/types';
+import type {
+  LogsEndpointAction,
+  LogsEndpointActionWithHosts,
+} from '../../../../common/endpoint/types';
 import type { LogsOsqueryAction } from '../../../../common/search_strategy/security_solution/response_actions/actions';
 import { useKibana } from '../../lib/kibana';
 
 interface ResponseActionsResultsProps {
-  actions: Array<LogsEndpointAction | LogsOsqueryAction>;
+  actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
   ruleName?: string[];
   ecsData: Ecs;
 }

@@ -9,7 +9,7 @@ import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useUserPrivileges } from '../user_privileges';
-import type { LogsEndpointAction } from '../../../../common/endpoint/types';
+import type { LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
@@ -17,7 +17,7 @@ import { ENDPOINT_COMMANDS } from '../event_details/translations';
 import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
 
 interface EndpointResponseActionResultsProps {
-  action: LogsEndpointAction;
+  action: LogsEndpointActionWithHosts;
 }
 
 export const EndpointResponseActionResults = ({ action }: EndpointResponseActionResultsProps) => {
