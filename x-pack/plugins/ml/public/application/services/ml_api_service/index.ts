@@ -42,7 +42,11 @@ import type {
   IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
 import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
-import type { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
+import type {
+  DataRecognizerConfigResponse,
+  Module,
+  RecognizeResult,
+} from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';
 import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
@@ -453,7 +457,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     recognizeIndex({ indexPatternTitle }: { indexPatternTitle: string }) {
-      return httpService.http<any>({
+      return httpService.http<RecognizeResult[]>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/${indexPatternTitle}`,
         method: 'GET',
         version: '1',
