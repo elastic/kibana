@@ -17,7 +17,7 @@ export const EngineHeaderDocsAction: React.FC = () => (
       <EuiButtonEmpty
         data-telemetry-id="entSearchApplications-engineHeader-documentationLink"
         data-test-subj="engine-documentation-link"
-        href={docLinks.enterpriseSearchEngines}
+        href={docLinks.searchApplications}
         target="_blank"
         iconType="documents"
       >
