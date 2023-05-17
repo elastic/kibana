@@ -86,17 +86,28 @@ describe('Response actions', () => {
     const testedCommand = 'isolate';
     const newDescription = 'Example isolate host description';
 
-    before(() => {
+    beforeEach(() => {
+      loginWithRole(ROLE.endpoint_response_actions_access);
       loadRule().then((res) => {
         ruleId = res.id;
         ruleName = res.name;
       });
     });
-    beforeEach(() => {
-      loginWithRole(ROLE.endpoint_response_actions_access);
-    });
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
+    });
+
+    it('delete response action inside of a rule', () => {
+      visitRuleActions(ruleId);
+      cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
+        cy.getByTestSubj('remove-response-action').click();
+      });
+      cy.intercept('PUT', '/api/detection_engine/rules').as('deleteResponseAction');
+      cy.getByTestSubj('ruleEditSubmitButton').click();
+      cy.wait('@deleteResponseAction').should(({ request }) => {
+        expect(request.body.response_actions).to.be.equal(undefined);
+      });
+      cy.contains(`${ruleName} was saved`).should('exist');
     });
 
     it('edit response action inside of a rule', () => {
@@ -119,19 +130,6 @@ describe('Response actions', () => {
           },
         };
         expect(request.body.response_actions[0]).to.deep.equal(query);
-      });
-      cy.contains(`${ruleName} was saved`).should('exist');
-    });
-
-    it('delete response action inside of a rule', () => {
-      visitRuleActions(ruleId);
-      cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
-        cy.getByTestSubj('remove-response-action').click();
-      });
-      cy.intercept('PUT', '/api/detection_engine/rules').as('deleteResponseAction');
-      cy.getByTestSubj('ruleEditSubmitButton').click();
-      cy.wait('@deleteResponseAction').should(({ request }) => {
-        expect(request.body.response_actions).to.be.equal(undefined);
       });
       cy.contains(`${ruleName} was saved`).should('exist');
     });
