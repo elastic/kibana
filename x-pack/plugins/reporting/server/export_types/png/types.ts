@@ -55,8 +55,6 @@ export class PngCore {
   private config: ReportingConfigType;
   core!: CoreSetup;
   router!: IRouter<CustomRequestHandlerContext<{}>>;
-  security!: PngInternalStart['security'];
-  docLinks!: PngInternalSetup['docLinks'];
   deprecatedAllowedRoles: false | string[];
   private pluginSetupDeps?: PngInternalSetup;
   private pluginStartDeps?: PngInternalStart;
