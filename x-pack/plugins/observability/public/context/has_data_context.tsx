@@ -10,6 +10,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import {
   ALERT_APP,
   APM_APP,
@@ -18,8 +19,7 @@ import {
   UPTIME_APP,
   UX_APP,
 } from './constants';
-import { getDataHandler } from '../data_handler';
-import { FETCH_STATUS } from '../hooks/use_fetcher';
+import { getDataHandler } from '../services/data_handler';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
