@@ -1,4 +1,4 @@
-[[docker]]
+[id="docker",canonical-url="https://www.elastic.co/guide/en/kibana/current/docker.html"]
 === Install {kib} with Docker
 ++++
 <titleabbrev>Install with Docker </titleabbrev>

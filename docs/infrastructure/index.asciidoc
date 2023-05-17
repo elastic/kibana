@@ -1,6 +1,6 @@
 [chapter]
 [role="xpack"]
-[[xpack-infra]]
+[id="xpack-infra",canonical-url="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html"]
 = Metrics
 
 The {metrics-app} in {kib} enables you to monitor your infrastructure metrics and identify problems in real time.

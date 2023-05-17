@@ -1,5 +1,5 @@
 [role="xpack"]
-[[xpack-siem]]
+[id="xpack-siem",canonical-url="https://www.elastic.co/guide/en/siem/guide/current/siem-overview.html"]
 = Elastic Security
 
 [partintro]

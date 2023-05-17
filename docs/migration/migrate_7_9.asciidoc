@@ -1,4 +1,4 @@
-[[breaking-changes-7.9]]
+[id="breaking-changes-7.9",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == Breaking changes in 7.9
 ++++
 <titleabbrev>7.9</titleabbrev>

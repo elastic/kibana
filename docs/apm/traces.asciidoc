@@ -1,5 +1,5 @@
 [role="xpack"]
-[[traces]]
+[id="traces",canonical-url="https://www.elastic.co/guide/en/apm/guide/current/apm-distributed-tracing.html"]
 === Traces overview
 
 TIP: Traces link together related transactions to show an end-to-end performance of how a request was served

@@ -1,5 +1,5 @@
 [role="xpack"]
-[[xpack-ml]]
+[id="xpack-ml",canonical-url="https://www.elastic.co/guide/en/kibana/current/xpack-ml.html"]
 = {ml-cap}
 
 [partintro]
@@ -30,7 +30,7 @@ NOTE: There are limitations in {ml-features} that affect {kib}. For more informa
 
 --
 
-[[xpack-ml-anomalies]]
+[id="xpack-ml-anomalies",canonical-url="https://www.elastic.co/guide/en/kibana/current/xpack-ml-anomalies.html"]
 == {anomaly-detect-cap}
 
 The Elastic {ml} {anomaly-detect} feature automatically models the normal

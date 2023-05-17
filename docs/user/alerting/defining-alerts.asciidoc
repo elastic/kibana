@@ -1,5 +1,5 @@
 [role="xpack"]
-[[defining-alerts]]
+[id="defining-alerts",canonical-url="https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html"]
 == Defining alerts
 
 {kib} alerts can be created in a variety of apps including <<xpack-apm,*APM*>>, <<xpack-infra,*Metrics*>>, <<xpack-siem,*SIEM*>>, <<xpack-uptime,*Uptime*>> and from <<management,*Management*>> UI. While alerting details may differ from app to app, they share a common interface for defining and configuring alerts that this section describes in more detail.

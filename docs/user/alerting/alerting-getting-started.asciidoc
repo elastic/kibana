@@ -1,5 +1,5 @@
 [role="xpack"]
-[[alerting-getting-started]]
+[id="alerting-getting-started",canonical-url="https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html"]
 = Alerting and Actions
 
 beta[]

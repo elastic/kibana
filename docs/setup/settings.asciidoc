@@ -1,4 +1,4 @@
-[[settings]]
+[id="settings",canonical-url="https://www.elastic.co/guide/en/kibana/current/settings.html"]
 == Configure {kib}
 
 The {kib} server reads properties from the `kibana.yml` file on startup. The

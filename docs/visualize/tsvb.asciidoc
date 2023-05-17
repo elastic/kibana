@@ -1,4 +1,4 @@
-[[TSVB]]
+[id="TSVB",canonical-url="https://www.elastic.co/guide/en/kibana/current/tsvb.html"]
 == TSVB
 
 TSVB is a time series data visualizer that allows you to use the full power of the

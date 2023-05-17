@@ -1,6 +1,6 @@
 [chapter]
 [role="xpack"]
-[[xpack-uptime]]
+[id="xpack-uptime",canonical-url="https://www.elastic.co/guide/en/observability/current/uptime-intro.html"]
 = Uptime
 
 The Uptime app in {kib} enables you to monitor the status of network endpoints via HTTP/S, TCP, and ICMP.

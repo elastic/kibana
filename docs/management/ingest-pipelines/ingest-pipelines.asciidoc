@@ -1,5 +1,5 @@
 [role="xpack"]
-[[ingest-node-pipelines]]
+[id="ingest-node-pipelines",canonical-url="https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html"]
 == Ingest Node Pipelines
 
 *Ingest Node Pipelines* enables you to create and manage {es}
