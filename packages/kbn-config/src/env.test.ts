@@ -13,6 +13,7 @@ import { Env, RawPackageInfo } from './env';
 import { getEnvOptions } from './internal_mocks';
 
 const REPO_ROOT = '/test/kibanaRoot';
+const BUILD_DATE = '2023-05-15T23:12:09+0000';
 
 const packageInfos: RawPackageInfo = {
   branch: 'master',
@@ -20,12 +21,21 @@ const packageInfos: RawPackageInfo = {
   build: {
     number: 42,
     sha: 'one',
-    date: '2023-05-15T23:12:09+0000',
+    date: BUILD_DATE,
   },
 };
 
+beforeAll(() => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date(BUILD_DATE));
+});
+
 beforeEach(() => {
   mockPackage.raw = {};
+});
+
+afterAll(() => {
+  jest.useRealTimers();
 });
 
 test('correctly creates default environment in dev mode.', () => {
