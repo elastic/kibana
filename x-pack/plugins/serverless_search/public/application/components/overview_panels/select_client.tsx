@@ -73,11 +73,7 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
                 textAlign="center"
                 color={selectedLanguage === language ? 'default' : 'subdued'}
               >
-                <h5>
-                  {i18n.translate('xpack.serverlessSearch.selectClient.language.name', {
-                    defaultMessage: language.name,
-                  })}
-                </h5>
+                <h5>{language.name}</h5>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
