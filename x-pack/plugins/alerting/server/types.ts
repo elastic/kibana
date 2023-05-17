@@ -20,6 +20,7 @@ import {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { Alert, type FieldMap } from '@kbn/alerts-as-data-utils';
@@ -279,6 +280,8 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
+  ruleStateSchemaByVersion?: Record<number, ObjectType>;
+  alertStateSchemaByVersion?: Record<number, ObjectType>;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

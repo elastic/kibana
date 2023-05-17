@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
+import { schema, ObjectType } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
-import { intersection } from 'lodash';
+import { intersection, max } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
@@ -267,6 +267,25 @@ export class RuleTypeRegistry {
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
 
+    let alertStateSchema: ObjectType = schema.object({
+      start: schema.maybe(schema.string()),
+      duration: schema.maybe(schema.string()),
+      end: schema.maybe(schema.string())
+    });
+    if (ruleType.alertStateSchemaByVersion) {
+      const versions = Object.keys(ruleType.alertStateSchemaByVersion).map((key) =>
+        parseInt(key, 10)
+      );
+      const latest = max(versions);
+      if (latest !== undefined) {
+        alertStateSchema = ruleType.alertStateSchemaByVersion[latest].extends({
+          start: schema.maybe(schema.string()),
+          duration: schema.maybe(schema.string()),
+          end: schema.maybe(schema.string()),
+        });
+      }
+    }
+
     const rawAlertInstanceSchema = schema.maybe(
       schema.recordOf(
         schema.string(),
@@ -290,8 +309,6 @@ export class RuleTypeRegistry {
               uuid: schema.maybe(schema.string()),
             })
           ),
-          // TODO expand any
-          //
           // Places using alert state:
           // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
           // x-pack/examples/alerting_example/server/alert_types/astros.ts
@@ -310,10 +327,21 @@ export class RuleTypeRegistry {
           // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
           // x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts
           // x-pack/test/functional_with_es_ssl/plugins/alerts/server/plugin.ts
-          state: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+          state: alertStateSchema,
         })
       )
     );
+
+    let ruleStateSchema: ObjectType = schema.object({});
+    if (ruleType.ruleStateSchemaByVersion) {
+      const versions = Object.keys(ruleType.ruleStateSchemaByVersion).map((key) =>
+        parseInt(key, 10)
+      );
+      const latest = max(versions);
+      if (latest !== undefined) {
+        ruleStateSchema = ruleType.ruleStateSchemaByVersion[latest];
+      }
+    }
 
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
@@ -321,8 +349,6 @@ export class RuleTypeRegistry {
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion: {
           1: schema.object({
-            // TODO expand any
-            //
             // Places using rule state:
             // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
             // x-pack/examples/alerting_example/server/alert_types/astros.ts
@@ -338,9 +364,7 @@ export class RuleTypeRegistry {
             // x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
             // x-pack/test/rule_registry/spaces_only/tests/trial/get_summarized_alerts.ts
             // x-pack/test/rule_registry/spaces_only/tests/trial/lifecycle_executor.ts
-            alertTypeState: schema.maybe(
-              schema.recordOf(schema.string(), schema.maybe(schema.any()))
-            ),
+            alertTypeState: ruleStateSchema,
             alertInstances: rawAlertInstanceSchema,
             alertRecoveredInstances: rawAlertInstanceSchema,
             previousStartedAt: schema.maybe(schema.nullable(schema.string())),
