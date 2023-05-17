@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaResponseFactory, Logger, RequestHandler, RouteMethod } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
@@ -13,8 +13,14 @@ import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { PngCore } from '../../export_types/png/types';
-import { getCounters, RequestHandler } from '../lib';
-import { RequestHandlerUser } from '../lib/authorized_user_pre_routing';
+import { getCounters } from '../lib';
+import {
+  ReportingRequestUser,
+  RequestHandlerUser,
+  superuserRole,
+} from '../lib/authorized_user_pre_routing';
+import { getUser } from '../lib/get_user';
+import { ReportingRequestHandlerContext } from '../../types';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;
 
@@ -22,9 +28,9 @@ export const authorizedUserPreRoutingPng = <P, Q, B>(
   reporting: PngCore,
   handler: RequestHandlerUser<P, Q, B>
 ): RequestHandler<P, Q, B, ReportingRequestHandlerContext, RouteMethod> => {
-  const { logger, security, docLinks } = reporting;
+  const { logger, security, docLinks } = reporting.getPluginSetupDeps();
 
-  return async (context, req, res) => {
+  return async (context: ReportingRequestHandlerContext, req, res: KibanaResponseFactory) => {
     const { security: securityStart } = await reporting.getPluginStartDeps();
     try {
       let user: ReportingRequestUser = false;
@@ -43,7 +49,7 @@ export const authorizedUserPreRoutingPng = <P, Q, B>(
         const allowedRoles = deprecatedAllowedRoles || [];
         const authorizedRoles = [superuserRole, ...allowedRoles];
 
-        if (!user.roles.find((role) => authorizedRoles.includes(role))) {
+        if (!user.roles.find((role: any) => authorizedRoles.includes(role))) {
           const body = i18n.translate('xpack.reporting.userAccessError.message', {
             defaultMessage: `Ask your administrator for access to reporting features. {grantUserAccessDocs}.`,
             values: {
@@ -70,7 +76,8 @@ export const authorizedUserPreRoutingPng = <P, Q, B>(
 };
 
 export const registerDiagnoseScreenshot = (reporting: PngCore, logger: Logger) => {
-  const { router } = reporting;
+  const setupDeps = reporting.getPluginSetupDeps();
+  const { router } = setupDeps;
 
   router.post(
     { path, validate: {} },
@@ -95,10 +102,8 @@ export const registerDiagnoseScreenshot = (reporting: PngCore, logger: Logger) =
         },
       };
 
-      const reportingPng = reporting as unknown as PngCore;
-
       return lastValueFrom(
-        generatePngObservable(reportingPng, logger, {
+        generatePngObservable(reporting, logger, {
           layout,
           request: req,
           browserTimezone: 'America/Los_Angeles',

@@ -9,9 +9,18 @@ import {
   ScreenshottingStart,
   ScreenshotOptions,
 } from '@kbn/screenshotting-plugin/server';
-import type { CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CustomRequestHandlerContext,
+  DocLinksServiceSetup,
+  IRouter,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import * as Rx from 'rxjs';
-import type { PngScreenshotOptions, ReportingPluginRouter } from '../../types';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { PngScreenshotOptions } from '../../types';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../common/constants';
 import { ReportingConfigType, createConfig } from '../../config';
 import { ReportingServerInfo } from '../../core';
@@ -29,21 +38,28 @@ export type CreateJobFnFactory<CreateJobFnType> = (
 export type RunTaskFnFactory<RunTaskFnType> = (reporting: PngCore, logger: Logger) => RunTaskFnType;
 
 interface PngInternalSetup {
-  router: ReportingPluginRouter;
+  router: IRouter<CustomRequestHandlerContext<{}>>;
+  docLinks: DocLinksServiceSetup;
+  security: SecurityPluginSetup;
+  logger: Logger;
+  usageCounter?: UsageCounter;
 }
 
 interface PngInternalStart {
   screenshotting: ScreenshottingStart;
+  security: SecurityPluginStart;
 }
 
 export class PngCore {
-  getDeprecatedAllowedRoles() {
-    throw new Error('Method not implemented.');
-  }
-  private pluginStartDeps!: PngInternalStart;
+  logger: Logger;
   private config: ReportingConfigType;
   core!: CoreSetup;
-  router!: PngInternalSetup['router'];
+  router!: IRouter<CustomRequestHandlerContext<{}>>;
+  security!: PngInternalStart['security'];
+  docLinks!: PngInternalSetup['docLinks'];
+  deprecatedAllowedRoles: false | string[];
+  private pluginSetupDeps?: PngInternalSetup;
+  private pluginStartDeps?: PngInternalStart;
 
   constructor(
     core: CoreSetup,
@@ -52,8 +68,23 @@ export class PngCore {
   ) {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
+    this.logger = logger;
+    this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
   }
 
+  public getPluginSetupDeps() {
+    if (!this.pluginSetupDeps) {
+      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
+    }
+    return this.pluginSetupDeps;
+  }
+
+  public getPluginStartDeps() {
+    if (!this.pluginStartDeps) {
+      throw new Error('Method not implemented.');
+    }
+    return this.pluginStartDeps;
+  }
   /*
    * Gives synchronous access to the config
    */
@@ -80,7 +111,7 @@ export class PngCore {
   getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
   getScreenshots(options: PngScreenshotOptions) {
     return Rx.defer(() => {
-      return this.pluginStartDeps.screenshotting.getScreenshots({
+      return this.getPluginStartDeps().screenshotting.getScreenshots({
         ...options,
         urls: options.urls.map((url) =>
           typeof url === 'string'
@@ -89,5 +120,22 @@ export class PngCore {
         ),
       } as ScreenshotOptions);
     });
+  }
+
+  /*
+   * If deprecated feature has not been disabled,
+   * this returns an array of allowed role names
+   * that have access to Reporting.
+   */
+  public getDeprecatedAllowedRoles(): string[] | false {
+    return this.deprecatedAllowedRoles;
+  }
+
+  /*
+   *
+   * Track usage of code paths for telemetry
+   */
+  public getUsageCounter(): UsageCounter | undefined {
+    return this.pluginSetupDeps?.usageCounter;
   }
 }

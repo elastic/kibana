@@ -9,9 +9,10 @@ import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { DiagnosticResponse } from '.';
-import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { authorizedUserPreRouting, getCounters } from '../lib';
+import { PngCore } from '../../export_types/png/types';
+import { getCounters } from '../lib';
+import { authorizedUserPreRoutingPng } from './screenshot';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   'error while loading shared libraries': i18n.translate(
@@ -38,12 +39,12 @@ const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
 
 const path = `${API_DIAGNOSE_URL}/browser`;
 
-export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
+export const registerDiagnoseBrowser = (reporting: PngCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
   router.post(
     { path: `${path}`, validate: {} },
-    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
+    authorizedUserPreRoutingPng(reporting, async (_user, _context, req, res) => {
       const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
       const { docLinks } = reporting.getPluginSetupDeps();

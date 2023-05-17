@@ -12,9 +12,9 @@ import { ReportingCore } from '../../core';
 import { getUser } from './get_user';
 import type { ReportingRequestHandlerContext } from '../../types';
 
-const superuserRole = 'superuser';
+export const superuserRole = 'superuser';
 
-type ReportingRequestUser = AuthenticatedUser | false;
+export type ReportingRequestUser = AuthenticatedUser | false;
 
 export type RequestHandlerUser<P, Q, B> = RequestHandler<
   P,

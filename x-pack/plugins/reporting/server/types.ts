@@ -91,7 +91,7 @@ export interface ReportingStartDeps {
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: ReportingStart | null;
+  // reporting: ReportingStart | null;
 }>;
 
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
