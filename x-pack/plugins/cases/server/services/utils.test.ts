@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { bulkDecodeSOAttributes } from './utils';
 
-describe('isSOError', () => {
+describe('bulkDecodeSOAttributes', () => {
   const typeToTest = rt.type({ foo: rt.string });
 
   it('decodes a valid SO correctly', () => {
