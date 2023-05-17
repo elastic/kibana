@@ -15,6 +15,7 @@ import {
 import { DataViewSavedObjectConflictError } from '../common/errors';
 
 import type { DataViewCrudTypes } from '../common/content_management';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;
@@ -22,7 +23,10 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
     this.savedObjectClient = savedObjectClient;
   }
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
-    const result = await this.savedObjectClient.find<T>({ ...options, type: 'index-pattern' });
+    const result = await this.savedObjectClient.find<T>({
+      ...options,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+    });
     return result.saved_objects;
   }
 
@@ -44,16 +48,16 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
 
   async update(id: string, attributes: DataViewAttributes, options: {}) {
     return (await this.savedObjectClient.update(
-      'index-pattern',
+      DATA_VIEW_SAVED_OBJECT_TYPE,
       id,
       attributes,
       options
     )) as SavedObject;
   }
   async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
-    return await this.savedObjectClient.create('index-pattern', attributes, options);
+    return await this.savedObjectClient.create(DATA_VIEW_SAVED_OBJECT_TYPE, attributes, options);
   }
   async delete(id: string) {
-    await this.savedObjectClient.delete('index-pattern', id, { force: true });
+    await this.savedObjectClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, id, { force: true });
   }
 }

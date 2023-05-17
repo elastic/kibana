@@ -14,9 +14,8 @@ import {
   createOptionsSchemas,
   updateOptionsSchema,
   createResultSchema,
-  searchOptionsSchema,
+  searchOptionsSchemas,
 } from '@kbn/content-management-utils';
-// import { fieldSpecSchema, serializedFieldFormatSchema, runtimeFieldSchema } from '../../schemas';
 
 const dataViewAttributesSchema = schema.object(
   {
@@ -60,6 +59,13 @@ const dataViewAttributesSchema = schema.object(
 
 const dataViewSavedObjectSchema = savedObjectSchema(dataViewAttributesSchema);
 
+const searchOptionsSchema = schema.object(searchOptionsSchemas);
+
+const dataViewCreateOptionsSchema = schema.object({
+  id: createOptionsSchemas.id,
+  initialNamespaces: createOptionsSchemas.initialNamespaces,
+});
+
 // Content management service definition.
 // We need it for BWC support between different versions of the content
 export const serviceDefinition: ServicesDefinition = {
@@ -73,8 +79,7 @@ export const serviceDefinition: ServicesDefinition = {
   create: {
     in: {
       options: {
-        // todo
-        schema: schema.object(createOptionsSchemas),
+        schema: dataViewCreateOptionsSchema,
       },
       data: {
         schema: dataViewAttributesSchema,
@@ -91,7 +96,6 @@ export const serviceDefinition: ServicesDefinition = {
       options: {
         // todo
         schema: schema.object({
-          references: updateOptionsSchema.references,
           version: updateOptionsSchema.version,
           refresh: updateOptionsSchema.refresh,
           upsert: updateOptionsSchema.upsert(dataViewAttributesSchema),
@@ -106,6 +110,7 @@ export const serviceDefinition: ServicesDefinition = {
   search: {
     in: {
       options: {
+        // todo
         schema: searchOptionsSchema,
       },
     },

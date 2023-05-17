@@ -113,31 +113,6 @@ export const updateOptionsSchema = {
   retryOnConflict: schema.maybe(schema.number()),
 };
 
-// its recommended to create a subset of this schema for stricter validation
-export const searchOptionsSchema = schema.object({
-  page: schema.maybe(schema.number()),
-  perPage: schema.maybe(schema.number()),
-  sortField: schema.maybe(schema.string()),
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
-  search: schema.maybe(schema.string()),
-  searchFields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  rootSearchFields: schema.maybe(schema.arrayOf(schema.string())),
-
-  hasReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
-  hasReferenceOperator: schema.maybe(schemaAndOr),
-  hasNoReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
-  hasNoReferenceOperator: schema.maybe(schemaAndOr),
-  defaultSearchOperator: schema.maybe(schemaAndOr),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
-  type: schema.maybe(schema.string()),
-
-  filter: schema.maybe(schema.string()),
-  pit: schema.maybe(
-    schema.object({ id: schema.string(), keepAlive: schema.maybe(schema.string()) })
-  ),
-});
-
 export const createResultSchema = (soSchema: ObjectType<any>) =>
   schema.object(
     {
