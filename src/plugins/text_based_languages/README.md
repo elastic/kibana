@@ -9,10 +9,10 @@ The editor accepts the following properties:
 - onTextLangQuerySubmit: callback that is called when the user submits the query
 ```
 
-To use it on your application, you need to add the @kbn/text-based-languages plugin to your dependencies
-and use the component like that:
+To use it on your application, you need to add the textBasedLanguages to your requiredBundles and the @kbn/text-based-languages to your tsconfig.json and use the component like that:
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 
- <textBasedLanguages.Editor
+ <TextBasedLangEditor
   query={query}
   onTextLangQueryChange={onTextLangQueryChange}
   expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
