@@ -119,12 +119,16 @@ export const ProjectHeader = ({
               navigateToUrl={application.navigateToUrl}
             />
           </EuiHeaderSectionItem>
-          <EuiHeaderSectionItem border="left">
-            <HeaderActionMenu actionMenu$={observables.actionMenu$} />
-          </EuiHeaderSectionItem>
 
           <EuiHeaderSectionItem>
             <HeaderNavControls navControls$={observables.navControlsRight$} />
+          </EuiHeaderSectionItem>
+        </EuiHeaderSection>
+      </EuiHeader>
+      <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
+        <EuiHeaderSection>
+          <EuiHeaderSectionItem>
+            <HeaderActionMenu actionMenu$={observables.actionMenu$} />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>
