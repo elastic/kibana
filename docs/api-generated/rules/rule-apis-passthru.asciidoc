@@ -138,6 +138,41 @@ Any modifications made to this file will be overwritten.
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "mute_all" : false,
   "actions" : [ {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "UTC",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        }, {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        } ],
+        "dsl" : "dsl"
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
@@ -150,6 +185,41 @@ Any modifications made to this file will be overwritten.
     },
     "group" : "default"
   }, {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "UTC",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        }, {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        } ],
+        "dsl" : "dsl"
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
@@ -434,6 +504,41 @@ Any modifications made to this file will be overwritten.
     "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
     "mute_all" : false,
     "actions" : [ {
+      "alerts_filter" : {
+        "timeframe" : {
+          "hours" : {
+            "start" : "08:00",
+            "end" : "17:00"
+          },
+          "timezone" : "UTC",
+          "days" : [ 1, 2, 3, 4, 5 ]
+        },
+        "query" : {
+          "kql" : "kql",
+          "filters" : [ {
+            "meta" : {
+              "key" : ""
+            },
+            "query" : {
+              "key" : ""
+            },
+            "state$" : {
+              "store" : "store"
+            }
+          }, {
+            "meta" : {
+              "key" : ""
+            },
+            "query" : {
+              "key" : ""
+            },
+            "state$" : {
+              "store" : "store"
+            }
+          } ],
+          "dsl" : "dsl"
+        }
+      },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
@@ -446,6 +551,41 @@ Any modifications made to this file will be overwritten.
       },
       "group" : "default"
     }, {
+      "alerts_filter" : {
+        "timeframe" : {
+          "hours" : {
+            "start" : "08:00",
+            "end" : "17:00"
+          },
+          "timezone" : "UTC",
+          "days" : [ 1, 2, 3, 4, 5 ]
+        },
+        "query" : {
+          "kql" : "kql",
+          "filters" : [ {
+            "meta" : {
+              "key" : ""
+            },
+            "query" : {
+              "key" : ""
+            },
+            "state$" : {
+              "store" : "store"
+            }
+          }, {
+            "meta" : {
+              "key" : ""
+            },
+            "query" : {
+              "key" : ""
+            },
+            "state$" : {
+              "store" : "store"
+            }
+          } ],
+          "dsl" : "dsl"
+        }
+      },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
@@ -500,6 +640,41 @@ Any modifications made to this file will be overwritten.
     "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
     "mute_all" : false,
     "actions" : [ {
+      "alerts_filter" : {
+        "timeframe" : {
+          "hours" : {
+            "start" : "08:00",
+            "end" : "17:00"
+          },
+          "timezone" : "UTC",
+          "days" : [ 1, 2, 3, 4, 5 ]
+        },
+        "query" : {
+          "kql" : "kql",
+          "filters" : [ {
+            "meta" : {
+              "key" : ""
+            },
+            "query" : {
+              "key" : ""
+            },
+            "state$" : {
+              "store" : "store"
+            }
+          }, {
+            "meta" : {
+              "key" : ""
+            },
+            "query" : {
+              "key" : ""
+            },
+            "state$" : {
+              "store" : "store"
+            }
+          } ],
+          "dsl" : "dsl"
+        }
+      },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
@@ -512,6 +687,41 @@ Any modifications made to this file will be overwritten.
       },
       "group" : "default"
     }, {
+      "alerts_filter" : {
+        "timeframe" : {
+          "hours" : {
+            "start" : "08:00",
+            "end" : "17:00"
+          },
+          "timezone" : "UTC",
+          "days" : [ 1, 2, 3, 4, 5 ]
+        },
+        "query" : {
+          "kql" : "kql",
+          "filters" : [ {
+            "meta" : {
+              "key" : ""
+            },
+            "query" : {
+              "key" : ""
+            },
+            "state$" : {
+              "store" : "store"
+            }
+          }, {
+            "meta" : {
+              "key" : ""
+            },
+            "query" : {
+              "key" : ""
+            },
+            "state$" : {
+              "store" : "store"
+            }
+          } ],
+          "dsl" : "dsl"
+        }
+      },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
@@ -681,6 +891,41 @@ Any modifications made to this file will be overwritten.
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "mute_all" : false,
   "actions" : [ {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "UTC",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        }, {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        } ],
+        "dsl" : "dsl"
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
@@ -693,6 +938,41 @@ Any modifications made to this file will be overwritten.
     },
     "group" : "default"
   }, {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "UTC",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        }, {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        } ],
+        "dsl" : "dsl"
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
@@ -2039,6 +2319,41 @@ Any modifications made to this file will be overwritten.
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "mute_all" : false,
   "actions" : [ {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "UTC",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        }, {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        } ],
+        "dsl" : "dsl"
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
@@ -2051,6 +2366,41 @@ Any modifications made to this file will be overwritten.
     },
     "group" : "default"
   }, {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "UTC",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        }, {
+          "meta" : {
+            "key" : ""
+          },
+          "query" : {
+            "key" : ""
+          },
+          "state$" : {
+            "store" : "store"
+          }
+        } ],
+        "dsl" : "dsl"
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
@@ -2099,6 +2449,12 @@ Any modifications made to this file will be overwritten.
     <li><a href="#Legacy_update_alert_request_properties_actions_inner"><code>Legacy_update_alert_request_properties_actions_inner</code> - </a></li>
     <li><a href="#Legacy_update_alert_request_properties_schedule"><code>Legacy_update_alert_request_properties_schedule</code> - </a></li>
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter"><code>actions_inner_alerts_filter</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_query"><code>actions_inner_alerts_filter_query</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_query_filters_inner_state_"><code>actions_inner_alerts_filter_query_filters_inner_state_</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_timeframe"><code>actions_inner_alerts_filter_timeframe</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_timeframe_hours"><code>actions_inner_alerts_filter_timeframe_hours</code> - </a></li>
     <li><a href="#actions_inner_frequency"><code>actions_inner_frequency</code> - </a></li>
     <li><a href="#alert_response_properties"><code>alert_response_properties</code> - Legacy alert response properties</a></li>
     <li><a href="#alert_response_properties_executionStatus"><code>alert_response_properties_executionStatus</code> - </a></li>
@@ -2226,11 +2582,62 @@ Any modifications made to this file will be overwritten.
     <h3><a name="actions_inner"><code>actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">connector_type_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. This property appears in responses but cannot be set in requests. </div>
+      <div class="param">alerts_filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter">actions_inner_alerts_filter</a></span>  </div>
+<div class="param">connector_type_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. This property appears in responses but cannot be set in requests. </div>
 <div class="param">frequency (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_frequency">actions_inner_frequency</a></span>  </div>
 <div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
 <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
 <div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter"><code>actions_inner_alerts_filter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Conditions that affect whether actions run when an alert occurs. If you specify multiple conditions, all conditions must be met for the actions to run. For example, if an alert occurs within the specified time frame and matches the query, its actions run.</div>
+    <div class="field-items">
+      <div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query">actions_inner_alerts_filter_query</a></span>  </div>
+<div class="param">timeframe (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_timeframe">actions_inner_alerts_filter_timeframe</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_query"><code>actions_inner_alerts_filter_query</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines a KQL query or filter that limits which alerts generate actions.</div>
+    <div class="field-items">
+      <div class="param">dsl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A filter written in Elasticsearch Query Domain Specific Language (DSL). </div>
+<div class="param">kql (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A filter written in Kibana Query Language (KQL). </div>
+<div class="param">filters (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner">array[actions_inner_alerts_filter_query_filters_inner]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">meta (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span>  </div>
+<div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span>  </div>
+<div class="param">stateDollar (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner_state_">actions_inner_alerts_filter_query_filters_inner_state_</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_query_filters_inner_state_"><code>actions_inner_alerts_filter_query_filters_inner_state_</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">store (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_timeframe"><code>actions_inner_alerts_filter_timeframe</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines a period that limits which alerts generate actions.</div>
+    <div class="field-items">
+      <div class="param">days (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> An array of numbers that represent days of the week. For example, <code>1</code> represents Monday. </div>
+<div class="param">hours (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_timeframe_hours">actions_inner_alerts_filter_timeframe_hours</a></span>  </div>
+<div class="param">timezone (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The time zone for the <code>hours</code> values. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_timeframe_hours"><code>actions_inner_alerts_filter_timeframe_hours</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">end (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The end of the time frame in 24-hour notation (<code>hh:mm</code>). </div>
+<div class="param">start (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The start of the time frame in 24-hour notation (<code>hh:mm</code>). </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
