@@ -125,5 +125,7 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/ml-anomaly-utils",
+    "@kbn/infra-forge",
+    "@kbn/maps-vector-tile-utils",
   ]
 }
