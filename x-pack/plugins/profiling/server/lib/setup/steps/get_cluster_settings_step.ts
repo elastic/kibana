@@ -17,13 +17,24 @@ export function getClusterSettingsStep({
     hasCompleted: async () => {
       const settings = await client.getEsClient().cluster.getSettings({});
 
-      return settings.persistent.search?.max_buckets === MAX_BUCKETS.toString();
+      const isProfilingTemplatesEnabled =
+        settings.persistent.xpack?.profiling?.templates?.enabled ?? false;
+      const maxBuckets = settings.persistent.search?.max_buckets;
+
+      return maxBuckets === MAX_BUCKETS.toString() && isProfilingTemplatesEnabled;
     },
     init: async () => {
       await client.getEsClient().cluster.putSettings({
         persistent: {
           search: {
             max_buckets: MAX_BUCKETS,
+          },
+          xpack: {
+            profiling: {
+              templates: {
+                enabled: true,
+              },
+            },
           },
         },
       });
