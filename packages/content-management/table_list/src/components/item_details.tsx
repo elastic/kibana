@@ -104,9 +104,9 @@ export function ItemDetails<T extends UserContentCommonSchema>({
 
   return (
     <div>
-      <EuiTitle size="xs">{renderTitle()}</EuiTitle>
+      <EuiText size="s">{renderTitle()}</EuiText>
       {Boolean(description) && (
-        <EuiText size="s">
+        <EuiText size="s" color="subdued">
           <p>
             <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
               {description!}
