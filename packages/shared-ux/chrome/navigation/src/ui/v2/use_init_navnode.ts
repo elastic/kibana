@@ -17,9 +17,16 @@ export const useInitNavnode = (
   navNode: ChromeProjectNavigationNode,
   { deepLinks }: { deepLinks: Readonly<ChromeNavLink[]> }
 ) => {
+  if (deepLinks.length === 0) {
+    // We don't render anything until we have at least one deep link
+    return {
+      id: '',
+      title: '',
+    };
+  }
   const { id } = getIdFromNavigationNode(navNode);
   const deepLink = getDeepLinkFromNavigationNode(navNode, { deepLinks });
-  const { title } = getTitleForNavigationNode({ title: navNode.title, deepLink });
+  const { title } = getTitleForNavigationNode({ title: navNode.title, deepLink, id });
 
   return {
     id,

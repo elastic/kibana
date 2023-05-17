@@ -116,6 +116,11 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link, onRemo
     };
   }, [register, id, title, link]);
 
+  if (deepLinks.length === 0) {
+    // Don't render anyting until we at least have 1 deeplink in the Observable
+    return null;
+  }
+
   return (
     <NavigationGroupContext.Provider value={contextValue}>
       <li style={{ paddingLeft: '20px', marginBottom: '15px' }}>

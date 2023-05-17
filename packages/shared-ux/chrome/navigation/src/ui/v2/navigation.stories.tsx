@@ -10,7 +10,7 @@ import React from 'react';
 import { of } from 'rxjs';
 import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { NavigationStorybookMock } from '../../../mocks';
 import mdx from '../../../README.mdx';
@@ -80,31 +80,61 @@ const navTree: ChromeProjectNavigationNode[] = [
         link: 'group2:item1',
       },
       {
+        id: 'item1',
+        title: 'Group 2: Item 1',
+        link: 'group2:item2',
+      },
+      {
         id: 'item2',
         title: 'Group 2: Item 2',
-        link: 'app2:item2',
+        link: 'group2:item3',
       },
     ],
   },
   {
     id: 'item1',
-    title: 'Item 1',
     link: 'item1',
+  },
+  {
+    id: 'item2',
+    title: "I'm a link with no 'link' prop",
+  },
+];
+
+const baseDeeplink = {
+  title: 'Title from deep link',
+        url: '',
+        href: 'https://elastic.co',
+        baseUrl: '',
+};
+
+const deepLinks: ChromeNavLink[] = [
+  {
+    ...baseDeeplink,
+    id: 'group1:item1',
+  },
+  {
+    ...baseDeeplink,
+    id: 'group1:groupA:groupI:item1',
+      },
+  {
+    ...baseDeeplink,
+    id: 'item1',
+  },
+  {
+    ...baseDeeplink,
+    id: 'group2:item1',
+  },
+  {
+    ...baseDeeplink,
+    id: 'group2:item3',
   },
 ];
 
 const Template = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([
-      {
-        id: 'group1:groupa:link1',
-        title: 'Kibana',
-        url: '',
-        href: 'https://elastic.co',
-        baseUrl: '',
-      },
-    ]),
+    navLinks$: of(deepLinks),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },

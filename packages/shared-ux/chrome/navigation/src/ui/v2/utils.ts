@@ -31,15 +31,17 @@ export const getDeepLinkFromNavigationNode = (
 
 export const getTitleForNavigationNode = ({
   title: _title = '',
+  id,
   deepLink,
 }: {
   title?: string;
+  id: string;
   deepLink?: ChromeNavLink;
 }): { title: string } => {
   let title = _title;
   if (title.trim().length === 0) {
     if (!deepLink) {
-      throw new Error(`Deeplink id required if no "title" is provided.`);
+      throw new Error(`Deeplink id required if no "title" is provided (node id: ${id}))`);
     }
 
     title = deepLink.title;

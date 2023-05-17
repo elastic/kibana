@@ -66,6 +66,16 @@ export const NavigationItem = ({ children, id: _id, title: _title, link, onRemov
     return unRegister;
   }, [register, id, title, link]);
 
+  if (deepLinks.length === 0) {
+    // Don't render anyting until we at least have 1 deeplink in the Observable
+    return null;
+  }
+
+  if (link && !deepLink) {
+    // If a link is provided, but no deepLink is found, don't render anything
+    return null;
+  }
+
   return (
     <li style={{ paddingLeft: '20px', marginBottom: '5px' }}>
       {renderContent()}
