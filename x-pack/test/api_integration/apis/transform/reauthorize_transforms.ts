@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   function generateHeaders(apiKey: SecurityCreateApiKeyResponse) {
     return {
-      ...COMMON_REQUEST_HEADERS,
+      ...getCommonRequestHeader(),
       'es-secondary-authorization': `ApiKey ${apiKey.encoded}`,
     };
   }

@@ -134,7 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const [{ stats }] = await supertest
           .post(`/api/telemetry/v2/clusters/_stats`)
-          .set(getCommonRequestHeader())
+          .set(COMMON_REQUEST_HEADERS)
           .set('Accept', 'application/json')
           .send({
             unencrypted: true,
