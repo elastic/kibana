@@ -22,7 +22,7 @@ export class MetadataEmbeddableFactoryDefinition
   constructor(private getStartServices: InfraClientStartServicesAccessor) {}
 
   public async isEditable() {
-    return true;
+    return false;
   }
 
   public async create(initialInput: MetadataEmbeddableInput, parent?: IContainer) {

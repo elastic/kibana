@@ -22,7 +22,7 @@ export class AssetDetailsEmbeddableFactoryDefinition
   constructor(private getStartServices: InfraClientStartServicesAccessor) {}
 
   public async isEditable() {
-    return true;
+    return false;
   }
 
   public async create(initialInput: AssetDetailsEmbeddableInput, parent?: IContainer) {
