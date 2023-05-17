@@ -43,28 +43,19 @@ export function mergeSavedObjectMigrations(
     return inner || outer;
   }
 
-  const merged = mergeWith(
-    { ...(isFunction(inner) ? { transform: inner } : inner) },
-    isFunction(outer) ? { transform: outer } : outer,
-    (innerValue, outerValue, key) => {
-      if (key === 'deferred') {
-        return !!(innerValue && outerValue);
-      }
-
-      if (key === 'transform') {
-        return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
-          outerValue(innerValue(state, context), context);
-      }
-
-      return inner ?? outer;
-    }
-  );
+  const innerMigration = isFunction(inner) ? { transform: inner } : inner;
+  const outerMigration = isFunction(outer) ? { transform: outer } : outer;
+  const merged = {
+    deferred: !!(innerMigration.deferred && outerMigration.deferred),
+    transform: (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
+      outerMigration.transform(innerMigration.transform(state, context), context),
+  };
 
   if (isFunction(inner) && isFunction(outer)) {
     return merged.transform;
   }
 
-  return merged;
+  return merged as SavedObjectMigration;
 }
 
 /**
