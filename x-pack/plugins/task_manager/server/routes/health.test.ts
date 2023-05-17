@@ -488,7 +488,7 @@ describe('healthRoute', () => {
       summary:
         'Task Manager is unhealthy - Reason: setting HealthStatus.Error because of expired hot timestamps',
     });
-    const warnCalls = (logger as jest.Mocked<Logger>).warn.mock.calls as string[][];
+    const warnCalls = (logger as jest.Mocked<Logger>).debug.mock.calls as string[][];
     const warnMessage =
       /^setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana/;
     const found = warnCalls
@@ -678,7 +678,6 @@ function mockHealthStats(overrides = {}) {
         value: {
           max_workers: 10,
           poll_interval: 3000,
-          max_poll_inactivity_cycles: 10,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
           monitored_stats_running_average_window: 50,

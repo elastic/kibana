@@ -7,7 +7,6 @@
  */
 
 import React, { FC, useContext } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { NavigationKibanaDependencies, NavigationServices } from '../types';
 
 const Context = React.createContext<NavigationServices | null>(null);
@@ -27,15 +26,14 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   ...dependencies
 }) => {
   const { core } = dependencies;
-  const { http } = core;
+  const { chrome, http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
 
-  const loadingCount = useObservable(http.getLoadingCount$(), 0);
-
   const value: NavigationServices = {
     basePath,
-    loadingCount,
+    loadingCount$: http.getLoadingCount$(),
+    recentlyAccessed$: chrome.recentlyAccessed.get$(),
     navigateToUrl,
     navIsOpen: true,
   };

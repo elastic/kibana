@@ -27,7 +27,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
-import type { ControlGroupCreationOptions } from '@kbn/controls-plugin/public/control_group/types';
+import type {
+  ControlGroupCreationOptions,
+  FieldFilterPredicate,
+} from '@kbn/controls-plugin/public/control_group/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterGroupProps, FilterItemObj } from './types';
@@ -46,6 +49,7 @@ import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
 import { TEST_IDS } from './constants';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
+import { convertToBuildEsQuery } from '../../lib/kuery';
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -149,14 +153,41 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     return cleanup;
   }, []);
 
-  useEffect(() => {
-    controlGroup?.updateInput({
-      timeRange,
+  const { filters: validatedFilters, query: validatedQuery } = useMemo(() => {
+    const [_, kqlError] = convertToBuildEsQuery({
+      config: {},
+      queries: query ? [query] : [],
+      filters: filters ?? [],
+      indexPattern: { fields: [], title: '' },
+    });
+
+    // we only need to handle kqlError because control group can handle Lucene error
+    if (kqlError) {
+      /*
+       * Based on the behaviour from other components,
+       * ignore all filters and queries if there is some error
+       * in the input filters and queries
+       *
+       * */
+      return {
+        filters: [],
+        query: undefined,
+      };
+    }
+    return {
       filters,
       query,
+    };
+  }, [filters, query]);
+
+  useEffect(() => {
+    controlGroup?.updateInput({
+      filters: validatedFilters,
+      query: validatedQuery,
+      timeRange,
       chainingSystem,
     });
-  }, [timeRange, filters, query, chainingSystem, controlGroup]);
+  }, [timeRange, chainingSystem, controlGroup, validatedQuery, validatedFilters]);
 
   const handleInputUpdates = useCallback(
     (newInput: ControlGroupInput) => {
@@ -171,7 +202,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     [setControlGroupInputUpdates, getStoredControlInput, isViewMode, setHasPendingChanges]
   );
 
-  const handleFilterUpdates = useCallback(
+  const handleOutputFilterUpdates = useCallback(
     ({ filters: newFilters }: ControlGroupOutput) => {
       if (isEqual(currentFiltersRef.current, newFilters)) return;
       if (onFilterChange) onFilterChange(newFilters ?? []);
@@ -181,8 +212,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const debouncedFilterUpdates = useMemo(
-    () => debounce(handleFilterUpdates, 500),
-    [handleFilterUpdates]
+    () => debounce(handleOutputFilterUpdates, 500),
+    [handleOutputFilterUpdates]
   );
 
   useEffect(() => {
@@ -270,6 +301,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     return resultControls;
   }, [initialUrlParam, initialControls, getStoredControlInput]);
 
+  const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
+
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
       defaultInput: Partial<ControlGroupInput>,
@@ -306,7 +339,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       return {
         initialInput,
         settings: {
-          fieldFilterPredicate: (f) => f.type !== 'number',
           showAddButton: false,
           staticDataViewId: dataViewId ?? '',
           editorConfig: {
@@ -315,9 +347,18 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             hideAdditionalSettings: true,
           },
         },
+        fieldFilterPredicate,
       } as ControlGroupCreationOptions;
     },
-    [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
+    [
+      dataViewId,
+      timeRange,
+      filters,
+      chainingSystem,
+      query,
+      selectControlsWithPriority,
+      fieldFilterPredicate,
+    ]
   );
 
   useFilterUpdatesToUrlSync({

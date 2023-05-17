@@ -978,7 +978,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.selectMessageText',
       {
-        defaultMessage: 'Send a message to a Slack channel or user.',
+        defaultMessage: 'Send messages to Slack channels.',
       }
     ),
     actionTypeTitle: i18n.translate(

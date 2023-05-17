@@ -97,6 +97,7 @@ export const createStartServicesMock = (
   core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
 ): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
+  core.settings.client.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
@@ -125,6 +126,8 @@ export const createStartServicesMock = (
         getIdsWithTitle: jest.fn(),
         get: jest.fn(),
         getIndexPattern: jest.fn(),
+        getFieldsForWildcard: jest.fn(),
+        getRuntimeMappings: jest.fn(),
       },
       query: {
         ...data.query,

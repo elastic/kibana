@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { jsonValueRt } from '../../runtime_types';
-import { SavedObjectFindOptionsRt } from '../../saved_object';
+import { NumberFromString } from '../../saved_object';
 
 import { UserRt } from '../../user';
 
@@ -185,7 +185,7 @@ export const CommentRequestRt = rt.union([
   PersistableStateAttachmentRt,
 ]);
 
-export const CommentResponseRt = rt.intersection([
+export const CommentRt = rt.intersection([
   CommentAttributesRt,
   rt.type({
     id: rt.string,
@@ -233,8 +233,6 @@ export const CommentResponseTypePersistableStateRt = rt.intersection([
   }),
 ]);
 
-export const AllCommentsResponseRT = rt.array(CommentResponseRt);
-
 export const CommentPatchRequestRt = rt.intersection([
   /**
    * Partial updates are not allowed.
@@ -266,18 +264,36 @@ export const CommentPatchAttributesRt = rt.intersection([
   rt.partial(CommentAttributesBasicRt.props),
 ]);
 
-export const CommentsResponseRt = rt.type({
-  comments: rt.array(CommentResponseRt),
+export const CommentsFindResponseRt = rt.type({
+  comments: rt.array(CommentRt),
   page: rt.number,
   per_page: rt.number,
   total: rt.number,
 });
 
-export const AllCommentsResponseRt = rt.array(CommentResponseRt);
+export const CommentsRt = rt.array(CommentRt);
 
-export const FindQueryParamsRt = rt.partial({
-  ...SavedObjectFindOptionsRt.props,
+export const FindCommentsQueryParamsRt = rt.partial({
+  /**
+   * The page of objects to return
+   */
+  page: rt.union([rt.number, NumberFromString]),
+  /**
+   * The number of objects to return for a page
+   */
+  perPage: rt.union([rt.number, NumberFromString]),
+  /**
+   * Order to sort the response
+   */
+  sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 });
+
+export const FindCommentsArgsRt = rt.intersection([
+  rt.type({
+    caseID: rt.string,
+  }),
+  rt.type({ queryParams: rt.union([FindCommentsQueryParamsRt, rt.undefined]) }),
+]);
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
@@ -286,7 +302,7 @@ export const BulkGetAttachmentsRequestRt = rt.type({
 });
 
 export const BulkGetAttachmentsResponseRt = rt.type({
-  attachments: AllCommentsResponseRt,
+  attachments: CommentsRt,
   errors: rt.array(
     rt.type({
       error: rt.string,
@@ -297,7 +313,7 @@ export const BulkGetAttachmentsResponseRt = rt.type({
   ),
 });
 
-export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
+export type FindCommentsQueryParams = rt.TypeOf<typeof FindCommentsQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
@@ -314,7 +330,7 @@ export type CommentAttributesNoSO = rt.TypeOf<typeof CommentAttributesNoSORt>;
 export type CommentAttributesWithoutRefs = rt.TypeOf<typeof CommentAttributesWithoutRefsRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type BulkCreateCommentRequest = rt.TypeOf<typeof BulkCreateCommentRequestRt>;
-export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
+export type Comment = rt.TypeOf<typeof CommentRt>;
 export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
 export type CommentResponseTypePersistableState = rt.TypeOf<
@@ -324,8 +340,8 @@ export type CommentResponseExternalReferenceType = rt.TypeOf<
   typeof CommentResponseTypeExternalReferenceRt
 >;
 export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
-export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
-export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
+export type Comments = rt.TypeOf<typeof CommentsRt>;
+export type CommentsFindResponse = rt.TypeOf<typeof CommentsFindResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
 export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;
