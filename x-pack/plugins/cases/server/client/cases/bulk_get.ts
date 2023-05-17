@@ -51,7 +51,7 @@ export const bulkGet = async (
     );
 
     const request = pipe(
-      (CasesBulkGetRequestRt).decode(params),
+      CasesBulkGetRequestRt.decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { either, fold } from 'fp-ts/lib/Either';
+import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
@@ -68,47 +68,6 @@ export const getTypeProps = (
       return null;
   }
 };
-
-const getExcessProps = (props: rt.Props, r: Record<string, unknown>): string[] => {
-  const ex: string[] = [];
-  for (const k of Object.keys(r)) {
-    if (!Object.prototype.hasOwnProperty.call(props, k)) {
-      ex.push(k);
-    }
-  }
-  return ex;
-};
-
-export function excess<
-  C extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>
->(codec: C): C {
-  const codecProps = getTypeProps(codec);
-
-  const r = new rt.InterfaceType(
-    codec.name,
-    codec.is,
-    (i, c) =>
-      either.chain(rt.UnknownRecord.validate(i, c), (s: Record<string, unknown>) => {
-        if (codecProps == null) {
-          return rt.failure(i, c, 'unknown codec');
-        }
-
-        const ex = getExcessProps(codecProps, s);
-        return ex.length > 0
-          ? rt.failure(
-              i,
-              c,
-              `Invalid value ${JSON.stringify(i)} supplied to : ${
-                codec.name
-              }, excess properties: ${JSON.stringify(ex)}`
-            )
-          : codec.validate(i, c);
-      }),
-    codec.encode,
-    codecProps
-  );
-  return r as C;
-}
 
 export const jsonScalarRt = rt.union([rt.null, rt.boolean, rt.number, rt.string]);
 
