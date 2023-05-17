@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CreateJobFn, CreateJobFnFactory } from '../../types';
+import { CreateJobFn } from '../../types';
+import { CreateJobFnFactory } from '../csv_v2/execute_job';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsCSV, TaskPayloadCSV>> =

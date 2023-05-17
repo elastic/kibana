@@ -20,7 +20,7 @@ import type {
 import * as Rx from 'rxjs';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { PngScreenshotOptions } from '../../types';
+import type { CreateJobFn, PngScreenshotOptions, RunTaskFn } from '../../types';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../common/constants';
 import { ReportingConfigType, createConfig } from '../../config';
 import { ReportingServerInfo } from '../../core';
@@ -138,4 +138,18 @@ export class PngCore {
   public getUsageCounter(): UsageCounter | undefined {
     return this.pluginSetupDeps?.usageCounter;
   }
+}
+
+export interface ExportTypeDefinitionPng<
+  CreateJobFnType = CreateJobFn | null,
+  RunTaskFnType = RunTaskFn
+> {
+  id: string;
+  name: string;
+  jobType: string;
+  jobContentEncoding?: string;
+  jobContentExtension: string;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
+  runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
+  validLicenses: string[];
 }

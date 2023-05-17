@@ -15,11 +15,12 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
 import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { CreateJobFn, RunTaskFn } from '../../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
+import { ExportTypeDefinitionCsv } from './types';
 
-export const getExportType = (): ExportTypeDefinition<
+export const getExportType = (): ExportTypeDefinitionCsv<
   CreateJobFn<JobParamsCsvFromSavedObject>,
   RunTaskFn<TaskPayloadCsvFromSavedObject>
 > => ({

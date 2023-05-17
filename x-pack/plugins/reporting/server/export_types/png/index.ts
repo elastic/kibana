@@ -13,13 +13,13 @@ import {
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE as jobType,
 } from '../../../common/constants';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { CreateJobFn, RunTaskFn } from '../../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
+import { ExportTypeDefinitionPng, JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 
-export const getExportType = (): ExportTypeDefinition<
+export const getExportType = (): ExportTypeDefinitionPng<
   CreateJobFn<JobParamsPNGDeprecated>,
   RunTaskFn<TaskPayloadPNG>
 > => ({

@@ -13,13 +13,14 @@ import {
   LICENSE_TYPE_TRIAL,
   PDF_JOB_TYPE_V2 as jobType,
 } from '../../../common/constants';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { CreateJobFn, RunTaskFn } from '../../types';
+import { ExportTypeDefinitionPdf } from '../printable_pdf/types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
 import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
 
-export const getExportType = (): ExportTypeDefinition<
+export const getExportType = (): ExportTypeDefinitionPdf<
   CreateJobFn<JobParamsPDFV2>,
   RunTaskFn<TaskPayloadPDFV2>
 > => ({

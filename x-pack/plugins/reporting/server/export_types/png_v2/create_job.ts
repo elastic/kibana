@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CreateJobFn, CreateJobFnFactory } from '../../types';
-import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
+import { CreateJobFn } from '../../types';
+import { CreateJobFnFactory, JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPNGV2, TaskPayloadPNGV2>> =
   function createJobFactoryFn() {

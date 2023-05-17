@@ -10,10 +10,11 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
-import { RunTaskFn, RunTaskFnFactory } from '../../../types';
+import { RunTaskFn } from '../../../types';
 import { decryptJobHeaders, getCustomLogo, getFullUrls } from '../../common';
+import { LogoCore } from '../../common/types';
 import { generatePdfObservable } from '../lib/generate_pdf';
-import { TaskPayloadPDF } from '../types';
+import { RunTaskFnFactory, TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
   function executeJobFactoryFn(reporting, parentLogger) {
@@ -25,9 +26,11 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
       const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
 
+      const reportingLogo = reporting as unknown as LogoCore;
+
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
+        mergeMap((headers) => getCustomLogo(reportingLogo, headers, job.spaceId, jobLogger)),
         mergeMap(({ headers, logo }) => {
           const urls = getFullUrls(reporting, job);
 

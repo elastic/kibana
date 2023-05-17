@@ -10,8 +10,10 @@ import { Stream } from 'stream';
 import { ReportingCore } from '../..';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
+import { ExportTypeDefinitionCsv } from '../../export_types/csv_v2/types';
+import { ExportTypeDefinitionPng } from '../../export_types/png/types';
+import { ExportTypeDefinitionPdf } from '../../export_types/printable_pdf/types';
 import { getContentStream, statuses } from '../../lib';
-import { ExportTypeDefinition } from '../../types';
 import { jobsQueryFactory } from './jobs_query';
 
 export interface ErrorFromPayload {
@@ -32,6 +34,11 @@ export type PayloadCompleted = Payload & { filename: string };
 type TaskRunResult = Required<ReportApiJSON>['output'];
 
 const DEFAULT_TITLE = 'report';
+
+type ExportTypeDefinition =
+  | ExportTypeDefinitionCsv
+  | ExportTypeDefinitionPng
+  | ExportTypeDefinitionPdf;
 
 const getTitle = (exportType: ExportTypeDefinition, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;

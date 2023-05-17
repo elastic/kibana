@@ -15,7 +15,7 @@ import {
 import { createConfig, ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
 import { PngCore, TaskPayloadPNG } from '../png/types';
-import { TaskPayloadPDF } from '../printable_pdf/types';
+import { PdfCore, TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
 
@@ -63,7 +63,10 @@ function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
   return (job as TaskPayloadPDF).objects !== undefined;
 }
 
-export function getFullUrls(reporting: UrlCore | PngCore, job: TaskPayloadPDF | TaskPayloadPNG) {
+export function getFullUrls(
+  reporting: UrlCore | PngCore | PdfCore,
+  job: TaskPayloadPDF | TaskPayloadPNG
+) {
   const serverInfo = reporting.getServerInfo();
   const {
     kibanaServer: { protocol, hostname, port },

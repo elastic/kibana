@@ -14,7 +14,7 @@ import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { ExportTypeDefinition } from '../../types';
+import { ExportTypeDefinitionCsv } from '../csv_v2/types';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
 
@@ -24,7 +24,7 @@ import { metadata } from './metadata';
  */
 export { runTaskFnFactory } from './execute_job';
 
-export const getExportType = (): ExportTypeDefinition<null, ImmediateExecuteFn> => ({
+export const getExportType = (): ExportTypeDefinitionCsv<null, ImmediateExecuteFn> => ({
   ...metadata,
   jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   jobContentExtension: 'csv',

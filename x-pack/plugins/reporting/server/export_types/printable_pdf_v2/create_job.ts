@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CreateJobFn, CreateJobFnFactory } from '../../types';
+import { CreateJobFn } from '../../types';
+import { CreateJobFnFactory } from '../printable_pdf/types';
 import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPDFV2, TaskPayloadPDFV2>> =

@@ -17,6 +17,7 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import * as Rx from 'rxjs';
 
 export interface LogoInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -30,11 +31,32 @@ export interface LogoInternalStart {
 }
 
 export class LogoCore {
-  spaces!: LogoInternalSetup['spaces'];
-  basePath!: LogoInternalSetup['basePath'];
-  savedObjects!: LogoInternalStart['savedObjects'];
-  uiSettings!: LogoInternalStart['uiSettings'];
-  logger!: Logger;
+  private pluginSetupDeps?: LogoInternalSetup;
+  private pluginStartDeps?: LogoInternalStart;
+  private readonly pluginStart$ = new Rx.ReplaySubject<LogoInternalStart>(); // observe async background startDeps
+
+  constructor(private logger: Logger) {}
+
+  /*
+   * Gives synchronous access to the setupDeps
+   */
+  public getPluginSetupDeps() {
+    if (!this.pluginSetupDeps) {
+      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
+    }
+    return this.pluginSetupDeps;
+  }
+
+  /*
+   * Gives async access to the startDeps
+   */
+  public async getPluginStartDeps() {
+    if (this.pluginStartDeps) {
+      return this.pluginStartDeps;
+    }
+
+    return await Rx.firstValueFrom(this.pluginStart$);
+  }
 
   public getFakeRequest(
     headers: Headers,
@@ -47,11 +69,11 @@ export class LogoCore {
     };
     const fakeRequest = CoreKibanaRequest.from(rawRequest);
 
-    const spacesService = this.spaces?.spacesService;
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {
       if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
         logger.info(`Generating request for space: ${spaceId}`);
-        this.basePath.set(fakeRequest, `/s/${spaceId}`);
+        this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
       }
     }
 
@@ -59,8 +81,8 @@ export class LogoCore {
   }
 
   public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     const spaceId = this.getSpaceId(request, logger);
-    const { spacesService } = this.spaces;
     if (spacesService && spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);
     }
@@ -69,17 +91,18 @@ export class LogoCore {
   }
 
   private async getSavedObjectsClient(request: KibanaRequest) {
-    return this.savedObjects.getScopedClient(request) as SavedObjectsClientContract;
+    const { savedObjects } = await this.getPluginStartDeps();
+    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
   public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const uiSettingsService = await this.uiSettings;
+    const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;
   }
 
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const { spacesService } = this.spaces;
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {
       const spaceId = spacesService?.getSpaceId(request);
 

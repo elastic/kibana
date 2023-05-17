@@ -10,10 +10,12 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { TaskRunResult } from '@kbn/reporting-common';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import { RunTaskFn, RunTaskFnFactory } from '../../types';
+import { RunTaskFn } from '../../types';
 import { decryptJobHeaders, getCustomLogo } from '../common';
 import { generatePdfObservable } from './lib/generate_pdf';
 import { TaskPayloadPDFV2 } from './types';
+import { RunTaskFnFactory } from '../printable_pdf/types';
+import { LogoCore } from '../common/types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
   function executeJobFactoryFn(reporting, parentLogger) {
@@ -25,9 +27,12 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
       const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
 
+      // LogoCore has different getSetupDeps()
+      const reportingLogo = reporting as unknown as LogoCore;
+
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
+        mergeMap((headers) => getCustomLogo(reportingLogo, headers, job.spaceId, jobLogger)),
         mergeMap(({ logo, headers }) => {
           const { browserTimezone, layout, title, locatorParams } = job;
           apmGetAssets?.end();
