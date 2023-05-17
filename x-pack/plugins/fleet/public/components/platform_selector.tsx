@@ -19,10 +19,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import {
+  FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+} from '../../common/constants/epm';
 import { type PLATFORM_TYPE } from '../hooks';
 import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
+import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';
 
 interface Props {
   linuxCommand: string;
@@ -32,7 +37,7 @@ interface Props {
   linuxRpmCommand: string;
   k8sCommand: string;
   hasK8sIntegration: boolean;
-  typeOfCSPIntegration?: string;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   hasK8sIntegrationMultiPage: boolean;
   isManaged?: boolean;
   hasFleetServer?: boolean;
@@ -54,7 +59,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxRpmCommand,
   k8sCommand,
   hasK8sIntegration,
-  typeOfCSPIntegration,
+  cloudSecurityIntegration,
   hasK8sIntegrationMultiPage,
   isManaged,
   enrollToken,
@@ -63,10 +68,15 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   onCopy,
 }) => {
   const getInitialPlatform = useCallback(() => {
-    if (hasK8sIntegration || typeOfCSPIntegration === 'IS_CSP_KSPM') return 'kubernetes';
+    if (
+      hasK8sIntegration ||
+      cloudSecurityIntegration?.integrationType ===
+        FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE
+    )
+      return 'kubernetes';
 
     return 'linux';
-  }, [hasK8sIntegration, typeOfCSPIntegration]);
+  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
@@ -164,18 +174,23 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           </>
         )}
         {platform === 'mac' &&
-          (typeOfCSPIntegration === 'IS_CSP_CSPM' || typeOfCSPIntegration === 'IS_CSP_KSPM') && (
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
             <>
               {macCallout}
               <EuiSpacer size="m" />
             </>
           )}
-        {platform === 'kubernetes' && typeOfCSPIntegration === 'IS_CSP_CSPM' && (
-          <>
-            {k8sCSPMCallout}
-            <EuiSpacer size="m" />
-          </>
-        )}
+        {platform === 'kubernetes' &&
+          cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE && (
+            <>
+              {k8sCSPMCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
         {platform === 'kubernetes' && !hasK8sIntegration && (
           <>
             {k8sCallout}

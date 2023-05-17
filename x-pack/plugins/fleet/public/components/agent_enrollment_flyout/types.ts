@@ -15,13 +15,13 @@ export type K8sMode =
   | 'IS_NOT_KUBERNETES'
   | 'IS_KUBERNETES_MULTIPAGE';
 
-export type CSPMode = 'IS_LOADING' | 'IS_NOT_CSP' | 'IS_CSP_KSPM' | 'IS_CSP_CNVM' | 'IS_CSP_CSPM';
+export type CloudSecurityIntegrationType = 'kspm' | 'vuln_mgmt' | 'cspm' | undefined;
 
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
 
-export interface CSPObject {
-  status: CSPMode;
+export interface CloudSecurityIntegration {
+  integrationType: CloudSecurityIntegrationType | undefined;
   cloudformationUrl: string | undefined;
 }
 
@@ -35,7 +35,7 @@ export interface BaseProps {
 
   isK8s?: K8sMode;
 
-  isCSP?: CSPObject;
+  cloudSecurityIntegration?: CloudSecurityIntegration;
 
   /**
    * There is a step in the agent enrollment process that allows users to see the data from an integration represented in the UI

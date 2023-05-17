@@ -11,13 +11,13 @@ import type { CommandsByPlatform } from '../../applications/fleet/components/fle
 
 import { InstallationMessage } from '../agent_enrollment_flyout/installation_message';
 
-import type { K8sMode, CSPMode } from '../agent_enrollment_flyout/types';
+import type { K8sMode, CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
 import { PlatformSelector } from '../platform_selector';
 
 interface Props {
   installCommand: CommandsByPlatform;
   isK8s: K8sMode | undefined;
-  isCSP: CSPMode | undefined;
+  cloudSecurityIntegration: CloudSecurityIntegration | undefined;
   enrollToken?: string;
   fullCopyButton?: boolean;
   isManaged?: boolean;
@@ -27,7 +27,7 @@ interface Props {
 export const InstallSection: React.FunctionComponent<Props> = ({
   installCommand,
   isK8s,
-  isCSP,
+  cloudSecurityIntegration,
   enrollToken,
   fullCopyButton = false,
   isManaged = true,
@@ -46,7 +46,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
         linuxRpmCommand={installCommand.rpm}
         k8sCommand={installCommand.kubernetes}
         hasK8sIntegration={isK8s === 'IS_KUBERNETES' || isK8s === 'IS_KUBERNETES_MULTIPAGE'}
-        typeOfCSPIntegration={isCSP}
+        cloudSecurityIntegration={cloudSecurityIntegration}
         hasK8sIntegrationMultiPage={isK8s === 'IS_KUBERNETES_MULTIPAGE'}
         isManaged={isManaged}
         enrollToken={enrollToken}

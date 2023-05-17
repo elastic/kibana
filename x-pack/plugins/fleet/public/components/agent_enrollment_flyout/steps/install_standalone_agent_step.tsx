@@ -14,19 +14,19 @@ import type { CommandsByPlatform } from '../../../applications/fleet/components/
 
 import { InstallSection } from '../../enrollment_instructions/install_section';
 
-import type { CSPMode, K8sMode } from '../types';
+import type { CloudSecurityIntegration, K8sMode } from '../types';
 
 export const InstallStandaloneAgentStep = ({
   installCommand,
   isK8s,
-  isCSP,
+  cloudSecurityIntegration,
   isComplete,
   fullCopyButton,
   onCopy,
 }: {
   installCommand: CommandsByPlatform;
   isK8s?: K8sMode;
-  isCSP?: CSPMode;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   isComplete?: boolean;
   fullCopyButton?: boolean;
   onCopy?: () => void;
@@ -39,7 +39,7 @@ export const InstallStandaloneAgentStep = ({
       <InstallSection
         installCommand={installCommand}
         isK8s={isK8s}
-        isCSP={isCSP}
+        cloudSecurityIntegration={cloudSecurityIntegration}
         onCopy={onCopy}
         fullCopyButton={fullCopyButton}
         isManaged={false}

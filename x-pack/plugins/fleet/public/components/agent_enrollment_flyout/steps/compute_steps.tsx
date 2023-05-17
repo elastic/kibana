@@ -52,7 +52,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   selectedApiKeyId,
   setSelectedAPIKeyId,
   isK8s,
-  isCSP,
+  cloudSecurityIntegration,
 }) => {
   const core = useStartServices();
   const { notifications } = core;
@@ -157,7 +157,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       InstallStandaloneAgentStep({
         installCommand: standaloneInstallCommands,
         isK8s,
-        isCSP: isCSP?.status,
+        cloudSecurityIntegration,
       })
     );
 
@@ -165,7 +165,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   }, [
     kibanaVersion,
     isK8s,
-    isCSP,
+    cloudSecurityIntegration,
     agentPolicy,
     selectedPolicy,
     agentPolicies,
@@ -198,7 +198,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   selectionType,
   onClickViewAgents,
   isK8s,
-  isCSP,
+  cloudSecurityIntegration,
   installedPackagePolicy,
   cloudFormationTemplateUrl,
 }) => {
@@ -263,7 +263,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           apiKeyData,
           selectedApiKeyId,
           isK8s,
-          isCSP: isCSP?.status,
+          cloudSecurityIntegration,
           enrollToken,
         })
       );
@@ -302,7 +302,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     refreshAgentPolicies,
     selectionType,
     isK8s,
-    isCSP,
+    cloudSecurityIntegration,
     installManagedCommands,
     apiKeyData,
     enrolledAgentIds,

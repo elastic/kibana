@@ -4,21 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../hooks';
-import {
-  FLEET_KUBERNETES_PACKAGE,
-  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
-  FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
-  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
-  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
-} from '../../../common';
+import { FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common';
 import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../services';
 
-import type { K8sMode, CSPObject } from './types';
+import type { K8sMode } from './types';
 
 // Packages that requires custom elastic-agent manifest
 const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
@@ -54,10 +48,6 @@ export function useAgentPolicyWithPackagePolicies(policyId?: string) {
 
 export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
   const [isK8s, setIsK8s] = useState<K8sMode>('IS_LOADING');
-  const [isCSP, setIsCSP] = useState<CSPObject>({
-    status: 'IS_LOADING',
-    cloudformationUrl: undefined,
-  });
 
   useEffect(() => {
     async function checkifK8s() {
@@ -73,34 +63,24 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
       );
     }
 
-    async function checkifCSP() {
-      if (!agentPolicy) {
-        setIsCSP({ status: 'IS_LOADING', cloudformationUrl: undefined });
-        return;
-      }
-
-      const cspPackageObj = agentPolicy?.package_policies?.map((pkgPolicy) =>
-        getCSPPackageType(pkgPolicy)
-      );
-
-      const cloudFormationTemplateUrl = getCloudFormationTemplateUrlFromPackagePolicy(agentPolicy);
-
-      if (cspPackageObj?.includes('IS_CSP_KSPM')) {
-        setIsCSP({ status: 'IS_CSP_KSPM', cloudformationUrl: cloudFormationTemplateUrl });
-      } else if (cspPackageObj?.includes('IS_CSP_CSPM')) {
-        setIsCSP({ status: 'IS_CSP_CSPM', cloudformationUrl: cloudFormationTemplateUrl });
-      } else if (cspPackageObj?.includes('IS_CSP_CNVM')) {
-        setIsCSP({ status: 'IS_CSP_CNVM', cloudformationUrl: cloudFormationTemplateUrl });
-      } else {
-        setIsCSP({ status: 'IS_NOT_CSP', cloudformationUrl: cloudFormationTemplateUrl });
-      }
-    }
-
     checkifK8s();
-    checkifCSP();
   }, [agentPolicy]);
 
-  return { isK8s, isCSP };
+  const cloudSecurityIntegration = useMemo(() => {
+    if (!agentPolicy) {
+      return undefined;
+    }
+
+    const integrationType = getCloudSecurityIntegrationTypeFromPackagePolicy(agentPolicy);
+    const cloudformationUrl = getCloudFormationTemplateUrlFromPackagePolicy(agentPolicy);
+
+    return {
+      integrationType,
+      cloudformationUrl,
+    };
+  }, [agentPolicy]);
+
+  return { isK8s, cloudSecurityIntegration };
 }
 
 const isK8sPackage = (pkg: PackagePolicy) => {
@@ -109,34 +89,10 @@ const isK8sPackage = (pkg: PackagePolicy) => {
   return K8S_PACKAGES.has(name);
 };
 
-const getCSPPackageType = (pkg: PackagePolicy) => {
-  const name = pkg.package?.name as string;
-  if (name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE) {
-    if (
-      pkg.inputs.some(
-        (input) =>
-          input.enabled &&
-          input.policy_template === FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE
-      )
-    ) {
-      return 'IS_CSP_KSPM';
-    } else if (
-      pkg.inputs.some(
-        (input) =>
-          input.enabled &&
-          input.policy_template === FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE
-      )
-    ) {
-      return 'IS_CSP_CSPM';
-    } else if (
-      pkg.inputs.some(
-        (input) =>
-          input.enabled &&
-          input.policy_template === FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE
-      )
-    ) {
-      return 'IS_CSP_CNVM';
-    }
-  }
-  return 'IS_NOT_CSP';
+const getCloudSecurityIntegrationTypeFromPackagePolicy = (agentPolicy: AgentPolicy) => {
+  const packagePolicy = agentPolicy?.package_policies?.find(
+    (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
+  );
+  if (!packagePolicy) return undefined;
+  return packagePolicy?.inputs?.find((input) => input.enabled)?.policy_template;
 };

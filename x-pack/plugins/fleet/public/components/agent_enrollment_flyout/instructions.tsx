@@ -81,14 +81,14 @@ export const Instructions = (props: InstructionProps) => {
 
   useEffect(() => {
     // If we have a cloudFormationTemplateUrl, we want to hide the selection type
-    if (props.isCSP?.cloudformationUrl) {
+    if (props.cloudSecurityIntegration?.cloudformationUrl) {
       setSelectionType(undefined);
     } else if (!isIntegrationFlow && showAgentEnrollment) {
       setSelectionType('radio');
     } else {
       setSelectionType('tabs');
     }
-  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.isCSP]);
+  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
 
   if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
     return <Loading size="l" />;
@@ -117,7 +117,10 @@ export const Instructions = (props: InstructionProps) => {
           {isFleetServerPolicySelected ? (
             <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
-            <ManagedSteps {...props} cloudFormationTemplateUrl={props.isCSP?.cloudformationUrl} />
+            <ManagedSteps
+              {...props}
+              cloudFormationTemplateUrl={props.cloudSecurityIntegration?.cloudformationUrl}
+            />
           )}
         </>
       );
