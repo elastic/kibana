@@ -15,7 +15,6 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
-import deepMerge from 'deepmerge';
 import {
   FunctionalTestRunner,
   readConfigFile,
@@ -40,7 +39,6 @@ import type {
   CallExpression,
 } from '@babel/types';
 import { getLocalhostRealIp } from '../common/localhost_services';
-import { renderSummaryTable } from './print_run';
 
 export default async () => {
   const { argv } = yargs(process.argv.slice(2));
@@ -159,7 +157,8 @@ export default async () => {
   const hostRealIp = await getLocalhostRealIp();
 
   await pMap(
-    files.slice(0, 2),
+    files,
+    // files.slice(0, 2),
     // [files[0]],
     async (filePath, index) => {
       const esPort = getEsPort();
@@ -276,6 +275,15 @@ export default async () => {
 
       const customEnv = await functionalTestRunner.run();
 
+      // return cypress.open({
+      //   spec: filePath,
+      //   headed: true,
+      //   configFile: argv.configFile,
+      //   config: {
+      //     env: customEnv,
+      //     baseUrl: `http://localhost:${kibanaPort}`,
+      //   },
+      // });
       return cypress
         .run({
           spec: filePath,
