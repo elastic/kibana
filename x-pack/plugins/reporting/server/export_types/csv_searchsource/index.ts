@@ -14,12 +14,14 @@ import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { CreateJobFn, RunTaskFn } from '../../types';
-import { ExportTypeDefinitionCsv } from '../csv_v2/types';
+import { CreateJobFn } from '../../types';
+import { ExportTypeDefinitionCsv, RunTaskFn } from '../csv_v2/types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
+export type { JobParamsCSV } from './types';
+export type { RunTaskFn as RunTaskFnCsv } from '../csv_v2/types';
 
 export const getExportType = (): ExportTypeDefinitionCsv<
   CreateJobFn<JobParamsCSV>,

@@ -29,7 +29,7 @@ import { mapToReportingError } from '../../../common/errors/map_to_reporting_err
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
-import type { ReportOutput } from '../../../common/types';
+import type { BasePayloadV2, ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
 import type { BasePayload, RunTaskFn } from '../../types';
 import type { ReportDocument, ReportingStore } from '../store';
@@ -49,7 +49,7 @@ interface ReportingExecuteTaskInstance {
 }
 
 interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
-  jobExecutor: RunTaskFn<BasePayload>;
+  jobExecutor: RunTaskFn<BasePayload | BasePayloadV2>;
 }
 
 function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {

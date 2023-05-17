@@ -199,7 +199,7 @@ export interface ExportTypeDefinitionPdf<
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }

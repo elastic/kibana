@@ -6,11 +6,16 @@
  */
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import type { BaseParams, BasePayload } from '../base';
+import { LocatorParams } from '../url';
 
 interface BaseParamsCSV {
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
+  locator: LocatorPublic<SerializableRecord>;
+  locatorParams: LocatorParams[];
 }
 
 export type JobParamsCSV = BaseParamsCSV & BaseParams;

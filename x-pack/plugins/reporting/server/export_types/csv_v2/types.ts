@@ -20,11 +20,14 @@ import {
 } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+import { BasePayloadV2, ReportSource } from '../../../common/types';
 import { createConfig, ReportingConfigType } from '../../config';
-import { CreateJobFn, RunTaskFn } from '../../types';
+import { CreateJobFn } from '../../types';
 import { CreateJobFnFactory, RunTaskFnFactory } from './execute_job';
 
 export interface CsvCoreSetup {
@@ -174,3 +177,24 @@ export interface ExportTypeDefinitionCsv<
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
+
+export type BasePayloadCsv = BasePayloadV2;
+
+export interface ReportTaskParamsCsv<JobPayloadType = BasePayloadCsv> {
+  id: string;
+  index: string;
+  payload: JobPayloadType;
+  created_at: ReportSource['created_at'];
+  created_by: ReportSource['created_by'];
+  jobtype: ReportSource['jobtype'];
+  attempts: ReportSource['attempts'];
+  meta: ReportSource['meta'];
+}
+
+// default fn type for RunTaskFnFactory
+export type RunTaskFn<TaskPayloadType = BasePayloadCsv> = (
+  jobId: string,
+  payload: ReportTaskParamsCsv<TaskPayloadType>['payload'],
+  cancellationToken: CancellationToken,
+  stream: Writable
+) => Promise<TaskRunResult>;

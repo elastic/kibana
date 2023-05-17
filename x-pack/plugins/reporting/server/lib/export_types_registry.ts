@@ -25,11 +25,16 @@ export type ExportTypeDefinition =
 type GetCallbackFn = (item: ExportTypeDefinition) => boolean;
 
 export class ExportTypesRegistry {
-  private _map: Map<string, ExportTypeDefinition> = new Map();
+  private _map: Map<
+    string,
+    ExportTypeDefinitionPdf | ExportTypeDefinitionCsv | ExportTypeDefinitionPng
+  > = new Map();
 
   constructor() {}
 
-  register(item: ExportTypeDefinition): void {
+  register(
+    item: ExportTypeDefinitionPdf & ExportTypeDefinitionCsv & ExportTypeDefinitionPng
+  ): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
     }
@@ -90,11 +95,17 @@ export class ExportTypesRegistry {
  */
 export function getExportTypesRegistry(): ExportTypesRegistry {
   const registry = new ExportTypesRegistry();
+
+  // issues with jobparams for gettypes
+  // JobParamsCsv
   registry.register(getTypeCsv());
   registry.register(getTypeCsvFromSavedObject());
+  // does not need to move out of reporting plugin
   registry.register(getTypeCsvFromSavedObjectImmediate());
+  // does not need to move out of reporting plugin
   registry.register(getTypePng());
   registry.register(getTypePngV2());
+  // does not need to move out of the reporting plugin
   registry.register(getTypePrintablePdf());
   registry.register(getTypePrintablePdfV2());
   return registry;
