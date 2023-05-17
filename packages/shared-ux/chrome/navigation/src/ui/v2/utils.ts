@@ -29,22 +29,26 @@ export const getDeepLinkFromNavigationNode = (
   return deepLinks.find((dl) => dl.id === link);
 };
 
-export const getTitleForNavigationNode = ({
-  title: _title = '',
-  id,
-  deepLink,
-}: {
-  title?: string;
-  id: string;
-  deepLink?: ChromeNavLink;
-}): { title: string } => {
+export const getTitleForNavigationNode = (
+  {
+    title: _title = '',
+    id,
+    link,
+  }: {
+    title?: string;
+    id: string;
+    link?: string;
+  },
+  { deepLink }: { deepLink?: ChromeNavLink }
+): { title: string } => {
   let title = _title;
+
   if (title.trim().length === 0) {
-    if (!deepLink) {
+    if (!link) {
       throw new Error(`Deeplink id required if no "title" is provided (node id: ${id}))`);
     }
 
-    title = deepLink.title;
+    title = deepLink?.title ?? '';
   }
   return { title };
 };

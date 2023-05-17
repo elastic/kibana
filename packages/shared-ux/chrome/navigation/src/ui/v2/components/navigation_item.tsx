@@ -51,6 +51,14 @@ export const NavigationItem = ({ children, id: _id, title: _title, link, onRemov
     return typeof children === 'function' ? children(deepLink) : wrapTextWithLink(children);
   }, [children, deepLink, title, wrapTextWithLink]);
 
+  const doRenderNode = useCallback(() => {
+    if (link && !deepLink) {
+      // If a link is provided, but no deepLink is found, don't render anything
+      return false;
+    }
+    return true;
+  }, [link, deepLink]);
+
   const renderTempUIToTestRemoveBehavior = () => (
     <>
       {' '}
@@ -66,13 +74,7 @@ export const NavigationItem = ({ children, id: _id, title: _title, link, onRemov
     return unRegister;
   }, [register, id, title, link]);
 
-  if (deepLinks.length === 0) {
-    // Don't render anyting until we at least have 1 deeplink in the Observable
-    return null;
-  }
-
-  if (link && !deepLink) {
-    // If a link is provided, but no deepLink is found, don't render anything
+  if (!doRenderNode()) {
     return null;
   }
 
