@@ -398,7 +398,12 @@ describe('CaseConfigureService', () => {
     describe('post', () => {
       it('includes the creation attributes excluding the connector.id field', async () => {
         unsecuredSavedObjectsClient.create.mockReturnValue(
-          Promise.resolve({ attributes: {} } as SavedObject<ConfigurePersistedAttributes>)
+          Promise.resolve({
+            attributes: createConfigPostParams(createJiraConnector()),
+            id: '1',
+            type: CASE_CONFIGURE_SAVED_OBJECT,
+            references: [],
+          })
         );
 
         await service.post({
@@ -450,7 +455,12 @@ describe('CaseConfigureService', () => {
 
       it('moves the connector.id to the references', async () => {
         unsecuredSavedObjectsClient.create.mockReturnValue(
-          Promise.resolve({ attributes: {} } as SavedObject<ConfigurePersistedAttributes>)
+          Promise.resolve({
+            attributes: createConfigPostParams(createJiraConnector()),
+            id: '1',
+            type: CASE_CONFIGURE_SAVED_OBJECT,
+            references: [],
+          })
         );
 
         await service.post({
@@ -476,7 +486,12 @@ describe('CaseConfigureService', () => {
 
       it('sets connector.fields to an empty array when it is not included', async () => {
         unsecuredSavedObjectsClient.create.mockReturnValue(
-          Promise.resolve({ attributes: {} } as SavedObject<ConfigurePersistedAttributes>)
+          Promise.resolve({
+            attributes: createConfigPostParams(createJiraConnector()),
+            id: '1',
+            type: CASE_CONFIGURE_SAVED_OBJECT,
+            references: [],
+          })
         );
 
         await service.post({
@@ -498,7 +513,12 @@ describe('CaseConfigureService', () => {
 
       it('does not create a reference for a none connector', async () => {
         unsecuredSavedObjectsClient.create.mockReturnValue(
-          Promise.resolve({ attributes: {} } as SavedObject<ConfigurePersistedAttributes>)
+          Promise.resolve({
+            attributes: createConfigPostParams(createJiraConnector()),
+            id: '1',
+            type: CASE_CONFIGURE_SAVED_OBJECT,
+            references: [],
+          })
         );
 
         await service.post({
@@ -695,10 +715,12 @@ describe('CaseConfigureService', () => {
         `);
       });
 
-      it('defaults to the none connector when attributes is an empty object', async () => {
+      it('defaults to the none connector when the persisted connector is undefined', async () => {
         unsecuredSavedObjectsClient.get.mockReturnValue(
           Promise.resolve({
-            attributes: {},
+            attributes: createConfigPostParams(undefined as unknown as CaseConnector),
+            id: '1',
+            type: CASE_CONFIGURE_SAVED_OBJECT,
             references: [
               {
                 id: '1',
