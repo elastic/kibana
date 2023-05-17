@@ -20,12 +20,7 @@ import {
   convertModelVersionBackwardConversionSchema,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { TransformSavedObjectDocumentError } from '../core';
-import {
-  type Transform,
-  type TransformFn,
-  TransformType,
-  type TypeVersionSchema,
-} from './types';
+import { type Transform, type TransformFn, TransformType, type TypeVersionSchema } from './types';
 
 export const getModelVersionSchemas = ({
   typeDefinition,
