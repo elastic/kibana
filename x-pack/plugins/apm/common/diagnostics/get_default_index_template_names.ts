@@ -7,20 +7,21 @@
 
 export function getDefaultIndexTemplateNames() {
   const indexTemplateNames = [
-    'traces-apm',
-    'traces-apm.sampled',
+    'logs-apm.app',
+    'logs-apm.error',
     'metrics-apm.app',
     'metrics-apm.internal',
-    'logs-apm.error',
-    'logs-apm.app',
+    'traces-apm.rum',
+    'traces-apm.sampled',
+    'traces-apm',
   ];
 
   const rollupIndexTemplateNames = ['1m', '10m', '60m'].flatMap((interval) => {
     return [
-      'metrics-apm.transaction',
-      'metrics-apm.service_transaction',
       'metrics-apm.service_destination',
       'metrics-apm.service_summary',
+      'metrics-apm.service_transaction',
+      'metrics-apm.transaction',
     ].map((ds) => `${ds}.${interval}`);
   });
 
