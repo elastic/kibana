@@ -20,7 +20,7 @@ describe('Assignee', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CaseAssigneesRt.decode([{...defaultRequest[0], foo: 'bar' }]);
+      const query = CaseAssigneesRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
       expect(query).toMatchObject({
         _tag: 'Right',
