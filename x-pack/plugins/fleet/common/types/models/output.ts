@@ -27,6 +27,7 @@ export interface NewOutput {
   } | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
+  allow_edit?: string[];
 }
 
 export type OutputSOAttributes = NewOutput & {

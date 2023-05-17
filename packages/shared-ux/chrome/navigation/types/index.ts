@@ -17,7 +17,8 @@ import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 export interface NavigationServices {
   activeNavItemId?: string;
   basePath: BasePathService;
-  loadingCount: number;
+  loadingCount$: Observable<number>;
+  recentlyAccessed$: Observable<RecentItem[]>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
 }
@@ -111,6 +112,10 @@ export interface ChromeNavigation {
    * above.
    */
   platformConfig?: Partial<PlatformConfigSet>;
+  /**
+   * Filter function to allow consumer to remove items from the recently accessed section
+   */
+  recentlyAccessedFilter?: (items: RecentItem[]) => RecentItem[];
 }
 
 /**
@@ -119,7 +124,7 @@ export interface ChromeNavigation {
  * @internal
  */
 export interface ChromeNavigationViewModel
-  extends Pick<ChromeNavigation, 'linkToCloud' | 'platformConfig'> {
+  extends Pick<ChromeNavigation, 'linkToCloud' | 'platformConfig' | 'recentlyAccessedFilter'> {
   /**
    * Target for the logo icon
    */

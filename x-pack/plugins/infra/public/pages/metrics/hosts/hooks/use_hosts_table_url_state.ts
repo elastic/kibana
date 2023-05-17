@@ -37,7 +37,7 @@ const reducer = (prevState: TableProperties, params: Payload) => {
   };
 };
 
-export const useHostsTableProperties = (): [TableProperties, TablePropertiesUpdater] => {
+export const useHostsTableUrlState = (): [TableProperties, TablePropertiesUpdater] => {
   const [localStoragePageSize, setLocalStoragePageSize] = useLocalStorage<number>(
     LOCAL_STORAGE_PAGE_SIZE_KEY,
     DEFAULT_PAGE_SIZE

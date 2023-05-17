@@ -10,9 +10,10 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useInspector, useKibana } from '../../../hooks';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useInspector } from '../../../hooks/use_inspector';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { useSourcererDataView } from '.';
+import { useSourcererDataView } from './use_sourcerer_data_view';
 import {
   ChartSeries,
   createFetchAggregatedIndicators,

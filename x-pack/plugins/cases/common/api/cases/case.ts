@@ -164,6 +164,34 @@ export const CasePostRequestRt = rt.intersection([
   }),
 ]);
 
+const CasesFindRequestSearchFieldsRt = rt.keyof({
+  'closed_by.username': null,
+  'closed_by.full_name': null,
+  'closed_by.email': null,
+  'closed_by.profile_uid': null,
+  'created_by.username': null,
+  'created_by.full_name': null,
+  'created_by.email': null,
+  'created_by.profile_uid': null,
+  description: null,
+  'connector.name': null,
+  'connector.type': null,
+  'external_service.pushed_by.username': null,
+  'external_service.pushed_by.full_name': null,
+  'external_service.pushed_by.email': null,
+  'external_service.pushed_by.profile_uid': null,
+  'external_service.connector_name': null,
+  'external_service.external_id': null,
+  'external_service.external_title': null,
+  'external_service.external_url': null,
+  title: null,
+  'title.keyword': null,
+  'updated_by.username': null,
+  'updated_by.full_name': null,
+  'updated_by.email': null,
+  'updated_by.profile_uid': null,
+});
+
 export const CasesFindRequestRt = rt.partial({
   /**
    * Tags to filter by
@@ -190,10 +218,6 @@ export const CasesFindRequestRt = rt.partial({
    */
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
   /**
-   * The fields in the entity to return in the response
-   */
-  fields: rt.union([rt.array(rt.string), rt.string]),
-  /**
    * A KQL date. If used all cases created after (gte) the from date will be returned
    */
   from: rt.string,
@@ -212,7 +236,10 @@ export const CasesFindRequestRt = rt.partial({
   /**
    * The fields to perform the simple_query_string parsed query against
    */
-  searchFields: rt.union([rt.array(rt.string), rt.string]),
+  searchFields: rt.union([
+    rt.array(CasesFindRequestSearchFieldsRt),
+    CasesFindRequestSearchFieldsRt,
+  ]),
   /**
    * The root fields to perform the simple_query_string parsed query against
    */
@@ -329,14 +356,9 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
-export const CasesBulkGetRequestRt = rt.intersection([
-  rt.type({
-    ids: rt.array(rt.string),
-  }),
-  rt.partial({
-    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
-  }),
-]);
+export const CasesBulkGetRequestRt = rt.type({
+  ids: rt.array(rt.string),
+});
 
 export const CasesBulkGetResponseRt = rt.type({
   cases: CasesRt,
@@ -375,15 +397,3 @@ export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
 
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
-export type CasesBulkGetRequestCertainFields<Field extends keyof Case = keyof Case> = Omit<
-  CasesBulkGetRequest,
-  'fields'
-> & {
-  fields?: Field[];
-};
-export type CasesBulkGetResponseCertainFields<Field extends keyof Case = keyof Case> = Omit<
-  CasesBulkGetResponse,
-  'cases'
-> & {
-  cases: Array<Pick<Case, Field | 'id' | 'version' | 'owner'>>;
-};

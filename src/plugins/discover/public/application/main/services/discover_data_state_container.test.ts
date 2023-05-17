@@ -9,12 +9,10 @@ import { Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
-import { getDiscoverStateContainer } from './discover_state';
 import { FetchStatus } from '../../types';
 import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import { RecordRawType } from './discover_data_state_container';
-import { createBrowserHistory } from 'history';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 setUrlTracker(urlTrackerMock);
@@ -70,21 +68,19 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    dataState.reset();
+    dataState.reset(stateContainer.savedSearchState.getState());
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     });
-
     unsubscribe();
   });
 
   test('useSavedSearch returns plain record raw type', async () => {
-    const history = createBrowserHistory();
-    const stateContainer = getDiscoverStateContainer({
+    const stateContainer = getDiscoverStateMock({
       savedSearch: savedSearchMockWithSQL,
-      services: discoverServiceMock,
-      history,
     });
+    stateContainer.savedSearchState.load = jest.fn().mockResolvedValue(savedSearchMockWithSQL);
+    await stateContainer.actions.loadSavedSearch({ savedSearchId: savedSearchMockWithSQL.id });
 
     expect(stateContainer.dataState.data$.main$.getValue().recordRawType).toBe(RecordRawType.PLAIN);
   });

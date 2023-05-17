@@ -784,6 +784,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 0,
+        is_protected: false,
       },
       {
         id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
@@ -798,6 +799,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 100,
+        is_protected: false,
       },
     ],
     total: 2,
