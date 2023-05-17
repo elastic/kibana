@@ -8,6 +8,17 @@
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
+
+const EuiFlexGroupStyled = styled(EuiFlexGroup)`
+  .formRowLabel {
+    width: 25%;
+  }
+
+  .formRowValue {
+    width: 25%;
+  }
+`;
 
 export interface PolicyFormRowLayoutProps {
   label: ReactNode;
@@ -26,18 +37,26 @@ export const PolicyFormRowLayout = memo<PolicyFormRowLayoutProps>(
     }
 
     return (
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem>{label}</EuiFlexItem>
+      <EuiFlexGroupStyled responsive={false} className="policyFormRow">
+        <EuiFlexItem grow={false} className="formRowLabel">
+          {label}
+        </EuiFlexItem>
         {all ? (
           <EuiFlexItem>{all}</EuiFlexItem>
         ) : (
           <>
-            <EuiFlexItem>{windows}</EuiFlexItem>
-            <EuiFlexItem>{macos}</EuiFlexItem>
-            <EuiFlexItem>{linux}</EuiFlexItem>
+            <EuiFlexItem grow={false} className="formRowValue">
+              {windows}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="formRowValue">
+              {macos}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="formRowValue">
+              {linux}
+            </EuiFlexItem>
           </>
         )}
-      </EuiFlexGroup>
+      </EuiFlexGroupStyled>
     );
   }
 );

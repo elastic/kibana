@@ -13,7 +13,7 @@ import { PolicyFormRowLayout } from './policy_form_row_layout';
 export const PolicyFormHeader = memo(() => {
   return (
     <PolicyFormRowLayout
-      label={<></>}
+      label={<>&nbsp;</>}
       windows={<PlatformIdentifier type="windows" />}
       linux={<PlatformIdentifier type="linux" />}
       macos={<PlatformIdentifier type="macos" />}

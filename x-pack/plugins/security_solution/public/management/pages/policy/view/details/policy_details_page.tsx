@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiSkeletonText } from '@elastic/eui';
+import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { PolicyDetailsForm } from './components/policy_details_form';
 import { useWithEndpointPolicy } from '../../../../hooks/policy/use_with_endpoint_policy';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
@@ -34,6 +34,8 @@ export const PolicyDetailsPage = memo(() => {
       restrictWidth={true}
       hasBottomBorder={false}
     >
+      <EuiSpacer size="xl" />
+
       {!data && <EuiSkeletonText lines={5} />}
 
       {data && <PolicyDetailsForm policyDetails={data.item} />}

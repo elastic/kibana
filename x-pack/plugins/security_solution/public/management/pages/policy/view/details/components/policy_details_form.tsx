@@ -6,8 +6,16 @@
  */
 
 import React, { memo } from 'react';
+import styled from 'styled-components';
+import { PolicyFormMalware } from './policy_form_malware';
 import { PolicyFormHeader } from './policy_form_header';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
+
+const FormContainer = styled.div`
+  .policyFormRow + .policyFormRow {
+    margin-top: ${({ theme: { eui } }) => eui.euiSizeL};
+  }
+`;
 
 export interface PolicyDetailsFormProps {
   policyDetails: PolicyData;
@@ -15,9 +23,11 @@ export interface PolicyDetailsFormProps {
 
 export const PolicyDetailsForm = memo<PolicyDetailsFormProps>((props) => {
   return (
-    <div>
+    <FormContainer>
       <PolicyFormHeader />
-    </div>
+
+      <PolicyFormMalware />
+    </FormContainer>
   );
 });
 PolicyDetailsForm.displayName = 'PolicyDetailsForm';
