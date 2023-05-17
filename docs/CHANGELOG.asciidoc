@@ -166,7 +166,7 @@ To improve task execution resiliency, remove the deprecated settings from the `k
 [%collapsible]
 ====
 *Details* +
-All monitor schedules in Synthetics app apart from the supported schedules have been deprecated. The only allowed schedules are every 1, 3, 5, 10, 15, 20, 30, 60, 120, 240 minutes. For more information, refer to {kibana-pull}154010[#154010] and {kibana-pull}154952[#154952].
+Synthetics now only accepts the following scheduling options for your monitors: every 1, 3, 5, 10, 15, 20, 30, 60, 120, 240 minutes. Other choices that existed previously have been deprecated. For more information, refer to {kibana-pull}154010[#154010] and {kibana-pull}154952[#154952].
 
 *Impact* +
 Any monitor that had been created using a schedule outside of the allowed schedules have been moved to the nearest supported schedule.
