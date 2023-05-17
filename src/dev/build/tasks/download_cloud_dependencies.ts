@@ -61,8 +61,8 @@ export const DownloadCloudDependencies: Task = {
     const axiosConfigWithNoCacheHeaders = {
       headers: {
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     };
     try {
