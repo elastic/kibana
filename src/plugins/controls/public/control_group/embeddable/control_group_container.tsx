@@ -26,6 +26,7 @@ import {
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
+  FieldFilterPredicate,
 } from '../types';
 import {
   cachedChildEmbeddableOrder,
@@ -98,11 +99,14 @@ export class ControlGroupContainer extends Container<
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
 
+  public fieldFilterPredicate: FieldFilterPredicate | undefined;
+
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
     initialInput: ControlGroupInput,
     parent?: Container,
-    settings?: ControlGroupSettings
+    settings?: ControlGroupSettings,
+    fieldFilterPredicate?: FieldFilterPredicate
   ) {
     super(
       initialInput,
@@ -141,6 +145,8 @@ export class ControlGroupContainer extends Container<
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
+
+    this.fieldFilterPredicate = fieldFilterPredicate;
   }
 
   private setupSubscriptions = () => {
