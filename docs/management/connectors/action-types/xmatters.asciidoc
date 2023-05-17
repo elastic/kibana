@@ -1,4 +1,4 @@
-[[xmatters-action-type]]
+[id="xmatters-action-type",canonical-url="https://www.elastic.co/guide/en/kibana/current/xmatters-action-type.html"]
 === xMatters connector and action
 ++++
 <titleabbrev>xMatters</titleabbrev>

@@ -1,5 +1,5 @@
 [role="xpack"]
-[[i18n-settings-kb]]
+[id="i18n-settings-kb",canonical-url="https://www.elastic.co/guide/en/kibana/current/i18n-settings-kb.html"]
 === i18n settings in {kib}
 ++++
 <titleabbrev>i18n settings</titleabbrev>

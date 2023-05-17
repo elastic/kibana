@@ -27,8 +27,7 @@ Review important information about the {kib} 8.x releases.
 //* <<release-notes-8.0.0-alpha1>>
 
 --
-
-[[release-notes-8.2.3]]
+[id="release-notes-8.2.3",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.2.3
 
 Review the following information about the {kib} 8.2.3 release.
@@ -65,7 +64,7 @@ Fixes an issue where `node.options` was reset between upgrades in deb and rpm pa
 Platform::
 defaultIndex attribute was migrated for config saved object {kibana-pull}133339[#133339]
 
-[[release-notes-8.2.2]]
+[id="release-notes-8.2.2",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.2.2
 
 Review the following information about the {kib} 8.2.2 release.
@@ -89,7 +88,7 @@ To review the breaking changes in previous versions, refer to the following:
 Machine Learning::
 Fixes width of icon column in Messages table {kibana-pull}132444[#132444]
 
-[[release-notes-8.2.1]]
+[id="release-notes-8.2.1",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.2.1
 
 Review the following information about the {kib} 8.2.1 release.
@@ -146,7 +145,7 @@ Platform::
 * Fixes resetting image values {kibana-pull}131610[#131610]
 * Fixes a bug causing the newsfeed to not be properly displayed in locales other than english {kibana-pull}131315[#131315]
 
-[[release-notes-8.2.0]]
+[id="release-notes-8.2.0",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.2.0
 
 Review the following information about the {kib} 8.2.0 release.
