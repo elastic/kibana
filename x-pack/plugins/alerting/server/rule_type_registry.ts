@@ -270,7 +270,7 @@ export class RuleTypeRegistry {
     let alertStateSchema: ObjectType = schema.object({
       start: schema.maybe(schema.string()),
       duration: schema.maybe(schema.string()),
-      end: schema.maybe(schema.string())
+      end: schema.maybe(schema.string()),
     });
     if (ruleType.alertStateSchemaByVersion) {
       const versions = Object.keys(ruleType.alertStateSchemaByVersion).map((key) =>
