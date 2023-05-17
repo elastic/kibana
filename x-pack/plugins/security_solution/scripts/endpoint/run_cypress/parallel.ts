@@ -14,6 +14,8 @@ import globby from 'globby';
 import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
+import cypress from 'cypress';
+import deepMerge from 'deepmerge';
 import {
   FunctionalTestRunner,
   readConfigFile,
@@ -38,6 +40,7 @@ import type {
   CallExpression,
 } from '@babel/types';
 import { getLocalhostRealIp } from '../common/localhost_services';
+import { renderSummaryTable } from './print_run';
 
 export default async () => {
   const { argv } = yargs(process.argv.slice(2));
@@ -156,7 +159,7 @@ export default async () => {
   const hostRealIp = await getLocalhostRealIp();
 
   await pMap(
-    files,
+    files.slice(0, 2),
     // [files[0]],
     async (filePath, index) => {
       const esPort = getEsPort();
@@ -271,14 +274,23 @@ export default async () => {
 
       const functionalTestRunner = new FunctionalTestRunner(log, config, EsVersion.getDefault());
 
-      return functionalTestRunner
-        .run()
-        .catch(() => 1)
+      const customEnv = await functionalTestRunner.run();
+
+      return cypress
+        .run({
+          spec: filePath,
+          headed: true,
+          configFile: argv.configFile,
+          config: {
+            env: customEnv,
+            baseUrl: `http://localhost:${kibanaPort}`,
+          },
+        })
         .finally(() => {
           cleanupServerPorts({ esPort, kibanaPort });
         });
     },
-    { concurrency: 3 }
+    { concurrency: 1 }
   ).then((results) => {
     console.error('results', results);
     // renderSummaryTable(undefined, deepMerge.all(results));

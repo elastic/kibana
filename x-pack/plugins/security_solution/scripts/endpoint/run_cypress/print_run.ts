@@ -444,33 +444,33 @@ export function renderSummaryTable(
 //   if (obj.screenshots?.length) displayScreenshots(obj.screenshots);
 // }
 
-function displayScreenshots(screenshots: Screenshot[] = []) {
-  console.log('');
+// function displayScreenshots(screenshots: Screenshot[] = []) {
+//   console.log('');
 
-  terminal.header('Screenshots', { color: ['yellow'] });
+//   terminal.header('Screenshots', { color: ['yellow'] });
 
-  console.log('');
+//   console.log('');
 
-  const table = terminal.table({
-    colWidths: [3, 82, 15],
-    colAligns: ['left', 'left', 'right'],
-    type: 'noBorder',
-    style: {
-      'padding-right': 0,
-    },
-    chars: {
-      left: ' ',
-      right: '',
-    },
-  });
+//   const table = terminal.table({
+//     colWidths: [3, 82, 15],
+//     colAligns: ['left', 'left', 'right'],
+//     type: 'noBorder',
+//     style: {
+//       'padding-right': 0,
+//     },
+//     chars: {
+//       left: ' ',
+//       right: '',
+//     },
+//   });
 
-  screenshots.forEach((screenshot) => {
-    const dimensions = gray(`(${screenshot.width}x${screenshot.height})`);
+//   screenshots.forEach((screenshot) => {
+//     const dimensions = gray(`(${screenshot.width}x${screenshot.height})`);
 
-    table.push(['-', formatPath(`${screenshot.path}`, getWidth(table, 1)), gray(dimensions)]);
-  });
+//     table.push(['-', formatPath(`${screenshot.path}`, getWidth(table, 1)), gray(dimensions)]);
+//   });
 
-  console.log(table.toString());
+//   console.log(table.toString());
 
-  console.log('');
-}
+//   console.log('');
+// }
