@@ -799,11 +799,23 @@ export class Embeddable
       this.input.onLoad(false, adapters);
     }
 
-    const { type, error } = data as { type: string; error: ErrorLike };
     this.updateOutput({
       loading: false,
-      error: type === 'error' ? error : undefined,
     });
+
+    const { type, error } = data as { type: string; error: ErrorLike };
+    if (type === 'error') {
+      this.addUserMessages([
+        {
+          uniqueId: 'active-data-error',
+          severity: 'error',
+          shortMessage: error.message,
+          longMessage: error.message,
+          fixableInEditor: false,
+          displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+        },
+      ]);
+    }
 
     const newActiveData = adapters?.tables?.tables;
 
@@ -863,7 +875,6 @@ export class Embeddable
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
-      ...this.getOutput(),
       rendered: true,
     });
   };
@@ -909,15 +920,9 @@ export class Embeddable
       severity: 'error',
     });
 
+    // Loading is set to false in updateActiveData
     this.updateOutput({
       loading: true,
-      error: blockingErrors.length
-        ? new Error(
-            typeof blockingErrors[0].longMessage === 'string'
-              ? blockingErrors[0].longMessage
-              : blockingErrors[0].shortMessage
-          )
-        : undefined,
     });
 
     if (blockingErrors.length) {
@@ -958,7 +963,22 @@ export class Embeddable
               executionContext={this.getExecutionContext()}
               addUserMessages={(messages) => this.addUserMessages(messages)}
               onRuntimeError={(message) => {
-                this.updateOutput({ error: new Error(message) });
+                const messageToDisplay =
+                  message ??
+                  i18n.translate('xpack.lens.embeddable.unknownRuntimeError', {
+                    defaultMessage:
+                      'An unknown error occurred. Try refreshing the page or opening this visualization in the editor.',
+                  });
+                this.addUserMessages([
+                  {
+                    uniqueId: messageToDisplay,
+                    severity: 'error',
+                    shortMessage: messageToDisplay,
+                    longMessage: messageToDisplay,
+                    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+                    fixableInEditor: true,
+                  },
+                ]);
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
