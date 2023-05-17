@@ -24,7 +24,7 @@ import {
   StringOrNull,
 } from '../../../../..';
 import { SectionContainer } from '../section_container';
-import { getDataHandler } from '../../../../../services/data_handler';
+import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { HostLink } from './host_link';
