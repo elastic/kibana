@@ -44,10 +44,8 @@ export type DiscoverSharedStateContainer = ReduxLikeStateContainer<
   DiscoverSharedStateTransitions
 >;
 
-export const {
-  Provider: DiscoverSharedStateProvider,
-  useSelector: useDiscoverSharedStateSelector,
-} = createStateContainerReactHelpers<ReduxLikeStateContainer<DiscoverSharedState>>();
+export const { Provider: SharedStateProvider, useSelector: useSharedStateSelector } =
+  createStateContainerReactHelpers<ReduxLikeStateContainer<DiscoverSharedState>>();
 
 export function getSharedStateContainer() {
   return createStateContainer<DiscoverSharedState, DiscoverSharedStateTransitions, {}>(

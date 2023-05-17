@@ -12,7 +12,7 @@ import { DiscoverServices } from '../../../build_services';
 import { useSavedSearch } from '../services/discover_state_provider';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { useAppStateSelector } from '../services/discover_app_state_container';
-import { useDiscoverSharedStateSelector } from '../services/discover_shared_state_container';
+import { useSharedStateSelector } from '../services/discover_shared_state_container';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { DiscoverStateContainer } from '../services/discover_state';
@@ -26,7 +26,7 @@ export const useAdHocDataViews = ({
   services: DiscoverServices;
 }) => {
   const query = useAppStateSelector((state) => state.query);
-  const dataView = useDiscoverSharedStateSelector((state) => state.dataView);
+  const dataView = useSharedStateSelector((state) => state.dataView);
   const savedSearch = useSavedSearch();
   const isTextBasedMode = isTextBasedQuery(query);
   const { filterManager, toastNotifications } = services;

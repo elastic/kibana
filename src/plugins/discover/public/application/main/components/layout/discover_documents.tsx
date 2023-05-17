@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
-import { useDiscoverSharedStateSelector } from '../../services/discover_shared_state_container';
+import { useSharedStateSelector } from '../../services/discover_shared_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
@@ -106,7 +106,7 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
-  const expandedDoc = useDiscoverSharedStateSelector((state) => state.expandedDoc);
+  const expandedDoc = useSharedStateSelector((state) => state.expandedDoc);
 
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);

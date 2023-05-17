@@ -26,7 +26,7 @@ import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/pu
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useDiscoverSharedStateSelector } from '../../services/discover_shared_state_container';
+import { useSharedStateSelector } from '../../services/discover_shared_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -90,7 +90,7 @@ export function DiscoverLayout({
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
-  const dataView = useDiscoverSharedStateSelector((state) => state.dataView!);
+  const dataView = useSharedStateSelector((state) => state.dataView!);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
