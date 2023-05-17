@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -65,7 +65,7 @@ const getTabBreadCrumb = (tabId: string) => {
 const ContentTabs: string[] = Object.values(SearchApplicationContentTabs);
 
 export const SearchApplicationContent = () => {
-  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
+  const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
   const { addIndicesFlyoutOpen } = useValues(EngineIndicesLogic);
   const { closeAddIndicesFlyout, openAddIndicesFlyout } = useActions(EngineIndicesLogic);
   const { contentTabId = SearchApplicationContentTabs.INDICES } = useParams<{
@@ -85,6 +85,7 @@ export const SearchApplicationContent = () => {
           rightSideItems: [],
         }}
         engineName={engineName}
+        hasSchemaConflicts={hasSchemaConflicts}
       >
         <EngineError notFound />
       </EnterpriseSearchEnginesPageTemplate>
@@ -146,12 +147,18 @@ export const SearchApplicationContent = () => {
           },
           {
             isSelected: contentTabId === SearchApplicationContentTabs.SCHEMA,
-            label: SCHEMA_TAB_TITLE,
+            label: (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
+                {SCHEMA_TAB_TITLE}
+              </EuiFlexGroup>
+            ),
             onClick: onTabClick(SearchApplicationContentTabs.SCHEMA),
           },
         ],
       }}
       engineName={engineName}
+      hasSchemaConflicts={hasSchemaConflicts}
     >
       {contentTabId === SearchApplicationContentTabs.INDICES && <EngineIndices />}
       {contentTabId === SearchApplicationContentTabs.SCHEMA && <EngineSchema />}

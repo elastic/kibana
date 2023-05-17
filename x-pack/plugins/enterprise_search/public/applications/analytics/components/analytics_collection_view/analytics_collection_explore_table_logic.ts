@@ -237,7 +237,7 @@ const tablesParams: {
     requestParams: (
       dataView,
       { timeRange, sorting, pageIndex, pageSize, search },
-      aggregationFieldName = 'page.referrer'
+      aggregationFieldName = 'page.referrer.original'
     ) =>
       getBaseSearchTemplate(
         dataView,

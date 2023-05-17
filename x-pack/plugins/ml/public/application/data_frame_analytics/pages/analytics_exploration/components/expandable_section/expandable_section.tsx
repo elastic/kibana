@@ -14,7 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
@@ -98,7 +98,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
                   </EuiText>
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              {headerItems === HEADER_ITEMS_LOADING && <EuiLoadingContent lines={1} />}
+              {headerItems === HEADER_ITEMS_LOADING && <EuiSkeletonText lines={1} />}
               {isHeaderItems(headerItems)
                 ? headerItems.map(({ label, value, id }) => (
                     <EuiFlexItem
