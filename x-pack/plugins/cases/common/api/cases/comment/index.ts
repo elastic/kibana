@@ -273,20 +273,22 @@ export const CommentsFindResponseRt = rt.strict({
 
 export const CommentsRt = rt.array(CommentRt);
 
-export const FindCommentsQueryParamsRt = rt.exact(rt.partial({
-  /**
-   * The page of objects to return
-   */
-  page: rt.union([rt.number, NumberFromString]),
-  /**
-   * The number of objects to return for a page
-   */
-  perPage: rt.union([rt.number, NumberFromString]),
-  /**
-   * Order to sort the response
-   */
-  sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-}));
+export const FindCommentsQueryParamsRt = rt.exact(
+  rt.partial({
+    /**
+     * The page of objects to return
+     */
+    page: rt.union([rt.number, NumberFromString]),
+    /**
+     * The number of objects to return for a page
+     */
+    perPage: rt.union([rt.number, NumberFromString]),
+    /**
+     * Order to sort the response
+     */
+    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+  })
+);
 
 export const FindCommentsArgsRt = rt.intersection([
   rt.strict({
