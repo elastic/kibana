@@ -61,6 +61,7 @@ type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
   rule_id?: string;
   rule_name?: string;
   error?: string;
+  hosts?: Record<string, { name: string }>;
 };
 
 interface CreateActionMetadata {
@@ -143,6 +144,7 @@ export const actionCreateService = (
       agent: {
         id: payload.endpoint_ids,
       },
+      hosts: payload.hosts,
       EndpointActions: {
         action_id: actionID,
         expiration: moment().add(2, 'weeks').toISOString(),

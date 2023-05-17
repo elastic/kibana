@@ -182,7 +182,7 @@ export const ActionsLogExpandedTray = memo<{
 }>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const { startedAt, completedAt, command: _command, comment, parameters } = action;
+  const { hosts, agents, startedAt, completedAt, command: _command, comment, parameters } = action;
 
   const parametersList = useMemo(
     () =>
@@ -223,13 +223,17 @@ export const ActionsLogExpandedTray = memo<{
           title: OUTPUT_MESSAGES.expandSection.comment,
           description: comment ? comment : emptyValue,
         },
+        {
+          title: OUTPUT_MESSAGES.expandSection.hostname,
+          description: hosts?.[agents?.[0]]?.name || emptyValue,
+        },
       ].map(({ title, description }) => {
         return {
           title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
           description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
         };
       }),
-    [command, comment, completedAt, parametersList, startedAt]
+    [agents, command, comment, completedAt, hosts, parametersList, startedAt]
   );
 
   const outputList = useMemo(

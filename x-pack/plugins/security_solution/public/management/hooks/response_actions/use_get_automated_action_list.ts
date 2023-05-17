@@ -11,7 +11,7 @@ import { lastValueFrom, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { compact, map } from 'lodash';
-import type { LogsEndpointAction, ActionDetails } from '../../../../common/endpoint/types';
+import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
 import { Direction } from '../../../../common/search_strategy/security_solution/response_actions/types';
 import type {
   ActionResponsesRequestOptions,
@@ -68,7 +68,7 @@ export const useGetAutomatedActionList = (
 
 interface GetAutomatedActionResponseListOptions {
   skip?: boolean;
-  action: LogsEndpointAction;
+  action: LogsEndpointActionWithHosts;
   isLive?: boolean;
 }
 
@@ -157,10 +157,10 @@ export const useGetAutomatedActionResponseList = (
 };
 
 const combineResponse = (
-  action: LogsEndpointAction,
+  action: LogsEndpointActionWithHosts,
   responseData: GetAutomatedActionResponseListResponse
 ): ActionDetails => {
-  const { rule } = action;
+  const { rule, hosts } = action;
   const { parameters, alert_id: alertId, comment, command } = action.EndpointActions.data;
 
   return {
@@ -177,15 +177,7 @@ const combineResponse = (
     createdBy: action.rule?.name || 'unknown',
     comment,
     command,
-    hosts: (action.agent.id as string[]).reduce(
-      (acc: Record<string, { name: string }>, agentId: string) => {
-        acc[agentId] = {
-          name: '',
-        };
-        return acc;
-      },
-      {}
-    ),
+    hosts,
     startedAt: action['@timestamp'],
     completedAt: responseData?.completedAt,
     isCompleted: !!responseData?.isCompleted,
