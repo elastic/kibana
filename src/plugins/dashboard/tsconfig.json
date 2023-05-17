@@ -57,6 +57,7 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/core-saved-objects-server",
+    "@kbn/saved-objects-tagging-plugin",
   ],
   "exclude": [
     "target/**/*",
