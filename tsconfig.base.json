@@ -14,6 +14,8 @@
       "@kbn/actions-simulators-plugin/*": ["x-pack/test/alerting_api_integration/common/plugins/actions_simulators/*"],
       "@kbn/advanced-settings-plugin": ["src/plugins/advanced_settings"],
       "@kbn/advanced-settings-plugin/*": ["src/plugins/advanced_settings/*"],
+      "@kbn/aeroelastic": ["packages/kbn-aeroelastic"],
+      "@kbn/aeroelastic/*": ["packages/kbn-aeroelastic/*"],
       "@kbn/aiops-components": ["x-pack/packages/ml/aiops_components"],
       "@kbn/aiops-components/*": ["x-pack/packages/ml/aiops_components/*"],
       "@kbn/aiops-plugin": ["x-pack/plugins/aiops"],

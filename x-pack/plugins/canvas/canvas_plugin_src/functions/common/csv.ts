@@ -15,7 +15,7 @@ interface Arguments {
   newline: string;
 }
 
-export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Datatable> {
+export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Promise<Datatable>> {
   const { help, args: argHelp } = getFunctionHelp().csv;
   const errorMessages = getFunctionErrors().csv;
 
@@ -40,9 +40,9 @@ export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Data
         help: argHelp.newline,
       },
     },
-    fn(input, args) {
+    async fn(input, args) {
       const { data: csvString, delimiter, newline } = args;
-      const Papa = import('papaparse');
+      const Papa = await import('papaparse');
 
       const config: Papa.ParseConfig = {
         transform: (val: string) => {
