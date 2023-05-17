@@ -38,6 +38,7 @@ import type {
   ObjectProperty,
   CallExpression,
 } from '@babel/types';
+import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../common/localhost_services';
 
 export default async () => {
@@ -300,8 +301,7 @@ export default async () => {
     },
     { concurrency: 1 }
   ).then((results) => {
-    console.error('results', results);
-    // renderSummaryTable(undefined, deepMerge.all(results));
+    renderSummaryTable(results);
     process.exit(_.some(results, (result) => result > 0) ? 1 : 0);
   });
   // ).then(() => {

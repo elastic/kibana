@@ -76,10 +76,11 @@ function getWidth(table: Table, index: number) {
 //   ]).join(' ');
 // }
 
-function formatFooterSummary(results: any) {
-  const { totalFailed, runs } = results;
+function formatFooterSummary(results: CypressCommandLine.CypressRunResult) {
+  const { totalFailed, runs, totalDuration, totalTests, totalPassed, totalPending, totalSkipped } =
+    results;
 
-  const isCanceled = _.some(results.runs, { skippedSpec: true });
+  const isCanceled = _.some(runs, { skippedSpec: true });
 
   // pass or fail color
   const c = isCanceled ? 'magenta' : totalFailed ? 'red' : 'green';
@@ -105,12 +106,12 @@ function formatFooterSummary(results: any) {
   return [
     isCanceled ? '-' : formatSymbolSummary(totalFailed),
     color(phrase, c),
-    gray(duration.format(results.totalDuration)),
-    colorIf(results.totalTests, 'reset'),
-    colorIf(results.totalPassed, 'green'),
+    gray(duration.format(totalDuration)),
+    colorIf(totalTests, 'reset'),
+    colorIf(totalPassed, 'green'),
     colorIf(totalFailed, 'red'),
-    colorIf(results.totalPending, 'cyan'),
-    colorIf(results.totalSkipped, 'blue'),
+    colorIf(totalPending, 'cyan'),
+    colorIf(totalSkipped, 'blue'),
   ];
 }
 
@@ -320,18 +321,46 @@ function formatPath(name: string, n: number | undefined, pathColor = 'reset') {
 //   }
 // }
 
-export function renderSummaryTable(
-  runUrl: string | undefined,
-  results: CypressCommandLine.CypressRunResult
-) {
-  const { runs } = results;
+export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[]) {
+  const parsedResults = _.reduce(
+    results,
+    (acc, result) => {
+      acc.status = result.status;
+      acc.startedTestsAt =
+        acc.startedTestsAt && new Date(result.startedTestsAt) > new Date(acc.startedTestsAt)
+          ? acc.startedTestsAt
+          : result.startedTestsAt;
+      acc.endedTestsAt =
+        acc.endedTestAt && new Date(result.endedTestsAt) < new Date(acc.endedTestsAt)
+          ? acc.endedTestsAt
+          : result.endedTestsAt;
+      acc.totalDuration = (acc.totalDuration ?? 0) + result.totalDuration;
+      acc.totalSuites = (acc.totalSuites ?? 0) + result.totalSuites;
+      acc.totalTests = (acc.totalTests ?? 0) + result.totalTests;
+      acc.totalPassed = (acc.totalPassed ?? 0) + result.totalPassed;
+      acc.totalPending = (acc.totalPending ?? 0) + result.totalPending;
+      acc.totalFailed = (acc.totalFailed ?? 0) + result.totalFailed;
+      acc.totalSkipped = (acc.totalSkipped ?? 0) + result.totalSkipped;
+      acc.browserPath = result.browserPath;
+      acc.browserName = result.browserName;
+      acc.browserVersion = result.browserVersion;
+      acc.osName = result.osName;
+      acc.osVersion = result.osVersion;
+      acc.cypressVersion = result.cypressVersion;
+      acc.config = result.config;
+      acc.runs = [].concat(acc.runs ?? [], result.runs);
+      return acc;
+    },
+    {}
+  );
 
-  console.log('');
+  const logEmptyLine = () => console.log('');
 
+  const { runs } = parsedResults;
+
+  logEmptyLine();
   terminal.divider('=');
-
-  console.log('');
-
+  logEmptyLine('');
   terminal.header('Run Finished', {
     color: ['reset'],
   });
@@ -366,14 +395,12 @@ export function renderSummaryTable(
       colAligns,
       colWidths,
       type: 'noBorder',
-      head: formatFooterSummary(results),
+      head: formatFooterSummary(parsedResults),
     });
 
     _.each(runs, (run) => {
       const { spec, stats } = run;
-
-      const ms = duration.format(stats.wallClockDuration || 0);
-
+      const ms = duration.format(stats.duration);
       const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1));
 
       if (run.skippedSpec) {
@@ -392,10 +419,10 @@ export function renderSummaryTable(
       ]);
     });
 
-    console.log('');
-    console.log('');
+    logEmptyLine();
+    logEmptyLine();
     console.log(terminal.renderTables(table1, table2, table3));
-    console.log('');
+    logEmptyLine();
   }
 }
 
