@@ -6,18 +6,29 @@
  */
 
 import type { DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { LanguageOrUndefined } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export const getFieldsForWildcard = async ({
   index,
   dataViews,
+  language,
 }: {
-  index: string[];
+  index: string[] | undefined;
+  language: LanguageOrUndefined;
   dataViews: DataViewsContract;
 }): Promise<FieldSpec[]> => {
-  const fields = await dataViews.getFieldsForWildcard({
-    pattern: index.join(),
-    allowNoIndex: true,
-  });
+  if (!index || language !== 'kuery') {
+    return [];
+  }
 
-  return fields;
+  try {
+    const fields = await dataViews.getFieldsForWildcard({
+      pattern: index.join(),
+      allowNoIndex: true,
+    });
+
+    return fields;
+  } catch (e) {
+    return [];
+  }
 };
