@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { memo } from 'react';
 import { PlatformIcon } from '../../../../../components/endpoint_responder/components/platforms';
 import { PolicyFormRowLayout } from './policy_form_row_layout';
@@ -28,16 +28,18 @@ export interface PlatformIdentifierProps {
 
 const PlatformIdentifier = memo<PlatformIdentifierProps>(({ type }) => {
   return (
-    <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="center" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <PlatformIcon platform={type} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h3>{type}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l">
+      <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <PlatformIcon platform={type} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{type}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 });
 PlatformIdentifier.displayName = 'PlatformIdentifier';

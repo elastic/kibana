@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { PolicyFormSectionTitle } from './policy_form_section_title';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { PolicyFormRowLayout } from './policy_form_row_layout';
 import { Ransomware } from '../../policy_forms/protections/ransomware';
@@ -15,6 +16,11 @@ export interface PolicyFormRansomwareProps {
 }
 
 export const PolicyFormRansomware = memo<PolicyFormRansomwareProps>((props) => {
-  return <PolicyFormRowLayout label={'Ransomware'} all={<Ransomware />} />;
+  return (
+    <PolicyFormRowLayout
+      label={<PolicyFormSectionTitle title={'Ransomware'} />}
+      windows={<Ransomware />}
+    />
+  );
 });
 PolicyFormRansomware.displayName = 'PolicyFormRansomware';

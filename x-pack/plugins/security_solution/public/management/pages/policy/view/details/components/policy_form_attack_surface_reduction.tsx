@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { PolicyFormSectionTitle } from './policy_form_section_title';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { AttackSurfaceReductionForm } from '../../components/attack_surface_reduction_form';
 import { PolicyFormRowLayout } from './policy_form_row_layout';
@@ -18,7 +19,7 @@ export const PolicyFormAttackSurfaceReduction = memo<PolicyFormAttackSurfaceRedu
   (props) => {
     return (
       <PolicyFormRowLayout
-        label={'Attack surface reduction'}
+        label={<PolicyFormSectionTitle title={'Attack surface reduction'} />}
         windows={<AttackSurfaceReductionForm />}
       />
     );

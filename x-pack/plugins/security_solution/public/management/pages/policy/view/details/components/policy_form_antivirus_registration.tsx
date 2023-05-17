@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { PolicyFormSectionTitle } from './policy_form_section_title';
 import { AntivirusRegistrationForm } from '../../components/antivirus_registration_form';
 import { PolicyFormRowLayout } from './policy_form_row_layout';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
@@ -18,7 +19,7 @@ export const PolicyFormAntivirusRegistration = memo<PolicyFormAntivirusRegistrat
   (props) => {
     return (
       <PolicyFormRowLayout
-        label={'Register as antivirus'}
+        label={<PolicyFormSectionTitle title={'Register as antivirus'} />}
         windows={<AntivirusRegistrationForm />}
       />
     );

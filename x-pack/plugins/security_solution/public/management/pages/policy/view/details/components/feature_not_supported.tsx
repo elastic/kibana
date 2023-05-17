@@ -7,13 +7,17 @@
 
 import React, { memo } from 'react';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const FeatureNotSupported = memo(() => {
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none">
       <EuiEmptyPrompt
+        css={css`
+          opacity: 0.5;
+        `}
         iconType="iInCircle"
-        body={<p>{'Currently not available for this platform'}</p>}
+        body={<p>{'Not available for this platform'}</p>}
       />
     </EuiPanel>
   );

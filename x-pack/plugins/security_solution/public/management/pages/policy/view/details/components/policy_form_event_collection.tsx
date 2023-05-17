@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { PolicyFormSectionTitle } from './policy_form_section_title';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { LinuxEvents, MacEvents, WindowsEvents } from '../../policy_forms/events';
 import { PolicyFormRowLayout } from './policy_form_row_layout';
@@ -17,7 +18,7 @@ export interface PolicyFormEventCollectionProps {
 export const PolicyFormEventCollection = memo<PolicyFormEventCollectionProps>((props) => {
   return (
     <PolicyFormRowLayout
-      label={'Event Collection'}
+      label={<PolicyFormSectionTitle title={'Event Collection'} />}
       windows={<WindowsEvents />}
       macos={<MacEvents />}
       linux={<LinuxEvents />}

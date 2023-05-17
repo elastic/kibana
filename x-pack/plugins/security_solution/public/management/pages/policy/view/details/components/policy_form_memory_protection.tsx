@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { PolicyFormSectionTitle } from './policy_form_section_title';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { MemoryProtection } from '../../policy_forms/protections/memory';
 import { PolicyFormRowLayout } from './policy_form_row_layout';
@@ -15,6 +16,11 @@ export interface PolicyFormMemoryProtectionProps {
 }
 
 export const PolicyFormMemoryProtection = memo<PolicyFormMemoryProtectionProps>((props) => {
-  return <PolicyFormRowLayout label={'Memory threat'} all={<MemoryProtection />} />;
+  return (
+    <PolicyFormRowLayout
+      label={<PolicyFormSectionTitle title={'Memory threat'} />}
+      all={<MemoryProtection />}
+    />
+  );
 });
 PolicyFormMemoryProtection.displayName = 'PolicyFormMemoryProtection';

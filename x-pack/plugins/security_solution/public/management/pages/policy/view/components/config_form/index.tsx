@@ -68,10 +68,10 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
           alignItems="center"
           style={{ padding: `${paddingSize} ${paddingSize} 0 ${paddingSize}` }}
         >
-          <EuiFlexItem grow={1}>
-            <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
-            <EuiText size="s">{type}</EuiText>
-          </EuiFlexItem>
+          {/* <EuiFlexItem grow={1}>*/}
+          {/*  <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>*/}
+          {/*  <EuiText size="s">{type}</EuiText>*/}
+          {/* </EuiFlexItem>*/}
           <EuiFlexItem grow={2}>
             <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
