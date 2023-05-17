@@ -312,12 +312,11 @@ export class CasesService {
 
   public async getCases({
     caseIds,
-    fields,
   }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
       const cases = await this.unsecuredSavedObjectsClient.bulkGet<CasePersistedAttributes>(
-        caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId, fields }))
+        caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
 
       const res = cases.saved_objects.reduce((acc, theCase) => {

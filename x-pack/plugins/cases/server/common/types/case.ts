@@ -50,6 +50,7 @@ export interface CasePersistedAttributes {
 }
 
 export type CaseTransformedAttributes = CaseAttributes;
+
 export const CaseTransformedAttributesRt = CaseAttributesRt;
 
 export const getPartialCaseTransformedAttributesRt = (): Type<Partial<CaseAttributes>> => {

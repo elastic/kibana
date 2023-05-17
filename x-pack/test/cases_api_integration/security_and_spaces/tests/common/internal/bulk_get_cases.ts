@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import expect from '@kbn/expect';
 import { Case, CommentType } from '@kbn/cases-plugin/common';
 import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
@@ -298,18 +297,6 @@ export default ({ getService }: FtrProviderContext): void => {
 };
 
 const getBulkGetCase = (theCase: Case) => {
-  const fieldsToPick = [
-    'id',
-    'version',
-    'owner',
-    'title',
-    'description',
-    'totalComment',
-    'status',
-    'created_at',
-    'created_by',
-  ];
-
-  const { totalComment, ...rest } = pick(theCase, fieldsToPick) as Case;
+  const { totalComment, ...rest } = theCase;
   return { ...rest, totalComments: totalComment };
 };
