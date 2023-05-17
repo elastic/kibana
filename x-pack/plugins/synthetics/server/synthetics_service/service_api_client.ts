@@ -15,7 +15,7 @@ import { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/typ
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { MonitorFields, PublicLocations, ServiceLocationErrors } from '../../common/runtime_types';
-import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
+import { convertToDataStreamFormat, DataStreamConfig } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../common/config';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
@@ -29,6 +29,20 @@ export interface ServiceData {
   endpoint?: 'monitors' | 'runOnce' | 'sync';
   isEdit?: boolean;
   license: LicenseGetLicenseInformation;
+}
+
+export interface InspectResultData {
+  monitors: DataStreamConfig[];
+  output: {
+    hosts: string[];
+    api_key: string;
+  };
+  stack_version: string;
+  is_edit: boolean;
+  license_level: string;
+  license_issued_to: string;
+  deployment_id: string;
+  cloud_id: string;
 }
 
 export class ServiceAPIClient {
@@ -263,5 +277,3 @@ export class ServiceAPIClient {
     };
   }
 }
-// type of return type of getRequestData of ServiceAPIClient
-export type InspectResultData = ReturnType<ServiceAPIClient['getRequestData']>;
