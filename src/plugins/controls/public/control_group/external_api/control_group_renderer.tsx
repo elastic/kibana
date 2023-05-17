@@ -26,7 +26,6 @@ import {
   CONTROL_GROUP_TYPE,
   ControlGroupOutput,
   ControlGroupCreationOptions,
-  FieldFilterPredicate,
 } from '../types';
 import {
   ControlGroupAPI,
@@ -42,8 +41,7 @@ export interface ControlGroupRendererProps {
   filters?: Filter[];
   getCreationOptions?: (
     initialInput: Partial<ControlGroupInput>,
-    builder: ControlGroupInputBuilder,
-    fieldFilterPredicate?: FieldFilterPredicate
+    builder: ControlGroupInputBuilder
   ) => Promise<ControlGroupCreationOptions>;
   timeRange?: TimeRange;
   query?: Query;
