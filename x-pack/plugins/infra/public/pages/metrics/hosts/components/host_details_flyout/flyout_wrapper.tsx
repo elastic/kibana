@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { FlyoutTabIds, useHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
-import { metadataTab } from './metadata';
-import { processesTab } from './processes';
+import { metadataTab, processesTab } from './tabs';
 
 export interface Props {
   node: HostNodeRow;
@@ -24,6 +24,8 @@ export interface Tab {
   name: any;
   'data-test-subj': string;
 }
+
+const NODE_TYPE = 'host' as InventoryItemType;
 
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
@@ -56,6 +58,7 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
       renderedTabsSet={renderedTabsSet}
       tabs={[metadataTab, processesTab]}
       links={['apmServices', 'uptime']}
+      nodeType={NODE_TYPE}
     />
   );
 };
