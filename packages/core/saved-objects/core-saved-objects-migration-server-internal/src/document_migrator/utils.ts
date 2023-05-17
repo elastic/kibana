@@ -14,6 +14,7 @@ import {
 } from '@kbn/core-saved-objects-server';
 import { Logger } from '@kbn/logging';
 import { MigrationLogger } from '../core/migration_logger';
+import { maxVersion } from './pipelines/utils';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
 import { type Transform, type TransformFn, TransformType } from './types';
 
@@ -92,7 +93,10 @@ export function downgradeRequired(
   latestVersions: Record<TransformType, string>
 ): boolean {
   const docTypeVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
-  const latestMigrationVersion = latestVersions[TransformType.Migrate];
+  const latestMigrationVersion = maxVersion(
+    latestVersions[TransformType.Migrate],
+    latestVersions[TransformType.Convert]
+  );
   if (!docTypeVersion || !latestMigrationVersion) {
     return false;
   }
