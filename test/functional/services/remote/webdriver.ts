@@ -15,7 +15,7 @@ import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
-import geckoDriver from 'geckodriver';
+// import geckoDriver from 'geckodriver';
 import { Builder, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
@@ -282,12 +282,14 @@ async function attemptToCreateCommand(
           firefoxOptions.headless();
         }
 
+        const geckoPath = resolve(REPO_ROOT, 'binary/geckodriver');
+
         // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
         if (process.platform === 'win32') {
           const session = await new Builder()
             .forBrowser(browserType)
             .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+            .setFirefoxService(new firefox.ServiceBuilder(geckoPath))
             .build();
           return {
             session,
@@ -302,7 +304,7 @@ async function attemptToCreateCommand(
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
           .setFirefoxService(
-            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
+            new firefox.ServiceBuilder(geckoPath).setStdio(['ignore', input, 'ignore'])
           )
           .build();
 
