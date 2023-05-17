@@ -8,25 +8,25 @@
 import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-plugin/public';
 
-import { selectFiltersData, setListOfFiltersActions } from '../../../../state/overview_status';
-import { ConfigKey } from '../../../../../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../../../../../common/types/saved_objects';
+import { selectFiltersData, setListOfFiltersActions } from '../state/overview_status';
+import { ConfigKey } from '../../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
   MonitorFilterState,
   selectMonitorFiltersAndQueryState,
   setOverviewPageStateAction,
   updateManagementPageStateAction,
-} from '../../../../state';
-import { SyntheticsUrlParams } from '../../../../utils/url_params';
-import { useUrlParams } from '../../../../hooks';
+} from '../state';
+import { SyntheticsUrlParams } from '../utils/url_params';
+import { useUrlParams } from './use_url_params';
 import {
   getMonitorFilterFields,
   getSyntheticsFilterKeyForLabel,
   SyntheticsMonitorFilterChangeHandler,
   SyntheticsMonitorFilterField,
-} from '../../../../utils/filters/filter_fields';
+} from '../utils/filters/filter_fields';
 
 const aggs = {
   monitorTypes: {

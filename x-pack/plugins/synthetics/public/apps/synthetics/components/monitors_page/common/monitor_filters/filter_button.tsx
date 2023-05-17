@@ -11,7 +11,7 @@ import {
   getSyntheticsFilterDisplayValues,
   SyntheticsMonitorFilterItem,
   valueToLabelWithEmptyCount,
-} from './filter_fields';
+} from '../../../../utils/filters/filter_fields';
 import { useGetUrlParams } from '../../../../hooks';
 import { useMonitorFiltersState } from './use_filters';
 

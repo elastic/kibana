@@ -24,7 +24,7 @@ import { getServiceLocations } from '../../../state/service_locations';
 
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
-import { useMonitorList } from '../hooks/use_monitor_list';
+import { useMonitorList } from '../../../hooks/use_monitor_list';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
 import { OverviewStatus } from './overview/overview_status';

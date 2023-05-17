@@ -8,15 +8,15 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import * as redux from 'react-redux';
-import { MONITOR_ROUTE } from '../../../../../../common/constants';
-import { mockState } from '../../../utils/testing/__mocks__/synthetics_store.mock';
-import { WrappedHelper } from '../../../utils/testing';
-import { SyntheticsAppState } from '../../../state/root_reducer';
+import { MONITOR_ROUTE } from '../../../../common/constants';
+import { mockState } from '../utils/testing/__mocks__/synthetics_store.mock';
+import { WrappedHelper } from '../utils/testing';
+import { SyntheticsAppState } from '../state/root_reducer';
 import {
   selectEncryptedSyntheticsSavedMonitors,
   updateManagementPageStateAction,
   MonitorFilterState,
-} from '../../../state';
+} from '../state';
 
 import { useMonitorList } from './use_monitor_list';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defaultCore, WrappedHelper } from '../../../utils/testing/rtl_helpers';
+import { defaultCore, WrappedHelper } from '../utils/testing/rtl_helpers';
 import { renderHook } from '@testing-library/react-hooks';
 import { useMonitorName } from './use_monitor_name';
 import { Router, useParams } from 'react-router-dom';
