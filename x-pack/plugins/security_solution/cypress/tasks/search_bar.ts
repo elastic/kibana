@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FILTER_BADGE, FILTER_BADGE_DELETE } from '../screens/alerts';
 import type { SearchBarFilter } from '../objects/filter';
 
 import {
@@ -42,11 +41,13 @@ export const clearKqlQueryBar = () => {
   cy.get('body').click(0, 0);
 };
 
-export const removeKqlFilter = () => {
-  cy.get(FILTER_BADGE).then((el) => {
-    el.click();
-    cy.get(FILTER_BADGE_DELETE).click();
-  });
+export const removeKqlFilter = (filterText: string) => {
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  // cy.get('button').contains(`Delete ${filterText}`).click();
+  cy.get(`[aria-label="Delete ${filterText}"]`).click();
+  // cy.get(FILTER_BADGE).click({ force: true });
+  // cy.get(FILTER_BADGE_DELETE).focus();
+  // cy.get(FILTER_BADGE_DELETE).click();
 };
 
 export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => {

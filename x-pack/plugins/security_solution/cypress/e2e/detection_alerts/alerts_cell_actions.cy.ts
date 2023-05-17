@@ -48,6 +48,61 @@ describe('Alerts cell actions', { testIsolation: false }, () => {
     waitForAlertsToPopulate();
   });
 
+  describe('Filter', () => {
+    afterEach(() => {
+      clearKqlQueryBar();
+      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
+    });
+
+    it('should filter for a non-empty property', () => {
+      cy.get(ALERT_TABLE_SEVERITY_VALUES)
+        .first()
+        .invoke('text')
+        .then((severityVal) => {
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
+          filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+          cy.get(FILTER_BADGE).first().should('have.text', `kibana.alert.severity: ${severityVal}`);
+          removeKqlFilter(`kibana.alert.severity: ${severityVal}`);
+        });
+    });
+
+    it('should filter for an empty property', () => {
+      // add query condition to make sure the field is empty
+      fillKqlQueryBar('not file.name: *{enter}');
+
+      scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+      filterForAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
+
+      cy.get(FILTER_BADGE).first().should('have.text', 'NOT file.name: exists');
+      removeKqlFilter('NOT file.name: exists');
+    });
+
+    it('should filter out a non-empty property', () => {
+      cy.get(ALERT_TABLE_SEVERITY_VALUES)
+        .first()
+        .invoke('text')
+        .then((severityVal) => {
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
+          filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+          cy.get(FILTER_BADGE)
+            .first()
+            .should('have.text', `NOT kibana.alert.severity: ${severityVal}`);
+          removeKqlFilter(`NOT kibana.alert.severity: ${severityVal}`);
+        });
+    });
+
+    it('should filter out an empty property', () => {
+      // add query condition to make sure the field is empty
+      fillKqlQueryBar('not file.name: *{enter}');
+
+      scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+      filterOutAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
+
+      cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');
+      removeKqlFilter('file.name: exists');
+    });
+  });
+
   describe('Add to timeline', () => {
     afterEach(() => {
       removeDataProvider();
@@ -96,61 +151,6 @@ describe('Alerts cell actions', { testIsolation: false }, () => {
           showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
           cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
         });
-    });
-  });
-
-  describe('Filter', () => {
-    afterEach(() => {
-      removeKqlFilter();
-      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
-    });
-
-    it('should filter for a non-empty property', () => {
-      cy.get(ALERT_TABLE_SEVERITY_VALUES)
-        .first()
-        .invoke('text')
-        .then((severityVal) => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
-          filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
-          cy.get(FILTER_BADGE).first().should('have.text', `kibana.alert.severity: ${severityVal}`);
-        });
-    });
-
-    it('should filter for an empty property', () => {
-      // add query condition to make sure the field is empty
-      fillKqlQueryBar('not file.name: *{enter}');
-
-      scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
-      filterForAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
-
-      cy.get(FILTER_BADGE).first().should('have.text', 'NOT file.name: exists');
-
-      clearKqlQueryBar();
-    });
-
-    it('should filter out a non-empty property', () => {
-      cy.get(ALERT_TABLE_SEVERITY_VALUES)
-        .first()
-        .invoke('text')
-        .then((severityVal) => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
-          filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
-          cy.get(FILTER_BADGE)
-            .first()
-            .should('have.text', `NOT kibana.alert.severity: ${severityVal}`);
-        });
-    });
-
-    it('should filter out an empty property', () => {
-      // add query condition to make sure the field is empty
-      fillKqlQueryBar('not file.name: *{enter}');
-
-      scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
-      filterOutAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
-
-      cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');
-
-      clearKqlQueryBar();
     });
   });
 
