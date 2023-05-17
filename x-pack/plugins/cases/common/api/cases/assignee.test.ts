@@ -9,32 +9,22 @@ import { CaseAssigneesRt } from './assignee';
 
 describe('Assignee', () => {
   describe('CaseAssigneesRt', () => {
+    const defaultRequest = [{ uid: '1' }, { uid: '2' }];
     it('has expected attributes in request', () => {
-      const query = CaseAssigneesRt.decode([{ uid: '1' }, { uid: '2' }]);
+      const query = CaseAssigneesRt.decode(defaultRequest);
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: [
-          {
-            uid: '1',
-          },
-          {
-            uid: '2',
-          },
-        ],
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CaseAssigneesRt.decode([{ uid: '1', foo: 'bar' }]);
+      const query = CaseAssigneesRt.decode([{...defaultRequest[0], foo: 'bar' }]);
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: [
-          {
-            uid: '1',
-          },
-        ],
+        right: defaultRequest,
       });
     });
   });
