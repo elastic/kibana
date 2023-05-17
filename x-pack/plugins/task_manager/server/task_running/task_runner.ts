@@ -311,9 +311,13 @@ export class TaskManagerRunner implements TaskRunner {
         id: this.instance.task.id,
         description: 'run task',
       };
+
+      const indirectParamsSchema = this.definitions.get(this.taskType).indirectParamsSchema;
+
       const result = await this.executionContext.withContext(ctx, () =>
-        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run(indirectParamsSchema))
       );
+
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())

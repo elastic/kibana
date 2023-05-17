@@ -223,7 +223,10 @@ export class TaskClaiming {
                 stats.tasksConflicted,
                 initialCapacity
               );
-              return { stats, docs, timing: stopTaskTimer() };
+
+              const filteredDocs = this.removeDocsWithUnknownParams(docs);
+
+              return { stats, docs: filteredDocs, timing: stopTaskTimer() };
             })
           );
         },
@@ -233,6 +236,21 @@ export class TaskClaiming {
         1
       )
     );
+  }
+  private removeDocsWithUnknownParams(docs: ConcreteTaskInstance[]): ConcreteTaskInstance[] {
+    return docs.filter((doc) => {
+      const def = this.definitions.get(doc.taskType);
+      try {
+        if (def.paramsSchema) {
+          def.paramsSchema.validate(doc.params);
+        }
+        return true;
+      } catch (e) {
+        this.logger.debug(`Task Manager has skipped claiming ${doc.id} as it has unknown params.`);
+        this.logger.warn(`Task Manager has skipped claiming ${doc.id} as it has unknown params.`);
+        return false;
+      }
+    });
   }
 
   private executeClaimAvailableTasks = async ({

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { ActionGroupIdsOf, ruleTypeSchema } from '@kbn/alerting-plugin/common';
 import { PluginSetupContract, RuleType } from '@kbn/alerting-plugin/server';
 import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
@@ -116,29 +116,29 @@ export async function registerMetricThresholdRuleType(
     }
   );
 
+  const paramsShema = schema.object(
+    {
+      criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion, customCriterion])),
+      groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      filterQuery: schema.maybe(
+        schema.string({
+          validate: validateIsStringElasticsearchJSONFilter,
+        })
+      ),
+      sourceId: schema.string(),
+      alertOnNoData: schema.maybe(schema.boolean()),
+      alertOnGroupDisappear: schema.maybe(schema.boolean()),
+    },
+    { unknowns: 'allow' }
+  );
+
   alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.alertName', {
       defaultMessage: 'Metric threshold',
     }),
     validate: {
-      params: schema.object(
-        {
-          criteria: schema.arrayOf(
-            schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
-          ),
-          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          filterQuery: schema.maybe(
-            schema.string({
-              validate: validateIsStringElasticsearchJSONFilter,
-            })
-          ),
-          sourceId: schema.string(),
-          alertOnNoData: schema.maybe(schema.boolean()),
-          alertOnGroupDisappear: schema.maybe(schema.boolean()),
-        },
-        { unknowns: 'allow' }
-      ),
+      params: paramsShema,
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
@@ -194,5 +194,8 @@ export async function registerMetricThresholdRuleType(
     producer: 'infrastructure',
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
+    schema: ruleTypeSchema.extends({
+      params: paramsShema,
+    }),
   });
 }

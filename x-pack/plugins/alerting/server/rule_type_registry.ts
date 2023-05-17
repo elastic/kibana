@@ -280,9 +280,14 @@ export class RuleTypeRegistry {
             ActionGroupIds,
             RecoveryActionGroupId | RecoveredActionGroupId
           >(normalizedRuleType, context, this.inMemoryMetrics),
+        paramsSchema: schema.object({
+          alertId: schema.string(),
+          spaceId: schema.string(),
+          consumer: schema.string(),
+        }),
+        ...(ruleType.schema && { indirectParamsSchema: ruleType.schema }),
       },
     });
-
     if (this.alertsService && ruleType.alerts) {
       this.alertsService.register(ruleType.alerts);
     }

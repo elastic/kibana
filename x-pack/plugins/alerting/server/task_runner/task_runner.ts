@@ -13,6 +13,7 @@ import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { ObjectType } from '@kbn/config-schema';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -684,7 +685,7 @@ export class TaskRunner<
     return { executionStatus, executionMetrics };
   }
 
-  async run(): Promise<RuleTaskRunResult> {
+  async run(ruleTypeSchema?: ObjectType): Promise<RuleTaskRunResult> {
     const {
       params: { alertId: ruleId, spaceId },
       startedAt,
@@ -708,6 +709,9 @@ export class TaskRunner<
         TaskRunnerTimerSpan.PrepareRule,
         async () => this.prepareToRun()
       );
+      if (ruleTypeSchema) {
+        ruleTypeSchema.validate(preparedResult.rawRule.attributes);
+      }
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
 
@@ -86,7 +86,9 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed;
 }
 
-export type RunFunction = () => Promise<RunResult | undefined | void>;
+export type RunFunction = (
+  indirectParamsSchema?: ObjectType
+) => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
 export interface CancellableTask {
   run: RunFunction;
@@ -138,6 +140,9 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
+
+    paramsSchema: schema.maybe(schema.any()),
+    indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
     validate({ timeout }) {
@@ -152,12 +157,17 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
+export type TaskDefinition = Omit<
+  TypeOf<typeof taskDefinitionSchema>,
+  'paramsSchema' | 'indirectParamsSchema'
+> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
+  paramsSchema?: ObjectType;
+  indirectParamsSchema?: ObjectType;
 };
 
 export enum TaskStatus {
