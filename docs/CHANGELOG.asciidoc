@@ -58,7 +58,7 @@ To review the breaking changes in previous versions, refer to the following:
 Discover::
 * Fixes toggle table column for classic table {kibana-pull}128603[#128603]
 
-[[release-notes-8.1.2]]
+[id="release-notes-8.1.2",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.1.2
 
 Review the following information about the {kib} 8.1.2 release.
@@ -101,7 +101,7 @@ Rename "APM & Fleet Server" to "Integrations Server" {kibana-pull}128574[#128574
 Platform::
 Fixes KQL typeahead missing description and improve display for long field names {kibana-pull}128480[#128480]
 
-[[release-notes-8.1.1]]
+[id="release-notes-8.1.1",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.1.1
 
 Review the following information about the {kib} 8.1.1 release.
@@ -144,7 +144,7 @@ Fleet::
 * Makes input IDs unique in agent policy yaml {kibana-pull}127343[#127343]
 * Fixes links to Agent logs for APM, Endpoint, Synthetics, and OSQuery {kibana-pull}127480[#127480]
 
-[[release-notes-8.1.0]]
+[id="release-notes-8.1.0",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.1.0
 
 Review the following information about the {kib} 8.1.0 release.

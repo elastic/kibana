@@ -1,5 +1,5 @@
 [role="xpack"]
-[[import-geospatial-data]]
+[id="import-geospatial-data",canonical-url="https://www.elastic.co/guide/en/kibana/current/import-geospatial-data.html"]
 == Import geospatial data
 
 To import geospatical data into the Elastic Stack, the data must be indexed as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
