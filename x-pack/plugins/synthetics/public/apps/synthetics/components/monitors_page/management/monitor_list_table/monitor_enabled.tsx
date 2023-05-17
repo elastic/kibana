@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { useCanUpdatePrivateMonitor, useMonitorEnableHandler } from '../../../../hooks';

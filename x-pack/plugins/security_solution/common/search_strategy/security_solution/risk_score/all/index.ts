@@ -15,6 +15,7 @@ export interface RiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
   riskScoreEntity: RiskScoreEntity;
   timerange?: TimerangeInput;
+  alertsTimerange?: TimerangeInput;
   includeAlertsCount?: boolean;
   onlyLatest?: boolean;
   pagination?: {

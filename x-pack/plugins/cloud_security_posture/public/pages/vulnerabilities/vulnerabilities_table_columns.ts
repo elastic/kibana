@@ -7,6 +7,7 @@
 
 import { EuiDataGridColumn, EuiDataGridColumnCellAction } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { severitySchemaConfig } from './utils/custom_sort_script';
 
 export const vulnerabilitiesColumns = {
   actions: 'actions',
@@ -73,6 +74,7 @@ export const getVulnerabilitiesColumnsGrid = (
     }),
     initialWidth: 100,
     cellActions,
+    schema: severitySchemaConfig.type,
   },
   {
     ...defaultColumnProps(),

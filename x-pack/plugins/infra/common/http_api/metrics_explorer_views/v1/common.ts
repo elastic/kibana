@@ -29,8 +29,6 @@ export const metricsExplorerViewRequestParamsRT = rt.type({
   metricsExplorerViewId: metricsExplorerViewIdRT,
 });
 
-export type MetricsExplorerViewRequestParams = rt.TypeOf<typeof metricsExplorerViewRequestParamsRT>;
-
 export const metricsExplorerViewRequestQueryRT = rt.partial({
   sourceId: rt.string,
 });
@@ -62,7 +60,3 @@ const metricsExplorerViewResponseRT = rt.exact(
 export const metricsExplorerViewResponsePayloadRT = rt.type({
   data: metricsExplorerViewResponseRT,
 });
-
-export type GetMetricsExplorerViewResponsePayload = rt.TypeOf<
-  typeof metricsExplorerViewResponsePayloadRT
->;
