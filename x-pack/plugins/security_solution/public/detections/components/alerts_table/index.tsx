@@ -315,7 +315,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   });
 
   const { DetailsPanel, SessionView } = useSessionView({
-    entityType: 'alerts',
+    entityType: 'events',
     scopeId: tableId,
   });
 

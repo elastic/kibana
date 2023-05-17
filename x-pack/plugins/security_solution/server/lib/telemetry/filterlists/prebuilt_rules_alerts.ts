@@ -96,9 +96,23 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     port: true,
   },
   dll: {
+    Ext: {
+      relative_file_creation_time: true,
+      relative_file_name_modify_time: true,
+    },
     code_signature: {
       status: true,
       subject_name: true,
+      trusted: true,
+    },
+    name: true,
+    path: true,
+    pe: {
+      original_file_name: true,
+      imphash: true,
+    },
+    hash: {
+      sha256: true,
     },
   },
   dns: {
@@ -155,6 +169,13 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     executable: true,
     exit_code: true,
     Ext: {
+      api: {
+        name: true,
+      },
+      effective_parent: {
+        executable: true,
+        name: true,
+      },
       token: {
         integrity_level_name: true,
       },
@@ -267,7 +288,13 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   file: {
+    directory: true,
     Ext: {
+      entropy: true,
+      header_bytes: true,
+      original: {
+        name: true,
+      },
       windows: {
         zone_identifier: true,
       },
