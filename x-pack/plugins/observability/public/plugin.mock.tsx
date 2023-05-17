@@ -7,22 +7,6 @@
 import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
-const embeddableStartMock = {
-  createStart() {
-    return {
-      getEmbeddableFactory: jest.fn(),
-      getEmbeddableFactories: jest.fn(),
-      EmbeddablePanel: jest.fn(),
-      getStateTransfer: jest.fn(),
-      getAttributeService: jest.fn(),
-      telemetry: null,
-      inject: jest.fn(),
-      extract: jest.fn(),
-      getAllMigrations: jest.fn(),
-    };
-  },
-};
-
 const triggersActionsUiStartMock = {
   createStart() {
     return {
@@ -95,7 +79,6 @@ export const observabilityPublicPluginsStartMock = {
   createStart() {
     return {
       cases: mockCasesContract(),
-      embeddable: embeddableStartMock.createStart(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       data: data.createStart(),
       lens: null,
