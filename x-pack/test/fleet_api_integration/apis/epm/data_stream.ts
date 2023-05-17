@@ -270,7 +270,7 @@ export default function (providerContext: FtrProviderContext) {
                 ...packagePolicyData.package,
                 experimental_data_stream_features: [
                   {
-                    data_stream: logsTemplateName,
+                    data_stream: metricsTemplateName,
                     features: {
                       synthetic_source: true,
                     },
