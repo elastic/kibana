@@ -81,12 +81,6 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
                     }}
                   />
                 </h5>
-
-                {/* <h5>
-                  {i18n.translate('xpack.serverlessSearch.selectClient.language.name', {
-                    defaultMessage: language.name === Languages.CURL ? 'cURL' : `${language.name}`,
-                  })}
-                </h5> */}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
