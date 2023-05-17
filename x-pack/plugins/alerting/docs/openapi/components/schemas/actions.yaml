@@ -8,6 +8,65 @@ nullable: true
 items:
   type: object
   properties:
+    alerts_filter:
+      type: object
+      description:  >
+        Conditions that affect whether actions run when an alert occurs.
+        If you specify multiple conditions, all conditions must be met for the actions to run.
+        For example, if an alert occurs within the specified time frame and matches the query, its actions run.
+      nullable: true
+      properties:
+        query:
+          type: object
+          description: Defines a KQL query or filter that limits which alerts generate actions.
+          properties:
+            dsl:
+              type: string
+              description: A filter written in Elasticsearch Query Domain Specific Language (DSL).
+            kql:
+              type: string
+              description: A filter written in Kibana Query Language (KQL).
+            filters:
+              type: array
+              items:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                    additionalProperties: true
+                  query:
+                    type: object
+                    additionalProperties: true
+                  state$:
+                    type: object
+                    properties:
+                      store:
+                        type: string
+        timeframe:
+          type: object
+          description: Defines a period that limits which alerts generate actions.
+          properties:
+            days:
+              type: array
+              description: An array of numbers that represent days of the week. For example, `1` represents Monday.
+              items:
+                type: integer
+              example: [1,2,3,4,5]
+            hours:
+              type: object
+              properties:
+                end:
+                  type: string
+                  description: The end of the time frame in 24-hour notation (`hh:mm`).
+                  example: 17:00
+                start:
+                  type: string
+                  description: The start of the time frame in 24-hour notation (`hh:mm`).
+                  example: 08:00
+            timezone:
+              type: string
+              description: The time zone for the `hours` values.
+              example: UTC
     connector_type_id:
       type: string
       description: The type of connector. This property appears in responses but cannot be set in requests.
