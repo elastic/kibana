@@ -9,6 +9,13 @@
     "@kbn/licensing-plugin",
     "@kbn/i18n",
     "@kbn/config-schema",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/mapbox-gl",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",
