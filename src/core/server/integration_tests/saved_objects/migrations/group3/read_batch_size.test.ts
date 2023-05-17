@@ -33,7 +33,7 @@ describe('migration v2 - read batch size', () => {
     await delay(10);
   });
 
-  it.only('reduces the read batchSize in half if a batch exceeds maxReadBatchSizeBytes', async () => {
+  it('reduces the read batchSize in half if a batch exceeds maxReadBatchSizeBytes', async () => {
     const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
