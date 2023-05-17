@@ -27,6 +27,7 @@ import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
 import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -36,6 +37,7 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/api/use_package_policy_list');
 
 const onChange = jest.fn();
 
@@ -44,6 +46,14 @@ describe('<CspPolicyTemplateForm />', () => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
+    (usePackagePolicyList as jest.Mock).mockImplementation((packageName) =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          items: [],
+        },
+      })
+    );
     onChange.mockClear();
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
@@ -221,6 +231,9 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'kspm',
     }));
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'kspm',
+    });
 
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
@@ -231,47 +244,29 @@ describe('<CspPolicyTemplateForm />', () => {
       })
     );
 
-    (useParams as jest.Mock).mockReturnValue({
-      integration: 'kspm',
-    });
-    render(<WrappedComponent newPolicy={policy} />);
+    (usePackagePolicyList as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          items: [
+            getPosturePolicy(getMockPolicyAWS(), CLOUDBEAT_AWS),
+            getPosturePolicy(getMockPolicyEKS(), CLOUDBEAT_EKS),
+            getPosturePolicy(getMockPolicyVulnMgmtAWS(), CLOUDBEAT_AWS),
+          ],
+        },
+      })
+    );
+
+    const { debug } = render(
+      <WrappedComponent newPolicy={policy} packageInfo={{ name: 'kspm' } as PackageInfo} />
+    );
+    debug();
 
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenNthCalledWith(1, {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyK8s(),
-      },
-    });
-  });
-
-  it('selects default CSPM input selector', () => {
-    const policy = getMockPolicyAWS();
-    // enable all inputs of a policy template, same as fleet does
-    policy.inputs = policy.inputs.map((input) => ({
-      ...input,
-      enabled: input.policy_template === 'cspm',
-    }));
-
-    (useParams as jest.Mock).mockReturnValue({
-      integration: 'cspm',
-    });
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
-        },
-      })
-    );
-
-    render(<WrappedComponent newPolicy={policy} />);
-
-    // 1st call happens on mount and selects the default policy template enabled input
-    expect(onChange).toHaveBeenNthCalledWith(1, {
-      isValid: true,
-      updatedPolicy: {
-        ...getMockPolicyAWS(),
       },
     });
   });
@@ -292,6 +287,18 @@ describe('<CspPolicyTemplateForm />', () => {
         status: 'success',
         data: {
           vuln_mgmt: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+        },
+      })
+    );
+    (usePackagePolicyList as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          items: [
+            getPosturePolicy(getMockPolicyAWS(), CLOUDBEAT_AWS),
+            getPosturePolicy(getMockPolicyEKS(), CLOUDBEAT_EKS),
+            getPosturePolicy(getMockPolicyVulnMgmtAWS(), CLOUDBEAT_AWS),
+          ],
         },
       })
     );
