@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
+import { PolicyDetailsPage } from './view/details';
 import { PolicyDetails, PolicyList } from './view';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
@@ -27,6 +28,12 @@ export const PolicyContainer = memo(() => {
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   return (
     <Switch>
+      <Route
+        path={`${MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH}-poc`}
+        exact
+        component={PolicyDetailsPage}
+      />
+
       <Route
         path={[
           MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
