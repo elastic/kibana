@@ -511,6 +511,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       indexAction: `${KIBANA_DOCS}index-action-type.html`,
       esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
       indexThreshold: `${KIBANA_DOCS}rule-type-index-threshold.html`,
+      maintenanceWindows: `${KIBANA_DOCS}maintenance-windows.html`,
       pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
       preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
       preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
