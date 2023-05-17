@@ -25,7 +25,7 @@ We support **calendar aligned** and **rolling** time windows. Any duration great
 
 **Rolling time window:** Requires a duration, e.g. `1w` for one week, and `isRolling: true`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
 
-**Calendar aligned time window:** Requires a duration, e.g. `1M` for one month, and a `calendar.startTime` date in ISO 8601 in UTC, which marks the beginning of the first period. From start time and the duration, the system will compute the different time windows. For example, starting the calendar on the **01/01/2022** with a monthly duration, if today is the **24/10/2022**, the window associated is: `[2022-10-01T00:00:00Z, 2022-11-01T00:00:00Z]`
+**Calendar aligned time window:** Requires a duration, limited to `1M` for monthly or `1w` for weekly, and `isCalendar: true`.
 
 ### Budgeting method
 
@@ -89,7 +89,7 @@ curl --request POST \
 </details>
 
 <details>
-<summary>95% availability for GET /api quarterly aligned</summary>
+<summary>95% availability for GET /api monthly aligned</summary>
 
 ```
 curl --request POST \
@@ -111,10 +111,8 @@ curl --request POST \
 		}
 	},
 	"timeWindow": {
-		"duration": "1q",
-		"calendar": {
-            "startTime": "2022-06-01T00:00:00.000Z"
-        }
+		"duration": "1M",
+		"isCalendar": true
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -262,10 +260,8 @@ curl --request POST \
 		}
 	},
 	"timeWindow": {
-		"duration": "7d",
-		"calendar": {
-			"startTime": "2022-01-01T00:00:00.000Z"
-		}
+		"duration": "1w",
+		"isCalendar": true
 	},
 	"budgetingMethod": "timeslices",
 	"objective": {

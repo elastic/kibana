@@ -10,6 +10,10 @@ required:
   - budgetingMethod
   - objective
 properties:
+  id:
+    description: A unique identifier for the SLO. Must be between 8 and 36 chars
+    type: string
+    example: my-super-slo-id
   name:
     description: A name for the SLO.
     type: string
