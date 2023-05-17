@@ -126,7 +126,7 @@ export async function find(
   } = clientArgs;
 
   const { caseID, queryParams } = pipe(
-    (FindCommentsArgsRt).decode(data),
+    FindCommentsArgsRt.decode(data),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
