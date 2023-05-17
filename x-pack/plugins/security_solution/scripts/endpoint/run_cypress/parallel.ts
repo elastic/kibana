@@ -288,6 +288,7 @@ export default async () => {
       // });
       return cypress
         .run({
+          browser: 'chrome'
           spec: filePath,
           headed: true,
           configFile: argv.configFile,
