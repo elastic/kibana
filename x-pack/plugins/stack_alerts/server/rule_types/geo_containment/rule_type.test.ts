@@ -6,31 +6,31 @@
  */
 
 import {
-  getAlertType,
+  getRuleType,
   injectEntityAndBoundaryIds,
-  GeoContainmentParams,
   extractEntityAndBoundaryReferences,
-} from '../alert_type';
+} from './rule_type';
+import type { GeoContainmentRuleParams } from './types';
 
-describe('alertType', () => {
-  const alertType = getAlertType();
+describe('ruleType', () => {
+  const ruleType = getRuleType();
 
   it('alert type creation structure is the expected value', async () => {
-    expect(alertType.id).toBe('.geo-containment');
-    expect(alertType.name).toBe('Tracking containment');
-    expect(alertType.actionGroups).toEqual([
+    expect(ruleType.id).toBe('.geo-containment');
+    expect(ruleType.name).toBe('Tracking containment');
+    expect(ruleType.actionGroups).toEqual([
       { id: 'Tracked entity contained', name: 'Tracking containment met' },
     ]);
-    expect(alertType.recoveryActionGroup).toEqual({
+    expect(ruleType.recoveryActionGroup).toEqual({
       id: 'notGeoContained',
       name: 'No longer contained',
     });
 
-    expect(alertType.actionVariables).toMatchSnapshot();
+    expect(ruleType.actionVariables).toMatchSnapshot();
   });
 
   it('validator succeeds with valid params', async () => {
-    const params: GeoContainmentParams = {
+    const params: GeoContainmentRuleParams = {
       index: 'testIndex',
       indexId: 'testIndexId',
       geoField: 'testField',
@@ -43,7 +43,7 @@ describe('alertType', () => {
       boundaryNameField: 'testField',
     };
 
-    expect(alertType.validate?.params?.validate(params)).toBeTruthy();
+    expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
   });
 
   test('injectEntityAndBoundaryIds', () => {
