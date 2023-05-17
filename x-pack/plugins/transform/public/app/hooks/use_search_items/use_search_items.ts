@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isDataView } from '../../../../common/types/data_view';
 
-import { getSavedSearch, getSavedSearchUrlConflictMessage } from '../../../shared_imports';
+import { getSavedSearchUrlConflictMessage } from '../../../shared_imports';
 
 import { useAppDependencies } from '../../app_dependencies';
 
@@ -45,13 +45,10 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
 
     try {
-      fetchedSavedSearch = await getSavedSearch(id, {
-        search: appDeps.data.search,
-        savedObjectsClient: appDeps.savedObjects.client,
-        spaces: appDeps.spaces,
-      });
+      fetchedSavedSearch = await appDeps.savedSearch.get(id);
 
       if (isMounted.current && fetchedSavedSearch?.sharingSavedObjectProps?.errorJSON) {
+        // todo consider moving this internal to get
         setError(await getSavedSearchUrlConflictMessage(fetchedSavedSearch));
         return;
       }

@@ -10,6 +10,10 @@
     "requiredPlugins": [
       "data"
     ],
+    "optionalPlugins": [
+      "spaces",
+      "savedObjectsTaggingOss"
+    ],
     "requiredBundles": [
       "kibanaUtils"
     ],
