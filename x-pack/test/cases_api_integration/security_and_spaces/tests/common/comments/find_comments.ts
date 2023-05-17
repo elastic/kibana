@@ -164,7 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s when total items invalid', async () => {
+      it('400s when page * perPage > 10k', async () => {
         const postedCase = await createCase(supertest, postCaseReq, 200);
 
         await createComment({
