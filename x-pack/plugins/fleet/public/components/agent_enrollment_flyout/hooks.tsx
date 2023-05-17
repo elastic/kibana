@@ -56,7 +56,7 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
   const [isK8s, setIsK8s] = useState<K8sMode>('IS_LOADING');
   const [isCSP, setIsCSP] = useState<CSPObject>({
     status: 'IS_LOADING',
-    cloudformationUrl: 'PlaceHolder',
+    cloudformationUrl: undefined,
   });
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
 
     async function checkifCSP() {
       if (!agentPolicy) {
-        setIsCSP({ status: 'IS_LOADING', cloudformationUrl: 'PlaceHolder' });
+        setIsCSP({ status: 'IS_LOADING', cloudformationUrl: undefined });
         return;
       }
 
