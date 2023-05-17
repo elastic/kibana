@@ -36,7 +36,7 @@ Review important information about the {kib} 8.4.x releases.
 
 --
 
-[[release-notes-8.4.3]]
+[id="release-notes-8.4.3",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.4.3
 
 Review the following information about the {kib} 8.4.3 release.
@@ -178,7 +178,7 @@ Alerting::
 Lens & Visualizations::
 * Fixes table pagination in *Lens* and *Aggregation-based* visualization editors {kibana-pull}139160[#139160]
 
-[[release-notes-8.4.0]]
+[id="release-notes-8.4.0",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.4.0
 
 Review the following information about the {kib} 8.4.0 release.
