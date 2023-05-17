@@ -47,7 +47,10 @@ export function checkAdditiveOnlyChange(
   if (missingProps.length > 0) {
     const props = JSON.stringify(missingProps, null, 2);
     throw createFailError(
-      `Removing mapped properties is disallowed. Properties found in current mappings but not in next mappings:\n${props}`
+      `Removing mapped properties is disallowed >8.8. Found the following properties in current mappings but not in next mappings:
+${props}
+
+Reach out to the #kibana-core team if you have any questions.`
     );
   }
 
