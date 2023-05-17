@@ -9,6 +9,16 @@ steps:
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
 
+  - command: umask; ls -alh .; ls -alh src/dev/build/lib/__fixtures__/foo_dir
+    label: umask debug
+    timeout_in_minutes: 10
+    agents:
+      provider: gcp
+      image: family/brian-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-2
+      minCpuPlatform: 'Intel Cascade Lake'
+
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
