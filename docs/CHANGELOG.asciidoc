@@ -20,7 +20,7 @@ Review important information about the {kib} 8.0.0 releases.
 
 --
 
-[[release-notes-8.0.1]]
+[id="release-notes-8.0.1",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.0.1
 
 The 8.0.1 release includes the following enhancement and bug fixes.
@@ -83,7 +83,7 @@ Adds 8.0.1 rules updates {kibana-pull}125316[#125316]
 Uptime::
 Update mobile data view to account for metrics events {kibana-pull}125916[#125916]
 
-[[release-notes-8.0.0]]
+[id="release-notes-8.0.0",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.0.0
 
 Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant] to complete the upgrade.
@@ -216,7 +216,7 @@ Ensure logstash getNodes always contains a uuid {kibana-pull}124201[#124201]
 Security::
 Long-running requests no longer cause sporadic logouts in certain cases, even when user sessions are active {kibana-pull}122155[#122155]
 
-[[release-notes-8.0.0-rc2]]
+[id="release-notes-8.0.0-rc2",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.0.0-rc2
 
 For information about the {kib} 8.0.0-rc2 release, review the following information.
@@ -298,7 +298,7 @@ Observability::
 * Adds locator to aid other plugins in linking properly to Uptime {kibana-pull}123004[#123004]
 * Fixes a bug in which headers would be incorrectly centered on desktop in Uptime {kibana-pull}122643[#122643]
 
-[[release-notes-8.0.0-rc1]]
+[id="release-notes-8.0.0-rc1",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.0.0-rc1
 
 Review the {kib} 8.0.0-rc1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
@@ -591,7 +591,7 @@ Fixes font glitches in code editor {kibana-pull}121392[#121392]
 Reporting::
 Fixes an issue where PDF and PNG reports break on Windows operating systems when the {kib} server hostname is `0.0.0.0` {kibana-pull}117022[#117022]
 
-[[release-notes-8.0.0-beta1]]
+[id="release-notes-8.0.0-beta1",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.0.0-beta1
 
 Review the {kib} 8.0.0-beta1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
@@ -1117,7 +1117,7 @@ Management::
 Querying & Filtering::
 * Fixes Add filter button doesnt close popup after openning {kibana-pull}111917[#111917]
 
-[[release-notes-8.0.0-alpha2]]
+[id="release-notes-8.0.0-alpha2",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.0.0-alpha2
 
 Review the {kib} 8.0.0-alpha2 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
@@ -1258,7 +1258,7 @@ For the Elastic Security 8.0.0-alpha2 release information, refer to {security-gu
 Security::
 * Interactive setup mode {kibana-pull}106881[#106881]
 
-[[release-notes-8.0.0-alpha1]]
+[id="release-notes-8.0.0-alpha1",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.0.0-alpha1
 
 Review the {kib} 8.0.0-alpha1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
