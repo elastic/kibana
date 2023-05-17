@@ -106,49 +106,31 @@ const navTree: ChromeProjectNavigationNode[] = [
   },
 ];
 
-const baseDeeplink = {
+const baseDeeplink: ChromeNavLink = {
+  id: 'foo',
   title: 'Title from deep link',
   url: '',
   href: 'https://elastic.co',
   baseUrl: '',
 };
 
+const createDeepLink = (id: string, title: string = baseDeeplink.title) => {
+  return {
+    ...baseDeeplink,
+    id,
+    title,
+  };
+};
+
 const deepLinks: ChromeNavLink[] = [
-  {
-    ...baseDeeplink,
-    id: 'group1:item1',
-  },
-  {
-    ...baseDeeplink,
-    id: 'group1:groupA:groupI:item1',
-  },
-  {
-    ...baseDeeplink,
-    id: 'item1',
-  },
-  {
-    ...baseDeeplink,
-    id: 'item2',
-    title: 'Foo',
-  },
-  {
-    ...baseDeeplink,
-    id: 'group2:item1',
-  },
-  {
-    ...baseDeeplink,
-    id: 'group2:item3',
-  },
-  {
-    ...baseDeeplink,
-    id: 'group1:groupA',
-    title: 'Group title from deep link',
-  },
-  {
-    ...baseDeeplink,
-    id: 'group2',
-    title: 'Group title from deep link',
-  },
+  createDeepLink('item1'),
+  createDeepLink('item2', 'Foo'),
+  createDeepLink('group1:item1'),
+  createDeepLink('group1:groupA:groupI:item1'),
+  createDeepLink('group1:groupA', 'Group title from deep link'),
+  createDeepLink('group2', 'Group title from deep link'),
+  createDeepLink('group2:item1'),
+  createDeepLink('group2:item3'),
 ];
 
 const Template = (args: ChromeNavigationViewModel & NavigationServices) => {
