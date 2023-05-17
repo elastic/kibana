@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   type HorizontalAlignment,
   type CriteriaWithPagination,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -292,6 +293,8 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const { withOutputs: withOutputsFromUrl } = useActionHistoryUrlParams();
 
+    const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>({});
+
     const actionIdsWithOpenTrays = useMemo((): string[] => {
       // get the list of action ids from URL params on the history page
       if (!isFlyout) {
@@ -309,12 +312,17 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       if (actionIdsWithOpenTrays.length && items.length) {
         const openDetails = actionIdsWithOpenTrays.reduce<ExpandedRowMapType>(
           (idToRowMap, actionId) => {
-            idToRowMap[actionId] = (
-              <ActionsLogExpandedTray
-                action={items.filter((item) => item.id === actionId)[0]}
-                data-test-subj={dataTestSubj}
-              />
-            );
+            const actionItem = items.find((item) => item.id === actionId);
+            if (!actionItem) {
+              idToRowMap[actionId] = <EuiSkeletonText size="relative" lines={8} />;
+            } else {
+              idToRowMap[actionId] = (
+                <ActionsLogExpandedTray
+                  action={items.filter((item) => item.id === actionId)[0]}
+                  data-test-subj={dataTestSubj}
+                />
+              );
+            }
             return idToRowMap;
           },
           {}
@@ -323,26 +331,10 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       }
     }, [actionIdsWithOpenTrays, dataTestSubj, items]);
 
-    const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>(
-      actionIdsWithOpenTrays.length && items.length
-        ? actionIdsWithOpenTrays.reduce<ExpandedRowMapType>((initialExpandedRowMap, actionId) => {
-            const actionItem = items.filter((item) => item.id === actionId)[0];
-            initialExpandedRowMap[actionId] = (
-              <ActionsLogExpandedTray action={actionItem} data-test-subj={dataTestSubj} />
-            );
-            return initialExpandedRowMap;
-          }, {})
-        : {}
-    );
-
-    const allActionIdsOnPage = useMemo(() => items.map((item) => item.id), [items]);
-
     // open trays that were open using URL params/ query params
     useEffect(() => {
-      if (actionIdsWithOpenTrays.every((actionId) => allActionIdsOnPage.includes(actionId))) {
-        redoOpenTrays();
-      }
-    }, [dataTestSubj, allActionIdsOnPage, actionIdsWithOpenTrays, items, redoOpenTrays]);
+      redoOpenTrays();
+    }, [redoOpenTrays]);
 
     const toggleDetails = useCallback(
       (action: ActionListApiResponse['data'][number]) => {
