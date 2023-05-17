@@ -26,6 +26,7 @@ import { Observable } from 'rxjs';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
+import { schema } from '@kbn/config-schema';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -909,7 +910,7 @@ if (doc['task.runAt'].size()!=0) {
         mockInstance({
           id: 'aaa',
           runAt,
-          taskType: 'foo',
+          taskType: 'yawn',
           schedule: undefined,
           attempts: 0,
           status: TaskStatus.Claiming,
@@ -982,11 +983,62 @@ if (doc['task.runAt'].size()!=0) {
           scope: ['reporting'],
           state: { baby: 'Henhen' },
           status: 'claiming',
-          taskType: 'foo',
+          taskType: 'yawn',
           user: 'jimbo',
           ownerId: taskManagerId,
         },
       ]);
+    });
+
+    test('it filters out tasks with unknown params', async () => {
+      const maxAttempts = _.random(2, 43);
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskManagerId = uuidv1();
+      definitions.registerTaskDefinitions({
+        unknownParams: {
+          title: 'unknownParams',
+          createTaskRunner: jest.fn(),
+          paramsSchema: schema.object({
+            foo: schema.string(),
+          }),
+        },
+      });
+      const results = await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {
+          maxAttempts,
+          getCapacity: (type) => {
+            switch (type) {
+              case 'limitedToTwo':
+                return 2;
+              case 'limitedToFive':
+                return 5;
+              default:
+                return 10;
+            }
+          },
+        },
+        hits: [
+          [
+            mockInstance({
+              taskType: 'unknownParams',
+              params: {
+                foo: 'bar',
+                bar: 'foo', // unknown
+              },
+            }),
+          ],
+        ],
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(results.length).toEqual(1);
+      expect(results[0].result.docs.length).toEqual(0);
     });
 
     test('it returns task objects', async () => {
@@ -997,7 +1049,7 @@ if (doc['task.runAt'].size()!=0) {
         mockInstance({
           id: 'aaa',
           runAt,
-          taskType: 'foo',
+          taskType: 'yawn',
           schedule: undefined,
           attempts: 0,
           status: TaskStatus.Claiming,
@@ -1010,7 +1062,7 @@ if (doc['task.runAt'].size()!=0) {
         mockInstance({
           id: 'bbb',
           runAt,
-          taskType: 'bar',
+          taskType: 'yawn',
           schedule: { interval: '5m' },
           attempts: 2,
           status: TaskStatus.Claiming,
@@ -1083,7 +1135,7 @@ if (doc['task.runAt'].size()!=0) {
           scope: ['reporting'],
           state: { baby: 'Henhen' },
           status: 'claiming',
-          taskType: 'foo',
+          taskType: 'yawn',
           user: 'jimbo',
           ownerId: taskManagerId,
         },
@@ -1096,7 +1148,7 @@ if (doc['task.runAt'].size()!=0) {
           scope: ['reporting', 'ceo'],
           state: { henry: 'The 8th' },
           status: 'claiming',
-          taskType: 'bar',
+          taskType: 'yawn',
           user: 'dabo',
           ownerId: taskManagerId,
         },

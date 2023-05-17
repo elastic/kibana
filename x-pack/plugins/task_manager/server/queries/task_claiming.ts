@@ -239,16 +239,21 @@ export class TaskClaiming {
   }
   private removeDocsWithUnknownParams(docs: ConcreteTaskInstance[]): ConcreteTaskInstance[] {
     return docs.filter((doc) => {
-      const def = this.definitions.get(doc.taskType);
       try {
+        const def = this.definitions.get(doc.taskType);
         if (def.paramsSchema) {
           def.paramsSchema.validate(doc.params);
         }
         return true;
       } catch (e) {
-        this.logger.debug(`Task Manager has skipped claiming ${doc.id} as it has unknown params.`);
-        this.logger.warn(`Task Manager has skipped claiming ${doc.id} as it has unknown params.`);
-        return false;
+        // Remove only the doc with unknown key ???
+        if (e.message.includes('definition for this key is missing')) {
+          this.logger.debug(
+            `Task Manager has skipped claiming ${doc.id} as it has unknown params.`
+          );
+          return false;
+        }
+        return true;
       }
     });
   }
