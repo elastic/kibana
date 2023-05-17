@@ -96,6 +96,10 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         ...mockedUseKibana.services,
         telemetry: mockedTelemetry,
+        storage: {
+          get: jest.fn().mockReturnValue([25, 25, 25]),
+          set: jest.fn(),
+        },
       },
     }),
   };
@@ -187,7 +191,7 @@ describe('GroupedAlertsTable', () => {
     );
   });
 
-  it('renders empty grouping table when group is selected without data', async () => {
+  it('renders empty grouping table when group is selected without data', () => {
     mockUseQueryAlerts.mockReturnValue(mockQueryResponse);
     jest
       .spyOn(window.localStorage, 'getItem')
@@ -201,7 +205,7 @@ describe('GroupedAlertsTable', () => {
     expect(getByTestId('empty-results-panel')).toBeInTheDocument();
   });
 
-  it('renders grouping table in first accordion level when single group is selected', async () => {
+  it('renders grouping table in first accordion level when single group is selected', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
@@ -235,7 +239,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('renders grouping table in second accordion level when 2 groups are selected', async () => {
+  it('renders grouping table in second accordion level when 2 groups are selected', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
@@ -255,7 +259,7 @@ describe('GroupedAlertsTable', () => {
     expect(level1.getByTestId('alerts-table')).toBeInTheDocument();
   });
 
-  it('resets all levels pagination when selected group changes', async () => {
+  it('resets all levels pagination when selected group changes', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
@@ -306,7 +310,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('resets all levels pagination when global query updates', async () => {
+  it('resets all levels pagination when global query updates', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
@@ -349,7 +353,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('resets only most inner group pagination when its parent groups open/close', async () => {
+  it('resets only most inner group pagination when its parent groups open/close', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
@@ -393,5 +397,97 @@ describe('GroupedAlertsTable', () => {
         .getByTestId('pagination-button-1')
         .getAttribute('aria-current')
     ).toEqual(null);
+  });
+
+  it(`resets innermost level's current page when that level's page size updates`, () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
+
+    const { getByTestId, getAllByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('pagination-button-1'));
+    fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
+
+    const level0 = getAllByTestId('grouping-accordion-content')[0];
+    fireEvent.click(within(level0).getByTestId('pagination-button-1'));
+    fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
+
+    const level1 = getAllByTestId('grouping-accordion-content')[1];
+    fireEvent.click(within(level1).getByTestId('pagination-button-1'));
+    fireEvent.click(
+      within(getByTestId('grouping-level-2')).getByTestId('tablePaginationPopoverButton')
+    );
+    fireEvent.click(getByTestId('tablePagination-100-rows'));
+    [
+      getByTestId('grouping-level-0-pagination'),
+      getByTestId('grouping-level-1-pagination'),
+      getByTestId('grouping-level-2-pagination'),
+    ].forEach((pagination, i) => {
+      if (i !== 2) {
+        expect(
+          within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
+        ).toEqual(null);
+        expect(
+          within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
+        ).toEqual('true');
+      } else {
+        expect(
+          within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
+        ).toEqual('true');
+        expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
+      }
+    });
+  });
+
+  it(`resets outermost level's current page when that level's page size updates`, () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
+
+    const { getByTestId, getAllByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('pagination-button-1'));
+    fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
+
+    const level0 = getAllByTestId('grouping-accordion-content')[0];
+    fireEvent.click(within(level0).getByTestId('pagination-button-1'));
+    fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
+
+    const level1 = getAllByTestId('grouping-accordion-content')[1];
+    fireEvent.click(within(level1).getByTestId('pagination-button-1'));
+    const tablePaginations = within(getByTestId('grouping-level-0')).getAllByTestId(
+      'tablePaginationPopoverButton'
+    );
+    fireEvent.click(tablePaginations[tablePaginations.length - 1]);
+    fireEvent.click(getByTestId('tablePagination-100-rows'));
+
+    [
+      getByTestId('grouping-level-0-pagination'),
+      getByTestId('grouping-level-1-pagination'),
+      getByTestId('grouping-level-2-pagination'),
+    ].forEach((pagination, i) => {
+      if (i !== 0) {
+        expect(
+          within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
+        ).toEqual(null);
+        expect(
+          within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
+        ).toEqual('true');
+      } else {
+        expect(
+          within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
+        ).toEqual('true');
+        expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
+      }
+    });
   });
 });

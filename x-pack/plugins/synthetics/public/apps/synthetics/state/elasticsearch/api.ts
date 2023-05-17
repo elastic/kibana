@@ -12,7 +12,7 @@ import {
 } from '@kbn/data-plugin/common';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/es-types';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { apiService } from '../../../../utils/api_service';
