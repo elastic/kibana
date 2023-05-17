@@ -237,7 +237,8 @@ describe('DiscoverGrid', () => {
       });
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          triggerId: '',
+          triggerId: undefined,
+          getCellValue: expect.any(Function),
           fields: undefined,
         })
       );
@@ -253,18 +254,17 @@ describe('DiscoverGrid', () => {
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
           triggerId: 'test',
+          getCellValue: expect.any(Function),
           fields: [
             {
               aggregatable: false,
               name: '@timestamp',
               type: 'keyword',
-              values: [[undefined], [undefined], [undefined], [undefined], [undefined]],
             },
             {
               aggregatable: false,
               name: 'message',
               type: 'keyword',
-              values: [['test1'], [undefined], [undefined], [undefined], ['']],
             },
           ],
         })

@@ -26,7 +26,8 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { Filter } from '@kbn/es-query';
 import {
   useDataGridColumnsCellActions,
-  UseDataGridColumnsCellActionsProps,
+  type UseDataGridColumnsCellActionsProps,
+  type CellActionValue,
 } from '@kbn/cell-actions';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
@@ -430,31 +431,35 @@ export const DiscoverGrid = ({
     [dataView, displayedColumns, showTimeCol]
   );
 
-  const cellActionProps = useMemo<UseDataGridColumnsCellActionsProps>(() => {
-    const fields = cellActionsTriggerId
-      ? visibleColumns.map((columnName) => {
-          const field = dataView.getFieldByName(columnName)?.spec;
-          return {
-            name: columnName,
-            type: field?.type ?? 'keyword',
-            values: displayedRows.map((row) => {
-              const value = row.flattened?.[columnName];
-              const valuesArray = Array.isArray(value) ? value : [value];
-              return valuesArray;
-            }),
-            aggregatable: field?.aggregatable ?? false,
-          };
-        })
-      : undefined;
+  const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
+    (fieldName, rowIndex) => {
+      const pageRowIndex = rowIndex % displayedRows.length;
+      return displayedRows[pageRowIndex].flattened[fieldName] as CellActionValue;
+    },
+    [displayedRows]
+  );
 
-    return {
-      triggerId: cellActionsTriggerId ?? '',
-      fields,
-      dataGridRef,
-    };
-  }, [visibleColumns, cellActionsTriggerId, dataView, displayedRows]);
+  const fields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
+    () =>
+      cellActionsTriggerId
+        ? visibleColumns.map((columnName) => {
+            const field = dataView.getFieldByName(columnName)?.spec;
+            return {
+              name: columnName,
+              type: field?.type ?? 'keyword',
+              aggregatable: field?.aggregatable ?? false,
+            };
+          })
+        : undefined,
+    [visibleColumns, cellActionsTriggerId, dataView]
+  );
 
-  const columnsCellActions = useDataGridColumnsCellActions(cellActionProps);
+  const columnsCellActions = useDataGridColumnsCellActions({
+    fields,
+    getCellValue,
+    triggerId: cellActionsTriggerId,
+    dataGridRef,
+  });
 
   const euiGridColumns = useMemo(
     () =>

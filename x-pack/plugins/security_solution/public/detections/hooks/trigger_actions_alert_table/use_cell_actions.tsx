@@ -61,34 +61,37 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
       tableDefaults.viewMode;
 
-    const cellActionProps = useMemo<UseDataGridColumnsSecurityCellActionsProps>(() => {
-      const fields =
-        viewMode === VIEW_SELECTION.eventRenderedView
-          ? []
-          : columns.map((col) => {
-              const fieldMeta: Partial<BrowserField> | undefined = browserFieldsByName[col.id];
-              return {
-                name: col.id,
-                type: fieldMeta?.type ?? 'keyword',
-                values: (finalData as TimelineNonEcsData[][]).map(
-                  (row) => row.find((rowData) => rowData.field === col.id)?.value ?? []
-                ),
-                aggregatable: fieldMeta?.aggregatable ?? false,
-              };
-            });
+    const cellActionsMetadata = useMemo(() => ({ scopeId: tableId }), []);
 
-      return {
-        triggerId: SecurityCellActionsTrigger.DEFAULT,
-        fields,
-        metadata: {
-          // cell actions scope
-          scopeId: tableId,
-        },
-        dataGridRef,
-      };
-    }, [viewMode, browserFieldsByName, columns, finalData, dataGridRef]);
+    const cellActionsFields = useMemo<UseDataGridColumnsSecurityCellActionsProps['fields']>(() => {
+      if (viewMode === VIEW_SELECTION.eventRenderedView) {
+        return undefined;
+      }
+      return columns.map((column) => {
+        const browserField: Partial<BrowserField> | undefined = browserFieldsByName[column.id];
+        return {
+          name: column.id,
+          type: browserField?.type ?? 'keyword',
+          aggregatable: browserField?.aggregatable,
+        };
+      });
+    }, [browserFieldsByName, columns, viewMode]);
 
-    const cellActions = useDataGridColumnsSecurityCellActions(cellActionProps);
+    const getCellValue = useCallback<UseDataGridColumnsSecurityCellActionsProps['getCellValue']>(
+      (fieldName, rowIndex) => {
+        const pageRowIndex = rowIndex % finalData.length;
+        return finalData[pageRowIndex].find((rowData) => rowData.field === fieldName)?.value ?? [];
+      },
+      [finalData]
+    );
+
+    const cellActions = useDataGridColumnsSecurityCellActions({
+      triggerId: SecurityCellActionsTrigger.DEFAULT,
+      fields: cellActionsFields,
+      getCellValue,
+      metadata: cellActionsMetadata,
+      dataGridRef,
+    });
 
     const getCellActions = useCallback(
       (_columnId: string, columnIndex: number) => {

@@ -181,11 +181,11 @@ describe('DataTable', () => {
         fields: [
           {
             name: '@timestamp',
-            values: [data[0]?.data[0]?.value],
             type: 'date',
             aggregatable: true,
           },
         ],
+        getCellValue: expect.any(Function),
         metadata: {
           scopeId: 'table-test',
         },
@@ -203,7 +203,8 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          fields: [],
+          triggerId: undefined,
+          fields: undefined,
         })
       );
     });

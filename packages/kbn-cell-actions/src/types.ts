@@ -20,6 +20,7 @@ export interface CellActionsProviderProps {
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
 }
 
+export type CellActionValue = string | string[] | null | undefined;
 export interface CellActionField {
   /**
    * Field name.
@@ -35,7 +36,7 @@ export interface CellActionField {
    * Field value.
    * Example: 'My-Laptop'
    */
-  value: string | string[] | null | undefined;
+  value: CellActionValue;
   /**
    * When true the field supports aggregations.
    *

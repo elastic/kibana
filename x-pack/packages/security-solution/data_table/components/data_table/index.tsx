@@ -38,7 +38,10 @@ import {
   RowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
-import { useDataGridColumnsCellActions } from '@kbn/cell-actions';
+import {
+  useDataGridColumnsCellActions,
+  UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
 import { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
@@ -327,30 +330,35 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
-    const columnsCellActionsProps = useMemo(() => {
-      const fields = !cellActionsTriggerId
-        ? []
-        : columnHeaders.map((column) => ({
-            name: column.id,
-            type: column.type ?? 'keyword',
-            values: data.map(
-              ({ data: columnData }) =>
-                columnData.find((rowData) => rowData.field === column.id)?.value
-            ),
-            aggregatable: column.aggregatable,
-          }));
+    const cellActionsMetadata = useMemo(() => ({ scopeId: id }), [id]);
 
-      return {
-        triggerId: cellActionsTriggerId || '',
-        fields,
-        metadata: {
-          scopeId: id,
-        },
-        dataGridRef,
-      };
-    }, [columnHeaders, cellActionsTriggerId, id, data]);
+    const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
+      () =>
+        cellActionsTriggerId
+          ? columnHeaders.map((column) => ({
+              name: column.id,
+              type: column.type ?? 'keyword',
+              aggregatable: column.aggregatable,
+            }))
+          : undefined,
+      [cellActionsTriggerId, columnHeaders]
+    );
 
-    const columnsCellActions = useDataGridColumnsCellActions(columnsCellActionsProps);
+    const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
+      (fieldName, rowIndex) => {
+        const pageIndex = rowIndex % data.length;
+        return data[pageIndex].data.find((rowData) => rowData.field === fieldName)?.value;
+      },
+      [data]
+    );
+
+    const columnsCellActions = useDataGridColumnsCellActions({
+      triggerId: cellActionsTriggerId,
+      fields: cellActionsFields,
+      getCellValue,
+      metadata: cellActionsMetadata,
+      dataGridRef,
+    });
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
