@@ -117,7 +117,7 @@ To attach alerts to cases, you must have `Read` access to an {observability} or 
 [%collapsible]
 ====
 *Details* +
-All monitor status alerts for the Synthetics app that are active at the time of upgrading will be resolved. A new alert will be created in its place, refer to {kibana-pull}157234[#157234].
+All monitor status alerts for the Synthetics app that are active at the time of upgrading will be resolved. New alerts will be created automatically. Refer to {kibana-pull}157234[#157234].
 ====
 
 [discrete]
