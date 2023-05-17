@@ -31,7 +31,13 @@ export {
   enableInfrastructureHostsView,
   enableAgentExplorerView,
 } from '../common/ui_settings_keys';
-export { uptimeOverviewLocatorID } from '../common';
+export {
+  alertsLocatorID,
+  ruleDetailsLocatorID,
+  rulesLocatorID,
+  sloDetailsLocatorID,
+  uptimeOverviewLocatorID,
+} from '../common';
 
 export const plugin: PluginInitializer<
   ObservabilityPublicSetup,

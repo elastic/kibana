@@ -30,7 +30,6 @@ import {
 import {
   createScopedLogger,
   AdditionalContext,
-  getAlertDetailsUrl,
   getContextForRecoveredAlerts,
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
@@ -152,7 +151,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          alertDetailsUrl:
+            (
+              await libs.alertsLocator?.getLocation({
+                baseUrl: libs.basePath.publicBaseUrl || '',
+                spaceId,
+                kuery: `kibana.alert.uuid: "${alertUuid}"`,
+              })
+            )?.path || '',
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -312,7 +318,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          alertDetailsUrl:
+            (
+              await libs.alertsLocator?.getLocation({
+                baseUrl: libs.basePath.publicBaseUrl || '',
+                spaceId,
+                kuery: `kibana.alert.uuid: "${alertUuid}"`,
+              })
+            )?.path || '',
           alertState: stateToAlertMessage[nextState],
           group,
           groupByKeys: groupByKeysObjectMapping[group],
@@ -363,7 +376,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
       alert.setContext({
-        alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+        alertDetailsUrl:
+          (
+            await libs.alertsLocator?.getLocation({
+              baseUrl: libs.basePath.publicBaseUrl || '',
+              spaceId,
+              kuery: `kibana.alert.uuid: "${alertUuid}"`,
+            })
+          )?.path || '',
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],

@@ -15,7 +15,6 @@ import {
 } from '../../../../common/alerting/logs/log_threshold';
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import { getAlertDetailsPageEnabledForApp } from '../common/utils';
 import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,
@@ -110,8 +109,6 @@ export async function registerLogThresholdRuleType(
     );
   }
 
-  const config = libs.getAlertDetailsConfig();
-
   alertingPlugin.registerType({
     id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
     name: i18n.translate('xpack.infra.logs.alertName', {
@@ -144,15 +141,11 @@ export async function registerLogThresholdRuleType(
           name: 'denominatorConditions',
           description: denominatorConditionsActionVariableDescription,
         },
-        ...(getAlertDetailsPageEnabledForApp(config, 'logs')
-          ? [
-              {
-                name: 'alertDetailsUrl',
-                description: alertDetailUrlActionVariableDescription,
-                usesPublicBaseUrl: true,
-              },
-            ]
-          : []),
+        {
+          name: 'alertDetailsUrl',
+          description: alertDetailUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         {
           name: 'viewInAppUrl',
           description: viewInAppUrlActionVariableDescription,
