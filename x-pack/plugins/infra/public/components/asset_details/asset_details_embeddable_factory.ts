@@ -22,9 +22,7 @@ export class AssetDetailsEmbeddableFactoryDefinition
   constructor(private getStartServices: InfraClientStartServicesAccessor) {}
 
   public async isEditable() {
-    const [{ application }] = await this.getStartServices();
-    // @TODO what show we use for hosts?
-    return application.capabilities.logs.save as boolean;
+    return true;
   }
 
   public async create(initialInput: AssetDetailsEmbeddableInput, parent?: IContainer) {
