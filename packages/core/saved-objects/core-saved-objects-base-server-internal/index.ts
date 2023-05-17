@@ -39,6 +39,7 @@ export type {
   KibanaMigratorStatus,
   MigrationResult,
   MigrationStatus,
+  MigrateDocumentOptions,
 } from './src/migration';
 export { parseObjectKey, getObjectKey, getIndexForType } from './src/utils';
 export {

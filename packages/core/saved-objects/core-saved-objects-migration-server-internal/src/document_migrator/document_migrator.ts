@@ -33,7 +33,7 @@ interface DocumentMigratorOptions {
 }
 
 /**
- * Options for {@link VersionedTransformer.migrate1}
+ * Options for {@link VersionedTransformer.migrate}
  */
 export interface DocumentMigrateOptions {
   /**
