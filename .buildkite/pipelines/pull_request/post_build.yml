@@ -8,4 +8,5 @@ steps:
       provider: gcp
       image: family/brian-ubuntu-2004
       imageProject: elastic-images-qa
-      machineType: n1-standard-2
+      machineType: n2-standard-2
+      minCpuPlatform: 'Intel Cascade Lake'

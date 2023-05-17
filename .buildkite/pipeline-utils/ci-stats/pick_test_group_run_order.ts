@@ -407,7 +407,8 @@ export async function pickTestGroupRunOrder() {
               provider: 'gcp',
               image: 'family/brian-ubuntu-2004',
               imageProject: 'elastic-images-qa',
-              machineType: 'n1-standard-4',
+              machineType: 'n2-standard-4',
+              minCpuPlatform: 'Intel Cascade Lake',
             },
             retry: {
               automatic: [
@@ -430,7 +431,8 @@ export async function pickTestGroupRunOrder() {
               provider: 'gcp',
               image: 'family/brian-ubuntu-2004',
               imageProject: 'elastic-images-qa',
-              machineType: 'n1-standard-4',
+              machineType: 'n2-standard-4',
+              minCpuPlatform: 'Intel Cascade Lake',
             },
             retry: {
               automatic: [
@@ -470,7 +472,8 @@ export async function pickTestGroupRunOrder() {
                     provider: 'gcp',
                     image: 'family/brian-ubuntu-2004',
                     imageProject: 'elastic-images-qa',
-                    machineType: 'n1-standard-4',
+                    machineType: 'n2-standard-4',
+                    minCpuPlatform: 'Intel Cascade Lake',
                   },
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
