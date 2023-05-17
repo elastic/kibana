@@ -76,17 +76,11 @@ export const bulkGet = async (
         userComments: 0,
       };
 
-      const flattenedCase = flattenCaseSavedObject({
+      return flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
         totalAlerts: alerts,
       });
-
-      return {
-        ...flattenedCase,
-        totalComments: flattenedCase.totalComment,
-        totalAlerts: flattenedCase.totalAlerts,
-      };
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);

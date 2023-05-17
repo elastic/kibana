@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Case, CommentType } from '@kbn/cases-plugin/common';
+import { CommentType } from '@kbn/cases-plugin/common';
 import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { cases, errors } = await bulkGetCases({ supertest, ids: [caseOne.id, caseTwo.id] });
 
-        expect(cases).to.eql([getBulkGetCase(caseOne), getBulkGetCase(caseTwo)]);
+        expect(cases).to.eql([caseOne, caseTwo]);
         expect(errors.length).to.be(0);
       });
 
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { cases, errors } = await bulkGetCases({ supertest, ids: [caseOne.id, 'not-exist'] });
 
-        expect(cases).to.eql([getBulkGetCase(caseOne)]);
+        expect(cases).to.eql([caseOne]);
         expect(errors.length).to.be(1);
       });
 
@@ -103,8 +103,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(cases).to.eql([
-          { ...getBulkGetCase(caseOneUpdated), totalComments: 1 },
-          { ...getBulkGetCase(caseTwoUpdated), totalComments: 0 },
+          { ...caseOneUpdated, totalComment: 1, comments: [] },
+          { ...caseTwoUpdated, totalComment: 0, comments: [] },
         ]);
         expect(errors.length).to.be(0);
       });
@@ -294,9 +294,4 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
   });
-};
-
-const getBulkGetCase = (theCase: Case) => {
-  const { totalComment, ...rest } = theCase;
-  return { ...rest, totalComments: totalComment };
 };
