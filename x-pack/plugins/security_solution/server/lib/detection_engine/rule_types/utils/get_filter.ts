@@ -27,6 +27,7 @@ import type { PartialFilter } from '../../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from './get_query_filter';
+import { getFieldsForWildcard } from './get_fields_for_wildcard';
 
 interface GetFilterArgs {
   type: Type;
@@ -58,6 +59,8 @@ export const getFilter = async ({
   query,
   exceptionFilter,
 }: GetFilterArgs): Promise<ESBoolQuery> => {
+  const fields = index ? await getFieldsForWildcard({ index, dataViews: services.dataViews }) : [];
+
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
       return getQueryFilter({
@@ -66,6 +69,7 @@ export const getFilter = async ({
         filters: filters || [],
         index,
         exceptionFilter,
+        fields,
       });
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
