@@ -43,11 +43,7 @@ export const clearKqlQueryBar = () => {
 
 export const removeKqlFilter = (filterText: string) => {
   cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-  // cy.get('button').contains(`Delete ${filterText}`).click();
   cy.get(`[aria-label="Delete ${filterText}"]`).click();
-  // cy.get(FILTER_BADGE).click({ force: true });
-  // cy.get(FILTER_BADGE_DELETE).focus();
-  // cy.get(FILTER_BADGE_DELETE).click();
 };
 
 export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => {
