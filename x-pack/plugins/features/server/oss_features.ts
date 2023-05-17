@@ -495,6 +495,30 @@ export const buildOSSFeatures = ({
       },
     },
     {
+      id: 'runtimeFieldEditor',
+      name: i18n.translate('xpack.features.runtimeFieldsFeatureName', {
+        defaultMessage: 'Field management',
+      }),
+      order: 1700,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      privilegesTooltip: i18n.translate('xpack.features.runtimeFields', {
+        defaultMessage: 'Allow adding and editing of data view fields',
+      }),
+      privileges: {
+        all: {
+          app: ['kibana'],
+          savedObject: {
+            all: ['file'],
+            read: [],
+          },
+          ui: [],
+          api: ['files:defaultImage'],
+        },
+      },
+    },
+    {
       id: 'savedObjectsManagement',
       name: i18n.translate('xpack.features.savedObjectsManagementFeatureName', {
         defaultMessage: 'Saved Objects Management',
