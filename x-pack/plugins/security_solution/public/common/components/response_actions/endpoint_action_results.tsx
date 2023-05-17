@@ -7,7 +7,7 @@
 
 import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useUserPrivileges } from '../user_privileges';
 import type { LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
@@ -45,6 +45,11 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
 
   const eventText = getCommentText(action.EndpointActions.data.command);
 
+  const hostName = useMemo(
+    () => expandedAction?.hosts?.[expandedAction.agents?.[0]]?.name,
+    [expandedAction?.agents, expandedAction?.hosts]
+  );
+
   return (
     <EuiComment
       username={rule?.name}
@@ -54,7 +59,10 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
     >
       {canReadEndpoint ? (
         expandedAction ? (
-          <ActionsLogExpandedTray action={expandedAction} />
+          <ActionsLogExpandedTray
+            action={expandedAction}
+            data-test-subj={`response-results-${hostName}`}
+          />
         ) : (
           <EuiLoadingSpinner />
         )

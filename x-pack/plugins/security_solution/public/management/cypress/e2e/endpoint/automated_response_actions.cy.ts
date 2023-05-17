@@ -22,6 +22,8 @@ import { changeAlertsFilter } from '../../tasks/alerts';
 
 describe('Automated Response Actions', () => {
   const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
+  const hostname = Cypress.env('hostname');
+  const fleetHostname = `dev-fleet-server.${hostname}`;
 
   beforeEach(() => {
     login();
@@ -68,7 +70,7 @@ describe('Automated Response Actions', () => {
       toggleRuleOffAndOn(ruleName);
     });
 
-    it('should display endpoint automated response action in event details flyout ', () => {
+    it.only('should display endpoint automated response action in event details flyout ', () => {
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
@@ -78,17 +80,14 @@ describe('Automated Response Actions', () => {
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('responseActionsViewTab').click();
       cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('responseActionsViewWrapper').within(($wrapper) => {
-        cy.wrap($wrapper).each(($comment, index) => {
-          if (index === 0) {
-            // TODO use translations
-            cy.contains('isolate completed successfully');
-          }
-          if (index === 1) {
-            cy.contains('The host does not have Elastic Defend integration installed');
-          }
-        });
-      });
+
+      cy.getByTestSubj(`response-results-${endpointHostname}-details-tray`)
+        .should('contain', 'isolate completed successfully')
+        .and('contain', endpointHostname);
+
+      cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
+        .should('contain', 'The host does not have Elastic Defend integration installed')
+        .and('contain', 'dev-fleet-server');
     });
   });
 });
