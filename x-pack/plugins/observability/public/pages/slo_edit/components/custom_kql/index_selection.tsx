@@ -62,6 +62,13 @@ export function IndexSelection() {
     setIndexOptions(options);
   };
 
+  const placeholder = i18n.translate(
+    'xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder',
+    {
+      defaultMessage: 'Select an index or index pattern',
+    }
+  );
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.observability.slo.sloEdit.customKql.indexSelection.label', {
@@ -84,12 +91,7 @@ export function IndexSelection() {
         render={({ field, fieldState }) => (
           <EuiComboBox
             {...field}
-            aria-label={i18n.translate(
-              'xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder',
-              {
-                defaultMessage: 'Select an index or index pattern',
-              }
-            )}
+            aria-label={placeholder}
             async
             data-test-subj="indexSelection"
             isClearable
@@ -104,12 +106,7 @@ export function IndexSelection() {
             }}
             onSearchChange={onSearchChange}
             options={indexOptions}
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder',
-              {
-                defaultMessage: 'Select a Data View, index, or index pattern',
-              }
-            )}
+            placeholder={placeholder}
             selectedOptions={
               !!field.value ? [findSelectedIndexPattern(dataViews, field.value)] : []
             }
