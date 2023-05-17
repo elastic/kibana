@@ -7,12 +7,12 @@
 
 import {
   EuiCallOut,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
   EuiLink,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -40,46 +40,37 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const panelItems = languages.map((language) => (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiPanel
-          hasBorder
-          borderRadius="m"
-          onClick={() => setSelectedLanguage(language)}
-          grow={false}
-          paddingSize="m"
-          css={
-            selectedLanguage === language
-              ? css`
-                  border: 1px solid ${euiTheme.colors.primary};
-                `
-              : css`
-                  border: 1px solid ${euiTheme.colors.lightShade};
-                `
-          }
-          color={selectedLanguage === language ? 'primary' : 'plain'}
-        >
-          <EuiFlexGroup direction="column" gutterSize="l" justifyContent="center">
-            <EuiFlexItem>
-              <EuiImage
-                alt=""
-                src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${language.iconType}`)}
-                height="32px"
-                width="32px"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText
-                textAlign="center"
-                color={selectedLanguage === language ? 'default' : 'subdued'}
-              >
-                <h5>{language.name}</h5>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPanel
+      hasBorder
+      borderRadius="m"
+      onClick={() => setSelectedLanguage(language)}
+      css={
+        selectedLanguage === language
+          ? css`
+              border: 1px solid ${euiTheme.colors.primary};
+            `
+          : css`
+              border: 1px solid ${euiTheme.colors.lightShade};
+            `
+      }
+      color={selectedLanguage === language ? 'primary' : 'plain'}
+    >
+      <EuiFlexGroup direction="column" justifyContent="center">
+        <EuiFlexItem>
+          <EuiImage
+            alt=""
+            src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${language.iconType}`)}
+            height="32px"
+            width="32px"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText textAlign="center" color={selectedLanguage === language ? 'default' : 'subdued'}>
+            <h5>{language.name}</h5>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   ));
 
   return (
@@ -101,7 +92,7 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
       }
       leftPanelContent={
         <>
-          <EuiFlexGroup gutterSize="l" direction="column">
+          <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <EuiText size="s">
                 <strong>
@@ -111,45 +102,30 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
                 </strong>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGrid
-                gutterSize="l"
-                direction="row"
-                columns={panelItems.length > 3 ? 4 : 3}
-                alignItems="center"
-              >
-                {panelItems.map((panelItem, index) => (
-                  <EuiFlexItem key={`panelItem.${index}`}>
-                    <EuiFlexGrid direction="column" gutterSize="s">
-                      <EuiFlexItem>{panelItem}</EuiFlexItem>
-                    </EuiFlexGrid>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGrid>
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiCallOut title="Try it now in Console" size="m" iconType="iInCircle">
-                <p>
-                  {i18n.translate('xpack.serverlessSearch.selectClient.callout.description', {
-                    defaultMessage:
-                      'With Console, you can get started right away with our REST API’s. No installation required. ',
-                  })}
-
-                  <span>
-                    <EuiLink
-                      target="_blank"
-                      href={http.basePath.prepend(`/app/dev_tools#/console`)}
-                    >
-                      {i18n.translate('xpack.serverlessSearch.selectClient.callout.link', {
-                        defaultMessage: 'Try Console now',
-                      })}
-                    </EuiLink>
-                  </span>
-                </p>
-              </EuiCallOut>
-            </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="xs" direction="row">
+            {panelItems.map((panelItem, index) => (
+              <EuiFlexItem key={`panelItem.${index}`}>{panelItem}</EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiCallOut title="Try it now in Console" size="m" iconType="iInCircle">
+            <p>
+              {i18n.translate('xpack.serverlessSearch.selectClient.callout.description', {
+                defaultMessage:
+                  'With Console, you can get started right away with our REST API’s. No installation required. ',
+              })}
+
+              <span>
+                <EuiLink target="_blank" href={http.basePath.prepend(`/app/dev_tools#/console`)}>
+                  {i18n.translate('xpack.serverlessSearch.selectClient.callout.link', {
+                    defaultMessage: 'Try Console now',
+                  })}
+                </EuiLink>
+              </span>
+            </p>
+          </EuiCallOut>
         </>
       }
       links={[
