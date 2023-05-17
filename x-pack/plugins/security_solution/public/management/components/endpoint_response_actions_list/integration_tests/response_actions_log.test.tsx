@@ -481,6 +481,7 @@ describe('Response actions history', () => {
           'Input',
           'Parameters',
           'Comment',
+          'Hostname',
           'Output:',
         ]
       );
