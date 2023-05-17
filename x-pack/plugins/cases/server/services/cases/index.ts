@@ -566,9 +566,9 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(createdCase);
-      decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
 
-      return res;
+      return { ...res, attributes: decodedRes };
     } catch (error) {
       this.log.error(`Error on POST a new case: ${error}`);
       throw error;
