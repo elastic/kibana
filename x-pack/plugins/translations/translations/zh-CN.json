@@ -16978,7 +16978,6 @@
     "xpack.infra.nodeContextMenu.viewUptimeLink": "Uptime 中的 {inventoryName}",
     "xpack.infra.nodeDetails.tabs.metadata.seeMore": "+ 另外 {count} 个",
     "xpack.infra.parseInterval.errorMessage": "{value} 不是时间间隔字符串",
-    "xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage": "正在加载 {nodeType} 日志",
     "xpack.infra.snapshot.missingSnapshotMetricError": "{nodeType} 的 {metric} 聚合不可用。",
     "xpack.infra.sourceConfiguration.logIndicesRecommendedValue": "推荐值为 {defaultValue}",
     "xpack.infra.sourceConfiguration.metricIndicesRecommendedValue": "推荐值为 {defaultValue}",
