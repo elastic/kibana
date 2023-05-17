@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { PolicyFormAntivirusRegistration } from './policy_form_antivirus_registration';
 import { PolicyFormEventCollection } from './policy_form_event_collection';
 import { PolicyFormAttackSurfaceReduction } from './policy_form_attack_surface_reduction';
 import { PolicyFormBehaviourProtection } from './policy_form_behaviour_protection';
@@ -26,22 +27,24 @@ export interface PolicyDetailsFormProps {
   policyDetails: PolicyData;
 }
 
-export const PolicyDetailsForm = memo<PolicyDetailsFormProps>((props) => {
+export const PolicyDetailsForm = memo<PolicyDetailsFormProps>(({ policyDetails }) => {
   return (
     <FormContainer>
       <PolicyFormHeader />
 
-      <PolicyFormMalware />
+      <PolicyFormMalware policyDetails={policyDetails} />
 
-      <PolicyFormRansomware />
+      <PolicyFormRansomware policyDetails={policyDetails} />
 
-      <PolicyFormMemoryProtection />
+      <PolicyFormMemoryProtection policyDetails={policyDetails} />
 
-      <PolicyFormBehaviourProtection />
+      <PolicyFormBehaviourProtection policyDetails={policyDetails} />
 
-      <PolicyFormAttackSurfaceReduction />
+      <PolicyFormAttackSurfaceReduction policyDetails={policyDetails} />
 
-      <PolicyFormEventCollection />
+      <PolicyFormEventCollection policyDetails={policyDetails} />
+
+      <PolicyFormAntivirusRegistration policyDetails={policyDetails} />
     </FormContainer>
   );
 });
