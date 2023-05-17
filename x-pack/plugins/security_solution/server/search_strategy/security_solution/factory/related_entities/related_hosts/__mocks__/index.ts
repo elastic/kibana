@@ -14,6 +14,7 @@ import type { UsersRelatedHostsRequestOptions } from '../../../../../../../commo
 import { RelatedEntitiesQueries } from '../../../../../../../common/search_strategy/security_solution/related_entities';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
+import { createMockConfig } from '../../../../../../lib/detection_engine/routes/__mocks__';
 
 export const mockOptions: UsersRelatedHostsRequestOptions = {
   defaultIndex: ['test_indices*'],
@@ -106,6 +107,7 @@ export const mockDeps = () => ({
       ...allowedExperimentalValues,
     },
     service: {} as EndpointAppContextService,
+    serverConfig: createMockConfig(),
   } as EndpointAppContext,
   request: {} as KibanaRequest,
   spaceId: 'test-space',
