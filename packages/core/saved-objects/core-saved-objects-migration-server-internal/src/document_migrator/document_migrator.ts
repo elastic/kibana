@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type {
@@ -153,7 +154,7 @@ export class DocumentMigrator implements VersionedTransformer {
       const currentVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
       const latestVersion = this.migrations[doc.type].latestVersion[TransformType.Migrate];
       if (!allowDowngrade) {
-        throw new Error(
+        throw Boom.badData(
           `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
         );
       }
