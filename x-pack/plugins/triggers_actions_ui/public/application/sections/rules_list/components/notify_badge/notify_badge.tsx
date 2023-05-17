@@ -29,8 +29,30 @@ import {
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
+  TIME_UNITS,
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
+
+function getTimeRemaining(endtime: Date) {
+  const duration = moment.duration(moment(endtime).diff(moment()));
+  const units = [
+    { name: TIME_UNITS.YEARS, value: duration.years() },
+    { name: TIME_UNITS.MONTHS, value: duration.months() },
+    { name: TIME_UNITS.WEEKS, value: duration.weeks() },
+    { name: TIME_UNITS.DAYS, value: duration.days() },
+    { name: TIME_UNITS.HOURS, value: duration.hours() },
+    { name: TIME_UNITS.MINUTES, value: duration.minutes() },
+    { name: TIME_UNITS.SECONDS, value: duration.seconds() },
+  ];
+  const nonZeroUnits = units.filter((unit) => unit.value !== 0);
+  const formattedUnits = nonZeroUnits.map((unit) => `${unit.value} ${unit.name}`);
+  const lastUnit = formattedUnits.pop();
+  if (formattedUnits.length > 0) {
+    const joinedUnits = formattedUnits.join(', ');
+    return `${joinedUnits} and ${lastUnit}`;
+  }
+  return lastUnit;
+}
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = ({
   snoozeSettings,
@@ -60,30 +82,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     [snoozeSettings]
   );
 
-  function getTimeRemaining(endtime: Date) {
-    const duration = moment.duration(moment(endtime).diff(moment()));
-    const units = [
-      { name: 'year', value: duration.years() },
-      { name: 'month', value: duration.months() },
-      { name: 'week', value: duration.weeks() },
-      { name: 'day', value: duration.days() },
-      { name: 'hour', value: duration.hours() },
-      { name: 'minute', value: duration.minutes() },
-    ];
-    const nonZeroUnits = units.filter((unit) => unit.value !== 0);
-    const formattedUnits = nonZeroUnits.map((unit) => {
-      const formattedUnitName = unit.value === 1 ? unit.name : `${unit.name}s`;
-      return `${unit.value} ${formattedUnitName}`;
-    });
-    const lastUnit = formattedUnits.pop();
-    if (formattedUnits.length > 0) {
-      const joinedUnits = formattedUnits.join(', ');
-      return `${joinedUnits} and ${lastUnit}`;
-    }
-    return lastUnit;
-  }
-
-  const snoozeTimeLeft = isSnoozedUntil ? getTimeRemaining(isSnoozedUntil) : undefined;
+  const snoozeTimeLeft = useMemo(
+    () => (isSnoozedUntil ? getTimeRemaining(isSnoozedUntil) : undefined),
+    [isSnoozedUntil]
+  );
 
   const {
     notifications: { toasts },
@@ -269,10 +271,14 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         ? disabled
         : isPopoverOpen || showTooltipInline
         ? undefined
-        : snoozeTooltipText;
+        : snoozeTimeLeft;
 
-    return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
-  }, [disabled, isPopoverOpen, button, snoozeTooltipText, showTooltipInline]);
+    return (
+      <EuiToolTip title={tooltipContent ? 'Time Remaining' : undefined} content={tooltipContent}>
+        {button}
+      </EuiToolTip>
+    );
+  }, [disabled, isPopoverOpen, button, showTooltipInline, snoozeTimeLeft]);
 
   const onApplySnooze = useCallback(
     async (schedule: SnoozeSchedule) => {
