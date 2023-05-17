@@ -6,32 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import {
+  getIdFromNavigationNode,
+  getDeepLinkFromNavigationNode,
+  getTitleForNavigationNode,
+} from './utils';
 
-export const useInitNavnode = ({
-  id: _id,
-  link,
-  title: _title = '',
-}: ChromeProjectNavigationNode) => {
-  const id = _id ?? link;
-
-  let title = _title;
-  if (title.trim().length === 0) {
-    if (!link) {
-      throw new Error(`Title prop missing for navigation item [${id}]`);
-    }
-    // TODO: read title from deeplink id
-    title = '<todo from deeplink>';
-  }
-
-  if (!id) {
-    throw new Error(`Id or link prop missing for navigation item [${title}]`);
-  }
-
-  // Here we'll have the logic to retrive deeplink info (href, title, etc.) from Chrome service
+export const useInitNavnode = (
+  navNode: ChromeProjectNavigationNode,
+  { deepLinks }: { deepLinks: Readonly<ChromeNavLink[]> }
+) => {
+  const { id } = getIdFromNavigationNode(navNode);
+  const deepLink = getDeepLinkFromNavigationNode(navNode, { deepLinks });
+  const { title } = getTitleForNavigationNode({ title: navNode.title, deepLink });
 
   return {
     id,
     title,
+    deepLink,
   };
 };

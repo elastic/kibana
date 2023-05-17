@@ -15,11 +15,15 @@ import React, {
   useRef,
   useEffect,
 } from 'react';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import type { RegisterFunction } from './navigation';
+import { EuiButton } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+
+import { useNavigation as useNavigationServices } from '../../../services';
 import { useInitNavnode } from '../use_init_navnode';
+import { InternalNavigationNode } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
+import type { RegisterFunction } from './navigation';
 
 export const NavigationGroupContext = createContext<Context | undefined>(undefined);
 
@@ -32,6 +36,8 @@ interface Props {
   id?: string;
   title?: string;
   link?: string;
+  // Temp to test removing nav nodes
+  onRemove: () => void;
 }
 
 export function useNavigationGroup<T extends boolean = true>(
@@ -44,22 +50,28 @@ export function useNavigationGroup<T extends boolean = true>(
   return context as T extends true ? Context : Context | undefined;
 }
 
-export const NavigationGroup = ({ children, id: _id, title: _title, link }: Props) => {
-  const navNodes = useRef<Record<string, ChromeProjectNavigationNode>>({});
+export const NavigationGroup = ({ children, id: _id, title: _title, link, onRemove }: Props) => {
+  const { navLinks$ } = useNavigationServices();
+  const deepLinks = useObservable(navLinks$, []);
 
-  const { id, title } = useInitNavnode({ id: _id, title: _title, link });
+  const navNodes = useRef<Record<string, InternalNavigationNode>>({});
+  const isRegistered = useRef(false);
+
+  const { id, title } = useInitNavnode({ id: _id, title: _title, link }, { deepLinks });
   const { register } = useRegisterTreeNode();
 
   const handleRegister = useCallback<RegisterFunction>(
     (navNode) => {
       navNodes.current[navNode.id] = navNode;
 
-      register({
-        id,
-        title,
-        link,
-        children: Object.values(navNodes.current),
-      });
+      if (isRegistered.current) {
+        register({
+          id,
+          title,
+          link,
+          children: Object.values(navNodes.current),
+        });
+      }
 
       // Unregister function
       return () => {
@@ -68,13 +80,15 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link }: Prop
         delete updatedItems[navNode.id];
         navNodes.current = updatedItems;
 
-        // Update the parent tree
-        register({
-          id,
-          title,
-          link,
-          children: Object.values(navNodes.current),
-        });
+        if (isRegistered.current) {
+          // Update the parent tree
+          register({
+            id,
+            title,
+            link,
+            children: Object.values(navNodes.current),
+          });
+        }
       };
     },
     [register, id, title, link]
@@ -87,18 +101,28 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link }: Prop
   }, [handleRegister]);
 
   useEffect(() => {
-    register({
+    const unregister = register({
       id,
       title,
       link,
       children: Object.values(navNodes.current),
     });
+
+    isRegistered.current = true;
+
+    return () => {
+      isRegistered.current = false;
+      unregister();
+    };
   }, [register, id, title, link]);
 
   return (
     <NavigationGroupContext.Provider value={contextValue}>
-      <li>
-        {title}
+      <li style={{ paddingLeft: '20px', marginBottom: '15px' }}>
+        {title} |{' '}
+        <EuiButton size="s" onClick={() => onRemove()}>
+          Remove
+        </EuiButton>
         <ul>{children}</ul>
       </li>
     </NavigationGroupContext.Provider>

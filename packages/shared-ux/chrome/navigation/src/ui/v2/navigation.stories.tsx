@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
@@ -27,17 +28,45 @@ const navTree: ChromeProjectNavigationNode[] = [
       {
         id: 'item1',
         title: 'Group 1: Item 1',
-        link: 'app:home',
+        link: 'group1:item1',
       },
       {
-        id: 'item2',
-        title: 'Group 1: Item 2',
-        link: 'app2:home',
+        id: 'groupA',
+        title: 'Group 1 : Group A',
+        link: 'group1:groupA',
+        children: [
+          {
+            id: 'item1',
+            title: 'Group 1 > Group A > Item 1',
+            link: 'group1:groupA:item1',
+          },
+          {
+            id: 'groupI',
+            title: 'Group 1 : Group A : Group I',
+            children: [
+              {
+                id: 'item1',
+                title: 'Group 1 > Group A > Group 1 > Item 1',
+                link: 'group1:groupA:groupI:item1',
+              },
+              {
+                id: 'item2',
+                title: 'Group 1 > Group A > Group 1 > Item 2',
+                link: 'group1:groupA:groupI:item2',
+              },
+            ],
+          },
+          {
+            id: 'item2',
+            title: 'Group 1 > Group A > Item 2',
+            link: 'group1:groupA:item2',
+          },
+        ],
       },
       {
         id: 'item3',
         title: 'Group 1: Item 3',
-        link: 'app3:home',
+        link: 'group1:item3',
       },
     ],
   },
@@ -48,49 +77,36 @@ const navTree: ChromeProjectNavigationNode[] = [
       {
         id: 'item1',
         title: 'Group 2: Item 1',
-        link: 'app2:link1',
+        link: 'group2:item1',
       },
       {
         id: 'item2',
-        title: 'Group 2: subGroup 1',
-        children: [
-          {
-            id: 'item1',
-            title: 'Group 2: Sub 1: Item 1',
-            link: 'app:link4',
-          },
-          {
-            id: 'item2',
-            title: 'Group 2: Sub 1: Item 2',
-            link: 'app:link5',
-          },
-        ],
-      },
-      {
-        id: 'item3',
         title: 'Group 2: Item 2',
-        link: 'app2:link7',
+        link: 'app2:item2',
       },
     ],
   },
   {
-    id: 'group3',
-    title: 'Group 3',
-    children: [
-      {
-        id: 'item1',
-        title: 'Group 3: Item 1',
-        link: 'app3:link1',
-      },
-    ],
+    id: 'item1',
+    title: 'Item 1',
+    link: 'item1',
   },
 ];
 
 const Template = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
+    navLinks$: of([
+      {
+        id: 'group1:groupa:link1',
+        title: 'Kibana',
+        url: '',
+        href: 'https://elastic.co',
+        baseUrl: '',
+      },
+    ]),
     onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(updated);
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
   });
 

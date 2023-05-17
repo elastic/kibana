@@ -36,30 +36,37 @@ const NavigationContext = createContext<Context>({
 
 interface Props {
   children: ReactNode;
+  onRootItemRemove?: (id: string) => void;
 }
 
-export function Navigation({ children }: Props) {
+export function Navigation({ children, onRootItemRemove }: Props) {
   const { onProjectNavigationChange } = useNavigationServices();
   const [navigationItems, setNavigationItems] = useState<
     Record<string, ChromeProjectNavigationNode>
   >({});
 
-  const register = useCallback((navNode: InternalNavigationNode) => {
-    setNavigationItems((prevItems) => {
-      return {
-        ...prevItems,
-        [navNode.id]: navNode,
-      };
-    });
-
-    return () => {
+  const register = useCallback(
+    (navNode: InternalNavigationNode) => {
       setNavigationItems((prevItems) => {
-        const updatedItems = { ...prevItems };
-        delete updatedItems[navNode.id];
-        return updatedItems;
+        return {
+          ...prevItems,
+          [navNode.id]: navNode,
+        };
       });
-    };
-  }, []);
+
+      return () => {
+        if (onRootItemRemove) {
+          onRootItemRemove(navNode.id);
+        }
+        setNavigationItems((prevItems) => {
+          const updatedItems = { ...prevItems };
+          delete updatedItems[navNode.id];
+          return updatedItems;
+        });
+      };
+    },
+    [onRootItemRemove]
+  );
 
   const contextValue = useMemo<Context>(
     () => ({
