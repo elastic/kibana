@@ -20,9 +20,7 @@ describe('Stats', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 

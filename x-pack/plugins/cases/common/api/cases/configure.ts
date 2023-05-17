@@ -8,7 +8,8 @@
 import * as rt from 'io-ts';
 
 import { UserRt } from '../user';
-import { CaseConnectorRt, ConnectorMappingsRt } from '../connectors';
+import { CaseConnectorRt } from '../connectors/connector';
+import { ConnectorMappingsRt } from '../connectors/mappings';
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);

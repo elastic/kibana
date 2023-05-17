@@ -28,9 +28,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -42,9 +40,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -56,9 +52,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });
@@ -79,9 +73,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -93,9 +85,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -107,9 +97,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });
@@ -131,9 +119,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -145,9 +131,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -159,9 +143,7 @@ describe('Connector', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });

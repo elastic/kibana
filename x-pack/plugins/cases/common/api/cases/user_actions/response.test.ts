@@ -7,11 +7,7 @@
 
 import { CommentType } from '../comment';
 import { ActionTypes } from './common';
-import {
-  UserActionsRt,
-  CaseUserActionsDeprecatedResponseRt,
-  CaseUserActionStatsResponseRt,
-} from './response';
+import { UserActionsRt, CaseUserActionStatsResponseRt } from './response';
 
 describe('Response', () => {
   describe('UserActionsRt', () => {
@@ -25,6 +21,14 @@ describe('Response', () => {
             owner: 'cases',
           },
         },
+        created_at: '2020-02-19T23:06:33.798Z',
+        created_by: {
+          full_name: 'Leslie Knope',
+          username: 'lknope',
+          email: 'leslie.knope@elastic.co',
+        },
+        owner: 'cases',
+        action: 'create',
         id: 'basic-comment-id',
         version: 'WzQ3LDFc',
         comment_id: 'basic-comment-id',
@@ -45,80 +49,27 @@ describe('Response', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from payload', () => {
       const query = UserActionsRt.decode([
-        { ...defaultRequest, payload: { ...defaultRequest[0].payload, foo: 'bar' } },
+        { ...defaultRequest[0], payload: { ...defaultRequest[0].payload, foo: 'bar' } },
       ]);
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
-      });
-    });
-  });
-
-  describe('CaseUserActionsDeprecatedResponseRt', () => {
-    const defaultRequest = [
-      {
-        type: ActionTypes.comment,
-        payload: {
-          comment: {
-            comment: 'this is a sample comment',
-            type: CommentType.user,
-            owner: 'cases',
-          },
-        },
-      },
-    ];
-
-    it('has expected attributes in request', () => {
-      const query = CaseUserActionsDeprecatedResponseRt.decode(defaultRequest);
-
-      expect(query).toMatchObject({
-        _tag: 'Right',
-        right: [...defaultRequest],
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = CaseUserActionsDeprecatedResponseRt.decode([
-        { ...defaultRequest[0], foo: 'bar' },
-      ]);
-
-      expect(query).toMatchObject({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });
 
   describe('CaseUserActionStatsResponseRt', () => {
     const defaultRequest = {
-      type: ActionTypes.pushed,
-      payload: {
-        externalService: {
-          connector_name: 'My SN connector',
-          external_id: 'external_id',
-          external_title: 'external title',
-          external_url: 'basicPush.com',
-          pushed_at: '2023-01-17T09:46:29.813Z',
-          pushed_by: {
-            full_name: 'Leslie Knope',
-            username: 'lknope',
-            email: 'leslie.knope@elastic.co',
-          },
-        },
-      },
+      total: 15,
+      total_comments: 10,
+      total_other_actions: 5,
     };
 
     it('has expected attributes in request', () => {
@@ -126,9 +77,7 @@ describe('Response', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -137,23 +86,7 @@ describe('Response', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
-      });
-    });
-
-    it('removes foo:bar attributes from payload', () => {
-      const query = CaseUserActionStatsResponseRt.decode({
-        ...defaultRequest,
-        payload: { ...defaultRequest.payload, foo: 'bar' },
-      });
-
-      expect(query).toMatchObject({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });

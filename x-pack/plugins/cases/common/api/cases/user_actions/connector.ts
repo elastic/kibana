@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connectors';
+import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connectors/connector';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 

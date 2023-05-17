@@ -24,9 +24,7 @@ describe('Comment', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -35,9 +33,7 @@ describe('Comment', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -48,9 +44,7 @@ describe('Comment', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });
@@ -71,9 +65,7 @@ describe('Comment', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -82,9 +74,7 @@ describe('Comment', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -96,9 +86,7 @@ describe('Comment', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });

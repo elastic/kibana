@@ -52,9 +52,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -63,9 +61,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });
@@ -82,9 +78,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -93,9 +87,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });
@@ -117,9 +109,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -128,9 +118,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -142,9 +130,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });
@@ -170,9 +156,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -181,9 +165,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -204,9 +186,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -227,9 +207,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });
@@ -755,7 +733,7 @@ describe('Comments', () => {
         page: 1,
         perPage: 10,
         sortOrder: 'asc',
-      }
+      },
     };
 
     it('has expected attributes in request', () => {
@@ -763,7 +741,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
@@ -772,7 +750,7 @@ describe('Comments', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });

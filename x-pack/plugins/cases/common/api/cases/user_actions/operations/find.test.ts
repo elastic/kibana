@@ -7,6 +7,7 @@
 
 import { UserActionFindResponseRt, UserActionFindRequestRt } from './find';
 import { ActionTypes } from '../common';
+import { CommentType } from '../../comment';
 
 describe('Find UserActions', () => {
   describe('UserActionFindRequestRt', () => {
@@ -24,6 +25,8 @@ describe('Find UserActions', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
+          page: 1,
+          perPage: 10,
         },
       });
     });
@@ -35,6 +38,8 @@ describe('Find UserActions', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
+          page: 1,
+          perPage: 10,
         },
       });
     });
@@ -46,17 +51,23 @@ describe('Find UserActions', () => {
         {
           type: ActionTypes.comment,
           payload: {
-            comment: 'Solve this fast!',
+            comment: {
+              comment: 'this is a sample comment',
+              type: CommentType.user,
+              owner: 'cases',
+            },
           },
-          owner: 'cases',
-          id: 'basic-comment-id',
-          version: 'WzQ3LDFc',
           created_at: '2020-02-19T23:06:33.798Z',
           created_by: {
             full_name: 'Leslie Knope',
             username: 'lknope',
             email: 'leslie.knope@elastic.co',
           },
+          owner: 'cases',
+          action: 'create',
+          id: 'basic-comment-id',
+          version: 'WzQ3LDFc',
+          comment_id: 'basic-comment-id',
         },
       ],
       page: 1,
@@ -69,9 +80,7 @@ describe('Find UserActions', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
 
@@ -80,9 +89,7 @@ describe('Find UserActions', () => {
 
       expect(query).toMatchObject({
         _tag: 'Right',
-        right: {
-          ...defaultRequest,
-        },
+        right: defaultRequest,
       });
     });
   });

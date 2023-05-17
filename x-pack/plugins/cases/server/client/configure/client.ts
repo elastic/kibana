@@ -257,13 +257,6 @@ async function update(
 
     const { version, ...queryWithoutVersion } = request;
 
-    /**
-     * Excess function does not supports union or intersection types.
-     * For that reason we need to check manually for excess properties
-     * in the partial attributes.
-     *
-     * The owner attribute should not be allowed.
-     */
     pipe(
       CasesConfigurePatchRt.types[0].decode(queryWithoutVersion),
       fold(throwErrors(Boom.badRequest), identity)

@@ -34,7 +34,6 @@ import {
   CommentsRt,
   CommentRt,
   CommentsFindResponseRt,
-  excess,
   throwErrors,
 } from '../../../common/api';
 import {
@@ -127,7 +126,7 @@ export async function find(
   } = clientArgs;
 
   const { caseID, queryParams } = pipe(
-    excess(FindCommentsArgsRt).decode(data),
+    (FindCommentsArgsRt).decode(data),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

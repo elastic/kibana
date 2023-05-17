@@ -220,14 +220,14 @@ describe('Case', () => {
       closed_by: null,
       created_at: '2020-02-19T23:06:33.798Z',
       created_by: {
-        fullName: 'Leslie Knope',
+        full_name: 'Leslie Knope',
         username: 'lknope',
         email: 'leslie.knope@elastic.co',
       },
       external_service: null,
       updated_at: '2020-02-20T15:02:57.995Z',
       updated_by: {
-        fullName: 'Leslie Knope',
+        full_name: 'Leslie Knope',
         username: 'lknope',
         email: 'leslie.knope@elastic.co',
       },
@@ -502,7 +502,7 @@ describe('Case', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CasesRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = CasesRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
       expect(query).toMatchObject({
         _tag: 'Right',

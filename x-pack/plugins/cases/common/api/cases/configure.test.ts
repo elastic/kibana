@@ -71,7 +71,7 @@ describe('configure', () => {
     const defaultRequest = {
       connector: serviceNow,
       closure_type: 'close-by-user',
-      version: 1,
+      version: 'WzQ3LDFd',
     };
 
     it('has expected attributes in request', () => {
@@ -133,10 +133,8 @@ describe('configure', () => {
 
   describe('CaseConfigureResponseRt', () => {
     const defaultRequest = {
-      connector: JiraConnector,
+      connector: serviceNow,
       closure_type: 'close-by-user',
-      version: 1,
-      owner: 'cases',
       created_at: '2020-02-19T23:06:33.798Z',
       created_by: {
         full_name: 'Leslie Knope',
@@ -144,16 +142,18 @@ describe('configure', () => {
         email: 'leslie.knope@elastic.co',
       },
       updated_at: '2020-02-19T23:06:33.798Z',
-      updated_by: {
-        full_name: 'Leslie Knope',
-        username: 'lknope',
-        email: 'leslie.knope@elastic.co',
-      },
-      source: 'not-a-case-field',
-      target: 'short_description',
-      action_type: 'overwrite',
+      updated_by: null,
+      mappings: [
+        {
+          source: 'description',
+          target: 'description',
+          action_type: 'overwrite',
+        },
+      ],
+      owner: 'cases',
+      version: 'WzQ3LDFd',
       id: 'case-id',
-      error: '',
+      error: null,
     };
 
     it('has expected attributes in request', () => {
