@@ -25,7 +25,7 @@ import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 // } from '@elastic/eui';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 // import { FieldIcon } from '@kbn/react-field';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { grokTypeToFieldType } from './get_field_names';
 import {
   splitGrok2,
@@ -262,6 +262,27 @@ export const AnalysisMarkup: FC<Props> = ({
       <div>First {NUMBER_OF_LINES} lines</div>
       <EuiSpacer size="m" /> */}
 
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>Message structure</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            onClick={() => update()}
+            disabled={originalGrokPattern! === results2.grok_pattern!}
+          >
+            Update
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
       <div style={{ lineHeight: '24px', fontSize: '12px', backgroundColor: '#f5f7fa' }}>
         <code>
           {markedUpLines.map((line, i) => {
@@ -294,14 +315,6 @@ export const AnalysisMarkup: FC<Props> = ({
       <EuiSpacer size="m" />
 
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={() => update()}
-            disabled={originalGrokPattern! === results2.grok_pattern!}
-          >
-            Update
-          </EuiButton>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={() =>

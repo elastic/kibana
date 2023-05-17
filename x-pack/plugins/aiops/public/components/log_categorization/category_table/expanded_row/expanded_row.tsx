@@ -38,6 +38,8 @@ interface ExpandedRowProps {
   openInDiscover(): void;
 }
 
+const DOC_COUNT = 1001;
+
 export const ExpandedRow: FC<ExpandedRowProps> = ({
   category,
   selectedField,
@@ -70,7 +72,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
         {
           params: {
             index: dataView.getIndexPattern(),
-            size: 1001,
+            size: DOC_COUNT,
             fields: ['message'],
             query: {
               bool: {
