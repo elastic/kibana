@@ -9,7 +9,7 @@ steps:
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
 
-  - command: umask; ls -alh .; ls -alh src/dev/build/lib/__fixtures__/foo_dir
+  - command: umask; ls -alh .
     label: umask debug
     timeout_in_minutes: 10
     agents:
