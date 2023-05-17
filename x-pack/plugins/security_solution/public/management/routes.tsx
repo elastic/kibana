@@ -37,10 +37,10 @@ const ManagementRoutes = () => (
 export const routes: SecuritySubPluginRoutes = [
   {
     path: MANAGE_PATH,
-    component: ManagementLanding,
+    component: React.memo(ManagementLanding),
   },
   {
     path: MANAGEMENT_PATH,
-    component: ManagementRoutes,
+    component: React.memo(ManagementRoutes),
   },
 ];
