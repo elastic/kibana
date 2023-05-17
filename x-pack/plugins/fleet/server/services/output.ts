@@ -407,14 +407,10 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(
-      SAVED_OBJECT_TYPE,
-      data,
-      {
-        overwrite: options?.overwrite || options?.fromPreconfiguration,
-        id,
-      }
-    );
+    const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
+      overwrite: options?.overwrite || options?.fromPreconfiguration,
+      id,
+    });
 
     return outputSavedObjectToOutput(newSo);
   }
