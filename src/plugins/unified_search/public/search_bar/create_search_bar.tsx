@@ -15,7 +15,6 @@ import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-pl
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { TextBasedLanguagesPluginStart } from '@kbn/text-based-languages/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -31,7 +30,6 @@ interface StatefulSearchBarDeps {
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
   unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
-  textBasedLanguages: TextBasedLanguagesPluginStart;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
@@ -148,7 +146,6 @@ export function createSearchBar({
   usageCollection,
   isScreenshotMode = false,
   unifiedSearch,
-  textBasedLanguages,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -205,7 +202,6 @@ export function createSearchBar({
           storage,
           usageCollection,
           unifiedSearch,
-          textBasedLanguages,
           ...core,
         }}
       >

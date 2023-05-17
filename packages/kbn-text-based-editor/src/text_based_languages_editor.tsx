@@ -58,6 +58,7 @@ export interface TextBasedLanguagesEditorProps {
   errors?: Error[];
   isDisabled?: boolean;
   isDarkMode?: boolean;
+  dataTestSubj?: string;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -89,6 +90,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   errors,
   isDisabled,
   isDarkMode,
+  dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -480,7 +482,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               }}
             >
               <div ref={resizeRef} css={styles.resizableContainer}>
-                <EuiFlexItem data-test-subj="TextBasedLangEditor" className={editorClassName}>
+                <EuiFlexItem
+                  data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
+                  className={editorClassName}
+                >
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge

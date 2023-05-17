@@ -66,13 +66,7 @@ export class UnifiedSearchPublicPlugin
 
   public start(
     core: CoreStart,
-    {
-      data,
-      dataViews,
-      uiActions,
-      screenshotMode,
-      textBasedLanguages,
-    }: UnifiedSearchStartDependencies
+    { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setTheme(core.theme);
     setOverlays(core.overlays);
@@ -88,7 +82,6 @@ export class UnifiedSearchPublicPlugin
       unifiedSearch: {
         autocomplete: autocompleteStart,
       },
-      textBasedLanguages,
     });
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);

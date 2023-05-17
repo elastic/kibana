@@ -9,6 +9,7 @@
 import { TextBasedLanguagesPlugin } from './plugin';
 export type { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
 export type { TextBasedLanguagesPluginStart } from './types';
+export { TextBasedLangEditor } from './create_editor';
 
 export function plugin() {
   return new TextBasedLanguagesPlugin();

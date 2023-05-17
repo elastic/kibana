@@ -7,21 +7,17 @@
  */
 
 import { Plugin, CoreStart } from '@kbn/core/public';
-import { createEditor } from './create_editor';
-import type { TextBasedLanguagesPluginStart } from './types';
+// import { createEditor } from './create_editor';
+import { setKibanaServices } from './kibana_services';
+// import type { TextBasedLanguagesPluginStart } from './types';
 
-export class TextBasedLanguagesPlugin implements Plugin<{}, TextBasedLanguagesPluginStart> {
+export class TextBasedLanguagesPlugin implements Plugin<{}, void> {
   public setup() {
     return {};
   }
 
-  public start(core: CoreStart): TextBasedLanguagesPluginStart {
-    const Editor = createEditor({
-      core,
-    });
-    return {
-      Editor,
-    };
+  public start(core: CoreStart): void {
+    setKibanaServices(core);
   }
 
   public stop() {}

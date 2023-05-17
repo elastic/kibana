@@ -6,28 +6,34 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
+import { untilPluginStartServicesReady } from './kibana_services';
 
-interface StatefulEditorDeps {
-  core: CoreStart;
-}
+export const TextBasedLangEditor = (props: TextBasedLanguagesEditorProps) => {
+  const { loading, value } = useAsync(() => {
+    const startServicesPromise = untilPluginStartServicesReady();
+    const modulePromise = import('@kbn/text-based-editor');
+    return Promise.all([startServicesPromise, modulePromise]);
+  }, []);
 
-const TextBasedLanguagesEditorLazy = React.lazy(() => import('@kbn/text-based-editor'));
-const TextBasedLanguagesEditor = withSuspense(TextBasedLanguagesEditorLazy);
+  const TextBasedLanguagesEditor = value?.[1]?.default;
+  const deps = value?.[0];
 
-export function createEditor({ core }: StatefulEditorDeps) {
-  return (props: TextBasedLanguagesEditorProps) => {
-    return (
-      <KibanaContextProvider
-        services={{
-          ...core,
-        }}
-      >
-        <TextBasedLanguagesEditor {...props} isDarkMode={core.uiSettings.get('theme:darkMode')} />
-      </KibanaContextProvider>
-    );
-  };
-}
+  if (loading || !deps || !TextBasedLanguagesEditor) return <EuiLoadingSpinner />;
+
+  return (
+    <KibanaContextProvider
+      services={{
+        ...deps.core,
+      }}
+    >
+      <TextBasedLanguagesEditor
+        {...props}
+        isDarkMode={deps.core.uiSettings.get('theme:darkMode')}
+      />
+    </KibanaContextProvider>
+  );
+};
