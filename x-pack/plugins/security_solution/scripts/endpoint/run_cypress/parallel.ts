@@ -283,7 +283,6 @@ export default async () => {
           CYPRESS_CONFIG_FILE: argv.configFile,
         },
       });
-      console.error('subprocess', subprocess);
       subprocess.stdout.pipe(process.stdout);
 
       try {
