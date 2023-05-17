@@ -8,11 +8,13 @@
 
 import { EuiButton } from '@elastic/eui';
 import { ChromeNavLink } from '@kbn/core-chrome-browser';
-import React, { ReactNode, useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../../services';
 import { useInitNavnode } from '../use_init_navnode';
+import { doRenderNode } from '../utils';
+import { UnRegisterFunction } from './navigation';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
 interface Props {
@@ -27,8 +29,10 @@ interface Props {
 export const NavigationItem = ({ children, id: _id, title: _title, link, onRemove }: Props) => {
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
+  const unregisterRef = useRef<UnRegisterFunction>();
 
-  const { id, title, deepLink } = useInitNavnode({ id: _id, title: _title, link }, { deepLinks });
+  const navNode = useInitNavnode({ id: _id, title: _title, link }, { deepLinks });
+  const { id, title, deepLink } = navNode;
   const { register } = useRegisterTreeNode();
 
   // Note: temporary UI. In future PR we'll have an EUI component here
@@ -51,14 +55,6 @@ export const NavigationItem = ({ children, id: _id, title: _title, link, onRemov
     return typeof children === 'function' ? children(deepLink) : wrapTextWithLink(children);
   }, [children, deepLink, title, wrapTextWithLink]);
 
-  const doRenderNode = useCallback(() => {
-    if (link && !deepLink) {
-      // If a link is provided, but no deepLink is found, don't render anything
-      return false;
-    }
-    return true;
-  }, [link, deepLink]);
-
   const renderTempUIToTestRemoveBehavior = () => (
     <>
       {' '}
@@ -69,16 +65,29 @@ export const NavigationItem = ({ children, id: _id, title: _title, link, onRemov
   );
 
   useEffect(() => {
-    const unRegister = register({ id, title, link });
+    unregisterRef.current = register({ id, title, link });
 
-    return unRegister;
+    return () => {
+      if (unregisterRef.current) {
+        unregisterRef.current(false);
+      }
+    };
   }, [register, id, title, link]);
 
-  if (!doRenderNode()) {
+  useEffect(() => {
+    return () => {
+      if (unregisterRef.current) {
+        unregisterRef.current(true);
+      }
+    };
+  }, []);
+
+  if (!doRenderNode(navNode)) {
     return null;
   }
 
   return (
+    // Note: temporary UI. In future PR we'll have an EUI component here
     <li style={{ paddingLeft: '20px', marginBottom: '5px' }}>
       {renderContent()}
       {renderTempUIToTestRemoveBehavior()}

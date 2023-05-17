@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 export interface InternalNavigationNode extends Omit<ChromeProjectNavigationNode, 'id'> {
   id: string;
+  title: string;
+  deepLink?: ChromeNavLink;
 }

@@ -22,7 +22,7 @@ import { InternalNavigationNode } from '../types';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
 
-export type UnRegisterFunction = () => void;
+export type UnRegisterFunction = (isUnmounted?: boolean) => void;
 
 export type RegisterFunction = (navNode: InternalNavigationNode) => UnRegisterFunction;
 
@@ -54,8 +54,8 @@ export function Navigation({ children, onRootItemRemove }: Props) {
         };
       });
 
-      return () => {
-        if (onRootItemRemove) {
+      return (isUnmounted = true) => {
+        if (onRootItemRemove && isUnmounted) {
           onRootItemRemove(navNode.id);
         }
         setNavigationItems((prevItems) => {

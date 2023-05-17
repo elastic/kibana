@@ -38,7 +38,6 @@ const navTree: ChromeProjectNavigationNode[] = [
           {
             id: 'item1',
             title: 'Group 1 > Group A > Item 1',
-            link: 'group1:groupA:item1',
           },
           {
             id: 'groupI',
@@ -52,27 +51,24 @@ const navTree: ChromeProjectNavigationNode[] = [
               {
                 id: 'item2',
                 title: 'Group 1 > Group A > Group 1 > Item 2',
-                link: 'group1:groupA:groupI:item2',
               },
             ],
           },
           {
             id: 'item2',
             title: 'Group 1 > Group A > Item 2',
-            link: 'group1:groupA:item2',
           },
         ],
       },
       {
         id: 'item3',
         title: 'Group 1: Item 3',
-        link: 'group1:item3',
       },
     ],
   },
   {
     id: 'group2',
-    title: 'Group 2',
+    link: 'group2',
     children: [
       {
         id: 'item1',
@@ -80,12 +76,12 @@ const navTree: ChromeProjectNavigationNode[] = [
         link: 'group2:item1',
       },
       {
-        id: 'item1',
+        id: 'item2',
         title: 'Group 2: Item 1',
         link: 'group2:item2',
       },
       {
-        id: 'item2',
+        id: 'item3',
         title: 'Group 2: Item 2',
         link: 'group2:item3',
       },
@@ -97,15 +93,15 @@ const navTree: ChromeProjectNavigationNode[] = [
   },
   {
     id: 'item2',
-    title: "I'm a link with no 'link' prop",
+    title: "I don't have a 'link' prop",
   },
 ];
 
 const baseDeeplink = {
   title: 'Title from deep link',
-        url: '',
-        href: 'https://elastic.co',
-        baseUrl: '',
+  url: '',
+  href: 'https://elastic.co',
+  baseUrl: '',
 };
 
 const deepLinks: ChromeNavLink[] = [
@@ -116,10 +112,15 @@ const deepLinks: ChromeNavLink[] = [
   {
     ...baseDeeplink,
     id: 'group1:groupA:groupI:item1',
-      },
+  },
   {
     ...baseDeeplink,
     id: 'item1',
+  },
+  {
+    ...baseDeeplink,
+    id: 'item2',
+    title: 'Foo',
   },
   {
     ...baseDeeplink,
@@ -128,6 +129,16 @@ const deepLinks: ChromeNavLink[] = [
   {
     ...baseDeeplink,
     id: 'group2:item3',
+  },
+  {
+    ...baseDeeplink,
+    id: 'group1:groupA',
+    title: 'Group title from deep link',
+  },
+  {
+    ...baseDeeplink,
+    id: 'group2',
+    title: 'Group title from deep link',
   },
 ];
 

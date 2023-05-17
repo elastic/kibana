@@ -7,6 +7,7 @@
  */
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { InternalNavigationNode } from './types';
 
 export const getIdFromNavigationNode = ({
   id: _id,
@@ -44,11 +45,15 @@ export const getTitleForNavigationNode = (
   let title = _title;
 
   if (title.trim().length === 0) {
-    if (!link) {
-      throw new Error(`Deeplink id required if no "title" is provided (node id: ${id}))`);
-    }
-
     title = deepLink?.title ?? '';
   }
   return { title };
+};
+
+export const doRenderNode = ({ link, deepLink }: InternalNavigationNode) => {
+  if (link && !deepLink) {
+    // If a link is provided, but no deepLink is found, don't render anything
+    return false;
+  }
+  return true;
 };

@@ -7,6 +7,7 @@
  */
 
 import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { InternalNavigationNode } from './types';
 import {
   getIdFromNavigationNode,
   getDeepLinkFromNavigationNode,
@@ -16,12 +17,18 @@ import {
 export const useInitNavnode = (
   navNode: ChromeProjectNavigationNode,
   { deepLinks }: { deepLinks: Readonly<ChromeNavLink[]> }
-) => {
+): InternalNavigationNode => {
   const { id } = getIdFromNavigationNode(navNode);
+
+  if (!navNode.title && !navNode.link) {
+    throw new Error(`Id or link prop missing for navigation item [${id}]`);
+  }
+
   const deepLink = getDeepLinkFromNavigationNode(navNode, { deepLinks });
   const { title } = getTitleForNavigationNode({ ...navNode, id }, { deepLink });
 
   return {
+    ...navNode,
     id,
     title,
     deepLink,

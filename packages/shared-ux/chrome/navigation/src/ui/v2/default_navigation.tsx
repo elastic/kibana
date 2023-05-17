@@ -17,47 +17,65 @@ interface Props {
 
 export const DefaultNavigation: FC<Props> = ({ navTree }) => {
   // Temp logic to demo removing items from the tree
-  const [removedItems, setRemovedItems] = useState<string[]>([]);
+  const [removedItems, setRemovedItems] = useState<Set<string>>(new Set());
 
-  const onRemove = useCallback((id: string) => {
-    setRemovedItems((prevItems) => [...prevItems, id]);
+  const onRemove = useCallback((path: string[]) => {
+    setRemovedItems((prevItems) => {
+      const newItems = new Set(prevItems);
+      newItems.add(path.join('.'));
+      return newItems;
+    });
   }, []);
 
   const renderItems = useCallback(
-    (items: ChromeProjectNavigationNode[], parent: string = '') => {
+    (items: ChromeProjectNavigationNode[], path: string[] = []) => {
       const filtered = items.filter(({ id: _id, link = '' }) => {
-        const id = `${parent}${_id ?? link}`;
-        return !removedItems.includes(id ?? link);
+        const id = _id ?? link;
+        const itemPath = [...path, id ?? ''].join('.');
+        return !removedItems.has(itemPath);
       });
 
-      return filtered.map((item) => (
-        <React.Fragment key={item.id}>
-          {item.children ? (
-            <Navigation.Group
-              id={item.id}
-              title={item.title}
-              onRemove={() => onRemove(`${parent}${item.id}`)}
-            >
-              {renderItems(item.children, `${parent}${item.id}`)}
-            </Navigation.Group>
-          ) : (
-            <Navigation.Item
-              id={item.id}
-              link={item.link}
-              title={item.title}
-              onRemove={() => onRemove(`${parent}${item.id}`)}
-            />
-          )}
-        </React.Fragment>
-      ));
+      return filtered.map((item) => {
+        const id = item.id ?? item.link;
+
+        return (
+          <React.Fragment key={item.id}>
+            {item.children ? (
+              <Navigation.Group
+                id={item.id}
+                link={item.link}
+                title={item.title}
+                onRemove={() => onRemove([...path, id ?? ''])}
+              >
+                {renderItems(item.children, [...path, id ?? ''])}
+              </Navigation.Group>
+            ) : (
+              <Navigation.Item
+                id={item.id}
+                link={item.link}
+                title={item.title}
+                onRemove={() => onRemove([...path, id ?? ''])}
+              />
+            )}
+          </React.Fragment>
+        );
+      });
     },
     [removedItems, onRemove]
   );
 
   const filteredNavTree = navTree.filter(({ id: _id, link }) => {
     const id = _id ?? link;
-    return !removedItems.includes(id ?? '');
+    return !removedItems.has(id ?? '');
   });
 
-  return <Navigation onRootItemRemove={onRemove}>{renderItems(filteredNavTree)}</Navigation>;
+  return (
+    <Navigation
+      onRootItemRemove={(id) => {
+        onRemove([id]);
+      }}
+    >
+      {renderItems(filteredNavTree)}
+    </Navigation>
+  );
 };
