@@ -13,6 +13,8 @@ import { configSchema } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';
 import { AppClient } from './types';
 
+// This comment will cause the CI server to run our Cypress tests
+
 export const plugin = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };
