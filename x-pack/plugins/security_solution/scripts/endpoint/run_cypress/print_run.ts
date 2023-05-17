@@ -324,14 +324,14 @@ function formatPath(name: string, n: number | undefined, pathColor = 'reset') {
 export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[]) {
   const parsedResults = _.reduce(
     results,
-    (acc, result) => {
+    (acc: CypressCommandLine.CypressRunResult, result) => {
       acc.status = result.status;
       acc.startedTestsAt =
         acc.startedTestsAt && new Date(result.startedTestsAt) > new Date(acc.startedTestsAt)
           ? acc.startedTestsAt
           : result.startedTestsAt;
       acc.endedTestsAt =
-        acc.endedTestAt && new Date(result.endedTestsAt) < new Date(acc.endedTestsAt)
+        acc.endedTestsAt && new Date(result.endedTestsAt) < new Date(acc.endedTestsAt)
           ? acc.endedTestsAt
           : result.endedTestsAt;
       acc.totalDuration = (acc.totalDuration ?? 0) + result.totalDuration;
@@ -348,10 +348,10 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
       acc.osVersion = result.osVersion;
       acc.cypressVersion = result.cypressVersion;
       acc.config = result.config;
-      acc.runs = [].concat(acc.runs ?? [], result.runs);
+      acc.runs = ([] as CypressCommandLine.RunResult[]).concat(acc.runs ?? [], result.runs);
       return acc;
     },
-    {}
+    {} as CypressCommandLine.CypressRunResult
   );
 
   const logEmptyLine = () => console.log('');
@@ -360,7 +360,7 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
 
   logEmptyLine();
   terminal.divider('=');
-  logEmptyLine('');
+  logEmptyLine();
   terminal.header('Run Finished', {
     color: ['reset'],
   });

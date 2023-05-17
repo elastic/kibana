@@ -15,6 +15,7 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
+
 import {
   FunctionalTestRunner,
   readConfigFile,
@@ -301,7 +302,7 @@ export default async () => {
     },
     { concurrency: 1 }
   ).then((results) => {
-    renderSummaryTable(results);
+    renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
     process.exit(_.some(results, (result) => result > 0) ? 1 : 0);
   });
   // ).then(() => {
