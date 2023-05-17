@@ -15,7 +15,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
-import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
+import { registerDataHandler, unregisterDataHandler } from '../../services/data_handler';
 import { OverviewPage } from './overview';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
