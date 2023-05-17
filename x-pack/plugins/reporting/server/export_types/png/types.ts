@@ -20,7 +20,8 @@ import type {
 import * as Rx from 'rxjs';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { CreateJobFn, PngScreenshotOptions, RunTaskFn } from '../../types';
+import { switchMap } from 'rxjs';
+import { CreateJobFn, PngScreenshotOptions, RunTaskFn } from '../../types';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../common/constants';
 import { ReportingConfigType, createConfig } from '../../config';
 import { ReportingServerInfo } from '../../core';
@@ -37,7 +38,7 @@ export type CreateJobFnFactory<CreateJobFnType> = (
 
 export type RunTaskFnFactory<RunTaskFnType> = (reporting: PngCore, logger: Logger) => RunTaskFnType;
 
-interface PngInternalSetup {
+interface PngCoreSetup {
   router?: IRouter<CustomRequestHandlerContext<{}>>;
   docLinks: DocLinksServiceSetup;
   security?: SecurityPluginSetup;
@@ -45,7 +46,7 @@ interface PngInternalSetup {
   usageCounter?: UsageCounter;
 }
 
-interface PngInternalStart {
+interface PngCoreStart {
   screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
 }
@@ -54,8 +55,9 @@ export class PngCore {
   config: ReportingConfigType;
   router?: IRouter<CustomRequestHandlerContext<{}>>;
   deprecatedAllowedRoles: false | string[];
-  pluginSetupDeps?: PngInternalSetup;
-  pluginStartDeps?: PngInternalStart;
+  pluginSetupDeps?: PngCoreSetup;
+  pluginStartDeps?: PngCoreStart;
+  readonly pluginStart$ = new Rx.ReplaySubject<PngCoreStart>(); // observe async background startDeps
 
   constructor(
     public core: CoreSetup,
@@ -74,12 +76,15 @@ export class PngCore {
     }
     return this.pluginSetupDeps;
   }
-
-  public getPluginStartDeps() {
-    if (!this.pluginStartDeps) {
-      throw new Error('Method not implemented.');
+  /*
+   * Gives async access to the startDeps
+   */
+  public async getPluginStartDeps() {
+    if (this.pluginStartDeps) {
+      return this.pluginStartDeps;
     }
-    return this.pluginStartDeps;
+
+    return await Rx.firstValueFrom(this.pluginStart$);
   }
   /*
    * Gives synchronous access to the config
@@ -106,16 +111,18 @@ export class PngCore {
 
   getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
   getScreenshots(options: PngScreenshotOptions) {
-    return Rx.defer(() => {
-      return this.getPluginStartDeps().screenshotting!.getScreenshots({
-        ...options,
-        urls: options.urls.map((url) =>
-          typeof url === 'string'
-            ? url
-            : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-        ),
-      } as ScreenshotOptions);
-    });
+    return Rx.defer(() => this.getPluginStartDeps()).pipe(
+      switchMap(({ screenshotting }) => {
+        return screenshotting!.getScreenshots({
+          ...options,
+          urls: options.urls.map((url) =>
+            typeof url === 'string'
+              ? url
+              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+          ),
+        } as ScreenshotOptions);
+      })
+    );
   }
 
   /*
