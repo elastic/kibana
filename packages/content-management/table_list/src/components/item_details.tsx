@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiTitle, EuiSpacer, EuiHighlight } from '@elastic/eui';
+import { EuiText, EuiLink, EuiSpacer, EuiHighlight } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import type { Tag } from '../types';

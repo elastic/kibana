@@ -531,7 +531,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (v) => showEditActionForItem ? showEditActionForItem(v) : true,
+          available: (v) => (showEditActionForItem ? showEditActionForItem(v) : true),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
         });

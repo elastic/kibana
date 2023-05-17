@@ -323,7 +323,9 @@ export const VisualizeListing = () => {
         defaultMessage: 'Visualize Library',
       })}
       getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) =>
-        readOnly ? undefined : getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
+        readOnly
+          ? undefined
+          : getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
       }
     >
       {dashboardCapabilities.createNew && (
