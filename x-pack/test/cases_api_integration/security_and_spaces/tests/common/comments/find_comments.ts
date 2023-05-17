@@ -110,77 +110,31 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy paths', () => {
-      it('400s when query is wrong type', async () => {
-        const postedCase = await createCase(supertest, postCaseReq, 200);
+      for (const errorScenario of [
+        { name: 'field is wrong type', queryParams: { perPage: true } },
+        { name: 'field is unknown', queryParams: { foo: 'bar' } },
+        { name: 'page > 10k', queryParams: { page: 10001 } },
+        { name: 'perPage > 10k', queryParams: { perPage: 10001 } },
+        { name: 'page * perPage > 10k', queryParams: { page: 2, perPage: 9001 } },
+      ]) {
+        it(`400s when ${errorScenario.name}`, async () => {
+          const postedCase = await createCase(supertest, postCaseReq, 200);
 
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-          expectedHttpCode: 200,
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: postCommentUserReq,
+            expectedHttpCode: 200,
+          });
+
+          await findAttachments({
+            supertest,
+            caseId: postedCase.id,
+            query: errorScenario.queryParams,
+            expectedHttpCode: 400,
+          });
         });
-
-        await findAttachments({
-          supertest,
-          caseId: postedCase.id,
-          query: { perPage: true },
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('400s when field is unkown', async () => {
-        const postedCase = await createCase(supertest, postCaseReq, 200);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-          expectedHttpCode: 200,
-        });
-
-        await findAttachments({
-          supertest,
-          caseId: postedCase.id,
-          query: { foo: 'bar' },
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('400s when page is 0 but pageSize > 10k', async () => {
-        const postedCase = await createCase(supertest, postCaseReq, 200);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-          expectedHttpCode: 200,
-        });
-
-        await findAttachments({
-          supertest,
-          caseId: postedCase.id,
-          query: { page: 0, perPage: 10001 },
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('400s when page * perPage > 10k', async () => {
-        const postedCase = await createCase(supertest, postCaseReq, 200);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-          expectedHttpCode: 200,
-        });
-
-        await findAttachments({
-          supertest,
-          caseId: postedCase.id,
-          query: { page: 2, perPage: 9001 },
-          expectedHttpCode: 400,
-        });
-      });
+      }
     });
 
     describe('rbac', () => {

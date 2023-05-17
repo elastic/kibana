@@ -23,11 +23,7 @@ import type {
 } from '../../../common/api';
 import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   FindCommentsArgsRt,
   CommentType,
@@ -48,6 +44,7 @@ import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
+import { validateFindCommentsPagination } from './validators';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -131,16 +128,7 @@ export async function find(
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  if (
-    typeof queryParams?.page === 'number' &&
-    typeof queryParams?.perPage === 'number' &&
-    (queryParams?.perPage > MAX_DOCS_PER_PAGE ||
-      queryParams?.page * queryParams?.perPage > MAX_DOCS_PER_PAGE)
-  ) {
-    throw Boom.badRequest(
-      'The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
-    );
-  }
+  validateFindCommentsPagination(queryParams);
 
   try {
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
