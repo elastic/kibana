@@ -49,7 +49,6 @@ import {
   getExecutionContext,
   getExpressions,
   getTheme,
-  getTypes,
   getUiActions,
 } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
@@ -171,8 +170,7 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
 
     if (this.attributeService) {
-      const visType = getTypes().get(vis.type.name);
-      const readOnly = Boolean(visType.hidden);
+      const readOnly = Boolean(vis.type.hidden);
       const isByValue = !this.inputIsRefType(initialInput);
       const editable = readOnly
         ? false
