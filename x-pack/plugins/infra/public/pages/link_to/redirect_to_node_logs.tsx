@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LinkDescriptor } from '@kbn/observability-plugin/public';
+import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
