@@ -38,6 +38,7 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
 }) => {
   const { http } = useKibanaServices();
   const { euiTheme } = useEuiTheme();
+
   const panelItems = languages.map((language) => (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
@@ -63,8 +64,8 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
               <EuiImage
                 alt=""
                 src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${language.iconType}`)}
-                height="100px"
-                width="128px"
+                height="32px"
+                width="32px"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -73,13 +74,9 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
                 color={selectedLanguage === language ? 'default' : 'subdued'}
               >
                 <h5>
-                  <FormattedMessage
-                    id="xpack.serverlessSearch.selectClient.language.name"
-                    defaultMessage="{languageName}"
-                    values={{
-                      languageName: language.name === Languages.CURL ? 'cURL' : `${language.name}`,
-                    }}
-                  />
+                  {i18n.translate('xpack.serverlessSearch.selectClient.language.name', {
+                    defaultMessage: language.name,
+                  })}
                 </h5>
               </EuiText>
             </EuiFlexItem>
@@ -97,7 +94,7 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
           defaultMessage="Elastic builds and maintains clients in several popular languages and our community has contributed many more. Select your favorite language client or dive into the {console} to get started."
           values={{
             console: (
-              <EuiLink href="../app/dev_tools#/console">
+              <EuiLink href={http.basePath.prepend(`/app/dev_tools#/console`)}>
                 {i18n.translate('xpack.serverlessSearch.selectClient.description.console.link', {
                   defaultMessage: 'Console',
                 })}
@@ -119,22 +116,19 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGrid gutterSize="l" direction="row" columns={3} alignItems="center">
-                <EuiFlexItem>
-                  <EuiFlexGrid direction="column" gutterSize="s">
-                    <EuiFlexItem>{panelItems[0]}</EuiFlexItem>
-                  </EuiFlexGrid>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGrid direction="column" gutterSize="s">
-                    <EuiFlexItem>{panelItems[1]}</EuiFlexItem>
-                  </EuiFlexGrid>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGrid direction="column" gutterSize="s">
-                    <EuiFlexItem>{panelItems[2]}</EuiFlexItem>
-                  </EuiFlexGrid>
-                </EuiFlexItem>
+              <EuiFlexGrid
+                gutterSize="l"
+                direction="row"
+                columns={panelItems.length > 3 ? 4 : 3}
+                alignItems="center"
+              >
+                {panelItems.map((panelItem, index) => (
+                  <EuiFlexItem key={`panelItem.${index}`}>
+                    <EuiFlexGrid direction="column" gutterSize="s">
+                      <EuiFlexItem>{panelItem}</EuiFlexItem>
+                    </EuiFlexGrid>
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGrid>
             </EuiFlexItem>
 
@@ -147,7 +141,10 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
                   })}
 
                   <span>
-                    <EuiLink target="_blank" href="../app/dev_tools#/console">
+                    <EuiLink
+                      target="_blank"
+                      href={http.basePath.prepend(`/app/dev_tools#/console`)}
+                    >
                       {i18n.translate('xpack.serverlessSearch.selectClient.callout.link', {
                         defaultMessage: 'Try Console now',
                       })}
