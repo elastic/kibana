@@ -86,7 +86,7 @@ steps:
   #     image: family/brian-ubuntu-2004
   #     imageProject: elastic-images-qa
   #     machineType: n2-standard-4
-  minCpuPlatform: 'Intel Cascade Lake'
+  #     minCpuPlatform: 'Intel Cascade Lake'
   #   env:
   #     FTR_CONFIG_GROUP_KEY: ftr_configs_0
   #   retry:
