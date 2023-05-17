@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`alertType alert type creation structure is the expected value 1`] = `
+exports[`ruleType alert type creation structure is the expected value 1`] = `
 Object {
   "context": Array [
     Object {
