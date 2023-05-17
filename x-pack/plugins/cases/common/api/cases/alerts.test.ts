@@ -10,9 +10,7 @@ import { AlertResponseRt } from './alerts';
 describe('Alerts', () => {
   describe('AlertResponseRt', () => {
     it('has expected attributes in request', () => {
-      const defaultRequest = [
-        { id: '1', index: '2', attached_at: '3' }
-      ];
+      const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
 
       const query = AlertResponseRt.decode(defaultRequest);
 
@@ -36,9 +34,7 @@ describe('Alerts', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const defaultRequest = [
-        { id: '1', index: '2', attached_at: '3' }
-      ];
+      const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
       const query = AlertResponseRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
       expect(query).toMatchObject({
