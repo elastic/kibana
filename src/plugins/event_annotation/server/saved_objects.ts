@@ -14,7 +14,8 @@ import {
 } from '@kbn/core/server';
 
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '../common/constants';
+import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
+import { ANNOTATIONS_LISTING_VIEW_ID, EVENT_ANNOTATION_GROUP_TYPE } from '../common/constants';
 import { EventAnnotationGroupAttributes } from '../common/types';
 
 export function setupSavedObjects(coreSetup: CoreSetup) {
@@ -28,6 +29,11 @@ export function setupSavedObjects(coreSetup: CoreSetup) {
       defaultSearchField: 'title',
       importableAndExportable: true,
       getTitle: (obj: { attributes: EventAnnotationGroupAttributes }) => obj.attributes.title,
+      getInAppUrl: (obj: { id: string }) => ({
+        // TODO link to specific object
+        path: `/app/${VISUALIZE_APP_NAME}#/${ANNOTATIONS_LISTING_VIEW_ID}`,
+        uiCapabilitiesPath: 'visualize.show',
+      }),
     },
     migrations: () => {
       const dataViewMigrations = DataViewPersistableStateService.getAllMigrations();
