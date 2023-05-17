@@ -15,11 +15,26 @@ import type {
 import { DataViewAttributes } from '../../types';
 import { DataViewContentType } from './constants';
 
+interface DataViewCreateOptions {
+  id?: SavedObjectCreateOptions['id'];
+  initialNamespaces?: SavedObjectCreateOptions['initialNamespaces'];
+}
+
+interface DataViewUpdateOptions {
+  version?: SavedObjectUpdateOptions['version'];
+  refresh?: SavedObjectUpdateOptions['refresh'];
+  retryOnConflict?: SavedObjectUpdateOptions['retryOnConflict'];
+}
+
+interface DataViewSearchOptions {
+  searchFields?: SavedObjectSearchOptions['searchFields'];
+  fields?: SavedObjectSearchOptions['fields'];
+}
+
 export type DataViewCrudTypes = ContentManagementCrudTypes<
   DataViewContentType,
   DataViewAttributes,
-  // todo limit these
-  SavedObjectCreateOptions,
-  SavedObjectUpdateOptions,
-  SavedObjectSearchOptions
+  DataViewCreateOptions,
+  DataViewUpdateOptions,
+  DataViewSearchOptions
 >;

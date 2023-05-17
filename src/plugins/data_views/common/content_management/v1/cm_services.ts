@@ -64,7 +64,6 @@ const dataViewSearchOptionsSchema = schema.object({
 const dataViewUpdateOptionsSchema = schema.object({
   version: updateOptionsSchema.version,
   refresh: updateOptionsSchema.refresh,
-  upsert: updateOptionsSchema.upsert(dataViewAttributesSchema),
   retryOnConflict: updateOptionsSchema.retryOnConflict,
 });
 
