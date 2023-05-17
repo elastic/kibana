@@ -79,7 +79,7 @@ function DataStreamsTable({ data }: { data?: APIResponseType }) {
         ) : (
           <>
             {templateName}&nbsp;
-            <EuiBadge color="warning">Non-standard template name</EuiBadge>
+            <EuiBadge color="warning">Non-standard template</EuiBadge>
           </>
         );
       },
