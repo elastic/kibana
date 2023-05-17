@@ -15,7 +15,6 @@ import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import type { ChromeProjectNavigation, SideNavComponent } from './project_navigation';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -162,26 +161,4 @@ export interface ChromeStart {
    * Get an observable of the current style type of the chrome.
    */
   getChromeStyle$(): Observable<ChromeStyle>;
-  /**
-   * Configuration for serverless projects
-   */
-  project: {
-    /**
-     * Sets the project navigation config to be used for rendering project navigation.
-     * It is used for default project sidenav, project breadcrumbs, tracking active deep link.
-     * @param projectNavigation The project navigation config
-     *
-     * @remarks Has no effect if the chrome style is not `project`.
-     */
-    setNavigation(projectNavigation: ChromeProjectNavigation): void;
-
-    /**
-     * Set custom project sidenav component to be used instead of the default project sidenav.
-     * @param getter A function returning a CustomNavigationComponent.
-     * This component will receive Chrome navigation state as props (not yet implemented)
-     *
-     * @remarks Has no effect if the chrome style is not `project`.
-     */
-    setSideNavComponent(component: SideNavComponent | null): void;
-  };
 }
