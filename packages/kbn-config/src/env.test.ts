@@ -21,7 +21,7 @@ const packageInfos: RawPackageInfo = {
   build: {
     number: 42,
     sha: 'one',
-    date: BUILD_DATE,
+    date: new Date(BUILD_DATE).toISOString(),
   },
 };
 
