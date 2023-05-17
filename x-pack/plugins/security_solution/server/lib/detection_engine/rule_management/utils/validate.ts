@@ -9,6 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
+import { isEqual, xorWith } from 'lodash';
 import {
   RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
@@ -26,7 +27,7 @@ import type { RuleParams, RuleAlertType, UnifiedQueryRuleParams } from '../../ru
 import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
-import { findDifferenceInArrays, transform } from './utils';
+import { transform } from './utils';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 import type {
   ResponseAction,
@@ -95,9 +96,10 @@ export const validateResponseActionsPermissions = async (
 
   const endpointAuthz = await securitySolution.getEndpointAuthz();
 
-  const differences = findDifferenceInArrays<ResponseAction, RuleResponseAction>(
+  const differences = xorWith<ResponseAction | RuleResponseAction>(
     ruleUpdate.response_actions,
-    existingRule?.params?.responseActions
+    existingRule?.params?.responseActions,
+    isEqual
   );
 
   differences.forEach((action) => {
