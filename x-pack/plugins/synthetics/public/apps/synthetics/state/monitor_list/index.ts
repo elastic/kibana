@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import {

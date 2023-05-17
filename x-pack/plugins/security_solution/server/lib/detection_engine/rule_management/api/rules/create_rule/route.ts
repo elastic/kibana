@@ -22,7 +22,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { createRules } from '../../../logic/crud/create_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { transformValidate } from '../../../utils/validate';
+import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const createRuleRoute = (
   router: SecuritySolutionPluginRouter,
@@ -92,6 +92,8 @@ export const createRuleRoute = (
           ruleRuleId: undefined,
           ruleId: undefined,
         });
+
+        await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
         const createdRule = await createRules({
           rulesClient,
