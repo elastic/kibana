@@ -13,7 +13,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { MemoryProtection } from './policy_forms/protections/memory';
 import { BehaviorProtection } from './policy_forms/protections/behavior';
-import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
+import { LinuxEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
 import { AttackSurfaceReductionForm } from './components/attack_surface_reduction_form';
@@ -108,7 +108,7 @@ export const PolicyDetailsForm = memo(() => {
       <EuiSpacer size="s" />
       <WindowsEvents />
       <EuiSpacer size="l" />
-      <MacEvents />
+
       <EuiSpacer size="l" />
       <LinuxEvents />
       <EuiSpacer size="l" />

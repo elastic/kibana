@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo } from 'react';
+import type { PolicyData } from '../../../../../../../common/endpoint/types';
+import { LinuxEvents, MacEvents, WindowsEvents } from '../../policy_forms/events';
+import { PolicyFormRowLayout } from './policy_form_row_layout';
+
+export interface PolicyFormEventCollectionProps {
+  policyDetails: PolicyData;
+}
+
+export const PolicyFormEventCollection = memo<PolicyFormEventCollectionProps>((props) => {
+  return (
+    <PolicyFormRowLayout
+      label={'Event Collection'}
+      windows={<WindowsEvents />}
+      macos={<MacEvents />}
+      linux={<LinuxEvents />}
+    />
+  );
+});
+PolicyFormEventCollection.displayName = 'PolicyFormEventCollection';
