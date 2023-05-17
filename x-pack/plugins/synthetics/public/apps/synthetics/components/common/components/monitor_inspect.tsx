@@ -132,31 +132,37 @@ const formatContent = (result: MonitorInspectResponse) => {
   );
 };
 
-const FORMATTED_CONFIG_LABEL = i18n.translate('xpack.uptime.monitorInspect.formattedConfigLabel', {
-  defaultMessage: 'Formatted configuration',
-});
+const FORMATTED_CONFIG_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.formattedConfigLabel',
+  {
+    defaultMessage: 'Formatted configuration',
+  }
+);
 
 const VALID_CONFIG_LABEL = i18n.translate(
-  'xpack.uptime.monitorInspect.formattedConfigLabel.valid',
+  'xpack.synthetics.monitorInspect.formattedConfigLabel.valid',
   {
     defaultMessage: 'Only valid form configurations can be inspected.',
   }
 );
 
 const FORMATTED_CONFIG_DESCRIPTION = i18n.translate(
-  'xpack.uptime.monitorInspect.formattedConfigLabel.description',
+  'xpack.synthetics.monitorInspect.formattedConfigLabel.description',
   {
     defaultMessage: 'View formatted configuration for this monitor.',
   }
 );
-const CLOSE_LABEL = i18n.translate('xpack.uptime.monitorInspect.closeLabel', {
+const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.closeLabel', {
   defaultMessage: 'Close',
 });
 
-export const SOURCE_CODE_LABEL = i18n.translate('xpack.uptime.monitorInspect.sourceCodeLabel', {
+export const SOURCE_CODE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.sourceCodeLabel', {
   defaultMessage: 'Source code',
 });
 
-export const INSPECT_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorInspect.inspectLabel', {
-  defaultMessage: 'Inspect configuration',
-});
+export const INSPECT_MONITOR_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.inspectLabel',
+  {
+    defaultMessage: 'Inspect configuration',
+  }
+);
