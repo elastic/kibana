@@ -36,7 +36,7 @@ export function DiagnosticsIndexTemplates() {
   return (
     <>
       <MatchingIndexTemplates data={data} />
-      <ExpectedIndexTemplates data={data} />
+      <DefaultApmIndexTemplates data={data} />
     </>
   );
 }
@@ -120,53 +120,12 @@ function MatchingIndexTemplates({
   );
 }
 
-// export function getIndexTemplatesByIndexPattern(
-//   data: APIResponseType | undefined
-// ) {
-//   return data?.matchingIndexTemplates
-//     .map(({ indexPattern, overlappingTemplates }) => {
-//       const indexTemplates = overlappingTemplates?.map(
-//         (overlappingTemplate) => {
-//           const expectedIndexTemplates = Object.keys(
-//             data.expectedIndexTemplateStates
-//           );
-
-//           const defaultXpackIndexTemplates = ['logs', 'metrics'];
-//           const templateName = overlappingTemplate.name;
-//           const templateIndexPattern =
-//             overlappingTemplate.templateIndexPatterns.join(', ');
-//           const { priority } = overlappingTemplate;
-
-//           const isNonStandard = [
-//             ...expectedIndexTemplates,
-//             ...defaultXpackIndexTemplates,
-//           ].every((expectedIndexTemplate) => {
-//             const notMatch = !templateName.startsWith(expectedIndexTemplate);
-//             return notMatch;
-//           });
-
-//           return {
-//             isNonStandard,
-//             templateName,
-//             templateIndexPattern,
-//             priority,
-//           };
-//         }
-//       );
-
-//       return { indexPattern, indexTemplates };
-//     })
-//     .filter(({ indexTemplates }) => {
-//       return indexTemplates && indexTemplates.length > 0;
-//     });
-// }
-
-function ExpectedIndexTemplates({
+function DefaultApmIndexTemplates({
   data,
 }: {
   data: APIResponseType | undefined;
 }) {
-  const items = Object.entries(data?.expectedIndexTemplateStates ?? {}).map(
+  const items = Object.entries(data?.defaultApmIndexTemplateStates ?? {}).map(
     ([defaultName, item]) => {
       return {
         ...item,

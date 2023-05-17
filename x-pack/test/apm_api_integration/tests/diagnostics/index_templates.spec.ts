@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           endpoint: 'GET /internal/apm/diagnostics/index_templates',
         });
         expect(status).to.be(200);
-        const noApmIndexTemplateExists = Object.values(body.expectedIndexTemplateStates).every(
+        const noApmIndexTemplateExists = Object.values(body.defaultApmIndexTemplateStates).every(
           ({ exists }) => exists === false
         );
         expect(noApmIndexTemplateExists).to.eql(true);
@@ -117,7 +117,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(status).to.be(200);
 
-        const everyApmIndexTemplateExists = Object.values(body.expectedIndexTemplateStates).every(
+        const everyApmIndexTemplateExists = Object.values(body.defaultApmIndexTemplateStates).every(
           ({ exists }) => exists === true
         );
 

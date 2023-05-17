@@ -45,7 +45,7 @@ export function FieldMappingStatus() {
             })}
 
         <EuiLink
-          data-test-subj="apmExpectedIndexTemplatesInstalledStatusAsLink"
+          data-test-subj="apmFieldMappingStatusSeeDetailsLink"
           href={router.link('/diagnostics/invalid-field-mappings')}
         >
           See details

@@ -20,11 +20,11 @@ export function IndexTemplatesStatus() {
   }, []);
 
   const hasNonStandardIndexTemplates = getHasNonStandardIndexTemplates(data);
-  const isEveryExpectedIndexTemplateInstalled =
-    getIsEveryExpectedIndexTemplateInstalled(data);
+  const isEveryDefaultApmIndexTemplateInstalled =
+    getIsEveryDefaultApmIndexTemplateInstalled(data);
 
   const isOk =
-    isEveryExpectedIndexTemplateInstalled && !hasNonStandardIndexTemplates;
+    isEveryDefaultApmIndexTemplateInstalled && !hasNonStandardIndexTemplates;
 
   return (
     <EuiFlexGroup>
@@ -42,12 +42,12 @@ export function IndexTemplatesStatus() {
       <EuiFlexItem grow={10}>
         {isOk
           ? 'Index templates: No problems found'
-          : isEveryExpectedIndexTemplateInstalled === false
+          : isEveryDefaultApmIndexTemplateInstalled === false
           ? 'Index templates: Not all expected index templates exist'
           : 'Index templates: Non standard index templates found'}
 
         <EuiLink
-          data-test-subj="apmExpectedIndexTemplatesInstalledStatusAsLink"
+          data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
           href={router.link('/diagnostics/index-templates')}
         >
           See details
@@ -63,10 +63,10 @@ function getHasNonStandardIndexTemplates(data: APIResponseType | undefined) {
   });
 }
 
-function getIsEveryExpectedIndexTemplateInstalled(
+function getIsEveryDefaultApmIndexTemplateInstalled(
   data: APIResponseType | undefined
 ) {
-  return Object.values(data?.expectedIndexTemplateStates ?? {}).every(
+  return Object.values(data?.defaultApmIndexTemplateStates ?? {}).every(
     (state) => state.exists
   );
 }

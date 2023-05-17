@@ -14,14 +14,14 @@ export function getUniqueApmIndices(indices: APMEventClient['indices']) {
   );
 }
 
-type ExpectedIndexTemplateStates = Record<
+type DefaultApmIndexTemplateStates = Record<
   string,
   { exists: boolean; name?: string | undefined }
 >;
 
 export async function getMatchingIndexTemplates(
   apmEventClient: APMEventClient,
-  expectedIndexTemplateStates: ExpectedIndexTemplateStates
+  defaultApmIndexTemplateStates: DefaultApmIndexTemplateStates
 ) {
   const apmIndexPatterns = getUniqueApmIndices(apmEventClient.indices);
   const matchingIndexTemplates = await Promise.all(
@@ -43,7 +43,7 @@ export async function getMatchingIndexTemplates(
             );
 
             const isNonStandard = getIsNonStandardIndexTemplate(
-              expectedIndexTemplateStates,
+              defaultApmIndexTemplateStates,
               templateName
             );
 
@@ -84,17 +84,16 @@ async function getTemplatePriority(
 }
 
 function getIsNonStandardIndexTemplate(
-  expectedIndexTemplateStates: ExpectedIndexTemplateStates,
+  defaultApmIndexTemplateStates: DefaultApmIndexTemplateStates,
   templateName: string
 ) {
-  const expectedIndexTemplates = Object.keys(expectedIndexTemplateStates);
-
+  const defaultApmIndexTemplates = Object.keys(defaultApmIndexTemplateStates);
   const defaultXpackIndexTemplates = ['logs', 'metrics'];
   const isNonStandard = [
-    ...expectedIndexTemplates,
+    ...defaultApmIndexTemplates,
     ...defaultXpackIndexTemplates,
-  ].every((expectedIndexTemplate) => {
-    const notMatch = !templateName.startsWith(expectedIndexTemplate);
+  ].every((defaultApmIndexTemplate) => {
+    const notMatch = !templateName.startsWith(defaultApmIndexTemplate);
     return notMatch;
   });
 

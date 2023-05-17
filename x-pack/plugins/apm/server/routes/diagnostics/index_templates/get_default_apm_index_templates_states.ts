@@ -9,35 +9,38 @@ import { IndicesGetIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/
 import { getDefaultIndexTemplateNames } from '../../../../common/diagnostics/get_default_index_template_names';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
-export function transformResponse(res: IndicesGetIndexTemplateResponse) {
+export function transformResponse(
+  existingIndexTemplates: IndicesGetIndexTemplateResponse
+) {
   const defaultIndexTemplateNames = getDefaultIndexTemplateNames();
-  const actualIndexTemplatesNames = res.index_templates.map(
-    (indexTemplate) => indexTemplate.name
-  );
+  const existingIndexTemplatesNames =
+    existingIndexTemplates.index_templates.map(
+      (indexTemplate) => indexTemplate.name
+    );
 
   return defaultIndexTemplateNames.reduce<
     Record<string, { exists: boolean; name?: string }>
   >((acc, defaultIndexTemplateName) => {
     // the actual index template name must have the same prefix as the default index template name
-    const actualIndexTemplateName = actualIndexTemplatesNames.find((name) =>
+    const existingIndexTemplateName = existingIndexTemplatesNames.find((name) =>
       name.startsWith(defaultIndexTemplateName)
     );
 
     acc[defaultIndexTemplateName] = {
-      exists: !!actualIndexTemplateName,
-      name: actualIndexTemplateName,
+      exists: existingIndexTemplateName !== undefined,
+      name: existingIndexTemplateName,
     };
     return acc;
   }, {});
 }
 
-export async function getExpectedIndexTemplateStates(
+export async function getDefaultApmIndexTemplateStates(
   apmEventClient: APMEventClient
 ) {
-  const res = await apmEventClient.indexTemplate(
+  const existingIndexTemplates = await apmEventClient.indexTemplate(
     'diagnostics_index_templates',
     { name: '*-apm.*' }
   );
 
-  return transformResponse(res);
+  return transformResponse(existingIndexTemplates);
 }

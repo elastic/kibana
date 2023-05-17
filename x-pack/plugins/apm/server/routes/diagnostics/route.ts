@@ -17,7 +17,7 @@ import {
   getMatchingIndexTemplates,
   getUniqueApmIndices,
 } from './index_templates/get_matching_index_templates';
-import { getExpectedIndexTemplateStates } from './index_templates/get_expected_index_templates_states';
+import { getDefaultApmIndexTemplateStates } from './index_templates/get_default_apm_index_templates_states';
 
 const fieldMappingsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics/invalid_field_mappings',
@@ -48,7 +48,7 @@ const indexTemplateRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    expectedIndexTemplateStates: Record<
+    defaultApmIndexTemplateStates: Record<
       string,
       { exists: boolean; name?: string | undefined }
     >;
@@ -63,15 +63,14 @@ const indexTemplateRoute = createApmServerRoute({
     }>;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const expectedIndexTemplateStates = await getExpectedIndexTemplateStates(
-      apmEventClient
-    );
+    const defaultApmIndexTemplateStates =
+      await getDefaultApmIndexTemplateStates(apmEventClient);
     const matchingIndexTemplates = await getMatchingIndexTemplates(
       apmEventClient,
-      expectedIndexTemplateStates
+      defaultApmIndexTemplateStates
     );
 
-    return { matchingIndexTemplates, expectedIndexTemplateStates };
+    return { matchingIndexTemplates, defaultApmIndexTemplateStates };
   },
 });
 
