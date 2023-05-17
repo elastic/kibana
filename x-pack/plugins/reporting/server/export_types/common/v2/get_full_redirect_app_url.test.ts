@@ -26,13 +26,20 @@ describe('getFullRedirectAppUrl', () => {
   });
 
   test('smoke test', () => {
-    expect(getFullRedirectAppUrl(reporting, 'test', undefined)).toBe(
-      'http://localhost:1234/test/s/test/app/reportingRedirect'
-    );
+    expect(
+      getFullRedirectAppUrl(reporting.getConfig(), reporting.getServerInfo(), 'test', undefined)
+    ).toBe('http://localhost:1234/test/s/test/app/reportingRedirect');
   });
 
   test('adding forceNow', () => {
-    expect(getFullRedirectAppUrl(reporting, 'test', 'TEST with a space')).toBe(
+    expect(
+      getFullRedirectAppUrl(
+        reporting.getConfig(),
+        reporting.getServerInfo(),
+        'test',
+        'TEST with a space'
+      )
+    ).toBe(
       'http://localhost:1234/test/s/test/app/reportingRedirect?forceNow=TEST%20with%20a%20space'
     );
   });

@@ -27,7 +27,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         mergeMap((headers) => {
-          const [url] = getFullUrls(reporting, job);
+          const [url] = getFullUrls(reporting.getServerInfo(), reporting.getConfig(), job);
 
           apmGetAssets?.end();
           apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');

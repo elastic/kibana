@@ -34,8 +34,9 @@ test(`gets logo from uiSettings`, async () => {
   mockReportingPlugin.getUiSettingsServiceFactory = jest.fn().mockResolvedValue({
     get: mockGet,
   });
-
-  const { logo } = await getCustomLogo(mockReportingPlugin, headers, 'spaceyMcSpaceIdFace', logger);
+  const fakeRequest = mockReportingPlugin.getFakeRequest(headers, 'spaceyMcSpaceIdFace', logger);
+  const uiSettingsClient = await mockReportingPlugin.getUiSettingsClient(fakeRequest, logger);
+  const { logo } = await getCustomLogo(uiSettingsClient, headers);
 
   expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');
   expect(logo).toBe('purple pony');

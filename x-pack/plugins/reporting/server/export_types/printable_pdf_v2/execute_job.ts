@@ -27,20 +27,31 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
-        mergeMap(({ logo, headers }) => {
+        mergeMap(async (headers) => {
+          const fakeRequest = reporting.getFakeRequest(headers, job.spaceId, jobLogger);
+          const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest);
+          getCustomLogo(uiSettingsClient, headers);
+        }),
+        mergeMap((logo, headers) => {
           const { browserTimezone, layout, title, locatorParams } = job;
           apmGetAssets?.end();
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
-          return generatePdfObservable(reporting, job, locatorParams, {
-            format: 'pdf',
-            title,
-            logo,
-            browserTimezone,
-            headers,
-            layout,
-          });
+          return generatePdfObservable(
+            reporting.getConfig(),
+            reporting.getServerInfo(),
+            reporting.getScreenshots(),
+            job,
+            locatorParams,
+            {
+              format: 'pdf',
+              title,
+              logo,
+              browserTimezone,
+              headers,
+              layout,
+            }
+          );
         }),
         tap(({ buffer }) => {
           apmGeneratePdf?.end();

@@ -7,9 +7,10 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../../..';
+import { PdfScreenshotResult, PdfScreenshotOptions } from '@kbn/screenshotting-plugin/server';
+import { ReportingConfigType } from '../../../config';
+import { ReportingServerInfo } from '../../../core';
 import type { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../../common/types';
-import type { PdfScreenshotOptions } from '../../../types';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import { getTracker } from '../../common/pdf_tracker';
 import type { TaskPayloadPDFV2 } from '../types';
@@ -20,8 +21,12 @@ interface PdfResult {
   warnings: string[];
 }
 
+type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
+
 export function generatePdfObservable(
-  reporting: ReportingCore,
+  config: ReportingConfigType,
+  serverInfo: ReportingServerInfo,
+  getScreenshots: GetScreenshotsFn,
   job: TaskPayloadPDFV2,
   locatorParams: LocatorParams[],
   options: Omit<PdfScreenshotOptions, 'urls'>
@@ -33,10 +38,10 @@ export function generatePdfObservable(
    * For each locator we get the relative URL to the redirect app
    */
   const urls = locatorParams.map((locator) => [
-    getFullRedirectAppUrl(reporting, job.spaceId, job.forceNow),
+    getFullRedirectAppUrl(config, serverInfo, job.spaceId, job.forceNow),
     locator,
   ]) as UrlOrUrlLocatorTuple[];
-  const screenshots$ = reporting.getScreenshots({ ...options, urls }).pipe(
+  const screenshots$ = getScreenshots({ ...options, urls }).pipe(
     tap(({ metrics }) => {
       if (metrics.cpu) {
         tracker.setCpuUsage(metrics.cpu);
