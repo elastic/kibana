@@ -7,10 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import {
-  CASES_URL,
-  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-} from '@kbn/cases-plugin/common/constants';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -32,6 +29,7 @@ import {
   getSpaceUrlPrefix,
   createCase,
   findAttachments,
+  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 
 import {
@@ -58,122 +56,85 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should find all case comment', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq, 200);
 
       // post 2 comments
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        expectedHttpCode: 200,
+      });
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        expectedHttpCode: 200,
+      });
 
-      const { body: caseComments } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const caseComments = await findAttachments({
+        supertest,
+        caseId: postedCase.id,
+        expectedHttpCode: 200,
+      });
 
       expect(caseComments.comments).to.eql(patchedCase.comments);
     });
 
     it('should find only case comments of the correct type', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq, 200);
 
       // post 5 comments of all possible types
-      await supertest
-        .post(INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', postedCase.id))
-        .set('kbn-xsrf', 'true')
-        .send([
+      await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
           postCommentUserReq,
           postCommentAlertReq,
           postCommentActionsReq,
           postExternalReferenceESReq,
           persistableStateAttachment,
-        ])
-        .expect(200);
+        ],
+        expectedHttpCode: 200,
+      });
 
-      const { body: caseComments } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const caseComments = await findAttachments({
+        supertest,
+        caseId: postedCase.id,
+        expectedHttpCode: 200,
+      });
 
       expect(caseComments.comments.length).to.eql(1);
       expect(caseComments.comments[0].type).to.eql(CommentType.user);
     });
 
-    it('unhappy path - 400s when query is wrong type', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+    describe('unhappy paths', () => {
+      for (const errorScenario of [
+        { name: 'field is wrong type', queryParams: { perPage: true } },
+        { name: 'field is unknown', queryParams: { foo: 'bar' } },
+        { name: 'page > 10k', queryParams: { page: 10001 } },
+        { name: 'perPage > 10k', queryParams: { perPage: 10001 } },
+        { name: 'page * perPage > 10k', queryParams: { page: 2, perPage: 9001 } },
+      ]) {
+        it(`400s when ${errorScenario.name}`, async () => {
+          const postedCase = await createCase(supertest, postCaseReq, 200);
 
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: postCommentUserReq,
+            expectedHttpCode: 200,
+          });
 
-      await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find?perPage=true`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-    });
-
-    it('unhappy path - 400s when field is unkown', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find?foobar=true`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-    });
-
-    it('unhappy path - 400s when total items invalid', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find?page=2&perPage=9001`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
+          await findAttachments({
+            supertest,
+            caseId: postedCase.id,
+            query: errorScenario.queryParams,
+            expectedHttpCode: 400,
+          });
+        });
+      }
     });
 
     describe('rbac', () => {
@@ -332,11 +293,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         await supertest.get(`${CASES_URL}/${obsCase.id}/comments/_find?namespaces=*`).expect(400);
-      });
-
-      it('should NOT allow to pass a non supported query parameter', async () => {
-        await supertest.get(`${CASES_URL}/id/comments/_find?notExists=papa`).expect(400);
-        await supertest.get(`${CASES_URL}/id/comments/_find?owner=papa`).expect(400);
       });
     });
   });
