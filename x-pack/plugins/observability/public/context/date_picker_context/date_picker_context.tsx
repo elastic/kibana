@@ -10,8 +10,8 @@ import useMount from 'react-use/lib/useMount';
 import { useLocation, useHistory } from 'react-router-dom';
 import { parse } from 'query-string';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '..';
-import { getAbsoluteTime } from '../utils/date';
+import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '../..';
+import { getAbsoluteTime } from '../../utils/date';
 
 export interface DatePickerContextValue {
   relativeStart: string;
