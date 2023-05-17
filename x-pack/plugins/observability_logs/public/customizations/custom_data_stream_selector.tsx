@@ -41,7 +41,7 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
       onUncategorizedClick={() => console.log('fetch uncategorized streams')}
       search={search}
       title={dataView.getName()}
-      uncategorizedStreams={mockUncategorized}
+      uncategorizedStreams={[]}
     />
   );
 });

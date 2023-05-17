@@ -23,13 +23,15 @@ export const findIntegrationsResponseRT = rt.exact(
   ])
 );
 
-export const findIntegrationsRequestQueryRT = rt.partial({
-  nameQuery: rt.string,
-  perPage: rt.number,
-  dataStreamType: rt.literal('logs'),
-  searchAfter: searchAfterRT,
-  sortOrder: sortOrderRT,
-});
+export const findIntegrationsRequestQueryRT = rt.exact(
+  rt.partial({
+    nameQuery: rt.string,
+    perPage: rt.number,
+    dataStreamType: rt.literal('logs'),
+    searchAfter: searchAfterRT,
+    sortOrder: sortOrderRT,
+  })
+);
 
 export type SearchAfter = rt.TypeOf<typeof searchAfterRT>;
 export type FindIntegrationsRequestQuery = rt.TypeOf<typeof findIntegrationsRequestQueryRT>;

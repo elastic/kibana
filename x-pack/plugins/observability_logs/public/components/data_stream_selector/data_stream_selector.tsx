@@ -19,11 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPanel,
   EuiPopover,
-  EuiSkeletonLoading,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
@@ -52,7 +48,7 @@ import { IntegrationsSearchParams } from '../../state_machines/integrations';
 
 export interface DataStreamSelectorProps {
   title: string;
-  search?: IntegrationsSearchParams;
+  search: IntegrationsSearchParams;
   integrations: Integration[] | null;
   uncategorizedStreams: any[];
   isLoadingIntegrations: boolean;
@@ -72,7 +68,6 @@ type CurrentPanelId =
   | typeof UNCATEGORIZED_STREAMS_PANEL_ID
   | `integration-${string}`;
 
-type SearchStrategy = 'integrations' | 'integrationsStreams' | 'uncategorizedStreams';
 type StreamSelectionHandler = (stream: DataStream) => void;
 
 export function DataStreamSelector({
@@ -143,7 +138,10 @@ export function DataStreamSelector({
     };
   }, [integrations, handleStreamSelection, onUncategorizedClick]);
 
-  const [localSearch, setLocalSearch] = useState({ sortOrder: 'asc', name: '' });
+  const [localSearch, setLocalSearch] = useState<IntegrationsSearchParams>({
+    sortOrder: 'asc',
+    name: '',
+  });
 
   const filteredIntegrationPanels = integrationPanels.map((panel) => {
     if (panel.id !== currentPanel) {
@@ -167,12 +165,11 @@ export function DataStreamSelector({
       id: UNCATEGORIZED_STREAMS_PANEL_ID,
       title: uncategorizedLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      items: isLoadingUncategorizedStreams
-        ? []
-        : uncategorizedStreams.map((stream) => ({
-            name: stream.name,
-            onClick: () => handleStreamSelection(stream),
-          })),
+      content: isLoadingUncategorizedStreams ? <h1>LOADING!</h1> : <h1>No results!</h1>,
+      items: uncategorizedStreams?.map((stream) => ({
+        name: stream.name,
+        onClick: () => handleStreamSelection(stream),
+      })),
     },
     ...filteredIntegrationPanels,
   ];
@@ -232,11 +229,11 @@ const DataStreamButton = (props: DataStreamButtonProps) => {
 interface SearchControlsProps {
   isLoading: boolean;
   search: IntegrationsSearchParams;
-  onSearch: (params: IntegrationsSearchParams) => void;
+  onSearch: SearchIntegrations;
 }
 
 const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) => {
-  const handleQueryChange = (event) => {
+  const handleQueryChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const name = event.target.value;
     onSearch({ ...search, name });
   };
@@ -312,7 +309,8 @@ const buildIntegrationsTree = ({ list, onStreamSelected, spyRef }: IntegrationsT
         width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
         items: entry.dataStreams.map((stream) => ({
           name: stream.name,
-          onClick: () => onStreamSelected(stream),
+          onClick: () =>
+            onStreamSelected({ title: stream.title, name: `[${entry.name}] ${stream.name}` }),
         })),
       });
 

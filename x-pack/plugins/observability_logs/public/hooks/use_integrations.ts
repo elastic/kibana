@@ -13,6 +13,7 @@ import {
   IntegrationsSearchParams,
 } from '../state_machines/integrations';
 import { IDataStreamsClient } from '../services/data_streams';
+import { FindIntegrationsRequestQuery } from '../../common';
 
 interface IntegrationsContextDeps {
   dataStreamsClient: IDataStreamsClient;
@@ -29,7 +30,9 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   );
 
   const integrations = useSelector(integrationsStateService, (state) => state.context.integrations);
-  const search = useSelector(integrationsStateService, (state) => state.context.search);
+  const search = useSelector(integrationsStateService, (state) =>
+    filterSearchParams(state.context.search)
+  );
 
   const error = useSelector(integrationsStateService, (state) => state.context.error);
 
@@ -84,3 +87,11 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
 };
 
 export const [IntegrationsProvider, useIntegrationsContext] = createContainer(useIntegrations);
+
+/**
+ * Utils
+ */
+const filterSearchParams = (search: FindIntegrationsRequestQuery): IntegrationsSearchParams => ({
+  name: search.nameQuery,
+  sortOrder: search.sortOrder,
+});
