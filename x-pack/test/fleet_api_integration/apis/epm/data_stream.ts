@@ -339,7 +339,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         return resLogsDatastream.body.data_streams[0].indices.length;
-      }
+      });
 
       it('should rollover datstream after enabling a experimental datastream feature that need a rollover', async () => {
         expect(await getLogsDefaultBackingIndicesLength()).to.be(1);
