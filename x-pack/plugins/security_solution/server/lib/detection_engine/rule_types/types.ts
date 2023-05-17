@@ -135,6 +135,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
   version: string;
   isPreview?: boolean;
+  isAdHocRun?: boolean;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

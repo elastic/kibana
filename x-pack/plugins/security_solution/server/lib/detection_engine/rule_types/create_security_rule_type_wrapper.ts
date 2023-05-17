@@ -70,6 +70,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     ruleExecutionLoggerFactory,
     version,
     isPreview,
+    isAdHocRun = false,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -343,6 +344,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               alertTimestampOverride,
               publicBaseUrl,
               ruleExecutionLogger,
+              isAdHocRun,
             });
 
             const wrapSequences = wrapSequencesFactory({

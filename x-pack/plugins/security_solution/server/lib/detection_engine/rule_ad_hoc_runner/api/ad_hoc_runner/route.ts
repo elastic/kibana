@@ -24,21 +24,9 @@ import { RuleMonitoringService } from '@kbn/alerting-plugin/server/monitoring/ru
 import { RuleResultService } from '@kbn/alerting-plugin/server/monitoring/rule_result_service';
 import { DETECTION_ENGINE_RULES_AD_HOC_RUNNER } from '../../../../../../common/constants';
 
-// import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
-import type { RulePreviewLogs } from '../../../../../../common/detection_engine/rule_schema';
-
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
-import type {
-  EqlRuleParams,
-  MachineLearningRuleParams,
-  NewTermsRuleParams,
-  QueryRuleParams,
-  RuleParams,
-  SavedQueryRuleParams,
-  ThreatRuleParams,
-  ThresholdRuleParams,
-} from '../../../rule_schema/model/rule_schemas';
+import type { RuleParams } from '../../../rule_schema/model/rule_schemas';
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -76,6 +64,13 @@ import type { IRuleExecutionLogService } from '../../../rule_monitoring';
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
 
+const requestSchema = t.type({
+  ruleId: t.string,
+  timeframeStart: t.string,
+  timeframeEnd: t.string,
+  interval: t.string,
+});
+
 export const adHocRunnerRoute = async (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -92,14 +87,7 @@ export const adHocRunnerRoute = async (
     {
       path: DETECTION_ENGINE_RULES_AD_HOC_RUNNER,
       validate: {
-        body: buildRouteValidation(
-          t.type({
-            ruleId: t.string,
-            timeframeStart: t.string,
-            timeframeEnd: t.string,
-            interval: t.string,
-          })
-        ),
+        body: buildRouteValidation(requestSchema),
       },
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
@@ -146,10 +134,8 @@ export const adHocRunnerRoute = async (
         const spaceId = siemClient.getSpaceId();
         const adHocRunId = uuidv4();
         const username = security?.authc.getCurrentUser(request)?.username;
-        // const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
-        // const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
         const runState: Record<string, unknown> = {};
-        const logs: RulePreviewLogs[] = [];
+
         let isAborted = false;
         const uniqueExecutionId = uuidv4();
 
@@ -161,6 +147,7 @@ export const adHocRunnerRoute = async (
           ruleDataClient: adHocRunnerDataClient,
           ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
           isPreview: false,
+          isAdHocRun: true,
         });
 
         const runExecutors = async <
@@ -230,16 +217,12 @@ export const adHocRunnerRoute = async (
             snoozeSchedule: [],
           };
 
-          // let invocationStartTime;
-
           const dataViewsService = await dataViews.dataViewsServiceFactory(
             savedObjectsClient,
             coreContext.elasticsearch.client.asInternalUser
           );
 
           while (invocationCount > 0 && !isAborted) {
-            // invocationStartTime = moment();
-
             ({ state: statePreview } = (await executor({
               executionId: uniqueExecutionId,
               params,
@@ -271,40 +254,10 @@ export const adHocRunnerRoute = async (
               flappingSettings: DISABLE_FLAPPING_SETTINGS,
             })) as { state: TState });
 
-            // const errors = loggedStatusChanges
-            //   .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-            //   .map((item) => item.message ?? 'Unknown Error');
-
-            // const warnings = loggedStatusChanges
-            //   .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
-            //   .map((item) => item.message ?? 'Unknown Warning');
-
-            // logs.push({
-            //   errors,
-            //   warnings,
-            //   startedAt: startedAt.toDate().toISOString(),
-            //   duration: moment().diff(invocationStartTime, 'milliseconds'),
-            // });
-
-            // loggedStatusChanges.length = 0;
-
-            // if (errors.length) {
-            //   break;
-            // }
-
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(rule.schedule.interval));
             invocationCount--;
           }
-        };
-
-        const ruleParamsForExecutors: RuleParams = {
-          ...rule.params,
-          // Need to override the timestamp otherwise the alerts
-          // get created when the execution gets run
-          // instead of when the event happened
-          timestampOverride: 'event.start',
-          timestampOverrideFallbackDisabled: true,
         };
 
         switch (rule.params.type) {
@@ -320,7 +273,7 @@ export const adHocRunnerRoute = async (
               queryAlertType.executor,
               queryAlertType.id,
               queryAlertType.name,
-              ruleParamsForExecutors as QueryRuleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -344,7 +297,7 @@ export const adHocRunnerRoute = async (
               savedQueryAlertType.executor,
               savedQueryAlertType.id,
               savedQueryAlertType.name,
-              ruleParamsForExecutors as SavedQueryRuleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -364,7 +317,7 @@ export const adHocRunnerRoute = async (
               thresholdAlertType.executor,
               thresholdAlertType.id,
               thresholdAlertType.name,
-              ruleParamsForExecutors as ThresholdRuleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -384,7 +337,7 @@ export const adHocRunnerRoute = async (
               threatMatchAlertType.executor,
               threatMatchAlertType.id,
               threatMatchAlertType.name,
-              ruleParamsForExecutors as ThreatRuleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -402,7 +355,7 @@ export const adHocRunnerRoute = async (
               eqlAlertType.executor,
               eqlAlertType.id,
               eqlAlertType.name,
-              ruleParamsForExecutors as EqlRuleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -420,7 +373,7 @@ export const adHocRunnerRoute = async (
               mlAlertType.executor,
               mlAlertType.id,
               mlAlertType.name,
-              ruleParamsForExecutors as MachineLearningRuleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -440,7 +393,7 @@ export const adHocRunnerRoute = async (
               newTermsAlertType.executor,
               newTermsAlertType.id,
               newTermsAlertType.name,
-              ruleParamsForExecutors as NewTermsRuleParams,
+              rule.params,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -469,7 +422,6 @@ export const adHocRunnerRoute = async (
             adHocRunId,
             initialInvocationCount,
             executionId: uniqueExecutionId,
-            logs: [],
             isAborted,
           },
         });

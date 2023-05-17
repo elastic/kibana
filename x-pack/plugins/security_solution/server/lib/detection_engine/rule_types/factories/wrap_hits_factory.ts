@@ -28,6 +28,7 @@ export const wrapHitsFactory =
     alertTimestampOverride,
     publicBaseUrl,
     ruleExecutionLogger,
+    isAdHocRun,
   }: {
     completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
@@ -37,6 +38,7 @@ export const wrapHitsFactory =
     alertTimestampOverride: Date | undefined;
     publicBaseUrl: string | undefined;
     ruleExecutionLogger: IRuleExecutionLogForExecutors;
+    isAdHocRun: boolean;
   }) =>
   (
     events: Array<estypes.SearchHit<SignalSource>>,
@@ -62,7 +64,8 @@ export const wrapHitsFactory =
         alertTimestampOverride,
         ruleExecutionLogger,
         id,
-        publicBaseUrl
+        publicBaseUrl,
+        isAdHocRun
       );
 
       return {

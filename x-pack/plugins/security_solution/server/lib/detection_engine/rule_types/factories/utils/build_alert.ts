@@ -147,8 +147,8 @@ export const buildAlert = (
     nameOverride: string;
     severityOverride: string;
     riskScoreOverride: number;
-    adHocTimestampOverride: string;
-  }
+  },
+  isAdHocRun?: boolean
 ): BaseFieldsLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
@@ -197,7 +197,7 @@ export const buildAlert = (
   });
 
   return {
-    [TIMESTAMP]: overrides?.adHocTimestampOverride ?? timestamp,
+    [TIMESTAMP]: isAdHocRun && originalTime ? originalTime?.toISOString() : timestamp,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [EVENT_KIND]: 'signal',
     [ALERT_ORIGINAL_TIME]: originalTime?.toISOString(),
