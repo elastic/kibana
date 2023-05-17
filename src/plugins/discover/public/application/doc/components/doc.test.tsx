@@ -16,6 +16,10 @@ import { Doc, DocProps } from './doc';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  DocViewsRegistry,
+  setDocViewsRegistry,
+} from '@kbn/unified-doc-viewer-plugin/public/services';
 
 const mockSearchApi = jest.fn();
 
@@ -102,6 +106,8 @@ async function mountDoc(update = false) {
 }
 
 describe('Test of <Doc /> of Discover', () => {
+  setDocViewsRegistry(new DocViewsRegistry());
+
   test('renders loading msg', async () => {
     const comp = await mountDoc();
     expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);

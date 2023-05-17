@@ -282,6 +282,7 @@ describe('Discover grid cell rendering', function () {
         </EuiFlexItem>
         <EuiFlexItem>
           <JsonCodeEditor
+            CodeEditor={[Function]}
             height={200}
             json={
               Object {
@@ -514,6 +515,7 @@ describe('Discover grid cell rendering', function () {
         </EuiFlexItem>
         <EuiFlexItem>
           <JsonCodeEditor
+            CodeEditor={[Function]}
             height={200}
             json={
               Object {
@@ -678,6 +680,7 @@ describe('Discover grid cell rendering', function () {
         </EuiFlexItem>
         <EuiFlexItem>
           <JsonCodeEditor
+            CodeEditor={[Function]}
             height={200}
             json={
               Object {

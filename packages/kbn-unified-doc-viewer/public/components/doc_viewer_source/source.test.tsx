@@ -10,12 +10,14 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import * as hooks from '../../hooks/use_es_doc_search';
+import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-plugin/public/utils/build_data_record';
-import { JsonCodeEditorCommon } from '../..';
+import { ElasticRequestState, JsonCodeEditorCommon } from '../..';
 import { DocViewerSource } from './source';
+
+const hooks = { useEsDocSearch };
 
 const mockDataView = {
   getComputedFields: () => [],
@@ -40,15 +42,16 @@ const services = {
 describe('Source Viewer component', () => {
   test('renders loading state', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
-
     const comp = mountWithIntl(
       <KibanaContextProvider services={services}>
         <DocViewerSource
-          id={'1'}
-          index={'index1'}
-          dataView={mockDataView}
+          CodeEditor={CodeEditor}
           width={123}
           hasLineNumbers={true}
+          useDocExplorer={false}
+          requestState={ElasticRequestState.Loading}
+          hit={null}
+          onRefresh={() => {}}
         />
       </KibanaContextProvider>
     );
@@ -58,15 +61,16 @@ describe('Source Viewer component', () => {
 
   test('renders error state', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
-
     const comp = mountWithIntl(
       <KibanaContextProvider services={services}>
         <DocViewerSource
-          id={'1'}
-          index={'index1'}
-          dataView={mockDataView}
+          CodeEditor={CodeEditor}
           width={123}
           hasLineNumbers={true}
+          useDocExplorer={false}
+          requestState={ElasticRequestState.Error}
+          hit={null}
+          onRefresh={() => {}}
         />
       </KibanaContextProvider>
     );
@@ -101,11 +105,13 @@ describe('Source Viewer component', () => {
     const comp = mountWithIntl(
       <KibanaContextProvider services={services}>
         <DocViewerSource
-          id={'1'}
-          index={'index1'}
-          dataView={mockDataView}
+          CodeEditor={CodeEditor}
           width={123}
           hasLineNumbers={true}
+          useDocExplorer={false}
+          requestState={ElasticRequestState.Found}
+          hit={mockHit}
+          onRefresh={() => {}}
         />
       </KibanaContextProvider>
     );
