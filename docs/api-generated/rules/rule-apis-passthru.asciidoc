@@ -111,6 +111,7 @@ Any modifications made to this file will be overwritten.
     "warning" : "warning",
     "outcome" : "succeeded"
   },
+  "api_key_created_by_user" : false,
   "params" : {
     "key" : ""
   },
@@ -407,6 +408,7 @@ Any modifications made to this file will be overwritten.
       "warning" : "warning",
       "outcome" : "succeeded"
     },
+    "api_key_created_by_user" : false,
     "params" : {
       "key" : ""
     },
@@ -473,6 +475,7 @@ Any modifications made to this file will be overwritten.
       "warning" : "warning",
       "outcome" : "succeeded"
     },
+    "api_key_created_by_user" : false,
     "params" : {
       "key" : ""
     },
@@ -654,6 +657,7 @@ Any modifications made to this file will be overwritten.
     "warning" : "warning",
     "outcome" : "succeeded"
   },
+  "api_key_created_by_user" : false,
   "params" : {
     "key" : ""
   },
@@ -2012,6 +2016,7 @@ Any modifications made to this file will be overwritten.
     "warning" : "warning",
     "outcome" : "succeeded"
   },
+  "api_key_created_by_user" : false,
   "params" : {
     "key" : ""
   },
@@ -2566,7 +2571,8 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">actions </div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
-<div class="param">api_key_owner </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">api_key_created_by_user (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the API key that is associated with the rule was created by the user. </div>
+<div class="param">api_key_owner </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The owner of the API key that is associated with the rule and used to run background tasks. </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The application or feature that owns the rule. For example, <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
 <div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> The date and time that the rule was created. format: date-time</div>
 <div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that created the rule. </div>
