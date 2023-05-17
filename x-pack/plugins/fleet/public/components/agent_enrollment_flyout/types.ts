@@ -15,7 +15,7 @@ export type K8sMode =
   | 'IS_NOT_KUBERNETES'
   | 'IS_KUBERNETES_MULTIPAGE';
 
-export type CloudSecurityIntegrationType = 'kspm' | 'vuln_mgmt' | 'cspm' | undefined;
+export type CloudSecurityIntegrationType = 'kspm' | 'vuln_mgmt' | 'cspm';
 
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;

@@ -70,13 +70,14 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   const getInitialPlatform = useCallback(() => {
     if (
       hasK8sIntegration ||
-      cloudSecurityIntegration?.integrationType ===
-        FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE
+      (cloudSecurityIntegration?.integrationType ===
+        FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE &&
+        isManaged)
     )
       return 'kubernetes';
 
     return 'linux';
-  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType]);
+  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType, isManaged]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
 

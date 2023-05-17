@@ -12,7 +12,7 @@ import { sendGetOneAgentPolicy, useStartServices } from '../../hooks';
 import { FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common';
 import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../services';
 
-import type { K8sMode } from './types';
+import type { K8sMode, CloudSecurityIntegrationType } from './types';
 
 // Packages that requires custom elastic-agent manifest
 const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
@@ -66,6 +66,10 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
     checkifK8s();
   }, [agentPolicy]);
 
+  return { isK8s };
+}
+
+export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
   const cloudSecurityIntegration = useMemo(() => {
     if (!agentPolicy) {
       return undefined;
@@ -80,7 +84,7 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
     };
   }, [agentPolicy]);
 
-  return { isK8s, cloudSecurityIntegration };
+  return { cloudSecurityIntegration };
 }
 
 const isK8sPackage = (pkg: PackagePolicy) => {
@@ -89,10 +93,13 @@ const isK8sPackage = (pkg: PackagePolicy) => {
   return K8S_PACKAGES.has(name);
 };
 
-const getCloudSecurityIntegrationTypeFromPackagePolicy = (agentPolicy: AgentPolicy) => {
+const getCloudSecurityIntegrationTypeFromPackagePolicy = (
+  agentPolicy: AgentPolicy
+): CloudSecurityIntegrationType | undefined => {
   const packagePolicy = agentPolicy?.package_policies?.find(
     (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
   );
   if (!packagePolicy) return undefined;
-  return packagePolicy?.inputs?.find((input) => input.enabled)?.policy_template;
+  return packagePolicy?.inputs?.find((input) => input.enabled)
+    ?.policy_template as CloudSecurityIntegrationType;
 };
