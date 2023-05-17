@@ -6,7 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CaseSeverity, ConnectorTypes } from '../../../common/api';
+import { ActionTypes, CaseSeverity, ConnectorTypes } from '../../../common/api';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
@@ -74,6 +74,38 @@ describe('create', () => {
       expect(clientArgs.services.notificationService.notifyAssignees).toHaveBeenCalledWith({
         assignees: [{ uid: '1' }],
         theCase: caseSO,
+      });
+    });
+  });
+
+  describe('Attributes', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should not have foo:bar attribute in request payload', async () => {
+      // @ts-expect-error
+      await create({ ...theCase, foo: 'bar' }, clientArgs);
+
+      expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          type: ActionTypes.create_case,
+          caseId: caseSO.id,
+          user: clientArgs.user,
+          payload: {
+            ...theCase,
+            foo: 'bar',
+          },
+          owner: caseSO.attributes.owner,
+        })
+      );
+
+      expect(clientArgs.services.notificationService.notifyAssignees).not.toHaveBeenCalledWith({
+        assignees: theCase.assignees,
+        theCase: { ...caseSO, foo: 'bar' },
       });
     });
   });

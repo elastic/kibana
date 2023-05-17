@@ -16,16 +16,6 @@ import {
 } from './configure';
 
 describe('configure', () => {
-  const JiraConnector = {
-    id: '1',
-    name: ConnectorTypes.jira,
-    fields: [
-      { key: 'issueType', value: 'bug' },
-      { key: 'priority', value: 'high' },
-      { key: 'parent', value: '2' },
-    ],
-    type: ConnectorTypes.jira,
-  };
 
   const serviceNow = {
     id: 'servicenow-1',
@@ -167,6 +157,15 @@ describe('configure', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = CaseConfigureResponseRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toMatchObject({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from mappings', () => {
+      const query = CaseConfigureResponseRt.decode({ ...defaultRequest, mappings: [{...defaultRequest.mappings[0], foo: 'bar' }]});
 
       expect(query).toMatchObject({
         _tag: 'Right',

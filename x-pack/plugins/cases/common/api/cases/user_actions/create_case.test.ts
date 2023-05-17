@@ -54,6 +54,15 @@ describe('Create case', () => {
         right: defaultRequest,
       });
     });
+
+    it('removes foo:bar attributes from payload', () => {
+      const query = CreateCaseUserActionRt.decode({ ...defaultRequest, payload: { ...defaultRequest.payload, foo: 'bar' }});
+
+      expect(query).toMatchObject({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
   });
 
   describe('CreateCaseUserActionWithoutConnectorIdRt', () => {
@@ -96,6 +105,15 @@ describe('Create case', () => {
         ...defaultRequest,
         foo: 'bar',
       });
+
+      expect(query).toMatchObject({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from payload', () => {
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode({ ...defaultRequest, payload: { ...defaultRequest.payload, foo: 'bar' }});
 
       expect(query).toMatchObject({
         _tag: 'Right',

@@ -249,5 +249,33 @@ describe('update', () => {
       expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([]);
       expect(clientArgs.services.notificationService.notifyAssignees).not.toHaveBeenCalled();
     });
+
+    it('should not have foo:bar attribute in request payload', async () => {
+      await update({
+        cases: [
+          {
+            id: mockCases[0].id,
+            version: mockCases[0].version ?? '',
+            assignees: [{ uid: '1' }],
+            // @ts-expect-error
+            foo: 'bar',
+          },
+        ],
+      }, clientArgs);
+
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([
+        expect.not.objectContaining(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                assignees: [{ uid: '1' }],
+                foo: 'bar',
+              },
+            ],
+          }),
+      ]);
+    });
   });
 });

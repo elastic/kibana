@@ -226,12 +226,9 @@ describe('Case', () => {
       },
       external_service: null,
       updated_at: '2020-02-20T15:02:57.995Z',
-      updated_by: {
-        full_name: 'Leslie Knope',
-        username: 'lknope',
-        email: 'leslie.knope@elastic.co',
-      },
+      updated_by: null,
     };
+
     it('has expected attributes in request', () => {
       const query = CaseAttributesRt.decode(defaultRequest);
 
@@ -254,6 +251,18 @@ describe('Case', () => {
       const query = CaseAttributesRt.decode({
         ...defaultRequest,
         connector: { ...defaultRequest.connector, foo: 'bar' },
+      });
+
+      expect(query).toMatchObject({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from created_by', () => {
+      const query = CaseAttributesRt.decode({
+        ...defaultRequest,
+        created_by: { ...defaultRequest.created_by, foo: 'bar' },
       });
 
       expect(query).toMatchObject({
@@ -421,6 +430,15 @@ describe('Case', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = CasesFindResponseRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toMatchObject({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from cases', () => {
+      const query = CasesFindResponseRt.decode({ ...defaultRequest, cases: [{...basicCase, foo: 'bar'}]});
 
       expect(query).toMatchObject({
         _tag: 'Right',

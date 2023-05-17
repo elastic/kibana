@@ -92,5 +92,14 @@ describe('Find UserActions', () => {
         right: defaultRequest,
       });
     });
+
+    it('removes foo:bar attributes from userActions', () => {
+        const query = UserActionFindResponseRt.decode({ ...defaultRequest, userActions: [{...defaultRequest.userActions[0], foo: 'bar' }]});
+  
+        expect(query).toMatchObject({
+          _tag: 'Right',
+          right: defaultRequest,
+        });
+      });
   });
 });
