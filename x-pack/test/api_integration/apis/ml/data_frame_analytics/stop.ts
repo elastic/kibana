@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .post(`/internal/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).not.to.be(undefined);
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .post(`/internal/ml/data_frame/analytics/${id}/_stop`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(404, status, body);
 
         expect(body.error).to.eql('Not Found');
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .post(`/internal/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
@@ -80,7 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .post(`/internal/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { omit, keyBy } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { getJobConfig } from '.';
 
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/job_audit_messages/messages`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.messages.length).to.eql(
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.messages.length).to.eql(
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.messages.length).to.eql(
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');

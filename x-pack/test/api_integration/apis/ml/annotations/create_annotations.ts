@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { createJobConfig, createAnnotationRequestBody } from './common_jobs';
 export default ({ getService }: FtrProviderContext) => {
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put('/internal/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(annotationRequestBody);
       ml.api.assertResponseStatusCode(200, status, body);
       const annotationId = body._id;
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put('/internal/ml/annotations/index')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(annotationRequestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put('/internal/ml/annotations/index')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(annotationRequestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 

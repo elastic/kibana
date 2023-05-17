@@ -12,7 +12,7 @@ import type {
 } from '@kbn/ml-plugin/common/types/notifications';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(`/internal/ml/notifications`)
         .query({ earliest: 'now-1d', latest: 'now' })
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect((body as NotificationsSearchResponse).total).to.eql(2);
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(`/internal/ml/notifications`)
         .query({ earliest: 'now-1d', latest: 'now', queryString: 'job_type:anomaly_detector' })
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect((body as NotificationsSearchResponse).total).to.eql(1);
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(`/internal/ml/notifications`)
         .query({ earliest: 'now-1d', latest: 'now', sortField: 'job_id', sortDirection: 'asc' })
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.results[0].job_id).to.eql('df_job');
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(`/internal/ml/notifications`)
         .query({ earliest: 'now-1h', latest: 'now', sortField: 'job_id', sortDirection: 'desc' })
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.results[0].job_id).to.eql('fq_job');
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .get(`/internal/ml/notifications`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
     });
   });

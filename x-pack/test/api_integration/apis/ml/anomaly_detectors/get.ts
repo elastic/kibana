@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors/${jobId}_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(1);
@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors/${jobId}_1,${jobId}_2`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors/${jobId}_1`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
@@ -138,7 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors/${jobId}_1/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(1);
@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors/${jobId}_1,${jobId}_2/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/anomaly_detectors/${jobId}_1/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');

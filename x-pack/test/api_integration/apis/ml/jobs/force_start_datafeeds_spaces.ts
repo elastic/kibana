@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ datafeedIds, start, end });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 

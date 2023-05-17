@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 const NUMBER_OF_CAPABILITIES = 38;
@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body, status } = await supertest
       .get(`/internal/ml/ml_capabilities`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(200, status, body);
 
     return body;

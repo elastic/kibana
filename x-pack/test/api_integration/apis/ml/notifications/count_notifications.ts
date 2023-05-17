@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/internal/ml/notifications/count`)
           .query({ lastCheckedAt: moment().subtract(7, 'd').valueOf() })
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.info).to.eql(0);
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/internal/ml/notifications/count`)
           .query({ lastCheckedAt: moment().subtract(7, 'd').valueOf() })
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.info).to.eql(1);
@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body, status } = await supertest
           .get(`/internal/ml/notifications/count`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
       });
     });

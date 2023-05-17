@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { Group } from '@kbn/ml-plugin/common/types/groups';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG } from './common_jobs';
 
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body, status } = await supertest
       .get('/internal/ml/jobs/groups')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(expectedResponsecode, status, body);
 
     return body;

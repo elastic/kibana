@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getJobConfig } from '.';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .get(`/internal/ml/job_audit_messages/messages`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       notificationIndices = body.notificationIndices;
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put(`/internal/ml/job_audit_messages/clear_messages`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({
           jobId: 'test_get_job_audit_messages_1',
           notificationIndices,
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: getBody, status: getStatus } = await supertest
           .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, getStatus, getBody);
 
         expect(getBody.messages.length).to.eql(
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put(`/internal/ml/job_audit_messages/clear_messages`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({
           jobId: 'test_get_job_audit_messages_2',
           notificationIndices,
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: getBody, status: getStatus } = await supertest
         .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, getStatus, getBody);
 
       expect(getBody.messages[0].cleared).to.not.eql(true);
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put(`/internal/ml/job_audit_messages/clear_messages`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({
           jobId: 'test_get_job_audit_messages_2',
           notificationIndices,
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: getBody, status: getStatus } = await supertest
         .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, getStatus, getBody);
 
       expect(getBody.messages[0].cleared).to.not.eql(true);
