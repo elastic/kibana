@@ -135,6 +135,51 @@ export interface RulesUpdateFlowSteps {
 
 type RulesUpdateFlow = (context: RulesClientContext) => RulesUpdateFlowSteps;
 
+/**
+ *
+ * @param context
+ * @returns RulesUpdateFlow
+ *
+ * This rules update flow returns a bunch of functions that are meant to be procedure steps
+ * used to update a rule. Following the steps will ensure all validation, auth, and refs
+ * are handled properly.
+ *
+ * typically one should call the functions in the following order:
+ *
+ * - prepareRuleForUpdate
+ *   - Initializes the internal state and injects refs for actions and params
+ *
+ * - ensureAuthorizedAndRuleTypeEnabled
+ *   - Checks auth for rule and actions
+ *
+ * - updateAction/updateParams
+ *   - Updates actions and params for the rule, also validates the updated values.
+ *     These updated actions/params are not merged into the updateAttributes object
+ *     because we need to extract their refs.
+ *
+ * - extractReferencesFromParamsAndActions
+ *   - Extracts action and params refs, this MUST be called if actions/params were updated
+ *     before trying to get the updated attributes for saving
+ *
+ * - updateAttributes
+ *   - Updates the rule savedObject with attributes other than actions/params (name, tags, etc.)
+ *
+ * - createAPIKey
+ *   - Creates new API key
+ *
+ * - maybeIncrementRevision
+ *   - Call this after the updates have been done, increments revision if needed
+ *
+ * - validateAttributes
+ *   - Final validation
+ *
+ * - getUpdatedAttributeAndRefsForSaving
+ *   - Gets the final updated rule attributes with refs for saving to ES, this will throw
+ *     if some pre-req functions have not been called
+ *
+ * - cleanup
+ *   - Invalidates unused API keys
+ */
 export const rulesUpdateFlow: RulesUpdateFlow = (context: RulesClientContext) => {
   let rulesUpdateState: RulesUpdateState = {};
   let apiKeysMap: ApiKeysMap = new Map();
@@ -214,10 +259,10 @@ export const rulesUpdateFlow: RulesUpdateFlow = (context: RulesClientContext) =>
       ...getRuleToUpdate(id).updatedAttributes,
       ...result,
     };
-
     getRuleToUpdate(id).validation.hasValidatedAttributes = false;
   };
 
+  // Simple getter for rule state
   const getRuleToUpdate = (id: string) => {
     const ruleState = rulesUpdateState[id];
     if (!ruleState) {
@@ -228,6 +273,7 @@ export const rulesUpdateFlow: RulesUpdateFlow = (context: RulesClientContext) =>
     return ruleState;
   };
 
+  // Simple getter for rule fields with refs
   const getRuleFieldsWithRefs = (id: string) => {
     const ruleState = rulesUpdateState[id];
     if (!ruleState) {
@@ -238,6 +284,7 @@ export const rulesUpdateFlow: RulesUpdateFlow = (context: RulesClientContext) =>
     return ruleState.fieldsWithRefs;
   };
 
+  // Simple getter for API keys map
   const getApiKeysMap = () => apiKeysMap;
 
   const ensureAuthorizedAndRuleTypeEnabled = async (
