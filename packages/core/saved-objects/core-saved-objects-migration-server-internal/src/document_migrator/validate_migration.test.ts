@@ -84,7 +84,7 @@ describe('validateTypeMigrations', () => {
         name: 'foo',
         migrations: {
           '1.2.3': {
-            deferred: true,
+            deferred: false,
             transform: 23 as any,
           },
         },
@@ -98,7 +98,7 @@ describe('validateTypeMigrations', () => {
         name: 'foo',
         migrations: {
           '1.2.3': {
-            deferred: true,
+            deferred: false,
             transform: jest.fn(),
           },
         },

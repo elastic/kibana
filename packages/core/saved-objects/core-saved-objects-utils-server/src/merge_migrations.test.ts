@@ -16,6 +16,7 @@ import { mergeSavedObjectMigrations, mergeSavedObjectMigrationMaps } from './mer
 
 describe('mergeSavedObjectMigrations', () => {
   test('merges migration parameters with a migration function', () => {
+    // @ts-expect-error
     expect(mergeSavedObjectMigrations({ deferred: true, transform: jest.fn() }, jest.fn())).toEqual(
       {
         deferred: false,
@@ -31,6 +32,7 @@ describe('mergeSavedObjectMigrations', () => {
   test('merges two deferred migrations', () => {
     expect(
       mergeSavedObjectMigrations(
+        // @ts-expect-error
         { deferred: true, transform: jest.fn() },
         { deferred: true, transform: jest.fn() }
       )
@@ -55,6 +57,7 @@ describe('mergeSavedObjectMigrations', () => {
   test('merges deferred and non-deferred migrations', () => {
     expect(
       mergeSavedObjectMigrations(
+        // @ts-expect-error
         { deferred: true, transform: jest.fn() },
         { deferred: false, transform: jest.fn() }
       )
