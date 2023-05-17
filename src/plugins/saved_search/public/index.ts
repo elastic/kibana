@@ -11,12 +11,12 @@ export type { SavedSearch, SaveSavedSearchOptions } from './services/saved_searc
 
 // discover, visualizations, transforms
 export {
-  getSavedSearch,
   getSavedSearchFullPathUrl, // - move to method
   getSavedSearchUrl,
   getSavedSearchUrlConflictMessage,
   throwErrorOnSavedSearchUrlConflict,
   saveSavedSearch,
+  // todo this next
   getNewSavedSearch,
 } from './services/saved_searches';
 

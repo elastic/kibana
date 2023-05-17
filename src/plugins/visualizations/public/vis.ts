@@ -22,21 +22,9 @@ import { i18n } from '@kbn/i18n';
 
 import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  getSavedSearch,
-  SavedSearch,
-  throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/saved-search-plugin/public';
+import { SavedSearch, throwErrorOnSavedSearchUrlConflict } from '@kbn/saved-search-plugin/public';
 import { PersistedState } from './persisted_state';
-import {
-  getTypes,
-  getAggs,
-  getSearch,
-  getSavedObjects,
-  getSpaces,
-  getFieldsFormats,
-  getSavedObjectTagging,
-} from './services';
+import { getTypes, getAggs, getSearch, getFieldsFormats, getSavedSearch } from './services';
 import { BaseVisType } from './vis_types';
 import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
@@ -55,16 +43,12 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
     let savedSearch: SavedSearch;
 
     try {
-      savedSearch = await getSavedSearch(savedSearchId, {
-        search: getSearch(),
-        savedObjectsClient: getSavedObjects().client,
-        spaces: getSpaces(),
-        savedObjectsTagging: getSavedObjectTagging()?.getTaggingApi(),
-      });
+      savedSearch = await getSavedSearch().get(savedSearchId);
     } catch (e) {
       return inputSearchSource;
     }
 
+    // todo
     await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
     if (savedSearch?.searchSource) {

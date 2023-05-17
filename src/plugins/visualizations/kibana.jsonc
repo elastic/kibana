@@ -26,6 +26,7 @@
       "usageCollection",
       "savedObjectsFinder",
       "savedObjectsManagement",
+      "savedSearch",
       "contentManagement",
     ],
     "optionalPlugins": [
@@ -36,7 +37,6 @@
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "savedSearch",
       "kibanaReact",
       "charts"
     ],

@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  getNewSavedSearch,
-  getSavedSearch,
-  SavedSearch,
-  saveSavedSearch,
-} from '@kbn/saved-search-plugin/public';
+import { getNewSavedSearch, SavedSearch, saveSavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
@@ -191,12 +186,9 @@ export function getSavedSearchContainer({
 
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
     addLog('[savedSearch] load', { id, dataView });
-    const loadedSavedSearch = await getSavedSearch(id, {
-      search: services.data.search,
-      savedObjectsClient: services.core.savedObjects.client,
-      spaces: services.spaces,
-      savedObjectsTagging: services.savedObjectsTagging,
-    });
+
+    const loadedSavedSearch = await services.savedSearch.get(id);
+
     if (!loadedSavedSearch.searchSource.getField('index') && dataView) {
       loadedSavedSearch.searchSource.setField('index', dataView);
     }

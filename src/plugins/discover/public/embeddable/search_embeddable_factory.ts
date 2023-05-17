@@ -17,7 +17,6 @@ import {
 import type { TimeRange } from '@kbn/es-query';
 
 import {
-  getSavedSearch,
   getSavedSearchUrl,
   throwErrorOnSavedSearchUrlConflict,
 } from '@kbn/saved-search-plugin/public';
@@ -72,13 +71,9 @@ export class SearchEmbeddableFactory
     const url = getSavedSearchUrl(savedObjectId);
     const editUrl = services.addBasePath(`/app/discover${url}`);
     try {
-      const savedSearch = await getSavedSearch(savedObjectId, {
-        search: services.data.search,
-        savedObjectsClient: services.core.savedObjects.client,
-        spaces: services.spaces,
-        savedObjectsTagging: services.savedObjectsTagging,
-      });
+      const savedSearch = await services.savedSearch.get(savedObjectId);
 
+      // todo
       await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
       const dataView = savedSearch.searchSource.getField('index');

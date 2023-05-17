@@ -10,7 +10,8 @@ import { CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getSavedSearch } from './services/saved_searches';
+import { getSavedSearch, saveSavedSearch, SaveSavedSearchOptions } from './services/saved_searches';
+import { SavedSearch } from '../common/types';
 
 /**
  * Data plugin public Setup contract
@@ -24,6 +25,10 @@ export interface SavedSearchPublicPluginSetup {}
 export interface SavedSearchPublicPluginStart {
   get: (savedSearchId: string) => ReturnType<typeof getSavedSearch>;
   getNew: () => ReturnType<typeof getSavedSearch>;
+  save: (
+    savedSearch: SavedSearch,
+    options?: SaveSavedSearchOptions
+  ) => ReturnType<typeof saveSavedSearch>;
 }
 
 /**
@@ -74,6 +79,15 @@ export class SavedSearchPublicPlugin
           spaces,
           savedObjectsTagging: savedObjectsTagging?.getTaggingApi(),
         });
+      },
+      save: (savedSearch, options = {}) => {
+        return saveSavedSearch(
+          savedSearch,
+          // todo limit options
+          options,
+          core.savedObjects.client,
+          savedObjectsTagging?.getTaggingApi()
+        );
       },
     };
   }

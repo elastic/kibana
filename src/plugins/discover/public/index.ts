@@ -21,7 +21,6 @@ export { loadSharingDataHelpers } from './utils';
 // re-export types and static functions to give other plugins time to migrate away
 export {
   type SavedSearch,
-  getSavedSearch,
   getSavedSearchFullPathUrl,
   getSavedSearchUrl,
   getSavedSearchUrlConflictMessage,
