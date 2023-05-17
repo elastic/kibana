@@ -149,7 +149,7 @@ export class DocumentMigrator implements VersionedTransformer {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
     const typeMigrations = this.migrations[doc.type];
-    if (downgradeRequired(doc, typeMigrations.latestVersion)) {
+    if (downgradeRequired(doc, typeMigrations?.latestVersion ?? {})) {
       const currentVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
       const latestVersion = this.migrations[doc.type].latestVersion[TransformType.Migrate];
       if (!allowDowngrade) {

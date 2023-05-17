@@ -50,7 +50,7 @@ export function buildActiveMigrations({
       referenceTransforms,
     });
 
-    if (!typeTransforms.transforms.length) {
+    if (!typeTransforms.transforms.length && !Object.keys(typeTransforms.versionSchemas).length) {
       return migrations;
     }
 

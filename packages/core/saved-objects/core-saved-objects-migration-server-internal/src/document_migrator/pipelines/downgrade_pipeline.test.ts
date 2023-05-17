@@ -13,7 +13,7 @@ import {
   TransformType,
   TypeTransforms,
   TransformFn,
-  VersionEvictionSchema,
+  TypeVersionSchema,
 } from '../types';
 import { DocumentDowngradePipeline } from './downgrade_pipeline';
 
@@ -34,7 +34,7 @@ describe('DocumentMigratorPipeline', () => {
     ...parts,
   });
 
-  const createSchema = (): jest.MockedFunction<VersionEvictionSchema> => {
+  const createSchema = (): jest.MockedFunction<TypeVersionSchema> => {
     return jest.fn().mockImplementation((doc: unknown) => doc);
   };
 
@@ -192,7 +192,7 @@ describe('DocumentMigratorPipeline', () => {
     expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
   });
 
-  it('throws skip transforms without down fn if `ignoreMissingTransforms` is `true`', () => {
+  it('skips transforms without down fn if `ignoreMissingTransforms` is `true`', () => {
     const document = createDoc({
       id: 'foo-1',
       type: 'foo',

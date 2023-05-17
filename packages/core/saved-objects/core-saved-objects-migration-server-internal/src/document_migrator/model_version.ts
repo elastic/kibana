@@ -24,14 +24,14 @@ import {
   type Transform,
   type TransformFn,
   TransformType,
-  type VersionEvictionSchema,
+  type TypeVersionSchema,
 } from './types';
 
 export const getModelVersionSchemas = ({
   typeDefinition,
 }: {
   typeDefinition: SavedObjectsType;
-}): Record<string, VersionEvictionSchema> => {
+}): Record<string, TypeVersionSchema> => {
   const modelVersionMap =
     typeof typeDefinition.modelVersions === 'function'
       ? typeDefinition.modelVersions()
@@ -45,7 +45,7 @@ export const getModelVersionSchemas = ({
       map[virtualVersion] = convertModelVersionBackwardConversionSchema(schema);
     }
     return map;
-  }, {} as Record<string, VersionEvictionSchema>);
+  }, {} as Record<string, TypeVersionSchema>);
 };
 
 export const getModelVersionTransforms = ({
