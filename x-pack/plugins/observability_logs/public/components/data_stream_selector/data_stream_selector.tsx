@@ -19,11 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPanel,
   EuiPopover,
-  EuiSkeletonLoading,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
