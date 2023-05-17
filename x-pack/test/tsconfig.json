@@ -120,7 +120,13 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/ml-anomaly-utils",
+<<<<<<< HEAD
     "@kbn/observability-shared-plugin",
     "@kbn/infra-forge"
+=======
+    "@kbn/infra-forge",
+    "@kbn/observability-shared-plugin",
+    "@kbn/maps-vector-tile-utils"
+>>>>>>> 94c9491748da312b2bbb0e8716f92e62db7659b5
   ]
 }
