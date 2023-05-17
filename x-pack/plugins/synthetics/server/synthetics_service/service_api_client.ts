@@ -87,28 +87,23 @@ export class ServiceAPIClient {
   }
 
   async post(data: ServiceData) {
-    const { pushErrors } = await this.callAPI('POST', data);
-    return pushErrors;
+    return (await this.callAPI('POST', data)).pushErrors;
   }
 
   async put(data: ServiceData) {
-    const { pushErrors } = await this.callAPI('PUT', data);
-    return pushErrors;
+    return (await this.callAPI('PUT', data)).pushErrors;
   }
 
   async delete(data: ServiceData) {
-    const { pushErrors } = await this.callAPI('DELETE', data);
-    return pushErrors;
+    return (await this.callAPI('DELETE', data)).pushErrors;
   }
 
   async runOnce(data: ServiceData) {
-    const { pushErrors } = await this.callAPI('POST', { ...data, endpoint: 'runOnce' });
-    return pushErrors;
+    return (await this.callAPI('POST', { ...data, endpoint: 'runOnce' })).pushErrors;
   }
 
   async syncMonitors(data: ServiceData) {
-    const { pushErrors } = await this.callAPI('PUT', { ...data, endpoint: 'sync' });
-    return pushErrors;
+    return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
   }
 
   addVersionHeader(req: AxiosRequestConfig) {
