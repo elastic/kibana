@@ -12,11 +12,11 @@ const ERROR_MSG =
 
 describe('validators', () => {
   describe('validateFindCommentsPagination', () => {
-    it('returns if page is undefined', () => {
+    it('does not throw if only page is undefined', () => {
       expect(() => validateFindCommentsPagination({ perPage: 100 })).not.toThrowError();
     });
 
-    it('returns if perPage is undefined', () => {
+    it('does not throw if only perPage is undefined', () => {
       expect(() => validateFindCommentsPagination({ page: 100 })).not.toThrowError();
     });
 
