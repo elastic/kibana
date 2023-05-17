@@ -14,8 +14,8 @@ import React, {
   useMemo,
   useEffect,
   useContext,
+  useRef,
 } from 'react';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../../services';
 import { InternalNavigationNode, RegisterFunction } from '../types';
@@ -37,12 +37,21 @@ interface Props {
 
 export function Navigation({ children, onRootItemRemove }: Props) {
   const { onProjectNavigationChange } = useNavigationServices();
-  const [navigationItems, setNavigationItems] = useState<
-    Record<string, ChromeProjectNavigationNode>
-  >({});
+
+  // We keep a reference of the order of the children that register themselves when mounting.
+  // This guarantees that the navTree items sent to the Chrome service has the same order
+  // that the nodes in the DOM.
+  const orderChildrenRef = useRef<Record<string, number>>({});
+  const idx = useRef(0);
+
+  const [navigationItems, setNavigationItems] = useState<Record<string, InternalNavigationNode>>(
+    {}
+  );
 
   const register = useCallback(
     (navNode: InternalNavigationNode) => {
+      orderChildrenRef.current[navNode.id] = idx.current++;
+
       setNavigationItems((prevItems) => {
         return {
           ...prevItems,
@@ -73,7 +82,11 @@ export function Navigation({ children, onRootItemRemove }: Props) {
 
   useEffect(() => {
     onProjectNavigationChange({
-      navigationTree: Object.values(navigationItems),
+      navigationTree: Object.values(navigationItems).sort((a, b) => {
+        const aOrder = orderChildrenRef.current[a.id];
+        const bOrder = orderChildrenRef.current[b.id];
+        return aOrder - bOrder;
+      }),
     });
   }, [navigationItems, onProjectNavigationChange]);
 

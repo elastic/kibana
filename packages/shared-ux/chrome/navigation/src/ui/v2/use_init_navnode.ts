@@ -30,6 +30,11 @@ export const useInitNavnode = (
   const childrenNodes = useRef<Record<string, InternalNavigationNode>>({});
   const isRegistered = useRef(false);
   const unregisterRef = useRef<UnRegisterFunction>();
+  // We keep a reference of the order of the children that register themselves when mounting.
+  // This guarantees that the navTree items sent to the Chrome service has the same order
+  // that the nodes in the DOM.
+  const orderChildrenRef = useRef<Record<string, number>>({});
+  const idx = useRef(0);
 
   const { register } = useRegisterTreeNode();
   const deepLink = getDeepLinkFromNavigationNode(navNode, { deepLinks });
@@ -62,11 +67,17 @@ export const useInitNavnode = (
 
   const regiserGroupAndChildren = useCallback(() => {
     if (isActive) {
-      const children = Object.values(childrenNodes.current);
+      const children = Object.values(childrenNodes.current).sort((a, b) => {
+        const aOrder = orderChildrenRef.current[a.id];
+        const bOrder = orderChildrenRef.current[b.id];
+        return aOrder - bOrder;
+      });
+
       unregisterRef.current = register({
         ...internalNavNode,
         children: children.length ? children : undefined,
       });
+
       isRegistered.current = true;
     }
   }, [register, internalNavNode, isActive]);
@@ -74,6 +85,7 @@ export const useInitNavnode = (
   const registerChildren = useCallback<RegisterFunction>(
     (childNode) => {
       childrenNodes.current[childNode.id] = childNode;
+      orderChildrenRef.current[childNode.id] = idx.current++;
 
       if (isRegistered.current) {
         regiserGroupAndChildren();
