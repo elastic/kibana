@@ -319,6 +319,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               index: inputIndex,
               dataViews: services.dataViews,
               language: params.language,
+              ruleExecutionLogger,
             });
           }
 

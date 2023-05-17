@@ -103,6 +103,7 @@ describe('threshold_executor', () => {
         aggregatableTimestampField: TIMESTAMP,
         exceptionFilter: undefined,
         unprocessedExceptions: [],
+        inputIndexFields: [],
       });
       expect(response.state).toEqual({
         initialized: true,

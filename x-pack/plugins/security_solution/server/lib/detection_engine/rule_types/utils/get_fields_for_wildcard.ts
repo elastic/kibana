@@ -8,14 +8,18 @@
 import type { DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { LanguageOrUndefined } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+
 export const getFieldsForWildcard = async ({
   index,
   dataViews,
   language,
+  ruleExecutionLogger,
 }: {
   index: string[] | undefined;
   language: LanguageOrUndefined;
   dataViews: DataViewsContract;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<FieldSpec[]> => {
   if (!index || language !== 'kuery') {
     return [];
@@ -29,6 +33,7 @@ export const getFieldsForWildcard = async ({
 
     return fields;
   } catch (e) {
+    ruleExecutionLogger.error(`Failed to fetch index fields: ${e?.message}`);
     return [];
   }
 };
