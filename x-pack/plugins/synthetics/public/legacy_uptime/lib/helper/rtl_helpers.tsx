@@ -183,6 +183,7 @@ export function MockKibanaProvider<ExtraCore>({
         <UptimeStartupPluginsContextProvider
           data={(coreOptions as any).data}
           observability={(coreOptions as any).observability}
+          observabilityShared={(coreOptions as any).observabilityShared}
           exploratoryView={(coreOptions as any).exploratoryView}
         >
           <EuiThemeProvider darkMode={false}>
