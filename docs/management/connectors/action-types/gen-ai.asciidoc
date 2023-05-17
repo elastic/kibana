@@ -69,7 +69,9 @@ as you're creating or editing the connector in {kib}. For example:
 [role="screenshot"]
 image::management/connectors/images/gen-ai-params-test.png[Generative AI params test]
 
-Generative AI actions have the following properties.
+The Generative AI connector supports one type of action: run (aka test)
+
+Generative AI run/test subaction has the following properties.
 
 Body::      A JSON payload sent to the OpenAI API URL. For example: 
 +
