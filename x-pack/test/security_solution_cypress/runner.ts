@@ -94,6 +94,10 @@ export async function SecuritySolutionCypressVisualTestRunner(context: FtrProvid
   return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:open');
 }
 
+export async function SecuritySolutionCypressCliIvestigationsTestRunner(context: FtrProviderContext) {
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:investigations:run');
+}
+
 export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
 
