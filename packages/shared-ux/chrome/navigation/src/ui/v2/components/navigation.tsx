@@ -18,13 +18,9 @@ import React, {
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../../services';
-import { InternalNavigationNode } from '../types';
+import { InternalNavigationNode, RegisterFunction } from '../types';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
-
-export type UnRegisterFunction = () => void;
-
-export type RegisterFunction = (navNode: InternalNavigationNode) => UnRegisterFunction;
 
 interface Context {
   register: RegisterFunction;

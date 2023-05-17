@@ -8,8 +8,8 @@
 
 import { useMemo } from 'react';
 
-import { useNavigation } from './navigation';
-import { useNavigationGroup } from './navigation_group';
+import { useNavigation } from './components/navigation';
+import { useNavigationGroup } from './components/navigation_group';
 
 /**
  * Helper hook that will proxy the correct "register" handler.

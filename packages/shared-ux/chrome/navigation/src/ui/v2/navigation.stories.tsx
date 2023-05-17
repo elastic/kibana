@@ -32,7 +32,6 @@ const navTree: ChromeProjectNavigationNode[] = [
       },
       {
         id: 'groupA',
-        title: 'Group 1 : Group A',
         link: 'group1:groupA',
         children: [
           {
@@ -69,6 +68,7 @@ const navTree: ChromeProjectNavigationNode[] = [
   {
     id: 'group2',
     link: 'group2',
+    title: 'Group 2',
     children: [
       {
         id: 'item1',

@@ -8,13 +8,11 @@
 
 import { EuiButton } from '@elastic/eui';
 import { ChromeNavLink } from '@kbn/core-chrome-browser';
-import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../../services';
 import { useInitNavnode } from '../use_init_navnode';
-import { UnRegisterFunction } from './navigation';
-import { useRegisterTreeNode } from './use_register_tree_node';
 
 interface Props {
   children?: ((deepLink?: ChromeNavLink) => ReactNode) | string;
@@ -28,20 +26,9 @@ interface Props {
 function NavigationItemComp({ children, onRemove, ...rest }: Props) {
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
-  const unregisterRef = useRef<UnRegisterFunction>();
-  const isRegistered = useRef(false);
 
-  const navNode = useInitNavnode(rest, { deepLinks });
-  const { title, deepLink, status } = navNode;
-  const isActive = status === 'active';
-  const { register } = useRegisterTreeNode();
-
-  const unregister = useCallback(() => {
-    if (isRegistered.current && unregisterRef.current) {
-      unregisterRef.current();
-      isRegistered.current = false;
-    }
-  }, []);
+  const { navNode, isActive } = useInitNavnode(rest, { deepLinks });
+  const { title, deepLink } = navNode;
 
   // Note: temporary UI. In future PR we'll have an EUI component here
   const wrapTextWithLink = useCallback(
@@ -71,21 +58,6 @@ function NavigationItemComp({ children, onRemove, ...rest }: Props) {
       </EuiButton>
     </>
   );
-
-
-
-  useEffect(() => {
-    if (isActive) {
-      unregisterRef.current = register(navNode);
-      isRegistered.current = true;
-    } else {
-      unregister();
-    }
-  }, [isActive, navNode, register, unregister]);
-
-  useEffect(() => {
-    return unregister;
-  }, [unregister]);
 
   if (!isActive) {
     return null;

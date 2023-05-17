@@ -14,3 +14,7 @@ export interface InternalNavigationNode extends Omit<ChromeProjectNavigationNode
   status: 'active' | 'disabled';
   deepLink?: ChromeNavLink;
 }
+
+export type UnRegisterFunction = () => void;
+
+export type RegisterFunction = (navNode: InternalNavigationNode) => UnRegisterFunction;

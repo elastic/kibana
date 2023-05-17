@@ -6,24 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  ReactNode,
-  createContext,
-  useCallback,
-  useMemo,
-  useContext,
-  useRef,
-  useEffect,
-} from 'react';
+import React, { ReactNode, createContext, useCallback, useMemo, useContext } from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../../services';
 import { useInitNavnode } from '../use_init_navnode';
-import { InternalNavigationNode } from '../types';
-import { useRegisterTreeNode } from './use_register_tree_node';
-import type { RegisterFunction, UnRegisterFunction } from './navigation';
+import { RegisterFunction } from '../types';
 
 export const NavigationGroupContext = createContext<Context | undefined>(undefined);
 
@@ -53,22 +43,9 @@ export function useNavigationGroup<T extends boolean = true>(
 function NavigationGroupComp({ children, onRemove, ...rest }: Props) {
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
-  const unregisterRef = useRef<UnRegisterFunction>();
 
-  const navNodes = useRef<Record<string, InternalNavigationNode>>({});
-  const isRegistered = useRef(false);
-
-  const navNode = useInitNavnode(rest, { deepLinks });
-  const { title, deepLink, status } = navNode;
-  const isActive = status === 'active';
-  const { register } = useRegisterTreeNode();
-
-  const unregister = useCallback(() => {
-    isRegistered.current = false;
-    if (unregisterRef.current) {
-      unregisterRef.current();
-    }
-  }, []);
+  const { navNode, isActive, registerChildren } = useInitNavnode(rest, { deepLinks });
+  const { title, deepLink } = navNode;
 
   const wrapTextWithLink = useCallback(
     (text: string) =>
@@ -104,61 +81,11 @@ function NavigationGroupComp({ children, onRemove, ...rest }: Props) {
     );
   }, [children, renderTempUIToTestRemoveBehavior, title, wrapTextWithLink]);
 
-  const regiserGroupAndChildren = useCallback(() => {
-    if (navNode.status === 'active') {
-      unregisterRef.current = register({
-        ...navNode,
-        children: Object.values(navNodes.current),
-      });
-      isRegistered.current = true;
-    }
-  }, [register, navNode]);
-
-  const handleRegister = useCallback<RegisterFunction>(
-    (childNode) => {
-      // Add child node to this group map
-      navNodes.current[childNode.id] = childNode;
-
-      if (isRegistered.current) {
-        regiserGroupAndChildren();
-      }
-
-      // Unregister function
-      return () => {
-        // Remove the child from this group map
-        const updatedItems = { ...navNodes.current };
-        delete updatedItems[childNode.id];
-        navNodes.current = updatedItems;
-
-        if (isRegistered.current) {
-          // Update the parent tree
-          regiserGroupAndChildren();
-        }
-      };
-    },
-    [regiserGroupAndChildren]
-  );
-
   const contextValue = useMemo(() => {
     return {
-      register: handleRegister,
+      register: registerChildren,
     };
-  }, [handleRegister]);
-
-  useEffect(() => {
-    regiserGroupAndChildren();
-  }, [regiserGroupAndChildren]);
-
-  useEffect(() => {
-    if (!isActive) {
-      unregister();
-    }
-  }, [isActive, unregister]);
-
-  useEffect(() => {
-    return unregister;
-  }, [unregister]);
-
+  }, [registerChildren]);
 
   if (!isActive) {
     return null;
