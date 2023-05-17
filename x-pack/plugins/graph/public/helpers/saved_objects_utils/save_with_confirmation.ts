@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
-import {CONTENT_ID, GraphCreateIn, GraphCreateOut} from '../../../common/content_management';
+import { CONTENT_ID, GraphCreateIn, GraphCreateOut } from '../../../common/content_management';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 import { GraphSavedObjectAttributes, GraphSavedObject } from '../../../common/content_management';

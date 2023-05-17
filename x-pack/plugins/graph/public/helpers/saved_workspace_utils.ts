@@ -23,7 +23,8 @@ import {
   GraphCreateOut,
   GraphSavedObjectAttributes,
   GraphUpdateOut,
-  GraphUpdateIn, CONTENT_ID,
+  GraphUpdateIn,
+  CONTENT_ID,
 } from '../../common/content_management';
 import {
   injectReferences,

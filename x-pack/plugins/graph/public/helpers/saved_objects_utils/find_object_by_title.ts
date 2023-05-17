@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ContentClient } from '@kbn/content-management-plugin/public';
-import {CONTENT_ID, GraphSearchIn, GraphSearchOut} from '../../../common/content_management';
+import { CONTENT_ID, GraphSearchIn, GraphSearchOut } from '../../../common/content_management';
 
 /** Returns an object matching a given title */
 export async function findObjectByTitle(contentClient: ContentClient, title: string) {

@@ -13,6 +13,9 @@ export const OVERWRITE_REJECTED = i18n.translate('xpack.graph.overwriteRejectedD
 });
 
 /** An error message to be used when the user rejects a confirm save with duplicate title. */
-export const SAVE_DUPLICATE_REJECTED = i18n.translate('xpack.graph.saveDuplicateRejectedDescription', {
-  defaultMessage: 'Save with duplicate title confirmation was rejected',
-});
+export const SAVE_DUPLICATE_REJECTED = i18n.translate(
+  'xpack.graph.saveDuplicateRejectedDescription',
+  {
+    defaultMessage: 'Save with duplicate title confirmation was rejected',
+  }
+);
