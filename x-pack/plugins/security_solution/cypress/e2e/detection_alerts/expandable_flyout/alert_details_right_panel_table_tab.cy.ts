@@ -55,13 +55,13 @@ describe.skip('Alert details expandable flyout right panel', { testIsolation: fa
   it('should test filter in cell actions', () => {
     filterInTableTabTable();
     cy.get(FILTER_BADGE).first().should('contain.text', '@timestamp:');
-    removeKqlFilter();
+    removeKqlFilter('@timestamp:');
   });
 
   it('should test filter out cell actions', () => {
     filterOutTableTabTable();
     cy.get(FILTER_BADGE).first().should('contain.text', 'NOT @timestamp:');
-    removeKqlFilter();
+    removeKqlFilter('NOT @timestamp:');
   });
 
   it('should test add to timeline cell actions', () => {
