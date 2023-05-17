@@ -11,7 +11,7 @@
         "label": "CustomAssetsAccordion",
         "description": [],
         "signature": [
-          "({ views, initialIsOpen, }: React.PropsWithChildren<",
+          "({ views, initialIsOpen, title, }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -30,7 +30,7 @@
             "id": "def-public.CustomAssetsAccordion.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  views,\n  initialIsOpen = false,\n}",
+            "label": "{\n  views,\n  initialIsOpen = false,\n  title,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -475,6 +475,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CustomAssetsAccordionProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx",
             "deprecated": false,
@@ -19988,6 +20002,20 @@
             "signature": [
               "ShipperOutput",
               " | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewOutput.allow_edit",
+            "type": "Array",
+            "tags": [],
+            "label": "allow_edit",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false,
