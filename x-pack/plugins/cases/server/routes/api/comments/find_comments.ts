@@ -12,7 +12,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { FindQueryParamsRt, throwErrors } from '../../../../common/api';
+import { FindCommentsQueryParamsRt, throwErrors } from '../../../../common/api';
 import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
@@ -28,7 +28,7 @@ export const findCommentsRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const query = pipe(
-        FindQueryParamsRt.decode(request.query),
+        FindCommentsQueryParamsRt.decode(request.query),
         fold(throwErrors(Boom.badRequest), identity)
       );
 

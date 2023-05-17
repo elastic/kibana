@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { jsonValueRt } from '../../runtime_types';
-import { SavedObjectFindOptionsRt } from '../../saved_object';
+import { NumberFromString } from '../../saved_object';
 
 import { UserRt } from '../../user';
 
@@ -273,11 +273,27 @@ export const CommentsFindResponseRt = rt.strict({
 
 export const CommentsRt = rt.array(CommentRt);
 
-export const FindQueryParamsRt = rt.exact(
-  rt.partial({
-    ...SavedObjectFindOptionsRt.type.props,
-  })
-);
+export const FindCommentsQueryParamsRt = rt.exact(rt.partial({
+  /**
+   * The page of objects to return
+   */
+  page: rt.union([rt.number, NumberFromString]),
+  /**
+   * The number of objects to return for a page
+   */
+  perPage: rt.union([rt.number, NumberFromString]),
+  /**
+   * Order to sort the response
+   */
+  sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+}));
+
+export const FindCommentsArgsRt = rt.intersection([
+  rt.strict({
+    caseID: rt.string,
+  }),
+  rt.strict({ queryParams: rt.union([FindCommentsQueryParamsRt, rt.undefined]) }),
+]);
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
@@ -297,7 +313,7 @@ export const BulkGetAttachmentsResponseRt = rt.strict({
   ),
 });
 
-export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
+export type FindCommentsQueryParams = rt.TypeOf<typeof FindCommentsQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
