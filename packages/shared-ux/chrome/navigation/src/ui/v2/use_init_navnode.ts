@@ -7,11 +7,13 @@
  */
 
 import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { useMemo } from 'react';
 import { InternalNavigationNode } from './types';
 import {
   getIdFromNavigationNode,
   getDeepLinkFromNavigationNode,
   getTitleForNavigationNode,
+  doRenderNode,
 } from './utils';
 
 export const useInitNavnode = (
@@ -27,10 +29,19 @@ export const useInitNavnode = (
   const deepLink = getDeepLinkFromNavigationNode(navNode, { deepLinks });
   const { title } = getTitleForNavigationNode({ ...navNode, id }, { deepLink });
 
-  return {
-    ...navNode,
-    id,
-    title,
-    deepLink,
-  };
+  return useMemo<InternalNavigationNode>(() => {
+    const internalNavNode = {
+      ...navNode,
+      id,
+      title,
+      deepLink,
+    };
+
+    const isActive = doRenderNode(internalNavNode);
+
+    return {
+      ...internalNavNode,
+      status: isActive ? 'active' : 'disabled',
+    };
+  }, [navNode, id, title, deepLink]);
 };

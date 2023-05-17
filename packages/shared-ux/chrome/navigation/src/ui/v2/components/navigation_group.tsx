@@ -24,7 +24,6 @@ import { useInitNavnode } from '../use_init_navnode';
 import { InternalNavigationNode } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
 import type { RegisterFunction, UnRegisterFunction } from './navigation';
-import { doRenderNode } from '../utils';
 
 export const NavigationGroupContext = createContext<Context | undefined>(undefined);
 
@@ -51,7 +50,7 @@ export function useNavigationGroup<T extends boolean = true>(
   return context as T extends true ? Context : Context | undefined;
 }
 
-export const NavigationGroup = ({ children, id: _id, title: _title, link, onRemove }: Props) => {
+function NavigationGroupComp({ children, onRemove, ...rest }: Props) {
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
   const unregisterRef = useRef<UnRegisterFunction>();
@@ -59,9 +58,17 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link, onRemo
   const navNodes = useRef<Record<string, InternalNavigationNode>>({});
   const isRegistered = useRef(false);
 
-  const navNode = useInitNavnode({ id: _id, title: _title, link }, { deepLinks });
-  const { id, title, deepLink } = navNode;
+  const navNode = useInitNavnode(rest, { deepLinks });
+  const { title, deepLink, status } = navNode;
+  const isActive = status === 'active';
   const { register } = useRegisterTreeNode();
+
+  const unregister = useCallback(() => {
+    isRegistered.current = false;
+    if (unregisterRef.current) {
+      unregisterRef.current();
+    }
+  }, []);
 
   const wrapTextWithLink = useCallback(
     (text: string) =>
@@ -97,38 +104,39 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link, onRemo
     );
   }, [children, renderTempUIToTestRemoveBehavior, title, wrapTextWithLink]);
 
+  const regiserGroupAndChildren = useCallback(() => {
+    if (navNode.status === 'active') {
+      unregisterRef.current = register({
+        ...navNode,
+        children: Object.values(navNodes.current),
+      });
+      isRegistered.current = true;
+    }
+  }, [register, navNode]);
+
   const handleRegister = useCallback<RegisterFunction>(
     (childNode) => {
+      // Add child node to this group map
       navNodes.current[childNode.id] = childNode;
 
       if (isRegistered.current) {
-        register({
-          id,
-          title,
-          link,
-          children: Object.values(navNodes.current),
-        });
+        regiserGroupAndChildren();
       }
 
       // Unregister function
       return () => {
-        // Remove the child from the navNodes
+        // Remove the child from this group map
         const updatedItems = { ...navNodes.current };
         delete updatedItems[childNode.id];
         navNodes.current = updatedItems;
 
         if (isRegistered.current) {
           // Update the parent tree
-          register({
-            id,
-            title,
-            link,
-            children: Object.values(navNodes.current),
-          });
+          regiserGroupAndChildren();
         }
       };
     },
-    [register, id, title, link]
+    [regiserGroupAndChildren]
   );
 
   const contextValue = useMemo(() => {
@@ -138,37 +146,21 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link, onRemo
   }, [handleRegister]);
 
   useEffect(() => {
-    unregisterRef.current = register({
-      id,
-      title,
-      link,
-      children: Object.values(navNodes.current),
-    });
-
-    isRegistered.current = true;
-
-    return () => {
-      isRegistered.current = false;
-      if (unregisterRef.current) {
-        unregisterRef.current(false);
-      }
-    };
-  }, [register, id, title, link]);
+    regiserGroupAndChildren();
+  }, [regiserGroupAndChildren]);
 
   useEffect(() => {
-    return () => {
-      if (unregisterRef.current) {
-        unregisterRef.current(true);
-      }
-    };
-  }, []);
+    if (!isActive) {
+      unregister();
+    }
+  }, [isActive, unregister]);
 
-  if (deepLinks.length === 0) {
-    // Don't render anyting until we at least have 1 deeplink
-    return null;
-  }
+  useEffect(() => {
+    return unregister;
+  }, [unregister]);
 
-  if (!doRenderNode(navNode)) {
+
+  if (!isActive) {
     return null;
   }
 
@@ -178,4 +170,6 @@ export const NavigationGroup = ({ children, id: _id, title: _title, link, onRemo
       <li style={{ paddingLeft: '20px', marginBottom: '15px' }}>{renderContent()}</li>
     </NavigationGroupContext.Provider>
   );
-};
+}
+
+export const NavigationGroup = React.memo(NavigationGroupComp);

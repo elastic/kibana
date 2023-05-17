@@ -13,7 +13,6 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../../services';
 import { useInitNavnode } from '../use_init_navnode';
-import { doRenderNode } from '../utils';
 import { UnRegisterFunction } from './navigation';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
@@ -23,17 +22,26 @@ interface Props {
   title?: string;
   link?: string;
   // Temp to test removing nav nodes
-  onRemove: () => void;
+  onRemove?: () => void;
 }
 
-export const NavigationItem = ({ children, id: _id, title: _title, link, onRemove }: Props) => {
+function NavigationItemComp({ children, onRemove, ...rest }: Props) {
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
   const unregisterRef = useRef<UnRegisterFunction>();
+  const isRegistered = useRef(false);
 
-  const navNode = useInitNavnode({ id: _id, title: _title, link }, { deepLinks });
-  const { id, title, deepLink } = navNode;
+  const navNode = useInitNavnode(rest, { deepLinks });
+  const { title, deepLink, status } = navNode;
+  const isActive = status === 'active';
   const { register } = useRegisterTreeNode();
+
+  const unregister = useCallback(() => {
+    if (isRegistered.current && unregisterRef.current) {
+      unregisterRef.current();
+      isRegistered.current = false;
+    }
+  }, []);
 
   // Note: temporary UI. In future PR we'll have an EUI component here
   const wrapTextWithLink = useCallback(
@@ -58,31 +66,28 @@ export const NavigationItem = ({ children, id: _id, title: _title, link, onRemov
   const renderTempUIToTestRemoveBehavior = () => (
     <>
       {' '}
-      <EuiButton size="s" onClick={() => onRemove()}>
+      <EuiButton size="s" onClick={() => onRemove?.()}>
         Remove
       </EuiButton>
     </>
   );
 
-  useEffect(() => {
-    unregisterRef.current = register({ id, title, link });
 
-    return () => {
-      if (unregisterRef.current) {
-        unregisterRef.current(false);
-      }
-    };
-  }, [register, id, title, link]);
 
   useEffect(() => {
-    return () => {
-      if (unregisterRef.current) {
-        unregisterRef.current(true);
-      }
-    };
-  }, []);
+    if (isActive) {
+      unregisterRef.current = register(navNode);
+      isRegistered.current = true;
+    } else {
+      unregister();
+    }
+  }, [isActive, navNode, register, unregister]);
 
-  if (!doRenderNode(navNode)) {
+  useEffect(() => {
+    return unregister;
+  }, [unregister]);
+
+  if (!isActive) {
     return null;
   }
 
@@ -93,4 +98,6 @@ export const NavigationItem = ({ children, id: _id, title: _title, link, onRemov
       {renderTempUIToTestRemoveBehavior()}
     </li>
   );
-};
+}
+
+export const NavigationItem = React.memo(NavigationItemComp);

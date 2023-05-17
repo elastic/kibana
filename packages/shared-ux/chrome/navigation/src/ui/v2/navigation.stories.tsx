@@ -77,12 +77,12 @@ const navTree: ChromeProjectNavigationNode[] = [
       },
       {
         id: 'item2',
-        title: 'Group 2: Item 1',
+        title: 'Group 2: Item 2',
         link: 'group2:item2',
       },
       {
         id: 'item3',
-        title: 'Group 2: Item 2',
+        title: 'Group 2: Item 3',
         link: 'group2:item3',
       },
     ],
@@ -93,7 +93,16 @@ const navTree: ChromeProjectNavigationNode[] = [
   },
   {
     id: 'item2',
+    title: 'Item 2',
+    link: 'bad',
+  },
+  {
+    id: 'item3',
     title: "I don't have a 'link' prop",
+  },
+  {
+    id: 'item4',
+    title: 'Item 4',
   },
 ];
 

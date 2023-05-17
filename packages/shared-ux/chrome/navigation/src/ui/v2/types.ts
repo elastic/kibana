@@ -11,5 +11,6 @@ import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-bro
 export interface InternalNavigationNode extends Omit<ChromeProjectNavigationNode, 'id'> {
   id: string;
   title: string;
+  status: 'active' | 'disabled';
   deepLink?: ChromeNavLink;
 }

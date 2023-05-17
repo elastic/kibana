@@ -31,12 +31,18 @@ export const DefaultNavigation: FC<Props> = ({ navTree }) => {
     (items: ChromeProjectNavigationNode[], path: string[] = []) => {
       const filtered = items.filter(({ id: _id, link = '' }) => {
         const id = _id ?? link;
-        const itemPath = [...path, id ?? ''].join('.');
+        const itemPath = (id ? [...path, id] : path).join('.');
         return !removedItems.has(itemPath);
       });
 
       return filtered.map((item) => {
         const id = item.id ?? item.link;
+
+        if (!id) {
+          throw new Error(
+            `At least one of id or link must be defined for navigation item ${item.title}`
+          );
+        }
 
         return (
           <React.Fragment key={item.id}>
@@ -45,16 +51,16 @@ export const DefaultNavigation: FC<Props> = ({ navTree }) => {
                 id={item.id}
                 link={item.link}
                 title={item.title}
-                onRemove={() => onRemove([...path, id ?? ''])}
+                onRemove={() => onRemove([...path, id])}
               >
-                {renderItems(item.children, [...path, id ?? ''])}
+                {renderItems(item.children, [...path, id])}
               </Navigation.Group>
             ) : (
               <Navigation.Item
                 id={item.id}
                 link={item.link}
                 title={item.title}
-                onRemove={() => onRemove([...path, id ?? ''])}
+                onRemove={() => onRemove([...path, id])}
               />
             )}
           </React.Fragment>
