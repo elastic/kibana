@@ -9,7 +9,7 @@ import type {
   BulkCreateCommentRequest,
   CommentPatchRequest,
   CommentRequest,
-  FindQueryParams,
+  FindCommentsQueryParams,
 } from '../../../common/api';
 
 /**
@@ -72,7 +72,7 @@ export interface DeleteArgs {
 /**
  * Parameters for finding attachments of a case
  */
-export interface FindArgs {
+export interface FindCommentsArgs {
   /**
    * The case ID for finding associated attachments
    */
@@ -80,7 +80,7 @@ export interface FindArgs {
   /**
    * Optional parameters for filtering the returned attachments
    */
-  queryParams?: FindQueryParams;
+  queryParams?: FindCommentsQueryParams;
 }
 
 /**
