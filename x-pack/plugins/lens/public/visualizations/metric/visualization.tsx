@@ -39,6 +39,10 @@ import { nonNullable } from '../../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
+const formatterOptions: FormatSelectorOptions = {
+  disableExtraOptions: true,
+};
+
 export const showingBar = (
   state: MetricVisualizationState
 ): state is MetricVisualizationState & { showBar: true; maxAccessor: string } =>
@@ -115,10 +119,6 @@ const getMetricLayerConfiguration = (
   };
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
-
-  const formatterOptions: FormatSelectorOptions = {
-    disableExtraOptions: true,
-  };
 
   return {
     groups: [
@@ -728,5 +728,8 @@ export const getMetricVisualization = ({
         },
       ],
     };
+  },
+  getSourcePreferences() {
+    return { format: formatterOptions };
   },
 });

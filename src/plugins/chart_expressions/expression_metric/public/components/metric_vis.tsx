@@ -109,6 +109,22 @@ export const MetricVis = ({
   filterable,
   overrides,
 }: MetricVisComponentProps) => {
+  const chartTheme = getThemeService().useChartsTheme();
+  const onRenderChange = useCallback<RenderChangeListener>(
+    (isRendered) => {
+      if (isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
+
+  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
+
+  const baseTheme = getThemeService().useChartsBaseTheme();
+
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
 
@@ -207,26 +223,36 @@ export const MetricVis = ({
   });
 
   if (config.metric.minTiles) {
-    while (metricConfigs.length < config.metric.minTiles) metricConfigs.push(undefined);
+    while (metricConfigs.length < config.metric.minTiles) {
+      metricConfigs.push(undefined);
+    }
   }
 
-  const grid: MetricSpec['data'] = [];
   const {
     metric: { maxCols },
   } = config;
+  const numRows = metricConfigs.length / maxCols;
+
+  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
+
+  useEffect(() => {
+    const minimumRequiredVerticalSpace = minHeight * numRows;
+    setScrollChildHeight(
+      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
+        ? '100%'
+        : `${minimumRequiredVerticalSpace}px`
+    );
+  }, [numRows, minHeight, scrollDimensions.height]);
+
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+    overrides,
+    'settings'
+  ) as Partial<SettingsProps>;
+
+  const grid: MetricSpec['data'] = [];
   for (let i = 0; i < metricConfigs.length; i += maxCols) {
     grid.push(metricConfigs.slice(i, i + maxCols));
   }
-
-  const chartTheme = getThemeService().useChartsTheme();
-  const onRenderChange = useCallback<RenderChangeListener>(
-    (isRendered) => {
-      if (isRendered) {
-        renderComplete();
-      }
-    },
-    [renderComplete]
-  );
 
   let pixelHeight;
   let pixelWidth;
@@ -236,28 +262,6 @@ export const MetricVis = ({
     pixelHeight = grid.length * maxTileSideLength;
     pixelWidth = grid[0]?.length * maxTileSideLength;
   }
-
-  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
-
-  const baseTheme = getThemeService().useChartsBaseTheme();
-
-  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
-
-  useEffect(() => {
-    const minimumRequiredVerticalSpace = minHeight * grid.length;
-    setScrollChildHeight(
-      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
-        ? '100%'
-        : `${minimumRequiredVerticalSpace}px`
-    );
-  }, [grid.length, minHeight, scrollDimensions.height]);
-
-  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
-    overrides,
-    'settings'
-  ) as Partial<SettingsProps>;
 
   return (
     <div
@@ -296,12 +300,11 @@ export const MetricVis = ({
             onElementClick={
               filterable
                 ? (events) => {
+                    const colRef = breakdownByColumn ?? primaryMetricColumn;
+                    const rowLength = grid[0].length;
                     events.forEach((event) => {
                       if (isMetricElementEvent(event)) {
-                        const colIdx = breakdownByColumn
-                          ? data.columns.findIndex((col) => col === breakdownByColumn)
-                          : data.columns.findIndex((col) => col === primaryMetricColumn);
-                        const rowLength = grid[0].length;
+                        const colIdx = data.columns.findIndex((col) => col === colRef);
                         fireEvent(
                           buildFilterEvent(
                             event.rowIndex * rowLength + event.columnIndex,

@@ -28,7 +28,7 @@ import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
-import type { IndexPattern, IndexPatternMap } from '../../types';
+import type { IndexPattern, IndexPatternMap, VisualizationDataPreferences } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
@@ -58,7 +58,8 @@ function getExpressionForLayer(
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
-  searchSessionId?: string
+  searchSessionId?: string,
+  visualizationDataPreferences?: VisualizationDataPreferences
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
@@ -324,9 +325,16 @@ function getExpressionForLayer(
         arguments: {
           format: format ? [format.id] : [''],
           columnId: [id],
-          decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+          decimals:
+            typeof format?.params?.decimals === 'number' &&
+            !visualizationDataPreferences?.format?.disableExtraOptions
+              ? [format.params.decimals]
+              : [],
           suffix:
-            format?.params && 'suffix' in format.params && format.params.suffix
+            format?.params &&
+            'suffix' in format.params &&
+            format.params.suffix &&
+            !visualizationDataPreferences?.format?.disableExtraOptions
               ? [format.params.suffix]
               : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
@@ -469,7 +477,8 @@ export function toExpression(
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
-  searchSessionId?: string
+  searchSessionId?: string,
+  visualizationDataPreferences?: VisualizationDataPreferences
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
@@ -477,7 +486,8 @@ export function toExpression(
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
       dateRange,
-      searchSessionId
+      searchSessionId,
+      visualizationDataPreferences
     );
   }
 

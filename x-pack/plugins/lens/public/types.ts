@@ -169,6 +169,10 @@ export interface VisualizationInfo {
   }>;
 }
 
+export interface VisualizationDataPreferences {
+  format?: FormatSelectorOptions;
+}
+
 /**
  * A possible table a datasource can create. This object is passed to the visualization
  * which tries to build a meaningful visualization given the shape of the table. If this
@@ -434,7 +438,8 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
-    searchSessionId?: string
+    searchSessionId?: string,
+    visualizationPreferences?: VisualizationDataPreferences
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
@@ -1284,6 +1289,10 @@ export interface Visualization<T = unknown, P = T> {
    * A visualization can return custom dimensions for the reporting tool
    */
   getReportingLayout?: (state: T) => { height: number; width: number };
+  /**
+   * A visualization can expose datasource preferences for data, like formatting options
+   */
+  getSourcePreferences?: (state: T) => VisualizationDataPreferences;
 }
 
 // Use same technique as TriggerContext
