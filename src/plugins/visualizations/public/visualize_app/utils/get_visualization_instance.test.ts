@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { VisualizeInput, VisSavedObject, Vis, VisParams } from '../..';
 import {
   getVisualizationInstance,
@@ -69,6 +68,15 @@ describe('getVisualizationInstance', () => {
     mockServices.createVisEmbeddableFromObject = jest.fn().mockImplementation(() => ({
       getOutput$: jest.fn(() => subj.asObservable()),
     }));
+    mockServices.savedSearch = {
+      get: jest.fn().mockImplementation(() => ({
+        id: 'savedSearch',
+        searchSource: {},
+        title: 'savedSearchTitle',
+      })),
+      getNew: jest.fn().mockImplementation(() => ({})),
+      save: jest.fn().mockImplementation(() => ({})),
+    };
   });
 
   test('should create new instances of savedVis, vis and embeddableHandler', async () => {
@@ -120,7 +128,6 @@ describe('getVisualizationInstance', () => {
     visMock.data.savedSearchId = 'saved_search_id';
     const { savedSearch } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
-    expect(getSavedSearch).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "id": "savedSearch",
