@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put('/internal/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader)
+        .set(getCommonRequestHeader())
         .send(annotationUpdateRequestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put('/internal/ml/annotations/index')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(getCommonRequestHeader)
+        .set(getCommonRequestHeader())
         .send(annotationUpdateRequestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put('/internal/ml/annotations/index')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(getCommonRequestHeader)
+        .set(getCommonRequestHeader())
         .send(annotationUpdateRequestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 
@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .put('/internal/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader)
+        .set(getCommonRequestHeader())
         .send(annotationUpdateRequestBodyWithMissingFields);
       ml.api.assertResponseStatusCode(200, status, body);
 
