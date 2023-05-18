@@ -16,10 +16,10 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import styled from 'styled-components';
-import { withSecuritySolutionLink } from '../../common/components/links';
-import { NavItemBetaBadge } from '../../common/components/navigation/nav_item_beta_badge';
-import type { NavLinkItem } from '../../common/components/navigation/types';
-import { TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
+import { withSecuritySolutionLink } from '../links';
+import { NavItemBetaBadge } from '../navigation/nav_item_beta_badge';
+import type { NavLinkItem } from '../navigation/types';
+import { TELEMETRY_EVENT, track } from '../../lib/telemetry';
 
 interface LandingImagesProps {
   items: NavLinkItem[];

@@ -7,11 +7,11 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { SecurityPageName } from '../../app/types';
-import type { NavLinkItem } from '../../common/components/navigation/types';
-import { TestProviders } from '../../common/mock';
+import { SecurityPageName } from '../../../app/types';
+import type { NavLinkItem } from '../navigation/types';
+import { TestProviders } from '../../mock';
 import { LandingLinksIcons } from './landing_links_icons';
-import * as telemetry from '../../common/lib/telemetry';
+import * as telemetry from '../../lib/telemetry';
 
 const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
@@ -22,8 +22,8 @@ const DEFAULT_NAV_ITEM: NavLinkItem = {
 const spyTrack = jest.spyOn(telemetry, 'track');
 
 const mockNavigateTo = jest.fn();
-jest.mock('../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../common/lib/kibana');
+jest.mock('../../lib/kibana', () => {
+  const originalModule = jest.requireActual('../../lib/kibana');
   return {
     ...originalModule,
     useNavigateTo: () => ({
@@ -32,8 +32,8 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../common/components/link_to', () => {
-  const originalModule = jest.requireActual('../../common/components/link_to');
+jest.mock('../link_to', () => {
+  const originalModule = jest.requireActual('../link_to');
   return {
     ...originalModule,
     useGetSecuritySolutionUrl: () =>
