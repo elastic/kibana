@@ -343,6 +343,43 @@ describe('Response actions history page', () => {
       );
       expect(history.location.search).toEqual(`?startDate=${startDate}&endDate=${endDate}`);
     });
+
+    it('should read and expand actions using `withOutputs`', () => {
+      const allActionIds = mockUseGetEndpointActionList.data?.data.map((action) => action.id) ?? [];
+      // select 5 actions to show details
+      const actionIdsWithDetails = allActionIds.filter((_, i) => [0, 2, 3, 4, 5].includes(i));
+      reactTestingLibrary.act(() => {
+        // load page 1 but with expanded actions.
+        history.push(
+          `/administration/response_actions_history?withOutputs=${actionIdsWithDetails.join(
+            ','
+          )}&page=1&pageSize=10`
+        );
+      });
+
+      const { getByTestId, getAllByTestId } = render();
+
+      // verify on page 1
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 43 response actions'
+      );
+
+      const traysOnPage1 = getAllByTestId(`${testPrefix}-details-tray`);
+      const expandButtonsOnPage1 = getAllByTestId(`${testPrefix}-expand-button`);
+      const expandedButtons = expandButtonsOnPage1.reduce<number[]>((acc, button, i) => {
+        // find expanded rows
+        if (button.getAttribute('aria-label') === 'Collapse') {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+
+      // verify 5 rows are expanded
+      expect(traysOnPage1).toBeTruthy();
+      expect(traysOnPage1.length).toEqual(5);
+      // verify 5 rows that are expanded are the ones from before
+      expect(expandedButtons).toEqual([0, 2, 3, 4, 5]);
+    });
   });
 
   describe('Set selected/set values to URL params', () => {
