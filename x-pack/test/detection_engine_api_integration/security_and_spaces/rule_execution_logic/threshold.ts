@@ -256,7 +256,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).eql(0);
     });
 
-    it('generates 1 signals from Threshold rules when bucketing by multiple fields', async () => {
+    it('generates signals from Threshold rules when bucketing by multiple fields', async () => {
       const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         threshold: {
