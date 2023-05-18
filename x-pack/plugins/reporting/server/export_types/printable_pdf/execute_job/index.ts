@@ -30,9 +30,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
         mergeMap(async (headers) => {
           const fakeRequest = reporting.getFakeRequest(headers, job.spaceId, jobLogger);
           const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, jobLogger);
-          getCustomLogo(uiSettingsClient, headers);
+          return getCustomLogo(uiSettingsClient, headers);
         }),
-        mergeMap((headers, logo) => {
+        mergeMap(({ headers, logo }) => {
           const urls = getFullUrls(reporting.getServerInfo(), reporting.getConfig(), job);
 
           const { browserTimezone, layout, title } = job;
@@ -42,10 +42,10 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
           return generatePdfObservable(reporting.getScreenshots, {
             format: 'pdf',
             title,
-            // logo,
+            logo,
             urls,
             browserTimezone,
-            // headers,
+            headers,
             layout,
           });
         }),

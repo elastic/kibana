@@ -30,9 +30,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
         mergeMap(async (headers) => {
           const fakeRequest = reporting.getFakeRequest(headers, job.spaceId, jobLogger);
           const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest);
-          getCustomLogo(uiSettingsClient, headers);
+          return getCustomLogo(uiSettingsClient, headers);
         }),
-        mergeMap((logo, headers) => {
+        mergeMap(({ logo, headers }) => {
           const { browserTimezone, layout, title, locatorParams } = job;
           apmGetAssets?.end();
 
@@ -46,9 +46,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
             {
               format: 'pdf',
               title,
-              // logo,
+              logo,
               browserTimezone,
-              // headers,
+              headers,
               layout,
             }
           );
