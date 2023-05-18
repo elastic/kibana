@@ -15,6 +15,7 @@ export class ObservabilityError extends Error {
 }
 
 export class SLONotFound extends ObservabilityError {}
+export class SLOIdConflict extends ObservabilityError {}
 export class InternalQueryError extends ObservabilityError {}
 export class NotSupportedError extends ObservabilityError {}
 export class IllegalArgumentError extends ObservabilityError {}

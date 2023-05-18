@@ -6,7 +6,7 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, ValueOf } from '..';
+import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -36,6 +36,7 @@ export interface NewAgentPolicy {
   is_protected?: boolean;
 }
 
+// SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
@@ -47,8 +48,6 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   agents?: number;
   is_protected: boolean;
 }
-
-export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
 
 export interface FullAgentPolicyInputStream {
   id: string;
@@ -122,6 +121,7 @@ export interface FullAgentPolicy {
       signing_key: string;
     };
   };
+  secret_references?: PolicySecretReference[];
   signed?: {
     data: string;
     signature: string;

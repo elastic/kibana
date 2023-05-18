@@ -1767,165 +1767,6 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useTrackMetric",
-        "type": "Function",
-        "tags": [],
-        "label": "useTrackMetric",
-        "description": [],
-        "signature": [
-          "({ app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.TrackMetricOptions",
-            "text": "TrackMetricOptions"
-          },
-          ", effectDependencies: EffectDeps) => void"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useTrackMetric.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.TrackMetricOptions",
-                "text": "TrackMetricOptions"
-              }
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useTrackMetric.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "effectDependencies",
-            "description": [],
-            "signature": [
-              "EffectDeps"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useTrackPageview",
-        "type": "Function",
-        "tags": [],
-        "label": "useTrackPageview",
-        "description": [],
-        "signature": [
-          "({ path, ...rest }: TrackPageviewProps, effectDependencies: EffectDeps) => void"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useTrackPageview.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ path, ...rest }",
-            "description": [],
-            "signature": [
-              "TrackPageviewProps"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useTrackPageview.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "effectDependencies",
-            "description": [],
-            "signature": [
-              "EffectDeps"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useUiTracker",
-        "type": "Function",
-        "tags": [],
-        "label": "useUiTracker",
-        "description": [],
-        "signature": [
-          "({\n  app: defaultApp,\n}: { app?: ",
-          "ObservabilityApp",
-          " | undefined; }) => ",
-          "TrackEvent"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useUiTracker.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  app: defaultApp,\n}",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.useUiTracker.$1.app",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "app",
-                "description": [],
-                "signature": [
-                  "ObservabilityApp",
-                  " | undefined"
-                ],
-                "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -3479,7 +3320,13 @@
               "{ navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
-              "NavigationSection",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.NavigationSection",
+                "text": "NavigationSection"
+              },
               "[]>) => void; }; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -4772,18 +4619,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.METRIC_TYPE",
-        "type": "Enum",
-        "tags": [],
-        "label": "METRIC_TYPE",
-        "description": [],
-        "path": "packages/kbn-analytics/src/metrics/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -5264,61 +5099,6 @@
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.TrackMetricOptions",
-        "type": "Type",
-        "tags": [],
-        "label": "TrackMetricOptions",
-        "description": [],
-        "signature": [
-          "TrackOptions & { metric: string; }"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.UiTracker",
-        "type": "Type",
-        "tags": [],
-        "label": "UiTracker",
-        "description": [],
-        "signature": [
-          "(options: ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.TrackMetricOptions",
-            "text": "TrackMetricOptions"
-          },
-          ") => void"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UiTracker.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "TrackOptions & { metric: string; }"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -8795,7 +8575,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; }; sloSavedObject: string | ",
+          ", { sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; sloSavedObject: string | ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -8803,7 +8583,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
           "TransformGetTransformStatsResponse",
           "; dataSample: string | ",
           "SearchResponse",
@@ -8837,7 +8617,7 @@
           "PublicLicenseJSON",
           "; userPrivileges: ",
           "SecurityGetUserPrivilegesResponse",
-          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; }; }, ",
+          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8943,19 +8723,7 @@
           "StringC",
           "; }>, ",
           "PartialC",
-          "<{ goodStatusCodes: ",
-          "ArrayC",
-          "<",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"2xx\">, ",
-          "LiteralC",
-          "<\"3xx\">, ",
-          "LiteralC",
-          "<\"4xx\">, ",
-          "LiteralC",
-          "<\"5xx\">]>>; filter: ",
+          "<{ filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -9001,11 +8769,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; calendar: ",
-          "TypeC",
-          "<{ startTime: ",
-          "Type",
-          "<Date, string, unknown>; }>; }>]>; budgetingMethod: ",
+          ", string, unknown>; isCalendar: ",
+          "LiteralC",
+          "<boolean>; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -9065,7 +8831,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9095,7 +8861,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9143,7 +8909,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9369,19 +9135,7 @@
           "StringC",
           "; }>, ",
           "PartialC",
-          "<{ goodStatusCodes: ",
-          "ArrayC",
-          "<",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"2xx\">, ",
-          "LiteralC",
-          "<\"3xx\">, ",
-          "LiteralC",
-          "<\"4xx\">, ",
-          "LiteralC",
-          "<\"5xx\">]>>; filter: ",
+          "<{ filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -9427,11 +9181,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; calendar: ",
-          "TypeC",
-          "<{ startTime: ",
-          "Type",
-          "<Date, string, unknown>; }>; }>]>; budgetingMethod: ",
+          ", string, unknown>; isCalendar: ",
+          "LiteralC",
+          "<boolean>; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -9459,7 +9211,9 @@
           },
           ", string, unknown>; }>]>; }>, ",
           "PartialC",
-          "<{ settings: ",
+          "<{ id: ",
+          "StringC",
+          "; settings: ",
           "PartialC",
           "<{ syncDelay: ",
           "Type",
@@ -9597,7 +9351,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; }; sloSavedObject: string | ",
+          ", { sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; sloSavedObject: string | ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -9605,7 +9359,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
           "TransformGetTransformStatsResponse",
           "; dataSample: string | ",
           "SearchResponse",
@@ -9639,7 +9393,7 @@
           "PublicLicenseJSON",
           "; userPrivileges: ",
           "SecurityGetUserPrivilegesResponse",
-          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; }; }, ",
+          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; } | undefined; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9745,19 +9499,7 @@
           "StringC",
           "; }>, ",
           "PartialC",
-          "<{ goodStatusCodes: ",
-          "ArrayC",
-          "<",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"2xx\">, ",
-          "LiteralC",
-          "<\"3xx\">, ",
-          "LiteralC",
-          "<\"4xx\">, ",
-          "LiteralC",
-          "<\"5xx\">]>>; filter: ",
+          "<{ filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -9803,11 +9545,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; calendar: ",
-          "TypeC",
-          "<{ startTime: ",
-          "Type",
-          "<Date, string, unknown>; }>; }>]>; budgetingMethod: ",
+          ", string, unknown>; isCalendar: ",
+          "LiteralC",
+          "<boolean>; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -9867,7 +9607,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9897,7 +9637,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9945,7 +9685,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10171,19 +9911,7 @@
           "StringC",
           "; }>, ",
           "PartialC",
-          "<{ goodStatusCodes: ",
-          "ArrayC",
-          "<",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"2xx\">, ",
-          "LiteralC",
-          "<\"3xx\">, ",
-          "LiteralC",
-          "<\"4xx\">, ",
-          "LiteralC",
-          "<\"5xx\">]>>; filter: ",
+          "<{ filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -10229,11 +9957,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; calendar: ",
-          "TypeC",
-          "<{ startTime: ",
-          "Type",
-          "<Date, string, unknown>; }>; }>]>; budgetingMethod: ",
+          ", string, unknown>; isCalendar: ",
+          "LiteralC",
+          "<boolean>; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -10261,7 +9987,9 @@
           },
           ", string, unknown>; }>]>; }>, ",
           "PartialC",
-          "<{ settings: ",
+          "<{ id: ",
+          "StringC",
+          "; settings: ",
           "PartialC",
           "<{ syncDelay: ",
           "Type",
@@ -12339,124 +12067,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.uiSettings.profilingElasticsearchPlugin",
-            "type": "Object",
-            "tags": [],
-            "label": "[profilingElasticsearchPlugin]",
-            "description": [],
-            "path": "x-pack/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.name",
-                "type": "Any",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.description",
-                "type": "Any",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "\"boolean\""
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-server.uiSettings.syntheticsThrottlingEnabled",
             "type": "Object",
             "tags": [],
@@ -13453,21 +13063,6 @@
           "\"observability\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.profilingElasticsearchPlugin",
-        "type": "string",
-        "tags": [],
-        "label": "profilingElasticsearchPlugin",
-        "description": [],
-        "signature": [
-          "\"observability:profilingElasticsearchPlugin\""
-        ],
-        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
