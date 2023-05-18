@@ -50,7 +50,7 @@ export class DataViewsPublicPlugin
       version: {
         latest: LATEST_VERSION,
       },
-      name: 'data view',
+      name: 'Data View',
     });
 
     return {};
