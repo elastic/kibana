@@ -125,11 +125,7 @@ export abstract class SubActionConnector<Config, Secrets> {
       this.logger.debug(
         `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
       );
-      console.log('before req', {
-        data: this.normalizeData(data),
-        url: normalizedURL,
-        headers: this.getHeaders(headers),
-      });
+
       const res = await request({
         ...config,
         axios: this.axiosInstance,
@@ -141,13 +137,10 @@ export abstract class SubActionConnector<Config, Secrets> {
         headers: this.getHeaders(headers),
       });
 
-      console.log('after req');
       this.validateResponse(responseSchema, res.data);
 
-      console.log('after validateResponse');
       return res;
     } catch (error) {
-      console.log('after error');
       if (isAxiosError(error)) {
         this.logger.debug(
           `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config.method}. URL: ${error.config.url}`

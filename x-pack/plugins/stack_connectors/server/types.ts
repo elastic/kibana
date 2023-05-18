@@ -17,8 +17,6 @@ export type {
   EmailActionParams,
   IndexConnectorTypeId,
   IndexActionParams,
-  GenerativeAiConnectorTypeId,
-  GenerativeAiActionParams,
   PagerDutyConnectorTypeId,
   PagerDutyActionParams,
   ServerLogConnectorTypeId,
