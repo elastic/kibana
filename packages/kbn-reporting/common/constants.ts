@@ -8,4 +8,4 @@
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
-export const CSV_REPORTING_ACTION = 'downloadCsvReport';
+export const CSV_REPORTING_ACTION = 'createCsvReport';

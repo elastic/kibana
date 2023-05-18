@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
-import { first } from 'rxjs/operators';
 import { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { SearchSource } from '@kbn/data-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import { LicenseCheckState } from '@kbn/licensing-plugin/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import * as Rx from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
 import type { ActionContext } from './get_csv_panel_action';
@@ -47,12 +47,12 @@ describe('GetCsvReportPanelAction', () => {
       });
     }
 
-    core.http.post.mockResolvedValue({});
+    core.http.post.mockResolvedValue({ job: { id: '123-f000', payload: {} } });
   });
 
   beforeEach(() => {
     apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
-    jest.spyOn(apiClient, 'createImmediateReport');
+    jest.spyOn(apiClient, 'createReportingJob');
 
     mockLicenseState = 'valid';
 
@@ -104,14 +104,13 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
-
+    await firstValueFrom(mockStartServices$);
     await panel.execute(context);
 
-    expect(apiClient.createImmediateReport).toHaveBeenCalledWith({
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith({
       browserTimezone: undefined,
       columns: [],
-      objectType: 'downloadCsv',
+      objectType: 'search',
       searchSource: {},
       title: '',
       version: '7.15.0',
@@ -140,14 +139,13 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
-
+    await firstValueFrom(mockStartServices$);
     await panel.execute(context);
 
-    expect(apiClient.createImmediateReport).toHaveBeenCalledWith({
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith({
       browserTimezone: undefined,
       columns: ['column_a', 'column_b'],
-      objectType: 'downloadCsv',
+      objectType: 'search',
       searchSource: { testData: 'testDataValue' },
       title: '',
       version: '7.15.0',
@@ -162,8 +160,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
-
+    await firstValueFrom(mockStartServices$);
     await panel.execute(context);
 
     expect(core.http.post).toHaveBeenCalled();
@@ -177,8 +174,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
-
+    await firstValueFrom(mockStartServices$);
     await panel.execute(context);
 
     expect(core.notifications.toasts.addSuccess).toHaveBeenCalled();
@@ -186,7 +182,7 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('shows a bad old toastie when it successfully fails', async () => {
-    apiClient.createImmediateReport = jest.fn().mockRejectedValue('No more ram!');
+    apiClient.createReportingJob = jest.fn().mockRejectedValue('No more ram!');
     const panel = new ReportingCsvPanelAction({
       core,
       apiClient,
@@ -194,8 +190,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
-
+    await firstValueFrom(mockStartServices$);
     await panel.execute(context);
 
     expect(core.notifications.toasts.addDanger).toHaveBeenCalled();
@@ -211,7 +206,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await firstValueFrom(mockStartServices$);
     expect(await plugin.isCompatible(context)).toEqual(false);
   });
 
@@ -223,10 +218,10 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await firstValueFrom(mockStartServices$);
 
     expect(panel.getIconType()).toMatchInlineSnapshot(`"document"`);
-    expect(panel.getDisplayName()).toMatchInlineSnapshot(`"Download CSV"`);
+    expect(panel.getDisplayName()).toMatchInlineSnapshot(`"Generate CSV report"`);
   });
 
   describe('Application UI Capabilities', () => {
@@ -239,7 +234,7 @@ describe('GetCsvReportPanelAction', () => {
         usesUiCapabilities: true,
       });
 
-      await mockStartServices$.pipe(first()).toPromise();
+      await firstValueFrom(mockStartServices$);
 
       expect(await plugin.isCompatible(context)).toEqual(false);
     });
@@ -252,7 +247,7 @@ describe('GetCsvReportPanelAction', () => {
         usesUiCapabilities: true,
       });
 
-      await mockStartServices$.pipe(first()).toPromise();
+      await firstValueFrom(mockStartServices$);
 
       expect(await plugin.isCompatible(context)).toEqual(true);
     });

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
-import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
 import type { ISearchEmbeddable, SavedSearch } from '@kbn/discover-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
@@ -37,20 +37,15 @@ interface Params {
 }
 
 export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
-  private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
-  private licenseHasDownloadCsv: boolean = false;
-  private capabilityHasDownloadCsv: boolean = false;
-  private notifications: NotificationsSetup;
+  private licenseHasGenerateCsv: boolean = false;
+  private capabilityHasGenerateCsv: boolean = false;
   private apiClient: ReportingAPIClient;
   private startServices$: Params['startServices$'];
-  private usesUiCapabilities: any;
+  private usesUiCapabilities: boolean;
 
-  constructor({ core, apiClient, startServices$, usesUiCapabilities }: Params) {
-    this.isDownloading = false;
-
-    this.notifications = core.notifications;
+  constructor({ apiClient, startServices$, usesUiCapabilities }: Params) {
     this.apiClient = apiClient;
 
     this.startServices$ = startServices$;
@@ -62,8 +57,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
-      defaultMessage: 'Download CSV',
+    return i18n.translate('xpack.reporting.dashboard.generateCsvPanelTitle', {
+      defaultMessage: 'Generate CSV report',
     });
   }
 
@@ -79,20 +74,22 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
         licensing.license$.subscribe((license) => {
           const results = license.check('reporting', 'basic');
           const { showLinks } = checkLicense(results);
-          this.licenseHasDownloadCsv = showLinks;
+          this.licenseHasGenerateCsv = showLinks;
         });
 
         if (this.usesUiCapabilities) {
-          this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
+          // when xpack.reporting.roles.enabled=false, the feature is controlled by UI capabilities.
+          this.capabilityHasGenerateCsv = application.capabilities.dashboard?.downloadCsv === true; // NOTE: "download" can not be renamed
         } else {
-          this.capabilityHasDownloadCsv = true; // deprecated
+          // when xpack.reporting.roles.enabled=true, the feature is controlled by the presence of the reporting_user role
+          this.capabilityHasGenerateCsv = true; // deprecated
         }
 
         resolve();
       });
     });
 
-    if (!this.licenseHasDownloadCsv || !this.capabilityHasDownloadCsv) {
+    if (!this.licenseHasGenerateCsv || !this.capabilityHasGenerateCsv) {
       return false;
     }
 
@@ -120,72 +117,18 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       throw new IncompatibleActionError();
     }
 
-    if (this.isDownloading) {
-      return;
-    }
-
     const savedSearch = embeddable.getSavedSearch();
     const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
 
-    const immediateJobParams = this.apiClient.getDecoratedJobParams({
+    const decoratedJobParams = this.apiClient.getDecoratedJobParams({
       searchSource: getSearchSource(true),
       columns,
       title: savedSearch.title || '',
-      objectType: 'csv_searchsource',
+      objectType: 'search',
     });
 
-    this.isDownloading = true;
-
-    this.notifications.toasts.addSuccess({
-      title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
-        defaultMessage: `CSV Download Started`,
-      }),
-      text: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedMessage', {
-        defaultMessage: `Your CSV will download momentarily.`,
-      }),
-      'data-test-subj': 'csvDownloadStarted',
-    });
-
-    await this.apiClient
-      .createImmediateReport(immediateJobParams)
-      .then(({ body, response }) => {
-        this.isDownloading = false;
-
-        const download = `${savedSearch.title}.csv`;
-        const blob = new Blob([body as BlobPart], {
-          type: response?.headers.get('content-type') || undefined,
-        });
-
-        // Hack for IE11 Support
-        // @ts-expect-error
-        if (window.navigator.msSaveOrOpenBlob) {
-          // @ts-expect-error
-          return window.navigator.msSaveOrOpenBlob(blob, download);
-        }
-
-        const a = window.document.createElement('a');
-        const downloadObject = window.URL.createObjectURL(blob);
-
-        a.href = downloadObject;
-        a.download = download;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(downloadObject);
-        document.body.removeChild(a);
-      })
-      .catch(this.onGenerationFail.bind(this));
+    // FIXME: disable generation controls, prevent multi-click
+    // FIXME: show toast notification
+    await this.apiClient.createReportingJob('csv_searchsource', decoratedJobParams);
   };
-
-  private onGenerationFail(_error: Error) {
-    this.isDownloading = false;
-    this.notifications.toasts.addDanger({
-      title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
-        defaultMessage: `CSV download failed`,
-      }),
-      text: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadMessage', {
-        defaultMessage: `We couldn't generate your CSV at this time.`,
-      }),
-      'data-test-subj': 'downloadCsvFail',
-    });
-  }
 }
