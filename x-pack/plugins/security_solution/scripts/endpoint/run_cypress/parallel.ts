@@ -155,235 +155,245 @@ export const cli = () => {
         // files.slice(0, 2),
         // [files[0]],
         async (filePath, index) => {
-          const esPort = getEsPort();
-          const kibanaPort = getKibanaPort();
-          const fleetServerPort = getFleetServerPort();
-          const configFromTestFile = parseTestFileConfig(filePath);
+          await withProcRunner(log, async (procs) => {
+            const abortCtrl = new AbortController();
 
-          const config = await readConfigFile(
-            log,
-            EsVersion.getDefault(),
-            argv.ftrConfigFile,
-            {
-              servers: {
-                elasticsearch: {
-                  port: esPort,
+            const onEarlyExit = (msg: string) => {
+              log.error(msg);
+              abortCtrl.abort();
+            };
+
+            const esPort = getEsPort();
+            const kibanaPort = getKibanaPort();
+            const fleetServerPort = getFleetServerPort();
+            const configFromTestFile = parseTestFileConfig(filePath);
+
+            const config = await readConfigFile(
+              log,
+              EsVersion.getDefault(),
+              argv.ftrConfigFile,
+              {
+                servers: {
+                  elasticsearch: {
+                    port: esPort,
+                  },
+                  kibana: {
+                    port: kibanaPort,
+                  },
+                  fleetserver: {
+                    port: fleetServerPort,
+                  },
                 },
-                kibana: {
-                  port: kibanaPort,
-                },
-                fleetserver: {
-                  port: fleetServerPort,
-                },
-              },
-              kbnTestServer: {
-                serverArgs: [
-                  `--server.port=${kibanaPort}`,
-                  `--elasticsearch.hosts=http://localhost:${esPort}`,
-                ],
-                env: {
-                  cypress: {
-                    env: {
-                      CYPRESS_SPEC_PATTERN: `**/${filePath}`,
+                kbnTestServer: {
+                  serverArgs: [
+                    `--server.port=${kibanaPort}`,
+                    `--elasticsearch.hosts=http://localhost:${esPort}`,
+                  ],
+                  env: {
+                    cypress: {
+                      env: {
+                        CYPRESS_SPEC_PATTERN: `**/${filePath}`,
+                      },
                     },
                   },
                 },
               },
-            },
-            (vars) => {
-              console.error('vars', vars);
+              (vars) => {
+                console.error('vars', vars);
 
-              const hasFleetServerArgs = _.some(
-                vars.kbnTestServer.serverArgs,
-                (value) =>
-                  value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-                  value.includes('--xpack.fleet.agents.elasticsearch.host')
-              );
-
-              vars.kbnTestServer.serverArgs = _.filter(
-                vars.kbnTestServer.serverArgs,
-                (value) =>
-                  !(
-                    value.includes('--elasticsearch.hosts=http://localhost:9220') ||
+                const hasFleetServerArgs = _.some(
+                  vars.kbnTestServer.serverArgs,
+                  (value) =>
                     value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
                     value.includes('--xpack.fleet.agents.elasticsearch.host')
-                  )
-              );
-
-              if (hasFleetServerArgs) {
-                vars.kbnTestServer.serverArgs.push(
-                  `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`,
-                  `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
                 );
+
+                vars.kbnTestServer.serverArgs = _.filter(
+                  vars.kbnTestServer.serverArgs,
+                  (value) =>
+                    !(
+                      value.includes('--elasticsearch.hosts=http://localhost:9220') ||
+                      value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
+                      value.includes('--xpack.fleet.agents.elasticsearch.host')
+                    )
+                );
+
+                if (hasFleetServerArgs) {
+                  vars.kbnTestServer.serverArgs.push(
+                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`,
+                    `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
+                  );
+                }
+
+                return vars;
               }
+            );
 
-              return vars;
-            }
-          );
+            console.error(
+              'xxxxx2',
+              config,
+              config.get('servers'),
+              config.get('kbnTestServer.serverArgs')
+            );
 
-          console.error(
-            'xxxxx2',
-            config,
-            config.get('servers'),
-            config.get('kbnTestServer.serverArgs')
-          );
+            const lifecycle = new Lifecycle(log);
 
-          const lifecycle = new Lifecycle(log);
+            const providers = new ProviderCollection(log, [
+              ...readProviderSpec('Service', {
+                lifecycle: () => lifecycle,
+                log: () => log,
+                config: () => config,
+              }),
+              ...readProviderSpec('Service', config.get('services')),
+            ]);
 
-          const providers = new ProviderCollection(log, [
-            ...readProviderSpec('Service', {
-              lifecycle: () => lifecycle,
-              log: () => log,
-              config: () => config,
-            }),
-            ...readProviderSpec('Service', config.get('services')),
-          ]);
+            const options = {
+              installDir: process.env.KIBANA_INSTALL_DIR,
+            };
 
-          const options = {
-            installDir: process.env.KIBANA_INSTALL_DIR,
-          };
+            console.error('options', options, kibanaPort);
 
-          console.error('options', options, kibanaPort);
+            const shutdownEs = await runElasticsearch({
+              config,
+              log,
+              name: `ftr-${esPort}`,
+              esFrom: 'snapshot',
+              onEarlyExit,
+            });
 
-          await runElasticsearch({
-            config,
-            log,
-            name: `ftr-${esPort}`,
-            esFrom: 'snapshot',
-          });
+            await runKibanaServer({
+              procs,
+              config,
+              installDir: options?.installDir,
+              extraKbnOpts: options?.installDir
+                ? []
+                : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+              onEarlyExit,
+            });
 
-          const procs = new ProcRunner(log);
+            await providers.loadAll();
 
-          await runKibanaServer({
-            procs,
-            config,
-            installDir: options?.installDir,
-            extraKbnOpts: options?.installDir
-              ? []
-              : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-          });
+            const functionalTestRunner = new FunctionalTestRunner(
+              log,
+              config,
+              EsVersion.getDefault(),
+              abortCtrl.signal
+            );
 
-          await providers.loadAll();
+            const customEnv = await functionalTestRunner.run();
 
-          const functionalTestRunner = new FunctionalTestRunner(
-            log,
-            config,
-            EsVersion.getDefault()
-          );
+            console.error('customEnv', customEnv);
 
-          const customEnv = await functionalTestRunner.run();
+            // const child = execa.node(require.resolve('./subprocess'));
 
-          console.error('customEnv', customEnv);
+            // const child = await execa('node', [require.resolve('./subprocess')]);
 
-          // const child = execa.node(require.resolve('./subprocess'));
+            // console.error('child', child);
 
-          // const child = await execa('node', [require.resolve('./subprocess')]);
+            // const subprocess = execa('node', [require.resolve('./subprocess')], {
+            //   extendEnv: true,
+            //   env: {
+            //     ...customEnv,
+            //     CYPRESS_SPEC: filePath,
+            //     CYPRESS_CONFIG_FILE: argv.configFile,
+            //   },
+            // });
+            // subprocess.stdout.pipe(process.stdout);
 
-          // console.error('child', child);
+            // try {
+            //   const { stdout } = await subprocess;
+            //   console.log('child output:', stdout);
+            // } catch (error) {
+            //   console.error('child failed:', error);
+            // }
 
-          // const subprocess = execa('node', [require.resolve('./subprocess')], {
-          //   extendEnv: true,
-          //   env: {
-          //     ...customEnv,
-          //     CYPRESS_SPEC: filePath,
-          //     CYPRESS_CONFIG_FILE: argv.configFile,
-          //   },
-          // });
-          // subprocess.stdout.pipe(process.stdout);
+            // child.on('message', (msg) => {
+            //   console.log('The message between IPC channel, in app.js\n', msg);
+            //   // resolve(msg);
+            // });
 
-          // try {
-          //   const { stdout } = await subprocess;
-          //   console.log('child output:', stdout);
-          // } catch (error) {
-          //   console.error('child failed:', error);
-          // }
+            // console.error('child', process.argv, require.resolve('.'), child);
 
-          // child.on('message', (msg) => {
-          //   console.log('The message between IPC channel, in app.js\n', msg);
-          //   // resolve(msg);
-          // });
+            // console.error({
+            //   spec: filePath,
+            //   headed: true,
+            //   configFile: argv.configFile,
+            //   config: {
+            //     env: customEnv,
+            //     baseUrl: `http://localhost:${kibanaPort}`,
+            //   },
+            // });
 
-          // console.error('child', process.argv, require.resolve('.'), child);
+            // child.send({
+            //   spec: filePath,
+            //   headed: true,
+            //   configFile: argv.configFile,
+            //   config: {
+            //     env: customEnv,
+            //     baseUrl: `http://localhost:${kibanaPort}`,
+            //   },
+            // });
 
-          // console.error({
-          //   spec: filePath,
-          //   headed: true,
-          //   configFile: argv.configFile,
-          //   config: {
-          //     env: customEnv,
-          //     baseUrl: `http://localhost:${kibanaPort}`,
-          //   },
-          // });
+            // return new Promise((resolve) => {
+            // child.on('message', (msg) => {
+            //   console.log('The message between IPC channel, in app.js\n', msg);
+            //   resolve(msg);
+            // });
+            //   setTimeout(() => resolve({}), 1000000);
+            // });
 
-          // child.send({
-          //   spec: filePath,
-          //   headed: true,
-          //   configFile: argv.configFile,
-          //   config: {
-          //     env: customEnv,
-          //     baseUrl: `http://localhost:${kibanaPort}`,
-          //   },
-          // });
-
-          // return new Promise((resolve) => {
-          // child.on('message', (msg) => {
-          //   console.log('The message between IPC channel, in app.js\n', msg);
-          //   resolve(msg);
-          // });
-          //   setTimeout(() => resolve({}), 1000000);
-          // });
-
-          await withProcRunner(log, async (cypressProcs) => {
-            await cypressProcs.run('cypress', {
+            await procs.run('cypress', {
               cmd: 'yarn',
               args: ['cypress:run', '--spec', filePath],
               cwd: resolve(__dirname, '../../'),
               env: customEnv,
               wait: true,
             });
+
+            await procs.stop('kibana');
+            shutdownEs();
+            cleanupServerPorts({ esPort, kibanaPort });
+
+            // return pRetry(
+            //   () =>
+            //     cypress
+            //       .run({
+            //         browser: 'chrome',
+            //         spec: filePath,
+            //         headed: true,
+            //         configFile: argv.configFile,
+            //         config: {
+            //           env: customEnv,
+            //           baseUrl: `http://localhost:${kibanaPort}`,
+            //         },
+            //       })
+            //       .then((results) => {
+            //         if (results.status === 'finished') {
+            //           _.forEach(results.runs, (run) => {
+            //             _.forEach(run.tests, (test) => {
+            //               _.forEach(test.attempts, (attempt) => {
+            //                 if (
+            //                   attempt.state === 'failed' &&
+            //                   attempt.error &&
+            //                   attempt.error.name !== 'AssertionError'
+            //                 ) {
+            //                   throw new Error(
+            //                     `Non AssertionError in ${filePath}, retrying test. Error message: ${attempt.error.message}`
+            //                   );
+            //                 }
+            //               });
+            //             });
+            //           });
+            //         }
+            //         return results;
+            //       }),
+            //   {
+            //     retries: 1,
+            //   }
+            // ).finally(() => {
+            //   cleanupServerPorts({ esPort, kibanaPort });
+            // });
           });
-
-          cleanupServerPorts({ esPort, kibanaPort });
-
-          // return pRetry(
-          //   () =>
-          //     cypress
-          //       .run({
-          //         browser: 'chrome',
-          //         spec: filePath,
-          //         headed: true,
-          //         configFile: argv.configFile,
-          //         config: {
-          //           env: customEnv,
-          //           baseUrl: `http://localhost:${kibanaPort}`,
-          //         },
-          //       })
-          //       .then((results) => {
-          //         if (results.status === 'finished') {
-          //           _.forEach(results.runs, (run) => {
-          //             _.forEach(run.tests, (test) => {
-          //               _.forEach(test.attempts, (attempt) => {
-          //                 if (
-          //                   attempt.state === 'failed' &&
-          //                   attempt.error &&
-          //                   attempt.error.name !== 'AssertionError'
-          //                 ) {
-          //                   throw new Error(
-          //                     `Non AssertionError in ${filePath}, retrying test. Error message: ${attempt.error.message}`
-          //                   );
-          //                 }
-          //               });
-          //             });
-          //           });
-          //         }
-          //         return results;
-          //       }),
-          //   {
-          //     retries: 1,
-          //   }
-          // ).finally(() => {
-          //   cleanupServerPorts({ esPort, kibanaPort });
-          // });
         },
         { concurrency: 1 }
       ).then((results) => {
