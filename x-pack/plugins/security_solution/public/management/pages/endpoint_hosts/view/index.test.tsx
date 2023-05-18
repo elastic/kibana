@@ -351,6 +351,15 @@ describe('when on the endpoint list page', () => {
         const total = await renderResult.findByTestId('endpointListTableTotal');
         expect(total.textContent).toEqual('Showing 5 endpoints');
       });
+      it('should show hostname tooltip when hovering over the hostname', async () => {
+        const renderResult = render();
+        await act(async () => {
+          fireEvent.mouseOver((await renderResult.findAllByTestId('hostnameCellLink'))[0]);
+        });
+        reactTestingLibrary.waitFor(() => {
+          expect(renderResult.queryByRole('tooltip')).toBeTruthy();
+        });
+      });
       it('should display correct status', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
