@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiTitle } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
 export function DiagnosticsInvalidFieldMappings() {
@@ -24,5 +31,19 @@ export function DiagnosticsInvalidFieldMappings() {
     );
   }
 
-  return <pre>{JSON.stringify(data?.invalidFieldMappings, null, 4)}</pre>;
+  return (
+    <>
+      <EuiText>
+        The following indices does not have the right mapping for
+        <EuiCode>service.name</EuiCode>:
+        <ul css={{ listStyleType: 'circle' }}>
+          {data?.invalidFieldMappings
+            .flatMap(({ indices }) => indices)
+            .map((indexName) => (
+              <li>{indexName}</li>
+            ))}
+        </ul>
+      </EuiText>
+    </>
+  );
 }
