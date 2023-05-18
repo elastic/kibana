@@ -8,20 +8,23 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { useTopGlobalHeaderPosition } from '../hooks/use_top_global_header_position';
 import { PlatformIcon } from '../../../../../components/endpoint_responder/components/platforms';
 import { PolicyFormRowLayout } from './policy_form_row_layout';
 
-const HeaderContainer = styled.div`
+const HeaderContainer = styled.div<{ $top: string }>`
   position: sticky;
-  top: 94px;
+  top: ${(props) => props.$top ?? '94px'};
   z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
   padding-top: 5px;
   background-color: ${({ theme: { eui } }) => eui.euiHeaderBackgroundColor};
 `;
 
 export const PolicyFormHeader = memo(() => {
+  const { bottom } = useTopGlobalHeaderPosition();
+
   return (
-    <HeaderContainer>
+    <HeaderContainer $top={`${bottom}px`}>
       <PolicyFormRowLayout
         label={<>&nbsp;</>}
         windows={<PlatformIdentifier type="windows" />}

@@ -36,6 +36,8 @@ export const PolicyDetailsForm = memo<PolicyDetailsFormProps>(({ policyDetails }
     <FormContainer>
       <PolicyFormHeader />
 
+      <EuiSpacer />
+
       <PolicyFormMalware policyDetails={policyDetails} />
 
       <PolicyFormRansomware policyDetails={policyDetails} />

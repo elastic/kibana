@@ -83,6 +83,7 @@ const PlatformAdvancedOptions = memo<PlatformAdvancedOptionsProps>(({ platformTy
         }) => {
           return (
             <PolicyAdvanced
+              key={key}
               configPath={key.split('.')}
               documentation={documentation}
               firstSupportedVersion={firstSupportedVersion}
