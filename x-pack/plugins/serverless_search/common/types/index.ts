@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext } from 'react';
 
-export const ServerlessSearchContext = React.createContext<{} | undefined>(undefined);
-
-export const useServerlessSearchContext = () => {
-  return useContext(ServerlessSearchContext);
-};
+export interface CreateAPIKeyArgs {
+  expiration?: string;
+  metadata?: Record<string, any>;
+  name: string;
+  role_descriptors?: Record<string, any>;
+}

@@ -19,6 +19,8 @@ class ESDocLinks {
   public jsClient: string = '';
   public kibanaRunApiInConsole: string = '';
   public logStash: string = '';
+  public metadata: string = '';
+  public roleDescriptors: string = '';
   public rubyAdvancedConfig: string = '';
   public rubyBasicConfig: string = '';
   public rubyClient: string = '';
@@ -35,6 +37,8 @@ class ESDocLinks {
     this.jsBasicConfig = newDocLinks.clients.jsBasicConfig;
     this.jsClient = newDocLinks.clients.jsIntro;
     this.kibanaRunApiInConsole = newDocLinks.console.guide;
+    this.metadata = newDocLinks.security.mappingRoles;
+    this.roleDescriptors = newDocLinks.security.mappingRoles;
     this.rubyAdvancedConfig = newDocLinks.clients.rubyAdvancedConfig;
     this.rubyBasicConfig = newDocLinks.clients.rubyBasicConfig;
     this.rubyExamples = newDocLinks.clients.rubyExamples;
