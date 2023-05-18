@@ -55,7 +55,7 @@ export const cli = () => {
         // 'cypress/e2e/cases/privileges.cy.ts',
         '**/cypress/e2e/cases/*.cy.ts',
         '**/cypress/e2e/dashboards/*.cy.ts',
-        // '**/cypress/e2e/detection_alerts/*.cy.ts',
+        '**/cypress/e2e/detection_alerts/*.cy.ts',
         // '**/cypress/e2e/detection_rules/*.cy.ts',
       ]);
 

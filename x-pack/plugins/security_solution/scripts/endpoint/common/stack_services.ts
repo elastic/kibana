@@ -80,8 +80,6 @@ export const createRuntimeServices = async ({
     }
   }
 
-  console.log('fleetServerUrl', fleetServerUrl);
-
   const kbnURL = new URL(kibanaUrl);
   const esURL = new URL(elasticsearchUrl);
   const fleetURL = new URL(fleetServerUrl);
