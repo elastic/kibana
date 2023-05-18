@@ -8,7 +8,6 @@
 import type { FC, ReactNode } from 'react';
 import React, { memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,13 +16,11 @@ import {
   EuiText,
   EuiShowFor,
   EuiPanel,
-  EuiTextColor,
-  EuiIconTip,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { ThemeContext } from 'styled-components';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import { OS_TITLES } from '../../../../../common/translations';
 
 const TITLES = {
   type: i18n.translate('xpack.securitySolution.endpoint.policyDetailType', {
@@ -72,31 +69,37 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
           {/*  <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>*/}
           {/*  <EuiText size="s">{type}</EuiText>*/}
           {/* </EuiFlexItem>*/}
-          <EuiFlexItem grow={2}>
-            <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>
-              </EuiFlexItem>
-              {osRestriction && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup direction="row" gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiTextColor color="subdued">
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
-                          defaultMessage="Restrictions"
-                        />
-                      </EuiTextColor>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip type="warning" color="warning" content={osRestriction} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {supportedOss.length === 3 && (
+            <EuiFlexItem grow={2}>
+              <EuiText size="s">{'Settings will be used across all platforms'}</EuiText>
+            </EuiFlexItem>
+          )}
+
+          {/* <EuiFlexItem grow={2}>*/}
+          {/* <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>*/}
+          {/* <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">*/}
+          {/*  <EuiFlexItem grow={false}>*/}
+          {/*    <EuiText size="s">{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>*/}
+          {/*  </EuiFlexItem>*/}
+          {/*  {osRestriction && (*/}
+          {/*    <EuiFlexItem grow={false}>*/}
+          {/*      <EuiFlexGroup direction="row" gutterSize="xs">*/}
+          {/*        <EuiFlexItem grow={false}>*/}
+          {/*          <EuiTextColor color="subdued">*/}
+          {/*            <FormattedMessage*/}
+          {/*              id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"*/}
+          {/*              defaultMessage="Restrictions"*/}
+          {/*            />*/}
+          {/*          </EuiTextColor>*/}
+          {/*        </EuiFlexItem>*/}
+          {/*        <EuiFlexItem grow={false}>*/}
+          {/*          <EuiIconTip type="warning" color="warning" content={osRestriction} />*/}
+          {/*        </EuiFlexItem>*/}
+          {/*      </EuiFlexGroup>*/}
+          {/*    </EuiFlexItem>*/}
+          {/*  )}*/}
+          {/* </EuiFlexGroup>*/}
+          {/* </EuiFlexItem>*/}
           <EuiShowFor sizes={['m', 'l', 'xl']}>
             <EuiFlexItem grow={3}>
               <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
@@ -109,9 +112,17 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
           </EuiShowFor>
         </EuiFlexGroup>
 
-        <EuiHorizontalRule margin="m" />
+        {children ? (
+          <>
+            <EuiHorizontalRule margin="m" />
 
-        <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>{children}</div>
+            <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>
+              {children}
+            </div>
+          </>
+        ) : (
+          <EuiSpacer size="s" />
+        )}
       </EuiPanel>
     );
   }

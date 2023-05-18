@@ -28,10 +28,12 @@ export const ProtectionSwitch = React.memo(
     protectionLabel,
     osList,
     additionalOnSwitchChange,
+    switchChecked,
   }: {
     protection: PolicyProtection;
     protectionLabel?: string;
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+    switchChecked?: boolean;
     additionalOnSwitchChange?: ({
       value,
       policyConfigData,
@@ -122,7 +124,9 @@ export const ProtectionSwitch = React.memo(
             mode: selected !== ProtectionModes.off,
           },
         })}
-        checked={selected !== ProtectionModes.off}
+        checked={
+          typeof switchChecked === 'boolean' ? switchChecked : selected !== ProtectionModes.off
+        }
         onChange={handleSwitchChange}
         disabled={!showEditableFormFields}
       />
