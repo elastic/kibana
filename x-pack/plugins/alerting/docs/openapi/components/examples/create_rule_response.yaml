@@ -39,6 +39,7 @@ value:
     timeField: "@timestamp"
     aggField: sheet.version
     termField: name.keyword
+  revision: 0
   rule_type_id: .index-threshold
   running: false
   schedule:
