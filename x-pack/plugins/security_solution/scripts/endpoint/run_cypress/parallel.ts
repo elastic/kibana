@@ -11,9 +11,10 @@ import _ from 'lodash';
 import * as fs from 'fs';
 import globby from 'globby';
 import pMap from 'p-map';
-import { resolve } from 'path';
+// import { resolve } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
+import cypress from 'cypress';
 // import cypress from 'cypress';
 
 import {
@@ -156,6 +157,7 @@ export const cli = () => {
         // files.slice(0, 2),
         // [files[0]],
         async (filePath, index) => {
+          let result;
           await withProcRunner(log, async (procs) => {
             const abortCtrl = new AbortController();
 
@@ -342,13 +344,31 @@ export const cli = () => {
             //   setTimeout(() => resolve({}), 1000000);
             // });
 
-            await procs.run('cypress', {
-              cmd: 'yarn',
-              args: ['cypress:run', '--spec', filePath],
-              cwd: resolve(__dirname, '../../'),
-              env: customEnv,
-              wait: true,
-            });
+            // await procs.run('cypress', {
+            //   cmd: 'yarn',
+            //   args: ['cypress:run', '--spec', filePath],
+            //   cwd: resolve(__dirname, '../../'),
+            //   env: customEnv,
+            //   wait: true,
+            // });
+
+            console.error('cofn', argv);
+
+            try {
+              result = await cypress.run({
+                browser: 'chrome',
+                spec: filePath,
+                // env: customEnv,
+                configFile: './cypress/cypress.config.ts',
+                config: {
+                  baseUrl: `http://localhost:${kibanaPort}`,
+                  numTestsKeptInMemory: 0,
+                  env: customEnv,
+                },
+              });
+            } catch (error) {
+              result = error;
+            }
 
             await procs.stop('kibana');
             shutdownEs();
@@ -393,9 +413,12 @@ export const cli = () => {
             // ).finally(() => {
             //   cleanupServerPorts({ esPort, kibanaPort });
             // });
+
+            return result;
           });
+          return result;
         },
-        { concurrency: 3 }
+        { concurrency: 1 }
       ).then((results) => {
         console.error('results', results);
         // renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
