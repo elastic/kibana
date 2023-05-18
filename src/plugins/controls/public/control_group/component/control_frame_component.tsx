@@ -40,7 +40,7 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [fatalError, setFatalError] = useState<Error>();
+  const [fatalError, setFatalError] = useState<Error | string>();
 
   const controlGroup = useControlGroupContainer();
 
@@ -65,8 +65,12 @@ export const ControlFrame = ({
     const inputSubscription = embeddable
       ?.getInput$()
       .subscribe((newInput) => setTitle(newInput.title));
-    const errorSubscription = embeddable?.getOutput$().subscribe({
-      error: setFatalError,
+    const errorSubscription = embeddable?.getOutput$().subscribe(({ error }) => {
+      // if (isErrorEmbeddable(embeddable)) {
+      //   setFatalError(embeddable.error);
+      // } else {
+      setFatalError(error);
+      // }
     });
     return () => {
       inputSubscription?.unsubscribe();
@@ -112,9 +116,7 @@ export const ControlFrame = ({
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
-        >
-          {fatalError && <ControlError error={fatalError} />}
-        </div>
+        />
       )}
       {fatalError && (
         <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>

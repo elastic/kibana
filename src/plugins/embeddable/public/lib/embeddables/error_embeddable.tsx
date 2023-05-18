@@ -23,18 +23,17 @@ export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
 
 export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput, ReactNode> {
   public readonly type = ERROR_EMBEDDABLE_TYPE;
-  public error: Error | string;
+  public error: Error;
 
   constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
     super(input, {}, parent);
-    this.error = error;
+    this.error = typeof error === 'string' ? { message: error, name: '' } : error;
+    this.output.error = this.error;
   }
 
   public reload() {}
 
   public render() {
-    const error = typeof this.error === 'string' ? { message: this.error, name: '' } : this.error;
-
-    return <EmbeddablePanelError embeddable={this} error={error} />;
+    return <EmbeddablePanelError embeddable={this} error={this.error} />;
   }
 }

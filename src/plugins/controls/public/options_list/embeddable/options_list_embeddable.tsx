@@ -414,14 +414,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.runOptionsListQuery();
   };
 
-  public onFatalError = (e: Error) => {
-    batch(() => {
-      this.dispatch.setLoading(false);
-      this.dispatch.setPopoverOpen(false);
-    });
-    super.onFatalError(e);
-  };
-
   public destroy = () => {
     super.destroy();
     this.cleanupStateTools();
