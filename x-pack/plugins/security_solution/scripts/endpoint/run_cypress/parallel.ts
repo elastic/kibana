@@ -12,8 +12,9 @@ import _ from 'lodash';
 import * as fs from 'fs';
 import globby from 'globby';
 import pMap from 'p-map';
+import { resolve } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ProcRunner } from '@kbn/dev-proc-runner';
+import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
 // import cypress from 'cypress';
 import execa from 'execa';
 
@@ -275,22 +276,22 @@ export default async () => {
 
       // console.error('child', child);
 
-      const subprocess = execa('node', [require.resolve('./subprocess')], {
-        extendEnv: true,
-        env: {
-          ...customEnv,
-          CYPRESS_SPEC: filePath,
-          CYPRESS_CONFIG_FILE: argv.configFile,
-        },
-      });
+      // const subprocess = execa('node', [require.resolve('./subprocess')], {
+      //   extendEnv: true,
+      //   env: {
+      //     ...customEnv,
+      //     CYPRESS_SPEC: filePath,
+      //     CYPRESS_CONFIG_FILE: argv.configFile,
+      //   },
+      // });
       // subprocess.stdout.pipe(process.stdout);
 
-      try {
-        const { stdout } = await subprocess;
-        console.log('child output:', stdout);
-      } catch (error) {
-        console.error('child failed:', error);
-      }
+      // try {
+      //   const { stdout } = await subprocess;
+      //   console.log('child output:', stdout);
+      // } catch (error) {
+      //   console.error('child failed:', error);
+      // }
 
       // child.on('message', (msg) => {
       //   console.log('The message between IPC channel, in app.js\n', msg);
@@ -326,6 +327,16 @@ export default async () => {
       // });
       //   setTimeout(() => resolve({}), 1000000);
       // });
+
+      await withProcRunner(log, async (cypressProcs) => {
+        await cypressProcs.run('cypress', {
+          cmd: 'yarn',
+          args: ['cypress:run', '--spec', filePath],
+          cwd: resolve(__dirname, '../../'),
+          env: customEnv,
+          wait: true,
+        });
+      });
 
       cleanupServerPorts({ esPort, kibanaPort });
 
