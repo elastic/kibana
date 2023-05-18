@@ -1,0 +1,216 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+const executionStatusErrorReason = schema.oneOf([
+  schema.literal('read'),
+  schema.literal('decrypt'),
+  schema.literal('execute'),
+  schema.literal('unknown'),
+  schema.literal('license'),
+  schema.literal('timeout'),
+  schema.literal('disabled'),
+  schema.literal('validate'),
+]);
+
+const executionStatusWarningReason = schema.oneOf([
+  schema.literal('maxExecutableActions'),
+  schema.literal('maxAlerts'),
+]);
+
+const outcome = schema.oneOf([
+  schema.literal('succeeded'),
+  schema.literal('warning'),
+  schema.literal('failed'),
+]);
+
+export const ruleTypeSchema = schema.object({
+  name: schema.string(),
+  enabled: schema.boolean(),
+  consumer: schema.string(),
+  tags: schema.arrayOf(schema.string()),
+  alertTypeId: schema.string(),
+  apiKeyOwner: schema.nullable(schema.string()),
+  apiKey: schema.nullable(schema.string()),
+  apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
+  createdBy: schema.nullable(schema.string()),
+  updatedBy: schema.nullable(schema.string()),
+  updatedAt: schema.string(),
+  createdAt: schema.string(),
+  muteAll: schema.boolean(),
+  mutedInstanceIds: schema.arrayOf(schema.string()),
+  throttle: schema.maybe(schema.nullable(schema.string())),
+  revision: schema.number(),
+  running: schema.maybe(schema.nullable(schema.boolean())),
+  schedule: schema.object({
+    interval: schema.string(),
+  }),
+  legacyId: schema.nullable(schema.string()),
+  scheduledTaskId: schema.nullable(schema.string()),
+  isSnoozedUntil: schema.maybe(schema.nullable(schema.string())),
+  snoozeSchedule: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        duration: schema.number(),
+        rRule: schema.object({
+          dtstart: schema.string(),
+          tzid: schema.string(),
+        }),
+        id: schema.maybe(schema.string()),
+        skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
+      })
+    )
+  ),
+  meta: schema.maybe(schema.object({ versionApiKeyLastmodified: schema.maybe(schema.string()) })),
+  actions: schema.arrayOf(
+    schema.object({
+      uuid: schema.maybe(schema.string()),
+      group: schema.string(),
+      actionRef: schema.string(),
+      actionTypeId: schema.string(),
+      params: schema.recordOf(schema.string(), schema.any()),
+      frequency: schema.maybe(
+        schema.object({
+          summary: schema.boolean(),
+          notifyWhen: schema.oneOf([
+            schema.literal('onActionGroupChange'),
+            schema.literal('onActiveAlert'),
+            schema.literal('onThrottleInterval'),
+          ]),
+          throttle: schema.nullable(schema.string()),
+        })
+      ),
+      alertsFilter: schema.maybe(
+        schema.object({
+          query: schema.maybe(
+            schema.object({
+              kql: schema.string(),
+              filters: schema.arrayOf(
+                schema.object({
+                  query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+                  meta: schema.recordOf(schema.string(), schema.any()),
+                  state$: schema.maybe(schema.object({ store: schema.string() })),
+                })
+              ),
+              dsl: schema.maybe(schema.string()),
+            })
+          ),
+          timeframe: schema.maybe(
+            schema.object({
+              days: schema.arrayOf(
+                schema.oneOf([
+                  schema.literal(1),
+                  schema.literal(2),
+                  schema.literal(3),
+                  schema.literal(4),
+                  schema.literal(5),
+                  schema.literal(6),
+                  schema.literal(7),
+                ])
+              ),
+              hours: schema.object({
+                start: schema.string(),
+                end: schema.string(),
+              }),
+              timezone: schema.string(),
+            })
+          ),
+        })
+      ),
+    })
+  ),
+  executionStatus: schema.object({
+    status: schema.oneOf([
+      schema.literal('ok'),
+      schema.literal('active'),
+      schema.literal('error'),
+      schema.literal('pending'),
+      schema.literal('unknown'),
+      schema.literal('warning'),
+    ]),
+    lastExecutionDate: schema.string(),
+    lastDuration: schema.maybe(schema.number()),
+    error: schema.nullable(
+      schema.object({
+        reason: executionStatusErrorReason,
+        message: schema.string(),
+      })
+    ),
+    warning: schema.nullable(
+      schema.object({
+        reason: executionStatusErrorReason,
+        message: schema.string(),
+      })
+    ),
+  }),
+  notifyWhen: schema.maybe(
+    schema.nullable(
+      schema.oneOf([
+        schema.literal('onActionGroupChange'),
+        schema.literal('onActiveAlert'),
+        schema.literal('onThrottleInterval'),
+      ])
+    )
+  ),
+  monitoring: schema.maybe(
+    schema.object({
+      run: schema.object({
+        history: schema.arrayOf(
+          schema.object({
+            success: schema.boolean(),
+            timestamp: schema.number(),
+            duration: schema.maybe(schema.number()),
+            outcome: schema.maybe(outcome),
+          })
+        ),
+        calculated_metrics: schema.object({
+          p50: schema.maybe(schema.number()),
+          p95: schema.maybe(schema.number()),
+          p99: schema.maybe(schema.number()),
+          success_ratio: schema.number(),
+        }),
+        last_run: schema.object({
+          timestamp: schema.string(),
+          metrics: schema.object({
+            duration: schema.maybe(schema.number()),
+            total_search_duration_ms: schema.maybe(schema.nullable(schema.number())),
+            total_indexing_duration_ms: schema.maybe(schema.nullable(schema.number())),
+            total_alerts_detected: schema.maybe(schema.nullable(schema.number())),
+            total_alerts_created: schema.maybe(schema.nullable(schema.number())),
+            gap_duration_s: schema.maybe(schema.nullable(schema.number())),
+          }),
+        }),
+      }),
+    })
+  ),
+  lastRun: schema.maybe(
+    schema.nullable(
+      schema.object({
+        outcome,
+        outcomeOrder: schema.maybe(schema.number()),
+        alertsCount: schema.object({
+          new: schema.maybe(schema.nullable(schema.number())),
+          active: schema.maybe(schema.nullable(schema.number())),
+          recovered: schema.maybe(schema.nullable(schema.number())),
+          ignored: schema.maybe(schema.nullable(schema.number())),
+        }),
+        outcomeMsg: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
+        warning: schema.maybe(
+          schema.nullable(schema.oneOf([executionStatusErrorReason, executionStatusWarningReason]))
+        ),
+      })
+    )
+  ),
+  nextRun: schema.maybe(schema.nullable(schema.string())),
+  mapped_params: schema.maybe(
+    schema.object({
+      risk_score: schema.maybe(schema.number()),
+      severity: schema.maybe(schema.string()),
+    })
+  ),
+});
