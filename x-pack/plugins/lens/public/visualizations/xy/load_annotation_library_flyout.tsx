@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { FlyoutContainer } from '../../shared_components/flyout_container';
 import type { ExtraAppendLayerArg } from './visualization';
 
@@ -24,27 +23,6 @@ export function LoadAnnotationLibraryFlyout({
   eventAnnotationService: EventAnnotationServiceType;
   addLayer: (argument: ExtraAppendLayerArg) => void;
 }) {
-  const containerPanelRef = useRef<HTMLDivElement | null>(null);
-  const otherElementsHeight = 250;
-  const singleEntryHeight = 40;
-  const numberOfElements = Math.floor(
-    ((containerPanelRef?.current?.clientHeight || 800) - otherElementsHeight) / singleEntryHeight
-  );
-
-  const [selectedItem, setSelectedItem] = React.useState<{
-    id: string;
-    type: string;
-    fullName: string;
-    savedObject: SavedObjectCommon<unknown>;
-  } | null>(null);
-
-  // needed to clean the state when clicking not on the item on the list
-  const hasBeenClicked = useRef(false);
-
-  React.useEffect(() => {
-    hasBeenClicked.current = false;
-  }, [selectedItem]);
-
   const {
     renderEventAnnotationGroupSavedObjectFinder: EventAnnotationGroupSavedObjectFinder,
     loadAnnotationGroup,
@@ -52,7 +30,6 @@ export function LoadAnnotationLibraryFlyout({
 
   return (
     <FlyoutContainer
-      panelContainerRef={(el) => (containerPanelRef.current = el)}
       customFooter={
         <EuiFlyoutFooter className="lnsDimensionContainer__footer">
           <EuiFlexGroup
@@ -68,7 +45,6 @@ export function LoadAnnotationLibraryFlyout({
                 iconType="cross"
                 onClick={() => {
                   setLoadLibraryFlyoutVisible(false);
-                  setSelectedItem(null);
                 }}
                 data-test-subj="lns-indexPattern-loadLibraryCancel"
               >
@@ -86,7 +62,6 @@ export function LoadAnnotationLibraryFlyout({
       })}
       handleClose={() => {
         setLoadLibraryFlyoutVisible(false);
-        setSelectedItem(null);
         return true;
       }}
     >
@@ -98,7 +73,6 @@ export function LoadAnnotationLibraryFlyout({
               setLoadLibraryFlyoutVisible(false);
             });
           }}
-          fixedPageSize={numberOfElements}
         />
       </div>
     </FlyoutContainer>

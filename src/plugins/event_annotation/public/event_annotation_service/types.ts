@@ -30,7 +30,7 @@ export interface EventAnnotationServiceType {
     >;
   }) => ExpressionAstExpression[];
   renderEventAnnotationGroupSavedObjectFinder: (props: {
-    fixedPageSize: number;
+    fixedPageSize?: number;
     onChoose: (value: {
       id: string;
       type: string;
