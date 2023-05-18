@@ -219,6 +219,7 @@ export function getColumns(
         return formatValue(item.actual, item.source.function, fieldFormat, item.source);
       },
       sortable: true,
+      className: 'eui-textBreakNormal',
     });
   }
 
@@ -248,6 +249,7 @@ export function getColumns(
         return formatValue(item.typical, item.source.function, fieldFormat, item.source);
       },
       sortable: true,
+      className: 'eui-textBreakNormal',
     });
 
     // Assume that if we are showing typical, there will be an actual too,
