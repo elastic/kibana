@@ -7,6 +7,7 @@
  */
 
 import { ReactNode } from 'react';
+import { Observable } from 'rxjs';
 
 import { Filter } from '@kbn/es-query';
 import {
@@ -42,6 +43,7 @@ export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
   TControlEmbeddableOutput extends ControlOutput = ControlOutput
 > = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
+  error$: Observable<string | undefined>;
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
 };

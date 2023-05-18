@@ -278,6 +278,7 @@ export abstract class Embeddable<
   }
 
   protected onFatalError(e: Error) {
+    console.log('PARENT ON FATAL ERROR');
     this.fatalError = e;
     this.outputSubject.error(e);
     // if the container is waiting for this embeddable to complete loading,

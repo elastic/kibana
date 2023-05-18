@@ -28,12 +28,16 @@ import {
 } from '../embeddable/control_group_container';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
+import { distinctUntilChanged } from 'rxjs';
+import { isEqual } from 'lodash';
+import { ControlInput, ControlOutput } from '../../types';
 
 interface ControlFrameErrorProps {
-  error: Error;
+  error: string;
 }
 
 const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
+  console.log('render frame error');
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const popoverButton = (
     <EuiButtonEmpty
@@ -59,11 +63,7 @@ const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
       anchorClassName="errorEmbeddableCompact__popoverAnchor"
       closePopover={() => setPopoverOpen(false)}
     >
-      <Markdown
-        markdown={error.message}
-        openLinksInNewTab={true}
-        data-test-subj="errorMessageMarkdown"
-      />
+      <Markdown markdown={error} openLinksInNewTab={true} data-test-subj="errorMessageMarkdown" />
     </EuiPopover>
   );
 };
@@ -82,10 +82,9 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [fatalError, setFatalError] = useState<Error>();
+  const [fatalError, setFatalError] = useState<string | undefined>();
 
   const controlGroup = useControlGroupContainer();
-
   const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
   const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
   const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
@@ -102,19 +101,33 @@ export const ControlFrame = ({
 
   useEffect(() => {
     if (embeddableRoot.current) {
-      embeddable?.render(embeddableRoot.current);
+      console.log('render', fatalError);
+      if (!fatalError) embeddable?.render(embeddableRoot.current);
     }
     const inputSubscription = embeddable
       ?.getInput$()
-      .subscribe((newInput) => setTitle(newInput.title));
-    const errorSubscription = embeddable?.getOutput$().subscribe({
-      error: setFatalError,
+      .pipe(distinctUntilChanged((a: ControlInput, b: ControlInput) => isEqual(a.title, b.title)))
+      .subscribe((newInput: ControlInput) => {
+        console.log(newInput.title);
+        setTitle(newInput.title);
+      });
+    const test = embeddable?.error$?.subscribe((message) => {
+      console.log('error$', message);
+      setFatalError(message);
     });
+
+    // const errorSubscription = embeddable
+    //   ?.getOutput$()
+    //   .pipe(distinctUntilChanged((a: ControlOutput, b: ControlOutput) => isEqual(a.error, b.error)))
+    //   .subscribe({
+    //     error: setFatalError,
+    //   });
     return () => {
+      test?.unsubscribe();
       inputSubscription?.unsubscribe();
-      errorSubscription?.unsubscribe();
+      // errorSubscription?.unsubscribe();
     };
-  }, [embeddable, embeddableRoot]);
+  }, [embeddable, embeddableRoot, fatalError]);
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
@@ -154,9 +167,7 @@ export const ControlFrame = ({
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
-        >
-          {fatalError && <ControlFrameError error={fatalError} />}
-        </div>
+        />
       )}
       {fatalError && (
         <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
