@@ -9,7 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -73,5 +73,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/exploratory-view-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
