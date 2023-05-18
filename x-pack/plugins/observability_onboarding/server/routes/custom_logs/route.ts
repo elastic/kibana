@@ -12,11 +12,11 @@ import { getESHosts } from './get_es_hosts';
 import { getKibanaUrl } from './get_kibana_url';
 import { createShipperApiKey } from './create_shipper_api_key';
 import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
-import { findObservabilityOnboardingState } from './find_observability_onboarding_state';
 import {
   ObservabilityOnboardingState,
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
 } from '../../saved_objects/observability_onboarding_status';
+import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 
 const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint:
@@ -68,10 +68,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     saveObservabilityOnboardingState({
       savedObjectsClient,
-      observabilityOnboardingState: {
-        apiKeyId,
-        state,
-      } as ObservabilityOnboardingState,
+      apiKeyId,
+      observabilityOnboardingState: { state } as ObservabilityOnboardingState,
     });
     return {
       apiKeyId, // key the status off this
@@ -119,22 +117,21 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
-    const [{ id, state }] = await findObservabilityOnboardingState({
+
+    const { state } = await getObservabilityOnboardingState({
       savedObjectsClient,
       apiKeyId,
     });
 
-    const nextState = {
-      apiKeyId,
-      state: {
-        ...state,
-        progress: { ...state.progress, [name]: status },
-      },
-    };
     await saveObservabilityOnboardingState({
       savedObjectsClient,
-      observabilityOnboardingStateId: id,
-      observabilityOnboardingState: nextState,
+      apiKeyId,
+      observabilityOnboardingState: {
+        state: {
+          ...state,
+          progress: { ...state.progress, [name]: status },
+        },
+      },
     });
     return { name, status };
   },
@@ -158,7 +155,7 @@ const getStateRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
-    const [{ state }] = await findObservabilityOnboardingState({
+    const { state } = await getObservabilityOnboardingState({
       savedObjectsClient,
       apiKeyId,
     });

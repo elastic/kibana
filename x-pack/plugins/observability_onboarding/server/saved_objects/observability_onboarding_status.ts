@@ -11,7 +11,6 @@ export const OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE =
   'observability-onboarding-state';
 
 export interface ObservabilityOnboardingState {
-  apiKeyId: string;
   state: {
     datasetName: string;
     customConfigurations: string;

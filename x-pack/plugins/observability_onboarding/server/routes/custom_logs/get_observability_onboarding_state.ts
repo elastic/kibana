@@ -14,10 +14,10 @@ import {
 
 export async function getObservabilityOnboardingState({
   savedObjectsClient,
-  observabilityOnboardingStateId,
+  apiKeyId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  observabilityOnboardingStateId: string;
+  apiKeyId: string;
 }): Promise<SavedObservabilityOnboardingState> {
   const {
     id,
@@ -25,7 +25,7 @@ export async function getObservabilityOnboardingState({
     attributes,
   } = await savedObjectsClient.get<ObservabilityOnboardingState>(
     OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-    observabilityOnboardingStateId
+    apiKeyId
   );
   return {
     id,
