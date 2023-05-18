@@ -1,0 +1,458 @@
+{
+  "cypress/e2e/cases/attach_alert_to_case.cy.ts": {
+    "time": 48867,
+    "weight": 7
+  },
+  "cypress/e2e/cases/attach_timeline.cy.ts": {
+    "time": 27015,
+    "weight": 4
+  },
+  "cypress/e2e/cases/connector_options.cy.ts": {
+    "time": 14746,
+    "weight": 2
+  },
+  "cypress/e2e/cases/connectors.cy.ts": {
+    "time": 27773,
+    "weight": 4
+  },
+  "cypress/e2e/cases/creation.cy.ts": {
+    "time": 21430,
+    "weight": 3
+  },
+  "cypress/e2e/cases/privileges.cy.ts": {
+    "time": 38518,
+    "weight": 5
+  },
+  "cypress/e2e/dashboards/detection_response.cy.ts": {
+    "time": 37558,
+    "weight": 5
+  },
+  "cypress/e2e/dashboards/enable_risk_score.cy.ts": {
+    "time": 40496,
+    "weight": 6
+  },
+  "cypress/e2e/dashboards/entity_analytics.cy.ts": {
+    "time": 223989,
+    "weight": 33
+  },
+  "cypress/e2e/dashboards/upgrade_risk_score.cy.ts": {
+    "time": 396205,
+    "weight": 59
+  },
+  "cypress/e2e/data_sources/create_runtime_field.cy.ts": {
+    "time": 42855,
+    "weight": 6
+  },
+  "cypress/e2e/data_sources/sourcerer.cy.ts": {
+    "time": 88412,
+    "weight": 13
+  },
+  "cypress/e2e/detection_alerts/alert_table_action_column.cy.ts": {
+    "time": 44889,
+    "weight": 6
+  },
+  "cypress/e2e/detection_alerts/alerts_cell_actions.cy.ts": {
+    "time": 38567,
+    "weight": 5
+  },
+  "cypress/e2e/detection_alerts/alerts_charts.cy.ts": {
+    "time": 19631,
+    "weight": 2
+  },
+  "cypress/e2e/detection_alerts/alerts_details.cy.ts": {
+    "time": 88931,
+    "weight": 13
+  },
+  "cypress/e2e/detection_alerts/alerts_detection_callouts_index_outdated.cy.ts": {
+    "time": 40473,
+    "weight": 6
+  },
+  "cypress/e2e/detection_alerts/building_block_alerts.cy.ts": {
+    "time": 28404,
+    "weight": 4
+  },
+  "cypress/e2e/detection_alerts/changing_alert_status.cy.ts": {
+    "time": 99678,
+    "weight": 14
+  },
+  "cypress/e2e/detection_alerts/cti_enrichments.cy.ts": {
+    "time": 81955,
+    "weight": 12
+  },
+  "cypress/e2e/detection_alerts/detection_page_filters.cy.ts": {
+    "time": 82674,
+    "weight": 12
+  },
+  "cypress/e2e/detection_alerts/enrichments.cy.ts": {
+    "time": 74468,
+    "weight": 11
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_left_panel.cy.ts": {
+    "time": 27,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_left_panel_analyzer_graph_tab.cy.ts": {
+    "time": 17,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_left_panel_session_view_tab.cy.ts": {
+    "time": 18,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_left_panel_threat_intelligence_tab.cy.ts": {
+    "time": 16,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_right_panel.cy.ts": {
+    "time": 13,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_right_panel_footer.cy.ts": {
+    "time": 22,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_right_panel_header.cy.ts": {
+    "time": 21,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_right_panel_overview_tab.cy.ts": {
+    "time": 33,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_right_panel_table_tab.cy.ts": {
+    "time": 23,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/expandable_flyout/alert_details_url_sync.cy.ts": {
+    "time": 12,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/investigate_in_timeline.cy.ts": {
+    "time": 20549,
+    "weight": 3
+  },
+  "cypress/e2e/detection_alerts/missing_privileges_callout.cy.ts": {
+    "time": 50101,
+    "weight": 7
+  },
+  "cypress/e2e/detection_alerts/navigation.cy.ts": {
+    "time": 19,
+    "weight": 0
+  },
+  "cypress/e2e/detection_alerts/ransomware_detection.cy.ts": {
+    "time": 30172,
+    "weight": 4
+  },
+  "cypress/e2e/detection_alerts/ransomware_prevention.cy.ts": {
+    "time": 29233,
+    "weight": 4
+  },
+  "cypress/e2e/detection_alerts/resolver.cy.ts": {
+    "time": 22695,
+    "weight": 3
+  },
+  "cypress/e2e/detection_rules/all_rules_read_only.cy.ts": {
+    "time": 33020,
+    "weight": 4
+  },
+  "cypress/e2e/detection_rules/bulk_duplicate_rules.cy.ts": {
+    "time": 71441,
+    "weight": 10
+  },
+  "cypress/e2e/detection_rules/bulk_edit_rules.cy.ts": {
+    "time": 821426,
+    "weight": 123
+  },
+  "cypress/e2e/detection_rules/bulk_edit_rules_actions.cy.ts": {
+    "time": 12,
+    "weight": 0
+  },
+  "cypress/e2e/detection_rules/bulk_edit_rules_data_view.cy.ts": {
+    "time": 222543,
+    "weight": 33
+  },
+  "cypress/e2e/detection_rules/custom_query_rule.cy.ts": {
+    "time": 90311,
+    "weight": 13
+  },
+  "cypress/e2e/detection_rules/custom_query_rule_data_view.cy.ts": {
+    "time": 62911,
+    "weight": 9
+  },
+  "cypress/e2e/detection_rules/custom_saved_query_rule.cy.ts": {
+    "time": 96350,
+    "weight": 14
+  },
+  "cypress/e2e/detection_rules/event_correlation_rule.cy.ts": {
+    "time": 78938,
+    "weight": 11
+  },
+  "cypress/e2e/detection_rules/export_rule.cy.ts": {
+    "time": 141803,
+    "weight": 21
+  },
+  "cypress/e2e/detection_rules/import_rules.cy.ts": {
+    "time": 58545,
+    "weight": 8
+  },
+  "cypress/e2e/detection_rules/indicator_match_rule.cy.ts": {
+    "time": 284530,
+    "weight": 42
+  },
+  "cypress/e2e/detection_rules/links.cy.ts": {
+    "time": 17427,
+    "weight": 2
+  },
+  "cypress/e2e/detection_rules/machine_learning_rule.cy.ts": {
+    "time": 37608,
+    "weight": 5
+  },
+  "cypress/e2e/detection_rules/maintenance_window.cy.ts": {
+    "time": 9790,
+    "weight": 1
+  },
+  "cypress/e2e/detection_rules/new_terms_rule.cy.ts": {
+    "time": 31776,
+    "weight": 4
+  },
+  "cypress/e2e/detection_rules/override.cy.ts": {
+    "time": 39756,
+    "weight": 5
+  },
+  "cypress/e2e/detection_rules/persistent_rules_table_state.cy.ts": {
+    "time": 167315,
+    "weight": 25
+  },
+  "cypress/e2e/detection_rules/prebuilt_rules.cy.ts": {
+    "time": 543527,
+    "weight": 81
+  },
+  "cypress/e2e/detection_rules/related_integrations.cy.ts": {
+    "time": 42960,
+    "weight": 6
+  },
+  "cypress/e2e/detection_rules/rule_actions.cy.ts": {
+    "time": 29543,
+    "weight": 4
+  },
+  "cypress/e2e/detection_rules/rules_selection.cy.ts": {
+    "time": 9,
+    "weight": 0
+  },
+  "cypress/e2e/detection_rules/rules_table_auto_refresh.cy.ts": {
+    "time": 21,
+    "weight": 0
+  },
+  "cypress/e2e/detection_rules/sorting.cy.ts": {
+    "time": 30411,
+    "weight": 4
+  },
+  "cypress/e2e/detection_rules/threshold_rule.cy.ts": {
+    "time": 34718,
+    "weight": 5
+  },
+  "cypress/e2e/value_lists/value_lists.cy.ts": {
+    "time": 80375,
+    "weight": 12
+  },
+  "cypress/e2e/users/user_details.cy.ts": {
+    "time": 17639,
+    "weight": 2
+  },
+  "cypress/e2e/users/users_tabs.cy.ts": {
+    "time": 203250,
+    "weight": 30
+  },
+  "cypress/e2e/urls/compatibility.cy.ts": {
+    "time": 22194,
+    "weight": 3
+  },
+  "cypress/e2e/urls/not_found.cy.ts": {
+    "time": 19468,
+    "weight": 2
+  },
+  "cypress/e2e/urls/state.cy.ts": {
+    "time": 73138,
+    "weight": 11
+  },
+  "cypress/e2e/timelines/bulk_add_to_timeline.cy.ts": {
+    "time": 88210,
+    "weight": 13
+  },
+  "cypress/e2e/timelines/creation.cy.ts": {
+    "time": 81807,
+    "weight": 12
+  },
+  "cypress/e2e/timelines/data_providers.cy.ts": {
+    "time": 48540,
+    "weight": 7
+  },
+  "cypress/e2e/timelines/export.cy.ts": {
+    "time": 10634,
+    "weight": 1
+  },
+  "cypress/e2e/timelines/fields_browser.cy.ts": {
+    "time": 81069,
+    "weight": 12
+  },
+  "cypress/e2e/timelines/flyout_button.cy.ts": {
+    "time": 27565,
+    "weight": 4
+  },
+  "cypress/e2e/timelines/full_screen.cy.ts": {
+    "time": 16095,
+    "weight": 2
+  },
+  "cypress/e2e/timelines/inspect.cy.ts": {
+    "time": 9815,
+    "weight": 1
+  },
+  "cypress/e2e/timelines/local_storage.cy.ts": {
+    "time": 15,
+    "weight": 0
+  },
+  "cypress/e2e/timelines/notes_tab.cy.ts": {
+    "time": 81578,
+    "weight": 12
+  },
+  "cypress/e2e/timelines/open_timeline.cy.ts": {
+    "time": 44577,
+    "weight": 6
+  },
+  "cypress/e2e/timelines/pagination.cy.ts": {
+    "time": 46884,
+    "weight": 7
+  },
+  "cypress/e2e/timelines/query_tab.cy.ts": {
+    "time": 63027,
+    "weight": 9
+  },
+  "cypress/e2e/timelines/row_renderers.cy.ts": {
+    "time": 35821,
+    "weight": 5
+  },
+  "cypress/e2e/timelines/search_or_filter.cy.ts": {
+    "time": 30806,
+    "weight": 4
+  },
+  "cypress/e2e/timelines/toggle_column.cy.ts": {
+    "time": 22022,
+    "weight": 3
+  },
+  "cypress/e2e/timelines/unsaved_timeline.cy.ts": {
+    "time": 111530,
+    "weight": 16
+  },
+  "cypress/e2e/timeline_templates/creation.cy.ts": {
+    "time": 2566,
+    "weight": 0
+  },
+  "cypress/e2e/timeline_templates/export.cy.ts": {
+    "time": 8970,
+    "weight": 1
+  },
+  "cypress/e2e/pagination/pagination.cy.ts": {
+    "time": 51522,
+    "weight": 7
+  },
+  "cypress/e2e/overview/cti_link_panel.cy.ts": {
+    "time": 33566,
+    "weight": 5
+  },
+  "cypress/e2e/overview/overview.cy.ts": {
+    "time": 42806,
+    "weight": 6
+  },
+  "cypress/e2e/network/hover_actions.cy.ts": {
+    "time": 46401,
+    "weight": 6
+  },
+  "cypress/e2e/network/overflow_items.cy.ts": {
+    "time": 25537,
+    "weight": 3
+  },
+  "cypress/e2e/ml/ml_conditional_links.cy.ts": {
+    "time": 64006,
+    "weight": 9
+  },
+  "cypress/e2e/inspect/inspect_button.cy.ts": {
+    "time": 84452,
+    "weight": 12
+  },
+  "cypress/e2e/hosts/events_viewer.cy.ts": {
+    "time": 57970,
+    "weight": 8
+  },
+  "cypress/e2e/hosts/host_risk_tab.cy.ts": {
+    "time": 40946,
+    "weight": 6
+  },
+  "cypress/e2e/hosts/hosts_risk_column.cy.ts": {
+    "time": 20352,
+    "weight": 3
+  },
+  "cypress/e2e/host_details/risk_tab.cy.ts": {
+    "time": 29969,
+    "weight": 4
+  },
+  "cypress/e2e/header/navigation.cy.ts": {
+    "time": 99964,
+    "weight": 15
+  },
+  "cypress/e2e/header/search_bar.cy.ts": {
+    "time": 16025,
+    "weight": 2
+  },
+  "cypress/e2e/guided_onboarding/tour.cy.ts": {
+    "time": 138587,
+    "weight": 20
+  },
+  "cypress/e2e/filters/pinned_filters.cy.ts": {
+    "time": 16731,
+    "weight": 2
+  },
+  "cypress/e2e/exceptions/add_edit_flyout/flyout_validation.cy.ts": {
+    "time": 272812,
+    "weight": 41
+  },
+  "cypress/e2e/exceptions/alerts_table_flow/add_exception.cy.ts": {
+    "time": 61749,
+    "weight": 9
+  },
+  "cypress/e2e/exceptions/list_management_flow/list_details.cy.ts": {
+    "time": 25122,
+    "weight": 3
+  },
+  "cypress/e2e/exceptions/rule_details_flow/add_edit_endpoint_exception.cy.ts": {
+    "time": 51092,
+    "weight": 7
+  },
+  "cypress/e2e/exceptions/rule_details_flow/add_edit_exception.cy.ts": {
+    "time": 117807,
+    "weight": 17
+  },
+  "cypress/e2e/exceptions/rule_details_flow/add_edit_exception_data_view.cy.ts": {
+    "time": 138835,
+    "weight": 20
+  },
+  "cypress/e2e/exceptions/rule_details_flow/read_only_view.cy.ts": {
+    "time": 31445,
+    "weight": 4
+  },
+  "cypress/e2e/exceptions/shared_exception_lists_management/add_edit_exception.cy.ts": {
+    "time": 30375,
+    "weight": 4
+  },
+  "cypress/e2e/exceptions/shared_exception_lists_management/all_exception_lists_read_only.cy.ts": {
+    "time": 39295,
+    "weight": 5
+  },
+  "cypress/e2e/exceptions/shared_exception_lists_management/exceptions_table.cy.ts": {
+    "time": 23038,
+    "weight": 3
+  },
+  "cypress/e2e/exceptions/shared_exception_lists_management/manage_shared_exception_list.cy.ts": {
+    "time": 84480,
+    "weight": 12
+  }
+}
