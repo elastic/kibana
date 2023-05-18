@@ -13,7 +13,7 @@ import globby from 'globby';
 import pMap from 'p-map';
 import { resolve } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 // import cypress from 'cypress';
 
 import {
