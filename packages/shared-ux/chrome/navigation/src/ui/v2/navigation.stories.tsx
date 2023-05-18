@@ -169,7 +169,7 @@ export const FromReactNodes = (args: ChromeNavigationViewModel & NavigationServi
           <Navigation.Item link="item2" title="Item 2 - override deeplink title" />
           <Navigation.Item id="item3" title="Item 3" />
         </Navigation.Group>
-        <Navigation.Item id="item3">Title from react node</Navigation.Item>
+        <Navigation.Item id="itemLast">Title from react node</Navigation.Item>
       </Navigation>
     </NavigationProvider>
   );

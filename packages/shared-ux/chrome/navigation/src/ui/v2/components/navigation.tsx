@@ -27,7 +27,10 @@ interface Context {
 }
 
 const NavigationContext = createContext<Context>({
-  register: () => () => {},
+  register: () => ({
+    unregister: () => {},
+    path: [],
+  }),
 });
 
 interface Props {
@@ -59,16 +62,19 @@ export function Navigation({ children, onRootItemRemove }: Props) {
         };
       });
 
-      return () => {
-        if (onRootItemRemove) {
-          onRootItemRemove(navNode.id);
-        }
+      return {
+        unregister: () => {
+          if (onRootItemRemove) {
+            onRootItemRemove(navNode.id);
+          }
 
-        setNavigationItems((prevItems) => {
-          const updatedItems = { ...prevItems };
-          delete updatedItems[navNode.id];
-          return updatedItems;
-        });
+          setNavigationItems((prevItems) => {
+            const updatedItems = { ...prevItems };
+            delete updatedItems[navNode.id];
+            return updatedItems;
+          });
+        },
+        path: [],
       };
     },
     [onRootItemRemove]

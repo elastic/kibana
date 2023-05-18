@@ -91,6 +91,12 @@ export const useInitNavnode = (node: NodeProps) => {
    */
   const idx = useRef(0);
 
+  /**
+   * The current node path, including all of its parents. We'll use it to match it against
+   * the list of active routes based on current URL location (passed by the Chrome service)
+   */
+  const nodePath = useRef<string[]>([]);
+
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
   const { register: registerNodeOnParent } = useRegisterTreeNode();
@@ -112,11 +118,13 @@ export const useInitNavnode = (node: NodeProps) => {
         return aOrder - bOrder;
       });
 
-      unregisterRef.current = registerNodeOnParent({
+      const { unregister, path } = registerNodeOnParent({
         ...internalNavNode,
         children: children.length ? children : undefined,
       });
 
+      nodePath.current = [...path, internalNavNode.id];
+      unregisterRef.current = unregister;
       isRegistered.current = true;
     }
   }, [internalNavNode, registerNodeOnParent, isLinkActive]);
@@ -130,8 +138,7 @@ export const useInitNavnode = (node: NodeProps) => {
         register();
       }
 
-      // Unregister function
-      return () => {
+      const unregisterFn = () => {
         // Remove the child from this children map
         const updatedItems = { ...childrenNodes.current };
         delete updatedItems[childNode.id];
@@ -141,6 +148,11 @@ export const useInitNavnode = (node: NodeProps) => {
           // Update the parent tree
           register();
         }
+      };
+
+      return {
+        unregister: unregisterFn,
+        path: [...nodePath.current],
       };
     },
     [register]

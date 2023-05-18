@@ -21,7 +21,10 @@ export interface InternalNavigationNode extends Omit<ChromeProjectNavigationNode
 
 export type UnRegisterFunction = () => void;
 
-export type RegisterFunction = (navNode: InternalNavigationNode) => UnRegisterFunction;
+export type RegisterFunction = (navNode: InternalNavigationNode) => {
+  unregister: UnRegisterFunction;
+  path: string[];
+};
 
 export interface NodeProps {
   children?: ((deepLink?: ChromeNavLink) => ReactNode) | ReactNode;
