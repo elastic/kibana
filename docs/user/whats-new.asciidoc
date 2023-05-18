@@ -220,6 +220,17 @@ image::images/highlights-maintenance-windows.png[Viewing maintenance windows in 
 These features are all available for cases in {stack-manage-app}, {observability}, and the {security-app}.
 
 [discrete]
+==== Case activities
+
+In 8.8, when you view a case there are new *Comments* and *History* filters on the *Activity* tab.
+These filters separate comments from user and system actions like alert and user assignments.
+Pagination and sorting are now also provided on this tab.
+
+[role="screenshot"]
+image::images/highlights-case-activity.png[The Activity tab in a case in {stack-manage-app}>Cases]
+
+
+[discrete]
 ==== Case attachments
 
 You can now attach files to cases for better investigation processes.
