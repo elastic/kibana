@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('transform - start reset & delete', function () {
+  describe('transform - actions', function () {
     this.tags('transform');
 
     before(async () => {
@@ -33,6 +33,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./deleting'));
+    loadTestFile(require.resolve('./reauthorizing'));
     loadTestFile(require.resolve('./resetting'));
     loadTestFile(require.resolve('./starting'));
   });
