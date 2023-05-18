@@ -421,7 +421,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   public onFatalError = (e: Error) => {
-    console.log('ON FATAL ERROR');
     batch(() => {
       this.dispatch.setLoading(false);
       this.dispatch.setPopoverOpen(false);

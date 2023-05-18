@@ -107,7 +107,6 @@ export const optionsListReducers = {
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<string | undefined>
   ) => {
-    console.log(action.payload);
     state.componentState.error = action.payload;
   },
   setLoading: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {

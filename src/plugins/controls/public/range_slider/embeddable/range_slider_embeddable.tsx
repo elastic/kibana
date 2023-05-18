@@ -136,12 +136,19 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.setInitializationFinished();
     }
 
-    this.runRangeSliderQuery().then(async () => {
-      if (initialValue) {
-        this.setInitializationFinished();
-      }
-      this.setupSubscriptions();
-    });
+    this.runRangeSliderQuery()
+      .catch((e) => {
+        batch(() => {
+          this.dispatch.setLoading(false);
+          this.dispatch.setRecoverableError(e.message);
+        });
+      })
+      .then(async () => {
+        if (initialValue) {
+          this.setInitializationFinished();
+        }
+        this.setupSubscriptions();
+      });
   };
 
   private setupSubscriptions = () => {
@@ -161,7 +168,13 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     );
 
     // fetch available min/max when input changes
-    this.subscriptions.add(dataFetchPipe.subscribe(this.runRangeSliderQuery));
+    this.subscriptions.add(
+      dataFetchPipe.subscribe(async () =>
+        this.runRangeSliderQuery().catch((e) => {
+          this.dispatch.setRecoverableError(e.message);
+        })
+      )
+    );
 
     // build filters when value change
     this.subscriptions.add(
@@ -198,24 +211,28 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
         this.dispatch.setDataViewId(this.dataView.id);
       } catch (e) {
-        this.onFatalError(e);
+        this.dispatch.setRecoverableError(e.message);
       }
     }
 
     if (!this.field || this.field.name !== fieldName) {
-      this.field = this.dataView?.getFieldByName(fieldName);
-      if (this.field === undefined) {
-        this.onFatalError(
-          new Error(
-            i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
-              defaultMessage: 'Could not locate field: {fieldName}',
-              values: { fieldName },
-            })
-          )
-        );
-      }
+      try {
+        this.field = this.dataView?.getFieldByName(fieldName);
+        if (this.field === undefined) {
+          this.onFatalError(
+            new Error(
+              i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
+                defaultMessage: 'Could not locate field: {fieldName}',
+                values: { fieldName },
+              })
+            )
+          );
+        }
 
-      this.dispatch.setField(this.field?.toSpec());
+        this.dispatch.setField(this.field?.toSpec());
+      } catch (e) {
+        this.dispatch.setRecoverableError(e.message);
+      }
     }
 
     return { dataView: this.dataView, field: this.field! };
@@ -268,15 +285,18 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       field,
       filters,
       query,
+    }).catch((e) => {
+      throw e;
     });
 
     this.dispatch.setMinMax({
       min: `${min ?? ''}`,
       max: `${max ?? ''}`,
     });
-
     // build filter with new min/max
-    await this.buildFilter();
+    await this.buildFilter().catch((e) => {
+      throw e;
+    });
   };
 
   private fetchMinMax = async ({
@@ -321,11 +341,11 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         min: aggBody,
       },
     };
-
     searchSource.setField('aggs', aggs);
 
-    const resp = await lastValueFrom(searchSource.fetch$());
-
+    const resp = await lastValueFrom(searchSource.fetch$()).catch((e) => {
+      throw e;
+    });
     const min = get(resp, 'rawResponse.aggregations.minAgg.value', '');
     const max = get(resp, 'rawResponse.aggregations.maxAgg.value', '');
 
@@ -343,7 +363,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         value: [selectedMin, selectedMax] = ['', ''],
       },
     } = this.getState();
-
     const hasData = !isEmpty(availableMin) && !isEmpty(availableMax);
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);
@@ -358,6 +377,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         this.dispatch.setIsInvalid(!ignoreParentSettings?.ignoreValidations && hasEitherSelection);
         this.dispatch.setDataViewId(dataView.id);
         this.dispatch.publishFilters([]);
+        this.dispatch.setRecoverableError(undefined);
       });
       return;
     }
@@ -413,6 +433,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
           this.dispatch.setIsInvalid(true);
           this.dispatch.setDataViewId(dataView.id);
           this.dispatch.publishFilters([]);
+          this.dispatch.setRecoverableError(undefined);
         });
         return;
       }
@@ -423,11 +444,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.dispatch.setIsInvalid(false);
       this.dispatch.setDataViewId(dataView.id);
       this.dispatch.publishFilters([rangeFilter]);
+      this.dispatch.setRecoverableError(undefined);
     });
   };
 
   public reload = () => {
-    this.runRangeSliderQuery();
+    this.runRangeSliderQuery().catch((e) => {
+      this.dispatch.setRecoverableError(e.message);
+    });
   };
 
   public destroy = () => {
