@@ -52,6 +52,7 @@ const defaultProps: OsqueryActionResultsProps = {
 
 const defaultPermissions = {
   osquery: {
+    read: true,
     runSavedQueries: false,
     readSavedQueries: false,
   },
