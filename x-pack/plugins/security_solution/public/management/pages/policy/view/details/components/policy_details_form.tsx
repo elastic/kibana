@@ -23,7 +23,7 @@ const FormContainer = styled.div`
   margin-bottom: calc(${({ theme: { eui } }) => eui.euiSizeXXL} * 2);
 
   .policyFormRow + .policyFormRow {
-    margin-top: ${({ theme: { eui } }) => eui.euiSizeXL};
+    margin-top: ${({ theme: { eui } }) => eui.euiSizeXXL};
   }
 `;
 
