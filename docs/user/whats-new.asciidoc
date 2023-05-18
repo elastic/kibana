@@ -74,7 +74,10 @@ for customizing your metric visualizations. The latest changes include:
 image::images/highlights-lens-metric-chart.png[Improvements to Lens metric chart]
 
 [discrete]
-=== Dashboard has a better way to change settings
+=== Dashboard
+
+[discrete]
+==== A better way to change settings
 
 Quickly change your dashboard settings with a single click,
 and right from the dashboard. When editing your dashboards,
@@ -86,10 +89,13 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt8f3b17378
 
 
 [discrete]
-=== Maps has metric filtering
+=== Maps
+
+[discrete]
+==== Reduce clutter with metric filtering
 
 Use metric filtering to hide aggregation buckets to reduce clutter and highlight areas of interest.
-Consider this map in which areas with more traffic are obscured by areas with little traffic.
+Consider this map, where areas with more traffic are obscured by areas with little traffic.
 
 [role="screenshot"]
 image::images/highlights-map-with-web-traffic.png[Metric filtering in maps]
@@ -100,7 +106,7 @@ With configure metric filtering, you can hide the clusters with little web traff
 image::images/highlights-maps-metric-filtering.png[How to configure metric filtering, width="50%"]
 
 The map now has less visual clutter and it’s easier to visualize areas with high web traffic,
-enabling the marketing team to better target high value areas.
+enabling your marketing team to better target high value areas.
 
 [role="screenshot"]
 image::images/highlights-maps-less-clutter.png[Same map, but with less less visual clustter]
@@ -110,7 +116,7 @@ image::images/highlights-maps-less-clutter.png[Same map, but with less less visu
 === Machine learning
 
 [discrete]
-==== {transform-cap} ‘schedule now’ action added to UI
+==== {transform-cap} ‘schedule now’ added to UI
 
 The {transform} UI has been updated to make use of the *Schedule now*
 functionality. This schedules a {transform} to instantly process new data
@@ -124,7 +130,7 @@ as a bulk action on multiple {transforms}.
 image::images/highlights-ml-transform-schedule-now.png[Shedule now action for Transforms]
 
 [discrete]
-==== ELSER configuration on the Trained Models UI
+==== ELSER configuration on Trained Models UI
 
 Elastic Learned Sparse EncodeR (ELSER) is a {ml} model newly added to the
 library. ELSER improves your search relevance by enabling you to perform
@@ -158,18 +164,54 @@ image::images/highlights-ml-change-point-detection-enhancements.png[Change point
 Starting in 8.8, the results data grid provides a link in the *Actions* column to
 *Discover* filtering for the row's field/values.
 Creating custom URLs for jobs is also supported from the jobs list. You can
-create a link to *Discover*, *Dashboards*, or an external URL. You can
+create a link to *Discover*, *Dashboard*, or an external URL. You can
 also test the configured custom URL.
 
 [role="screenshot"]
 image::images/highlights-ml-dfa-drilldown-1.png[Data frame analytics custom URLs]
 
-The custom URLs you created appear in the {dfanalytics} results table row, and
-you can click through to any URL with the values from that row.
+The custom URLs you create appear in the {dfanalytics} results table row.
+You can click through to any URL with the values from that row.
 
 [role="screenshot"]
 image::images/highlights-ml-dfa-drilldown-2.png[Data frame analytics results table]
 
+
+
+[discrete]
+=== Alerting
+
+[discrete]
+==== Maintenance windows
+
+Schedule single or recurring maintenance windows to reduce alert noise and suppress notifications.
+For example, if you have a planned outage or event, a maintenance window prevents false alarms during this period.
+// For more information, check <<maintenance-windows>>.
+
+[role="screenshot"]
+image::images/highlights-maintenance-windows.png[Viewing maintenance windows in {kib}]
+
+[discrete]
+=== Cases
+
+These features are all available for cases in *{stack-manage-app}*, *{observability}*, and the *{security-app}*.
+
+[discrete]
+==== Case activities
+
+In 8.8, when you view a case, there are new *Comments* and *History* filters on the *Activity* tab.
+These filters separate comments from user and system actions, such as alerts and user assignments.
+Pagination and sorting are now also provided on this tab.
+
+[role="screenshot"]
+image::images/highlights-case-activity.png[The Activity tab in a case in {stack-manage-app}>Cases]
+
+
+[discrete]
+==== Case attachments
+
+You can now attach files to cases for better investigation processes.
+With the new capability you can upload indicators of compromise (IOCs) and other files to support alert and case triage. For more information, check <<add-case-files>>.
 
 [discrete]
 === Per-user dark mode
@@ -200,38 +242,3 @@ and applies to all spaces.
 
 [role="screenshot"]
 image::images/highlights-branding-settings.png[Settings in for customizing logo, organaization name, page title, and browser icon]
-
-[discrete]
-=== Alerting
-
-[discrete]
-==== Maintenance windows
-
-Schedule single or recurring maintenance windows to reduce alert noise and suppress notifications.
-For example, if you have a planned outage or event, a maintenance window prevents false alarms during this period.
-// For more information, check <<maintenance-windows>>.
-
-[role="screenshot"]
-image::images/highlights-maintenance-windows.png[Viewing maintenance windows in {kib}]
-
-[discrete]
-=== Cases
-
-These features are all available for cases in {stack-manage-app}, {observability}, and the {security-app}.
-
-[discrete]
-==== Case activities
-
-In 8.8, when you view a case there are new *Comments* and *History* filters on the *Activity* tab.
-These filters separate comments from user and system actions like alert and user assignments.
-Pagination and sorting are now also provided on this tab.
-
-[role="screenshot"]
-image::images/highlights-case-activity.png[The Activity tab in a case in {stack-manage-app}>Cases]
-
-
-[discrete]
-==== Case attachments
-
-You can now attach files to cases for better investigation processes.
-With the new capability you can upload indicators of compromise (IOCs) and other files to support alert and case triage. For more information, check <<add-case-files>>.
