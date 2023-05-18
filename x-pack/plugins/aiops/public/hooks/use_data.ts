@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
+import type { Moment } from 'moment';
 
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -38,9 +39,10 @@ export const useData = (
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate?: (params: Dictionary<unknown>) => void,
   selectedSignificantTerm?: SignificantTerm,
-  selectedGroup?: GroupTableItem | null,
+  selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
-  readOnly: boolean = false
+  readOnly: boolean = false,
+  timeRange?: { min: Moment; max: Moment }
 ) => {
   const {
     executionContext,
@@ -67,17 +69,17 @@ export const useData = (
       filterManager,
     });
 
-    if (searchData === undefined || aiopsListState.searchString !== '') {
-      if (aiopsListState.filters && readOnly === false) {
+    if (searchData === undefined || (aiopsListState && aiopsListState.searchString !== '')) {
+      if (aiopsListState?.filters && readOnly === false) {
         const globalFilters = filterManager?.getGlobalFilters();
 
         if (filterManager) filterManager.setFilters(aiopsListState.filters);
         if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
-        searchQuery: aiopsListState.searchQuery,
-        searchString: aiopsListState.searchString,
-        searchQueryLanguage: aiopsListState.searchQueryLanguage,
+        searchQuery: aiopsListState?.searchQuery,
+        searchString: aiopsListState?.searchString,
+        searchQueryLanguage: aiopsListState?.searchQueryLanguage,
       };
     } else {
       return {
@@ -90,11 +92,11 @@ export const useData = (
   }, [
     selectedSavedSearch?.id,
     selectedDataView.id,
-    aiopsListState.searchString,
-    aiopsListState.searchQueryLanguage,
+    aiopsListState?.searchString,
+    aiopsListState?.searchQueryLanguage,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify({
-      searchQuery: aiopsListState.searchQuery,
+      searchQuery: aiopsListState?.searchQuery,
     }),
     lastRefresh,
   ]);
@@ -106,7 +108,7 @@ export const useData = (
   });
 
   const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(() => {
-    const timefilterActiveBounds = timefilter.getActiveBounds();
+    const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
     if (timefilterActiveBounds !== undefined) {
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
@@ -122,7 +124,7 @@ export const useData = (
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh, searchQuery]);
+  }, [lastRefresh, searchQuery, timeRange]);
 
   const overallStatsRequest = useMemo(() => {
     return fieldStatsRequest

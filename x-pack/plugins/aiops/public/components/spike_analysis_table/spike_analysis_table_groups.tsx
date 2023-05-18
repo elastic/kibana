@@ -350,10 +350,14 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
-      name: i18n.translate('xpack.aiops.spikeAnalysisTable.actionsColumnName', {
+      name: i18n.translate('xpack.aiops.aiopsSpikeAnalysisGroupsTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      actions: [viewInDiscoverAction, viewInLogPatternAnalysisAction, copyToClipBoardAction],
+      actions: [
+        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+        copyToClipBoardAction,
+      ],
       width: ACTIONS_COLUMN_WIDTH,
       valign: 'top',
     },
