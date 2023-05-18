@@ -87,7 +87,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Saved Views', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/111076
+    describe.skip('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       describe('save functionality', () => {
