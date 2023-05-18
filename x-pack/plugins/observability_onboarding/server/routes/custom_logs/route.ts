@@ -12,6 +12,11 @@ import { getESHosts } from './get_es_hosts';
 import { getKibanaUrl } from './get_kibana_url';
 import { createShipperApiKey } from './create_shipper_api_key';
 import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
+import { findObservabilityOnboardingState } from './find_observability_onboarding_state';
+import {
+  ObservabilityOnboardingState,
+  OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+} from '../../saved_objects/observability_onboarding_status';
 
 const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint:
@@ -26,7 +31,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   async handler(resources): Promise<{
     apiKeyId: string;
     apiKeyEncoded: string;
-    statusApiEndpoint: string;
+    apiEndpoint: string;
     scriptDownloadUrl: string;
     esHost: string;
   }> {
@@ -44,9 +49,9 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       coreStart,
       '/observabilityOnboarding/standalone-agent-setup.sh'
     );
-    const statusApiEndpoint = getKibanaUrl(
+    const apiEndpoint = getKibanaUrl(
       coreStart,
-      '/api/observability_onboarding/custom_logs/status'
+      '/api/observability_onboarding/custom_logs'
     );
     const {
       elasticsearch: { client },
@@ -63,37 +68,126 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     saveObservabilityOnboardingState({
       savedObjectsClient,
-      observabilityOnboardingState: { apiKeyId, state },
+      observabilityOnboardingState: {
+        apiKeyId,
+        state,
+      } as ObservabilityOnboardingState,
     });
     return {
       apiKeyId, // key the status off this
       apiKeyEncoded,
-      statusApiEndpoint,
+      apiEndpoint,
       scriptDownloadUrl,
       esHost,
     };
   },
 });
 
-const updateStatusRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/custom_logs/status',
+const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /api/observability_onboarding/custom_logs/step/{name}',
+  options: { tags: [] },
+  params: t.type({
+    path: t.type({
+      name: t.string,
+    }),
+    query: t.type({
+      status: t.string,
+    }),
+  }),
+  async handler(resources): Promise<object> {
+    const {
+      params: {
+        path: { name },
+        query: { status },
+      },
+      request: {
+        headers: { authorization },
+      },
+      core,
+    } = resources;
+    if (
+      !(
+        typeof authorization === 'string' && authorization.startsWith('ApiKey ')
+      )
+    ) {
+      return {};
+    }
+    const apiKeyEncoded = authorization.split(' ')[1];
+    const [apiKeyId] = Buffer.from(apiKeyEncoded, 'base64')
+      .toString('utf8')
+      .split(':');
+    const coreStart = await core.start();
+    const savedObjectsClient =
+      coreStart.savedObjects.createInternalRepository();
+    const [{ id, state }] = await findObservabilityOnboardingState({
+      savedObjectsClient,
+      apiKeyId,
+    });
+
+    const nextState = {
+      apiKeyId,
+      state: {
+        ...state,
+        progress: { ...state.progress, [name]: status },
+      },
+    };
+    await saveObservabilityOnboardingState({
+      savedObjectsClient,
+      observabilityOnboardingStateId: id,
+      observabilityOnboardingState: nextState,
+    });
+    return { name, status };
+  },
+});
+
+const getStateRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /api/observability_onboarding/custom_logs/state',
   options: { tags: [] },
   params: t.type({
     query: t.type({
-      ping: t.string,
+      apiKeyId: t.string,
     }),
   }),
-  async handler(resources): Promise<{ ok: string; ping: string }> {
+  async handler(resources): Promise<object> {
     const {
       params: {
-        query: { ping },
+        query: { apiKeyId },
       },
+      core,
     } = resources;
-    return { ok: 'success', ping };
+    const coreStart = await core.start();
+    const savedObjectsClient =
+      coreStart.savedObjects.createInternalRepository();
+    const [{ state }] = await findObservabilityOnboardingState({
+      savedObjectsClient,
+      apiKeyId,
+    });
+    return { state };
+  },
+});
+
+const cleanStateRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /api/observability_onboarding/custom_logs/clean_state',
+  options: { tags: [] },
+  async handler(resources): Promise<object> {
+    const { core } = resources;
+    const coreStart = await core.start();
+    const savedObjectsClient =
+      coreStart.savedObjects.createInternalRepository();
+    const findStatesResult =
+      await savedObjectsClient.find<ObservabilityOnboardingState>({
+        type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+      });
+    const buldDeleteResult = await savedObjectsClient.bulkDelete(
+      findStatesResult.saved_objects
+    );
+    return { buldDeleteResult };
   },
 });
 
 export const customLogsRouteRepository = {
   ...createApiKeyRoute,
-  ...updateStatusRoute,
+  ...stepProgressUpdateRoute,
+  ...getStateRoute,
+  ...cleanStateRoute,
 };

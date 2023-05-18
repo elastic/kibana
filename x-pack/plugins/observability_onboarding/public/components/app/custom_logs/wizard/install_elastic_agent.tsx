@@ -129,7 +129,7 @@ export function InstallElasticAgent() {
                     {getInstallShipperCommand({
                       elasticAgentPlatform,
                       apiKeyEncoded,
-                      statusApiEndpoint: installShipperSetup?.statusApiEndpoint,
+                      apiEndpoint: installShipperSetup?.apiEndpoint,
                       scriptDownloadUrl: installShipperSetup?.scriptDownloadUrl,
                     })}
                   </EuiCodeBlock>
@@ -187,19 +187,19 @@ export function InstallElasticAgent() {
 function getInstallShipperCommand({
   elasticAgentPlatform,
   apiKeyEncoded = '$API_KEY',
-  statusApiEndpoint = '$STATUS_API_ENDPOINT',
+  apiEndpoint = '$API_ENDPOINT',
   scriptDownloadUrl = '$SCRIPT_DOWNLOAD_URL',
 }: {
   elasticAgentPlatform: ElasticAgentPlatform;
   apiKeyEncoded: string | undefined;
-  statusApiEndpoint: string | undefined;
+  apiEndpoint: string | undefined;
   scriptDownloadUrl: string | undefined;
 }) {
   const setupScriptFilename = 'standalone-agent-setup.sh';
   const PLATFORM_COMMAND: Record<ElasticAgentPlatform, string> = {
     'linux-tar': oneLine`
       curl ${scriptDownloadUrl} -o ${setupScriptFilename} &&
-      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${statusApiEndpoint}
+      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${apiEndpoint}
     `,
     macos: oneLine`
       curl -O https://elastic.co/agent-setup.sh &&
