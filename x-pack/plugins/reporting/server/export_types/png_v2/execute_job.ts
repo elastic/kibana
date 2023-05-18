@@ -39,7 +39,15 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
           apmGetAssets?.end();
           apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
-          return generatePngObservable(reporting.getScreenshots, jobLogger, {
+          const screenshotFn = () =>
+            reporting.getScreenshots({
+              headers,
+              browserTimezone: job.browserTimezone,
+              layout: { ...job.layout, id: 'preserve_layout' },
+              urls: [[url, locatorParams]],
+            });
+
+          return generatePngObservable(screenshotFn, jobLogger, {
             headers,
             browserTimezone: job.browserTimezone,
             layout: { ...job.layout, id: 'preserve_layout' },

@@ -9,6 +9,8 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { TaskRunResult } from '@kbn/reporting-common';
+import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
+import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders, getCustomLogo } from '../common';
@@ -34,13 +36,34 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
         }),
         mergeMap(({ logo, headers }) => {
           const { browserTimezone, layout, title, locatorParams } = job;
+
+          const urls = locatorParams.map((locator) => [
+            getFullRedirectAppUrl(
+              reporting.getConfig(),
+              reporting.getServerInfo(),
+              job.spaceId,
+              job.forceNow
+            ),
+            locator,
+          ]) as UrlOrUrlLocatorTuple[];
+
+          const screenshotFn = () =>
+            reporting.getScreenshots({
+              format: 'pdf',
+              title,
+              logo,
+              browserTimezone,
+              headers,
+              layout,
+              urls,
+            });
           apmGetAssets?.end();
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
           return generatePdfObservable(
             reporting.getConfig(),
             reporting.getServerInfo(),
-            reporting.getScreenshots,
+            screenshotFn,
             job,
             locatorParams,
             {

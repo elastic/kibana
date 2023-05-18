@@ -29,7 +29,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         mergeMap(async (headers) => {
           const fakeRequest = reporting.getFakeRequest(headers, job.spaceId, jobLogger);
-          const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, jobLogger);
+          const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest);
           return getCustomLogo(uiSettingsClient, headers);
         }),
         mergeMap(({ headers, logo }) => {
@@ -39,7 +39,18 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
           apmGetAssets?.end();
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
-          return generatePdfObservable(reporting.getScreenshots, {
+          //  make a new function that will call reporting.getScreenshots
+          const snapshotFn = () =>
+            reporting.getScreenshots({
+              format: 'pdf',
+              title,
+              logo,
+              urls,
+              browserTimezone,
+              headers,
+              layout,
+            });
+          return generatePdfObservable(snapshotFn, {
             format: 'pdf',
             title,
             logo,
