@@ -26,6 +26,7 @@ import {
 } from '../../../../../components/effected_policy_select/test_utils';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { testIdPrefix } from '../form';
 
 jest.mock('../../../../../../common/components/user_privileges');
 
@@ -139,7 +140,7 @@ describe('When on the host isolation exceptions entry form', () => {
     it('should select the "global" policy by default', () => {
       expect(
         renderResult
-          .getByTestId('effectedPolicies-select-global')
+          .getByTestId(`${testIdPrefix}-effectedPolicies-global`)
           .classList.contains('euiButtonGroupButton-isSelected')
       ).toBe(true);
     });
@@ -161,7 +162,9 @@ describe('When on the host isolation exceptions entry form', () => {
       // move back to global
       userEvent.click(renderResult.getByTestId('globalPolicy'));
 
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
+      expect(
+        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeFalsy();
 
       // move back to per-policy
       userEvent.click(renderResult.getByTestId('perPolicy'));
@@ -240,7 +243,7 @@ describe('When on the host isolation exceptions entry form', () => {
 
       expect(
         renderResult
-          .getByTestId('effectedPolicies-select-global')
+          .getByTestId(`${testIdPrefix}-effectedPolicies-global`)
           .classList.contains('euiButtonGroupButton-isSelected')
       ).toBe(true);
     });
@@ -265,14 +268,18 @@ describe('When on the host isolation exceptions entry form', () => {
       existingException.tags = [];
       await render();
 
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+      expect(
+        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeTruthy();
     });
 
     it('should show the policies selector when no policy is selected and there are previous tags', async () => {
       existingException.tags = ['non-a-policy-tag'];
       await render();
 
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+      expect(
+        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeTruthy();
     });
   });
 });
