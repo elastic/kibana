@@ -21,6 +21,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
+import { pick } from 'lodash';
 import type {
   CMCrudTypes,
   ServicesDefinitionSet,
@@ -44,16 +45,19 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
 
 function savedObjectToItem<Attributes extends object, Item extends SOWithMetadata>(
   savedObject: SavedObject<Attributes>,
+  allowedSavedObjectAttributes: string[],
   partial: false
 ): Item;
 
 function savedObjectToItem<Attributes extends object, PartialItem extends SOWithMetadata>(
   savedObject: PartialSavedObject<Attributes>,
+  allowedSavedObjectAttributes: string[],
   partial: true
 ): PartialItem;
 
 function savedObjectToItem<Attributes extends object>(
-  savedObject: SavedObject<Attributes> | PartialSavedObject<Attributes>
+  savedObject: SavedObject<Attributes> | PartialSavedObject<Attributes>,
+  allowedSavedObjectAttributes: string[]
 ): SOWithMetadata | SOWithMetadataPartial {
   const {
     id,
@@ -72,7 +76,7 @@ function savedObjectToItem<Attributes extends object>(
     type,
     updatedAt,
     createdAt,
-    attributes,
+    attributes: pick(attributes, allowedSavedObjectAttributes),
     references,
     error,
     namespaces,
@@ -125,6 +129,8 @@ export type UpdateArgsToSoUpdateOptions<Types extends CMCrudTypes> = (
 export interface SOContentStorageConstrutorParams<Types extends CMCrudTypes> {
   savedObjectType: string;
   cmServicesDefinition: ServicesDefinitionSet;
+  // this is necessary since unexpected saved object attributes could cause schema validation to fail
+  allowedSavedObjectAttributes: string[];
   createArgsToSoCreateOptions?: CreateArgsToSoCreateOptions<Types>;
   updateArgsToSoUpdateOptions?: UpdateArgsToSoUpdateOptions<Types>;
   searchArgsToSOFindOptions?: SearchArgsToSOFindOptions<Types>;
@@ -146,6 +152,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     updateArgsToSoUpdateOptions,
     searchArgsToSOFindOptions,
     enableMSearch,
+    allowedSavedObjectAttributes,
   }: SOContentStorageConstrutorParams<Types>) {
     this.savedObjectType = savedObjectType;
     this.cmServicesDefinition = cmServicesDefinition;
@@ -154,6 +161,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     this.updateArgsToSoUpdateOptions =
       updateArgsToSoUpdateOptions || updateArgsToSoUpdateOptionsDefault;
     this.searchArgsToSOFindOptions = searchArgsToSOFindOptions || searchArgsToSOFindOptionsDefault;
+    this.allowedSavedObjectAttributes = allowedSavedObjectAttributes;
 
     if (enableMSearch) {
       this.mSearch = {
@@ -165,7 +173,13 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
           const { value, error: resultError } = transforms.mSearch.out.result.down<
             Types['Item'],
             Types['Item']
-          >(savedObjectToItem(savedObject as SavedObjectsFindResult<Types['Attributes']>, false));
+          >(
+            savedObjectToItem(
+              savedObject as SavedObjectsFindResult<Types['Attributes']>,
+              this.allowedSavedObjectAttributes,
+              false
+            )
+          );
 
           if (resultError) {
             throw Boom.badRequest(`Invalid response. ${resultError.message}`);
@@ -182,6 +196,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   private createArgsToSoCreateOptions: CreateArgsToSoCreateOptions<Types>;
   private updateArgsToSoUpdateOptions: UpdateArgsToSoUpdateOptions<Types>;
   private searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;
+  private allowedSavedObjectAttributes: string[];
 
   mSearch?: {
     savedObjectType: string;
@@ -201,7 +216,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
 
     const response: Types['GetOut'] = {
-      item: savedObjectToItem(savedObject, false),
+      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
       meta: {
         aliasPurpose,
         aliasTargetId,
@@ -266,7 +281,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['CreateOut'],
       Types['CreateOut']
     >({
-      item: savedObjectToItem(savedObject, false),
+      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
     });
 
     if (resultError) {
@@ -317,7 +332,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['UpdateOut'],
       Types['UpdateOut']
     >({
-      item: savedObjectToItem(partialSavedObject, true),
+      item: savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true),
     });
 
     if (resultError) {
@@ -363,7 +378,9 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['SearchOut'],
       Types['SearchOut']
     >({
-      hits: response.saved_objects.map((so) => savedObjectToItem(so, false)),
+      hits: response.saved_objects.map((so) =>
+        savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
+      ),
       pagination: {
         total: response.total,
       },

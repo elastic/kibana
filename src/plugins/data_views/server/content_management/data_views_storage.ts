@@ -18,6 +18,19 @@ export class DataViewsStorage extends SOContentStorage<DataViewCrudTypes> {
       savedObjectType: DataViewSOType,
       cmServicesDefinition,
       enableMSearch: true,
+      allowedSavedObjectAttributes: [
+        'fields',
+        'title',
+        'type',
+        'typeMeta',
+        'timeFieldName',
+        'sourceFilters',
+        'fieldFormatMap',
+        'fieldAttrs',
+        'runtimeFieldMap',
+        'allowNoIndex',
+        'name',
+      ],
     });
   }
 }
