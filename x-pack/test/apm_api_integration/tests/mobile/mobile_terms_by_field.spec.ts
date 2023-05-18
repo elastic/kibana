@@ -6,9 +6,123 @@
  */
 
 import expect from '@kbn/expect';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { generateMobileData } from './generate_mobile_data';
+
+// we generate 3 transactions per each mobile device
+// timerange 15min, interval 5m, rate 1
+// generate 3 http spans for galaxy10 device
+async function generateData({
+  start,
+  end,
+  synthtraceEsClient,
+}: {
+  start: number;
+  end: number;
+  synthtraceEsClient: ApmSynthtraceEsClient;
+}) {
+  const galaxy10 = apm
+    .mobileApp({
+      name: 'synth-android',
+      environment: 'production',
+      agentName: 'android/java',
+    })
+    .mobileDevice({ serviceVersion: '1.2' })
+    .deviceInfo({
+      manufacturer: 'Samsung',
+      modelIdentifier: 'SM-G973F',
+      modelName: 'Galaxy S10',
+    })
+    .osInfo({
+      osType: 'android',
+      osVersion: '10',
+      osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
+      runtimeVersion: '2.1.0',
+    })
+    .setGeoInfo({
+      clientIp: '223.72.43.22',
+      cityName: 'Beijing',
+      continentName: 'Asia',
+      countryIsoCode: 'CN',
+      countryName: 'China',
+      regionIsoCode: 'CN-BJ',
+      regionName: 'Beijing',
+      location: { coordinates: [116.3861, 39.9143], type: 'Point' },
+    })
+    .setNetworkConnection({ type: 'wifi' });
+
+  const huaweiP2 = apm
+    .mobileApp({
+      name: 'synth-android',
+      environment: 'production',
+      agentName: 'android/java',
+    })
+    .mobileDevice({ serviceVersion: '2.3' })
+    .deviceInfo({
+      manufacturer: 'Huawei',
+      modelIdentifier: 'HUAWEI P2-0000',
+      modelName: 'HuaweiP2',
+    })
+    .osInfo({
+      osType: 'android',
+      osVersion: '11',
+      osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
+      runtimeVersion: '2.1.0',
+    })
+    .setGeoInfo({
+      clientIp: '20.24.184.101',
+      cityName: 'Singapore',
+      continentName: 'Asia',
+      countryIsoCode: 'SG',
+      countryName: 'Singapore',
+      location: { coordinates: [103.8554, 1.3036], type: 'Point' },
+    })
+    .setNetworkConnection({
+      type: 'cell',
+      subType: 'edge',
+      carrierName: 'Osaka Gas Business Create Co., Ltd.',
+      carrierMNC: '17',
+      carrierICC: 'JP',
+      carrierMCC: '440',
+    });
+
+  return await synthtraceEsClient.index([
+    timerange(start, end)
+      .interval('5m')
+      .rate(1)
+      .generator((timestamp) => {
+        galaxy10.startNewSession();
+        huaweiP2.startNewSession();
+        return [
+          galaxy10
+            .transaction('Start View - View Appearing', 'Android Activity')
+            .errors(galaxy10.crash({ message: 'error' }).timestamp(timestamp))
+            .timestamp(timestamp)
+            .duration(500)
+            .success()
+            .children(
+              galaxy10
+                .httpSpan({
+                  spanName: 'GET backend:1234',
+                  httpMethod: 'GET',
+                  httpUrl: 'https://backend:1234/api/start',
+                })
+                .duration(800)
+                .success()
+                .timestamp(timestamp + 400)
+            ),
+          huaweiP2
+            .transaction('Start View - View Appearing', 'huaweiP2 Activity')
+            .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
+            .timestamp(timestamp)
+            .duration(20)
+            .success(),
+        ];
+      }),
+  ]);
+}
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
@@ -73,7 +187,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Mobile terms', { config: 'basic', archives: [] }, () => {
     before(async () => {
-      await generateMobileData({
+      await generateData({
         synthtraceEsClient,
         start,
         end,
@@ -91,12 +205,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           size: 10,
         });
         expect(response.terms).to.eql([
-          { label: 'SM-G973F', count: 6 },
           { label: 'HUAWEI P2-0000', count: 3 },
-          { label: 'Pixel 7', count: 3 },
-          { label: 'Pixel 7 Pro', count: 3 },
-          { label: 'Pixel 8', count: 3 },
-          { label: 'SM-G930F', count: 3 },
+          { label: 'SM-G973F', count: 3 },
         ]);
       });
 
@@ -109,15 +219,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(response.terms).to.eql([
           {
-            label: '2.3',
-            count: 15,
-          },
-          {
-            label: '1.1',
+            label: '1.2',
             count: 3,
           },
           {
-            label: '1.2',
+            label: '2.3',
             count: 3,
           },
         ]);
@@ -132,8 +238,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(response.terms).to.eql([
           {
-            label: '2.3',
-            count: 15,
+            label: '1.2',
+            count: 3,
           },
         ]);
       });

@@ -149,7 +149,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const enableHostView = () => pageObjects.infraHostsView.clickEnableHostViewButton();
 
   // Tests
-  describe('Hosts View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/157718
+  describe.skip('Hosts View', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -179,7 +180,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(pageUrl).to.contain(HOSTS_VIEW_PATH);
     });
 
-    describe('#Landing page', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157718
+    describe.skip('#Landing page', () => {
       beforeEach(() => {
         setHostViewEnabled(false);
       });
