@@ -13,39 +13,58 @@ import useObservable from 'react-use/lib/useObservable';
 import { useNavigation as useNavigationServices } from '../../services';
 import { InternalNavigationNode, NodeProps, RegisterFunction, UnRegisterFunction } from './types';
 import { useRegisterTreeNode } from './use_register_tree_node';
-import {
-  getIdFromNavigationNode,
-  getDeepLinkFromNavigationNode,
-  getTitleForNavigationNode,
-  doRenderNode,
-} from './utils';
 
-function validateNode(navNode: NodeProps, id: string) {
-  if (!navNode.title && !navNode.link) {
-    throw new Error(`Id or link prop missing for navigation item [${id}]`);
+function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {
+  const id = _id ?? link;
+
+  if (!id) {
+    throw new Error(`Id or link prop missing for navigation item [${title}]`);
   }
+
+  return id;
 }
 
 function createInternalNavNode(
-  navNode: NodeProps,
   id: string,
-  title: string,
-  deepLink?: ChromeNavLink
+  _navNode: NodeProps,
+  deepLinks: Readonly<ChromeNavLink[]>
 ): InternalNavigationNode {
-  const { children, ...rest } = navNode;
-  const node = {
-    ...rest,
+  const { children, ...navNode } = _navNode;
+  const deepLink = deepLinks.find((dl) => dl.id === navNode.link);
+
+  let title = navNode.title ?? deepLink?.title;
+
+  if (!title && typeof children === 'string') {
+    title = children;
+  }
+
+  const isLinkActive = isNodeActive({ link: navNode.link, deepLink });
+
+  if (!title || title.trim().length === 0) {
+    if (isLinkActive) {
+      throw new Error(`Title prop missing for navigation item [${id}]`);
+    } else {
+      // No title provided but the node is disabled, so we can safely set it to an empty string
+      title = '';
+    }
+  }
+
+  return {
+    ...navNode,
     id,
     title,
     deepLink,
+    isLinkActive,
+    status: 'idle',
   };
+}
 
-  const isActive = doRenderNode(node);
-
-  return {
-    ...node,
-    status: isActive ? 'active' : 'disabled',
-  };
+function isNodeActive({ link, deepLink }: { link?: string; deepLink?: ChromeNavLink }) {
+  if (link && !deepLink) {
+    // If a link is provided, but no deepLink is found, don't render anything
+    return false;
+  }
+  return true;
 }
 
 export const useInitNavnode = (node: NodeProps) => {
@@ -72,34 +91,21 @@ export const useInitNavnode = (node: NodeProps) => {
    */
   const idx = useRef(0);
 
-  const { id } = getIdFromNavigationNode(node);
-  validateNode(node, id);
-
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
-
-  const navNode = useMemo(() => {
-    if (typeof node.children === 'string' && !node.title) {
-      const updated = { ...node };
-      updated.title = updated.children as string;
-      return updated;
-    }
-
-    return node;
-  }, [node]);
-
   const { register: registerNodeOnParent } = useRegisterTreeNode();
-  const deepLink = getDeepLinkFromNavigationNode(navNode, { deepLinks });
-  const { title } = getTitleForNavigationNode({ ...navNode, id }, { deepLink });
+
+  const id = getIdFromNavigationNode(node);
 
   const internalNavNode = useMemo(
-    () => createInternalNavNode(navNode, id, title, deepLink),
-    [navNode, id, title, deepLink]
+    () => createInternalNavNode(id, node, deepLinks),
+    [node, id, deepLinks]
   );
-  const isActive = internalNavNode.status === 'active';
+
+  const { isLinkActive } = internalNavNode;
 
   const register = useCallback(() => {
-    if (isActive) {
+    if (isLinkActive) {
       const children = Object.values(childrenNodes.current).sort((a, b) => {
         const aOrder = orderChildrenRef.current[a.id];
         const bOrder = orderChildrenRef.current[b.id];
@@ -113,7 +119,7 @@ export const useInitNavnode = (node: NodeProps) => {
 
       isRegistered.current = true;
     }
-  }, [internalNavNode, registerNodeOnParent, isActive]);
+  }, [internalNavNode, registerNodeOnParent, isLinkActive]);
 
   const registerChildNode = useCallback<RegisterFunction>(
     (childNode) => {
@@ -148,21 +154,20 @@ export const useInitNavnode = (node: NodeProps) => {
   }, []);
 
   useEffect(() => {
-    if (isActive) {
+    if (isLinkActive) {
       register();
     } else {
       unregister();
     }
-  }, [isActive, unregister, register]);
+  }, [isLinkActive, unregister, register]);
 
   useEffect(() => unregister, [unregister]);
 
   return useMemo(
     () => ({
       navNode: internalNavNode,
-      isActive,
       registerChildNode,
     }),
-    [internalNavNode, isActive, registerChildNode]
+    [internalNavNode, registerChildNode]
   );
 };

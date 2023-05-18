@@ -14,7 +14,7 @@ import { useInitNavnode } from '../use_init_navnode';
 
 function NavigationItemComp(node: NodeProps) {
   const { children, onRemove } = node;
-  const { navNode, isActive } = useInitNavnode(node);
+  const { navNode } = useInitNavnode(node);
   const { title, deepLink } = navNode;
 
   // Note: temporary UI. In future PR we'll have an EUI component here
@@ -34,11 +34,13 @@ function NavigationItemComp(node: NodeProps) {
     if (!children) {
       return wrapTextWithLink(title);
     }
+
     if (typeof children === 'string') {
       return wrapTextWithLink(children);
     } else if (typeof children === 'function') {
       return children(deepLink);
     }
+
     return children;
   }, [children, deepLink, title, wrapTextWithLink]);
 
@@ -52,7 +54,7 @@ function NavigationItemComp(node: NodeProps) {
       </>
     ) : null;
 
-  if (!isActive) {
+  if (!navNode.isLinkActive) {
     return null;
   }
 

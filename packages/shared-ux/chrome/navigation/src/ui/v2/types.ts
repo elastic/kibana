@@ -12,7 +12,10 @@ import { ReactNode } from 'react';
 export interface InternalNavigationNode extends Omit<ChromeProjectNavigationNode, 'id'> {
   id: string;
   title: string;
-  status: 'active' | 'disabled';
+  /** Flag to indicate if the deepLink id has been found and we should render the node in the UI */
+  isLinkActive: boolean;
+  /** Current state of the navigation node. "active" means it matches the current URL route */
+  status: 'idle' | 'active';
   deepLink?: ChromeNavLink;
 }
 

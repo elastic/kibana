@@ -63,6 +63,7 @@ export function Navigation({ children, onRootItemRemove }: Props) {
         if (onRootItemRemove) {
           onRootItemRemove(navNode.id);
         }
+
         setNavigationItems((prevItems) => {
           const updatedItems = { ...prevItems };
           delete updatedItems[navNode.id];
@@ -81,6 +82,7 @@ export function Navigation({ children, onRootItemRemove }: Props) {
   );
 
   useEffect(() => {
+    // Send the navigation tree to the Chrome service
     onProjectNavigationChange({
       navigationTree: Object.values(navigationItems).sort((a, b) => {
         const aOrder = orderChildrenRef.current[a.id];

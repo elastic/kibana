@@ -30,7 +30,7 @@ export function useNavigationGroup<T extends boolean = true>(
 
 function NavigationGroupComp(node: NodeProps) {
   const { children, onRemove } = node;
-  const { navNode, isActive, registerChildNode } = useInitNavnode(node);
+  const { navNode, registerChildNode } = useInitNavnode(node);
   const { title, deepLink } = navNode;
 
   const wrapTextWithLink = useCallback(
@@ -74,7 +74,7 @@ function NavigationGroupComp(node: NodeProps) {
     };
   }, [registerChildNode]);
 
-  if (!isActive) {
+  if (!navNode.isLinkActive) {
     return null;
   }
 
