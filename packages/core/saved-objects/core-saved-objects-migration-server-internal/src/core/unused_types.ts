@@ -29,8 +29,6 @@ export const REMOVED_TYPES: string[] = [
   'server',
   // https://github.com/elastic/kibana/issues/95617
   'tsvb-validation-telemetry',
-  // Was removed in 8.8 https://github.com/elastic/kibana/issues/223232
-  'osquery-manager-usage-metric',
   // replaced by osquery-manager-usage-metric
   'osquery-usage-metric',
   // Was removed in 8.1 https://github.com/elastic/kibana/issues/91265
