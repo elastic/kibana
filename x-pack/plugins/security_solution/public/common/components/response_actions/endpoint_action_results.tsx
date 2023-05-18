@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiComment, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useUserPrivileges } from '../user_privileges';
@@ -51,25 +51,29 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
   );
 
   return (
-    <EuiComment
-      username={rule?.name}
-      timestamp={<FormattedRelative value={action['@timestamp']} />}
-      event={eventText}
-      data-test-subj={'endpoint-results-comment'}
-    >
-      {canReadEndpoint ? (
-        expandedAction ? (
-          <ActionsLogExpandedTray
-            action={expandedAction}
-            data-test-subj={`response-results-${hostName}`}
-          />
+    <>
+      <EuiSpacer size="s" />
+      <EuiComment
+        username={rule?.name}
+        timestamp={<FormattedRelative value={action['@timestamp']} />}
+        event={eventText}
+        data-test-subj={'endpoint-results-comment'}
+      >
+        {canReadEndpoint ? (
+          expandedAction ? (
+            <ActionsLogExpandedTray
+              action={expandedAction}
+              data-test-subj={`response-results-${hostName}`}
+            />
+          ) : (
+            <EuiLoadingSpinner />
+          )
         ) : (
-          <EuiLoadingSpinner />
-        )
-      ) : (
-        <ResponseActionsEmptyPrompt type="endpoint" />
-      )}
-    </EuiComment>
+          <ResponseActionsEmptyPrompt type="endpoint" />
+        )}
+      </EuiComment>
+      <EuiSpacer size="s" />
+    </>
   );
 };
 
