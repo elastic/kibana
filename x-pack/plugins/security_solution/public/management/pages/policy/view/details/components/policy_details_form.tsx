@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { EuiSpacer } from '@elastic/eui';
 import { PolicyFormAntivirusRegistration } from './policy_form_antivirus_registration';
 import { PolicyFormEventCollection } from './policy_form_event_collection';
 import { PolicyFormAttackSurfaceReduction } from './policy_form_attack_surface_reduction';
@@ -16,9 +17,10 @@ import { PolicyFormRansomware } from './policy_form_ransomware';
 import { PolicyFormMalware } from './policy_form_malware';
 import { PolicyFormHeader } from './policy_form_header';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
+import { PolicyFormAdvancedSettings } from './policy_form_advanced_settings';
 
 const FormContainer = styled.div`
-  margin-bottom: ${({ theme: { eui } }) => eui.euiSizeXXL};
+  margin-bottom: calc(${({ theme: { eui } }) => eui.euiSizeXXL} * 2);
 
   .policyFormRow + .policyFormRow {
     margin-top: ${({ theme: { eui } }) => eui.euiSizeXL};
@@ -47,6 +49,9 @@ export const PolicyDetailsForm = memo<PolicyDetailsFormProps>(({ policyDetails }
       <PolicyFormEventCollection policyDetails={policyDetails} />
 
       <PolicyFormAntivirusRegistration policyDetails={policyDetails} />
+
+      <EuiSpacer size="xxl" />
+      <PolicyFormAdvancedSettings policyDetails={policyDetails} />
     </FormContainer>
   );
 });

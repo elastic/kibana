@@ -133,7 +133,7 @@ export const AdvancedPolicyForms = React.memo(({ isPlatinumPlus }: { isPlatinumP
 
 AdvancedPolicyForms.displayName = 'AdvancedPolicyForms';
 
-const PolicyAdvanced = React.memo(
+export const PolicyAdvanced = React.memo(
   ({
     configPath,
     firstSupportedVersion,
@@ -175,8 +175,8 @@ const PolicyAdvanced = React.memo(
         <EuiFormRow
           fullWidth
           label={
-            <EuiFlexGroup responsive={false}>
-              <EuiFlexItem grow={true}>{configPath.join('.')}</EuiFlexItem>
+            <EuiFlexGroup responsive={false} gutterSize="xs">
+              <EuiFlexItem grow={true}>{configPath.slice(2).join('.')}</EuiFlexItem>
               {documentation && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip content={documentation} position="right" />
