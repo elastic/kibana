@@ -7,7 +7,6 @@
 
 import {
   EuiCallOut,
-  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
