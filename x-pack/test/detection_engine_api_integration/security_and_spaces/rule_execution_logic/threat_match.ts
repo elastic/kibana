@@ -1049,29 +1049,6 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts.length).equal(2);
       });
-
-      it('[TODO REMOVE LATER]  creates alerts if wildcard is used in queries signals with the single indicator that matched', async () => {
-        const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
-          query: 'agent.type:auditbeat',
-          threat_mapping: [
-            {
-              entries: [
-                {
-                  value: 'threat.indicator.domain',
-                  field: 'destination.ip',
-                  type: 'mapping',
-                },
-              ],
-            },
-          ],
-          threat_query: 'threat.indicator.domain: 159.89.119.67', // still matches only domain field, which is enough to ensure wildcard in path works correctly
-          threat_index: ['filebeat-*'],
-        });
-
-        const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
-      });
     });
 
     describe('indicator enrichment: event-first search', () => {
@@ -1556,44 +1533,6 @@ export default ({ getService }: FtrProviderContext) => {
           // source.po* matches port source.port field
           query: '(source.po*:57324 and source.ip:45.115.45.3) or destination.ip:159.89.119.67', // narrow our query to a single record that matches two indicators
           threat_query: 'agent.t*:filebeat', // still matches all documents
-          threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
-          threat_mapping: [
-            {
-              entries: [
-                {
-                  value: 'threat.indicator.port',
-                  field: 'source.port',
-                  type: 'mapping',
-                },
-                {
-                  value: 'threat.indicator.ip',
-                  field: 'source.ip',
-                  type: 'mapping',
-                },
-              ],
-            },
-            {
-              entries: [
-                {
-                  value: 'threat.indicator.domain',
-                  field: 'destination.ip',
-                  type: 'mapping',
-                },
-              ],
-            },
-          ],
-        });
-
-        const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
-      });
-
-      it('[TODO REMOVE LATER] generates alerts if queries contain field path wildcards', async () => {
-        const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
-          // source.po* matches port source.port field
-          query: '(source.port:57324 and source.ip:45.115.45.3) or destination.ip:159.89.119.67', // narrow our query to a single record that matches two indicators
-          threat_query: 'agent.type:filebeat', // still matches all documents
           threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
           threat_mapping: [
             {
