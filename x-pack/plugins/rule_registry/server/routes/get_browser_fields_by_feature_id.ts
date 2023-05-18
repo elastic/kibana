@@ -9,7 +9,6 @@ import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import * as t from 'io-ts';
 
-import { BrowserFields } from '../../common';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
@@ -51,14 +50,14 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           });
         }
 
-        const browserFields: BrowserFields = await alertsClient.getBrowserFields({
+        const fields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
 
         return response.ok({
-          body: browserFields,
+          body: fields,
         });
       } catch (error) {
         const formatedError = transformError(error);

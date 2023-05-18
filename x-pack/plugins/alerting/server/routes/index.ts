@@ -8,6 +8,8 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import { Observable } from 'rxjs';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
@@ -54,16 +56,19 @@ import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenan
 import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
 import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
 import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
+import { registerValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
+import { registerFieldsRoute } from './suggestions/fields_rules';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   usageCounter?: UsageCounter;
+  config$: Observable<ConfigSchema>;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects, usageCounter } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter, config$ } = opts;
 
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
@@ -110,4 +115,6 @@ export function defineRoutes(opts: RouteOptions) {
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
   activeMaintenanceWindowsRoute(router, licenseState);
+  registerValueSuggestionsRoute(router, licenseState, config$);
+  registerFieldsRoute(router, licenseState);
 }

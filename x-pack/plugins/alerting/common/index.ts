@@ -46,6 +46,7 @@ export * from './maintenance_window';
 export * from './default_rule_aggregation';
 export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
+export * from './saved_objects/rules/mappings';
 
 export {
   mappingFromFieldMap,

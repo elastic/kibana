@@ -28,6 +28,7 @@ import { TypeFilter, TypeFilterProps } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
+import { KqlSearchBar } from './kql_search_bar';
 
 interface RulesListFiltersBarProps {
   actionTypes: ActionType[];
@@ -158,6 +159,9 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
         setRuleLastRunOutcomesFilter={(value) =>
           updateFilters({ filter: 'ruleLastRunOutcomes', value })
         }
+      />
+      <KqlSearchBar
+        onQuerySubmit={(kueryNode) => updateFilters({ filter: 'kueryNode', value: kueryNode })}
       />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>

@@ -42,11 +42,19 @@ import { toUser } from './to_user';
 import { fromUser } from './from_user';
 import { type DataViewByIdOrTitle, fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import {
+  AutocompleteService,
+  QuerySuggestion,
+  QuerySuggestionField,
+  QuerySuggestionTypes,
+} from '../autocomplete';
 import { getTheme } from '../services';
 import './query_string_input.scss';
 
@@ -112,6 +120,7 @@ export interface QueryStringInputProps {
   submitOnBlur?: boolean;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   className?: string;
   isInvalid?: boolean;
   isClearable?: boolean;
@@ -287,8 +296,22 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           useTimeRange: this.props.timeRangeForSuggestionsOverride,
           boolFilter: buildQueryFromFilters(this.props.filtersForSuggestions, undefined).filter,
           method: this.props.filtersForSuggestions?.length ? 'terms_agg' : undefined,
+          suggestionsAbstraction: this.props.suggestionsAbstraction,
         })) || [];
-      return [...suggestions, ...recentSearchSuggestions];
+      return [...suggestions, ...recentSearchSuggestions].map((suggestion) => {
+        let displayText;
+        const fieldName = (suggestion as QuerySuggestionField)?.field?.name ?? '';
+        if (
+          this.props.suggestionsAbstraction &&
+          this.props.suggestionsAbstraction?.fields[fieldName]
+        ) {
+          displayText = this.props.suggestionsAbstraction?.fields[fieldName]?.displayField;
+        }
+        return {
+          ...suggestion,
+          displayText,
+        };
+      });
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
       // Ignore aborted requests
@@ -464,7 +487,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     if (!this.inputRef) {
       return;
     }
-    const { type, text, start, end, cursorIndex } = suggestion;
+    const { type, displayText = suggestion.text, start, end, cursorIndex } = suggestion;
 
     this.handleNestedFieldSyntaxNotification(suggestion);
 
@@ -475,7 +498,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     }
 
     const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
-    const newQueryString = value.substr(0, start) + text + value.substr(end);
+    const newQueryString = value.substr(0, start) + displayText + value.substr(end);
 
     this.reportUiCounter?.(
       METRIC_TYPE.CLICK,
@@ -489,8 +512,8 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     this.onQueryStringChange(newQueryString);
 
     this.setState({
-      selectionStart: start + (cursorIndex ? cursorIndex : text.length),
-      selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
+      selectionStart: start + (cursorIndex ? cursorIndex : displayText.length),
+      selectionEnd: start + (cursorIndex ? cursorIndex : displayText.length),
     });
     const isTypeRecentSearch = type === QuerySuggestionTypes.RecentSearch;
 

@@ -45,7 +45,10 @@ import {
 } from '../dataview_picker';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import './query_bar.scss';
 
@@ -117,6 +120,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   submitButtonStyle?: 'auto' | 'iconOnly' | 'full';
   suggestionsSize?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
   onTextLangQueryChange: (query: AggregateQuery) => void;
@@ -510,6 +514,7 @@ export const QueryBarTopRow = React.memo(
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
               isDisabled={props.isDisabled}
+              suggestionsAbstraction={props.suggestionsAbstraction}
             />
           </EuiFlexItem>
         )
@@ -555,6 +560,7 @@ export const QueryBarTopRow = React.memo(
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
+                suggestionsAbstraction={props.suggestionsAbstraction}
                 isDisabled={props.isDisabled}
                 appName={appName}
                 submitOnBlur={props.submitOnBlur}

@@ -58,11 +58,18 @@ export const setupKqlQuerySuggestionProvider = (
       querySuggestionsArgs: QuerySuggestionGetFnArgs
     ): Promise<Array<Promise<QuerySuggestion[]>> | []> => {
       try {
-        const cursorNode = fromKueryExpression(cursoredQuery, {
+        const { suggestionsAbstraction } = querySuggestionsArgs;
+        let cursorNode = fromKueryExpression(cursoredQuery, {
           cursorSymbol,
           parseCursor: true,
         });
-
+        if (suggestionsAbstraction && suggestionsAbstraction?.fields[cursorNode.fieldName]) {
+          cursorNode = {
+            ...cursorNode,
+            fieldName:
+              suggestionsAbstraction?.fields[cursorNode.fieldName]?.field ?? cursorNode.fieldName,
+          };
+        }
         return cursorNode.suggestionTypes.map((type: $Keys<typeof providers>) =>
           providers[type](querySuggestionsArgs, cursorNode)
         );
@@ -78,8 +85,8 @@ export const setupKqlQuerySuggestionProvider = (
       selectionEnd
     )}`;
     const fn = await asyncGetSuggestionsByTypeFn();
-    return Promise.all(await fn(cursoredQuery, querySuggestionsArgs)).then((suggestionsByType) =>
-      dedup(flatten(suggestionsByType))
-    );
+    return Promise.all(await fn(cursoredQuery, querySuggestionsArgs)).then((suggestionsByType) => {
+      return dedup(flatten(suggestionsByType));
+    });
   };
 };

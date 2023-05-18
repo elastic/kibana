@@ -24,6 +24,7 @@ interface ValueSuggestionsGetFnArgs {
   boolFilter?: any[];
   signal?: AbortSignal;
   method?: ValueSuggestionsMethod;
+  suggestionType?: 'rules' | 'cases' | 'alerts';
 }
 
 const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {
@@ -61,11 +62,16 @@ export const setupValueSuggestionProvider = (
       signal?: AbortSignal,
       method: ValueSuggestionsMethod = core.uiSettings.get<ValueSuggestionsMethod>(
         UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD
-      )
+      ),
+      suggestionType?: string
     ) => {
       usageCollector?.trackRequest();
+      let path = `/api/kibana/suggestions/values/${index}`;
+      if (suggestionType) {
+        path = `/internal/${suggestionType}/suggestions/values`;
+      }
       return core.http
-        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<T>(path, {
           method: 'POST',
           body: JSON.stringify({
             query,
@@ -92,6 +98,7 @@ export const setupValueSuggestionProvider = (
     boolFilter,
     signal,
     method,
+    suggestionType,
   }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
     const shouldSuggestValues = core!.uiSettings.get<boolean>(
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
@@ -121,7 +128,7 @@ export const setupValueSuggestionProvider = (
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {
       usageCollector?.trackCall();
-      return await requestSuggestions(title, field, query, filters, signal, method);
+      return await requestSuggestions(title, field, query, filters, signal, method, suggestionType);
     } catch (e) {
       if (!signal?.aborted) {
         usageCollector?.trackError();

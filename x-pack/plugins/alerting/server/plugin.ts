@@ -52,6 +52,7 @@ import {
   PluginStartContract as FeaturesPluginStart,
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
+import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
@@ -163,6 +164,7 @@ export interface AlertingPluginsSetup {
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
+  unifiedSearch: UnifiedSearchServerPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -341,6 +343,7 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       usageCounter: this.usageCounter,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
+      config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
     });
 
     return {
