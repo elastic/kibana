@@ -26,6 +26,7 @@ const useGetSeverityMock = useGetSeverity as jest.Mock;
 describe('Jira Fields: Preview', () => {
   const useGetIncidentTypesResponse = {
     isLoading: false,
+    isFetching: false,
     data: {
       data: [
         {
@@ -42,6 +43,7 @@ describe('Jira Fields: Preview', () => {
 
   const useGetSeverityResponse = {
     isLoading: false,
+    isFetching: false,
     data: {
       data: [
         {

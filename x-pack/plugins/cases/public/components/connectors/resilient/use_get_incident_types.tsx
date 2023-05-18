@@ -25,7 +25,7 @@ interface Props {
 export const useGetIncidentTypes = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<IncidentTypes>, ServerError>(
-    connectorsQueriesKeys.resilientGetIncidentTypes(),
+    connectorsQueriesKeys.resilientGetIncidentTypes(connector?.id ?? ''),
     () => {
       const abortCtrlRef = new AbortController();
       return getIncidentTypes({

@@ -22,6 +22,7 @@ const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 describe('Jira Fields: Preview', () => {
   const useGetIssueTypesResponse = {
     isLoading: false,
+    isFetching: false,
     data: {
       data: [
         {

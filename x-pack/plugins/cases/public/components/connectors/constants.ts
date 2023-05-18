@@ -9,13 +9,16 @@ export const connectorsQueriesKeys = {
   jira: ['jira'] as const,
   resilient: ['resilient'] as const,
   servicenow: ['servicenow'] as const,
-  jiraGetFieldsByIssueType: (issueType: string) =>
-    [...connectorsQueriesKeys.jira, 'getFields', issueType] as const,
-  jiraGetIssueTypes: () => [...connectorsQueriesKeys.jira, 'getIssueType'] as const,
-  jiraGetIssues: (query: string) => [...connectorsQueriesKeys.jira, 'getIssues', query] as const,
-  resilientGetIncidentTypes: () =>
-    [...connectorsQueriesKeys.resilient, 'getIncidentTypes'] as const,
-  resilientGetSeverity: () => [...connectorsQueriesKeys.resilient, 'getSeverity'] as const,
-  servicenowGetChoices: (fields: string[]) =>
-    [...connectorsQueriesKeys.servicenow, 'getChoices', fields] as const,
+  jiraGetFieldsByIssueType: (connectorId: string, issueType: string) =>
+    [...connectorsQueriesKeys.jira, connectorId, 'getFields', issueType] as const,
+  jiraGetIssueTypes: (connectorId: string) =>
+    [...connectorsQueriesKeys.jira, connectorId, 'getIssueType'] as const,
+  jiraGetIssues: (connectorId: string, query: string) =>
+    [...connectorsQueriesKeys.jira, connectorId, 'getIssues', query] as const,
+  resilientGetIncidentTypes: (connectorId: string) =>
+    [...connectorsQueriesKeys.resilient, connectorId, 'getIncidentTypes'] as const,
+  resilientGetSeverity: (connectorId: string) =>
+    [...connectorsQueriesKeys.resilient, connectorId, 'getSeverity'] as const,
+  servicenowGetChoices: (connectorId: string, fields: string[]) =>
+    [...connectorsQueriesKeys.servicenow, connectorId, 'getChoices', fields] as const,
 };

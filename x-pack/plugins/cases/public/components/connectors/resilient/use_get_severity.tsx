@@ -24,7 +24,7 @@ interface Props {
 export const useGetSeverity = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<ResilientSeverity>, ServerError>(
-    connectorsQueriesKeys.resilientGetSeverity(),
+    connectorsQueriesKeys.resilientGetSeverity(connector?.id ?? ''),
     () => {
       const abortCtrlRef = new AbortController();
       return getSeverity({

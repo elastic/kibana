@@ -31,6 +31,7 @@ const useGetIssuesMock = useGetIssues as jest.Mock;
 describe('Jira Fields', () => {
   const useGetIssueTypesResponse = {
     isLoading: false,
+    isFetching: false,
     data: {
       data: [
         {
@@ -47,6 +48,7 @@ describe('Jira Fields', () => {
 
   const useGetFieldsByIssueTypeResponse = {
     isLoading: false,
+    isFetching: false,
     data: {
       data: {
         summary: { allowedValues: [], defaultValue: {} },

@@ -25,7 +25,7 @@ export interface Props {
 export const useGetChoices = ({ http, connector, fields }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<Choice[]>, ServerError>(
-    connectorsQueriesKeys.servicenowGetChoices(fields),
+    connectorsQueriesKeys.servicenowGetChoices(connector?.id ?? '', fields),
     () => {
       const abortCtrlRef = new AbortController();
 

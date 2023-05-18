@@ -43,13 +43,18 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
   const { http } = useKibana().services;
   const showConnectorWarning = connector.isDeprecated;
 
-  const { isLoading: isLoadingChoices, data: choicesData } = useGetChoices({
+  const {
+    isLoading,
+    isFetching,
+    data: choicesData,
+  } = useGetChoices({
     http,
     connector,
     fields: choicesToGet,
   });
 
   const choices = choicesData?.data ?? [];
+  const isLoadingChoices = isLoading || isFetching;
 
   const choicesFormatted = choices.reduce(
     (acc, value) => ({

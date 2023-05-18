@@ -27,6 +27,7 @@ const useGetSeverityMock = useGetSeverity as jest.Mock;
 describe('ResilientParamsFields renders', () => {
   const useGetIncidentTypesResponse = {
     isLoading: false,
+    isFetching: false,
     data: {
       data: resilientIncidentTypes,
     },
@@ -34,6 +35,7 @@ describe('ResilientParamsFields renders', () => {
 
   const useGetSeverityResponse = {
     isLoading: false,
+    isFetching: false,
     data: {
       data: resilientSeverity,
     },

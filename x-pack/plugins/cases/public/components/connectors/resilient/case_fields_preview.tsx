@@ -23,15 +23,26 @@ const ResilientFieldsComponent: React.FunctionComponent<
   const { incidentTypes = null, severityCode = null } = fields ?? {};
   const { http } = useKibana().services;
 
-  const { isLoading: isLoadingIncidentTypes, data: allIncidentTypesData } = useGetIncidentTypes({
+  const {
+    isLoading: isLoadingIncidentTypesData,
+    isFetching: isFetchingIncidentTypesData,
+    data: allIncidentTypesData,
+  } = useGetIncidentTypes({
     http,
     connector,
   });
 
-  const { isLoading: isLoadingSeverity, data: severityData } = useGetSeverity({
+  const {
+    isLoading: isLoadingSeverityData,
+    isFetching: isFetchingSeverityData,
+    data: severityData,
+  } = useGetSeverity({
     http,
     connector,
   });
+
+  const isLoadingIncidentTypes = isLoadingIncidentTypesData || isFetchingIncidentTypesData;
+  const isLoadingSeverity = isLoadingSeverityData || isFetchingSeverityData;
 
   const allIncidentTypes = allIncidentTypesData?.data;
   const severity = severityData?.data;

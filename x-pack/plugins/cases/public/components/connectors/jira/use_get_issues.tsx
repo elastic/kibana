@@ -40,7 +40,7 @@ export const useGetIssues = ({ http, actionConnector, query }: Props) => {
 
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<Issues>, ServerError>(
-    connectorsQueriesKeys.jiraGetIssues(debouncedQuery ?? ''),
+    connectorsQueriesKeys.jiraGetIssues(actionConnector?.id ?? '', debouncedQuery ?? ''),
     () => {
       const abortCtrlRef = new AbortController();
       return getIssues({

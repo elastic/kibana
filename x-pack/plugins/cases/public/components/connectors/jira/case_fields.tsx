@@ -29,7 +29,11 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
 
   const { issueType } = fields ?? {};
 
-  const { isLoading: isLoadingIssueTypes, data: issueTypesData } = useGetIssueTypes({
+  const {
+    isLoading: isLoadingIssueTypesData,
+    isFetching: isFetchingIssueTypesData,
+    data: issueTypesData,
+  } = useGetIssueTypes({
     connector,
     http,
   });
@@ -41,7 +45,11 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
     value: type.id ?? '',
   }));
 
-  const { isLoading: isLoadingFields, data: fieldsByIssueTypeData } = useGetFieldsByIssueType({
+  const {
+    isLoading: isLoadingFieldsData,
+    isFetching: isFetchingFieldsData,
+    data: fieldsByIssueTypeData,
+  } = useGetFieldsByIssueType({
     connector,
     http,
     issueType,
@@ -51,6 +59,8 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
 
   const hasPriority = fieldsByIssueType?.priority != null;
   const hasParent = fieldsByIssueType?.parent != null;
+  const isLoadingIssueTypes = isLoadingIssueTypesData || isFetchingIssueTypesData;
+  const isLoadingFields = isLoadingFieldsData || isFetchingFieldsData;
 
   const prioritiesSelectOptions = useMemo(() => {
     const priorities = fieldsByIssueType?.priority?.allowedValues ?? [];

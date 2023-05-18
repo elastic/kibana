@@ -24,7 +24,7 @@ interface Props {
 export const useGetIssueTypes = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<IssueTypes>, ServerError>(
-    connectorsQueriesKeys.jiraGetIssueTypes(),
+    connectorsQueriesKeys.jiraGetIssueTypes(connector?.id ?? ''),
     () => {
       const abortCtrlRef = new AbortController();
       return getIssueTypes({

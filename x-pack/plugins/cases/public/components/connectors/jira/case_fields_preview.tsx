@@ -21,7 +21,11 @@ const JiraFieldsPreviewComponent: React.FunctionComponent<
   const { http } = useKibana().services;
   const { issueType = null, priority = null, parent = null } = fields ?? {};
 
-  const { isLoading: isLoadingIssueTypes, data: issueTypesData } = useGetIssueTypes({
+  const {
+    isLoading,
+    isFetching,
+    data: issueTypesData,
+  } = useGetIssueTypes({
     connector,
     http,
   });
@@ -61,7 +65,7 @@ const JiraFieldsPreviewComponent: React.FunctionComponent<
   return (
     <ConnectorCard
       connectorType={ConnectorTypes.jira}
-      isLoading={isLoadingIssueTypes}
+      isLoading={isLoading || isFetching}
       listItems={listItems}
       title={connector.name}
     />
