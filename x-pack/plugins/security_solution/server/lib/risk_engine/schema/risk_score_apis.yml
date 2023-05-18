@@ -17,6 +17,10 @@ paths:
       responses:
         '200':
           description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskScoresResponse'
         '400':
           description: Invalid request
 
@@ -35,7 +39,7 @@ components:
         filter:
           type: array
           items:
-          $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
+            $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
         identifier_type:
           $ref: '#/components/schemas/IdentifierType'
         range:
@@ -60,19 +64,34 @@ components:
             - type: 'global_identifier'
               host: 0.5
               user: 0.1
-
-
-    AfterKey:
+    RiskScoresResponse:
       type: object
-      additionalProperties:
-        type: string
+      required:
+        - scores
+      properties:
+        after_keys:
+          $ref: '#/components/schemas/AfterKeys'
+        debug:
+          type: object
+          properties:
+            request:
+              type: string
+            response:
+              type: string
+        scores:
+          $ref: '#/components/schemas/RiskScore'
+
     AfterKeys:
       type: object
       properties:
         host:
-          $ref: '#/components/schemas/AfterKey'
+          type: object
+          additionalProperties:
+            type: string
         user:
-          $ref: '#/components/schemas/AfterKey'
+          type: object
+          additionalProperties:
+            type: string
       example:
         host:
           'host.name': 'example.host'
@@ -90,6 +109,65 @@ components:
       enum:
         - host
         - user
+    RiskScore:
+      type: object
+      required:
+        - '@timestamp'
+        - identifierField
+        - identifierValue
+        - level
+        - totalScore
+        - totalScoreNormalized
+        - alertsScore
+        - otherScore
+        - riskiestInputs
+      properties:
+        '@timestamp':
+          type: string
+          format: 'date-time'
+          example: '2017-07-21T17:32:28Z'
+        identifierField:
+          type: string
+          example: 'host.name'
+        identifierValue:
+          type: string
+          example: 'example.host'
+        level:
+          type: string
+          example: 'Critical'
+        totalScore:
+          type: number
+          format: double
+        totalScoreNormalized:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        alertsScore:
+          type: number
+          format: double
+        otherScore:
+          type: number
+          format: double
+        riskiestInputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskScoreInput'
+
+    RiskScoreInput:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+        index:
+          type: string
+          example: .internal.alerts-security.alerts-default-000001
+        riskScore:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
     RiskScoreWeight:
       type: object
       required:
