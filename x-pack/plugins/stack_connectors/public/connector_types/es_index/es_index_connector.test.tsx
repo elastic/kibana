@@ -364,6 +364,7 @@ describe('IndexActionConnectorFields', () => {
           config: {
             index: 'test_es_index',
             executionTimeField: '1',
+            refresh: false,
           },
           id: 'test',
           isDeprecated: false,
