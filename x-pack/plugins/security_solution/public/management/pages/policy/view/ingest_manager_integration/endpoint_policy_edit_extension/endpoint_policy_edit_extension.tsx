@@ -13,9 +13,9 @@ import type {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
 } from '@kbn/fleet-plugin/public';
+import { PolicyDetailsForm } from '../../details/components/policy_details_form';
 import { EndpointPolicyArtifactCards } from './components/endpoint_policy_artifact_cards';
 import { getPolicyDetailPath } from '../../../../../common/routing';
-import { PolicyDetailsForm } from '../../policy_details_form';
 import type { AppAction } from '../../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
@@ -131,7 +131,7 @@ const WrappedPolicyDetailsForm = memo<{
         ) : !endpointPolicyDetails ? (
           <EuiLoadingSpinner size="l" className="essentialAnimation" />
         ) : (
-          <PolicyDetailsForm />
+          <PolicyDetailsForm policyDetails={endpointPolicyDetails} />
         )}
       </div>
     </div>

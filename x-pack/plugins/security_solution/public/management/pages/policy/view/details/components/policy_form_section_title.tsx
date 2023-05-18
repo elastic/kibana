@@ -18,7 +18,7 @@ export const PolicyFormSectionTitle = memo<PolicyFormSectionTitleProps>(({ title
     <>
       {
         <EuiTitle size="xs">
-          <h4>{title}</h4>
+          <h5>{title}</h5>
         </EuiTitle>
       }
       {children}
