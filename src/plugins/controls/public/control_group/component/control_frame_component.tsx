@@ -10,16 +10,12 @@ import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiButtonEmpty,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
   EuiLoadingChart,
-  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
 import {
