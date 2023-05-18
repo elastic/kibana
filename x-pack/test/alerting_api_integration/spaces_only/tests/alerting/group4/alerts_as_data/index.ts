@@ -12,5 +12,6 @@ export default function alertsAsDataTests({ loadTestFile }: FtrProviderContext) 
   describe('alerts_as_data', () => {
     loadTestFile(require.resolve('./install_resources'));
     loadTestFile(require.resolve('./alerts_as_data'));
+    loadTestFile(require.resolve('./alerts_as_data_flapping'));
   });
 }
