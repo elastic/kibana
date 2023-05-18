@@ -8,13 +8,10 @@ import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } fr
 import React from 'react';
 import styled from 'styled-components';
 
-import { NavItemBetaBadge } from '../../common/components/navigation/nav_item_beta_badge';
-import {
-  SecuritySolutionLinkAnchor,
-  withSecuritySolutionLink,
-} from '../../common/components/links';
-import type { NavLinkItem } from '../../common/components/navigation/types';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
+import { NavItemBetaBadge } from '../navigation/nav_item_beta_badge';
+import { SecuritySolutionLinkAnchor, withSecuritySolutionLink } from '../links';
+import type { NavLinkItem } from '../navigation/types';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 
 interface LandingLinksImagesProps {
   items: NavLinkItem[];

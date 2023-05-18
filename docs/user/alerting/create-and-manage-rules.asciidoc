@@ -134,6 +134,7 @@ image:images/snooze-panel.png[Snooze notifications for a rule]
 When a rule is in a snoozed state, you can cancel or change the duration of
 this state.
 
+preview:[] To temporarily suppress notifications for _all_ rules, create a <<maintenance-windows,maintenance window>>.
 
 [float]
 [[importing-and-exporting-rules]]

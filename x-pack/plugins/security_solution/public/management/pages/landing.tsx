@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { SecurityPageName } from '../../app/types';
 import { HeaderPage } from '../../common/components/header_page';
@@ -14,8 +15,11 @@ import { useRootNavLink } from '../../common/links/nav_links';
 import type { NavigationLink } from '../../common/links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { LandingLinksIcons } from '../components/landing_links_icons';
-import { MANAGE_PAGE_TITLE } from './translations';
+import { LandingLinksIcons } from '../../common/components/landing_links/landing_links_icons';
+
+const MANAGE_PAGE_TITLE = i18n.translate('xpack.securitySolution.management.landing.pageTitle', {
+  defaultMessage: 'Manage',
+});
 
 export const ManageLandingPage = () => (
   <SecuritySolutionPageWrapper>
