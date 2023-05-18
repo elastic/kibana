@@ -15,11 +15,11 @@ import { useInitNavnode } from '../use_init_navnode';
 function NavigationItemComp(node: NodeProps) {
   const { children, onRemove } = node;
   const { navNode } = useInitNavnode(node);
-  const { title, deepLink } = navNode;
+  const { title, deepLink } = navNode ?? {};
 
   // Note: temporary UI. In future PR we'll have an EUI component here
   const wrapTextWithLink = useCallback(
-    (text: string) =>
+    (text?: string) =>
       deepLink ? (
         <a href={deepLink.href} target="_blank">
           {text}
@@ -54,7 +54,7 @@ function NavigationItemComp(node: NodeProps) {
       </>
     ) : null;
 
-  if (!navNode.isLinkActive) {
+  if (!navNode) {
     return null;
   }
 

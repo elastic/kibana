@@ -31,10 +31,10 @@ export function useNavigationGroup<T extends boolean = true>(
 function NavigationGroupComp(node: NodeProps) {
   const { children, onRemove } = node;
   const { navNode, registerChildNode } = useInitNavnode(node);
-  const { title, deepLink } = navNode;
+  const { title, deepLink } = navNode ?? {};
 
   const wrapTextWithLink = useCallback(
-    (text: string) =>
+    (text?: string) =>
       deepLink ? (
         <a href={deepLink.href} target="_blank">
           {text}
@@ -74,7 +74,7 @@ function NavigationGroupComp(node: NodeProps) {
     };
   }, [registerChildNode]);
 
-  if (!navNode.isLinkActive) {
+  if (!navNode) {
     return null;
   }
 

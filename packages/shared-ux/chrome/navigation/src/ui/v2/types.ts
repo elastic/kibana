@@ -9,13 +9,9 @@
 import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { ReactNode } from 'react';
 
-export interface InternalNavigationNode extends Omit<ChromeProjectNavigationNode, 'id'> {
+export interface InternalNavigationNode extends Omit<ChromeProjectNavigationNode, 'id' | 'link'> {
   id: string;
   title: string;
-  /** Flag to indicate if the deepLink id has been found and we should render the node in the UI */
-  isLinkActive: boolean;
-  /** Current state of the navigation node. "active" means it matches the current URL route */
-  status: 'idle' | 'active';
   deepLink?: ChromeNavLink;
 }
 

@@ -28,9 +28,9 @@ function createInternalNavNode(
   id: string,
   _navNode: NodeProps,
   deepLinks: Readonly<ChromeNavLink[]>
-): InternalNavigationNode {
-  const { children, ...navNode } = _navNode;
-  const deepLink = deepLinks.find((dl) => dl.id === navNode.link);
+): InternalNavigationNode | null {
+  const { children, link, ...navNode } = _navNode;
+  const deepLink = deepLinks.find((dl) => dl.id === link);
 
   let title = navNode.title ?? deepLink?.title;
 
@@ -38,7 +38,7 @@ function createInternalNavNode(
     title = children;
   }
 
-  const isLinkActive = isNodeActive({ link: navNode.link, deepLink });
+  const isLinkActive = isNodeActive({ link, deepLink });
 
   if (!title || title.trim().length === 0) {
     if (isLinkActive) {
@@ -49,13 +49,15 @@ function createInternalNavNode(
     }
   }
 
+  if (!isLinkActive) {
+    return null;
+  }
+
   return {
     ...navNode,
     id,
     title,
     deepLink,
-    isLinkActive,
-    status: 'idle',
   };
 }
 
@@ -108,10 +110,8 @@ export const useInitNavnode = (node: NodeProps) => {
     [node, id, deepLinks]
   );
 
-  const { isLinkActive } = internalNavNode;
-
   const register = useCallback(() => {
-    if (isLinkActive) {
+    if (internalNavNode) {
       const children = Object.values(childrenNodes.current).sort((a, b) => {
         const aOrder = orderChildrenRef.current[a.id];
         const bOrder = orderChildrenRef.current[b.id];
@@ -127,7 +127,7 @@ export const useInitNavnode = (node: NodeProps) => {
       unregisterRef.current = unregister;
       isRegistered.current = true;
     }
-  }, [internalNavNode, registerNodeOnParent, isLinkActive]);
+  }, [internalNavNode, registerNodeOnParent]);
 
   const registerChildNode = useCallback<RegisterFunction>(
     (childNode) => {
@@ -166,12 +166,12 @@ export const useInitNavnode = (node: NodeProps) => {
   }, []);
 
   useEffect(() => {
-    if (isLinkActive) {
+    if (internalNavNode) {
       register();
     } else {
       unregister();
     }
-  }, [isLinkActive, unregister, register]);
+  }, [internalNavNode, unregister, register]);
 
   useEffect(() => unregister, [unregister]);
 
