@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, visualize } = getPageObjects(['visualBuilder', 'visualize']);
+  const { visualBuilder } = getPageObjects(['visualBuilder']);
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -43,10 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
-      await visualBuilder.setTime();
+      await visualBuilder.resetPage();
     });
 
     it('should render from a tsdb dataView regular fields with no issues', async () => {

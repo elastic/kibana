@@ -26,6 +26,7 @@ const DASHBOARD_TOP_OFFSET = 96 + 105; // 96 for Kibana navigation bar + 105 for
 
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
+  private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -221,6 +222,9 @@ export class DashboardPanelActionsService extends FtrService {
       await this.clickContextMenuMoreItem();
     }
     await this.testSubjects.click(UNLINK_FROM_LIBRARY_TEST_SUBJ);
+    await this.testSubjects.waitForDeleted(
+      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+    );
   }
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
@@ -235,6 +239,11 @@ export class DashboardPanelActionsService extends FtrService {
       clearWithKeyboard: true,
     });
     await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+      );
+    });
   }
 
   async expectExistsPanelAction(testSubject: string, title?: string) {

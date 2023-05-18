@@ -27,7 +27,7 @@ import {
   apmEnableContinuousRollups,
   enableCriticalPath,
   enableInfrastructureHostsView,
-  profilingElasticsearchPlugin,
+  syntheticsThrottlingEnabled,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -337,21 +337,32 @@ export const uiSettings: Record<string, UiSettings> = {
     type: 'boolean',
     showInLabs: true,
   },
-  [profilingElasticsearchPlugin]: {
+  [syntheticsThrottlingEnabled]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingElasticsearchPlugin', {
-      defaultMessage: 'Use Elasticsearch profiler plugin',
+    name: i18n.translate('xpack.observability.syntheticsThrottlingEnabledExperimentName', {
+      defaultMessage: 'Enable Synthetics throttling (Experimental)',
     }),
-    description: i18n.translate('xpack.observability.profilingElasticsearchPluginDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Whether to load stacktraces using Elasticsearch profiler plugin.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.syntheticsThrottlingEnabledExperimentDescription',
+      {
+        defaultMessage:
+          'Enable the throttling setting in Synthetics monitor configurations. Note that throttling may still not be available for your monitors even if the setting is active. Intended for internal use only. {link}',
+        values: {
+          link: throttlingDocsLink({
+            href: 'https://github.com/elastic/synthetics/blob/main/docs/throttling.md',
+          }),
+        },
+      }
+    ),
     schema: schema.boolean(),
-    value: true,
     requiresPageReload: true,
-    type: 'boolean',
   },
 };
+
+function throttlingDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
+    'xpack.observability.uiSettings.throttlingDocsLinkText',
+    { defaultMessage: 'read notice here.' }
+  )}</a>`;
+}

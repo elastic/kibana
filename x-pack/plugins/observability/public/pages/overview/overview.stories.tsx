@@ -13,9 +13,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { HasDataContextProvider } from '../../context/has_data_context';
-import { PluginContext } from '../../context/plugin_context';
-import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
+import { PluginContext } from '../../context/plugin_context/plugin_context';
+import { HasDataContextProvider } from '../../context/has_data_context/has_data_context';
+import {
+  registerDataHandler,
+  unregisterDataHandler,
+} from '../../context/has_data_context/data_handler';
 import { OverviewPage } from './overview';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';

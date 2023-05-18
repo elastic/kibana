@@ -29,6 +29,9 @@ disabled:
   - x-pack/test/defend_workflows_cypress/config.ts
   - x-pack/test/defend_workflows_cypress/endpoint_config.ts
   - x-pack/test/defend_workflows_cypress/visual_config.ts
+  - x-pack/plugins/observability_onboarding/e2e/ftr_config_open.ts
+  - x-pack/plugins/observability_onboarding/e2e/ftr_config_runner.ts
+  - x-pack/plugins/observability_onboarding/e2e/ftr_config.ts
   - x-pack/test/osquery_cypress/cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
   - x-pack/test/osquery_cypress/visual_config.ts
@@ -209,7 +212,6 @@ enabled:
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/rule_execution_logic/config.ts
   - x-pack/test/encrypted_saved_objects_api_integration/config.ts
-  - x-pack/test/endpoint_api_integration_no_ingest/config.ts
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
   - x-pack/test/fleet_api_integration/config.agent_policy.ts
