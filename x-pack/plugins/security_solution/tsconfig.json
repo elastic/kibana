@@ -85,6 +85,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/ecs-data-quality-dashboard",
+    "@kbn/elastic-assistant",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",

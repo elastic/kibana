@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HelloWorld } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiButtonIcon,
@@ -148,9 +149,14 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
                 {promptContextId != null && (
-                  <EuiFlexItem grow={false}>
-                    <NewChat promptContextId={promptContextId} />
-                  </EuiFlexItem>
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <HelloWorld />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <NewChat promptContextId={promptContextId} />
+                    </EuiFlexItem>
+                  </>
                 )}
                 {isAlert && alertDetailsLink && (
                   <EuiFlexItem grow={false}>
