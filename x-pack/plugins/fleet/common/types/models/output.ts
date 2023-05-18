@@ -27,12 +27,8 @@ export interface NewOutput {
   } | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
+  allow_edit?: string[];
 }
-
-export type OutputSOAttributes = NewOutput & {
-  output_id?: string;
-  ssl?: string | null; // encrypted ssl field
-};
 
 export type Output = NewOutput & {
   id: string;

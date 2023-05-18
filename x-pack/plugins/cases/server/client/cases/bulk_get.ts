@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { pick, partition } from 'lodash';
+import { partition } from 'lodash';
 
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
 import type {
@@ -19,19 +19,18 @@ import type {
 } from '../../../common/api';
 import {
   CasesBulkGetRequestRt,
-  CasesBulkGetResponseFieldsRt,
   excess,
   throwErrors,
   CasesBulkGetResponseRt,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
-import type { CasesClientArgs, SOWithErrors } from '../types';
+import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { SOWithErrors } from '../../common/types';
 
-type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
-type BulkGetCase = CasesBulkGetResponse['cases'][number];
+type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 
 /**
  * Retrieves multiple cases by ids.
@@ -47,10 +46,6 @@ export const bulkGet = async (
   } = clientArgs;
 
   try {
-    const fields = Object.keys(CasesBulkGetResponseFieldsRt.props).filter(
-      (field) => !['totalComments', 'id', 'version'].includes(field)
-    );
-
     const request = pipe(
       excess(CasesBulkGetRequestRt).decode(params),
       fold(throwErrors(Boom.badRequest), identity)
@@ -58,7 +53,7 @@ export const bulkGet = async (
 
     throwErrorIfCaseIdsReachTheLimit(request.ids);
 
-    const cases = await caseService.getCases({ caseIds: request.ids, fields });
+    const cases = await caseService.getCases({ caseIds: request.ids });
 
     const [validCases, soBulkGetErrors] = partition(
       cases.saved_objects,
@@ -76,20 +71,16 @@ export const bulkGet = async (
     });
 
     const flattenedCases = authorizedCases.map((theCase) => {
-      const { userComments } = commentTotals.get(theCase.id) ?? {
+      const { userComments, alerts } = commentTotals.get(theCase.id) ?? {
         alerts: 0,
         userComments: 0,
       };
 
-      const flattenedCase = flattenCaseSavedObject({
+      return flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
+        totalAlerts: alerts,
       });
-
-      return {
-        ...(pick(flattenedCase, [...fields, 'id', 'version']) as BulkGetCase),
-        totalComments: flattenedCase.totalComment,
-      };
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
