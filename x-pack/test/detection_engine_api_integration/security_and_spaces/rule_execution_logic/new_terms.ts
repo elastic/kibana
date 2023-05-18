@@ -520,7 +520,6 @@ export default ({ getService }: FtrProviderContext) => {
         ruleExecutionDocuments,
       });
 
-      // ensure there are no alerts for single new terms fields, it means values are not new
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         index: ['new_terms'],
