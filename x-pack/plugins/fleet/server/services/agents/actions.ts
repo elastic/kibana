@@ -13,6 +13,7 @@ import { appContextService } from '../app_context';
 import type {
   Agent,
   AgentAction,
+  AgentActionType,
   NewAgentAction,
   FleetServerAgentAction,
 } from '../../../common/types/models';
@@ -30,6 +31,8 @@ import { bulkUpdateAgents } from './crud';
 const ONE_MONTH_IN_MS = 2592000000;
 
 export const NO_EXPIRATION = 'NONE';
+
+const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE']);
 
 export async function createAgentAction(
   esClient: ElasticsearchClient,
@@ -53,6 +56,15 @@ export async function createAgentAction(
     total: newAgentAction.total,
     traceparent: apm.currentTraceparent,
   };
+
+  const messageSigningService = appContextService.getMessageSigningService();
+  if (SIGNED_ACTIONS.has(newAgentAction.type) && messageSigningService) {
+    const signedBody = await messageSigningService.sign(body);
+    body.signed = {
+      data: signedBody.data.toString('base64'),
+      signature: signedBody.signature,
+    };
+  }
 
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,

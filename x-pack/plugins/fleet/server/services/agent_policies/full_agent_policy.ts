@@ -89,6 +89,11 @@ export async function getFullAgentPolicy(
     })
   );
 
+  const inputs = await storedPackagePoliciesToAgentInputs(
+    agentPolicy.package_policies as PackagePolicy[],
+    packageInfoCache,
+    getOutputIdForAgentPolicy(dataOutput)
+  );
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -102,11 +107,7 @@ export async function getFullAgentPolicy(
         return acc;
       }, {}),
     },
-    inputs: await storedPackagePoliciesToAgentInputs(
-      agentPolicy.package_policies as PackagePolicy[],
-      packageInfoCache,
-      getOutputIdForAgentPolicy(dataOutput)
-    ),
+    inputs,
     secret_references: (agentPolicy?.package_policies || []).flatMap(
       (policy) => policy.secret_references || []
     ),
@@ -208,6 +209,12 @@ export async function getFullAgentPolicy(
       agent: {
         protection: fullAgentPolicy.agent.protection,
       },
+      inputs: inputs.map(({ id, name, revision, type }) => ({
+        id,
+        name,
+        revision,
+        type,
+      })),
     };
 
     const { data: signedData, signature } = await messageSigningService.sign(dataToSign);
