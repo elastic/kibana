@@ -28,7 +28,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
-  const { goToStep, goBack, getState } = useWizard();
+  const { goToStep, goBack, getState, CurrentStep } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
@@ -42,6 +42,9 @@ export function InstallElasticAgent() {
   }
 
   const { data: installShipperSetup } = useFetcher((callApi) => {
+    if (CurrentStep !== InstallElasticAgent) {
+      return;
+    }
     return callApi(
       'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
       {

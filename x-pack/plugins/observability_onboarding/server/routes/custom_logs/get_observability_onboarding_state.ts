@@ -18,18 +18,19 @@ export async function getObservabilityOnboardingState({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   apiKeyId: string;
-}): Promise<SavedObservabilityOnboardingState> {
-  const {
-    id,
-    updated_at: updatedAt,
-    attributes,
-  } = await savedObjectsClient.get<ObservabilityOnboardingState>(
-    OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-    apiKeyId
-  );
-  return {
-    id,
-    updatedAt: updatedAt ? Date.parse(updatedAt) : 0,
-    ...attributes,
-  };
+}): Promise<SavedObservabilityOnboardingState | undefined> {
+  try {
+    const result = await savedObjectsClient.get<ObservabilityOnboardingState>(
+      OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+      apiKeyId
+    );
+    const { id, updated_at: updatedAt, attributes } = result;
+    return {
+      id,
+      updatedAt: updatedAt ? Date.parse(updatedAt) : 0,
+      ...attributes,
+    };
+  } catch (error) {
+    return undefined;
+  }
 }

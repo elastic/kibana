@@ -172,8 +172,9 @@ export function createWizardContext<
   }
 
   function useWizard() {
-    const { CurrentStep: _, ...rest } = useContext(context);
-    return rest;
+    // const { CurrentStep: _, ...rest } = useContext(context);
+    // return rest;
+    return useContext(context);
   }
 
   return { context, Provider, Step, useWizard };

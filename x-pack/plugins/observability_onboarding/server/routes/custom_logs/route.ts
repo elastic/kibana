@@ -15,8 +15,10 @@ import { saveObservabilityOnboardingState } from './save_observability_onboardin
 import {
   ObservabilityOnboardingState,
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+  SavedObservabilityOnboardingState,
 } from '../../saved_objects/observability_onboarding_status';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
+import { findLatestObservabilityOnboardingState } from './find_latest_observability_onboarding_state';
 
 const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint:
@@ -108,7 +110,10 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         typeof authorization === 'string' && authorization.startsWith('ApiKey ')
       )
     ) {
-      return {};
+      return {
+        message:
+          'Unable to report setup progress without ApiKey in authorization header.',
+      };
     }
     const apiKeyEncoded = authorization.split(' ')[1];
     const [apiKeyId] = Buffer.from(apiKeyEncoded, 'base64')
@@ -118,18 +123,32 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
 
-    const { state } = await getObservabilityOnboardingState({
-      savedObjectsClient,
-      apiKeyId,
-    });
+    const savedObservabilityOnboardingState =
+      await getObservabilityOnboardingState({
+        savedObjectsClient,
+        apiKeyId,
+      });
 
+    if (!savedObservabilityOnboardingState) {
+      return {
+        message:
+          'Unable to report setup progress - onboarding session not found.',
+      };
+    }
+
+    const { id, updatedAt, ...observabilityOnboardingState } =
+      savedObservabilityOnboardingState;
     await saveObservabilityOnboardingState({
       savedObjectsClient,
       apiKeyId,
       observabilityOnboardingState: {
+        ...observabilityOnboardingState,
         state: {
-          ...state,
-          progress: { ...state.progress, [name]: status },
+          ...observabilityOnboardingState.state,
+          progress: {
+            ...observabilityOnboardingState.state.progress,
+            [name]: status,
+          },
         },
       },
     });
@@ -145,7 +164,9 @@ const getStateRoute = createObservabilityOnboardingServerRoute({
       apiKeyId: t.string,
     }),
   }),
-  async handler(resources): Promise<object> {
+  async handler(resources): Promise<{
+    savedObservabilityOnboardingState: SavedObservabilityOnboardingState | null;
+  }> {
     const {
       params: {
         query: { apiKeyId },
@@ -155,11 +176,29 @@ const getStateRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
-    const { state } = await getObservabilityOnboardingState({
-      savedObjectsClient,
-      apiKeyId,
-    });
-    return { state };
+    const savedObservabilityOnboardingState =
+      (await getObservabilityOnboardingState({
+        savedObjectsClient,
+        apiKeyId,
+      })) || null;
+    return { savedObservabilityOnboardingState };
+  },
+});
+
+const getLatestStateRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /api/observability_onboarding/custom_logs/state/latest',
+  options: { tags: [] },
+  async handler(resources): Promise<{
+    savedObservabilityOnboardingState: SavedObservabilityOnboardingState | null;
+  }> {
+    const { core } = resources;
+    const coreStart = await core.start();
+    const savedObjectsClient =
+      coreStart.savedObjects.createInternalRepository();
+    const savedObservabilityOnboardingState =
+      (await findLatestObservabilityOnboardingState({ savedObjectsClient })) ||
+      null;
+    return { savedObservabilityOnboardingState };
   },
 });
 
@@ -175,10 +214,10 @@ const cleanStateRoute = createObservabilityOnboardingServerRoute({
       await savedObjectsClient.find<ObservabilityOnboardingState>({
         type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
       });
-    const buldDeleteResult = await savedObjectsClient.bulkDelete(
+    const bulkDeleteResult = await savedObjectsClient.bulkDelete(
       findStatesResult.saved_objects
     );
-    return { buldDeleteResult };
+    return { bulkDeleteResult: bulkDeleteResult };
   },
 });
 
@@ -186,5 +225,6 @@ export const customLogsRouteRepository = {
   ...createApiKeyRoute,
   ...stepProgressUpdateRoute,
   ...getStateRoute,
+  ...getLatestStateRoute,
   ...cleanStateRoute,
 };
