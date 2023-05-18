@@ -6,9 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { lastValueFrom, of } from 'rxjs';
-
-import { mergeMap } from 'rxjs/operators';
+import { lastValueFrom } from 'rxjs';
 
 import { compact, map } from 'lodash';
 import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
@@ -75,7 +73,9 @@ interface GetAutomatedActionResponseListOptions {
 type GetAutomatedActionResponseListResponse = Pick<
   ActionDetails,
   'completedAt' | 'isExpired' | 'wasSuccessful' | 'isCompleted' | 'status'
->;
+> & {
+  action_id: string;
+};
 
 export const useGetAutomatedActionResponseList = (
   query: EndpointAutomatedActionResponseRequestQuery,
@@ -88,65 +88,32 @@ export const useGetAutomatedActionResponseList = (
     queryKey: ['allResponsesResults', { actionId }],
     queryFn: async (): Promise<GetAutomatedActionResponseListResponse> => {
       const responseData = await lastValueFrom(
-        data.search
-          .search<ActionResponsesRequestOptions, ActionResponsesRequestStrategyResponse>(
-            {
-              actionId,
-              expiration,
-              sort: {
-                direction: Direction.desc,
-                field: '@timestamp',
-              },
-              factoryQueryType: ResponseActionsQueries.results,
+        data.search.search<ActionResponsesRequestOptions, ActionResponsesRequestStrategyResponse>(
+          {
+            actionId,
+            expiration,
+            sort: {
+              direction: Direction.desc,
+              field: '@timestamp',
             },
-            {
-              strategy: 'securitySolutionSearchStrategy',
-            }
-          )
-          .pipe(
-            mergeMap((val) => {
-              const responded =
-                val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-
-              // We should get just one agent id, but just in case we get more than one, we'll use the length
-              const agents = Array.isArray(agent.id) ? agent.id : [agent.id];
-              const agentsWithPendingActions = agents.length - responded;
-              const isExpired = !expiration ? true : new Date(expiration) < new Date();
-              const isCompleted = isExpired || agentsWithPendingActions <= 0;
-
-              const aggsBuckets =
-                val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
-              const successful =
-                aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
-
-              return of({
-                items: val.rawResponse.hits.hits,
-                action_id: actionId,
-                isCompleted,
-                wasSuccessful: responded === successful,
-                isExpired,
-              });
-            })
-          )
+            agents: (Array.isArray(agent.id) ? agent.id : [agent.id]).length,
+            factoryQueryType: ResponseActionsQueries.results,
+          },
+          {
+            strategy: 'securitySolutionSearchStrategy',
+          }
+        )
       );
 
-      const action = responseData.items[0]?._source;
-
-      // TODO use getActionsStatus() - this requires a refactor of the function to accept isExpired
-      const status = responseData.isExpired
-        ? 'failed'
-        : responseData?.isCompleted
-        ? responseData.wasSuccessful
-          ? 'successful'
-          : 'failed'
-        : 'pending';
+      const action = responseData.edges[0]?._source;
 
       return {
+        action_id: actionId,
         completedAt: action?.EndpointActions.completed_at,
         isExpired: responseData.isExpired,
         wasSuccessful: responseData.wasSuccessful,
         isCompleted: responseData.isCompleted,
-        status,
+        status: responseData.status,
       };
     },
     select: (response) => combineResponse(requestAction, response),

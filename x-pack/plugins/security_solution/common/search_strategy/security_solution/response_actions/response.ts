@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsEndpointActionResponse } from '../../../endpoint/types';
 import type { Direction, Inspect, Maybe, RequestBasicOptions } from './types';
 
-export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
+export type ResultEdges<T = unknown> = estypes.SearchResponse<T>['hits']['hits'];
 
 export interface ActionResponsesRequestOptions extends RequestBasicOptions {
   expiration: string;
@@ -19,9 +19,19 @@ export interface ActionResponsesRequestOptions extends RequestBasicOptions {
     direction: Direction;
     field: string;
   };
+  agents: number;
 }
 
 export interface ActionResponsesRequestStrategyResponse
+  extends ActionResponsesRequestStrategyParseResponse {
+  isCompleted: boolean;
+  wasSuccessful: boolean;
+  isExpired: boolean;
+  status: 'successful' | 'failed' | 'pending';
+  edges: ResultEdges<LogsEndpointActionResponse>;
+}
+
+export interface ActionResponsesRequestStrategyParseResponse
   extends IKibanaSearchResponse<
     estypes.SearchResponse<
       LogsEndpointActionResponse,
@@ -40,6 +50,5 @@ export interface ActionResponsesRequestStrategyResponse
       }
     >
   > {
-  edges: ResultEdges;
   inspect?: Maybe<Inspect>;
 }

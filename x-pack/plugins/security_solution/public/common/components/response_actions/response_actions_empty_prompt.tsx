@@ -32,7 +32,7 @@ export const ResponseActionsEmptyPrompt = ({ type }: ResponseActionsEmptyPromptP
       titleSize="xs"
       body={
         <FormattedMessage
-          id="xpack.securitySolution.osquery.results.missingPrivileges"
+          id="xpack.securitySolution.responseActions.results.missingPrivileges"
           defaultMessage="To access these results, ask your administrator for {integration} Kibana
               privileges."
           values={{
