@@ -13603,7 +13603,11 @@
               },
               {
                 "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/common/mocks/mock_security_context.tsx"
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -21209,7 +21213,11 @@
               },
               {
                 "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/common/mocks/mock_security_context.tsx"
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
               },
               {
                 "plugin": "securitySolution",

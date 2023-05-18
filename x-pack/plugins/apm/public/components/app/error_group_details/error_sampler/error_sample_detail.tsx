@@ -12,9 +12,9 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiLoadingContent,
   EuiPagination,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -252,7 +252,7 @@ export function ErrorSampleDetails({
       {isLoading ? (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
-          <EuiLoadingContent lines={2} data-test-sub="loading-content" />
+          <EuiSkeletonText lines={2} data-test-sub="loading-content" />
         </EuiFlexItem>
       ) : (
         <Summary
@@ -334,7 +334,7 @@ export function ErrorSampleDetails({
       {isLoading ? (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
-          <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+          <EuiSkeletonText lines={3} data-test-sub="loading-content" />
         </EuiFlexItem>
       ) : (
         <SampleSummary error={error} />
@@ -363,7 +363,7 @@ export function ErrorSampleDetails({
       </EuiTabs>
       <EuiSpacer />
       {isLoading || !error ? (
-        <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+        <EuiSkeletonText lines={3} data-test-sub="loading-content" />
       ) : (
         <TabContent error={error} currentTab={currentTab} />
       )}

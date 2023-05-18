@@ -6,10 +6,7 @@
  */
 
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import {
-  EnterpriseSearchPublicSetup,
-  EnterpriseSearchPublicStart,
-} from '@kbn/enterprise-search-plugin/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -18,11 +15,11 @@ export interface ServerlessSearchPluginSetup {}
 export interface ServerlessSearchPluginStart {}
 
 export interface ServerlessSearchPluginSetupDependencies {
-  enterpriseSearch: EnterpriseSearchPublicSetup;
   management: ManagementSetup;
+  serverless: ServerlessPluginSetup;
 }
 
 export interface ServerlessSearchPluginStartDependencies {
-  enterpriseSearch: EnterpriseSearchPublicStart;
   management: ManagementStart;
+  serverless: ServerlessPluginStart;
 }
