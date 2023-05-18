@@ -217,7 +217,7 @@ const cleanStateRoute = createObservabilityOnboardingServerRoute({
     const bulkDeleteResult = await savedObjectsClient.bulkDelete(
       findStatesResult.saved_objects
     );
-    return { bulkDeleteResult: bulkDeleteResult };
+    return { bulkDeleteResult };
   },
 });
 
