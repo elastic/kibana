@@ -16,7 +16,7 @@ export const findDataStreamsResponseRT = rt.type({
 export const findDataStreamsRequestQueryRT = rt.exact(
   rt.partial({
     datasetQuery: rt.string,
-    type: rt.literal('log'),
+    type: rt.literal('logs'),
     sortOrder: sortOrderRT,
     uncategorisedOnly: rt.boolean,
   })

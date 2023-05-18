@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export class ImmutableCache<KeyType, ValueType> {
+export interface IImmutableCache<KeyType, ValueType> {
+  get(key: KeyType): ValueType | undefined;
+  set(key: KeyType, value: ValueType): ImmutableCache<KeyType, ValueType>;
+  has(key: KeyType): boolean;
+  clear(): ImmutableCache<KeyType, ValueType>;
+}
+
+export class ImmutableCache<KeyType, ValueType> implements IImmutableCache<KeyType, ValueType> {
   private cache: Record<string, ValueType>;
 
   constructor(cache?: Record<string, ValueType>) {
@@ -25,6 +32,10 @@ export class ImmutableCache<KeyType, ValueType> {
   public has(key: KeyType): boolean {
     const serializedKey = this.serialize(key);
     return Boolean(this.cache[serializedKey]);
+  }
+
+  public clear(): ImmutableCache<KeyType, ValueType> {
+    return new ImmutableCache();
   }
 
   private serialize(key: KeyType): string {

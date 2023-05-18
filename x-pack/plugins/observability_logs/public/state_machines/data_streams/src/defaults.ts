@@ -6,11 +6,11 @@
  */
 
 import { ImmutableCache } from '../../../../common/immutable_cache';
-import { DefaultIntegrationsContext } from './types';
+import { DefaultDataStreamsContext } from './types';
 
-export const DEFAULT_CONTEXT: DefaultIntegrationsContext = {
+export const DEFAULT_CONTEXT: DefaultDataStreamsContext = {
   cache: new ImmutableCache(),
-  integrations: null,
+  dataStreams: null,
   error: null,
   search: {
     sortOrder: 'asc',

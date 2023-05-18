@@ -6,7 +6,7 @@
  */
 
 import { catchError, from, map, of } from 'rxjs';
-import { actions, assign, createMachine } from 'xstate';
+import { assign, createMachine } from 'xstate';
 import { IDataStreamsClient } from '../../../services/data_streams';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -19,7 +19,7 @@ import {
 export const createPureIntegrationsStateMachine = (
   initialContext: DefaultIntegrationsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAJk4BmMgoCcnWQA4FGjQDYFAdlkKANCACeiALTTlGzmumcD6gCwrdK2QF9vZtJg4+MSkZPREuBA0UKwAMgDyAIIAIsgAcgDiAPoAygCqAMIFAKLFyWVcvEgggsKiqOJSCFq2rm0ArO0aTrrtutIaZpYI0gpK0r0qLpycurKunNIGvv4YWHj15OGR0XFJqZlZAGKJyLEVPOK1IiGNMqoGZANtstJLTm+DFjIqSs6u8iMujmLk6KxAAXWwRIWwiUVQUAAskRsGA9il0tl8kVSuVkpUrkIbmJqk15rIyLIPO43px2gpXEZTN8EAo6WR9ANOAtXL1ehpwZCgpswnDosjUeiDtkTmcLlUBET6ncEFYDLYPCp2rMnPT9K52kNELz2hzRpNfvIVK5pO1BWthSFyAQIPQ0QkUllEfEAErFLLpAAqxQyPsSgeQ8TSOQJ1WuytJiE0tk5C1kBgU7Q8+iNCBtrkpDi8ahN-PtgQ2TrILrdrByxUSPoKAAkA2lg6Hw5Ho7HFXVbomEMmOQppGmM1ngczhozdGQXCpi9y+V1y1CRQBjAAWYA3AGtxSiwELKzDEgA3XAEei4ABG15E5g4lzjSoHoCaVi18-ktqmugWMYjFzN4506Bx2lGeZdFmNo10dGEyG3XcDwRCVjwdU9SAvK8b3vRh0CfdhpAVGo3xJD9EF6SlXA0LN1EzbNNFzeQCxgtoYKpFcDDtPwIUw6FQggMBbyIKgN2iHIwFwbBtzrBsm1bIMQzDCMoxjF8+2JBpBysJQxlkXQDA8bpFi0OZp2saRvw8AxugGKZtXceCsPIYTRPEyTpNkrdWAkWB0HwMAyFwAAzTBsAACm1TgAEpWBPQS3JEsTUAkhEpJk7dezI-sKMkKj2gLbV5mpOjs0s1VfjIRRDEXV52iMLoVBcpLRR2BEjlwtg-Q9ZI2w7VTuw00j43fAqRm0WwDH6QwJg0WR5A0VwQLHZQZi1KDeVg1xfD41AiGE+BqkSzZCTynTKNVMclCMRYsxmwDDFkXMrE0JReQMOyGtkRqtGWPjTqrKgaBuBhmEgc7tJVN4jCeOzfgBUYjBm165FsTMDF5eRZiLFRpFakVtnhKAoYTK63nkJ46TkGaFH0IwvmGDwau1KZVEZTMGsJqticPVEyfGz9qptIqjEMp7gJZKl9IURbsbUIzFh5xCazAQX8uF007r-R7aql4Y+hTc0s0tBwARV0JkP3fmMIrJKcOvO8H0IjXLomiZOGUKZ1C+xjgWYlkFjIWjGT1BbzYGS3ko8tKvKyrc3ZVentfaUqAPKqc0f0MhtS5nijLULofEBgSibFTruogJPBwmOXKVmgCOlojwQJmMg6Icew5mx7oS98IA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogBMARgDsnMgFZpAZjWc1ADgCcANm0AWbQBoQAT0TbpKzvenSjy-WqP79RgL5fzaTDj4xKRk9ES4EDRQrAAyAPIAggAiyAByAOIA+gDKAKoAwvkAokVJpVy8SCCCwqKo4lIIcooq6po6BsZmloj68rpk0pzGw-JjsspGsj5+GFh4deRhEVGxiSkZmQBiCcgx5TziNSLBDTJysmTyepyyRpz9ym7mVk32g0a6X7pu+rra+jkMxA-nmQRIS3CkVQUAAskRsGA1sk0lk8oUSmUkhUjkITmIqo1ZJpLronnc5GoFNIXr1tGpBsp7PI3LpZB5-sDQYFFqEoVF4YjkRssjs9gdKgI8XUzghtDYyEZnGppLonK4NPJaQh5J8yJwDEY1E96U5+ly5jzgpCImx4slMrC4gAlIqZNIAFSK6WdCQ9yDiqWyOKqxxlhMQxNuZDJVKMlOp2qVl3kTNugKe0nkHnkFoCC2tfNtEFY2SKCWd+QAEu7Ul6fX6A0GQ1LaqcIwh2T8yHdjJoyfp08ptcoAWQdNpRopZACXHmwbyAMYACzAi4A1gKEWBuQWIQkAG64Aj0XAAIxPIgsHEOoel7dAjWM+hU2mUP2U2cHo-02sUDINTx5GkU01HkO55ytCEyBXNdNxhQUd0tPdSEPY9TwvRh0GvdhZElap7wJR9rHcV932NL9OB-EdPCuNM1TkQEqX0SCUPICAwDPIgqEXKJsjAXBsBXUty0rGtPW9X1-UDYNb1bfF6g7WQfkuekf11aRPBVEcHjIeVJ20cC9EBGdWPBEIOK4ni+IEoTl1YCRYHQfAwDIXAADNMGwAAKNMAEpWF3cz2M47jUF4mF+MElcWwItsiMkGQFCUVQNC0YyuhHQy9PlB49BVTS3zM3llmhKAtnQthXXtJJa3rKSm1k-CwwfRKmiVOixjZT5dCoplfx6BBeoZN9dBMZMqPy4rC1KqIKpPO11kdF03QkhtpObOS4oU2UnCMTr+juL4+s4AbXhcJR7HsJVDLNDRpug2aYXm+g2DLCtqzqyTGxk2KWoSxo9oO7rjuUfrtRVS4rs4LMDH0GcsxY4FUCIDj4CqILFlxeLFOIhAAFozsQfHlBjb53xzPQWU-ZQHpCKgaBOBhmEgbGdo7IYDSuU7TQ8e5wO1bRLjTW5ZCo-41TUJHZnzYKizKtnwzxpwQJUQcs1kM12S1Qa31J8X7njcCjGzNQ6ZtMrEMV1qiQeJQWSNTwxfZdwiZ1MWe36XU7bcVNpl8EFkLl0rWbvHHZQmYwyD+J4ph0Th43pP8nH1SYxgT3R+mMaRzZg1cNy3RFMetNCT3PS9sOtgHEGUBRFW+XrdTGVxh0Gi67HsN8hmcbNc8ssKIqgKK7Kr3G2uUpk9LUTPhhuH4qJohkJ1OsDXEnMbc6e8rKogUfZXjEcwP1K74c0-Ra6+HwfCAA */
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
       context: initialContext,
@@ -34,18 +34,16 @@ export const createPureIntegrationsStateMachine = (
           },
         },
         loading: {
-          entry: 'notifyLoadingStarted',
           invoke: {
             src: 'loadIntegrations',
           },
           on: {
             LOADING_SUCCEEDED: {
-              target: 'idle',
-              actions: ['storeSearch', 'storeIntegrations', 'storeInCache'],
+              target: 'loaded',
+              actions: ['storeInCache', 'storeIntegrations', 'storeSearch'],
             },
             LOADING_FAILED: {
               target: 'loadingFailed',
-              actions: 'storeError',
             },
           },
         },
@@ -55,22 +53,19 @@ export const createPureIntegrationsStateMachine = (
           },
           on: {
             LOADING_SUCCEEDED: {
-              target: 'idle',
-              actions: 'appendIntegrations',
+              target: 'loaded',
+              actions: ['storeInCache', 'appendIntegrations', 'storeSearch'],
             },
             LOADING_FAILED: {
               target: 'loadingFailed',
-              actions: 'storeError',
             },
           },
         },
-        idle: {
-          entry: 'notifyLoadingSucceeded',
+        loaded: {
           on: {
             LOAD_MORE_INTEGRATIONS: 'checkingMoreIntegrationsAvailability',
             SEARCH_INTEGRATIONS: {
               target: 'debouncingSearch',
-              actions: 'storeSearch',
             },
           },
         },
@@ -81,15 +76,15 @@ export const createPureIntegrationsStateMachine = (
               target: 'loadingMore',
             },
             {
-              target: 'idle',
+              target: 'loaded',
             },
           ],
         },
         debouncingSearch: {
+          entry: 'storeSearch',
           on: {
             SEARCH_INTEGRATIONS: {
               target: 'debouncingSearch',
-              actions: 'storeSearch',
             },
           },
           after: {
@@ -99,20 +94,18 @@ export const createPureIntegrationsStateMachine = (
           },
         },
         loadingFailed: {
-          entry: 'notifyLoadingFailed',
+          entry: ['clearCache', 'storeError'],
+          exit: 'clearError',
           on: {
-            RELOAD_INTEGRATIONS: {
-              target: 'loading',
-            },
+            LOAD_MORE_INTEGRATIONS: 'checkingMoreIntegrationsAvailability',
+            RELOAD_INTEGRATIONS: 'loading',
+            SEARCH_INTEGRATIONS: 'debouncingSearch',
           },
         },
       },
     },
     {
       actions: {
-        notifyLoadingStarted: actions.pure(() => undefined),
-        notifyLoadingSucceeded: actions.pure(() => undefined),
-        notifyLoadingFailed: actions.pure(() => undefined),
         storeSearch: assign((context, event) => ({
           // Store search from search event
           ...('search' in event && { search: event.search }),
@@ -139,6 +132,13 @@ export const createPureIntegrationsStateMachine = (
             cache: context.cache.set(context.search, event.data),
           };
         }),
+        clearCache: assign((context, event) => {
+          if (event.type !== 'LOADING_FAILED') return {};
+
+          return {
+            cache: context.cache.clear(),
+          };
+        }),
         appendIntegrations: assign((context, event) =>
           'data' in event
             ? {
@@ -154,6 +154,7 @@ export const createPureIntegrationsStateMachine = (
               }
             : {}
         ),
+        clearError: assign((_context) => ({ error: null })),
       },
       guards: {
         hasMoreIntegrations: (context) => Boolean(context.search.searchAfter),
@@ -171,7 +172,6 @@ export const createIntegrationStateMachine = ({
   dataStreamsClient,
 }: IntegrationsStateMachineDependencies) =>
   createPureIntegrationsStateMachine(initialContext).withConfig({
-    actions: {},
     services: {
       loadIntegrations: (context, event) => {
         const searchParams =

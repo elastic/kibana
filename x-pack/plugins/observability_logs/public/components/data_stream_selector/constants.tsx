@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export const POPOVER_ID = 'data-stream-selector-popover';
 export const INTEGRATION_PANEL_ID = 'integrations_panel';
@@ -33,6 +36,30 @@ export const uncategorizedLabel = i18n.translate(
 export const sortOrdersLabel = i18n.translate(
   'xpack.observabilityLogs.dataStreamSelector.sortOrders',
   { defaultMessage: 'Sort directions' }
+);
+
+export const noDataStreamsLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.noDataStreams',
+  { defaultMessage: 'No data streams found' }
+);
+
+export const noDataStreamsDescriptionLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.noDataStreamsDescription',
+  {
+    defaultMessage:
+      "Looks like you don't have data stream or your search does not match any of them.",
+  }
+);
+
+export const errorLabel = i18n.translate('xpack.observabilityLogs.dataStreamSelector.error', {
+  defaultMessage: 'error',
+});
+
+export const noDataStreamsRetryLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.noDataStreamsRetry',
+  {
+    defaultMessage: 'Retry',
+  }
 );
 
 export const sortOptions = [

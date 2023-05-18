@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ImmutableCache } from '../../../../common/immutable_cache';
+import type { IImmutableCache } from '../../../../common/immutable_cache';
 import { FindIntegrationsResponse, FindIntegrationsRequestQuery } from '../../../../common/latest';
 import { Integration } from '../../../../common/data_streams';
 
 export interface DefaultIntegrationsContext {
-  cache: ImmutableCache<FindIntegrationsRequestQuery, FindIntegrationsResponse>;
+  cache: IImmutableCache<FindIntegrationsRequestQuery, FindIntegrationsResponse>;
   integrations: Integration[] | null;
   error: Error | null;
   search: FindIntegrationsRequestQuery;
@@ -17,7 +17,7 @@ export interface DefaultIntegrationsContext {
 }
 
 export interface IntegrationsSearchParams {
-  name?: string;
+  nameQuery?: string;
   sortOrder?: 'asc' | 'desc';
 }
 
