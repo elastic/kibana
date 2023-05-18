@@ -41,7 +41,7 @@ import type {
   CallExpression,
 } from '@babel/types';
 // import pRetry from 'p-retry';
-// import { renderSummaryTable } from './print_run';
+import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../common/localhost_services';
 
 export const cli = () => {
@@ -104,7 +104,7 @@ export const cli = () => {
 
       const parseTestFileConfig = (
         filePath: string
-      ): Array<Record<string, string | number>> | undefined => {
+      ): Record<string, string | number | Record<string, string | number>> | undefined => {
         const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
 
         const ast = parser.parse(testFile, {
@@ -116,31 +116,49 @@ export const cli = () => {
           | ExpressionStatement
           | undefined;
 
-        const callExpression = expressionStatement?.expression as CallExpression | undefined;
+        const callExpression = expressionStatement?.expression;
 
-        if (callExpression?.arguments.length === 3) {
+        if (expressionStatement?.expression?.arguments?.length === 3) {
           const callExpressionArguments = _.find(callExpression?.arguments, [
             'type',
             'ObjectExpression',
           ]) as ObjectExpression | undefined;
 
-          const callExpressionProperties = callExpressionArguments?.properties as
-            | ObjectProperty[]
-            | undefined;
+          const callExpressionProperties = _.find(callExpressionArguments?.properties, [
+            'key.name',
+            'env',
+          ]) as ObjectProperty[] | undefined;
+
+          const ftrConfig = _.find(callExpressionProperties?.value?.properties, [
+            'key.name',
+            'ftrConfig',
+          ]);
+
+          if (!ftrConfig) {
+            return {};
+          }
 
           const configValues = _.reduce(
-            callExpressionProperties,
-            (acc: Array<{ [key: string]: string | number }>, property) => {
+            ftrConfig.value.properties,
+            (acc: Record<string, string | number | Record<string, string>>, property) => {
               const key = (property.key as Identifier).name;
-              const value = (property.value as NumericLiteral | StringLiteral).value;
+              let value;
+              if (property.value.type === 'ArrayExpression') {
+                value = _.map(property.value.elements, (element) => {
+                  if (element.type === 'StringLiteral') {
+                    return element.value as string;
+                  }
+                  return element.value as string;
+                });
+              }
               if (key && value) {
-                acc.push({ [key]: value });
+                acc[key] = value;
               }
               return acc;
             },
-            []
+            {}
           );
-          return configValues.length ? configValues : undefined;
+          return configValues;
         }
         return undefined;
       };
@@ -192,18 +210,9 @@ export const cli = () => {
                     `--server.port=${kibanaPort}`,
                     `--elasticsearch.hosts=http://localhost:${esPort}`,
                   ],
-                  env: {
-                    cypress: {
-                      env: {
-                        CYPRESS_SPEC_PATTERN: `**/${filePath}`,
-                      },
-                    },
-                  },
                 },
               },
               (vars) => {
-                console.error('vars', vars);
-
                 const hasFleetServerArgs = _.some(
                   vars.kbnTestServer.serverArgs,
                   (value) =>
@@ -220,6 +229,23 @@ export const cli = () => {
                       value.includes('--xpack.fleet.agents.elasticsearch.host')
                     )
                 );
+
+                if (
+                  configFromTestFile?.enableExperimental?.length &&
+                  _.some(vars.kbnTestServer.serverArgs, (value) =>
+                    value.includes('--xpack.securitySolution.enableExperimental')
+                  )
+                ) {
+                  vars.kbnTestServer.serverArgs = _.filter(
+                    vars.kbnTestServer.serverArgs,
+                    (value) => !value.includes('--xpack.securitySolution.enableExperimental')
+                  );
+                  vars.kbnTestServer.serverArgs.push(
+                    `--xpack.securitySolution.enableExperimental=${JSON.stringify(
+                      configFromTestFile?.enableExperimental
+                    )}`
+                  );
+                }
 
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
@@ -352,16 +378,26 @@ export const cli = () => {
             //   wait: true,
             // });
 
-            console.error('cofn', argv);
+            // await cypress.open({
+            //   configFile: require.resolve(`../../../${argv.configFile}`),
+            //   config: {
+            //     e2e: {
+            //       baseUrl: `http://localhost:${kibanaPort}`,
+            //     },
+            //   },
+            //   env: customEnv,
+            //   // ...commonCypressConfig,
+            // });
 
             try {
               result = await cypress.run({
                 browser: 'chrome',
                 spec: filePath,
-                // env: customEnv,
-                configFile: './cypress/cypress.config.ts',
+                configFile: argv.configFile,
                 config: {
-                  baseUrl: `http://localhost:${kibanaPort}`,
+                  e2e: {
+                    baseUrl: `http://localhost:${kibanaPort}`,
+                  },
                   numTestsKeptInMemory: 0,
                   env: customEnv,
                 },
@@ -418,10 +454,10 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: 1 }
+        { concurrency: 3 }
       ).then((results) => {
-        console.error('results', results);
-        // renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
+        // console.error('results', results);
+        renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         // process.exit(_.some(results, (result) => result > 0) ? 1 : 0);
       });
     },

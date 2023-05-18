@@ -66,11 +66,9 @@ const deleteCase = () => {
   cy.get(CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON).should('be.visible').click();
 };
 
-// Skipping these for now as the feature is protected behind a feature flag set to false by default
-// To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip(
+describe(
   'Alert details expandable flyout right panel footer',
-  { testIsolation: false },
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     before(() => {
       cleanKibana();
