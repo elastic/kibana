@@ -9,7 +9,7 @@
 import { join } from 'path';
 import { accessSync, constants } from 'fs';
 import { getConfigPath, getDataPath, getConfigDirectory, buildDataPaths } from '.';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { REPO_ROOT } from '../repo_root';
 
 expect.addSnapshotSerializer(
   ((rootPath: string = REPO_ROOT, replacement = '<absolute path>') => {

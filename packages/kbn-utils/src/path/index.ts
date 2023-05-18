@@ -9,9 +9,9 @@
 import { join } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigFromFiles } from '@kbn/config';
 import getopts from 'getopts';
+import { REPO_ROOT } from '../repo_root';
 
 const isString = (v: any): v is string => typeof v === 'string';
 
@@ -31,7 +31,6 @@ const CONFIG_DIRECTORIES = [
   join(REPO_ROOT, 'config'),
   '/etc/kibana',
 ].filter(isString);
-
 
 function findFile(paths: string[]) {
   const availablePath = paths.find((configPath) => {
