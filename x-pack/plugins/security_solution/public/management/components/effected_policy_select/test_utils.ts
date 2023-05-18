@@ -55,8 +55,8 @@ export const forceHTMLElementOffsetWidth = (width: number = 100): (() => void) =
  */
 export const clickOnEffectedPolicy = async (
   renderResult: ReturnType<AppContextTestRender['render']>,
-  atIndex: number = 0,
-  effectedPoliciesPrefix: string
+  effectedPoliciesPrefix: string,
+  atIndex: number = 0
 ): Promise<Element> => {
   const policiesHolderElement = await renderResult.findByTestId(
     `${effectedPoliciesPrefix}-effectedPolicies-policiesSelectable`
@@ -78,8 +78,8 @@ export const clickOnEffectedPolicy = async (
  */
 export const isEffectedPolicySelected = async (
   renderResult: ReturnType<AppContextTestRender['render']>,
-  atIndex: number = 0,
-  effectedPoliciesPrefix: string
+  effectedPoliciesPrefix: string,
+  atIndex: number = 0
 ): Promise<boolean> => {
   const policiesHolderElement = await renderResult.findByTestId(
     `${effectedPoliciesPrefix}-effectedPolicies-policiesSelectable`

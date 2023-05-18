@@ -147,21 +147,17 @@ describe('When on the host isolation exceptions entry form', () => {
 
     it('should show policy as selected when user clicks on it', async () => {
       userEvent.click(renderResult.getByTestId('perPolicy'));
-      await clickOnEffectedPolicy(renderResult, undefined, testIdPrefix);
+      await clickOnEffectedPolicy(renderResult, testIdPrefix);
 
-      await expect(isEffectedPolicySelected(renderResult, undefined, testIdPrefix)).resolves.toBe(
-        true
-      );
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
     });
 
     it('should retain the previous policy selection when switching from per-policy to global', async () => {
       // move to per-policy and select the first
       userEvent.click(renderResult.getByTestId('perPolicy'));
-      await clickOnEffectedPolicy(renderResult, undefined, testIdPrefix);
+      await clickOnEffectedPolicy(renderResult, testIdPrefix);
 
-      await expect(isEffectedPolicySelected(renderResult, undefined, testIdPrefix)).resolves.toBe(
-        true
-      );
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
 
       // move back to global
       userEvent.click(renderResult.getByTestId('globalPolicy'));
@@ -172,9 +168,7 @@ describe('When on the host isolation exceptions entry form', () => {
 
       // move back to per-policy
       userEvent.click(renderResult.getByTestId('perPolicy'));
-      await expect(isEffectedPolicySelected(renderResult, undefined, testIdPrefix)).resolves.toBe(
-        true
-      );
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
     });
   });
 
@@ -266,8 +260,8 @@ describe('When on the host isolation exceptions entry form', () => {
 
       await render();
 
-      await expect(isEffectedPolicySelected(renderResult, 0, testIdPrefix)).resolves.toBe(true);
-      await expect(isEffectedPolicySelected(renderResult, 3, testIdPrefix)).resolves.toBe(true);
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix, 0)).resolves.toBe(true);
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix, 3)).resolves.toBe(true);
     });
 
     it('should show the policies selector when no policy is selected', async () => {
