@@ -76,7 +76,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/saved-objects-finder-plugin",
   ],
   "exclude": [
     "target/**/*",
