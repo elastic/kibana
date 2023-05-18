@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 export const POPOVER_ID = 'data-stream-selector-popover';
 export const INTEGRATION_PANEL_ID = 'integrations_panel';
