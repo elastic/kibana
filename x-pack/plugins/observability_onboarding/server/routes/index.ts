@@ -10,11 +10,13 @@ import type {
 } from '@kbn/server-route-repository';
 import { statusRouteRepository } from './status/route';
 import { customLogsRouteRepository } from './custom_logs/route';
+import { elasticAgentRouteRepository } from './elastic_agent/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
     ...statusRouteRepository,
     ...customLogsRouteRepository,
+    ...elasticAgentRouteRepository,
   };
 
   return repository;

@@ -18,18 +18,18 @@ export async function findObservabilityOnboardingState({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   apiKeyId: string;
-}): Promise<SavedObservabilityOnboardingState[]> {
+}): Promise<SavedObservabilityOnboardingState> {
   const result = await savedObjectsClient.find<ObservabilityOnboardingState>({
     type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
     page: 1,
     perPage: 1,
     filter: `${OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE}.attributes.apiKeyId: "${apiKeyId}"`,
   });
-  return result.saved_objects.map(
-    ({ id, attributes, updated_at: upatedAt }) => ({
+  return (
+    result.saved_objects.map(({ id, attributes, updated_at: upatedAt }) => ({
       id,
       updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
       ...attributes,
-    })
+    }))?.[0] ?? {}
   );
 }
