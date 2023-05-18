@@ -7,6 +7,7 @@
 
 import {
   EuiCallOut,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -56,15 +57,14 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
       color={selectedLanguage === language ? 'primary' : 'plain'}
     >
       <EuiFlexGroup direction="column" justifyContent="center">
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiImage
             alt=""
             src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${language.iconType}`)}
             height="32px"
             width="32px"
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
+          <EuiSpacer size="s" />
           <EuiText textAlign="center" color={selectedLanguage === language ? 'default' : 'subdued'}>
             <h5>{language.name}</h5>
           </EuiText>
@@ -109,7 +109,7 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
               <EuiFlexItem key={`panelItem.${index}`}>{panelItem}</EuiFlexItem>
             ))}
           </EuiFlexGroup>
-          <EuiSpacer />
+          <EuiSpacer size="l" />
           <EuiCallOut
             title={i18n.translate('xpack.serverlessSearch.selectClient.callout.title', {
               defaultMessage: 'Try it now in Console',
