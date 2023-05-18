@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { NameLogs } from './name_logs';
 import { ConfigureLogs } from './configure_logs';
+import { SelectLogs } from './select_logs';
 import { InstallElasticAgent } from './install_elastic_agent';
 import { createWizardContext } from '../../../../context/create_wizard_context';
-import { ImportData } from './import_data';
+import { CollectLogs } from './collect_logs';
 import { Inspect } from './inspect';
 
 interface WizardState {
   datasetName: string;
+  logFilePaths: string[];
+  namespace: string;
+  customConfigurations: string;
   logsType?:
     | 'system'
     | 'sys'
@@ -34,6 +37,9 @@ interface WizardState {
 
 const initialState: WizardState = {
   datasetName: '',
+  logFilePaths: [''],
+  namespace: 'default',
+  customConfigurations: '',
   elasticAgentPlatform: 'linux-tar',
   alternativeShippers: {
     filebeat: false,
@@ -45,12 +51,12 @@ const initialState: WizardState = {
 
 const { Provider, Step, useWizard } = createWizardContext({
   initialState,
-  initialStep: 'nameLogs',
+  initialStep: 'selectLogs',
   steps: {
-    nameLogs: NameLogs,
+    selectLogs: SelectLogs,
     configureLogs: ConfigureLogs,
     installElasticAgent: InstallElasticAgent,
-    importData: ImportData,
+    collectLogs: CollectLogs,
     inspect: Inspect,
   },
 });

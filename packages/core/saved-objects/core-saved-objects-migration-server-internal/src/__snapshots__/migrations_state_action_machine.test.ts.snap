@@ -214,12 +214,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -446,12 +445,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -682,12 +680,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -922,12 +919,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -947,25 +943,13 @@ Object {
       "[.my-so-index] Log from LEGACY_REINDEX control state",
     ],
     Array [
-      "[.my-so-index] INIT -> LEGACY_REINDEX. took: 0ms.",
-    ],
-    Array [
       "[.my-so-index] Log from LEGACY_DELETE control state",
     ],
     Array [
-      "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE. took: 0ms.",
-    ],
-    Array [
       "[.my-so-index] Log from LEGACY_DELETE control state",
-    ],
-    Array [
-      "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE. took: 0ms.",
     ],
     Array [
       "[.my-so-index] Log from DONE control state",
-    ],
-    Array [
-      "[.my-so-index] LEGACY_DELETE -> DONE. took: 0ms.",
     ],
   ],
   "log": Array [],
@@ -1199,12 +1183,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -1442,12 +1425,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -1467,13 +1449,7 @@ Object {
       "[.my-so-index] Log from LEGACY_DELETE control state",
     ],
     Array [
-      "[.my-so-index] INIT -> LEGACY_DELETE. took: 0ms.",
-    ],
-    Array [
       "[.my-so-index] Log from FATAL control state",
-    ],
-    Array [
-      "[.my-so-index] LEGACY_DELETE -> FATAL. took: 0ms.",
     ],
   ],
   "log": Array [],

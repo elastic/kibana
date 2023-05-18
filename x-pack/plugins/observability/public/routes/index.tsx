@@ -37,15 +37,13 @@ export interface Params {
 // so I've recreated this simple version for this purpose.
 function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: string }) {
   const {
-    http: { basePath },
+    application: { navigateToApp },
   } = useKibana().services;
   const history = useHistory();
   const { search, hash } = useLocation();
 
   if (redirectToApp) {
-    window.location.replace(
-      `${window.location.origin}${basePath.prepend(`/app/${redirectToApp}${to}${search}${hash}`)}`
-    );
+    navigateToApp(redirectToApp, { path: `/${search}${hash}`, replace: true });
   } else if (to) {
     history.replace(to);
   }

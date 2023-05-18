@@ -14,6 +14,7 @@ import {
   getIbmResilientConnectorOptions,
   getJiraConnectorOptions,
   getServiceNowConnectorOptions,
+  getCaseResponse,
 } from '../../objects/case';
 import {
   createCase,
@@ -56,9 +57,13 @@ describe('Cases connector incident fields', () => {
           req.body.params.subAction === 'incidentTypes'
             ? getExecuteResponses().resilient.incidentTypes
             : getExecuteResponses().resilient.severity;
+
         req.reply(response);
       }
     );
+    cy.intercept('POST', `/api/cases/**/connector/${getConnectorIds().resilient}/_push`, (req) => {
+      req.reply(getCaseResponse());
+    });
   });
 
   it('Correct incident fields show when connector is changed', () => {

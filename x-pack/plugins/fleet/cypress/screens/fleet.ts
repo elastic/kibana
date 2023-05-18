@@ -15,10 +15,18 @@ export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
 export const DATA_STREAMS_TAB = 'fleet-datastreams-tab';
 export const SETTINGS_TAB = 'fleet-settings-tab';
 
-export const MISSING_PRIVILEGES_TITLE = 'missingPrivilegesPromptTitle';
-export const MISSING_PRIVILEGES_MESSAGE = 'missingPrivilegesPromptMessage';
-export const FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE = 'fleetServerMissingPrivilegesMessage';
-export const FLEET_SERVER_MISSING_PRIVILEGES_TITLE = 'fleetServerMissingPrivilegesTitle';
+export const MISSING_PRIVILEGES = {
+  PROMPT: 'missingPrivilegesPrompt',
+  TITLE: 'missingPrivilegesPromptTitle',
+  MESSAGE: 'missingPrivilegesPromptMessage',
+};
+
+export const FLEET_SERVER_MISSING_PRIVILEGES = {
+  PROMPT: 'fleetServerMissingPrivilegesPrompt',
+  MESSAGE: 'fleetServerMissingPrivilegesMessage',
+  TITLE: 'fleetServerMissingPrivilegesTitle',
+};
+
 export const AGENT_POLICY_SAVE_INTEGRATION = 'saveIntegration';
 export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
@@ -65,6 +73,7 @@ export const AGENT_FLYOUT = {
   ADVANCED_TAB_BUTTON: 'fleetServerFlyoutTab-advanced',
   AGENT_POLICY_CODE_BLOCK: 'agentPolicyCodeBlock',
   STANDALONE_TAB: 'standaloneTab',
+  MANAGED_TAB: 'managedTab',
   CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
   INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
 };

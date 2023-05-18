@@ -146,25 +146,21 @@ export const createIndex = ({
       AcknowledgeResponse,
       'create_index_succeeded'
     >((res) => {
-      if (res.acknowledged && res.shardsAcknowledged) {
-        // If the cluster state was updated and all shards started we're done
-        return TaskEither.right('create_index_succeeded');
-      } else {
-        // Otherwise, wait until the target index has a 'green' status meaning
-        // the primary (and on multi node clusters) the replica has been started
-        return pipe(
-          waitForIndexStatus({
-            client,
-            index: indexName,
-            timeout: DEFAULT_TIMEOUT,
-            status: 'green',
-          }),
-          TaskEither.map(() => {
-            /** When the index status is 'green' we know that all shards were started */
-            return 'create_index_succeeded';
-          })
-        );
-      }
+      // Systematicaly wait until the target index has a 'green' status meaning
+      // the primary (and on multi node clusters) the replica has been started
+      // see https://github.com/elastic/kibana/issues/157968
+      return pipe(
+        waitForIndexStatus({
+          client,
+          index: indexName,
+          timeout: DEFAULT_TIMEOUT,
+          status: 'green',
+        }),
+        TaskEither.map(() => {
+          /** When the index status is 'green' we know that all shards were started */
+          return 'create_index_succeeded';
+        })
+      );
     })
   );
 };
