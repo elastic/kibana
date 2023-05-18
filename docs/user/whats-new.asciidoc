@@ -252,4 +252,4 @@ https://www.elastic.co/subscriptions[subscription feature] and
 and applies to all spaces.
 
 [role="screenshot"]
-image::images/highlights-branding-settings.png[Settings in for customizing logo, organaization name, page title, and browser icon]
+image::images/highlights-branding-settings.png[Settings in for customizing logo, organization name, page title, and browser icon]
