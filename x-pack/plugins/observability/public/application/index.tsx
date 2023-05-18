@@ -6,9 +6,9 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
+import { Router, Switch, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
@@ -30,6 +30,12 @@ import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rul
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
 
 function App() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
     <>
       <Switch>
