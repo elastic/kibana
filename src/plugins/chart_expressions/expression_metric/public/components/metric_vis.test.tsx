@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { MetricVis, MetricVisComponentProps } from './metric_vis';
+import { COMPACT_CUSTOM_PATTERNS_LOOKUP, MetricVis, MetricVisComponentProps } from './metric_vis';
 import {
   LayoutDirection,
   Metric,
@@ -21,6 +21,7 @@ import {
 } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { HtmlAttributes } from 'csstype';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import { DimensionsVisParam } from '../../common';
@@ -30,12 +31,15 @@ import faker from 'faker';
 
 const mockDeserialize = jest.fn(({ id }: { id: string } = { id: 'fallback' }) => {
   const convertFn = (v: unknown) => `${id}-${v}`;
-  return { getConverterFor: () => convertFn, convert: convertFn };
+  return { getConverterFor: () => convertFn };
 });
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
 
-const mockLookupCurrentLocale = jest.fn(() => 'en');
+const CURRENCY_DEFAULT_FORMAT = '$0.0';
+
+const mockFormatSettingLookup = jest.fn(() => CURRENCY_DEFAULT_FORMAT);
+const mockIsOverridden = jest.fn();
 
 jest.mock('../services', () => ({
   getFormatService: () => {
@@ -52,7 +56,8 @@ jest.mock('../services', () => ({
   },
   getUiSettingsService: () => {
     return {
-      get: mockLookupCurrentLocale,
+      get: mockFormatSettingLookup,
+      isOverridden: mockIsOverridden,
     };
   },
 }));
@@ -202,6 +207,7 @@ const defaultProps = {
   fireEvent: () => {},
   filterable: true,
   renderMode: 'view',
+  uiSettings: {} as unknown as IUiSettingsClient,
 } as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'renderMode'>;
 
 describe('MetricVisComponent', function () {
@@ -1362,16 +1368,130 @@ describe('MetricVisComponent', function () {
       return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
     };
 
-    it('correctly formats when format is passed', () => {
-      getFormattedMetrics(394.2393, 983123.984, { id: 'number' });
+    it.each`
+      id            | pattern | finalPattern
+      ${'number'}   | ${'0'}  | ${'0'}
+      ${'currency'} | ${'$0'} | ${'$0'}
+      ${'percent'}  | ${'0%'} | ${'0%'}
+    `(
+      'applies $id custom field format pattern when passed over',
+      ({ id, pattern, finalPattern }) => {
+        getFormattedMetrics(394.2393, 983123.984, { id, params: { pattern } });
+        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: finalPattern } });
+      }
+    );
+
+    it.each`
+      id            | compactPattern
+      ${'number'}   | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.number.patternFn()}
+      ${'currency'} | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.currency.patternFn(CURRENCY_DEFAULT_FORMAT)}
+      ${'percent'}  | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.percent.patternFn()}
+    `(
+      'applies the metric compact format "$compactPattern" if no custom params are passed over',
+      ({ id, compactPattern }) => {
+        getFormattedMetrics(394.2393, 983123.984, { id });
+        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: compactPattern } });
+      }
+    );
+
+    it.each`
+      id            | compactPattern
+      ${'number'}   | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.number.patternFn()}
+      ${'currency'} | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.currency.patternFn(CURRENCY_DEFAULT_FORMAT)}
+      ${'percent'}  | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.percent.patternFn()}
+    `(
+      'applies the metric compact format "$compactPattern" if has the override flag enabled',
+      ({ id, compactPattern }) => {
+        getFormattedMetrics(394.2393, 983123.984, { id, params: { formatOverride: true } });
+        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: compactPattern } });
+      }
+    );
+
+    it.each`
+      id
+      ${'number'}
+      ${'percent'}
+    `(
+      'does not apply the metric compact format if user customized default settings pattern for $id',
+      ({ id }) => {
+        mockIsOverridden.mockReturnValueOnce(true);
+        getFormattedMetrics(394.2393, 983123.984, { id });
+        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledWith({ id });
+      }
+    );
+
+    it('applies a custom duration configuration to the formatter', () => {
+      getFormattedMetrics(394.2393, 983123.984, { id: 'duration' });
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
-      expect(mockDeserialize).toHaveBeenCalledWith({ id: 'number' });
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'duration',
+        params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: true },
+      });
+    });
+
+    it('does not override duration custom configuration when set', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'duration',
+        params: { useShortSuffix: false },
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'duration',
+        params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: false },
+      });
+    });
+
+    it('does not tweak bytes format when passed', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'bytes',
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'bytes',
+      });
+    });
+
+    it('does not tweak bit format when passed', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'bytes',
+        params: { pattern: '0.0bitd' },
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'bytes',
+        params: { pattern: '0.0bitd' },
+      });
+    });
+
+    it('does not tweak legacy bits format when passed', () => {
+      const legacyBitFormat = {
+        id: 'number',
+        params: { pattern: `0,0bitd` },
+      };
+      getFormattedMetrics(394.2393, 983123.984, legacyBitFormat);
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith(legacyBitFormat);
+    });
+
+    it('should handle abs pattern for currency when passed', () => {
+      mockFormatSettingLookup.mockReturnValueOnce('(€0.0,[00])');
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'currency',
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'currency',
+        params: { pattern: '(€0.0,[00]a)' },
+      });
     });
 
     it('calls the formatter only once when no secondary value is passed', () => {
       getFormattedMetrics(394.2393, undefined, { id: 'number' });
       expect(mockDeserialize).toHaveBeenCalledTimes(1);
-      expect(mockDeserialize).toHaveBeenCalledWith({ id: 'number' });
     });
 
     it('still call the formatter when no format is passed', () => {
