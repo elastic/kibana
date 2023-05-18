@@ -1609,6 +1609,9 @@
       "shipper": {
         "dynamic": false,
         "properties": {}
+      },
+      "allow_edit": {
+        "enabled": false
       }
     }
   },
@@ -1655,6 +1658,13 @@
       "inputs": {
         "dynamic": false,
         "properties": {}
+      },
+      "secret_references": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
       },
       "revision": {
         "type": "integer"

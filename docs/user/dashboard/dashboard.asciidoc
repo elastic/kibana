@@ -333,6 +333,54 @@ Copy panels from one dashboard to another dashboard.
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
 
 [float]
+[[add-dashboard-settings]]
+== Add the dashboard settings
+
+Add the title, tags, design options, and more to the dashboard.
+
+. In the toolbar, click *Settings*.
+
+. On the *Dashboard settings* flyout, enter the *Title* and an optional *Description*.
+
+. Add any applicable <<managing-tags,*Tags*>>. 
+
+. Specify the following settings:
+
+* *Store time with dashboard* &mdash; Saves the specified time filter.
+
+* *Use margins between panels* &mdash; Adds a margin of space between each panel.
+
+* *Show panel titles* &mdash; Displays the titles in the panel headers.
+
+* *Sync color palettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
+
+* *Sync cursor across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY or heatmap chart, the cursor on all other related dashboard charts automatically appears.
+
+* *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appears.
+
+. Click *Apply*. 
+
+[float]
+[[reset-the-dashboard]]
+== Reset the dashboard
+
+To remove any dashboard changes you've made, reset the dashboard to the last saved changes.
+
+. In the toolbar, click *Reset*.
+
+. On the *Reset dashboard* window, click *Reset dashboard*.
+
+[float]
+[[save-dashboards]]
+== Save dashboards
+
+When you've finished making changes to the dashboard, save it.
+
+. In the toolbar, click *Save*.
+
+. To exit *Edit* mode, click *Switch to view mode*. 
+
+[float]
 [[search-or-filter-your-data]]
 == Search and filter your data
 
@@ -354,48 +402,6 @@ To view and edit panel-level filters:
 . On the panel, click image:images/dashboard_panelFiltersButton_8.7.0.png[Panel filters button on panel header].
 
 . To edit, click *Edit filters*.
-
-[float]
-[[apply-design-options]]
-== Apply design options
-
-Apply a set of design options to the entire dashboard.
-
-. If you're in view mode, click *Edit* in the toolbar.
-
-. In the toolbar, click *Settings*, to open the *Dashboard settings* flyout, then use the following options:
-
-* *Use margins between panels* &mdash; Adds a margin of space between each panel.
-
-* *Show panel titles* &mdash; Displays the titles in the panels headers.
-
-* *Sync color pallettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
-
-* *Sync cursor across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart and a heatmap chart, the cursor on all other related dashboard charts automatically appear.
-
-* *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appear.
-
-[float]
-[[save-dashboards]]
-== Save dashboards
-
-When you've finished making changes to the dashboard, save it.
-
-If you are saving a new dashboard:
-
-. In the toolbar, click *Save*.
-
-. On the *Save dashboard* window, enter the *Title* and an optional *Description*.
-
-. Add any applicable <<managing-tags,*Tags*>>. 
-
-. To save the time filter to the dashboard, select *Store time with dashboard*.
-
-. Click *Save*.
-
-If you are saving an existing dashboard, click *Save*.
-
-To exit *Edit* mode, click *Switch to view mode*. 
 
 [float]
 [[download-csv]]
