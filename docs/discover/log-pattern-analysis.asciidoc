@@ -16,10 +16,11 @@ can use your own data.
 
 . Click the `message` field in the **Available fields** list on the left 
 sidebar and click **Run pattern analysis**.
-
++
+--
 [role="screenshot"]
 image::images/log-pattern-analysis-available-fields.png["Available fields view in Discover showing the message field selected."]
-
+--
 . The pattern analysis starts. The results are displayed in a flyout when the 
 analysis is complete.
 
