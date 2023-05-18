@@ -25,7 +25,7 @@ describe('Stack Connectors Plugin', () => {
     it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
       plugin.setup(coreSetup, { actions: actionsSetup });
-      expect(actionsSetup.registerType).toHaveBeenCalledTimes(18);
+      expect(actionsSetup.registerType).toHaveBeenCalledTimes(17);
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -138,8 +138,23 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        18,
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(3);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: '.opsgenie',
+          name: 'Opsgenie',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: '.tines',
+          name: 'Tines',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        3,
         expect.objectContaining({
           id: '.gen-ai',
           name: 'Generative AI',
