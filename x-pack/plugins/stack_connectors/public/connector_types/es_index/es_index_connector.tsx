@@ -214,33 +214,6 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         }}
       </UseField>
       <EuiSpacer size="m" />
-      <UseField
-        path="config.refresh"
-        component={ToggleField}
-        config={{
-          defaultValue: false,
-        }}
-        componentProps={{
-          euiFieldProps: {
-            label: (
-              <>
-                <FormattedMessage
-                  id="xpack.stackConnectors.components.index.refreshLabel"
-                  defaultMessage="Refresh index"
-                />{' '}
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={translations.REFRESH_FIELD_TOGGLE_TOOLTIP}
-                />
-              </>
-            ),
-            disabled: readOnly,
-            'data-test-subj': 'indexRefreshCheckbox',
-          },
-        }}
-      />
-      <EuiSpacer size="m" />
       {showTimeFieldCheckbox ? (
         <UseField
           path="__internal__.hasTimeFieldCheckbox"
