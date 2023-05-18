@@ -109,7 +109,15 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.download).to.equal(undefined);
       await uninstallPackage(testPkgName, '9999.0.0');
     });
-
+    describe('Installed Packages', () => {
+      it('Allows the fetching of installed packages', async () => {
+        await installPackage(testPkgName, testPkgVersion);
+        const res = await supertest.get(`/api/fleet/epm/packages/installed`).expect(200);
+        const packages = res.body.items;
+        expect(packages.length).to.be(1);
+        await uninstallPackage(testPkgName, testPkgVersion);
+      });
+    });
     it('returns a 404 for a package that do not exists', async function () {
       await supertest.get('/api/fleet/epm/packages/notexists/99.99.99').expect(404);
     });

@@ -364,7 +364,7 @@ owner: elastic`,
         ],
       } as any);
 
-      const results = await getInstalledPackages({
+      await getInstalledPackages({
         savedObjectsClient: soClient,
         dataStreamType: 'logs',
         nameQuery: 'nginx',
