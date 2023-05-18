@@ -51,6 +51,7 @@ import { createNetworkEventsRoute } from './network_events';
 import { addPrivateLocationRoute } from './settings/private_locations/add_private_location';
 import { deletePrivateLocationRoute } from './settings/private_locations/delete_private_location';
 import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
+import { getSyntheticsFilters } from './filters/filters';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -92,6 +93,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
   getPrivateLocationsRoute,
+  getSyntheticsFilters,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
