@@ -11,6 +11,13 @@ export interface Tag {
   name: string;
   description: string;
   color: string;
+}
+
+export interface TagReference {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
   type: string;
 }
 

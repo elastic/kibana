@@ -40,7 +40,10 @@ export interface Params {
   fixedTagReferences?: TagReference[] | null;
 }
 
-const getTotalActiveFilters = (options: TagOptionItem[], fixedTagReferences?: Tag[] | null) =>
+const getTotalActiveFilters = (
+  options: TagOptionItem[],
+  fixedTagReferences?: TagReference[] | null
+) =>
   Math.max(
     fixedTagReferences?.length ?? 0,
     options.filter((option) => option.checked === 'on').length ?? 0

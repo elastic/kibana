@@ -8,7 +8,6 @@
 
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import React, { PropsWithChildren, useCallback, useState } from 'react';
-import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
 
 import {
   TableListView,
@@ -43,6 +42,14 @@ import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
 type TableListViewApplicationService = DashboardApplicationService & {
   capabilities: { advancedSettings: { save: boolean } };
 };
+
+interface TagReference {
+  id: string;
+  type: string;
+  name: string;
+  color: string;
+  description: string;
+}
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -79,7 +86,7 @@ export type DashboardListingProps = PropsWithChildren<{
   initialFilter?: string;
   pageSectionPadding?: EuiPaddingSize;
   restrictPageSectionWidth?: boolean;
-  fixedTagReferences?: Tag[] | null;
+  fixedTagReferences?: TagReference[] | null;
   useSessionStorageIntegration?: boolean;
   withPageTemplateHeader?: boolean;
   urlStateEnabled?: boolean;

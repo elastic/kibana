@@ -29,8 +29,6 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-
-import type { Tag as TagReference } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   Table,
   ConfirmDeleteModal,
@@ -44,7 +42,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
-import { RowActions, TableItemsRowActions } from './types';
+import { RowActions, TableItemsRowActions, TagReference } from './types';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -1002,6 +1000,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             dispatch={dispatch}
             entityName={entityName}
             entityNamePlural={entityNamePlural}
+            fixedTagReferences={fixedTagReferences}
             hasUpdatedAtMetadata={hasUpdatedAtMetadata}
             isFetchingItems={isFetchingItems}
             items={items}
@@ -1016,7 +1015,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             tableItemsRowActions={tableItemsRowActions}
             tableSort={tableSort}
             tagsToTableItemMap={tagsToTableItemMap}
-            fixedTagReferences={fixedTagReferences}
           />
 
           {/* Delete modal */}
