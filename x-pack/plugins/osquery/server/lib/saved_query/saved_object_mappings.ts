@@ -12,7 +12,7 @@ import {
   savedQuerySavedObjectType,
   packSavedObjectType,
   packAssetSavedObjectType,
-  usageMetricSavedObjectType
+  usageMetricSavedObjectType,
 } from '../../../common/types';
 
 export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {

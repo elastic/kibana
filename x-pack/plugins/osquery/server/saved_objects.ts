@@ -11,7 +11,7 @@ import {
   savedQueryType,
   packType,
   packAssetType,
-  usageMetricType
+  usageMetricType,
 } from './lib/saved_query/saved_object_mappings';
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
