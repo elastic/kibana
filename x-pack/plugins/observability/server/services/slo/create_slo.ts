@@ -32,13 +32,14 @@ export class CreateSLO {
     try {
       await this.transformManager.install(slo);
     } catch (err) {
-      await this.repository.deleteById(slo.id);
+      await Promise.all([this.transformManager.uninstall(slo), this.repository.deleteById(slo.id)]);
       throw err;
     }
 
     try {
       await this.transformManager.start(slo);
     } catch (err) {
+      await this.transformManager.stop(slo);
       await Promise.all([this.transformManager.uninstall(slo), this.repository.deleteById(slo.id)]);
 
       throw err;

@@ -15,6 +15,7 @@ import {
   createSLO,
   createSLOWithTimeslicesBudgetingMethod,
 } from './fixtures/slo';
+import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
@@ -130,6 +131,44 @@ describe('UpdateSLO', () => {
       expectInstallationOfNewSLOTransform();
     });
 
+    it('consideres an objective change as a breaking change', async () => {
+      const slo = createSLO({ objective: { target: 0.99 } });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+
+      const newObjective = { ...slo.objective, target: 0.5 };
+      await updateSLO.execute(slo.id, { objective: newObjective });
+
+      expectDeletionOfObsoleteSLOData(slo);
+      expect(mockRepository.save).toBeCalledWith(
+        expect.objectContaining({
+          ...slo,
+          objective: newObjective,
+          revision: 2,
+          updatedAt: expect.anything(),
+        })
+      );
+      expectInstallationOfNewSLOTransform();
+    });
+
+    it('consideres a time window change as a breaking change', async () => {
+      const slo = createSLO({ timeWindow: sevenDaysRolling() });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+
+      const newTimeWindow = weeklyCalendarAligned();
+      await updateSLO.execute(slo.id, { timeWindow: newTimeWindow });
+
+      expectDeletionOfObsoleteSLOData(slo);
+      expect(mockRepository.save).toBeCalledWith(
+        expect.objectContaining({
+          ...slo,
+          timeWindow: newTimeWindow,
+          revision: 2,
+          updatedAt: expect.anything(),
+        })
+      );
+      expectInstallationOfNewSLOTransform();
+    });
+
     it('removes the obsolete data from the SLO previous revision', async () => {
       const slo = createSLO({
         indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
@@ -167,6 +206,7 @@ describe('UpdateSLO', () => {
   function expectDeletionOfObsoleteSLOData(originalSlo: SLO) {
     expect(mockTransformManager.stop).toBeCalledWith(originalSlo);
     expect(mockTransformManager.uninstall).toBeCalledWith(originalSlo);
+    expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(mockEsClient.deleteByQuery).toBeCalledWith(
       expect.objectContaining({
         query: {

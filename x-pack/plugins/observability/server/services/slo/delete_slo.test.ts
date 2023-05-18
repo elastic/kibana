@@ -9,7 +9,7 @@ import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
+import { SLO_INDEX_TEMPLATE_NAME, SLO_SUMMARY_INDEX_TEMPLATE_NAME } from '../../assets/constants';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
@@ -39,15 +39,21 @@ describe('DeleteSLO', () => {
       await deleteSLO.execute(slo.id);
 
       expect(mockRepository.findById).toHaveBeenCalledWith(slo.id);
-      expect(mockTransformManager.stop).toHaveBeenCalledWith(
-        getSLOTransformId(slo.id, slo.revision)
-      );
-      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(
-        getSLOTransformId(slo.id, slo.revision)
-      );
+      expect(mockTransformManager.stop).toHaveBeenCalledWith(slo);
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(slo);
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: `${SLO_INDEX_TEMPLATE_NAME}*`,
+          query: {
+            match: {
+              'slo.id': slo.id,
+            },
+          },
+        })
+      );
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: `${SLO_SUMMARY_INDEX_TEMPLATE_NAME}*`,
           query: {
             match: {
               'slo.id': slo.id,

@@ -7,7 +7,7 @@
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
+import { SLO_INDEX_TEMPLATE_NAME, SLO_SUMMARY_INDEX_TEMPLATE_NAME } from '../../assets/constants';
 
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
@@ -23,18 +23,27 @@ export class DeleteSLO {
   public async execute(sloId: string): Promise<void> {
     const slo = await this.repository.findById(sloId);
 
-    const sloTransformId = getSLOTransformId(slo.id, slo.revision);
-    await this.transformManager.stop(sloTransformId);
-    await this.transformManager.uninstall(sloTransformId);
+    await this.transformManager.stop(slo);
+    await this.transformManager.uninstall(slo);
 
-    await this.deleteRollupData(slo.id);
+    await this.deleteRollupAndSummaryData(slo.id);
     await this.deleteAssociatedRules(slo.id);
     await this.repository.deleteById(slo.id);
   }
 
-  private async deleteRollupData(sloId: string): Promise<void> {
+  private async deleteRollupAndSummaryData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
       index: `${SLO_INDEX_TEMPLATE_NAME}*`,
+      wait_for_completion: false,
+      query: {
+        match: {
+          'slo.id': sloId,
+        },
+      },
+    });
+
+    await this.esClient.deleteByQuery({
+      index: `${SLO_SUMMARY_INDEX_TEMPLATE_NAME}*`,
       wait_for_completion: false,
       query: {
         match: {

@@ -9,7 +9,7 @@ import deepEqual from 'fast-deep-equal';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 
-import { SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
+import { SLO_INDEX_TEMPLATE_NAME, SLO_SUMMARY_INDEX_TEMPLATE_NAME } from '../../assets/constants';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { SLO } from '../../domain/models';
@@ -27,7 +27,7 @@ export class UpdateSLO {
     const { hasBreakingChange, updatedSlo } = this.updateSLO(originalSlo, params);
 
     if (hasBreakingChange) {
-      await this.deleteObsoleteSLORevisionData(originalSlo);
+      await this.manageObsoleteData(originalSlo);
 
       await this.repository.save(updatedSlo);
       await this.transformManager.install(updatedSlo);
@@ -44,24 +44,13 @@ export class UpdateSLO {
     const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updatedAt: new Date() });
     validateSLO(updatedSlo);
 
-    if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {
-      hasBreakingChange = true;
-    }
-
-    if (originalSlo.budgetingMethod !== updatedSlo.budgetingMethod) {
-      hasBreakingChange = true;
-    }
-
     if (
-      originalSlo.budgetingMethod === 'timeslices' &&
-      updatedSlo.budgetingMethod === 'timeslices' &&
-      (originalSlo.objective.timesliceTarget !== updatedSlo.objective.timesliceTarget ||
-        !deepEqual(originalSlo.objective.timesliceWindow, updatedSlo.objective.timesliceWindow))
+      !deepEqual(originalSlo.indicator, updatedSlo.indicator) ||
+      !deepEqual(originalSlo.timeWindow, updatedSlo.timeWindow) ||
+      originalSlo.budgetingMethod !== updatedSlo.budgetingMethod ||
+      !deepEqual(originalSlo.objective, updatedSlo.objective) ||
+      !deepEqual(originalSlo.settings, updatedSlo.settings)
     ) {
-      hasBreakingChange = true;
-    }
-
-    if (!deepEqual(originalSlo.settings, updatedSlo.settings)) {
       hasBreakingChange = true;
     }
 
@@ -72,19 +61,29 @@ export class UpdateSLO {
     return { hasBreakingChange, updatedSlo };
   }
 
-  private async deleteObsoleteSLORevisionData(originalSlo: SLO) {
+  private async manageObsoleteData(originalSlo: SLO) {
     await this.transformManager.stop(originalSlo);
     await this.transformManager.uninstall(originalSlo);
-    await this.deleteRollupData(originalSlo.id, originalSlo.revision);
+    await this.deleteRollupAndSummaryData(originalSlo);
   }
 
-  private async deleteRollupData(sloId: string, sloRevision: number): Promise<void> {
+  private async deleteRollupAndSummaryData(slo: SLO): Promise<void> {
     await this.esClient.deleteByQuery({
       index: `${SLO_INDEX_TEMPLATE_NAME}*`,
       wait_for_completion: false,
       query: {
         bool: {
-          filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],
+          filter: [{ term: { 'slo.id': slo.id } }, { term: { 'slo.revision': slo.revision } }],
+        },
+      },
+    });
+
+    await this.esClient.deleteByQuery({
+      index: `${SLO_SUMMARY_INDEX_TEMPLATE_NAME}*`,
+      wait_for_completion: false,
+      query: {
+        bool: {
+          filter: [{ term: { 'slo.id': slo.id } }, { term: { 'slo.revision': slo.revision } }],
         },
       },
     });
