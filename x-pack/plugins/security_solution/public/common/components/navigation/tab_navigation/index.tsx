@@ -15,6 +15,7 @@ import { useNavigation } from '../../../lib/kibana';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import type { TabNavigationProps, TabNavigationItemProps } from './types';
 import { BETA } from '../../../translations';
+import { useRouteSpy } from '../../../utils/route/use_route_spy';
 
 const TabNavigationItemComponent = ({
   disabled,
@@ -57,7 +58,8 @@ const TabNavigationItemComponent = ({
 
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
-export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs, tabName }) => {
+export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs }) => {
+  const [{ tabName }] = useRouteSpy();
   const mapLocationToTab = useCallback(
     (): string =>
       getOr(
@@ -105,12 +107,8 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs, 
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';
 
-export const TabNavigation = React.memo(
-  TabNavigationComponent,
-  (prevProps, nextProps) =>
-    prevProps.display === nextProps.display &&
-    prevProps.tabName === nextProps.tabName &&
-    deepEqual(prevProps.navTabs, nextProps.navTabs)
+export const TabNavigation = React.memo(TabNavigationComponent, (prevProps, nextProps) =>
+  deepEqual(prevProps.navTabs, nextProps.navTabs)
 );
 
 TabNavigation.displayName = 'TabNavigation';

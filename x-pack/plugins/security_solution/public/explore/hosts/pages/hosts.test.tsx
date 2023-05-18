@@ -18,7 +18,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { inputsActions } from '../../../common/store/inputs';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
@@ -138,7 +138,7 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(TabNavigationWithBreadcrumbs).exists()).toBe(true);
+    expect(wrapper.find(TabNavigation).exists()).toBe(true);
   });
 
   test('it should add the new filters after init', async () => {

@@ -68,7 +68,6 @@ export enum TELEMETRY_EVENT {
 
   // Breadcrumbs
   BREADCRUMB = 'breadcrumb_',
-  LEGACY_NAVIGATION = 'legacy_navigation_',
 }
 
 export const getTelemetryEvent = {
