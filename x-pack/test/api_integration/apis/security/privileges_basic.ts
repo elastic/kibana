@@ -50,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
             filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
+            guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -176,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
               'readFlappingSettings',
             ],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
+            guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };

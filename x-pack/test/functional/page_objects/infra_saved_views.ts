@@ -15,57 +15,33 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return {
-    async getSavedViewsButton() {
-      return await testSubjects.find('savedViews-openPopover');
+    clickSavedViewsButton() {
+      return testSubjects.click('savedViews-openPopover');
     },
-
-    async clickSavedViewsButton() {
-      return await testSubjects.click('savedViews-openPopover');
-    },
-
-    async getSavedViewsPopoer() {
-      return await testSubjects.find('savedViews-popover');
+    pressEsc() {
+      return browser.pressKeys([Key.ESCAPE]);
     },
 
     async closeSavedViewsPopover() {
       await testSubjects.find('savedViews-popover');
-      return await browser.pressKeys([Key.ESCAPE]);
+      return this.pressEsc();
     },
 
-    async getLoadViewButton() {
-      return await testSubjects.find('savedViews-loadView');
+    clickManageViewsButton() {
+      return testSubjects.click('savedViews-manageViews');
     },
 
-    async clickLoadViewButton() {
-      return await testSubjects.click('savedViews-loadView');
+    async getManageViewsEntries() {
+      await this.clickManageViewsButton();
+      return testSubjects.findAll('infraRenderNameButton');
     },
 
-    async getManageViewsButton() {
-      return await testSubjects.find('savedViews-manageViews');
+    clickUpdateViewButton() {
+      return testSubjects.click('savedViews-updateView');
     },
 
-    async clickManageViewsButton() {
-      return await testSubjects.click('savedViews-manageViews');
-    },
-
-    async getUpdateViewButton() {
-      return await testSubjects.find('savedViews-updateView');
-    },
-
-    async clickUpdateViewButton() {
-      return await testSubjects.click('savedViews-updateView');
-    },
-
-    async getSaveNewViewButton() {
-      return await testSubjects.find('savedViews-saveNewView');
-    },
-
-    async clickSaveNewViewButton() {
-      return await testSubjects.click('savedViews-saveNewView');
-    },
-
-    async getCreateSavedViewModal() {
-      return await testSubjects.find('savedViews-upsertModal');
+    clickSaveNewViewButton() {
+      return testSubjects.click('savedViews-saveNewView');
     },
 
     async createNewSavedView(name: string) {
@@ -74,20 +50,21 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
       await testSubjects.missingOrFail('savedViews-upsertModal');
     },
 
+    async createView(name: string) {
+      await this.clickSaveNewViewButton();
+      await this.createNewSavedView(name);
+    },
+
+    async updateView(name: string) {
+      await this.clickUpdateViewButton();
+      await this.createNewSavedView(name);
+    },
+
     async ensureViewIsLoaded(name: string) {
       await retry.try(async () => {
         const subject = await testSubjects.find('savedViews-openPopover');
         expect(await subject.getVisibleText()).to.be(name);
       });
-    },
-
-    async ensureViewIsLoadable(name: string) {
-      const subject = await testSubjects.find('savedViews-loadList');
-      await subject.findByCssSelector(`li[title="${name}"]`);
-    },
-
-    async closeSavedViewsLoadModal() {
-      return await testSubjects.click('cancelSavedViewModal');
     },
   };
 }

@@ -8,7 +8,7 @@
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TEST_IDS } from '../constants';
 import type { FilterGroupProps } from '../types';
 import { getControlGroupMock } from './control_group';
@@ -61,15 +61,17 @@ import { getControlGroupMock } from './control_group';
  *});
  *
  */
-export function getMockedFilterGroupWithCustomFilters(outputFilters: Filter[] | undefined) {
+export function getMockedFilterGroupWithCustomFilters(outputFilters?: Filter[]) {
   const FilterGroup: FC<FilterGroupProps> = ({ onInit, onFilterChange }) => {
-    if (onInit) {
-      onInit(getControlGroupMock() as unknown as ControlGroupContainer);
-    }
+    useEffect(() => {
+      if (onInit) {
+        onInit(getControlGroupMock() as unknown as ControlGroupContainer);
+      }
 
-    if (onFilterChange) {
-      onFilterChange(outputFilters ?? []);
-    }
+      if (onFilterChange) {
+        onFilterChange(outputFilters ?? []);
+      }
+    }, [onInit, onFilterChange]);
 
     return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;
   };

@@ -23,6 +23,7 @@ export const EnterpriseSearchEnginesPageTemplate: React.FC<
   const navItems = useEnterpriseSearchEngineNav(engineName, pageTemplateProps.isEmptyState);
   return (
     <EnterpriseSearchPageTemplateWrapper
+      panelled
       {...pageTemplateProps}
       solutionNav={{
         items: navItems,

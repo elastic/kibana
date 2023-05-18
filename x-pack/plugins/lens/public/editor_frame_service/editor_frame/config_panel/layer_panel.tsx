@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
+import { DimensionButton } from '@kbn/visualization-ui-components/public';
 import { LayerType } from '../../../../common/types';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
@@ -38,7 +39,6 @@ import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 import {
@@ -561,7 +561,7 @@ export function LayerPanel(
                               className="lnsLayerPanel__dimension"
                               accessorConfig={accessorConfig}
                               label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
-                              group={group}
+                              groupLabel={group.groupLabel}
                               onClick={(id: string) => {
                                 setActiveDimension({
                                   isNew: false,
@@ -573,7 +573,10 @@ export function LayerPanel(
                                 props.onRemoveDimension({ columnId: id, layerId });
                                 removeButtonRef(id);
                               }}
-                              message={messages[0]}
+                              message={{
+                                severity: messages[0]?.severity,
+                                content: messages[0]?.shortMessage || messages[0]?.longMessage,
+                              }}
                             >
                               {layerDatasource ? (
                                 <NativeRenderer

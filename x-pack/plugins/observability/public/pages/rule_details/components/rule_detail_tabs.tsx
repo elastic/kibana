@@ -20,7 +20,7 @@ import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { BoolQuery, Query } from '@kbn/es-query';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../utils/kibana_react';
-import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/shared/alert_search_bar';
+import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import {
   ALERTS_TAB,
   EXECUTION_TAB,

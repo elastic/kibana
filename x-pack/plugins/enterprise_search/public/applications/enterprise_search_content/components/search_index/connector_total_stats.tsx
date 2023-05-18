@@ -36,8 +36,9 @@ export const ConnectorTotalStats: React.FC = () => {
     return <></>;
   }
 
-  const stats: EuiStatProps[] = [
+  const stats: EuiStatProps[] & { 'data-test-subj'?: string } = [
     {
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-ingestionType',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
         {
@@ -53,6 +54,7 @@ export const ConnectorTotalStats: React.FC = () => {
       ),
     },
     {
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-connectorType',
       description: i18n.translate('xpack.enterpriseSearch.connector.connectorTypePanel.title', {
         defaultMessage: 'Connector type',
       }),

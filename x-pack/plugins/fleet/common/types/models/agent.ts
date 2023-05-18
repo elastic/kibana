@@ -79,6 +79,8 @@ export interface AgentAction extends NewAgentAction {
 export interface AgentMetadata {
   [x: string]: any;
 }
+
+// SO definition for this type is declared in server/types/interfaces
 interface AgentBase {
   type: AgentType;
   active: boolean;
@@ -122,10 +124,6 @@ export interface Agent extends AgentBase {
   packages: string[];
   sort?: Array<number | string | null>;
   metrics?: AgentMetrics;
-}
-
-export interface AgentSOAttributes extends AgentBase {
-  packages?: string[];
 }
 
 export interface CurrentUpgrade {
@@ -180,6 +178,9 @@ export interface AgentDiagnostics {
 }
 
 // Generated from FleetServer schema.json
+/**
+ * Fleet Server agent component unit
+ */
 export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
@@ -190,7 +191,10 @@ export interface FleetServerAgentComponentUnit {
   };
 }
 
-interface FleetServerAgentComponent {
+/**
+ * Fleet server agent component
+ */
+export interface FleetServerAgentComponent {
   id: string;
   type: string;
   status: FleetServerAgentComponentStatus;

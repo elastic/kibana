@@ -11,7 +11,6 @@ import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import { hasAllPrivilege } from './has_all_privilege';
-import { hasExecuteActionsCapability } from './has_execute_actions_capability';
 
 interface CanEditRuleProps {
   rule: Rule<RuleTypeParams> | undefined;
@@ -26,17 +25,17 @@ export function canEditRule({
   capabilities,
   ruleTypeRegistry,
 }: CanEditRuleProps): boolean {
-  const canExecuteActions = hasExecuteActionsCapability(capabilities);
+  const canExecuteActions = capabilities?.actions?.execute;
 
-  return (
+  return Boolean(
     // can the user save the rule
     rule &&
-    hasAllPrivilege(rule, ruleTypeDefinition) &&
-    // if the rule has actions, can the user save the rule's action params
-    (canExecuteActions || (!canExecuteActions && rule.actions.length === 0)) &&
-    // is this rule type editable from within Rules Management
-    (ruleTypeRegistry.has(rule.ruleTypeId)
-      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-      : false)
+      hasAllPrivilege(rule, ruleTypeDefinition) &&
+      // if the rule has actions, can the user save the rule's action params
+      (canExecuteActions || (!canExecuteActions && rule.actions.length === 0)) &&
+      // is this rule type editable from within Rules Management
+      (ruleTypeRegistry.has(rule.ruleTypeId)
+        ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
+        : false)
   );
 }

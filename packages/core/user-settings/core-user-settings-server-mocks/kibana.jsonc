@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-user-settings-server-mocks",
-  "owner": "@elastic/platform-security",
+  "owner": "@elastic/kibana-security",
 }

@@ -8,7 +8,19 @@
 import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { loadRuleSummary } from '@kbn/triggers-actions-ui-plugin/public';
-import { FetchRuleSummaryProps, FetchRuleSummary } from '../pages/rule_details/types';
+import { HttpSetup } from '@kbn/core/public';
+import { RuleSummary } from '@kbn/triggers-actions-ui-plugin/public';
+
+export interface FetchRuleSummaryProps {
+  ruleId: string;
+  http: HttpSetup;
+}
+
+export interface FetchRuleSummary {
+  isLoadingRuleSummary: boolean;
+  ruleSummary?: RuleSummary;
+  errorRuleSummary?: string;
+}
 
 export function useFetchRuleSummary({ ruleId, http }: FetchRuleSummaryProps) {
   const [ruleSummary, setRuleSummary] = useState<FetchRuleSummary>({

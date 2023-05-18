@@ -78,6 +78,7 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     id: schema.string(),
     config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     config_yaml: schema.never(),
+    allow_edit: schema.maybe(schema.arrayOf(schema.string())),
   }),
   {
     defaultValue: [],
@@ -134,7 +135,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
               if (value === 'synthetics') {
                 return i18n.translate('xpack.fleet.config.disableSynthetics', {
                   defaultMessage:
-                    'Synthetics package is not supported via kibana.yml config. Please use synthetics app to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
+                    'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
                 });
               }
             },

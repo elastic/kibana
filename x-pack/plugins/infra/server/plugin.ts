@@ -17,7 +17,12 @@ import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import {
+  DISCOVER_APP_TARGET,
+  LOGS_APP_TARGET,
+  LOGS_FEATURE_ID,
+  METRICS_FEATURE_ID,
+} from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
@@ -49,6 +54,7 @@ import {
 import { InventoryViewsService } from './services/inventory_views';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
+import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { RulesService } from './services/rules';
 import {
   InfraConfig,
@@ -62,9 +68,12 @@ import { UsageCollector } from './usage/usage_collector';
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
     logs: schema.object({
-      app_target: schema.oneOf([schema.literal('logs-ui'), schema.literal('discover')], {
-        defaultValue: 'logs-ui',
-      }),
+      app_target: schema.oneOf(
+        [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
+        {
+          defaultValue: LOGS_APP_TARGET,
+        }
+      ),
     }),
     alerting: schema.object({
       inventory_threshold: schema.object({
@@ -122,6 +131,7 @@ export class InfraServerPlugin
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
   private logViews: LogViewsService;
+  private metricsExplorerViews: MetricsExplorerViewsService;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
@@ -140,6 +150,9 @@ export class InfraServerPlugin
 
     this.inventoryViews = new InventoryViewsService(this.logger.get('inventoryViews'));
     this.logViews = new LogViewsService(this.logger.get('logViews'));
+    this.metricsExplorerViews = new MetricsExplorerViewsService(
+      this.logger.get('metricsExplorerViews')
+    );
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
@@ -155,12 +168,13 @@ export class InfraServerPlugin
     );
     const inventoryViews = this.inventoryViews.setup();
     const logViews = this.logViews.setup();
+    const metricsExplorerViews = this.metricsExplorerViews.setup();
 
     // register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
-    core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
     core.savedObjects.registerType(logViewSavedObjectType);
+    core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
     // and make them available via the request context so we can do away with
@@ -237,6 +251,7 @@ export class InfraServerPlugin
       defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
       inventoryViews,
       logViews,
+      metricsExplorerViews,
     } as InfraPluginSetup;
   }
 
@@ -258,9 +273,15 @@ export class InfraServerPlugin
       },
     });
 
+    const metricsExplorerViews = this.metricsExplorerViews.start({
+      infraSources: this.libs.sources,
+      savedObjects: core.savedObjects,
+    });
+
     return {
       inventoryViews,
       logViews,
+      metricsExplorerViews,
       getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };
   }

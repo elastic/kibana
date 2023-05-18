@@ -176,4 +176,69 @@ describe('Create rule route', () => {
       expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
     });
   });
+  describe('rule containing response actions', () => {
+    beforeEach(() => {
+      // @ts-expect-error We're writting to a read only property just for the purpose of the test
+      clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
+    });
+    const getResponseAction = (command: string = 'isolate') => ({
+      action_type_id: '.endpoint',
+      params: {
+        command,
+        comment: '',
+      },
+    });
+    const defaultAction = getResponseAction();
+
+    test('is successful', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [defaultAction],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+    });
+
+    test('fails when isolate rbac is set to false', async () => {
+      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
+        canIsolateHost: jest.fn().mockReturnValue(false),
+      }));
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [defaultAction],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(403);
+      expect(response.body.message).toEqual(
+        'User is not authorized to change isolate response actions'
+      );
+    });
+    test('fails when provided with an unsupported command', async () => {
+      const wrongAction = getResponseAction('processes');
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [wrongAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'Invalid value "processes" supplied to "response_actions,params,command"'
+      );
+    });
+  });
 });

@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract, KibanaRequest, SavedObject } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import pMap from 'p-map';
 import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { RouteContext } from '../../../legacy_uptime/routes';
+import { deleteMonitorIfCreated } from '../add_monitor';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { deleteMonitor } from '../delete_monitor';
 import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
@@ -21,7 +25,6 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
 export const createNewSavedObjectMonitorBulk = async ({
   soClient,
@@ -41,27 +44,28 @@ export const createNewSavedObjectMonitorBulk = async ({
     }),
   }));
 
-  return await soClient.bulkCreate<EncryptedSyntheticsMonitor>(newMonitors);
+  const result = await soClient.bulkCreate<EncryptedSyntheticsMonitor>(newMonitors);
+  return result.saved_objects;
 };
 
+type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitor>;
+
+type CreatedMonitors = SavedObjectsBulkResponse<EncryptedSyntheticsMonitor>['saved_objects'];
+
 export const syncNewMonitorBulk = async ({
+  routeContext,
   normalizedMonitors,
-  server,
-  syntheticsMonitorClient,
-  soClient,
-  request,
   privateLocations,
   spaceId,
 }: {
+  routeContext: RouteContext;
   normalizedMonitors: SyntheticsMonitor[];
-  server: UptimeServerSetup;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
-  soClient: SavedObjectsClientContract;
-  request: KibanaRequest;
   privateLocations: PrivateLocation[];
   spaceId: string;
 }) => {
-  let newMonitors: SavedObjectsBulkResponse<EncryptedSyntheticsMonitor> | null = null;
+  const { server, savedObjectsClient, syntheticsMonitorClient, request } = routeContext;
+  let newMonitors: CreatedMonitors | null = null;
+
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
     const monitorSavedObjectId = uuidV4();
     return {
@@ -76,57 +80,86 @@ export const syncNewMonitorBulk = async ({
   });
 
   try {
-    const [createdMonitors, { syncErrors }] = await Promise.all([
+    const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
       createNewSavedObjectMonitorBulk({
         monitorsToCreate,
-        soClient,
+        soClient: savedObjectsClient,
       }),
       syntheticsMonitorClient.addMonitors(
         monitorsToCreate,
         request,
-        soClient,
+        savedObjectsClient,
         privateLocations,
         spaceId
       ),
     ]);
 
+    let failedMonitors: FailedMonitorConfig[] = [];
+
+    const { failed: failedPolicies } = policiesResult ?? {};
+
     newMonitors = createdMonitors;
 
-    sendNewMonitorTelemetry(server, newMonitors.saved_objects, syncErrors);
+    if (failedPolicies && failedPolicies?.length > 0 && newMonitors) {
+      failedMonitors = await handlePrivateConfigErrors(routeContext, newMonitors, failedPolicies);
+    }
 
-    return { errors: syncErrors, newMonitors: newMonitors.saved_objects };
+    sendNewMonitorTelemetry(server, newMonitors, syncErrors);
+
+    return { errors: syncErrors, newMonitors, failedMonitors };
   } catch (e) {
-    await rollBackNewMonitorBulk(
-      monitorsToCreate,
-      server,
-      soClient,
-      syntheticsMonitorClient,
-      request
-    );
-
+    await rollBackNewMonitorBulk(monitorsToCreate, routeContext);
     throw e;
   }
 };
 
+interface FailedMonitorConfig {
+  monitor: MonitorSavedObject;
+  error?: Error | SavedObjectError;
+}
+
+const handlePrivateConfigErrors = async (
+  routeContext: RouteContext,
+  createdMonitors: CreatedMonitors,
+  failedPolicies: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>
+) => {
+  const failedMonitors: FailedMonitorConfig[] = [];
+
+  await pMap(failedPolicies, async ({ packagePolicy, error }) => {
+    const { inputs } = packagePolicy;
+    const enabledInput = inputs?.find((input) => input.enabled);
+    const stream = enabledInput?.streams?.[0];
+    const vars = stream?.vars;
+    const monitorId = vars?.[ConfigKey.CONFIG_ID]?.value;
+    const monitor = createdMonitors.find(
+      (savedObject) => savedObject.attributes[ConfigKey.CONFIG_ID] === monitorId
+    );
+    if (monitor) {
+      failedMonitors.push({ monitor, error });
+      await deleteMonitorIfCreated({
+        routeContext,
+        newMonitorId: monitor.id,
+      });
+      createdMonitors.splice(createdMonitors.indexOf(monitor), 1);
+    }
+  });
+  return failedMonitors;
+};
+
 const rollBackNewMonitorBulk = async (
   monitorsToCreate: Array<{ id: string; monitor: MonitorFields }>,
-  server: UptimeServerSetup,
-  soClient: SavedObjectsClientContract,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  request: KibanaRequest
+  routeContext: RouteContext
 ) => {
+  const { server } = routeContext;
   try {
     await pMap(
       monitorsToCreate,
       async (monitor) =>
         deleteMonitor({
-          server,
-          request,
-          savedObjectsClient: soClient,
+          routeContext,
           monitorId: monitor.id,
-          syntheticsMonitorClient,
         }),
-      { concurrency: 100 }
+      { concurrency: 100, stopOnError: false }
     );
   } catch (e) {
     // ignore errors here

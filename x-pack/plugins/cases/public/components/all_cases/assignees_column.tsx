@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { Case } from '../../../common/ui/types';
+import type { CaseUI } from '../../../common/ui/types';
 import { getEmptyTagValue } from '../empty_value';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
@@ -19,7 +19,7 @@ import * as i18n from './translations';
 const COMPRESSED_AVATAR_LIMIT = 3;
 
 export interface AssigneesColumnProps {
-  assignees: Case['assignees'];
+  assignees: CaseUI['assignees'];
   userProfiles: Map<string, UserProfileWithAvatar>;
   compressedDisplayLimit?: number;
 }

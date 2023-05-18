@@ -21,7 +21,7 @@ import {
 import type {
   CaseUserActionAttributesWithoutConnectorId,
   ConnectorUserAction,
-  UserAction,
+  ActionCategory,
 } from '../../../common/api';
 import { CaseSeverity, CaseStatuses, Actions } from '../../../common/api';
 import {
@@ -76,7 +76,7 @@ export const createUserActionSO = ({
   type,
   references = [],
 }: {
-  action: UserAction;
+  action: ActionCategory;
   type?: string;
   payload?: Record<string, unknown>;
   attributesOverrides?: Partial<CaseUserActionAttributesWithoutConnectorId>;
