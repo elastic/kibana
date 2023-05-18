@@ -266,7 +266,6 @@ describe('SearchBar', () => {
     );
     expect(component.find(QUERY_INPUT).length).toBeFalsy();
     expect(component.find(EDITOR).length).toBeTruthy();
-    // expect(component).toMatchInlineSnapshot();
   });
 
   it('Should render in isDisabled state', () => {

@@ -7,9 +7,7 @@
  */
 
 import { Plugin, CoreStart } from '@kbn/core/public';
-// import { createEditor } from './create_editor';
 import { setKibanaServices } from './kibana_services';
-// import type { TextBasedLanguagesPluginStart } from './types';
 
 export class TextBasedLanguagesPlugin implements Plugin<{}, void> {
   public setup() {
