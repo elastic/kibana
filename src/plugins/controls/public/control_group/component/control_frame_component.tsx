@@ -25,6 +25,8 @@ import {
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { ControlError } from './control_error_component';
+import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { isErr } from '@kbn/task-manager-plugin/server/lib/result_type';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -116,11 +118,8 @@ export const ControlFrame = ({
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
-        />
-      )}
-      {fatalError && (
-        <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
-          {<ControlError error={fatalError} />}
+        >
+          {isErrorEmbeddable(embeddable) && <ControlError error={embeddable.error} />}
         </div>
       )}
       {!embeddable && (
