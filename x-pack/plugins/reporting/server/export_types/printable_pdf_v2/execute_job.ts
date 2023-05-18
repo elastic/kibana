@@ -46,9 +46,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
             {
               format: 'pdf',
               title,
-              logo,
+              // logo,
               browserTimezone,
-              headers,
+              // headers,
               layout,
             }
           );
