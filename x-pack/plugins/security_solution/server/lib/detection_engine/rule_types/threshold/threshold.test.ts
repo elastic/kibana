@@ -165,6 +165,7 @@ describe('threshold_executor', () => {
         aggregatableTimestampField: TIMESTAMP,
         exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
+        inputIndexFields: [],
       });
       expect(result.warningMessages).toEqual([
         `The following exceptions won't be applied to rule execution: ${
