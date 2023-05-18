@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
-import { ManagementCategories } from './manage';
+import { ManagementCategories } from './landing';
 import type { NavigationLink } from '../../common/links';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
