@@ -29,7 +29,7 @@ function createInternalNavNode(
   _navNode: NodeProps,
   deepLinks: Readonly<ChromeNavLink[]>
 ): InternalNavigationNode | null {
-  const { children, link, ...navNode } = _navNode;
+  const { children, onRemove, link, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
   const isLinkActive = isNodeActive({ link, deepLink });
 

@@ -107,6 +107,78 @@ describe('<Navigation />', () => {
       });
     });
 
+    test('should render any level of depth', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item3',
+          title: 'Title from deeplink!',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const onProjectNavigationChange = jest.fn();
+
+      render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <Navigation>
+            <Navigation.Group id="item1" title="Item 1">
+              <Navigation.Group id="item1" title="Item 1">
+                {/* Will read the title from the deeplink */}
+                <Navigation.Group link="item3">
+                  <Navigation.Item id="item1" title="Item 1" />
+                </Navigation.Group>
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTree] = lastCall;
+
+      expect(navTree).toEqual({
+        navigationTree: [
+          {
+            id: 'item1',
+            title: 'Item 1',
+            children: [
+              {
+                id: 'item1',
+                title: 'Item 1',
+                children: [
+                  {
+                    id: 'item3',
+                    title: 'Title from deeplink!',
+                    deepLink: {
+                      baseUrl: '',
+                      href: '',
+                      id: 'item3',
+                      title: 'Title from deeplink!',
+                      url: '',
+                    },
+                    children: [
+                      {
+                        id: 'item1',
+                        title: 'Item 1',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
     test.skip('does not render in the UI the nodes that points to unexisting deeplinks', async () => {
       // TODO: This test will be added when we'll have the UI and be able to add
       // data-test-subj to all the nodes with their paths

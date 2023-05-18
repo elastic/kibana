@@ -19,7 +19,7 @@ describe('<DefaultNavigation />', () => {
   const services = getServicesMock();
 
   describe('builds the navigation tree', () => {
-    test('should read the title from props, children or deeplink', async () => {
+    test('should read the title from config or deeplink', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
         {
           id: 'item2',
@@ -67,7 +67,7 @@ describe('<DefaultNavigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTreeGenerated] = lastCall;
 
-      expect(navTreeGenerated).toMatchObject({
+      expect(navTreeGenerated).toEqual({
         navigationTree: [
           {
             id: 'item1',
@@ -76,10 +76,111 @@ describe('<DefaultNavigation />', () => {
           {
             id: 'item2-a',
             title: 'Title from deeplink!',
+            deepLink: {
+              id: 'item2',
+              title: 'Title from deeplink!',
+              baseUrl: '',
+              url: '',
+              href: '',
+            },
           },
           {
             id: 'item2-b',
             title: 'Override the deeplink with props',
+            deepLink: {
+              id: 'item2',
+              title: 'Title from deeplink!',
+              baseUrl: '',
+              url: '',
+              href: '',
+            },
+          },
+        ],
+      });
+    });
+
+    test('should render any level of depth', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item2',
+          title: 'Title from deeplink!',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const onProjectNavigationChange = jest.fn();
+
+      const navTreeConfig: ChromeProjectNavigationNode[] = [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          children: [
+            {
+              id: 'item1',
+              title: 'Item 1',
+              children: [
+                {
+                  link: 'item2', // Title from deeplink
+                  children: [
+                    {
+                      id: 'item1',
+                      title: 'Item 1',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <DefaultNavigation navTree={navTreeConfig} />
+        </NavigationProvider>
+      );
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTreeGenerated] = lastCall;
+
+      expect(navTreeGenerated).toEqual({
+        navigationTree: [
+          {
+            id: 'item1',
+            title: 'Item 1',
+            children: [
+              {
+                id: 'item1',
+                title: 'Item 1',
+                children: [
+                  {
+                    id: 'item2',
+                    title: 'Title from deeplink!',
+                    deepLink: {
+                      id: 'item2',
+                      title: 'Title from deeplink!',
+                      baseUrl: '',
+                      url: '',
+                      href: '',
+                    },
+                    children: [
+                      {
+                        id: 'item1',
+                        title: 'Item 1',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       });
