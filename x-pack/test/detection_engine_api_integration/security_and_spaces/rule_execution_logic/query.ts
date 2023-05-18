@@ -2159,7 +2159,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('field names wildcard queries', async () => {
+    // https://github.com/elastic/kibana/issues/149920
+    describe('field name wildcard queries', async () => {
       const { indexEnhancedDocuments } = dataGeneratorFactory({
         es,
         index: 'ecs_compliant',
@@ -2176,7 +2177,6 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      // https://github.com/elastic/kibana/issues/149920
       it('should return correct documents with wildcard field query', async () => {
         const id = uuidv4();
         const firstDoc = { id, agent: { name: 'test-1' } };
