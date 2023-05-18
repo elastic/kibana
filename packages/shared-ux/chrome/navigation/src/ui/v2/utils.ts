@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { NodeProps } from './types';
 
-export const getIdFromNavigationNode = ({
-  id: _id,
-  link,
-  title,
-}: ChromeProjectNavigationNode): { id: string } => {
+export const getIdFromNavigationNode = ({ id: _id, link, title }: NodeProps): { id: string } => {
   const id = _id ?? link;
 
   if (!id) {
@@ -32,8 +28,6 @@ export const getDeepLinkFromNavigationNode = (
 export const getTitleForNavigationNode = (
   {
     title: _title = '',
-    id,
-    link,
   }: {
     title?: string;
     id: string;

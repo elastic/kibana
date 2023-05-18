@@ -7,27 +7,19 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { ChromeNavLink } from '@kbn/core-chrome-browser';
-import React, { ReactNode, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../../services';
+import { NodeProps } from '../types';
 import { useInitNavnode } from '../use_init_navnode';
 
-interface Props {
-  children?: ((deepLink?: ChromeNavLink) => ReactNode) | string;
-  id?: string;
-  title?: string;
-  link?: string;
-  // Temp to test removing nav nodes
-  onRemove?: () => void;
-}
-
-function NavigationItemComp({ children, onRemove, ...rest }: Props) {
+function NavigationItemComp(node: NodeProps) {
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
 
-  const { navNode, isActive } = useInitNavnode(rest, { deepLinks });
+  const { children, onRemove } = node;
+  const { navNode, isActive } = useInitNavnode(node, { deepLinks });
   const { title, deepLink } = navNode;
 
   // Note: temporary UI. In future PR we'll have an EUI component here
@@ -47,17 +39,23 @@ function NavigationItemComp({ children, onRemove, ...rest }: Props) {
     if (!children) {
       return wrapTextWithLink(title);
     }
-    return typeof children === 'function' ? children(deepLink) : wrapTextWithLink(children);
+    if (typeof children === 'string') {
+      return wrapTextWithLink(children);
+    } else if (typeof children === 'function') {
+      return children(deepLink);
+    }
+    return children;
   }, [children, deepLink, title, wrapTextWithLink]);
 
-  const renderTempUIToTestRemoveBehavior = () => (
-    <>
-      {' '}
-      <EuiButton size="s" onClick={() => onRemove?.()}>
-        Remove
-      </EuiButton>
-    </>
-  );
+  const renderTempUIToTestRemoveBehavior = () =>
+    onRemove ? (
+      <>
+        {' '}
+        <EuiButton size="s" onClick={() => onRemove()}>
+          Remove
+        </EuiButton>
+      </>
+    ) : null;
 
   if (!isActive) {
     return null;

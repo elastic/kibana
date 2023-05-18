@@ -6,28 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode, createContext, useCallback, useMemo, useContext } from 'react';
+import React, { createContext, useCallback, useMemo, useContext } from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../../services';
 import { useInitNavnode } from '../use_init_navnode';
-import { RegisterFunction } from '../types';
+import { NodeProps, RegisterFunction } from '../types';
 
 export const NavigationGroupContext = createContext<Context | undefined>(undefined);
 
 interface Context {
   register: RegisterFunction;
-}
-
-interface Props {
-  children: ReactNode;
-  id?: string;
-  title?: string;
-  link?: string;
-  // Temp to test removing nav nodes
-  onRemove: () => void;
 }
 
 export function useNavigationGroup<T extends boolean = true>(
@@ -40,11 +31,12 @@ export function useNavigationGroup<T extends boolean = true>(
   return context as T extends true ? Context : Context | undefined;
 }
 
-function NavigationGroupComp({ children, onRemove, ...rest }: Props) {
+function NavigationGroupComp(node: NodeProps) {
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
 
-  const { navNode, isActive, registerChildren } = useInitNavnode(rest, { deepLinks });
+  const { children, onRemove } = node;
+  const { navNode, isActive, registerChildNode } = useInitNavnode(node, { deepLinks });
   const { title, deepLink } = navNode;
 
   const wrapTextWithLink = useCallback(
@@ -60,14 +52,15 @@ function NavigationGroupComp({ children, onRemove, ...rest }: Props) {
   );
 
   const renderTempUIToTestRemoveBehavior = useCallback(
-    () => (
-      <>
-        {' '}
-        <EuiButton size="s" onClick={() => onRemove()}>
-          Remove
-        </EuiButton>
-      </>
-    ),
+    () =>
+      onRemove ? (
+        <>
+          {' '}
+          <EuiButton size="s" onClick={() => onRemove()}>
+            Remove
+          </EuiButton>
+        </>
+      ) : null,
     [onRemove]
   );
 
@@ -83,9 +76,9 @@ function NavigationGroupComp({ children, onRemove, ...rest }: Props) {
 
   const contextValue = useMemo(() => {
     return {
-      register: registerChildren,
+      register: registerChildNode,
     };
-  }, [registerChildren]);
+  }, [registerChildNode]);
 
   if (!isActive) {
     return null;
