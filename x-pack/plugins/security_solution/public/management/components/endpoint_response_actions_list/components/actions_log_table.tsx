@@ -317,10 +317,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
               idToRowMap[actionId] = <EuiSkeletonText size="relative" lines={8} />;
             } else {
               idToRowMap[actionId] = (
-                <ActionsLogExpandedTray
-                  action={items.filter((item) => item.id === actionId)[0]}
-                  data-test-subj={dataTestSubj}
-                />
+                <ActionsLogExpandedTray action={actionItem} data-test-subj={dataTestSubj} />
               );
             }
             return idToRowMap;
