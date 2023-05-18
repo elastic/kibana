@@ -7,18 +7,28 @@
 
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '@kbn/slo-schema';
+import {
+  calendarAlignedTimeWindowSchema,
+  DurationUnit,
+  rollingTimeWindowSchema,
+} from '@kbn/slo-schema';
 
 import { DateRange, toMomentUnitOfTime } from '../models';
 import type { TimeWindow } from '../models/time_window';
 
 export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-    const unit = toMomentUnitOfTime(timeWindow.duration.unit);
-    const from = moment.utc(currentDate).startOf(unit);
-    const to = moment.utc(currentDate).endOf(unit);
-
-    return { from: from.toDate(), to: to.toDate() };
+    if (timeWindow.duration.unit === DurationUnit.Week) {
+      // week is defined as Monday-Sunday
+      const from = moment.utc(currentDate).startOf('week').weekday(1);
+      const to = moment.utc(currentDate).endOf('week').weekday(7);
+      return { from: from.toDate(), to: to.toDate() };
+    } else {
+      const unit = toMomentUnitOfTime(timeWindow.duration.unit);
+      const from = moment.utc(currentDate).startOf(unit);
+      const to = moment.utc(currentDate).endOf(unit);
+      return { from: from.toDate(), to: to.toDate() };
+    }
   }
 
   if (rollingTimeWindowSchema.is(timeWindow)) {
