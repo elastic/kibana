@@ -2666,7 +2666,6 @@
     "expressionMetric.functions.metricHelpText": "在标签上显示数字。",
     "expressionMetric.renderer.metric.displayName": "指标",
     "expressionMetric.renderer.metric.helpDescription": "在标签上呈现数字",
-    "expressionMetricVis.errors.unsupportedColumnFormat": "指标可视化表达式 - 不支持的列格式：“{id}”",
     "expressionMetricVis.trendA11yTitle": "时移 {dataTitle}。",
     "expressionMetricVis.function.breakdownBy.help": "包含子类别标签的维度。",
     "expressionMetricVis.function.color.help": "提供静态可视化颜色。已由调色板覆盖。",

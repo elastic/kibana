@@ -30,7 +30,11 @@ import type {
   RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import {
+  FieldFormatConvertFunction,
+  FORMATS_UI_SETTINGS,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -39,18 +43,109 @@ import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
-import { getPaletteService, getThemeService, getFormatService } from '../services';
+import {
+  getPaletteService,
+  getThemeService,
+  getFormatService,
+  getUiSettingsService,
+} from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorLightestShade;
+
+export const COMPACT_CUSTOM_PATTERNS_LOOKUP = {
+  number: {
+    uiSettingsKey: FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN,
+    patternFn: () => '0,0.[00]a',
+    overrideCheck: true,
+  },
+  currency: {
+    uiSettingsKey: FORMATS_UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN,
+    patternFn: (prevPattern: string) =>
+      /a/.test(prevPattern) ? prevPattern : `${prevPattern}a`.replace(/(\))?a$/, 'a$1'), // add the "a" first to have always a match
+    overrideCheck: false,
+  },
+  percent: {
+    uiSettingsKey: FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN,
+    patternFn: () => `0,0.[000]a%`,
+    overrideCheck: true,
+  },
+  // bytes does not require a special compact format
+} as const;
+
+type FormatTypesWithCompactVariants = keyof typeof COMPACT_CUSTOM_PATTERNS_LOOKUP;
+
+function isBitFormat(serializedFieldFormat: SerializedFieldFormat) {
+  return (
+    serializedFieldFormat.id === 'number' &&
+    /bitd/.test(`${serializedFieldFormat.params?.pattern || ''}`)
+  );
+}
+
+function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
+  const uiSettings = getUiSettingsService();
+  if (serializedFieldFormat?.id === 'duration') {
+    return {
+      ...serializedFieldFormat,
+      params: {
+        // by default use the compact precise format
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        useShortSuffix: true,
+        // but if user configured something else, use it
+        ...serializedFieldFormat!.params,
+      },
+    };
+  }
+  // Some formats (number, currency, percentage) should be handled carefully
+  // * if format is coming from field format and has params configured, then skip this
+  // * if format is the legacy Lens bits format then skip this
+  // * if format is coming from Lens, then override the pattern with the custom compact one
+  // * if format is falling back to the Advanced settings one, then override only if not touched
+  if (
+    serializedFieldFormat?.id &&
+    serializedFieldFormat.id in COMPACT_CUSTOM_PATTERNS_LOOKUP &&
+    (!serializedFieldFormat.params || serializedFieldFormat.params?.formatOverride) &&
+    // due to legacy configuration of lens bit formatter this was set as "number" with a custom format
+    !isBitFormat(serializedFieldFormat)
+  ) {
+    const { uiSettingsKey, patternFn, overrideCheck } =
+      COMPACT_CUSTOM_PATTERNS_LOOKUP[serializedFieldFormat.id as FormatTypesWithCompactVariants];
+    // If the format was set in Lens use the custom pattern
+    if (serializedFieldFormat.params?.formatOverride) {
+      return {
+        ...serializedFieldFormat,
+        params: {
+          pattern: patternFn(
+            (serializedFieldFormat.params.pattern as string) || uiSettings.get(uiSettingsKey)
+          ),
+        },
+      };
+    }
+    // otherwise if user customized it in Advanced Settings, then just return it
+    if (overrideCheck && uiSettings.isOverridden(uiSettingsKey)) {
+      return serializedFieldFormat;
+    }
+    // otherwise propose a custom compact format
+    return {
+      ...serializedFieldFormat,
+      params: {
+        pattern: patternFn(
+          (serializedFieldFormat.params?.pattern as string) || uiSettings.get(uiSettingsKey)
+        ),
+      },
+    };
+  }
+  return serializedFieldFormat;
+}
 
 const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatter = getFormatService().deserialize(serializedFieldFormat);
-  return formatter.convert.bind(formatter);
+  const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat);
+  return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
 };
 
 const getColor = (
