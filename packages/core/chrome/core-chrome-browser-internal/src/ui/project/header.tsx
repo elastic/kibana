@@ -29,7 +29,7 @@ import { Observable } from 'rxjs';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
-import { HeaderActionMenu } from '../header/header_action_menu';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { ProjectNavigation } from './navigation';
@@ -68,6 +68,8 @@ export const ProjectHeader = ({
       aria-label="Go to home page"
     />
   );
+
+  const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
 
   return (
     <>
@@ -125,13 +127,15 @@ export const ProjectHeader = ({
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>
-      <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
-        <EuiHeaderSection>
-          <EuiHeaderSectionItem>
-            <HeaderActionMenu actionMenu$={observables.actionMenu$} />
-          </EuiHeaderSectionItem>
-        </EuiHeaderSection>
-      </EuiHeader>
+      {headerActionMenuMounter.mount && (
+        <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
+          <EuiHeaderSection>
+            <EuiHeaderSectionItem>
+              <HeaderActionMenu mounter={headerActionMenuMounter} />
+            </EuiHeaderSectionItem>
+          </EuiHeaderSection>
+        </EuiHeader>
+      )}
     </>
   );
 };
