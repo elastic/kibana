@@ -45,7 +45,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       };
 
       return lastValueFrom(
-        generatePngObservable(reporting, logger, {
+        generatePngObservable(reporting.getScreenshots, logger, {
           layout,
           request: req,
           browserTimezone: 'America/Los_Angeles',

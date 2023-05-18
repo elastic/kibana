@@ -9,7 +9,7 @@ import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import { CaptureResult } from '@kbn/screenshotting-plugin/server/screenshots';
+import { PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
 import type { PngScreenshotOptions } from '../../types';
@@ -20,7 +20,7 @@ interface PngResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options: PngScreenshotOptions) => Rx.Observable<CaptureResult>;
+type GetScreenshotsFn = (options: PngScreenshotOptions) => Rx.Observable<PngScreenshotResult>;
 
 export function generatePngObservable(
   getScreenshots: GetScreenshotsFn,
