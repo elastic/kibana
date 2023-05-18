@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Risk Scoring API
+  description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
+paths:
+  /scores:
+    post:
+      description: Returns a list of Risk Scores
+      requestBody:
+        description: Details about the Risk Scores being requested
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskScoresRequest'
+        required: false
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Invalid request
+
+components:
+  schemas:
+    RiskScoresRequest:
+      type: object
+      properties:
+        after_keys:
+          $ref: '#/components/schemas/AfterKeys'
+        data_view_id:
+          type: string
+          example: security-solution-default
+        debug:
+          type: boolean
+        filter:
+          type: array
+          items:
+          $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
+        identifier_type:
+          $ref: '#/components/schemas/IdentifierType'
+        range:
+          type: object
+          required:
+            - start
+            - end
+          properties:
+            start:
+              $ref: '#/components/schemas/KibanaDate'
+            end:
+              $ref: '#/components/schemas/KibanaDate'
+        weights:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskScoreWeight'
+          example:
+            - type: 'risk_category'
+              value: 'alerts'
+              host: 0.8
+              user: 0.4
+            - type: 'global_identifier'
+              host: 0.5
+              user: 0.1
+
+
+    AfterKey:
+      type: object
+      additionalProperties:
+        type: string
+    AfterKeys:
+      type: object
+      properties:
+        host:
+          $ref: '#/components/schemas/AfterKey'
+        user:
+          $ref: '#/components/schemas/AfterKey'
+      example:
+        host:
+          'host.name': 'example.host'
+        user:
+          'user.name': 'example_user_name'
+    KibanaDate:
+      type: string
+      oneOf:
+        - format: date
+        - format: date-time
+        - format: datemath
+      example: '2017-07-21T17:32:28Z'
+    IdentifierType:
+      type: string
+      enum:
+        - host
+        - user
+    RiskScoreWeight:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+        host:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+        user:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+      example:
+        type: 'risk_category'
+        value: 'alerts'
+        host: 0.8
+        user: 0.4
