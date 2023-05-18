@@ -81,7 +81,8 @@ export function EditorFrame(props: EditorFrameProps) {
       visualizationMap,
       datasourceMap[activeDatasourceId],
       field,
-      framePublicAPI.dataViews
+      framePublicAPI.dataViews,
+      true
     );
   };
 
