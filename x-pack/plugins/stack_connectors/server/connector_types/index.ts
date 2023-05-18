@@ -42,8 +42,6 @@ export { ConnectorTypeId as EmailConnectorTypeId } from './email';
 export type { ActionParamsType as EmailActionParams } from './email';
 export { ConnectorTypeId as IndexConnectorTypeId } from './es_index';
 export type { ActionParamsType as IndexActionParams } from './es_index';
-export { ConnectorTypeId as GenerativeAiConnectorTypeId } from './gen_ai';
-export type { ActionParamsType as GenerativeAiActionParams } from './gen_ai';
 export { ConnectorTypeId as PagerDutyConnectorTypeId } from './pagerduty';
 export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
 export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
