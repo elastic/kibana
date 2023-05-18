@@ -346,5 +346,9 @@ function isGrantedElasticsearchPrivilege(
     }
   );
 
-  return hasRequiredClusterPrivileges && hasRequiredIndexPrivileges;
+  const hasRequiredRoles = (privilege.requiredRoles ?? []).every(
+    (requiredRole) => user?.roles.includes(requiredRole) ?? false
+  );
+
+  return hasRequiredClusterPrivileges && hasRequiredIndexPrivileges && hasRequiredRoles;
 }

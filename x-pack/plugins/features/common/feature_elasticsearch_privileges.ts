@@ -40,6 +40,17 @@ export interface FeatureElasticsearchPrivileges {
   };
 
   /**
+   * A set of Elasticsearch roles which are required for this feature to be enabled.
+   *
+   * @deprecated do not rely on hard-coded role names.
+   * @removeBy 8.8.0
+   *
+   * This is relied on by the reporting feature, and should be removed once reporting
+   * migrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914
+   */
+  requiredRoles?: string[];
+
+  /**
    * A list of UI Capabilities that should be granted to users with this privilege.
    * These capabilities will automatically be namespaces within your feature id.
    *
