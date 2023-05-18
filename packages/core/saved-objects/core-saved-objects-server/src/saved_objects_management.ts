@@ -60,10 +60,12 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
    *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
-  getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
-    path: string;
-    uiCapabilitiesPath: string;
-  } | undefined;
+  getInAppUrl?: (savedObject: SavedObject<Attributes>) =>
+    | {
+        path: string;
+        uiCapabilitiesPath: string;
+      }
+    | undefined;
   /**
    * An optional export transform function that can be used transform the objects of the registered type during
    * the export process.
