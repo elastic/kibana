@@ -110,7 +110,13 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
             ))}
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiCallOut title="Try it now in Console" size="m" iconType="iInCircle">
+          <EuiCallOut
+            title={i18n.translate('xpack.serverlessSearch.selectClient.callout.title', {
+              defaultMessage: 'Try it now in Console',
+            })}
+            size="m"
+            iconType="iInCircle"
+          >
             <p>
               {i18n.translate('xpack.serverlessSearch.selectClient.callout.description', {
                 defaultMessage:
