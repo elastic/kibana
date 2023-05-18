@@ -17,15 +17,17 @@ import type {
   OsType,
   OsTypeArray,
   NamespaceType,
+  FilterEndpointFields,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import type { DataViewBase } from '@kbn/es-query';
 import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { DataView } from '@kbn/data-views-plugin/common';
+
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -65,7 +67,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   /* Exception items - could be one being edited, or multiple being added */
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   /* Fields used to populate the field option dropdown */
-  indexPatterns: DataViewBase;
+  indexPatterns: DataView | undefined;
   /* Exception items can be added to zero (just being added to a shared list), one or more rules */
   rules: Rule[] | null;
   /* OS options required for endpoint exceptions */
@@ -84,11 +86,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   onExceptionItemAdd: (items: ExceptionsBuilderReturnExceptionItem[]) => void;
   /* Exception item builder takes a callback used when there are updates to the item that includes information on if any form errors exist */
   onSetErrorExists: (errorExists: boolean) => void;
-  onFilterIndexPatterns: (
-    patterns: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: Array<'linux' | 'macos' | 'windows'> | undefined
-  ) => DataViewBase;
+  onFilterIndexPatterns: FilterEndpointFields;
 }
 
 const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({

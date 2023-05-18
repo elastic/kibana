@@ -20,7 +20,7 @@ import type {
   NamespaceType,
   EntryNested,
   OsTypeArray,
-  ExceptionListType,
+  FilterEndpointFields,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   ExceptionListSchema,
@@ -32,7 +32,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
@@ -46,11 +46,7 @@ import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 
-export const filterIndexPatterns = (
-  patterns: DataViewBase,
-  type: ExceptionListType,
-  osTypes?: OsTypeArray
-): DataViewBase => {
+export const filterIndexPatterns: FilterEndpointFields = (patterns, type, osTypes) => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -62,15 +58,19 @@ export const filterIndexPatterns = (
 
       return {
         ...patterns,
-        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
-      };
+        fields:
+          patterns != null ? patterns.fields.filter(({ name }) => osFilterForEndpoint(name)) : [],
+      } as DataView;
     case 'endpoint_events':
       return {
         ...patterns,
-        fields: patterns.fields.filter(({ name }) =>
-          EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(name)
-        ),
-      };
+        fields:
+          patterns != null
+            ? patterns.fields.filter(({ name }) =>
+                EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(name)
+              )
+            : [],
+      } as DataView;
     default:
       return patterns;
   }

@@ -13,6 +13,7 @@ import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
   ExceptionListItemSchema,
   ExceptionListType,
+  FilterEndpointFields,
   NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
@@ -31,7 +32,7 @@ import {
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 
 import { AndOrBadge } from '../and_or_badge';
@@ -80,7 +81,7 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
-  indexPatterns: DataViewBase;
+  indexPatterns: DataView | undefined;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
@@ -88,10 +89,7 @@ export interface ExceptionBuilderProps {
   listId: string | undefined;
   listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: (
-    pattern: DataViewBase,
-    type: ExceptionListType
-  ) => DataViewBase;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields;
   onChange: (arg: OnChangeProps) => void;
   ruleName?: string;
   isDisabled?: boolean;

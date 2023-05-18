@@ -7,6 +7,9 @@
  */
 
 import * as t from 'io-ts';
+import type { DataView } from '@kbn/data-views-plugin/common';
+
+import { OsTypeArray } from '../os_type';
 
 export const exceptionListType = t.keyof({
   detection: null,
@@ -29,3 +32,9 @@ export enum ExceptionListTypeEnum {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS = 'endpoint_host_isolation_exceptions',
   ENDPOINT_BLOCKLISTS = 'endpoint_blocklists',
 }
+
+export type FilterEndpointFields = (
+  patterns: DataView | undefined,
+  type: ExceptionListType,
+  osTypes?: OsTypeArray
+) => DataView | undefined;

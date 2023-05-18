@@ -20,6 +20,7 @@ import {
 import styled from 'styled-components';
 import {
   ExceptionListType,
+  FilterEndpointFields,
   ListSchema,
   ListOperatorTypeEnum as OperatorTypeEnum,
   OsTypeArray,
@@ -53,9 +54,10 @@ import {
   OperatingSystem,
   validateFilePathInput,
 } from '@kbn/securitysolution-utils';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { HttpStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { getEmptyValue } from '../../../common/empty_value';
 
@@ -71,15 +73,11 @@ export interface EntryItemProps {
   autocompleteService: AutocompleteStart;
   entry: FormattedBuilderEntry;
   httpService: HttpStart;
-  indexPattern: DataViewBase;
+  indexPattern: DataView | undefined;
   showLabel: boolean;
   osTypes?: OsTypeArray;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: (
-    pattern: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: OsTypeArray
-  ) => DataViewBase;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: EntryFieldError) => void;

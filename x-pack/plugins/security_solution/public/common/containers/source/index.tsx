@@ -104,7 +104,7 @@ const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
 interface FetchIndexReturn {
   /**
-   * @deprecated use fields list on dataview / "indexPattern"
+   * @deprecated use fields list on `dataView`
    * about to use browserFields? Reconsider! Maybe you can accomplish
    * everything you need via the `fields` property on the data view
    * you are working with? Or perhaps you need a description for a
@@ -113,6 +113,9 @@ interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
+  /**
+   * @deprecated use `dataView` property
+   */
   indexPatterns: { title: string; fields: FieldSpec[] };
   dataView: DataView | undefined;
 }

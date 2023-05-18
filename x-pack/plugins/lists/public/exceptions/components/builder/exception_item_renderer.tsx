@@ -10,7 +10,11 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { HttpStart } from '@kbn/core/public';
-import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListType,
+  FilterEndpointFields,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   BuilderEntry,
   ExceptionsBuilderExceptionItem,
@@ -19,7 +23,7 @@ import {
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
@@ -48,15 +52,11 @@ interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
   osTypes?: OsTypeArray;
-  indexPattern: DataViewBase;
+  indexPattern: DataView | undefined;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: (
-    pattern: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: OsTypeArray
-  ) => DataViewBase;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: EntryFieldError) => void;

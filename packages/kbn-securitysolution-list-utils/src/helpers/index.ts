@@ -28,6 +28,7 @@ import {
   nestedEntryItem,
   CreateRuleExceptionListItemSchema,
   createRuleExceptionListItemSchema,
+  FilterEndpointFields,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   DataViewBase,
@@ -35,6 +36,8 @@ import {
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeNested,
 } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {
@@ -301,19 +304,19 @@ export const getUpdatedEntriesOnDelete = (
  * set to add a nested field
  */
 export const getFilteredIndexPatterns = (
-  patterns: DataViewBase,
+  patterns: DataView | undefined,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: DataViewBase, t: ExceptionListType, o?: OsTypeArray) => DataViewBase,
+  preFilter?: FilterEndpointFields,
   osTypes?: OsTypeArray
-): DataViewBase => {
+): DataView => {
   const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
     return {
       ...indexPatterns,
-      fields: indexPatterns.fields
+      fields: indexPatterns?.fields
         .filter((indexField) => {
           const subTypeNested = getDataViewFieldSubtypeNested(indexField);
           const fieldHasCommonParentPath =
@@ -327,18 +330,18 @@ export const getFilteredIndexPatterns = (
           const [fieldNameWithoutParentPath] = f.name.split('.').slice(-1);
           return { ...f, name: fieldNameWithoutParentPath };
         }),
-    };
+    } as DataView;
   } else if (item.nested === 'parent' && item.field != null) {
     // when user has selected a nested entry, right above it we show the common parent
-    return { ...indexPatterns, fields: [item.field] };
+    return { ...indexPatterns, fields: [item.field] } as DataView;
   } else if (item.nested === 'parent' && item.field == null) {
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
       ...indexPatterns,
-      fields: indexPatterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
-    };
+      fields: indexPatterns?.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
+    } as DataView;
   } else {
-    return indexPatterns;
+    return indexPatterns as DataView;
   }
 };
 

@@ -15,7 +15,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
-  indexPatterns: DataView;
+  indexPatterns: DataView | undefined;
 }
 
 /**
@@ -75,7 +75,6 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
 
   return {
     isLoading: isIndexPatternLoading || mlJobLoading,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    indexPatterns: dataView!,
+    indexPatterns: dataView,
   };
 };
