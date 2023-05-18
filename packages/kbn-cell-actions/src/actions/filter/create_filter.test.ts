@@ -64,7 +64,6 @@ describe('createFilter', () => {
   ])('should return combined filter with multiple $caseName values', ({ negate }) => {
     const value2 = 'the-value2';
     expect(createFilter({ key: field, value: [value, value2], negate })).toEqual({
-      $state: expect.any(Object),
       meta: {
         type: 'combined',
         relation: 'AND',

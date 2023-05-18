@@ -12,7 +12,6 @@ import {
   type ExistsFilter,
   type PhraseFilter,
   type Filter,
-  FilterStateStore,
 } from '@kbn/es-query';
 
 export const isEmptyFilterValue = (
@@ -33,7 +32,7 @@ const createPhraseFilter = ({
   key: string;
   negate?: boolean;
 }): PhraseFilter => ({
-  meta: { key, negate, type: FILTERS.PHRASE, value: undefined, params: { query: value } },
+  meta: { key, negate, type: FILTERS.PHRASE, params: { query: value } },
   query: { match_phrase: { [key]: { query: value } } },
 });
 
@@ -46,13 +45,9 @@ const createCombinedFilter = ({
   key: string;
   negate: boolean;
 }): CombinedFilter => ({
-  $state: {
-    store: FilterStateStore.APP_STATE,
-  },
   meta: {
     key,
     negate,
-    value: undefined,
     type: FILTERS.COMBINED,
     relation: BooleanRelation.AND,
     params: values.map((value) => createPhraseFilter({ key, value })),
