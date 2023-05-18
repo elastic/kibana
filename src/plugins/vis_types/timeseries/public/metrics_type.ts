@@ -23,7 +23,7 @@ import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
 } from '../common/index_patterns_utils';
-import { TSVB_DEFAULT_COLOR, UI_SETTINGS } from '../common/constants';
+import { TSVB_DEFAULT_COLOR, UI_SETTINGS, VIS_TYPE } from '../common/constants';
 import { toExpressionAst } from './to_ast';
 import { getDataViewsStart, getUISettings } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
@@ -99,7 +99,7 @@ async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
 export const metricsVisDefinition: VisTypeDefinition<
   TimeseriesVisParams | TimeseriesVisDefaultParams
 > = {
-  name: 'metrics',
+  name: VIS_TYPE,
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
     defaultMessage: 'Perform advanced analysis of your time series data.',
