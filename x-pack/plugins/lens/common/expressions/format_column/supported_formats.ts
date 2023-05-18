@@ -37,7 +37,7 @@ export const supportedFormats: Record<
     },
   },
   bits: {
-    formatId: 'number',
+    formatId: 'bytes',
     decimalsToPattern: (decimals = 2) => {
       if (decimals === 0) {
         return `0,0bitd`;
