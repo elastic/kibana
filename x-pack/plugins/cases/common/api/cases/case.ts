@@ -356,6 +356,9 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
+export const GetTagsResponseRt = rt.array(rt.string);
+export const GetReportersResponseRt = rt.array(UserRt);
+
 export const CasesBulkGetRequestRt = rt.type({
   ids: rt.array(rt.string),
 });

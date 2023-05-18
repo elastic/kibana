@@ -29,6 +29,7 @@ import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Creates a new case.
@@ -111,10 +112,6 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
       owner: newCase.attributes.owner,
     });
 
-    const flattenedCase = flattenCaseSavedObject({
-      savedObject: newCase,
-    });
-
     if (query.assignees && query.assignees.length !== 0) {
       const assigneesWithoutCurrentUser = query.assignees.filter(
         (assignee) => assignee.uid !== user.profile_uid
@@ -126,7 +123,11 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
       });
     }
 
-    return CaseRt.encode(flattenedCase);
+    const res = flattenCaseSavedObject({
+      savedObject: newCase,
+    });
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }
