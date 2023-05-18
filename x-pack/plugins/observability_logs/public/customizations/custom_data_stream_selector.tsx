@@ -15,6 +15,7 @@ import {
   ObservabilityLogsPluginProvider,
   ObservabilityLogsPluginProviderProps,
 } from '../hooks/use_kibana';
+import { DataStreamsProvider, useDataStreamsContext } from '../hooks/use_data_streams';
 
 interface CustomDataStreamSelectorProps {
   stateContainer: DiscoverStateContainer;
@@ -23,8 +24,23 @@ interface CustomDataStreamSelectorProps {
 export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
-  const { integrations, isLoading, loadMore, search, searchIntegrations } =
-    useIntegrationsContext();
+
+  const {
+    integrations,
+    isLoading: isLoadingIntegrations,
+    loadMore,
+    search,
+    searchIntegrations,
+  } = useIntegrationsContext();
+
+  const {
+    dataStreams,
+    error: dataStreamsError,
+    isLoading: isLoadingStreams,
+    loadDataStreams,
+    reloadDataStreams,
+    searchDataStreams,
+  } = useDataStreamsContext();
 
   const handleStreamSelection = (dataStream: DataStream) => {
     return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream);
@@ -32,24 +48,24 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
 
   return (
     <DataStreamSelector
+      dataStreamsError={dataStreamsError}
       integrations={integrations}
-      isLoadingIntegrations={isLoading}
-      isLoadingUncategorizedStreams={false}
-      onIntegrationsSearch={searchIntegrations}
-      onLoadMore={loadMore}
+      isLoadingIntegrations={isLoadingIntegrations}
+      isLoadingStreams={isLoadingStreams}
+      onSearchIntegrations={searchIntegrations}
+      onLoadMoreIntegrations={loadMore}
       onStreamSelected={handleStreamSelection}
-      onUncategorizedClick={() => console.log('fetch uncategorized streams')}
+      onStreamsEntryClick={loadDataStreams}
+      onStreamsReload={reloadDataStreams}
       search={search}
       title={dataView.getName()}
-      uncategorizedStreams={[]}
+      uncategorizedStreams={dataStreams}
     />
   );
 });
 
 // eslint-disable-next-line import/no-default-export
 export default CustomDataStreamSelector;
-
-const mockUncategorized = [{ name: 'metrics-*' }, { name: 'logs-*' }];
 
 export type CustomDataStreamSelectorBuilderProps = ObservabilityLogsPluginProviderProps &
   CustomDataStreamSelectorProps;
@@ -65,7 +81,9 @@ function withProviders(Component: React.FunctionComponent<CustomDataStreamSelect
       <ObservabilityLogsPluginProvider core={core} plugins={plugins} pluginStart={pluginStart}>
         <InternalStateProvider value={stateContainer.internalState}>
           <IntegrationsProvider dataStreamsClient={pluginStart.dataStreamsService.client}>
-            <Component stateContainer={stateContainer} />
+            <DataStreamsProvider dataStreamsClient={pluginStart.dataStreamsService.client}>
+              <Component stateContainer={stateContainer} />
+            </DataStreamsProvider>
           </IntegrationsProvider>
         </InternalStateProvider>
       </ObservabilityLogsPluginProvider>

@@ -1,0 +1,107 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useInterpret, useSelector } from '@xstate/react';
+import createContainer from 'constate';
+import { useCallback } from 'react';
+import { createDataStreamsStateMachine } from '../state_machines/data_streams';
+import { IDataStreamsClient } from '../services/data_streams';
+import { FindDataStreamsRequestQuery } from '../../common';
+
+interface DataStreamsContextDeps {
+  dataStreamsClient: IDataStreamsClient;
+}
+
+export interface SearchDataStreamsParams {
+  name?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export type SearchDataStreams = (params: SearchDataStreamsParams) => void;
+
+const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
+  const dataStreamsStateService = useInterpret(() =>
+    createDataStreamsStateMachine({
+      dataStreamsClient,
+    })
+  );
+
+  const dataStreams = useSelector(dataStreamsStateService, (state) => state.context.dataStreams);
+
+  const search = useSelector(dataStreamsStateService, (state) =>
+    filterSearchParams(state.context.search)
+  );
+
+  const error = useSelector(dataStreamsStateService, (state) => state.context.error);
+
+  const isUninitialized = useSelector(dataStreamsStateService, (state) =>
+    state.matches('uninitialized')
+  );
+
+  const isLoading = useSelector(
+    dataStreamsStateService,
+    (state) => state.matches('loading') || state.matches('debouncingSearch')
+  );
+
+  const hasFailedLoading = useSelector(dataStreamsStateService, (state) =>
+    state.matches('loadingFailed')
+  );
+
+  const loadDataStreams = useCallback(
+    () => dataStreamsStateService.send({ type: 'LOAD_DATA_STREAMS' }),
+    [dataStreamsStateService]
+  );
+
+  const reloadDataStreams = useCallback(
+    () => dataStreamsStateService.send({ type: 'RELOAD_DATA_STREAMS' }),
+    [dataStreamsStateService]
+  );
+
+  const searchDataStreams: SearchDataStreams = useCallback(
+    (searchParams) =>
+      dataStreamsStateService.send({
+        type: 'SEARCH_DATA_STREAMS',
+        search: {
+          datasetQuery: searchParams.name,
+          sortOrder: searchParams.sortOrder,
+        },
+      }),
+    [dataStreamsStateService]
+  );
+
+  return {
+    // Underlying state machine
+    dataStreamsStateService,
+
+    // Failure states
+    error,
+    hasFailedLoading,
+
+    // Loading states
+    isUninitialized,
+    isLoading,
+
+    // Data
+    dataStreams,
+    search,
+
+    // Actions
+    loadDataStreams,
+    reloadDataStreams,
+    searchDataStreams,
+  };
+};
+
+export const [DataStreamsProvider, useDataStreamsContext] = createContainer(useDataStreams);
+
+/**
+ * Utils
+ */
+const filterSearchParams = (search: FindDataStreamsRequestQuery): SearchDataStreamsParams => ({
+  name: search.datasetQuery,
+  sortOrder: search.sortOrder,
+});

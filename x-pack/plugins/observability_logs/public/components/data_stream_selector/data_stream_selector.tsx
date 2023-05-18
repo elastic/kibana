@@ -15,50 +15,66 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiPanel,
   EuiPopover,
+  EuiSkeletonText,
+  EuiText,
+  EuiToolTip,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 
-import useIntersection from 'react-use/lib/useIntersection';
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  contextMenuStyles,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
-  integrationsLabel,
   INTEGRATION_PANEL_ID,
   POPOVER_ID,
-  selectViewLabel,
-  sortOrdersLabel,
-  sortOptions,
-  uncategorizedLabel,
   UNCATEGORIZED_STREAMS_PANEL_ID,
+  contextMenuStyles,
+  integrationsLabel,
+  selectViewLabel,
+  sortOptions,
+  sortOrdersLabel,
+  uncategorizedLabel,
+  noDataStreamsLabel,
+  noDataStreamsDescriptionLabel,
+  noDataStreamsRetryLabel,
+  errorLabel,
 } from './constants';
 import { getPopoverButtonStyles } from './data_stream_selector.utils';
 
 import { useBoolean } from '../../hooks/use_boolean';
 
 import type { DataStream, Integration } from '../../../common/data_streams';
-import { LoadMoreIntegrations, SearchIntegrations } from '../../hooks/use_integrations';
-import { IntegrationsSearchParams } from '../../state_machines/integrations';
+import {
+  LoadMoreIntegrations,
+  SearchIntegrations,
+  SearchIntegrationsParams,
+} from '../../hooks/use_integrations';
+import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 
 export interface DataStreamSelectorProps {
   title: string;
-  search: IntegrationsSearchParams;
+  search: SearchIntegrationsParams;
   integrations: Integration[] | null;
-  uncategorizedStreams: any[];
+  uncategorizedStreams: DataStream[] | null;
+  dataStreamsError: Error | null;
   isLoadingIntegrations: boolean;
-  isLoadingUncategorizedStreams: boolean;
+  isLoadingStreams: boolean;
   /* Triggered when a search or sorting is performed on integrations */
-  onIntegrationsSearch: SearchIntegrations;
+  onSearchIntegrations: SearchIntegrations;
   /* Triggered when we reach the bottom of the integration list and want to load more */
-  onLoadMore: LoadMoreIntegrations;
+  onLoadMoreIntegrations: LoadMoreIntegrations;
   /* Triggered when the uncategorized streams entry is selected */
-  onUncategorizedClick: () => void;
+  onStreamsEntryClick: () => void;
+  /* Triggered when retrying to load the data streams */
+  onStreamsReload: () => void;
   /* Triggered when a data stream entry is selected */
   onStreamSelected: (dataStream: any) => Promise<void>;
 }
@@ -74,29 +90,26 @@ export function DataStreamSelector({
   title,
   integrations,
   uncategorizedStreams,
+  dataStreamsError,
   isLoadingIntegrations,
-  isLoadingUncategorizedStreams,
-  onIntegrationsSearch,
-  onLoadMore,
+  isLoadingStreams,
+  onSearchIntegrations,
+  onLoadMoreIntegrations,
   onStreamSelected,
-  onUncategorizedClick,
+  onStreamsEntryClick,
+  onStreamsReload,
   search,
 }: DataStreamSelectorProps) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
-  const [loadMoreSpyRef, setRef] = useState<HTMLButtonElement | null>(null);
-
-  const loadMoreSpyIntersection = useIntersection(
-    { current: loadMoreSpyRef },
-    { root: null, threshold: 0.5 }
-  );
+  const [loadMoreIntersection, setRef] = useIntersectionRef();
 
   useEffect(() => {
-    if (loadMoreSpyIntersection?.isIntersecting) {
-      onLoadMore();
+    if (loadMoreIntersection?.isIntersecting) {
+      onLoadMoreIntegrations();
     }
-  }, [loadMoreSpyIntersection, onLoadMore]);
+  }, [loadMoreIntersection, onLoadMoreIntegrations]);
 
   const [currentPanel, setCurrentPanel] = useState<CurrentPanelId>(INTEGRATION_PANEL_ID);
 
@@ -115,7 +128,7 @@ export function DataStreamSelector({
   const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
     const uncategorizedStreamsItem = {
       name: uncategorizedLabel,
-      onClick: onUncategorizedClick,
+      onClick: onStreamsEntryClick,
       panel: UNCATEGORIZED_STREAMS_PANEL_ID,
     };
 
@@ -136,9 +149,9 @@ export function DataStreamSelector({
       items: [uncategorizedStreamsItem, ...items],
       panels,
     };
-  }, [integrations, handleStreamSelection, onUncategorizedClick]);
+  }, [integrations, handleStreamSelection, onStreamsEntryClick, setRef]);
 
-  const [localSearch, setLocalSearch] = useState<IntegrationsSearchParams>({
+  const [localSearch, setLocalSearch] = useState<SearchIntegrationsParams>({
     sortOrder: 'asc',
     name: '',
   });
@@ -165,11 +178,15 @@ export function DataStreamSelector({
       id: UNCATEGORIZED_STREAMS_PANEL_ID,
       title: uncategorizedLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      content: isLoadingUncategorizedStreams ? <h1>LOADING!</h1> : <h1>No results!</h1>,
-      items: uncategorizedStreams?.map((stream) => ({
-        name: stream.name,
-        onClick: () => handleStreamSelection(stream),
-      })),
+      content: (
+        <DataStreamList
+          dataStreams={uncategorizedStreams}
+          error={dataStreamsError}
+          isLoading={isLoadingStreams}
+          onRetry={onStreamsReload}
+          onStreamClick={handleStreamSelection}
+        />
+      ),
     },
     ...filteredIntegrationPanels,
   ];
@@ -184,7 +201,7 @@ export function DataStreamSelector({
 
   // TODO: Handle search strategy by current panel id
   const handleSearch =
-    currentPanel === INTEGRATION_PANEL_ID ? onIntegrationsSearch : handleIntegrationStreamsSearch;
+    currentPanel === INTEGRATION_PANEL_ID ? onSearchIntegrations : handleIntegrationStreamsSearch;
   const searchValue = currentPanel === INTEGRATION_PANEL_ID ? search : localSearch;
 
   return (
@@ -228,7 +245,7 @@ const DataStreamButton = (props: DataStreamButtonProps) => {
 
 interface SearchControlsProps {
   isLoading: boolean;
-  search: IntegrationsSearchParams;
+  search: SearchIntegrationsParams;
   onSearch: SearchIntegrations;
 }
 
@@ -239,7 +256,7 @@ const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) =>
   };
 
   const handleSortChange = (id: string) => {
-    onSearch({ ...search, sortOrder: id as IntegrationsSearchParams['sortOrder'] });
+    onSearch({ ...search, sortOrder: id as SearchIntegrationsParams['sortOrder'] });
   };
 
   return (
@@ -268,6 +285,81 @@ const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) =>
   );
 };
 
+interface DataStreamListProps {
+  dataStreams: DataStream[] | null;
+  error: Error | null;
+  isLoading: boolean;
+  onStreamClick: StreamSelectionHandler;
+  onRetry: () => void;
+}
+
+const DataStreamList = ({
+  dataStreams,
+  error,
+  isLoading,
+  onStreamClick,
+  onRetry,
+}: DataStreamListProps) => {
+  const isEmpty = dataStreams == null || dataStreams.length <= 0;
+  const hasError = error !== null;
+
+  if (isLoading) {
+    return (
+      <EuiPanel>
+        <EuiSkeletonText lines={7} isLoading contentAriaLabel={uncategorizedLabel} />
+      </EuiPanel>
+    );
+  }
+
+  if (isEmpty) {
+    return (
+      <EuiEmptyPrompt
+        iconType="search"
+        paddingSize="m"
+        title={<h2>{noDataStreamsLabel}</h2>}
+        titleSize="s"
+        body={<p>{noDataStreamsDescriptionLabel}</p>}
+      />
+    );
+  }
+
+  if (hasError) {
+    return (
+      <EuiEmptyPrompt
+        iconType="warning"
+        iconColor="danger"
+        paddingSize="m"
+        title={<h2>{noDataStreamsLabel}</h2>}
+        titleSize="s"
+        body={
+          <FormattedMessage
+            id="xpack.observabilityLogs.dataStreamSelector.noDataStreamsError"
+            defaultMessage="An {error} occurred while getting your data streams. Please retry."
+            values={{
+              error: (
+                <EuiToolTip content={error.message}>
+                  <EuiText color="danger">{errorLabel}</EuiText>
+                </EuiToolTip>
+              ),
+            }}
+          />
+        }
+        actions={[<EuiButton onClick={onRetry}>{noDataStreamsRetryLabel}</EuiButton>]}
+      />
+    );
+  }
+
+  return (
+    <>
+      {dataStreams.map((stream) => (
+        <EuiContextMenuItem key={stream.name} onClick={() => onStreamClick(stream)}>
+          {stream.name}
+        </EuiContextMenuItem>
+      ))}
+    </>
+  );
+};
+
 interface IntegrationsTree {
   items: EuiContextMenuPanelItemDescriptor[];
   panels: EuiContextMenuPanelDescriptor[];
@@ -279,7 +371,7 @@ interface IntegrationsTreeParams {
   spyRef: RefCallback<HTMLButtonElement>;
 }
 
-const applyStreamSearch = (streams: DataStream[], search: IntegrationsSearchParams) => {
+const applyStreamSearch = (streams: DataStream[], search: SearchIntegrationsParams) => {
   const { name, sortOrder } = search;
 
   const filteredStreams = streams.filter((stream) => stream.name.includes(name ?? ''));

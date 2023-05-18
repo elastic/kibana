@@ -66,5 +66,5 @@ Basic.args = {
   // eslint-disable-next-line no-console
   onStreamSelected: async (stream) => console.log('Create ad hoc view for stream: ', stream),
   // eslint-disable-next-line no-console
-  onUncategorizedClick: () => console.log('Load uncategorized streams...'),
+  onStreamsEntryClick: () => console.log('Load uncategorized streams...'),
 };

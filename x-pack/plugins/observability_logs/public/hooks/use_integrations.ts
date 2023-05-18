@@ -8,10 +8,7 @@
 import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { useCallback } from 'react';
-import {
-  createIntegrationStateMachine,
-  IntegrationsSearchParams,
-} from '../state_machines/integrations';
+import { createIntegrationStateMachine } from '../state_machines/integrations';
 import { IDataStreamsClient } from '../services/data_streams';
 import { FindIntegrationsRequestQuery } from '../../common';
 
@@ -19,7 +16,12 @@ interface IntegrationsContextDeps {
   dataStreamsClient: IDataStreamsClient;
 }
 
-export type SearchIntegrations = (params: IntegrationsSearchParams) => void;
+export interface SearchIntegrationsParams {
+  name?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export type SearchIntegrations = (params: SearchIntegrationsParams) => void;
 export type LoadMoreIntegrations = () => void;
 
 const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
@@ -30,6 +32,7 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   );
 
   const integrations = useSelector(integrationsStateService, (state) => state.context.integrations);
+
   const search = useSelector(integrationsStateService, (state) =>
     filterSearchParams(state.context.search)
   );
@@ -54,7 +57,10 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
     (searchParams) =>
       integrationsStateService.send({
         type: 'SEARCH_INTEGRATIONS',
-        search: searchParams,
+        search: {
+          nameQuery: searchParams.name,
+          sortOrder: searchParams.sortOrder,
+        },
       }),
     [integrationsStateService]
   );
@@ -81,8 +87,8 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
     search,
 
     // Actions
-    searchIntegrations,
     loadMore,
+    searchIntegrations,
   };
 };
 
@@ -91,7 +97,7 @@ export const [IntegrationsProvider, useIntegrationsContext] = createContainer(us
 /**
  * Utils
  */
-const filterSearchParams = (search: FindIntegrationsRequestQuery): IntegrationsSearchParams => ({
+const filterSearchParams = (search: FindIntegrationsRequestQuery): SearchIntegrationsParams => ({
   name: search.nameQuery,
   sortOrder: search.sortOrder,
 });
