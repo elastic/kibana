@@ -15,6 +15,7 @@ import {
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
 import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../services';
+
 import type { K8sMode, CloudSecurityIntegrationType } from './types';
 
 // Packages that requires custom elastic-agent manifest
