@@ -16,21 +16,21 @@ test('should return visualize edit url', () => {
   const obj = {
     id: '1',
     attributes: {
-      visState: JSON.stringify({ type: 'vega' })
-    }
+      visState: JSON.stringify({ type: 'vega' }),
+    },
   } as unknown as VisualizationSavedObject;
   expect(getInAppUrl(obj)).toEqual({
     path: '/app/visualize#/edit/1',
-    uiCapabilitiesPath: 'visualize.show'
-  })
+    uiCapabilitiesPath: 'visualize.show',
+  });
 });
 
 test('should return undefined when visualization type is read only', () => {
   const obj = {
     id: '1',
     attributes: {
-      visState: JSON.stringify({ type: 'myLegacyVis' })
-    }
+      visState: JSON.stringify({ type: 'myLegacyVis' }),
+    },
   } as unknown as VisualizationSavedObject;
   expect(getInAppUrl(obj)).toBeUndefined();
 });
