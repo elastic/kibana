@@ -10,6 +10,7 @@ import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { chunk, flatMap, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -140,7 +141,9 @@ export class AlertsClient<
 
     const indexTemplateAndPattern = getIndexTemplateAndPattern({
       context: context!,
-      namespace: this.options.namespace,
+      namespace: this.options.ruleType.alerts?.isSpaceAware
+        ? this.options.namespace
+        : DEFAULT_NAMESPACE_STRING,
     });
 
     const {
@@ -178,7 +181,9 @@ export class AlertsClient<
 
     const indexTemplateAndPattern = getIndexTemplateAndPattern({
       context: context!,
-      namespace: this.options.namespace,
+      namespace: this.options.ruleType.alerts?.isSpaceAware
+        ? this.options.namespace
+        : DEFAULT_NAMESPACE_STRING,
     });
 
     const { alertsToReturn, recoveredAlertsToReturn } =
@@ -193,8 +198,11 @@ export class AlertsClient<
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(alertsToReturn)) {
-      // See if there's an existing alert document
-      if (this.fetchedAlerts.data.hasOwnProperty(id)) {
+      // See if there's an existing active alert document
+      if (
+        this.fetchedAlerts.data.hasOwnProperty(id) &&
+        this.fetchedAlerts.data[id].kibana.alert.status === 'active'
+      ) {
         activeAlertsToIndex.push(
           buildOngoingAlert<
             AlertData,

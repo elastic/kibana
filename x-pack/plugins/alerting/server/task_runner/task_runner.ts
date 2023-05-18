@@ -532,11 +532,12 @@ export class TaskRunner<
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
+    const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
+      await alertsClient.getAlertsToSerialize();
+
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-        await alertsClient.getAlertsToSerialize();
       alertsToReturn = alerts;
       recoveredAlertsToReturn = recovered;
     }
