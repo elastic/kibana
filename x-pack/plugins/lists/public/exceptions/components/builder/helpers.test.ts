@@ -11,7 +11,7 @@ import {
   EntryMatch,
   EntryMatchAny,
   EntryNested,
-  ExceptionListType,
+  FilterEndpointFields,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -37,7 +37,6 @@ import {
   getEntryOnOperatorChange,
   getEntryValue,
   getExceptionOperatorSelect,
-  getFilteredIndexPatterns,
   getFormattedBuilderEntries,
   getFormattedBuilderEntry,
   getNewExceptionItem,
@@ -55,6 +54,8 @@ import {
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { createStubDataView } from '@kbn/data-plugin/common/stubs';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
@@ -64,6 +65,8 @@ import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getListResponseMock } from '../../../../common/schemas/response/list_schema.mock';
 import { getEntryListMock } from '../../../../common/schemas/types/entry_list.mock';
+
+import { getFilteredIndexPatterns } from './entry_renderer';
 
 // TODO: ALL THESE TESTS SHOULD BE MOVED TO @kbn/securitysolution-list-utils for its helper. The only reason why they're here is due to missing other packages we hae to create or missing things from kbn packages such as mocks from kibana core
 
@@ -91,10 +94,12 @@ const getEntryMatchAnyWithIdMock = (): EntryMatchAny & { id: string } => ({
   id: '123',
 });
 
-const getMockIndexPattern = (): DataViewBase => ({
+const getMockIndexPattern = (): DataView => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  // @ts-expect-error fields does not contain toSpec, it's okay
   fields,
-  id: '1234',
-  title: 'logstash-*',
 });
 
 const getMockBuilderEntry = (): FormattedBuilderEntry => ({
@@ -168,14 +173,14 @@ const mockEndpointFields = [
 export const getEndpointField = (name: string): DataViewFieldBase =>
   mockEndpointFields.find((field) => field.name === name) as DataViewFieldBase;
 
-const filterIndexPatterns = (patterns: DataViewBase, type: ExceptionListType): DataViewBase => {
+const filterIndexPatterns: FilterEndpointFields<DataView> = (patterns, type) => {
   return type === 'endpoint'
-    ? {
+    ? ({
         ...patterns,
-        fields: patterns.fields.filter(({ name }) =>
+        fields: patterns?.fields.filter(({ name }) =>
           ['file.path.caseless', 'file.Ext.code_signature.status'].includes(name)
         ),
-      }
+      } as DataView)
     : patterns;
 };
 
@@ -243,6 +248,7 @@ describe('Exception builder helpers', () => {
       beforeAll(() => {
         payloadIndexPattern = {
           ...payloadIndexPattern,
+          // @ts-expect-error fields does not contain toSpec, it's okay
           fields: [...payloadIndexPattern.fields, ...mockEndpointFields],
         };
       });

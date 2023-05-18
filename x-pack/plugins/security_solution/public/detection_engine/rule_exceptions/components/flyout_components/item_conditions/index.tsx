@@ -86,7 +86,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   onExceptionItemAdd: (items: ExceptionsBuilderReturnExceptionItem[]) => void;
   /* Exception item builder takes a callback used when there are updates to the item that includes information on if any form errors exist */
   onSetErrorExists: (errorExists: boolean) => void;
-  onFilterIndexPatterns: FilterEndpointFields;
+  onFilterIndexPatterns: FilterEndpointFields<DataView>;
 }
 
 const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({

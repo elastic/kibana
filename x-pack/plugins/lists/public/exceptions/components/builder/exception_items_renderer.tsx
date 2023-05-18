@@ -89,7 +89,7 @@ export interface ExceptionBuilderProps {
   listId: string | undefined;
   listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: FilterEndpointFields;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<DataView>;
   onChange: (arg: OnChangeProps) => void;
   ruleName?: string;
   isDisabled?: boolean;

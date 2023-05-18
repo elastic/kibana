@@ -11,12 +11,22 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
+
+const getMockIndexPattern = (): DataView => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  // @ts-expect-error fields does not contain toSpec, it's okay
+  fields,
+});
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
@@ -43,11 +53,7 @@ describe('BuilderExceptionListItemComponent', () => {
             exceptionItem={exceptionItem}
             exceptionItemIndex={0}
             httpService={mockKibanaHttpService}
-            indexPattern={{
-              fields,
-              id: '1234',
-              title: 'logstash-*',
-            }}
+            indexPattern={getMockIndexPattern()}
             isOnlyItem={false}
             listType="detection"
             onChangeExceptionItem={jest.fn()}
@@ -75,11 +81,7 @@ describe('BuilderExceptionListItemComponent', () => {
             exceptionItem={exceptionItem}
             exceptionItemIndex={1}
             httpService={mockKibanaHttpService}
-            indexPattern={{
-              fields,
-              id: '1234',
-              title: 'logstash-*',
-            }}
+            indexPattern={getMockIndexPattern()}
             isOnlyItem={false}
             listType="detection"
             onChangeExceptionItem={jest.fn()}
@@ -105,11 +107,7 @@ describe('BuilderExceptionListItemComponent', () => {
             exceptionItem={exceptionItem}
             exceptionItemIndex={1}
             httpService={mockKibanaHttpService}
-            indexPattern={{
-              fields,
-              id: '1234',
-              title: 'logstash-*',
-            }}
+            indexPattern={getMockIndexPattern()}
             isOnlyItem={false}
             listType="detection"
             onChangeExceptionItem={jest.fn()}
@@ -137,11 +135,7 @@ describe('BuilderExceptionListItemComponent', () => {
             exceptionItem={exceptionItem}
             exceptionItemIndex={1}
             httpService={mockKibanaHttpService}
-            indexPattern={{
-              fields,
-              id: '1234',
-              title: 'logstash-*',
-            }}
+            indexPattern={getMockIndexPattern()}
             isOnlyItem={false}
             listType="detection"
             onChangeExceptionItem={jest.fn()}
@@ -176,11 +170,7 @@ describe('BuilderExceptionListItemComponent', () => {
           exceptionItem={exceptionItem}
           exceptionItemIndex={0}
           httpService={mockKibanaHttpService}
-          indexPattern={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPattern={getMockIndexPattern()}
           isOnlyItem={true}
           listType="detection"
           onChangeExceptionItem={jest.fn()}
@@ -207,11 +197,7 @@ describe('BuilderExceptionListItemComponent', () => {
           exceptionItem={exceptionItem}
           exceptionItemIndex={0}
           httpService={mockKibanaHttpService}
-          indexPattern={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPattern={getMockIndexPattern()}
           isOnlyItem={false}
           listType="detection"
           onChangeExceptionItem={jest.fn()}
@@ -237,11 +223,7 @@ describe('BuilderExceptionListItemComponent', () => {
           exceptionItem={exceptionItem}
           exceptionItemIndex={1}
           httpService={mockKibanaHttpService}
-          indexPattern={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPattern={getMockIndexPattern()}
           // if exceptionItemIndex is not 0, wouldn't make sense for
           // this to be true, but done for testing purposes
           isOnlyItem={true}
@@ -269,11 +251,7 @@ describe('BuilderExceptionListItemComponent', () => {
           exceptionItem={exceptionItem}
           exceptionItemIndex={0}
           httpService={mockKibanaHttpService}
-          indexPattern={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPattern={getMockIndexPattern()}
           isOnlyItem={true}
           listType="detection"
           onChangeExceptionItem={jest.fn()}
@@ -301,11 +279,7 @@ describe('BuilderExceptionListItemComponent', () => {
           exceptionItem={exceptionItem}
           exceptionItemIndex={0}
           httpService={mockKibanaHttpService}
-          indexPattern={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPattern={getMockIndexPattern()}
           isOnlyItem={true}
           listType="detection"
           onChangeExceptionItem={jest.fn()}

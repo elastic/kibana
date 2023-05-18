@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { ExceptionsConditions } from '.';
 import { TestProviders, mockIndexPattern } from '../../../../../common/mock';
@@ -18,6 +20,14 @@ import * as i18n from './translations';
 
 jest.mock('@kbn/lists-plugin/public');
 
+const getMockIndexPattern = (): DataView => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: mockIndexPattern.title },
+  }),
+  // @ts-expect-error fields does not contain toSpec, it's okay
+  fields: mockIndexPattern.fields,
+});
+
 describe('ExceptionsConditions', () => {
   describe('EQL rule type', () => {
     it('it displays EQL warning callout if rule is EQL sequence', () => {
@@ -27,7 +37,7 @@ describe('ExceptionsConditions', () => {
             exceptionItemName={'Item name'}
             allowLargeValueLists={false}
             exceptionListItems={[]}
-            indexPatterns={mockIndexPattern}
+            indexPatterns={getMockIndexPattern()}
             rules={[
               {
                 ...getRulesEqlSchemaMock(),
@@ -58,7 +68,7 @@ describe('ExceptionsConditions', () => {
             exceptionItemName={'Item name'}
             allowLargeValueLists={false}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
-            indexPatterns={mockIndexPattern}
+            indexPatterns={getMockIndexPattern()}
             rules={[
               {
                 ...getRulesEqlSchemaMock(),
@@ -89,7 +99,7 @@ describe('ExceptionsConditions', () => {
             exceptionItemName={'Item name'}
             allowLargeValueLists={false}
             exceptionListItems={[]}
-            indexPatterns={mockIndexPattern}
+            indexPatterns={getMockIndexPattern()}
             rules={[
               {
                 ...getRulesEqlSchemaMock(),
@@ -119,7 +129,7 @@ describe('ExceptionsConditions', () => {
             exceptionItemName={'Item name'}
             allowLargeValueLists={false}
             exceptionListItems={[]}
-            indexPatterns={mockIndexPattern}
+            indexPatterns={getMockIndexPattern()}
             rules={[
               {
                 ...getRulesEqlSchemaMock(),
@@ -152,7 +162,7 @@ describe('ExceptionsConditions', () => {
                 os_types: ['windows'],
               },
             ]}
-            indexPatterns={mockIndexPattern}
+            indexPatterns={getMockIndexPattern()}
             rules={[
               {
                 ...getRulesEqlSchemaMock(),
@@ -183,7 +193,7 @@ describe('ExceptionsConditions', () => {
             exceptionItemName={'Item name'}
             allowLargeValueLists={false}
             exceptionListItems={[]}
-            indexPatterns={mockIndexPattern}
+            indexPatterns={getMockIndexPattern()}
             rules={[
               {
                 ...getRulesEqlSchemaMock(),

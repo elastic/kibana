@@ -11,6 +11,8 @@ import { HttpStart } from '@kbn/core/public';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
@@ -219,13 +221,21 @@ const BuilderTemplate: Story<ExceptionBuilderProps> = (args) => (
   <ExceptionBuilderComponent {...args} />
 );
 
+const getMockIndexPattern = (): DataView => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  // @ts-expect-error fields does not contain toSpec, it's okay
+  fields,
+});
+
 export const Default = BuilderTemplate.bind({});
 Default.args = {
   allowLargeValueLists: true,
   autocompleteService: mockAutocompleteService,
   exceptionListItems: [],
   httpService: mockHttpService,
-  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
+  indexPatterns: getMockIndexPattern(),
   isAndDisabled: false,
   isNestedDisabled: false,
   isOrDisabled: false,
@@ -278,7 +288,7 @@ SingleExceptionItem.args = {
   autocompleteService: mockAutocompleteService,
   exceptionListItems: [sampleExceptionItem],
   httpService: mockHttpService,
-  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
+  indexPatterns: getMockIndexPattern(),
   isAndDisabled: false,
   isNestedDisabled: false,
   isOrDisabled: false,
@@ -304,7 +314,7 @@ MultiExceptionItems.args = {
   autocompleteService: mockAutocompleteService,
   exceptionListItems: [sampleExceptionItem, sampleExceptionItem],
   httpService: mockHttpService,
-  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
+  indexPatterns: getMockIndexPattern(),
   isAndDisabled: false,
   isNestedDisabled: false,
   isOrDisabled: false,
@@ -330,7 +340,7 @@ WithNestedExceptionItem.args = {
   autocompleteService: mockAutocompleteService,
   exceptionListItems: [sampleNestedExceptionItem, sampleExceptionItem],
   httpService: mockHttpService,
-  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
+  indexPatterns: getMockIndexPattern(),
   isAndDisabled: false,
   isNestedDisabled: false,
   isOrDisabled: false,

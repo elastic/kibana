@@ -12,6 +12,8 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { coreMock } from '@kbn/core/public/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
@@ -19,6 +21,13 @@ import { getEmptyValue } from '../../../common/empty_value';
 
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
+const getMockIndexPattern = (): DataView => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  // @ts-expect-error fields does not contain toSpec, it's okay
+  fields,
+});
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 
@@ -41,11 +50,7 @@ describe('ExceptionBuilderComponent', () => {
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -87,11 +92,7 @@ describe('ExceptionBuilderComponent', () => {
             },
           ]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -132,11 +133,7 @@ describe('ExceptionBuilderComponent', () => {
             },
           ]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -169,11 +166,7 @@ describe('ExceptionBuilderComponent', () => {
             },
           ]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -199,12 +192,7 @@ describe('ExceptionBuilderComponent', () => {
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -236,11 +224,7 @@ describe('ExceptionBuilderComponent', () => {
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -293,11 +277,7 @@ describe('ExceptionBuilderComponent', () => {
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -361,11 +341,7 @@ describe('ExceptionBuilderComponent', () => {
             },
           ]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -409,11 +385,7 @@ describe('ExceptionBuilderComponent', () => {
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -445,11 +417,7 @@ describe('ExceptionBuilderComponent', () => {
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           httpService={mockKibanaHttpService}
-          indexPatterns={{
-            fields,
-            id: '1234',
-            title: 'logstash-*',
-          }}
+          indexPatterns={getMockIndexPattern()}
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
@@ -484,11 +452,7 @@ describe('ExceptionBuilderComponent', () => {
             autocompleteService={autocompleteStartMock}
             exceptionListItems={[]}
             httpService={mockKibanaHttpService}
-            indexPatterns={{
-              fields,
-              id: '1234',
-              title: 'logstash-*',
-            }}
+            indexPatterns={getMockIndexPattern()}
             isAndDisabled={false}
             isNestedDisabled={false}
             isOrDisabled={false}

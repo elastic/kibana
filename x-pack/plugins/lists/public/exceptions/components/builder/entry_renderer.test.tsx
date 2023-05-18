@@ -27,6 +27,8 @@ import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { waitFor } from '@testing-library/dom';
 import { ReactWrapper, mount } from 'enzyme';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
 
@@ -35,6 +37,14 @@ import * as i18n from './translations';
 
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
+
+const getMockIndexPattern = (title?: string): DataView => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: title ?? 'logstash-*' },
+  }),
+  // @ts-expect-error fields does not contain toSpec, it's okay
+  fields,
+});
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
@@ -73,11 +83,7 @@ describe('BuilderEntryItem', () => {
           value: undefined,
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -105,11 +111,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -142,11 +144,7 @@ describe('BuilderEntryItem', () => {
           value: undefined,
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -177,11 +175,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -212,11 +206,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -246,11 +236,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -281,11 +267,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -318,11 +300,7 @@ describe('BuilderEntryItem', () => {
           value: ['1234'],
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -355,11 +333,7 @@ describe('BuilderEntryItem', () => {
           value: ['1234'],
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -393,11 +367,7 @@ describe('BuilderEntryItem', () => {
           value: 'some-list-id',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -431,11 +401,7 @@ describe('BuilderEntryItem', () => {
           value: 'some-list-id',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -468,11 +434,7 @@ describe('BuilderEntryItem', () => {
           value: undefined,
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -506,11 +468,7 @@ describe('BuilderEntryItem', () => {
           value: undefined,
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -544,11 +502,7 @@ describe('BuilderEntryItem', () => {
           value: '1234*',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -585,11 +539,7 @@ describe('BuilderEntryItem', () => {
           value: '1234*',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="rule_default"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -619,11 +569,7 @@ describe('BuilderEntryItem', () => {
           value: '1234*',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -676,11 +622,7 @@ describe('BuilderEntryItem', () => {
           value: ['1234'],
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -719,11 +661,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -760,11 +698,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -801,11 +735,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -842,11 +772,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -883,11 +809,7 @@ describe('BuilderEntryItem', () => {
           value: '1234',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -930,11 +852,7 @@ describe('BuilderEntryItem', () => {
           value: '1234*',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -971,11 +889,7 @@ describe('BuilderEntryItem', () => {
           value: '',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
@@ -1011,11 +925,7 @@ describe('BuilderEntryItem', () => {
           value: '',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
@@ -1060,11 +970,7 @@ describe('BuilderEntryItem', () => {
           value: '',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern('logs-endpoint.events.*')}
         listType="endpoint_events"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -1109,11 +1015,7 @@ describe('BuilderEntryItem', () => {
           value: '',
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern('logs-endpoint.events.*')}
         listType="endpoint_events"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -1155,11 +1057,7 @@ describe('BuilderEntryItem', () => {
           value: ['1234'],
         }}
         httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}

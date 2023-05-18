@@ -56,7 +56,7 @@ interface BuilderExceptionListItemProps {
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: FilterEndpointFields;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<DataView>;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: EntryFieldError) => void;

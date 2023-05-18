@@ -46,7 +46,7 @@ import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 
-export const filterIndexPatterns: FilterEndpointFields = (patterns, type, osTypes) => {
+export const filterIndexPatterns: FilterEndpointFields<DataView> = (patterns, type, osTypes) => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')

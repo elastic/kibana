@@ -146,7 +146,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
-    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
+    const [isIndexPatternLoading, { dataView }] = useFetchIndex(
       indexNames,
       undefined,
       ENDPOINT_FIELDS_SEARCH_STRATEGY
@@ -443,7 +443,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
           listNamespaceType: 'agnostic',
           ruleName: RULE_NAME,
-          indexPatterns,
+          indexPatterns: dataView,
           isOrDisabled: true,
           isOrHidden: true,
           isAndDisabled: false,
@@ -455,14 +455,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception.os_types,
         }),
-      [
-        autocompleteSuggestions,
-        handleOnBuilderChange,
-        http,
-        indexPatterns,
-        exception,
-        eventFilterItem,
-      ]
+      [autocompleteSuggestions, handleOnBuilderChange, http, dataView, exception, eventFilterItem]
     );
 
     // conditions
