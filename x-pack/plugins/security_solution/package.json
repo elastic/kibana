@@ -12,7 +12,7 @@
     "cypress:open:ccs": "yarn cypress:open --config specPattern=./cypress/ccs_e2e/**/*.cy.ts",
     "cypress:open-as-ci": "node ./scripts/endpoint/start_cypress_parallel open --config-file ./cypress/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/visual_config",
     "cypress:open:upgrade": "yarn cypress:open --config specPattern=./cypress/upgrade_e2e/**/*.cy.ts",
-    "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+    "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'",
     "cypress:run:spec": "yarn cypress:run:reporter --browser chrome --spec ${SPEC_LIST:-'./cypress/e2e/**/*.cy.ts'}; status=$?; yarn junit:merge && exit $status",
     "cypress:run:cases": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/cases/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
     "cypress:run:firefox": "yarn cypress:run:reporter --browser firefox --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
