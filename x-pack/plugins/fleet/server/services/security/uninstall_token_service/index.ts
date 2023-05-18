@@ -374,7 +374,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private generateToken(): string {
-    return randomBytes(32).toString('hex');
+    return randomBytes(16).toString('hex');
   }
 
   private hashToken(token: string): string {
