@@ -60,6 +60,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { FilesStart } from '@kbn/files-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -87,6 +88,10 @@ import type {
 } from './visualizations/partition';
 import type { HeatmapVisualization as HeatmapVisualizationType } from './visualizations/heatmap';
 import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
+import type {
+  RevealImageVisualization as RevealImageVisualizationType,
+  RevealImageVisualizationPluginSetupPlugins,
+} from './visualizations/reveal_image';
 
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
@@ -162,6 +167,7 @@ export interface LensPluginStartDependencies {
   docLinks: DocLinksStart;
   share?: SharePluginStart;
   contentManagement: ContentManagementPublicStart;
+  files: FilesStart;
 }
 
 export interface LensPublicSetup {
@@ -267,6 +273,7 @@ export class LensPlugin {
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
   private gaugeVisualization: GaugeVisualizationType | undefined;
+  private revealImageVisualization: RevealImageVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
@@ -305,7 +312,8 @@ export class LensPlugin {
         expressions,
         fieldFormats,
         plugins.fieldFormats.deserialize,
-        eventAnnotation
+        eventAnnotation,
+        plugins.files
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
       const datasourceMap = await this.editorFrameService!.loadDatasources();
@@ -388,7 +396,8 @@ export class LensPlugin {
         const { getTimeZone } = await import('./utils');
         return getTimeZone(core.uiSettings);
       },
-      () => startServices().plugins.data.nowProvider.get()
+      () => startServices().plugins.data.nowProvider.get(),
+      () => startServices().plugins.files.filesClientFactory.asUnscoped()
     );
 
     const getPresentationUtilContext = () =>
@@ -408,7 +417,8 @@ export class LensPlugin {
           expressions,
           fieldFormats,
           deps.fieldFormats.deserialize,
-          eventAnnotation
+          eventAnnotation,
+          deps.files
         );
 
         const {
@@ -459,7 +469,8 @@ export class LensPlugin {
         expressions,
         fieldFormats,
         plugins.fieldFormats.deserialize,
-        eventAnnotation
+        eventAnnotation,
+        plugins.files
       );
     };
 
@@ -485,7 +496,8 @@ export class LensPlugin {
     expressions: ExpressionsServiceSetup,
     fieldFormats: FieldFormatsSetup,
     formatFactory: FormatFactory,
-    eventAnnotation: EventAnnotationPluginSetup
+    eventAnnotation: EventAnnotationPluginSetup,
+    files: FilesStart
   ) {
     const {
       DatatableVisualization,
@@ -497,6 +509,7 @@ export class LensPlugin {
       PieVisualization,
       HeatmapVisualization,
       GaugeVisualization,
+      RevealImageVisualization,
       TextBasedDatasource,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
@@ -509,6 +522,7 @@ export class LensPlugin {
     this.pieVisualization = new PieVisualization();
     this.heatmapVisualization = new HeatmapVisualization();
     this.gaugeVisualization = new GaugeVisualization();
+    this.revealImageVisualization = new RevealImageVisualization();
 
     const editorFrameSetupInterface = this.editorFrameService.setup();
 
@@ -516,7 +530,8 @@ export class LensPlugin {
       XyVisualizationPluginSetupPlugins &
       DatatableVisualizationPluginSetupPlugins &
       LegacyMetricVisualizationPluginSetupPlugins &
-      PieVisualizationPluginSetupPlugins = {
+      PieVisualizationPluginSetupPlugins &
+      RevealImageVisualizationPluginSetupPlugins = {
       expressions,
       data,
       fieldFormats,
@@ -524,6 +539,7 @@ export class LensPlugin {
       editorFrame: editorFrameSetupInterface,
       formatFactory,
       eventAnnotation,
+      files: files.filesClientFactory.asUnscoped(),
     };
     this.FormBasedDatasource.setup(core, dependencies);
     this.TextBasedDatasource.setup(core, dependencies);
@@ -534,6 +550,7 @@ export class LensPlugin {
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);
     this.gaugeVisualization.setup(core, dependencies);
+    this.revealImageVisualization.setup(core, dependencies);
 
     this.queuedVisualizations.forEach((queuedVis) => {
       editorFrameSetupInterface.registerVisualization(queuedVis);

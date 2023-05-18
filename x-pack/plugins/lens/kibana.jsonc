@@ -32,11 +32,13 @@
       "expressionGauge",
       "expressionMetricVis",
       "expressionHeatmap",
+      "expressionRevealImage",
       "expressionXY",
       "eventAnnotation",
       "unifiedSearch",
       "unifiedFieldList",
-      "contentManagement"
+      "contentManagement",
+      "files",
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",

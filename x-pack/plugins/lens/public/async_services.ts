@@ -28,6 +28,8 @@ export * from './visualizations/heatmap/heatmap_visualization';
 export * from './visualizations/heatmap';
 export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
+export * from './visualizations/reveal_image/reveal_image_visualization';
+export * from './visualizations/reveal_image';
 
 export * from './datasources/form_based/form_based';
 export { getTextBasedDatasource } from './datasources/text_based/text_based_languages';
