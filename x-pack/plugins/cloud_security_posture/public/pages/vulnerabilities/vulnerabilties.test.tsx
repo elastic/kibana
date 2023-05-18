@@ -29,9 +29,12 @@ import { expectIdsInDoc } from '../../test/utils';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { TestProvider } from '../../test/test_provider';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
@@ -42,6 +45,13 @@ beforeEach(() => {
   jest.restoreAllMocks();
 
   (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    createReactQueryResponse({
+      status: 'success',
+      data: true,
+    })
+  );
+
+  (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
     createReactQueryResponse({
       status: 'success',
       data: true,
@@ -59,6 +69,7 @@ const renderVulnerabilitiesPage = () => {
         discover: discoverPluginMock.createStartContract(),
         fleet: fleetMock.createStartMock(),
         licensing: licensingMock.createStart(),
+        share: sharePluginMock.createStartContract(),
       }}
     >
       <Vulnerabilities />
