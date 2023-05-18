@@ -6,11 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// Follow pattern from https://github.com/elastic/kibana/pull/52447
-// TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
-
-import type { CustomIntegrationIcon } from '@kbn/custom-integrations-plugin/common';
+// // Follow pattern from https://github.com/elastic/kibana/pull/52447
+// // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
+// import type { SavedObject } from '@kbn/core/public'; // DEPRECATION
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -21,12 +19,7 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '..';
 
-import type {
-  PackageSpecManifest,
-  PackageSpecIcon,
-  PackageSpecScreenshot,
-  PackageSpecCategory,
-} from './package_spec';
+import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -48,13 +41,6 @@ export type InstallSource = 'registry' | 'upload' | 'bundled';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
-export type DetailViewPanelName =
-  | 'overview'
-  | 'policies'
-  | 'assets'
-  | 'settings'
-  | 'custom'
-  | 'api-reference';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type DocAssetType = 'doc' | 'notice' | 'license';
@@ -251,12 +237,6 @@ export interface RegistryStream {
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
 
-export type RequirementVersion = string;
-export type RequirementVersionRange = string;
-export interface ServiceRequirements {
-  versions: RequirementVersionRange;
-}
-
 // Registry's response types
 // from /search
 // https://github.com/elastic/package-registry/blob/master/docs/api/search.json
@@ -279,8 +259,6 @@ export type RegistrySearchResult = Pick<
   | 'categories'
 >;
 
-export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
-
 // from /categories
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json
 export type CategorySummaryList = CategorySummaryItem[];
@@ -293,7 +271,7 @@ export interface CategorySummaryItem {
   parent_title?: string;
 }
 
-export type RequirementsByServiceName = PackageSpecManifest['conditions'];
+// export type RequirementsByServiceName = PackageSpecManifest['conditions'];
 export interface AssetParts {
   pkgkey: string;
   dataset?: string;
@@ -431,41 +409,23 @@ export interface EpmPackageAdditions {
   keepPoliciesUpToDate?: boolean;
 }
 
-type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
-  SecondType;
+// type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
+//   SecondType;
 
+// TODO: these depends on installable
 // Managers public HTTP response types
-export type PackageList = PackageListItem[];
-export type PackageListItem = Installable<RegistrySearchResult> & {
-  integration?: string;
-  id: string;
-};
+// export type PackageList = PackageListItem[];
+// export type PackageListItem = Installable<RegistrySearchResult> & {
+//   integration?: string;
+//   id: string;
+// };
 
-export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
-
-export interface IntegrationCardItem {
-  url: string;
-  release?: IntegrationCardReleaseLabel;
-  description: string;
-  name: string;
-  title: string;
-  version: string;
-  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
-  integration: string;
-  id: string;
-  categories: string[];
-  fromIntegrations?: string;
-  isReauthorizationRequired?: boolean;
-  isUnverified?: boolean;
-  isUpdateAvailable?: boolean;
-  showLabels?: boolean;
-}
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
-export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
-export type PackageInfo =
-  | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
-  | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
+// export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
+// export type PackageInfo =
+//   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
+//   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 // TODO - Expand this with other experimental indexing types
 export type ExperimentalIndexingFeature =
@@ -479,7 +439,7 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
-export interface Installation extends SavedObjectAttributes {
+export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
@@ -506,49 +466,55 @@ export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> =
-  | InstallStatusExcluded<T>
-  | InstalledRegistry<T>
-  | Installing<T>
-  | NotInstalled<T>
-  | InstallFailed<T>;
+// TODO: refactor dependencies
+// export type Installable<T> =
+//   | InstallStatusExcluded<T>
+//   | InstalledRegistry<T>
+//   | Installing<T>
+//   | NotInstalled<T>
+//   | InstallFailed<T>;
 
-export type InstallStatusExcluded<T = {}> = T & {
-  status: undefined;
-};
+// export type InstallStatusExcluded<T = {}> = T & {
+//   status: undefined;
+// };
 
-export type InstalledRegistry<T = {}> = T & {
-  status: InstallationStatus['Installed'];
-  savedObject: SavedObject<Installation>;
-};
+// export type InstalledRegistry<T = {}> = T & {
+//   status: InstallationStatus['Installed'];
+//   savedObject: SavedObject<Installation>;
+// };
 
-export type Installing<T = {}> = T & {
-  status: InstallationStatus['Installing'];
-  savedObject: SavedObject<Installation>;
-};
+// export type Installing<T = {}> = T & {
+//   status: InstallationStatus['Installing'];
+//   savedObject: SavedObject<Installation>;
+// };
 
-export type NotInstalled<T = {}> = T & {
-  status: InstallationStatus['NotInstalled'];
-};
+// export type NotInstalled<T = {}> = T & {
+//   status: InstallationStatus['NotInstalled'];
+// };
 
-export type InstallFailed<T = {}> = T & {
-  status: InstallationStatus['InstallFailed'];
-};
+// export type InstallFailed<T = {}> = T & {
+//   status: InstallationStatus['InstallFailed'];
+// };
 
+// TODO: the following `reference` types should live under /server but they' re used in public/epm/assets
 export type AssetReference = KibanaAssetReference | EsAssetReference;
 
-export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
+export interface KibanaAssetReference {
+  id: string;
   type: KibanaSavedObjectType;
-};
-export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
+}
+export interface EsAssetReference {
+  id: string;
   type: ElasticsearchAssetType;
   deferred?: boolean;
-};
+}
 
-export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
+export interface PackageAssetReference {
+  id: string;
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
-};
+}
 
+// TODO: Move all the following to only used in server
 export interface IndexTemplateMappings {
   properties: any;
   dynamic_templates?: any;

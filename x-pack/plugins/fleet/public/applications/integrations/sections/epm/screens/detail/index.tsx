@@ -56,7 +56,7 @@ import {
   useIsGuidedOnboardingActive,
 } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type { DetailViewPanelName, PackageInfo } from '../../../../types';
+import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import {
   Error,
@@ -85,6 +85,14 @@ import { CustomViewPage } from './custom';
 import { DocumentationPage } from './documentation';
 
 import './index.scss';
+
+type DetailViewPanelName =
+  | 'overview'
+  | 'policies'
+  | 'assets'
+  | 'settings'
+  | 'custom'
+  | 'api-reference';
 
 export interface DetailParams {
   pkgkey: string;
