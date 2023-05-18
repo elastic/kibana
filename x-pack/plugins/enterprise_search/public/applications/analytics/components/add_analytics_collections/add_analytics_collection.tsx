@@ -14,9 +14,13 @@ import { i18n } from '@kbn/i18n';
 import { AddAnalyticsCollectionModal } from './add_analytics_collection_modal';
 
 interface AddAnalyticsCollectionProps {
+  disabled?: boolean;
   render?: (onClick: () => void) => React.ReactNode;
 }
-export const AddAnalyticsCollection: React.FC<AddAnalyticsCollectionProps> = ({ render }) => {
+export const AddAnalyticsCollection: React.FC<AddAnalyticsCollectionProps> = ({
+  render,
+  disabled,
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
@@ -26,7 +30,7 @@ export const AddAnalyticsCollection: React.FC<AddAnalyticsCollectionProps> = ({ 
       {render ? (
         render(showModal)
       ) : (
-        <EuiButton fill iconType="plusInCircle" onClick={showModal}>
+        <EuiButton fill iconType="plusInCircle" onClick={showModal} disabled={disabled}>
           {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
             defaultMessage: 'Create collection',
           })}

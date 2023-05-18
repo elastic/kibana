@@ -46,26 +46,18 @@ import {
 } from '../../tasks/table_pagination';
 
 function createTestRules(): void {
-  createRule({ ...getNewRule(), rule_id: '1', name: 'test 1', tags: ['tag-a'], enabled: false });
-  createRule({ ...getNewRule(), rule_id: '2', name: 'rule 1', tags: ['tag-b'], enabled: false });
-  createRule({ ...getNewRule(), rule_id: '3', name: 'rule 2', tags: ['tag-b'], enabled: false });
-  createRule({
-    ...getNewRule(),
-    rule_id: '4',
-    name: 'rule 3',
-    tags: ['tag-b', 'tag-c'],
-    enabled: false,
-  });
-  createRule({ ...getNewRule(), rule_id: '5', name: 'rule 4', tags: ['tag-b'], enabled: false });
-  createRule({
-    ...getNewRule(),
-    rule_id: '6',
-    name: 'rule 5',
-    tags: ['tag-b', 'tag-c'],
-    enabled: false,
-  });
-  createRule({ ...getNewRule(), rule_id: '7', name: 'rule 6', tags: ['tag-b'], enabled: false });
-  createRule({ ...getNewRule(), rule_id: '8', name: 'rule 7', tags: ['tag-b'], enabled: true });
+  createRule(getNewRule({ rule_id: '1', name: 'test 1', tags: ['tag-a'], enabled: false }));
+  createRule(getNewRule({ rule_id: '2', name: 'rule 1', tags: ['tag-b'], enabled: false }));
+  createRule(getNewRule({ rule_id: '3', name: 'rule 2', tags: ['tag-b'], enabled: false }));
+  createRule(
+    getNewRule({ rule_id: '4', name: 'rule 3', tags: ['tag-b', 'tag-c'], enabled: false })
+  );
+  createRule(getNewRule({ rule_id: '5', name: 'rule 4', tags: ['tag-b'], enabled: false }));
+  createRule(
+    getNewRule({ rule_id: '6', name: 'rule 5', tags: ['tag-b', 'tag-c'], enabled: false })
+  );
+  createRule(getNewRule({ rule_id: '7', name: 'rule 6', tags: ['tag-b'], enabled: false }));
+  createRule(getNewRule({ rule_id: '8', name: 'rule 7', tags: ['tag-b'], enabled: true }));
 }
 
 function visitRulesTableWithState(urlTableState: Record<string, unknown>): void {

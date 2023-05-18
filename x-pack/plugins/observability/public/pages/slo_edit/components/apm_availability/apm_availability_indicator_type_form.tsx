@@ -6,14 +6,8 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-} from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
@@ -38,13 +32,19 @@ export function ApmAvailabilityIndicatorTypeForm() {
           })}
           placeholder={i18n.translate(
             'xpack.observability.slo.sloEdit.apmAvailability.serviceName.placeholder',
-            {
-              defaultMessage: 'Select the APM service',
-            }
+            { defaultMessage: 'Select the APM service' }
           )}
           fieldName="service.name"
           name="indicator.params.service"
           dataTestSubj="apmAvailabilityServiceSelector"
+          tooltip={
+            <EuiIconTip
+              content={i18n.translate('xpack.observability.slo.sloEdit.apm.serviceName.tooltip', {
+                defaultMessage: 'This is the APM service monitored by this SLO.',
+              })}
+              position="top"
+            />
+          }
         />
         <FieldSelector
           label={i18n.translate(
@@ -98,49 +98,6 @@ export function ApmAvailabilityIndicatorTypeForm() {
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
-          <EuiFormLabel>
-            {i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes', {
-              defaultMessage: 'Good status codes',
-            })}
-          </EuiFormLabel>
-          <Controller
-            shouldUnregister={true}
-            name="indicator.params.goodStatusCodes"
-            control={control}
-            defaultValue={['2xx', '3xx', '4xx']}
-            rules={{ required: true }}
-            render={({ field: { ref, ...field }, fieldState }) => (
-              <EuiComboBox
-                {...field}
-                aria-label={i18n.translate(
-                  'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
-                  {
-                    defaultMessage: 'Select the good status codes',
-                  }
-                )}
-                placeholder={i18n.translate(
-                  'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
-                  {
-                    defaultMessage: 'Select the good status codes',
-                  }
-                )}
-                isInvalid={!!fieldState.error}
-                options={generateStatusCodeOptions(['2xx', '3xx', '4xx', '5xx'])}
-                selectedOptions={generateStatusCodeOptions(field.value)}
-                onChange={(selected: EuiComboBoxOptionOption[]) => {
-                  if (selected.length) {
-                    return field.onChange(selected.map((opts) => opts.value));
-                  }
-
-                  field.onChange([]);
-                }}
-                isClearable={true}
-                data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
-              />
-            )}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
           <QueryBuilder
             control={control}
             dataTestSubj="apmLatencyFilterInput"
@@ -155,17 +112,18 @@ export function ApmAvailabilityIndicatorTypeForm() {
                 defaultMessage: 'Custom filter to apply on the index',
               }
             )}
+            tooltip={
+              <EuiIconTip
+                content={i18n.translate('xpack.observability.slo.sloEdit.apm.filter.tooltip', {
+                  defaultMessage:
+                    'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+                })}
+                position="top"
+              />
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
-}
-
-function generateStatusCodeOptions(codes: string[] = []) {
-  return codes.map((code) => ({
-    label: code,
-    value: code,
-    'data-test-subj': `${code}Option`,
-  }));
 }

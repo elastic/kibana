@@ -8,11 +8,13 @@
 import type { FilterItemObj } from '../../public/common/components/filter_group/types';
 
 export const formatPageFilterSearchParam = (filters: FilterItemObj[]) => {
-  return filters.map((filter) => ({
-    title: filter.title ?? filter.fieldName,
-    selectedOptions: filter.selectedOptions ?? [],
-    fieldName: filter.fieldName,
-    existsSelected: filter.existsSelected ?? false,
-    exclude: filter.exclude ?? false,
-  }));
+  return filters.map(
+    ({ title, fieldName, selectedOptions = [], existsSelected = false, exclude = false }) => ({
+      title: title ?? fieldName,
+      selectedOptions,
+      fieldName,
+      existsSelected,
+      exclude,
+    })
+  );
 };

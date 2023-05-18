@@ -6,7 +6,6 @@
  */
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiI18nNumber,
   EuiAvatar,
@@ -19,10 +18,14 @@ import {
   EuiText,
   EuiToolTip,
   type HorizontalAlignment,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SecurityPageName } from '../../../../../common/constants';
+import { getRuleDetailsUrl } from '../../../../common/components/link_to';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -98,24 +101,46 @@ const getResponseActionListTableColumns = ({
       },
     },
     {
-      field: 'createdBy',
       name: TABLE_COLUMN_NAMES.user,
       width: !showHostNames ? '21%' : '14%',
       truncateText: true,
-      render: (userId: ActionListApiResponse['data'][number]['createdBy']) => {
+      render: ({ createdBy, ruleId }: ActionListApiResponse['data'][number]) => {
+        if (createdBy === 'unknown' && ruleId) {
+          return (
+            <EuiToolTip content={UX_MESSAGES.triggeredByRule} anchorClassName="eui-textTruncate">
+              <SecuritySolutionLinkAnchor
+                data-test-subj="ruleName"
+                deepLinkId={SecurityPageName.rules}
+                path={getRuleDetailsUrl(ruleId)}
+              >
+                <EuiText
+                  size="s"
+                  className="eui-textTruncate eui-fullWidth"
+                  data-test-subj={getTestId('column-user-name')}
+                >
+                  {UX_MESSAGES.triggeredByRule}
+                </EuiText>
+              </SecuritySolutionLinkAnchor>
+            </EuiToolTip>
+          );
+        }
         return (
           <StyledFacetButton
             icon={
-              <EuiAvatar name={userId} data-test-subj={getTestId('column-user-avatar')} size="s" />
+              <EuiAvatar
+                name={createdBy}
+                data-test-subj={getTestId('column-user-avatar')}
+                size="s"
+              />
             }
           >
-            <EuiToolTip content={userId} anchorClassName="eui-textTruncate">
+            <EuiToolTip content={createdBy} anchorClassName="eui-textTruncate">
               <EuiText
                 size="s"
                 className="eui-textTruncate eui-fullWidth"
                 data-test-subj={getTestId('column-user-name')}
               >
-                {userId}
+                {createdBy}
               </EuiText>
             </EuiToolTip>
           </StyledFacetButton>
@@ -142,6 +167,7 @@ const getResponseActionListTableColumns = ({
           .join(', ');
 
         let hostnames = _hostnames;
+
         if (!_hostnames) {
           if (hosts.length > 1) {
             // when action was for a single agent and no host name
@@ -185,12 +211,11 @@ const getResponseActionListTableColumns = ({
       },
     },
     {
-      field: 'status',
       name: TABLE_COLUMN_NAMES.status,
       width: !showHostNames ? '15%' : '10%',
-      render: (_status: ActionListApiResponse['data'][number]['status']) => {
+      render: (action: ActionListApiResponse['data'][number]) => {
+        const _status = action.errors?.length ? 'failed' : action.status;
         const status = getActionStatus(_status);
-
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
             <StatusBadge

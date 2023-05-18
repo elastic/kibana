@@ -125,17 +125,12 @@ describe('Detection rules, bulk edit', () => {
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
-    createRule({
-      ...getNewRule(),
-      name: RULE_NAME,
-      ...defaultRuleData,
-      rule_id: '1',
-    });
-    createRule({ ...getEqlRule(), ...defaultRuleData, rule_id: '2' });
-    createRule({ ...getMachineLearningRule(), tags: ['test-default-tag-1', 'test-default-tag-2'] });
-    createRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData, rule_id: '4' });
-    createRule({ ...getNewThresholdRule(), ...defaultRuleData, rule_id: '5' });
-    createRule({ ...getNewTermsRule(), ...defaultRuleData, rule_id: '6' });
+    createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' }));
+    createRule(getEqlRule({ ...defaultRuleData, rule_id: '2' }));
+    createRule(getMachineLearningRule({ tags: ['test-default-tag-1', 'test-default-tag-2'] }));
+    createRule(getNewThreatIndicatorRule({ ...defaultRuleData, rule_id: '4' }));
+    createRule(getNewThresholdRule({ ...defaultRuleData, rule_id: '5' }));
+    createRule(getNewTermsRule({ ...defaultRuleData, rule_id: '6' }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 

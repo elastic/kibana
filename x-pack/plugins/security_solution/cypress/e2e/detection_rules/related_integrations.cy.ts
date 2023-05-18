@@ -111,7 +111,7 @@ describe('Related integrations', () => {
     });
   });
 
-  context(
+  context.skip(
     'installed integrations: Amazon CloudFront, AWS CloudTrail, System, enabled integrations: Amazon CloudFront, Aws Cloudfront, System',
     () => {
       const rule = {

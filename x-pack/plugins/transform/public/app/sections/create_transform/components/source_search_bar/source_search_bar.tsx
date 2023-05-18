@@ -25,8 +25,8 @@ interface SourceSearchBarProps {
 }
 export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar }) => {
   const {
-    actions: { searchChangeHandler, searchSubmitHandler, setErrorMessage },
-    state: { errorMessage, searchInput },
+    actions: { searchChangeHandler, searchSubmitHandler, setQueryErrorMessage },
+    state: { queryErrorMessage, searchInput },
   } = searchBar;
 
   const {
@@ -44,7 +44,7 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar 
   return (
     <EuiInputPopover
       style={{ maxWidth: '100%' }}
-      closePopover={() => setErrorMessage(undefined)}
+      closePopover={() => setQueryErrorMessage(undefined)}
       input={
         <QueryStringInput
           bubbleSubmitEvent={true}
@@ -80,13 +80,13 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar 
           }}
         />
       }
-      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+      isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}
     >
       <EuiCode>
         {i18n.translate('xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar', {
-          defaultMessage: 'Invalid query: {errorMessage}',
+          defaultMessage: 'Invalid query: {queryErrorMessage}',
           values: {
-            errorMessage: errorMessage?.message.split('\n')[0],
+            queryErrorMessage: queryErrorMessage?.message.split('\n')[0],
           },
         })}
       </EuiCode>

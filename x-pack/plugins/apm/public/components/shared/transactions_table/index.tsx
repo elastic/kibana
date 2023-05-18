@@ -18,6 +18,7 @@ import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -27,6 +28,7 @@ import {
   isPending,
   useFetcher,
 } from '../../../hooks/use_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
@@ -63,6 +65,7 @@ const DEFAULT_SORT = {
 };
 
 interface Props {
+  hideTitle?: boolean;
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
@@ -79,6 +82,7 @@ interface Props {
 export function TransactionsTable({
   fixedHeight = false,
   hideViewTransactionsLink = false,
+  hideTitle = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
   showPerPageOptions = true,
@@ -129,9 +133,21 @@ export function TransactionsTable({
 
   const { transactionType, serviceName } = useApmServiceContext();
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    numBuckets: 20,
+    type: ApmDocumentType.TransactionMetric,
+  });
+
+  const shouldUseDurationSummary =
+    latencyAggregationType === 'avg' &&
+    preferred?.source?.hasDurationSummaryField;
+
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end || !latencyAggregationType || !transactionType) {
+      if (!latencyAggregationType || !transactionType || !preferred) {
         return Promise.resolve(undefined);
       }
       return callApmApi(
@@ -145,8 +161,11 @@ export function TransactionsTable({
               start,
               end,
               transactionType,
+              useDurationSummary: shouldUseDurationSummary,
               latencyAggregationType:
                 latencyAggregationType as LatencyAggregationType,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
             },
           },
         }
@@ -189,6 +208,7 @@ export function TransactionsTable({
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
+      preferred,
     ]
   );
 
@@ -212,7 +232,8 @@ export function TransactionsTable({
         start &&
         end &&
         transactionType &&
-        latencyAggregationType
+        latencyAggregationType &&
+        preferred
       ) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
@@ -224,8 +245,11 @@ export function TransactionsTable({
                 kuery,
                 start,
                 end,
-                numBuckets: 20,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 transactionType,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                useDurationSummary: shouldUseDurationSummary,
                 latencyAggregationType:
                   latencyAggregationType as LatencyAggregationType,
                 transactionNames: JSON.stringify(
@@ -281,32 +305,35 @@ export function TransactionsTable({
       gutterSize="s"
       data-test-subj="transactionsGroupTable"
     >
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.apm.transactionsTable.title', {
-                  defaultMessage: 'Transactions',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {!hideViewTransactionsLink && (
+      {!hideTitle && (
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
-              <TransactionOverviewLink
-                serviceName={serviceName}
-                latencyAggregationType={latencyAggregationType}
-                transactionType={transactionType}
-              >
-                {i18n.translate('xpack.apm.transactionsTable.linkText', {
-                  defaultMessage: 'View transactions',
-                })}
-              </TransactionOverviewLink>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.apm.transactionsTable.title', {
+                    defaultMessage: 'Transactions',
+                  })}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            {!hideViewTransactionsLink && (
+              <EuiFlexItem grow={false}>
+                <TransactionOverviewLink
+                  serviceName={serviceName}
+                  latencyAggregationType={latencyAggregationType}
+                  transactionType={transactionType}
+                >
+                  {i18n.translate('xpack.apm.transactionsTable.linkText', {
+                    defaultMessage: 'View transactions',
+                  })}
+                </TransactionOverviewLink>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+
       {showMaxTransactionGroupsExceededWarning && maxTransactionGroupsExceeded && (
         <EuiFlexItem>
           <EuiCallOut

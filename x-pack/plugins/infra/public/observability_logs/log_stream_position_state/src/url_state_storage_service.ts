@@ -37,7 +37,8 @@ export const updateContextInUrl =
       positionStateKey,
       positionStateInUrlRT.encode({
         position: context.latestPosition ? pickTimeKey(context.latestPosition) : null,
-      })
+      }),
+      { replace: true }
     );
   };
 
@@ -100,8 +101,8 @@ const decodePositionQueryValueFromUrl = (queryValueFromUrl: unknown) => {
 };
 
 // Used by linkTo components
-export const replaceLogPositionInQueryString = (time: number) =>
-  Number.isNaN(time)
+export const replaceLogPositionInQueryString = (time?: number) =>
+  Number.isNaN(time) || time == null
     ? (value: string) => value
     : replaceStateKeyInQueryString<PositionStateInUrl>(defaultPositionStateKey, {
         position: {

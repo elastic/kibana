@@ -1,2 +1,4 @@
-routes_doc
-server/routes/apidoc_scripts/header.md
+scripts/apidoc_scripts/ML_API.mdx
+scripts/apidoc_scripts/ml_kibana_api.mdx
+scripts/apidoc_scripts/header.md
+apidoc_config.json

@@ -17,13 +17,6 @@ import {
   testNowRunsSelector,
   TestRunStatus,
 } from '../../state/manual_test_runs';
-import { MonitorFields } from '../../../../../common/runtime_types';
-
-export interface TestRun {
-  id: string;
-  monitor: MonitorFields;
-  runOnceMode: boolean;
-}
 
 export function TestNowModeFlyoutContainer() {
   const dispatch = useDispatch();
@@ -82,12 +75,15 @@ export function TestNowModeFlyoutContainer() {
   return (
     <>
       {Object.values(testNowRuns)
-        .filter((val) => val.testRunId)
+        .filter(
+          (val) => val.testRunId && (val.status === 'in-progress' || val.status === 'loading')
+        )
         .map((manualTestRun) => (
           <ManualTestRunMode
             key={manualTestRun.testRunId}
             manualTestRun={manualTestRun}
             onDone={onDone}
+            showErrors={flyoutOpenTestRun?.testRunId !== manualTestRun.testRunId}
           />
         ))}
       {flyout}

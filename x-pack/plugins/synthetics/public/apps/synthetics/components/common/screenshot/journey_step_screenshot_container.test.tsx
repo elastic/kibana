@@ -9,15 +9,15 @@ import React from 'react';
 import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { JourneyStepScreenshotContainer } from './journey_step_screenshot_container';
 import { render } from '../../../utils/testing';
-import * as observabilityPublic from '@kbn/observability-plugin/public';
 import * as retrieveHooks from '../monitor_test_result/use_retrieve_step_image';
+import { getScreenshotUrl } from './journey_screenshot_dialog';
 
-jest.mock('@kbn/observability-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.setTimeout(10 * 1000);
 
-const imgPath1 = '/internal/uptime/journey/screenshot/test-check-group/1';
-const imgPath2 = '/internal/uptime/journey/screenshot/test-check-group/2';
+const imgPath1 = getScreenshotUrl({ basePath: '', checkGroup: 'test-check-group', stepNumber: 1 });
+const imgPath2 = getScreenshotUrl({ basePath: '', checkGroup: 'test-check-group', stepNumber: 2 });
 const testImageDataResult = {
   [imgPath1]: {
     attempts: 1,
@@ -38,8 +38,8 @@ const testImageDataResult = {
 };
 
 describe('JourneyStepScreenshotContainer', () => {
+  afterEach(() => jest.clearAllMocks());
   let checkGroup: string;
-  const { FETCH_STATUS } = observabilityPublic;
 
   beforeAll(() => {
     checkGroup = 'test-check-group';
@@ -49,21 +49,8 @@ describe('JourneyStepScreenshotContainer', () => {
     jest.clearAllMocks();
   });
 
-  it.each([[FETCH_STATUS.PENDING], [FETCH_STATUS.LOADING]])(
-    'displays spinner when loading step image',
-    (fetchStatus) => {
-      jest
-        .spyOn(observabilityPublic, 'useFetcher')
-        .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null, loading: true });
-      const { getByTestId } = render(<JourneyStepScreenshotContainer checkGroup={checkGroup} />);
-      expect(getByTestId('stepScreenshotPlaceholderLoading')).toBeInTheDocument();
-    }
-  );
-
   it('displays no image available when img src is unavailable and fetch status is successful', () => {
-    jest
-      .spyOn(observabilityPublic, 'useFetcher')
-      .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
+    jest.spyOn(retrieveHooks, 'useRetrieveStepImage').mockReturnValue(undefined);
     const { getByTestId } = render(
       <JourneyStepScreenshotContainer checkGroup={checkGroup} allStepsLoaded={true} />
     );

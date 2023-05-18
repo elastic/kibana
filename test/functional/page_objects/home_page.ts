@@ -57,7 +57,7 @@ export class HomePageObject extends FtrService {
   }
 
   async isGuidedOnboardingLandingDisplayed() {
-    return await this.testSubjects.isDisplayed('onboarding--landing-page');
+    return await this.testSubjects.isDisplayed('guided-onboarding--landing-page');
   }
 
   async isHomePageDisplayed() {

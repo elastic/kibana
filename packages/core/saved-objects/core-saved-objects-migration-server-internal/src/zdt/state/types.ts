@@ -6,16 +6,32 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SavedObjectsRawDoc,
+  SavedObjectsMappingProperties,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
+} from '@kbn/core-saved-objects-server';
 import type { IndexMapping, IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
-import type { MigrationLog } from '../../types';
+import type { MigrationLog, Progress, TransformRawDocs } from '../../types';
 import type { ControlState } from '../../state_action_machine';
+import type { BulkOperationBatch } from '../../model/create_batches';
 import type { AliasAction } from '../../actions';
+import { TransformErrorObjects } from '../../core';
 
 export interface BaseState extends ControlState {
   readonly retryCount: number;
   readonly retryDelay: number;
   readonly logs: MigrationLog[];
+  /**
+   * When true, will fully skip document migration, and will transition directly to DONE
+   * after the INDEX_STATE_UPDATE_DONE stage.
+   *
+   * This flag is set to `true` in the following scenarios:
+   * - on nodes without the `migrator` role, the flag will always be `true`.
+   * - if the migrator create the index, the workflow will set the flag to `true` given there is nothing to migrate.
+   */
+  readonly skipDocumentMigration: boolean;
 }
 
 /** Initial state before any action is performed */
@@ -23,6 +39,9 @@ export interface InitState extends BaseState {
   readonly controlState: 'INIT';
 }
 
+/**
+ * Common state properties available after the `INIT` stage
+ */
 export interface PostInitState extends BaseState {
   /**
    * The index we're currently migrating.
@@ -46,6 +65,28 @@ export interface PostInitState extends BaseState {
    * All operations updating this field will update in the state accordingly.
    */
   readonly currentIndexMeta: IndexMappingMeta;
+}
+
+/**
+ * Common state properties available after the `DOCUMENTS_UPDATE_INIT` stage
+ */
+export interface PostDocInitState extends PostInitState {
+  readonly excludeOnUpgradeQuery: QueryDslQueryContainer;
+  readonly excludeFromUpgradeFilterHooks: Record<
+    string,
+    SavedObjectTypeExcludeFromUpgradeFilterHook
+  >;
+  readonly outdatedDocumentsQuery: QueryDslQueryContainer;
+  readonly transformRawDocs: TransformRawDocs;
+}
+
+export interface OutdatedDocumentsSearchState extends PostDocInitState {
+  readonly pitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
+  readonly hasTransformedDocs: boolean;
 }
 
 export interface CreateTargetIndexState extends BaseState {
@@ -72,6 +113,72 @@ export interface UpdateAliasesState extends PostInitState {
   readonly controlState: 'UPDATE_ALIASES';
 }
 
+export interface IndexStateUpdateDoneState extends PostInitState {
+  readonly controlState: 'INDEX_STATE_UPDATE_DONE';
+}
+
+export interface DocumentsUpdateInitState extends PostInitState {
+  readonly controlState: 'DOCUMENTS_UPDATE_INIT';
+}
+
+export interface SetDocMigrationStartedState extends PostDocInitState {
+  readonly controlState: 'SET_DOC_MIGRATION_STARTED';
+}
+
+export interface SetDocMigrationStartedWaitForInstancesState extends PostDocInitState {
+  readonly controlState: 'SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES';
+}
+
+export interface CleanupUnknownAndExcludedDocsState extends PostDocInitState {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS';
+  readonly hasDeletedDocs?: boolean;
+}
+
+export interface CleanupUnknownAndExcludedDocsWaitForTaskState extends PostDocInitState {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK';
+  readonly deleteTaskId: string;
+  readonly hasDeletedDocs?: boolean;
+}
+
+export interface CleanupUnknownAndExcludedDocsRefreshState extends PostDocInitState {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH';
+}
+
+export interface OutdatedDocumentsSearchOpenPitState extends PostDocInitState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT';
+}
+
+export interface OutdatedDocumentsSearchReadState extends OutdatedDocumentsSearchState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ';
+}
+
+export interface OutdatedDocumentsSearchTransformState extends OutdatedDocumentsSearchState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM';
+  readonly outdatedDocuments: SavedObjectsRawDoc[];
+}
+
+export interface OutdatedDocumentsSearchBulkIndexState extends OutdatedDocumentsSearchState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX';
+  readonly bulkOperationBatches: BulkOperationBatch[];
+  readonly currentBatch: number;
+}
+
+export interface OutdatedDocumentsSearchClosePitState extends OutdatedDocumentsSearchState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT';
+}
+
+export interface OutdatedDocumentsSearchRefreshState extends OutdatedDocumentsSearchState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_REFRESH';
+}
+
+export interface UpdateDocumentModelVersionsState extends PostDocInitState {
+  readonly controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS';
+}
+
+export interface UpdateDocumentModelVersionsWaitForInstancesState extends PostInitState {
+  readonly controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES';
+}
+
 /** Migration completed successfully */
 export interface DoneState extends BaseState {
   readonly controlState: 'DONE';
@@ -92,7 +199,22 @@ export type State =
   | UpdateIndexMappingsState
   | UpdateIndexMappingsWaitForTaskState
   | UpdateMappingModelVersionState
-  | UpdateAliasesState;
+  | UpdateAliasesState
+  | IndexStateUpdateDoneState
+  | DocumentsUpdateInitState
+  | SetDocMigrationStartedState
+  | SetDocMigrationStartedWaitForInstancesState
+  | CleanupUnknownAndExcludedDocsState
+  | CleanupUnknownAndExcludedDocsWaitForTaskState
+  | CleanupUnknownAndExcludedDocsRefreshState
+  | OutdatedDocumentsSearchOpenPitState
+  | OutdatedDocumentsSearchReadState
+  | OutdatedDocumentsSearchTransformState
+  | OutdatedDocumentsSearchBulkIndexState
+  | OutdatedDocumentsSearchClosePitState
+  | UpdateDocumentModelVersionsState
+  | UpdateDocumentModelVersionsWaitForInstancesState
+  | OutdatedDocumentsSearchRefreshState;
 
 export type AllControlStates = State['controlState'];
 
@@ -110,6 +232,21 @@ export interface ControlStateMap {
   UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: UpdateIndexMappingsWaitForTaskState;
   UPDATE_MAPPING_MODEL_VERSIONS: UpdateMappingModelVersionState;
   UPDATE_ALIASES: UpdateAliasesState;
+  INDEX_STATE_UPDATE_DONE: IndexStateUpdateDoneState;
+  DOCUMENTS_UPDATE_INIT: DocumentsUpdateInitState;
+  SET_DOC_MIGRATION_STARTED: SetDocMigrationStartedState;
+  SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: SetDocMigrationStartedWaitForInstancesState;
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: CleanupUnknownAndExcludedDocsState;
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: CleanupUnknownAndExcludedDocsWaitForTaskState;
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH: CleanupUnknownAndExcludedDocsRefreshState;
+  OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: OutdatedDocumentsSearchOpenPitState;
+  OUTDATED_DOCUMENTS_SEARCH_READ: OutdatedDocumentsSearchReadState;
+  OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: OutdatedDocumentsSearchTransformState;
+  OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: OutdatedDocumentsSearchBulkIndexState;
+  OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: OutdatedDocumentsSearchClosePitState;
+  OUTDATED_DOCUMENTS_SEARCH_REFRESH: OutdatedDocumentsSearchRefreshState;
+  UPDATE_DOCUMENT_MODEL_VERSIONS: UpdateDocumentModelVersionsState;
+  UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: UpdateDocumentModelVersionsWaitForInstancesState;
 }
 
 /**

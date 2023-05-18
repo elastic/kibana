@@ -5,22 +5,21 @@
  * 2.0.
  */
 
+import type { IndexEndpointHostsCyTaskOptions } from '../types';
 import type {
   IndexedHostsAndAlertsResponse,
   DeleteIndexedHostsAndAlertsResponse,
 } from '../../../../common/endpoint/index_data';
 
-interface CyIndexEndpointHosts {
+export interface CyIndexEndpointHosts {
   data: IndexedHostsAndAlertsResponse;
   cleanup: () => Cypress.Chainable<DeleteIndexedHostsAndAlertsResponse>;
 }
 
 export const indexEndpointHosts = (
-  options: {
-    count?: number;
-  } = {}
+  options: IndexEndpointHostsCyTaskOptions = {}
 ): Cypress.Chainable<CyIndexEndpointHosts> => {
-  return cy.task('indexEndpointHosts', options).then((indexHosts) => {
+  return cy.task('indexEndpointHosts', options, { timeout: 120000 }).then((indexHosts) => {
     return {
       data: indexHosts,
       cleanup: () => {

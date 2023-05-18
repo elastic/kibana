@@ -9,13 +9,27 @@
 import { omit } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
-import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
+import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
 import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { bulkGet } from './bulk_get';
+
+const storageContextGetTransforms = jest.fn();
+const spy = () => storageContextGetTransforms;
+
+jest.mock('@kbn/object-versioning', () => {
+  const original = jest.requireActual('@kbn/object-versioning');
+  return {
+    ...original,
+    getContentManagmentServicesTransforms: (...args: any[]) => {
+      spy()(...args);
+      return original.getContentManagmentServicesTransforms(...args);
+    },
+  };
+});
 
 const { fn, schemas } = bulkGet;
 
@@ -121,7 +135,22 @@ describe('RPC -> bulkGet()', () => {
     test('should validate that the response is an object or an array of object', () => {
       let error = validate(
         {
-          any: 'object',
+          hits: [
+            {
+              contentTypeId: '123',
+              result: {
+                item: {
+                  any: 'object',
+                },
+                meta: {
+                  foo: 'bar',
+                },
+              },
+            },
+          ],
+          meta: {
+            foo: 'bar',
+          },
         },
         outputSchema
       );
@@ -129,22 +158,20 @@ describe('RPC -> bulkGet()', () => {
       expect(error).toBe(null);
 
       error = validate(
-        [
-          {
-            any: 'object',
-          },
-        ],
+        {
+          hits: [
+            {
+              contentTypeId: '123',
+              result: 123,
+            },
+          ],
+        },
         outputSchema
       );
 
-      expect(error).toBe(null);
-
-      error = validate(123, outputSchema);
-
       expect(error?.message).toContain(
-        'expected a plain object value, but found [number] instead.'
+        '[hits.0.result]: expected a plain object value, but found [number] instead.'
       );
-      expect(error?.message).toContain('expected value of type [array] but got [number]');
     });
   });
 
@@ -164,7 +191,8 @@ describe('RPC -> bulkGet()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: getServiceObjectTransformFactory,
+        getTransformsFactory: (contentTypeId: string, version: Version) =>
+          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
       };
 
       return { ctx, storage };
@@ -173,7 +201,16 @@ describe('RPC -> bulkGet()', () => {
     test('should return the storage bulkGet() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = ['Item1', 'Item2'];
+      const expected = {
+        hits: [
+          {
+            item: 'Item1',
+          },
+          {
+            item: 'Item2',
+          },
+        ],
+      };
       storage.bulkGet.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, {
@@ -184,7 +221,7 @@ describe('RPC -> bulkGet()', () => {
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
-        items: expected,
+        result: expected,
       });
 
       expect(storage.bulkGet).toHaveBeenCalledWith(
@@ -201,6 +238,31 @@ describe('RPC -> bulkGet()', () => {
         ['123', '456'],
         undefined
       );
+    });
+
+    test('should implicitly set the requestVersion in storageContext -> utils -> getTransforms()', async () => {
+      const { ctx, storage } = setup();
+
+      const requestVersion = 1;
+      await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        ids: ['123', '456'],
+        version: requestVersion,
+      });
+
+      const [storageContext] = storage.bulkGet.mock.calls[0];
+      storageContext.utils.getTransforms({ 1: {} });
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith(
+        { 1: {} },
+        requestVersion,
+        expect.any(Object)
+      );
+
+      // We can still pass custom version
+      storageContext.utils.getTransforms({ 1: {} }, 1234);
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith({ 1: {} }, 1234, expect.any(Object));
     });
 
     describe('validation', () => {
@@ -249,7 +311,7 @@ describe('RPC -> bulkGet()', () => {
           2: {},
         };
 
-        const transforms = getTransforms(definitions, 1);
+        const transforms = getTransforms(definitions);
 
         // Some smoke tests for the getTransforms() utils. Complete test suite is inside
         // the package @kbn/object-versioning

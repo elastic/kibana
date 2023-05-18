@@ -9,7 +9,7 @@ import * as rt from 'io-ts';
 
 import { NumberFromString } from '../saved_object';
 import { UserRt } from '../user';
-import { CommentResponseRt } from './comment';
+import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
@@ -164,6 +164,34 @@ export const CasePostRequestRt = rt.intersection([
   }),
 ]);
 
+const CasesFindRequestSearchFieldsRt = rt.keyof({
+  'closed_by.username': null,
+  'closed_by.full_name': null,
+  'closed_by.email': null,
+  'closed_by.profile_uid': null,
+  'created_by.username': null,
+  'created_by.full_name': null,
+  'created_by.email': null,
+  'created_by.profile_uid': null,
+  description: null,
+  'connector.name': null,
+  'connector.type': null,
+  'external_service.pushed_by.username': null,
+  'external_service.pushed_by.full_name': null,
+  'external_service.pushed_by.email': null,
+  'external_service.pushed_by.profile_uid': null,
+  'external_service.connector_name': null,
+  'external_service.external_id': null,
+  'external_service.external_title': null,
+  'external_service.external_url': null,
+  title: null,
+  'title.keyword': null,
+  'updated_by.username': null,
+  'updated_by.full_name': null,
+  'updated_by.email': null,
+  'updated_by.profile_uid': null,
+});
+
 export const CasesFindRequestRt = rt.partial({
   /**
    * Tags to filter by
@@ -190,10 +218,6 @@ export const CasesFindRequestRt = rt.partial({
    */
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
   /**
-   * The fields in the entity to return in the response
-   */
-  fields: rt.union([rt.array(rt.string), rt.string]),
-  /**
    * A KQL date. If used all cases created after (gte) the from date will be returned
    */
   from: rt.string,
@@ -212,7 +236,10 @@ export const CasesFindRequestRt = rt.partial({
   /**
    * The fields to perform the simple_query_string parsed query against
    */
-  searchFields: rt.union([rt.array(rt.string), rt.string]),
+  searchFields: rt.union([
+    rt.array(CasesFindRequestSearchFieldsRt),
+    CasesFindRequestSearchFieldsRt,
+  ]),
   /**
    * The root fields to perform the simple_query_string parsed query against
    */
@@ -249,7 +276,7 @@ export const CasesByAlertIDRequestRt = rt.partial({
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
-export const CaseResponseRt = rt.intersection([
+export const CaseRt = rt.intersection([
   CaseAttributesRt,
   rt.type({
     id: rt.string,
@@ -258,13 +285,13 @@ export const CaseResponseRt = rt.intersection([
     version: rt.string,
   }),
   rt.partial({
-    comments: rt.array(CommentResponseRt),
+    comments: rt.array(CommentRt),
   }),
 ]);
 
 export const CaseResolveResponseRt = rt.intersection([
   rt.type({
-    case: CaseResponseRt,
+    case: CaseRt,
     outcome: rt.union([rt.literal('exactMatch'), rt.literal('aliasMatch'), rt.literal('conflict')]),
   }),
   rt.partial({
@@ -275,7 +302,7 @@ export const CaseResolveResponseRt = rt.intersection([
 
 export const CasesFindResponseRt = rt.intersection([
   rt.type({
-    cases: rt.array(CaseResponseRt),
+    cases: rt.array(CaseRt),
     page: rt.number,
     per_page: rt.number,
     total: rt.number,
@@ -292,7 +319,7 @@ export const CasePatchRequestRt = rt.intersection([
 ]);
 
 export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
-export const CasesResponseRt = rt.array(CaseResponseRt);
+export const CasesRt = rt.array(CaseRt);
 
 export const CasePushRequestParamsRt = rt.type({
   case_id: rt.string,
@@ -329,17 +356,12 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
-export const CasesBulkGetRequestRt = rt.intersection([
-  rt.type({
-    ids: rt.array(rt.string),
-  }),
-  rt.partial({
-    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
-  }),
-]);
+export const CasesBulkGetRequestRt = rt.type({
+  ids: rt.array(rt.string),
+});
 
 export const CasesBulkGetResponseRt = rt.type({
-  cases: CasesResponseRt,
+  cases: CasesRt,
   errors: rt.array(
     rt.type({
       error: rt.string,
@@ -353,9 +375,9 @@ export const CasesBulkGetResponseRt = rt.type({
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
-export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
+export type Case = rt.TypeOf<typeof CaseRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
-export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
+export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
@@ -375,13 +397,3 @@ export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
 
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
-export type CasesBulkGetRequestCertainFields<
-  Field extends keyof CaseResponse = keyof CaseResponse
-> = Omit<CasesBulkGetRequest, 'fields'> & {
-  fields?: Field[];
-};
-export type CasesBulkGetResponseCertainFields<
-  Field extends keyof CaseResponse = keyof CaseResponse
-> = Omit<CasesBulkGetResponse, 'cases'> & {
-  cases: Array<Pick<CaseResponse, Field | 'id' | 'version' | 'owner'>>;
-};

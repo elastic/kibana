@@ -504,7 +504,7 @@ export function getUiSettings(
           'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the ' +
           'Elasticsearch terms enum API for improved autocomplete suggestion performance. (Note that terms_enum is ' +
           'incompatible with Document Level Security.) Select terms_agg to use an Elasticsearch terms aggregation. ' +
-          '{learnMoreLink}',
+          '(Note that terms_agg is incompatible with IP-type fields.) {learnMoreLink}',
         values: {
           learnMoreLink:
             `<a href=${docLinks.links.kibana.autocompleteSuggestions} target="_blank" rel="noopener">` +

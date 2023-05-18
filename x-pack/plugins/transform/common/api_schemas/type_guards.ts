@@ -21,6 +21,7 @@ import type { DeleteTransformsResponseSchema } from './delete_transforms';
 import type { ResetTransformsResponseSchema } from './reset_transforms';
 import type { StartTransformsResponseSchema } from './start_transforms';
 import type { StopTransformsResponseSchema } from './stop_transforms';
+import type { ScheduleNowTransformsResponseSchema } from './schedule_now_transforms';
 import type {
   GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
@@ -142,5 +143,11 @@ export const isStartTransformsResponseSchema = (
 export const isStopTransformsResponseSchema = (
   arg: unknown
 ): arg is StopTransformsResponseSchema => {
+  return isGenericSuccessResponseSchema(arg);
+};
+
+export const isScheduleNowTransformsResponseSchema = (
+  arg: unknown
+): arg is ScheduleNowTransformsResponseSchema => {
   return isGenericSuccessResponseSchema(arg);
 };

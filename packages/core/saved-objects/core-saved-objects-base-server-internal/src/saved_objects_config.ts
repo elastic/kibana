@@ -32,6 +32,24 @@ const migrationSchema = schema.object({
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
   retryAttempts: schema.number({ defaultValue: 15 }),
+  /**
+   * ZDT algorithm specific options
+   */
+  zdt: schema.object({
+    /**
+     * The delay that the migrator will wait for, in seconds, when updating the
+     * index mapping's meta to let the other nodes pickup the changes.
+     */
+    metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 120 }),
+    /**
+     * If set to true, the document migration phase will be run even if the
+     * instance does not have the `migrator` role.
+     *
+     * This is mostly used for testing environments and integration tests were
+     * we have full control over a single node Kibana deployment.
+     */
+    runOnNonMigratorNodes: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
@@ -60,6 +78,7 @@ export const savedObjectsConfig: ServiceConfigDescriptor<SavedObjectsConfigType>
   path: 'savedObjects',
   schema: soSchema,
 };
+
 export class SavedObjectConfig {
   public maxImportPayloadBytes: number;
   public maxImportExportSize: number;

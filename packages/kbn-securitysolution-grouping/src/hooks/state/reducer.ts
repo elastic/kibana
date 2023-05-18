@@ -25,8 +25,8 @@ export const initialState: GroupMap = {
 
 const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) => {
   switch (action.type) {
-    case ActionType.updateActiveGroup: {
-      const { id, activeGroup } = action.payload;
+    case ActionType.updateActiveGroups: {
+      const { id, activeGroups } = action.payload;
       return {
         ...state,
         groupById: {
@@ -34,35 +34,7 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
           [id]: {
             ...defaultGroup,
             ...groupsById[id],
-            activeGroup,
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupActivePage: {
-      const { id, activePage } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...groupsById,
-          [id]: {
-            ...defaultGroup,
-            ...groupsById[id],
-            activePage,
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupItemsPerPage: {
-      const { id, itemsPerPage } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...groupsById,
-          [id]: {
-            ...defaultGroup,
-            ...groupsById[id],
-            itemsPerPage,
+            activeGroups,
           },
         },
       };
@@ -89,22 +61,10 @@ export const groupsReducerWithStorage = (state: GroupMap, action: Action) => {
   if (storage) {
     groupsInStorage = getAllGroupsInStorage(storage);
   }
-  const trackedGroupIds = Object.keys(state.groupById);
-
-  const adjustedStorageGroups = Object.entries(groupsInStorage).reduce(
-    (acc: GroupsById, [key, group]) => ({
-      ...acc,
-      [key]: {
-        // reset page to 0 if is initial state
-        ...(trackedGroupIds.includes(key) ? group : { ...group, activePage: 0 }),
-      },
-    }),
-    {} as GroupsById
-  );
 
   const groupsById: GroupsById = {
     ...state.groupById,
-    ...adjustedStorageGroups,
+    ...groupsInStorage,
   };
 
   const newState = groupsReducer(state, action, groupsById);

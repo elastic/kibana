@@ -122,8 +122,6 @@ async function mountComponent(
     state: { columns: [], query, hideChart: false, interval: 'auto' },
     stateContainer,
     setExpandedDoc: jest.fn(),
-    persistDataView: jest.fn(),
-    updateAdHocDataViewId: jest.fn(),
     updateDataViewList: jest.fn(),
   };
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
@@ -162,20 +160,6 @@ describe('Discover component', () => {
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).not.toBeNull();
   }, 10000);
-
-  test('sql query displays no chart toggle', async () => {
-    const container = document.createElement('div');
-    await mountComponent(
-      dataViewWithTimefieldMock,
-      false,
-      { attachTo: container },
-      { sql: 'SELECT * FROM test' },
-      true
-    );
-    expect(
-      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
-    ).toBeNull();
-  });
 
   test('the saved search title h1 gains focus on navigate', async () => {
     const container = document.createElement('div');

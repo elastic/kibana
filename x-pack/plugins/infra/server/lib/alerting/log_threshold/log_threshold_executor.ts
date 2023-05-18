@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import {
+  ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
@@ -27,6 +28,7 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import {
   RuleParams,
   ruleParamsRT,
@@ -46,6 +48,7 @@ import {
   RatioRuleParams,
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
+  ExecutionTimeRange,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
@@ -84,7 +87,7 @@ export type LogThresholdAlertFactory = (
   value: number,
   threshold: number,
   actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>,
-  additionalContext?: AdditionalContext
+  rootLevelContext?: AdditionalContext
 ) => LogThresholdAlert;
 export type LogThresholdAlertLimit = RuleExecutorServices<
   LogThresholdAlertState,
@@ -132,15 +135,21 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       value,
       threshold,
       actions,
-      additionalContext
+      rootLevelContext
     ) => {
+      const alertContext =
+        actions != null
+          ? actions.reduce((next, action) => ({ ...next, ...action.context }), {})
+          : {};
+
       const alert = alertWithLifecycle({
         id,
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
           [ALERT_REASON]: reason,
-          ...flattenAdditionalContext(additionalContext),
+          [ALERT_CONTEXT]: alertContext,
+          ...flattenAdditionalContext(rootLevelContext),
         },
       });
 
@@ -346,20 +355,23 @@ const getESQuery = (
   runtimeMappings: estypes.MappingRuntimeFields,
   executionTimestamp: number
 ) => {
+  const executionTimeRange = {
+    lte: executionTimestamp,
+  };
   return hasGroupBy(alertParams)
     ? getGroupedESQuery(
         alertParams,
         timestampField,
         indexPattern,
         runtimeMappings,
-        executionTimestamp
+        executionTimeRange
       )
     : getUngroupedESQuery(
         alertParams,
         timestampField,
         indexPattern,
         runtimeMappings,
-        executionTimestamp
+        executionTimeRange
       );
 };
 
@@ -480,7 +492,7 @@ const getReducedGroupByResults = (
 ): ReducedGroupByResults => {
   const getGroupName = (
     key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
-  ) => Object.values(key).join(', ');
+  ) => getChartGroupNames(Object.values(key));
 
   const reducedGroupByResults: ReducedGroupByResults = [];
   if (isOptimizedGroupedSearchQueryResponse(results)) {
@@ -641,14 +653,14 @@ export const processGroupByRatioResults = (
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
-  executionTimestamp: number
+  executionTimeRange?: ExecutionTimeRange
 ) => {
   const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMs = intervalAsSeconds * 1000;
-  const to = executionTimestamp;
-  const from = to - intervalAsMs;
+  const to = executionTimeRange?.lte || Date.now();
+  const from = executionTimeRange?.gte || to - intervalAsMs;
 
   const positiveCriteria = criteria.filter((criterion) =>
     positiveComparators.includes(criterion.comparator)
@@ -699,7 +711,7 @@ export const getGroupedESQuery = (
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  executionTimestamp: number
+  executionTimeRange?: ExecutionTimeRange
 ): estypes.SearchRequest | undefined => {
   // IMPORTANT:
   // For the group by scenario we need to account for users utilizing "less than" configurations
@@ -721,7 +733,7 @@ export const getGroupedESQuery = (
   const { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
-    executionTimestamp
+    executionTimeRange
   );
 
   if (isOptimizableGroupedThreshold(comparator, value)) {
@@ -812,12 +824,12 @@ export const getUngroupedESQuery = (
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  executionTimestamp: number
+  executionTimeRange?: ExecutionTimeRange
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
-    executionTimestamp
+    executionTimeRange
   );
 
   const body: estypes.SearchRequest['body'] = {

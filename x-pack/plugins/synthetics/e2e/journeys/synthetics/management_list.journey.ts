@@ -6,8 +6,8 @@
  */
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
-import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { byTestId } from '../../helpers/utils';
+import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -25,7 +25,7 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
 
   const pageBaseUrl = 'http://localhost:5620/app/synthetics/monitors';
   const searchBarInput = page.locator(
-    '[placeholder="Search by name, url, host, tag, project or location"]'
+    '[placeholder="Search by name, URL, host, tag, project or location"]'
   );
 
   page.setDefaultTimeout(60 * 1000);
@@ -66,25 +66,22 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
     await page.click('[aria-label="expands filter group for Type filter"]');
   });
 
-  step(
-    'Click [aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text="Journey / Page"',
-    async () => {
-      await page.click(
-        '[aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text="Journey / Page"'
-      );
-      await page.click('[aria-label="Apply the selected filters for Type"]');
-      expect(page.url()).toBe(`${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D`);
-      await page.click('[placeholder="Search by name, url, host, tag, project or location"]');
-      await Promise.all([
-        page.waitForNavigation({
-          url: `${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D&query=3`,
-        }),
-        page.fill('[placeholder="Search by name, url, host, tag, project or location"]', '3'),
-      ]);
-      await page.click('text=1-1');
-      await page.waitForSelector('text=Showing 1-1 of 1 Configuration');
-    }
-  );
+  step('Click listbox option >> text="Journey / Page"', async () => {
+    // Refactored the aria-label in https://github.com/elastic/eui/pull/6589
+    // to an aria-describedby so it would be announced on EuiSelectable focus.
+    await page.click('span >> text="Journey / Page"');
+    await page.click('[aria-label="Apply the selected filters for Type"]');
+    expect(page.url()).toBe(`${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D`);
+    await page.click('[placeholder="Search by name, URL, host, tag, project or location"]');
+    await Promise.all([
+      page.waitForNavigation({
+        url: `${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D&query=3`,
+      }),
+      page.fill('[placeholder="Search by name, URL, host, tag, project or location"]', '3'),
+    ]);
+    await page.click('text=1-1');
+    await page.waitForSelector('text=Showing 1-1 of 1 Configuration');
+  });
 
   step('when no results appears', async () => {
     await searchBarInput.click();

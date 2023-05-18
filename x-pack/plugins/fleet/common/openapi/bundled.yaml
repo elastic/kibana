@@ -378,8 +378,18 @@ paths:
                 packages:
                   type: array
                   items:
-                    type: string
-                  description: list of package names to install
+                    oneOf:
+                      - type: string
+                        description: package name
+                      - type: object
+                        properties:
+                          name:
+                            type: string
+                            description: package name
+                          version:
+                            type: string
+                            description: package version
+                  description: list of packages to install
                 force:
                   type: boolean
                   description: force install to ignore package verification errors
@@ -2406,6 +2416,8 @@ paths:
                   - item
         '400':
           $ref: '#/components/responses/error'
+        '409':
+          $ref: '#/components/responses/error'
       requestBody:
         description: >-
           You should use inputs as an object and not use the deprecated inputs
@@ -2536,6 +2548,8 @@ paths:
                     - id
                     - success
         '400':
+          $ref: '#/components/responses/error'
+        '409':
           $ref: '#/components/responses/error'
   /package_policies/upgrade/dryrun:
     post:
@@ -4192,6 +4206,11 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          description: >-
+            Indicates whether the agent policy has tamper protection enabled.
+            Default false.
+          type: boolean
       required:
         - id
         - status
@@ -4244,6 +4263,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - name
         - namespace
@@ -4292,6 +4313,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - name
         - namespace

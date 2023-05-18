@@ -13,7 +13,7 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
@@ -152,6 +152,23 @@ export interface BaseState extends ControlState {
    */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
   readonly waitForMigrationCompletion: boolean;
+
+  /**
+   * This flag tells the migrator that SO documents must be redistributed,
+   * i.e. stored in different system indices, compared to where they are currently stored.
+   * This requires reindexing documents.
+   */
+  readonly mustRelocateDocuments: boolean;
+
+  /**
+   * This object holds a relation of all the types that are stored in each index, e.g.:
+   * {
+   *  '.kibana': [ 'type_1', 'type_2', ... 'type_N' ],
+   *  '.kibana_cases': [ 'type_N+1', 'type_N+2', ... 'type_N+M' ],
+   *  ...
+   * }
+   */
+  readonly indexTypesMap: IndexTypesMap;
 }
 
 export interface InitState extends BaseState {
@@ -231,6 +248,8 @@ export interface FatalState extends BaseState {
   readonly controlState: 'FATAL';
   /** The reason the migration was terminated */
   readonly reason: string;
+  /** The delay in milliseconds before throwing the FATAL exception */
+  readonly throwDelayMillis?: number;
 }
 
 export interface WaitForYellowSourceState extends SourceExistsState {
@@ -263,12 +282,17 @@ export interface CreateNewTargetState extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
-export interface CreateReindexTempState extends SourceExistsState {
+export interface CreateReindexTempState extends PostInitState {
   /**
    * Create a target index with mappings from the source index and registered
    * plugins
    */
   readonly controlState: 'CREATE_REINDEX_TEMP';
+}
+
+export interface ReadyToReindexSyncState extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'READY_TO_REINDEX_SYNC';
 }
 
 export interface ReindexSourceToTempOpenPit extends SourceExistsState {
@@ -304,11 +328,16 @@ export interface ReindexSourceToTempIndexBulk extends ReindexSourceToTempBatch {
   readonly currentBatch: number;
 }
 
+export interface DoneReindexingSyncState extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'DONE_REINDEXING_SYNC';
+}
+
 export interface SetTempWriteBlock extends PostInitState {
   readonly controlState: 'SET_TEMP_WRITE_BLOCK';
 }
 
-export interface CloneTempToSource extends PostInitState {
+export interface CloneTempToTarget extends PostInitState {
   /**
    * Clone the temporary reindex index into
    */
@@ -482,9 +511,10 @@ export type State = Readonly<
   | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded
   | CleanupUnknownAndExcludedWaitForTaskState
-  | CloneTempToSource
+  | CloneTempToTarget
   | CreateNewTargetState
   | CreateReindexTempState
+  | DoneReindexingSyncState
   | DoneState
   | FatalState
   | InitState
@@ -501,6 +531,7 @@ export type State = Readonly<
   | OutdatedDocumentsSearchRead
   | OutdatedDocumentsTransform
   | PrepareCompatibleMigration
+  | ReadyToReindexSyncState
   | RefreshSource
   | RefreshTarget
   | ReindexSourceToTempClosePit

@@ -23,9 +23,14 @@ export interface ItemsetResult {
   total_doc_count: number;
 }
 
+interface SimpleHierarchicalTreeNodeSet extends FieldValuePair {
+  docCount: number;
+  pValue: number | null;
+}
+
 export interface SimpleHierarchicalTreeNode {
   name: string;
-  set: FieldValuePair[];
+  set: SimpleHierarchicalTreeNodeSet[];
   docCount: number;
   pValue: number | null;
   children: SimpleHierarchicalTreeNode[];

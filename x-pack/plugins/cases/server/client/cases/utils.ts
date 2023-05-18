@@ -15,8 +15,8 @@ import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type {
   ActionConnector,
   CaseFullExternalService,
-  CaseResponse,
-  CommentResponse,
+  Case,
+  Comment,
   User,
   CaseAttributes,
   CaseAssignees,
@@ -34,7 +34,7 @@ import { getCaseViewPath } from '../../common/utils';
 import * as i18n from './translations';
 
 interface CreateIncidentArgs {
-  theCase: CaseResponse;
+  theCase: Case;
   userActions: CaseUserActionsDeprecatedResponse;
   connector: ActionConnector;
   alerts: CasesClientGetAlertsResponse;
@@ -77,7 +77,7 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: CommentResponse): string => {
+const getCommentContent = (comment: Comment): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
   } else if (comment.type === CommentType.alert) {
@@ -106,7 +106,7 @@ interface CountAlertsInfo {
 }
 
 const getAlertsInfo = (
-  comments: CaseResponse['comments']
+  comments: Case['comments']
 ): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
   const countingInfo = { totalComments: 0, pushed: 0, totalAlerts: 0 };
 
@@ -129,7 +129,7 @@ const getAlertsInfo = (
 };
 
 const addAlertMessage = (params: {
-  theCase: CaseResponse;
+  theCase: Case;
   externalServiceComments: ExternalServiceComment[];
   spaceId: string;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
@@ -238,7 +238,7 @@ export const formatComments = ({
   userProfiles,
   publicBaseUrl,
 }: {
-  theCase: CaseResponse;
+  theCase: Case;
   latestPushInfo: LatestPushInfo;
   userActions: CaseUserActionsDeprecatedResponse;
   spaceId: string;
@@ -275,7 +275,7 @@ export const formatComments = ({
 };
 
 export const addKibanaInformationToDescription = (
-  theCase: CaseResponse,
+  theCase: Case,
   spaceId: string,
   userProfiles?: Map<string, UserProfile>,
   publicBaseUrl?: IBasePath['publicBaseUrl']
@@ -307,7 +307,7 @@ export const addKibanaInformationToDescription = (
 };
 
 const addKibanaInformationToComments = (
-  comments: CaseResponse['comments'] = [],
+  comments: Case['comments'] = [],
   userProfiles?: Map<string, UserProfile>
 ): ExternalServiceComment[] =>
   comments.map((theComment) => {
@@ -328,7 +328,7 @@ const addKibanaInformationToComments = (
   });
 
 export const getEntity = (
-  entity: { createdBy: CaseResponse['created_by']; updatedBy: CaseResponse['updated_by'] },
+  entity: { createdBy: Case['created_by']; updatedBy: Case['updated_by'] },
   userProfiles?: Map<string, UserProfile>
 ): string => {
   return (

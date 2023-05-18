@@ -7,20 +7,16 @@
 
 import React, { memo, useCallback } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
-import { PolicyConfig } from './types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-
-export const defaultConfig: PolicyConfig = DEFAULT_FIELDS;
 
 /**
  * Exports Synthetics-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
-  ({ newPolicy, onChange }) => {
+  ({ newPolicy }) => {
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
 

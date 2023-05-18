@@ -6,6 +6,7 @@
  */
 
 import type { Agent } from '@kbn/fleet-plugin/common';
+import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import {
   getAgentByHostName,
@@ -13,7 +14,6 @@ import {
   reassignAgentPolicy,
 } from '../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { getEndpointListPath } from '../../../common/routing';
 import { login } from '../../tasks/login';
 import {
   AGENT_HOSTNAME_CELL,
@@ -34,7 +34,7 @@ describe('Endpoints page', () => {
   });
 
   it('Shows endpoint on the list', () => {
-    cy.visit(getEndpointListPath({ name: 'endpointList' }));
+    cy.visit(APP_ENDPOINTS_PATH);
     cy.contains('Hosts running Elastic Defend').should('exist');
     cy.getByTestSubj(AGENT_HOSTNAME_CELL).should('have.text', endpointHostname);
   });
@@ -48,9 +48,12 @@ describe('Endpoints page', () => {
         initialAgentData = agentData;
       });
       getEndpointIntegrationVersion().then((version) => {
+        const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
+
         cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-          policyName: `Reassign ${Math.random().toString(36).substr(2, 5)}`,
+          policyName,
           endpointPackageVersion: version,
+          agentPolicyName: policyName,
         }).then((data) => {
           response = data;
         });
@@ -71,7 +74,7 @@ describe('Endpoints page', () => {
     });
 
     it('User can reassign a single endpoint to a different Agent Configuration', () => {
-      cy.visit(getEndpointListPath({ name: 'endpointList' }));
+      cy.visit(APP_ENDPOINTS_PATH);
       const hostname = cy
         .getByTestSubj(AGENT_HOSTNAME_CELL)
         .filter(`:contains("${endpointHostname}")`);
@@ -91,5 +94,39 @@ describe('Endpoints page', () => {
         .getByTestSubj(AGENT_POLICY_CELL)
         .should('have.text', response.agentPolicies[0].name);
     });
+  });
+
+  it('should update endpoint policy on Endpoint', () => {
+    const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
+
+    cy.visit(APP_ENDPOINTS_PATH);
+
+    cy.getByTestSubj('policyListRevNo')
+      .first()
+      .invoke('text')
+      .then(parseRevNumber)
+      .then((initialRevisionNumber) => {
+        // Update policy
+        cy.getByTestSubj('policyNameCellLink').first().click();
+
+        cy.getByTestSubj('policyDetailsSaveButton').click();
+        cy.getByTestSubj('policyDetailsConfirmModal').should('exist');
+        cy.getByTestSubj('confirmModalConfirmButton').click();
+        cy.contains(/has been updated/);
+
+        cy.getByTestSubj('policyDetailsBackLink').click();
+
+        // Assert disappearing 'Out-of-date' indicator, Success Policy Status and increased revision number
+        cy.getByTestSubj('rowPolicyOutOfDate').should('exist');
+        cy.getByTestSubj('rowPolicyOutOfDate').should('not.exist'); // depends on the 10s auto-refresh
+
+        cy.getByTestSubj('policyStatusCellLink').first().should('contain', 'Success');
+
+        cy.getByTestSubj('policyListRevNo')
+          .first()
+          .invoke('text')
+          .then(parseRevNumber)
+          .should('equal', initialRevisionNumber + 1);
+      });
   });
 });

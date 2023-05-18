@@ -28,6 +28,9 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/ecs",
     "@kbn/safer-lodash-set",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-server-mocks",
   ],
   "exclude": [
     "target/**/*",

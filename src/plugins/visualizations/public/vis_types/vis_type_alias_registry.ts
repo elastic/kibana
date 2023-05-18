@@ -30,7 +30,7 @@ export interface VisualizationListItem {
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
-  toListItem: (savedObject: SimpleSavedObject) => VisualizationListItem;
+  toListItem: (savedObject: SimpleSavedObject<any>) => VisualizationListItem;
 }
 
 export interface VisTypeAlias {
@@ -44,6 +44,7 @@ export interface VisTypeAlias {
   note?: string;
   getSupportedTriggers?: () => string[];
   stage: VisualizationStage;
+  hidden?: boolean;
   isDeprecated?: boolean;
 
   appExtensions?: {

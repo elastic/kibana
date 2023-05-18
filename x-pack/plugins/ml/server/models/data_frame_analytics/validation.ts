@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../common/constants/data_frame_analytics';
 import {
@@ -25,7 +26,6 @@ import {
   isRegressionAnalysis,
   isClassificationAnalysis,
 } from '../../../common/util/analytics_utils';
-import { extractErrorMessage } from '../../../common/util/errors';
 import {
   AnalysisConfig,
   DataFrameAnalyticsConfig,

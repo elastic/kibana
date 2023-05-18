@@ -76,14 +76,14 @@ function dfDepthFirstSearch(
   if (parentDocCount === docCount && collapseRedundant) {
     // collapse identical paths
     displayParent.name += ` ${value}`;
-    displayParent.set.push({ fieldName: field, fieldValue: value });
+    displayParent.set.push({ fieldName: field, fieldValue: value, docCount, pValue });
     displayParent.docCount = docCount;
     displayParent.pValue = pValue;
     displayNode = displayParent;
   } else {
     displayNode = NewNodeFactory(`${docCount}/${totalDocCount}${label}`);
     displayNode.set = [...displayParent.set];
-    displayNode.set.push({ fieldName: field, fieldValue: value });
+    displayNode.set.push({ fieldName: field, fieldValue: value, docCount, pValue });
     displayNode.docCount = docCount;
     displayNode.pValue = pValue;
     displayParent.addNode(displayNode);
@@ -144,7 +144,7 @@ function dfDepthFirstSearch(
 }
 
 /**
- * Create simple tree consisting or non-overlapping sets of data.
+ * Create simple tree consisting of non-overlapping sets of data.
  *
  * By default (fields==None), the field search order is dependent on the highest count itemsets.
  */
@@ -154,24 +154,24 @@ export function getSimpleHierarchicalTree(
   displayOther: boolean,
   fields: string[] = []
 ) {
-  const field = fields[0];
-
   const totalDocCount = Math.max(...df.map((d) => d.total_doc_count));
 
   const newRoot = NewNodeFactory('');
 
-  for (const value of getValuesDescending(df, field)) {
-    dfDepthFirstSearch(
-      fields,
-      newRoot,
-      totalDocCount + 1,
-      '',
-      field,
-      value,
-      df,
-      collapseRedundant,
-      displayOther
-    );
+  for (const field of fields) {
+    for (const value of getValuesDescending(df, field)) {
+      dfDepthFirstSearch(
+        fields,
+        newRoot,
+        totalDocCount + 1,
+        '',
+        field,
+        value,
+        df,
+        collapseRedundant,
+        displayOther
+      );
+    }
   }
 
   return { root: newRoot, fields };

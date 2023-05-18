@@ -29,6 +29,7 @@ import {
   setAddingNewPrivateLocation,
   getAgentPoliciesAction,
   selectAgentPolicies,
+  cleanMonitorListState,
 } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { PrivateLocation } from '../../../../../common/runtime_types';
@@ -46,6 +47,9 @@ export const GettingStartedPage = () => {
     if (canReadAgentPolicies) {
       dispatch(getAgentPoliciesAction.get());
     }
+    return () => {
+      dispatch(cleanMonitorListState());
+    };
   }, [canReadAgentPolicies, dispatch]);
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview

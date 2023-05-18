@@ -22,7 +22,7 @@ import {
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
-import { getSampleDashboardInput } from '../mocks';
+import { buildMockDashboard } from '../mocks';
 import { pluginServices } from '../services/plugin_services';
 import { AddToLibraryAction } from './add_to_library_action';
 import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
@@ -48,8 +48,7 @@ Object.defineProperty(pluginServices.getServices().application, 'capabilities', 
 beforeEach(async () => {
   pluginServices.getServices().application.capabilities = defaultCapabilities;
 
-  container = new DashboardContainer(getSampleDashboardInput());
-  await container.untilInitialized();
+  container = buildMockDashboard();
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

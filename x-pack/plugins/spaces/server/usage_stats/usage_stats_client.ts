@@ -15,9 +15,9 @@ interface BaseIncrementOptions {
   headers?: Headers;
 }
 export type IncrementCopySavedObjectsOptions = BaseIncrementOptions &
-  Pick<CopyOptions, 'createNewCopies' | 'overwrite'>;
+  Pick<CopyOptions, 'createNewCopies' | 'overwrite' | 'compatibilityMode'>;
 export type IncrementResolveCopySavedObjectsErrorsOptions = BaseIncrementOptions &
-  Pick<ResolveConflictsOptions, 'createNewCopies'>;
+  Pick<ResolveConflictsOptions, 'createNewCopies' | 'compatibilityMode'>;
 
 export const COPY_STATS_PREFIX = 'apiCalls.copySavedObjects';
 export const RESOLVE_COPY_STATS_PREFIX = 'apiCalls.resolveCopySavedObjectsErrors';
@@ -30,11 +30,15 @@ const ALL_COUNTER_FIELDS = [
   `${COPY_STATS_PREFIX}.createNewCopiesEnabled.no`,
   `${COPY_STATS_PREFIX}.overwriteEnabled.yes`,
   `${COPY_STATS_PREFIX}.overwriteEnabled.no`,
+  `${COPY_STATS_PREFIX}.compatibilityModeEnabled.yes`,
+  `${COPY_STATS_PREFIX}.compatibilityModeEnabled.no`,
   `${RESOLVE_COPY_STATS_PREFIX}.total`,
   `${RESOLVE_COPY_STATS_PREFIX}.kibanaRequest.yes`,
   `${RESOLVE_COPY_STATS_PREFIX}.kibanaRequest.no`,
   `${RESOLVE_COPY_STATS_PREFIX}.createNewCopiesEnabled.yes`,
   `${RESOLVE_COPY_STATS_PREFIX}.createNewCopiesEnabled.no`,
+  `${RESOLVE_COPY_STATS_PREFIX}.compatibilityModeEnabled.yes`,
+  `${RESOLVE_COPY_STATS_PREFIX}.compatibilityModeEnabled.no`,
   `${DISABLE_LEGACY_URL_ALIASES_STATS_PREFIX}.total`,
 ];
 export class UsageStatsClient {
@@ -65,6 +69,7 @@ export class UsageStatsClient {
     headers,
     createNewCopies,
     overwrite,
+    compatibilityMode,
   }: IncrementCopySavedObjectsOptions) {
     const isKibanaRequest = getIsKibanaRequest(headers);
     const counterFieldNames = [
@@ -72,6 +77,7 @@ export class UsageStatsClient {
       `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
       `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
       ...(!createNewCopies ? [`overwriteEnabled.${overwrite ? 'yes' : 'no'}`] : []), // the overwrite option is ignored when createNewCopies is true
+      ...(!createNewCopies ? [`compatibilityModeEnabled.${compatibilityMode ? 'yes' : 'no'}`] : []), // the compatibilityMode option is ignored when createNewCopies is true
     ];
     await this.updateUsageStats(counterFieldNames, COPY_STATS_PREFIX);
   }
@@ -79,12 +85,14 @@ export class UsageStatsClient {
   public async incrementResolveCopySavedObjectsErrors({
     headers,
     createNewCopies,
+    compatibilityMode,
   }: IncrementResolveCopySavedObjectsErrorsOptions) {
     const isKibanaRequest = getIsKibanaRequest(headers);
     const counterFieldNames = [
       'total',
       `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
       `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
+      ...(!createNewCopies ? [`compatibilityModeEnabled.${compatibilityMode ? 'yes' : 'no'}`] : []), // the compatibilityMode option is ignored when createNewCopies is true
     ];
     await this.updateUsageStats(counterFieldNames, RESOLVE_COPY_STATS_PREFIX);
   }
@@ -111,7 +119,9 @@ export class UsageStatsClient {
 }
 
 function getIsKibanaRequest(headers?: Headers) {
-  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
+  // The presence of these request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers.referer;
+  return (
+    headers && headers['kbn-version'] && headers.referer && headers['x-elastic-internal-origin']
+  );
 }

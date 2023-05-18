@@ -16,8 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useToggle from 'react-use/lib/useToggle';
 
 interface Row {
   name: string;
@@ -118,14 +119,7 @@ interface ExpandableContentProps {
 
 const ExpandableContent = (props: ExpandableContentProps) => {
   const { values } = props;
-  const [isExpanded, setIsExpanded] = useState(false);
-  const expand = useCallback(() => {
-    setIsExpanded(true);
-  }, []);
-
-  const collapse = useCallback(() => {
-    setIsExpanded(false);
-  }, []);
+  const [isExpanded, toggle] = useToggle(false);
 
   const list = Array.isArray(values) ? values : [values];
   const [first, ...others] = list;
@@ -145,7 +139,7 @@ const ExpandableContent = (props: ExpandableContentProps) => {
         {shouldShowMore && (
           <>
             {' ... '}
-            <EuiLink data-test-subj="infraArrayValueCountMoreLink" onClick={expand}>
+            <EuiLink data-test-subj="infraArrayValueCountMoreLink" onClick={toggle}>
               <FormattedMessage
                 id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
                 defaultMessage="+{count} more"
@@ -160,7 +154,7 @@ const ExpandableContent = (props: ExpandableContentProps) => {
       {isExpanded && others.map((item) => <EuiFlexItem key={item}>{item}</EuiFlexItem>)}
       {hasOthers && isExpanded && (
         <EuiFlexItem>
-          <EuiLink data-test-subj="infraArrayValueShowLessLink" onClick={collapse}>
+          <EuiLink data-test-subj="infraArrayValueShowLessLink" onClick={toggle}>
             {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
               defaultMessage: 'Show less',
             })}

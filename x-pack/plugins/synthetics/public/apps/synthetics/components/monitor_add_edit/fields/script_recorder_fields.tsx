@@ -63,7 +63,7 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
                 iconSide="right"
               >
                 <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.showScriptLabel"
+                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.recorder.showScriptLabel"
                   defaultMessage="Show script"
                 />
               </EuiButton>
@@ -78,7 +78,7 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
                   color="danger"
                 >
                   <FormattedMessage
-                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.removeScriptLabel"
+                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.recorder.removeScriptLabel"
                     defaultMessage="Remove script"
                   />
                 </EuiButton>

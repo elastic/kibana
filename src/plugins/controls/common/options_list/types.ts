@@ -28,9 +28,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   placeholder?: string;
 }
 
-export interface OptionsListSuggestions {
-  [key: string]: { doc_count: number };
-}
+export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.

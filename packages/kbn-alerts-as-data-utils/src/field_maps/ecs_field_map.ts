@@ -9,8 +9,16 @@
 import { EcsFlat } from '@kbn/ecs';
 import { EcsMetadata, FieldMap } from './types';
 
+const EXCLUDED_TYPES = ['constant_keyword'];
+
 export const ecsFieldMap: FieldMap = Object.keys(EcsFlat).reduce((acc, currKey) => {
   const value: EcsMetadata = EcsFlat[currKey as keyof typeof EcsFlat];
+
+  // Exclude excluded types
+  if (EXCLUDED_TYPES.includes(value.type)) {
+    return acc;
+  }
+
   return {
     ...acc,
     [currKey]: {

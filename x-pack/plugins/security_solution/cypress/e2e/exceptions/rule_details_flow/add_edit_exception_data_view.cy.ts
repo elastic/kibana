@@ -71,13 +71,14 @@ describe('Add exception using data views from rule details', () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule({
-      ...getNewRule(),
-      query: 'agent.name:*',
-      data_view_id: 'exceptions-*',
-      interval: '10s',
-      rule_id: 'rule_testing',
-    });
+    createRule(
+      getNewRule({
+        query: 'agent.name:*',
+        data_view_id: 'exceptions-*',
+        interval: '10s',
+        rule_id: 'rule_testing',
+      })
+    );
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForAlertsToPopulate();

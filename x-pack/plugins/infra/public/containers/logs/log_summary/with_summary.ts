@@ -25,7 +25,7 @@ export const WithSummary = ({
     end: number | null;
   }>;
 }) => {
-  const { logViewId } = useLogViewContext();
+  const { logViewReference } = useLogViewContext();
   const serializedParsedQuery = useSelector(useLogStreamPageStateContext(), (logStreamPageState) =>
     logStreamPageState.matches({ hasLogViewIndices: 'initialized' })
       ? stringify(logStreamPageState.context.parsedQuery)
@@ -38,7 +38,7 @@ export const WithSummary = ({
   const throttledEndTimestamp = useThrottle(endTimestamp, FETCH_THROTTLE_INTERVAL);
 
   const { buckets, start, end } = useLogSummary(
-    logViewId,
+    logViewReference,
     throttledStartTimestamp,
     throttledEndTimestamp,
     serializedParsedQuery

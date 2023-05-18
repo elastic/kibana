@@ -7,6 +7,8 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import { appContextService } from '..';
 import { outputService } from '../output';
 
@@ -16,6 +18,10 @@ jest.mock('../app_context');
 jest.mock('../output');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 function mockHasLicence(res: boolean) {

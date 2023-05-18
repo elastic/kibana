@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { createClientAPI } from '.';
-import { allCases, allCasesSnake } from '../../containers/mock';
+import { allCases, allCasesSnake, casesSnake } from '../../containers/mock';
 
 describe('createClientAPI', () => {
   beforeEach(() => {
@@ -77,6 +77,30 @@ describe('createClientAPI', () => {
         await api.cases.getCasesMetrics({ features: ['mttr'], from: 'now-1d' });
         expect(http.get).toHaveBeenCalledWith('/api/cases/metrics', {
           query: { features: ['mttr'], from: 'now-1d' },
+        });
+      });
+    });
+
+    describe('bulkGet', () => {
+      const http = httpServiceMock.createStartContract({ basePath: '' });
+      const api = createClientAPI({ http });
+
+      const snakeCase = casesSnake[0];
+
+      http.post.mockResolvedValue({ cases: [snakeCase], errors: [] });
+
+      it('should return the correct cases', async () => {
+        http.post.mockResolvedValueOnce({ cases: [snakeCase], errors: [] });
+        expect(await api.cases.bulkGet({ ids: ['test'] })).toEqual({
+          cases: [snakeCase],
+          errors: [],
+        });
+      });
+
+      it('should have been called with the correct path', async () => {
+        await api.cases.bulkGet({ ids: ['test'] });
+        expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
+          body: '{"ids":["test"]}',
         });
       });
     });

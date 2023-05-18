@@ -52,7 +52,7 @@ and lighter shades will symbolize countries with less traffic.
 ** **Data view** to **kibana_sample_data_logs**
 ** **Join field** to **geo.dest**
 
-. Click **Add layer**.
+. Click **Add and continue**.
 
 . In **Layer settings**, set:
 
@@ -71,7 +71,7 @@ and lighter shades will symbolize countries with less traffic.
 ** Set **Border color** to white.
 ** Under **Label**, change **By value** to **Fixed**.
 
-. Click **Save & close**.
+. Click **Keep changes**.
 +
 Your map now looks like this:
 +
@@ -97,7 +97,7 @@ The layer is only visible when users zoom in.
 
 . Set **Data view** to **kibana_sample_data_logs**.
 
-. Click **Add layer**.
+. Click **Add and continue**.
 
 . In **Layer settings**, set:
 ** **Name** to `Actual Requests`
@@ -111,7 +111,7 @@ The layer is only visible when users zoom in.
 
 . In **Layer style**, set **Fill color** to **#2200FF**.
 
-. Click **Save & close**.
+. Click **Keep changes**.
 +
 Your map will look like this from zoom level 9 to 24:
 +
@@ -130,7 +130,7 @@ grids with less bytes transferred.
 
 . Click **Add layer**, and select **Clusters**.
 . Set **Data view** to **kibana_sample_data_logs**.
-. Click **Add layer**.
+. Click **Add and continue**.
 . In **Layer settings**, set:
 ** **Name** to `Total Requests and Bytes`
 ** **Visibility** to the range [0, 9]
@@ -142,7 +142,7 @@ grids with less bytes transferred.
 . In **Layer style**, change **Symbol size**:
 ** Set *By value* to *sum bytes*.
 ** Set the min size to 7 and the max size to 25 px.
-. Click **Save & close** button.
+. Click **Keep changes** button.
 +
 Your map will look like this between zoom levels 0 and 9:
 +

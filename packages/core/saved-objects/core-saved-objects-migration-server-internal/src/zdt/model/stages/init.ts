@@ -23,7 +23,11 @@ import type { ModelStage } from '../types';
 
 export const init: ModelStage<
   'INIT',
-  'CREATE_TARGET_INDEX' | 'UPDATE_INDEX_MAPPINGS' | 'UPDATE_ALIASES' | 'FATAL'
+  | 'CREATE_TARGET_INDEX'
+  | 'UPDATE_INDEX_MAPPINGS'
+  | 'UPDATE_ALIASES'
+  | 'INDEX_STATE_UPDATE_DONE'
+  | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
@@ -65,7 +69,7 @@ export const init: ModelStage<
 
   logs.push({
     level: 'info',
-    message: `Mappings model version check result: ${versionCheck.status}`,
+    message: `INIT: mapping version check result: ${versionCheck.status}`,
   });
 
   const aliases = Object.keys(indices[currentIndex].aliases);
@@ -77,6 +81,15 @@ export const init: ModelStage<
   });
   // cloning as we may be mutating it in later stages.
   const currentIndexMeta = cloneDeep(currentMappings._meta!);
+
+  const commonState = {
+    logs,
+    currentIndex,
+    currentIndexMeta,
+    aliases,
+    aliasActions,
+    previousMappings: currentMappings,
+  };
 
   switch (versionCheck.status) {
     // app version is greater than the index mapping version.
@@ -90,12 +103,7 @@ export const init: ModelStage<
       return {
         ...state,
         controlState: 'UPDATE_INDEX_MAPPINGS',
-        logs,
-        currentIndex,
-        currentIndexMeta,
-        aliases,
-        aliasActions,
-        previousMappings: currentMappings,
+        ...commonState,
         additiveMappingChanges,
       };
     // app version and index mapping version are the same.
@@ -104,22 +112,17 @@ export const init: ModelStage<
     case 'equal':
       return {
         ...state,
-        controlState: 'UPDATE_ALIASES',
-        logs,
-        currentIndex,
-        currentIndexMeta,
-        aliases,
-        aliasActions,
-        previousMappings: currentMappings,
+        controlState: aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
+        ...commonState,
       };
     // app version is lower than the index mapping version.
-    // likely a rollback scenario - unsupported for the initial implementation
+    // either a rollback scenario, or an old node rebooting during the cohabitation period
+    // in that case, we simply no-op the expand phase.
     case 'lesser':
       return {
         ...state,
-        controlState: 'FATAL',
-        reason: 'Downgrading model version is currently unsupported',
-        logs,
+        controlState: 'INDEX_STATE_UPDATE_DONE',
+        ...commonState,
       };
     // conflicts: version for some types are greater, some are lower
     // shouldn't occur in any normal scenario - cannot recover

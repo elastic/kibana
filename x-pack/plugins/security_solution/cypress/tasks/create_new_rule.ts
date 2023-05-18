@@ -13,7 +13,7 @@ import type {
   ThreatSubtechnique,
   ThreatTechnique,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Actions } from '../objects/rule';
+import type { Actions } from '../objects/types';
 // For some reason importing these functions from ../../public/detections/pages/detection_engine/rules/helpers
 // causes a "Webpack Compilation Error" in this file specifically, even though it imports fine in the test files
 // in ../e2e/*, so we have a copy of the implementations in the cypress helpers.
@@ -99,7 +99,6 @@ import {
   NEW_TERMS_HISTORY_SIZE,
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
-  ACTIONS_THROTTLE_INPUT,
   CONTINUE_BUTTON,
   CREATE_WITHOUT_ENABLING_BTN,
   RULE_INDICES,
@@ -407,7 +406,6 @@ export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) =
 };
 
 export const fillRuleAction = (actions: Actions) => {
-  cy.get(ACTIONS_THROTTLE_INPUT).select(actions.throttle);
   actions.connectors.forEach((connector) => {
     switch (connector.type) {
       case 'index':

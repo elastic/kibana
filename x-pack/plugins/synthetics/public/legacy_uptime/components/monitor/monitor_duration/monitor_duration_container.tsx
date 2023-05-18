@@ -8,7 +8,6 @@
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { JobStat } from '@kbn/ml-plugin/public';
-import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useGetUrlParams } from '../../../hooks';
 import {
   getAnomalyRecordsAction,
@@ -25,7 +24,6 @@ import { UptimeRefreshContext } from '../../../contexts';
 import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../../common/types';
 import { getMLJobId } from '../../../../../common/lib';
-import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const { dateRangeStart, dateRangeEnd, absoluteDateRangeStart, absoluteDateRangeEnd } =
@@ -46,27 +44,6 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const dispatch = useDispatch();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
-
-  const { basePath } = useUptimeSettingsContext();
-
-  const exploratoryViewLink = createExploratoryViewUrl(
-    {
-      reportType: 'kpi-over-time',
-      allSeries: [
-        {
-          name: `${monitorId}-response-duration`,
-          time: { from: dateRangeStart, to: dateRangeEnd },
-          reportDefinitions: {
-            'monitor.id': [monitorId] as string[],
-          },
-          breakdown: 'observer.geo.name',
-          operationType: 'average',
-          dataType: 'synthetics',
-        },
-      ],
-    },
-    basePath
-  );
 
   useEffect(() => {
     if (isMLAvailable && hasMLJob) {
@@ -96,7 +73,6 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
       anomalies={anomalies}
       hasMLJob={hasMLJob}
       loading={loading || jobsLoading}
-      exploratoryViewLink={exploratoryViewLink}
       locationDurationLines={durationLines?.locationDurationLines ?? []}
     />
   );

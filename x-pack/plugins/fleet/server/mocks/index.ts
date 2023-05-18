@@ -63,7 +63,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {} as ExperimentalFeatures,
+    experimentalFeatures: { diagnosticFileUploadEnabled: true } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -76,6 +76,7 @@ export const createAppContextStartContractMock = (
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
     messageSigningService: createMessageSigningServiceMock(),
+    uninstallTokenService: createUninstallTokenServiceMock(),
   };
 };
 
@@ -167,5 +168,22 @@ export function createMessageSigningServiceMock() {
     generateKeyPair: jest.fn(),
     sign: jest.fn(),
     getPublicKey: jest.fn(),
+    removeKeyPair: jest.fn(),
+    rotateKeyPair: jest.fn(),
+  };
+}
+
+export function createUninstallTokenServiceMock() {
+  return {
+    getTokenForPolicyId: jest.fn(),
+    getTokensForPolicyIds: jest.fn(),
+    getAllTokens: jest.fn(),
+    getHashedTokenForPolicyId: jest.fn(),
+    getHashedTokensForPolicyIds: jest.fn(),
+    getAllHashedTokens: jest.fn(),
+    generateTokenForPolicyId: jest.fn(),
+    generateTokensForPolicyIds: jest.fn(),
+    generateTokensForAllPolicies: jest.fn(),
+    encryptTokens: jest.fn(),
   };
 }

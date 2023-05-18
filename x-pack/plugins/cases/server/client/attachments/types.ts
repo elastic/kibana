@@ -9,7 +9,7 @@ import type {
   BulkCreateCommentRequest,
   CommentPatchRequest,
   CommentRequest,
-  FindQueryParams,
+  FindCommentsQueryParams,
 } from '../../../common/api';
 
 /**
@@ -42,6 +42,20 @@ export interface DeleteAllArgs {
 }
 
 /**
+ * Parameters for deleting a file attachment.
+ */
+export interface BulkDeleteFileArgs {
+  /**
+   * The id of the case
+   */
+  caseId: string;
+  /**
+   * The ids of the file saved objects
+   */
+  fileIds: string[];
+}
+
+/**
  * Parameters for deleting a single attachment of a case.
  */
 export interface DeleteArgs {
@@ -58,7 +72,7 @@ export interface DeleteArgs {
 /**
  * Parameters for finding attachments of a case
  */
-export interface FindArgs {
+export interface FindCommentsArgs {
   /**
    * The case ID for finding associated attachments
    */
@@ -66,7 +80,7 @@ export interface FindArgs {
   /**
    * Optional parameters for filtering the returned attachments
    */
-  queryParams?: FindQueryParams;
+  queryParams?: FindCommentsQueryParams;
 }
 
 /**

@@ -19,7 +19,7 @@ import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { AlertsOverview, ALERT_STATUS_ALL } from '../../app/alerts_overview';
 import { ErrorGroupDetails } from '../../app/error_group_details';
@@ -48,7 +48,7 @@ function page({
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
-    showKueryBar?: boolean;
+    showUnifiedSearchBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
     hidden?: boolean;
@@ -97,9 +97,9 @@ function RedirectNodeMetricsToMetricsDetails() {
 export const serviceDetail = {
   '/services/{serviceName}': {
     element: (
-      <TimeRangeMetadataContextProvider>
+      <ApmTimeRangeMetadataContextProvider>
         <ApmServiceWrapper />
-      </TimeRangeMetadataContextProvider>
+      </ApmTimeRangeMetadataContextProvider>
     ),
     params: t.intersection([
       t.type({
@@ -320,7 +320,7 @@ export const serviceDetail = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showKueryBar: false,
+          showUnifiedSearchBar: false,
         },
       }),
       '/services/{serviceName}/infrastructure': {
@@ -331,7 +331,7 @@ export const serviceDetail = {
           }),
           element: <InfraOverview />,
           searchBarOptions: {
-            showKueryBar: false,
+            showUnifiedSearchBar: false,
           },
         }),
         params: t.partial({

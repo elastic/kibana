@@ -8,15 +8,12 @@
 
 import LRUCache from 'lru-cache';
 import type { ObjectMigrationDefinition } from '@kbn/object-versioning';
-import type {
-  ContentManagementServiceDefinitionVersioned,
-  Version,
-  ContentManagementGetTransformsFn,
-} from '@kbn/object-versioning';
+import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 import {
   compileServiceDefinitions,
   getContentManagmentServicesTransforms,
 } from '@kbn/object-versioning';
+import type { StorageContextGetTransformFn } from '../core';
 
 /**
  * We keep a cache of compiled service definition to avoid unnecessary recompile on every request.
@@ -35,15 +32,31 @@ const compiledCache = new LRUCache<string, { [path: string]: ObjectMigrationDefi
  * @returns A "getContentManagmentServicesTransforms()"
  */
 export const getServiceObjectTransformFactory =
-  (contentTypeId: string): ContentManagementGetTransformsFn =>
-  (definitions: ContentManagementServiceDefinitionVersioned, requestVersion: Version) => {
-    const compiledFromCache = compiledCache.get(contentTypeId);
-    if (compiledFromCache) {
-      return getContentManagmentServicesTransforms(definitions, requestVersion, compiledFromCache);
+  (
+    contentTypeId: string,
+    _requestVersion: Version,
+    { cacheEnabled = true }: { cacheEnabled?: boolean } = {}
+  ): StorageContextGetTransformFn =>
+  (definitions: ContentManagementServiceDefinitionVersioned, requestVersionOverride?: Version) => {
+    const requestVersion = requestVersionOverride ?? _requestVersion;
+
+    if (cacheEnabled) {
+      const compiledFromCache = compiledCache.get(contentTypeId);
+
+      if (compiledFromCache) {
+        return getContentManagmentServicesTransforms(
+          definitions,
+          requestVersion,
+          compiledFromCache
+        );
+      }
     }
 
     const compiled = compileServiceDefinitions(definitions);
-    compiledCache.set(contentTypeId, compiled);
+
+    if (cacheEnabled) {
+      compiledCache.set(contentTypeId, compiled);
+    }
 
     return getContentManagmentServicesTransforms(definitions, requestVersion, compiled);
   };

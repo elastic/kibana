@@ -42,7 +42,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
         return (
           <SecurityCellActions
             key={escapeDataProviderId(`networkDns-table--name-${dnsName}`)}
-            mode={CellActionsMode.HOVER}
+            mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}

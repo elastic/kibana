@@ -238,6 +238,19 @@ export class InspectorService extends FtrService {
     });
   }
 
+  public async getTableDataWithId(tableTestSubj: string): Promise<string[][]> {
+    const chooserDataTestId = 'inspectorTableChooser';
+    if (!(await this.testSubjects.exists(chooserDataTestId))) {
+      return [];
+    }
+
+    return await this.retry.try(async () => {
+      await this.testSubjects.click(chooserDataTestId);
+      await this.testSubjects.click(tableTestSubj);
+      return this.getTableData();
+    });
+  }
+
   /**
    * Returns the selected option value from combobox
    */
@@ -252,6 +265,16 @@ export class InspectorService extends FtrService {
     }
 
     return selectedOption[0];
+  }
+
+  /**
+   * Opens request by name. Use when inspector has multiple requests and you want to view a specific request
+   */
+  public async openRequestByName(requestName: string): Promise<void> {
+    await this.openInspectorRequestsView();
+    this.log.debug(`Open Inspector request ${requestName}`);
+    await this.testSubjects.click('inspectorRequestChooser');
+    await this.testSubjects.click(`inspectorRequestChooser${requestName.replace(/\s+/, '_')}`);
   }
 
   /**

@@ -260,7 +260,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Endpoint action response error: endpoint failed to apply'],
           isCompleted: true,
           wasSuccessful: false,
-          outputs: {},
+          outputs: expect.anything(),
           agentState: {
             '123': {
               completedAt: endpointResponseAtError.item.data['@timestamp'],
@@ -301,7 +301,7 @@ describe('When using Actions service utilities', () => {
           ],
           isCompleted: true,
           wasSuccessful: false,
-          outputs: {},
+          outputs: expect.anything(),
           agentState: {
             '123': {
               completedAt: endpointResponseAtError.item.data['@timestamp'],
@@ -406,9 +406,7 @@ describe('When using Actions service utilities', () => {
           ])
         ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
-          outputs: {
-            '789': expect.any(Object),
-          },
+          outputs: expect.any(Object),
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
@@ -444,10 +442,7 @@ describe('When using Actions service utilities', () => {
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
           errors: undefined,
-          outputs: {
-            456: expect.any(Object),
-            789: expect.any(Object),
-          },
+          outputs: expect.any(Object),
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
@@ -489,9 +484,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Fleet action response error: something is no good'],
           isCompleted: true,
           wasSuccessful: false,
-          outputs: {
-            789: expect.any(Object),
-          },
+          outputs: expect.any(Object),
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',

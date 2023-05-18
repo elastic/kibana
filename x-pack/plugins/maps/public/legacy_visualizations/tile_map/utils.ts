@@ -9,6 +9,7 @@ import { Vis } from '@kbn/visualizations-plugin/public';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { TileMapVisParams } from './types';
 import { title } from './tile_map_vis_type';
+import { GEOHASH_GRID } from './geo_hash';
 
 export function extractLayerDescriptorParams(vis: Vis<TileMapVisParams>) {
   const params: { [key: string]: any } = {
@@ -20,7 +21,7 @@ export function extractLayerDescriptorParams(vis: Vis<TileMapVisParams>) {
   };
 
   const bucketAggs = vis.data?.aggs?.byType('buckets');
-  if (bucketAggs?.length && bucketAggs[0].type.dslName === 'geohash_grid') {
+  if (bucketAggs?.length && bucketAggs[0].type.dslName === GEOHASH_GRID) {
     params.geoFieldName = bucketAggs[0].getField()?.name;
   } else if (vis.data.indexPattern) {
     // attempt to default to first geo point field when geohash is not configured yet

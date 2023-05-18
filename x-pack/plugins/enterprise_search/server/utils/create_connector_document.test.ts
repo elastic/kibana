@@ -22,6 +22,7 @@ describe('createConnectorDocument', () => {
           reduce_whitespace: true,
           run_ml_inference: false,
         },
+        serviceType: null,
       })
     ).toEqual({
       api_key_id: null,
@@ -86,6 +87,7 @@ describe('createConnectorDocument', () => {
       language: 'fr',
       last_seen: null,
       last_sync_error: null,
+      last_sync_scheduled_at: null,
       last_sync_status: null,
       last_synced: null,
       name: 'indexName',
@@ -113,6 +115,7 @@ describe('createConnectorDocument', () => {
           reduce_whitespace: true,
           run_ml_inference: false,
         },
+        serviceType: null,
       })
     ).toEqual({
       api_key_id: null,
@@ -177,6 +180,7 @@ describe('createConnectorDocument', () => {
       language: 'fr',
       last_seen: null,
       last_sync_error: null,
+      last_sync_scheduled_at: null,
       last_sync_status: null,
       last_synced: null,
       name: 'indexName',

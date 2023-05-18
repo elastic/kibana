@@ -50,6 +50,7 @@ const metricsSourceConfigurationOriginRT = rt.keyof({
 
 export const metricsSourceStatusRT = rt.strict({
   metricIndicesExist: SourceStatusRuntimeType.props.metricIndicesExist,
+  remoteClustersExist: SourceStatusRuntimeType.props.metricIndicesExist,
   indexFields: SourceStatusRuntimeType.props.indexFields,
 });
 

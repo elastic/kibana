@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -46,6 +47,7 @@ import {
   parseDuration,
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
+  MaintenanceWindow,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -259,6 +261,7 @@ export class TaskRunner<
       enabled,
       actions,
       muteAll,
+      revision,
       snoozeSchedule,
     } = rule;
     const {
@@ -277,6 +280,19 @@ export class TaskRunner<
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
+
+    if (this.context.alertsService && ruleType.alerts) {
+      // Wait for alerts-as-data resources to be installed
+      // Since this occurs at the beginning of rule execution, we can be
+      // assured that all resources will be ready for reading/writing when
+      // the rule type executors are called
+
+      // TODO - add retry if any initialization steps have failed
+      await this.context.alertsService.getContextInitializationPromise(
+        ruleType.alerts.context,
+        namespace ?? DEFAULT_NAMESPACE_STRING
+      );
+    }
 
     const wrappedClientOptions = {
       rule: {
@@ -300,11 +316,32 @@ export class TaskRunner<
     });
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
+    const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
+
+    let activeMaintenanceWindows: MaintenanceWindow[] = [];
+    try {
+      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
+    } catch (err) {
+      this.logger.error(
+        `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
+      );
+    }
+
+    const maintenanceWindowIds = activeMaintenanceWindows.map(
+      (maintenanceWindow) => maintenanceWindow.id
+    );
+    if (maintenanceWindowIds.length) {
+      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
+    }
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
-        this.legacyAlertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
+        this.legacyAlertsClient.initialize(
+          alertRawInstances,
+          alertRecoveredRawInstances,
+          maintenanceWindowIds
+        );
 
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();
@@ -365,6 +402,7 @@ export class TaskRunner<
                 tags,
                 consumer,
                 producer: ruleType.producer,
+                revision,
                 ruleTypeId: rule.alertTypeId,
                 ruleTypeName: ruleType.name,
                 enabled,
@@ -381,6 +419,7 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
+              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
             })
           );
 
@@ -428,6 +467,7 @@ export class TaskRunner<
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
         notifyWhen,
+        maintenanceWindowIds,
       });
     });
 
@@ -442,8 +482,10 @@ export class TaskRunner<
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
+      previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      maintenanceWindowIds,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
@@ -531,7 +573,7 @@ export class TaskRunner<
     this.alertingEventLogger.start();
 
     return await loadRule<Params>({
-      paramValidator: this.ruleType.validate?.params,
+      paramValidator: this.ruleType.validate.params,
       ruleId,
       spaceId,
       context: this.context,
@@ -675,7 +717,7 @@ export class TaskRunner<
       schedule = asOk(
         (
           await loadRule<Params>({
-            paramValidator: this.ruleType.validate?.params,
+            paramValidator: this.ruleType.validate.params,
             ruleId,
             spaceId,
             context: this.context,

@@ -461,7 +461,7 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             indices: [
               {
-                names: ['rollup-*'],
+                names: ['rollup-*', 'regular-index*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],

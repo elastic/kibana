@@ -78,7 +78,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const globalTimeRange = useTimeRangeUpdates(true);
 
-    const selectCaseModal = cases?.hooks.getUseCasesAddToExistingCaseModal();
+    const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
     const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
       useAnomalyExplorerContext();

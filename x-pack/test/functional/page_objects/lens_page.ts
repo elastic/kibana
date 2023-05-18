@@ -191,22 +191,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (opts.operation === 'formula') {
         await this.switchToFormula();
       } else {
-        const operationSelector = opts.isPreviousIncompatible
-          ? `lns-indexPatternDimension-${opts.operation} incompatible`
-          : `lns-indexPatternDimension-${opts.operation}`;
-        async function getAriaPressed() {
-          const operationSelectorContainer = await testSubjects.find(operationSelector);
-          await testSubjects.click(operationSelector);
-          const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
-          return ariaPressed;
-        }
-
-        // adding retry here as it seems that there is a flakiness of the operation click
-        // it seems that the aria-pressed attribute is updated to true when the button is clicked
-        await retry.waitFor('aria pressed to be true', async () => {
-          const ariaPressedStatus = await getAriaPressed();
-          return ariaPressedStatus === 'true';
-        });
+        await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
@@ -380,7 +365,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
         await find.existsByCssSelector(
-          `.lnsDragDrop__extraDrop > [data-test-subj="lnsDragDrop-${metaToAction[metaKey]}"].lnsDragDrop-isActiveDropTarget`
+          `.domDragDrop__extraDrop > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDragDrop-isActiveDropTarget`
         );
       });
     },
@@ -405,7 +390,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await field.focus();
       await retry.try(async () => {
         await browser.pressKeys(browser.keys.ENTER);
-        await testSubjects.exists('.lnsDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+        await testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
@@ -477,7 +462,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async waitForLensDragDropToFinish() {
       await retry.try(async () => {
-        const exists = await find.existsByCssSelector('.lnsDragDrop-isActiveGroup');
+        const exists = await find.existsByCssSelector('.domDragDrop-isActiveGroup');
         if (exists) {
           throw new Error('UI still in drag/drop mode');
         }
@@ -525,7 +510,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param endIndex - the index of drop starting from 1
      * */
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
-      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
+      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .domDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await find.existsByCssSelector(dragging);
       await browser.html5DragAndDrop(dragging, dropping);
@@ -571,6 +556,25 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lns-indexPattern-dimensionContainerClose');
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+    },
+
+    async selectOperation(operation: string, isPreviousIncompatible: boolean = false) {
+      const operationSelector = isPreviousIncompatible
+        ? `lns-indexPatternDimension-${operation} incompatible`
+        : `lns-indexPatternDimension-${operation}`;
+      async function getAriaPressed() {
+        const operationSelectorContainer = await testSubjects.find(operationSelector);
+        await testSubjects.click(operationSelector);
+        const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
+        return ariaPressed;
+      }
+
+      // adding retry here as it seems that there is a flakiness of the operation click
+      // it seems that the aria-pressed attribute is updated to true when the button is clicked
+      await retry.waitFor('aria pressed to be true', async () => {
+        const ariaPressedStatus = await getAriaPressed();
+        return ariaPressedStatus === 'true';
       });
     },
 
@@ -627,9 +631,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
     },
     /**
+     * Cen remove the dimension matching a specific test subject?
+     */
+    async canRemoveDimension(dimensionTestSubj: string) {
+      await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+      return await testSubjects.isDisplayed(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+    },
+    /**
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
+      await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
       await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
     /**
@@ -1027,6 +1039,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
+    async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
+      const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1470,7 +1494,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+        testSubjects.getCssSelector(`${to} > domDragDrop-dropTarget-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
     },
@@ -1491,7 +1515,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+        testSubjects.getCssSelector(`${to} > domDragDrop-dropTarget-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
     },
@@ -1658,12 +1682,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async findFieldIdsByType(
-      type: 'string' | 'number' | 'date' | 'geo_point' | 'ip_range',
+      type: 'keyword' | 'number' | 'date' | 'geo_point' | 'ip_range',
       group: 'available' | 'empty' | 'meta' = 'available'
     ) {
       const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
       const allFieldsForType = await find.allByCssSelector(
-        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .lnsFieldItem--${type}`
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldListItemButton--${type}`
       );
       // map to testSubjId
       return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
@@ -1677,16 +1701,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks') {
+    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
       switch (action) {
         case 'csvDownload':
           return await testSubjects.isEnabled('sharePanel-CSVDownload');
         case 'permalinks':
           return await testSubjects.isEnabled('sharePanel-Permalinks');
+        default:
+          return await testSubjects.isEnabled(`sharePanel-${action}`);
       }
     },
 
-    async ensureShareMenuIsOpen(action: 'csvDownload' | 'permalinks') {
+    async ensureShareMenuIsOpen(
+      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports'
+    ) {
       await this.clickShareMenu();
 
       if (!(await testSubjects.exists('shareContextMenu'))) {
@@ -1737,6 +1765,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await browser.execute<[boolean], void>((v) => {
         window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = v;
       }, value);
+    },
+
+    async openReportingShare(type: 'PNG' | 'PDF') {
+      await this.ensureShareMenuIsOpen(`${type}Reports`);
+      await testSubjects.click(`sharePanel-${type}Reports`);
     },
 
     async getCSVContent() {

@@ -16,6 +16,7 @@ import type { HttpResponse, HttpFetchOptionsWithPath } from '@kbn/core-http-brow
 
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));
@@ -159,6 +160,7 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
+        'x-elastic-internal-origin': 'Kibana',
         myheader: 'foo',
       });
     });
@@ -167,10 +169,27 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
+          headers: {
+            myHeader: 'foo',
+            'kbn-version': 'CUSTOM!',
+          },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+      );
+    });
+
+    it('should not allow overwriting of x-elastic-internal-origin header', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: {
+            myHeader: 'foo',
+            'x-elastic-internal-origin': 'anything',
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"x-elastic-internal-\\" are not allowed: [x-elastic-internal-origin]"`
       );
     });
 
@@ -309,6 +328,7 @@ describe('Fetch', () => {
         headers: {
           'content-type': 'application/json',
           'kbn-version': 'VERSION',
+          'x-elastic-internal-origin': 'Kibana',
         },
       });
     });
@@ -478,6 +498,14 @@ describe('Fetch', () => {
       const ndjson = await new Response(data).text();
 
       expect(ndjson).toEqual(content);
+    });
+
+    it('should pass through version as a header', async () => {
+      fetchMock.get('*', { body: {} });
+      await fetchInstance.fetch('/my/path', { asResponse: true, version: '99' });
+      expect(fetchMock.lastOptions()!.headers).toEqual(
+        expect.objectContaining({ [ELASTIC_HTTP_VERSION_HEADER.toLowerCase()]: '99' })
+      );
     });
   });
 

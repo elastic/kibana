@@ -24,7 +24,9 @@ import {
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 
+import type { DataGridItem } from '../../../../../components/data_grid';
 import {
   isClassificationAnalysis,
   isRegressionAnalysis,
@@ -49,6 +51,11 @@ import {
   SEARCH_SIZE,
   getAnalysisType,
 } from '../../../../common';
+
+import {
+  replaceTokensInDFAUrlValue,
+  openCustomUrlWindow,
+} from '../../../../../util/custom_url_utils';
 
 import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
@@ -130,7 +137,12 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   searchQuery,
 }) => {
   const {
-    services: { application, share, data },
+    services: {
+      application,
+      share,
+      data,
+      http: { basePath },
+    },
   } = useMlKibana();
 
   const dataViewId = indexPattern?.id;
@@ -217,6 +229,16 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     [indexData?.visibleColumns, discoverLocator, dataViewId, resultsField, tableItems, data]
   );
 
+  const openCustomUrl = (item: DataGridItem, customUrl: MlKibanaUrlConfig) => {
+    // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
+    const urlPath = replaceTokensInDFAUrlValue(
+      customUrl,
+      item,
+      data.query.timefilter.timefilter.getTime()
+    );
+    openCustomUrlWindow(urlPath, customUrl, basePath.get());
+  };
+
   const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = [
     {
       id: 'actions',
@@ -228,13 +250,14 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
         />
       ),
       rowCellRender: function RowCellRender({ rowIndex }) {
+        const item = tableItems[rowIndex];
         const [isPopoverVisible, setIsPopoverVisible] = useState(false);
         const closePopover = () => setIsPopoverVisible(false);
 
         const actions = [
           <EuiContextMenuItem
             icon="discoverApp"
-            key="custom-discover-url"
+            key="custom_discover_url"
             disabled={discoverUrlError !== undefined}
             onClick={async () => {
               const openInDiscoverUrl = await generateDiscoverUrl(rowIndex);
@@ -258,6 +281,24 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             )}
           </EuiContextMenuItem>,
         ];
+
+        if (jobConfig && jobConfig._meta && Array.isArray(jobConfig._meta.custom_urls)) {
+          jobConfig?._meta.custom_urls.forEach((customUrl, index) => {
+            actions.push(
+              <EuiContextMenuItem
+                key={`custom_url_${index}`}
+                icon="popout"
+                onClick={() => {
+                  closePopover();
+                  openCustomUrl(item, customUrl);
+                }}
+                data-test-subj={`mlExplorationDataGridRowActionCustomUrlButton_${index}`}
+              >
+                {customUrl.url_name}
+              </EuiContextMenuItem>
+            );
+          });
+        }
 
         return (
           <EuiPopover

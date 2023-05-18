@@ -8,7 +8,7 @@
 import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 
 import { selectFiltersData, setListOfFiltersActions } from '../../../../state/overview_status';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
@@ -132,7 +132,7 @@ export const useFilters = (): FiltersList => {
           })) ?? [],
       schedules:
         schedules?.buckets?.map(({ key, doc_count: count }) => ({
-          label: key,
+          label: String(key),
           count,
         })) ?? [],
     };

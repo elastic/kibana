@@ -10,8 +10,14 @@ import {
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
 } from '@kbn/observability-plugin/common';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
+import {
+  environmentRt,
+  kueryRt,
+  rangeRt,
+  transactionDataSourceRt,
+} from '../../default_api_types';
 import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
 import {
   ActiveInstanceOverview,
@@ -43,6 +49,10 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       t.partial({ serverlessId: t.string }),
+      t.intersection([
+        transactionDataSourceRt,
+        t.type({ bucketSizeInSeconds: toNumberRt }),
+      ]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -55,7 +65,16 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end, serverlessId } = params.query;
+    const {
+      environment,
+      kuery,
+      start,
+      end,
+      serverlessId,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
+    } = params.query;
 
     const charts = await getServerlessAgentMetricsCharts({
       environment,
@@ -66,7 +85,11 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
       apmEventClient,
       serviceName,
       serverlessId,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
     });
+
     return { charts };
   },
 });

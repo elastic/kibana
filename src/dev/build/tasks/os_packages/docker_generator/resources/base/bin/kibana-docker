@@ -87,7 +87,6 @@ kibana_vars=(
     i18n.locale
     interactiveSetup.enabled
     interactiveSetup.connectionCheck.interval
-    interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
     kibana.autocompleteTimeout
     kibana.index
@@ -162,6 +161,7 @@ kibana_vars=(
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist
     server.rewriteBasePath
+    server.restrictInternalApis
     server.securityResponseHeaders.disableEmbedding
     server.securityResponseHeaders.permissionsPolicy
     server.securityResponseHeaders.referrerPolicy
@@ -205,6 +205,7 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
     xpack.actions.email.domain_allowlist
+    xpack.actions.enableFooterInEmail
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
@@ -252,6 +253,8 @@ kibana_vars=(
     xpack.banners.placement
     xpack.banners.textColor
     xpack.banners.textContent
+    xpack.cases.files.allowedMimeTypes
+    xpack.cases.files.maxSize
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
     xpack.code.indexRepoFrequencyMs
@@ -397,7 +400,6 @@ kibana_vars=(
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
-    xpack.task_manager.max_poll_inactivity_cycles
     xpack.task_manager.max_workers
     xpack.task_manager.monitored_aggregated_stats_refresh_rate
     xpack.task_manager.monitored_stats_required_freshness
@@ -410,7 +412,9 @@ kibana_vars=(
     xpack.task_manager.version_conflict_threshold
     xpack.task_manager.event_loop_delay.monitor
     xpack.task_manager.event_loop_delay.warn_threshold
+    xpack.task_manager.worker_utilization_running_average_window
     xpack.uptime.index
+    serverless
 )
 
 longopts=''

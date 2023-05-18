@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -20,11 +20,10 @@ export interface Props {
 }
 
 export function SloTimeWindowBadge({ slo }: Props) {
-  const duration = Number(slo.timeWindow.duration.slice(0, -1));
   const unit = slo.timeWindow.duration.slice(-1);
   if ('isRolling' in slo.timeWindow) {
     return (
-      <div>
+      <EuiFlexItem grow={false}>
         <EuiBadge
           color={euiLightVars.euiColorDisabled}
           iconType="editorItemAlignRight"
@@ -32,25 +31,21 @@ export function SloTimeWindowBadge({ slo }: Props) {
         >
           {toDurationLabel(slo.timeWindow.duration)}
         </EuiBadge>
-      </div>
+      </EuiFlexItem>
     );
   }
 
   const unitMoment = toMomentUnitOfTime(unit);
   const now = moment.utc();
-  const startTime = moment.utc(slo.timeWindow.calendar.startTime);
-  const differenceInUnit = now.diff(startTime, unitMoment);
 
-  const periodStart = startTime
-    .clone()
-    .add(Math.floor(differenceInUnit / duration) * duration, unitMoment);
-  const periodEnd = periodStart.clone().add(duration, unitMoment);
+  const periodStart = now.clone().startOf(unitMoment!);
+  const periodEnd = now.clone().endOf(unitMoment!);
 
-  const totalDurationInDays = periodEnd.diff(periodStart, 'days');
+  const totalDurationInDays = periodEnd.diff(periodStart, 'days') + 1;
   const elapsedDurationInDays = now.diff(periodStart, 'days') + 1;
 
   return (
-    <div>
+    <EuiFlexItem grow={false}>
       <EuiBadge color={euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
         {i18n.translate('xpack.observability.slo.slo.timeWindow.calendar', {
           defaultMessage: '{elapsed}/{total} days',
@@ -60,6 +55,6 @@ export function SloTimeWindowBadge({ slo }: Props) {
           },
         })}
       </EuiBadge>
-    </div>
+    </EuiFlexItem>
   );
 }

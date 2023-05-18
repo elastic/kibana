@@ -118,9 +118,9 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       .expect(200);
 
     expect(savedObjectsClient.get).toHaveBeenCalled();
-
-    const args = savedObjectsClient.get.mock.calls[0];
-    expect(args).toEqual(['index-pattern', 'logstash-*']);
+    expect(savedObjectsClient.get).nthCalledWith(1, 'index-pattern', 'logstash-*', {
+      migrationVersionCompatibility: 'compatible',
+    });
   });
 
   it('returns with status 400 when a type is hidden from the http APIs', async () => {

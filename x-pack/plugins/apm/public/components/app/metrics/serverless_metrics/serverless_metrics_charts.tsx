@@ -12,6 +12,8 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { MetricsChart } from '../../../shared/charts/metrics_chart';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../../common/document_type';
 
 interface Props {
   serverlessId?: string;
@@ -29,9 +31,17 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { serviceName } = useApmServiceContext();
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    numBuckets: 100,
+    type: ApmDocumentType.TransactionMetric,
+  });
+
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end) {
+      if (!start || !end || !preferred) {
         return undefined;
       }
       return callApmApi(
@@ -47,6 +57,9 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
               start,
               end,
               serverlessId,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
+              bucketSizeInSeconds: preferred.bucketSizeInSeconds,
             },
           },
         }
@@ -69,7 +82,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
         };
       });
     },
-    [kuery, environment, serviceName, start, end, serverlessId]
+    [kuery, environment, serviceName, start, end, serverlessId, preferred]
   );
 
   return (

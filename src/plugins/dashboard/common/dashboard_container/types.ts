@@ -30,13 +30,9 @@ export interface DashboardPanelState<
   panelRefName?: string;
 }
 
-export type DashboardContainerInput =
-  | DashboardContainerByReferenceInput
-  | DashboardContainerByValueInput;
+export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;
 
-export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput & { panels: never };
-
-export interface DashboardContainerByValueInput extends EmbeddableInput {
+export interface DashboardContainerInput extends EmbeddableInput {
   // filter context to be passed to children
   query: Query;
   filters: Filter[];

@@ -9,10 +9,11 @@
 import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
 import type { ModelStage } from '../types';
+import { setMetaMappingMigrationComplete } from '../../utils';
 
 export const updateMappingModelVersion: ModelStage<
   'UPDATE_MAPPING_MODEL_VERSIONS',
-  'DONE' | 'FATAL'
+  'UPDATE_ALIASES' | 'INDEX_STATE_UPDATE_DONE'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
@@ -20,6 +21,10 @@ export const updateMappingModelVersion: ModelStage<
 
   return {
     ...state,
-    controlState: 'DONE',
+    controlState: state.aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
+    currentIndexMeta: setMetaMappingMigrationComplete({
+      meta: state.currentIndexMeta,
+      versions: context.typeVirtualVersions,
+    }),
   };
 };

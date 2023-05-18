@@ -8,8 +8,8 @@
 import React, { useEffect } from 'react';
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
-import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../../common/constants';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../../common/constants';
 import { ClientPluginsStart } from '../../plugin';
 import { useNoDataConfig } from './use_no_data_config';
 import { EmptyStateLoading } from '../components/overview/empty_state/empty_state_loading';
@@ -28,10 +28,10 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
   ...pageTemplateProps
 }) => {
   const {
-    services: { observability },
+    services: { observabilityShared },
   } = useKibana<ClientPluginsStart>();
 
-  const PageTemplateComponent = observability.navigation.PageTemplate;
+  const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
   const noDataConfig = useNoDataConfig();
 
@@ -42,7 +42,7 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
     inspectorAdapters.requests.reset();
   }, [inspectorAdapters.requests]);
 
-  if (error) {
+  if (error && path !== SETTINGS_ROUTE) {
     return <EmptyStateError errors={[error]} />;
   }
 

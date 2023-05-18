@@ -28,7 +28,23 @@ import {
   EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP,
   EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON,
   EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../screens/exceptions';
+
+export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
+  cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', numberOfItems);
+};
+
+export const expectToContainItem = (container: string, itemName: string) => {
+  cy.log(`Expecting exception items table to contain '${itemName}'`);
+  cy.get(container).should('include.text', itemName);
+};
+
+export const assertExceptionItemsExists = (container: string, itemNames: string[]) => {
+  for (const itemName of itemNames) {
+    expectToContainItem(container, itemName);
+  }
+};
 
 export const addExceptionEntryFieldValueOfItemX = (
   field: string,

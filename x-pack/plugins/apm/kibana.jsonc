@@ -7,10 +7,7 @@
     "id": "apm",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "apm"
-    ],
+    "configPath": ["xpack", "apm"],
     "requiredPlugins": [
       "data",
       "embeddable",
@@ -19,6 +16,8 @@
       "inspector",
       "licensing",
       "observability",
+      "observabilityShared",
+      "exploratoryView",
       "ruleRegistry",
       "triggersActionsUi",
       "share",
@@ -27,7 +26,8 @@
       "advancedSettings",
       "unifiedFieldList",
       "lens",
-      "maps"
+      "maps",
+      "uiActions"
     ],
     "optionalPlugins": [
       "actions",

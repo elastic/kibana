@@ -48,14 +48,12 @@ export const callEnterpriseSearchConfigAPI = async ({
     return {
       access: {
         hasAppSearchAccess: false,
-        hasSearchEnginesAccess: false, // TODO: update to read ES feature flag, or just refactor out
         hasWorkplaceSearchAccess: false,
       },
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
         hasNativeConnectors: config.hasNativeConnectors,
-        hasSearchApplications: false, // TODO: update to read ES feature flag, or just refactor out
         hasWebCrawler: config.hasWebCrawler,
       },
       kibanaVersion: kibanaPackageJson.version,
@@ -103,14 +101,12 @@ export const callEnterpriseSearchConfigAPI = async ({
       kibanaVersion: kibanaPackageJson.version,
       access: {
         hasAppSearchAccess: !!data?.current_user?.access?.app_search,
-        hasSearchEnginesAccess: !!data?.current_user?.access?.search_engines,
         hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
       },
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
         hasNativeConnectors: config.hasNativeConnectors,
-        hasSearchApplications: !!data?.current_user?.access?.search_engines,
         hasWebCrawler: config.hasWebCrawler,
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),

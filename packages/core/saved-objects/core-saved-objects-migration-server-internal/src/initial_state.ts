@@ -7,34 +7,25 @@
  */
 
 import * as Option from 'fp-ts/Option';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
+  IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
+import { getTempIndexName } from './model/helpers';
 
-/**
- * Construct the initial state for the model
- */
-export const createInitialState = ({
-  kibanaVersion,
-  waitForMigrationCompletion,
-  targetMappings,
-  preMigrationScript,
-  migrationVersionPerType,
-  indexPrefix,
-  migrationsConfig,
-  typeRegistry,
-  docLinks,
-  logger,
-}: {
+export interface CreateInitialStateParams {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
+  mustRelocateDocuments: boolean;
+  indexTypesMap: IndexTypesMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -43,13 +34,52 @@ export const createInitialState = ({
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
   logger: Logger;
-}): InitState => {
-  const outdatedDocumentsQuery = {
+}
+
+/**
+ * Construct the initial state for the model
+ */
+export const createInitialState = ({
+  kibanaVersion,
+  waitForMigrationCompletion,
+  mustRelocateDocuments,
+  indexTypesMap,
+  targetMappings,
+  preMigrationScript,
+  migrationVersionPerType,
+  indexPrefix,
+  migrationsConfig,
+  typeRegistry,
+  docLinks,
+  logger,
+}: CreateInitialStateParams): InitState => {
+  const outdatedDocumentsQuery: QueryDslQueryContainer = {
     bool: {
       should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
         bool: {
-          must: { term: { type } },
-          must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+          must: [
+            { term: { type } },
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: { exists: { field: 'migrationVersion' } },
+                      must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: [
+                        { exists: { field: 'migrationVersion' } },
+                        { term: { typeMigrationVersion: latestVersion } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
         },
       })),
     },
@@ -59,10 +89,8 @@ export const createInitialState = ({
     dynamic: false,
     properties: {
       type: { type: 'keyword' },
-      migrationVersion: {
-        // @ts-expect-error we don't allow plugins to set `dynamic`
-        dynamic: 'true',
-        type: 'object',
+      typeMigrationVersion: {
+        type: 'version',
       },
     },
   };
@@ -95,18 +123,28 @@ export const createInitialState = ({
     );
   }
 
+  const targetIndexMappings: IndexMapping = {
+    ...targetMappings,
+    _meta: {
+      ...targetMappings._meta,
+      indexTypesMap,
+    },
+  };
+
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
+    mustRelocateDocuments,
+    indexTypesMap,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
+    tempIndex: getTempIndexName(indexPrefix, kibanaVersion),
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
-    targetIndexMappings: targetMappings,
+    targetIndexMappings,
     tempIndexMappings: reindexTargetMappings,
     outdatedDocumentsQuery,
     retryCount: 0,

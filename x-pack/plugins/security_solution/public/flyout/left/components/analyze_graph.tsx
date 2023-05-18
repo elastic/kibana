@@ -7,8 +7,15 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import { EuiEmptyPrompt } from '@elastic/eui';
+
+import { ANALYZER_ERROR_MESSAGE } from './translations';
+import { useLeftPanelContext } from '../context';
+import { ANALYZE_GRAPH_ERROR_TEST_ID, ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import { Resolver } from '../../../resolver/view';
+import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
+import { ERROR_TITLE, ERROR_MESSAGE } from '../../shared/translations';
+import { isActiveTimeline } from '../../../helpers';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 
@@ -16,7 +23,35 @@ export const ANALYZE_GRAPH_ID = 'analyze_graph';
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const AnalyzeGraph: FC = () => {
-  return <EuiText data-test-subj={ANALYZER_GRAPH_TEST_ID}>{'Analyzer graph'}</EuiText>;
+  const { eventId } = useLeftPanelContext();
+  const scopeId = 'flyout'; // TO-DO: update to use context
+  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
+    isActiveTimeline(scopeId)
+  );
+
+  if (!eventId) {
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{ERROR_TITLE(ANALYZER_ERROR_MESSAGE)}</h2>}
+        body={<p>{ERROR_MESSAGE(ANALYZER_ERROR_MESSAGE)}</p>}
+        data-test-subj={ANALYZE_GRAPH_ERROR_TEST_ID}
+      />
+    );
+  }
+
+  return (
+    <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>
+      <Resolver
+        databaseDocumentID={eventId}
+        resolverComponentInstanceID={scopeId}
+        indices={selectedPatterns}
+        shouldUpdate={shouldUpdate}
+        filters={{ from, to }}
+      />
+    </div>
+  );
 };
 
 AnalyzeGraph.displayName = 'AnalyzeGraph';

@@ -31,6 +31,7 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
         executeTriggerActions: (triggerId: string, context: ImageClickContext) => void;
         hasTriggerActions: (triggerId: string, context: ImageClickContext) => Promise<boolean>;
       };
+      isScreenshotMode: () => boolean;
     },
     initialInput: ImageEmbeddableInput,
     parent?: IContainer
@@ -88,6 +89,7 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
         <ImageViewer
           className="imageEmbeddableImage"
           imageConfig={input.imageConfig}
+          isScreenshotMode={this.deps.isScreenshotMode()}
           onLoad={() => {
             this.renderComplete.dispatchComplete();
           }}

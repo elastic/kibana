@@ -37,6 +37,14 @@ const apmFtrConfigs = {
       'logging.loggers': [apmDebugLogger],
     },
   },
+  cloud: {
+    license: 'basic' as const,
+    kibanaConfig: {
+      'xpack.apm.agent.migrations.enabled': 'true',
+      'xpack.apm.forceSyntheticSource': 'true',
+      'logging.loggers': [apmDebugLogger],
+    },
+  },
 };
 
 export type APMFtrConfigName = keyof typeof apmFtrConfigs;

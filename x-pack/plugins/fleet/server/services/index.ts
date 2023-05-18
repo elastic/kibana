@@ -50,6 +50,7 @@ export { dataStreamService } from './data_streams';
 // Plugin services
 export { appContextService } from './app_context';
 export { licenseService } from './license';
+export { auditLoggingService } from './audit_logging';
 
 // Artifacts services
 export * from './artifacts';

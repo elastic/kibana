@@ -82,7 +82,7 @@ export const useSummaryChartData: UseAlerts = ({
   signalIndexName,
   skip = false,
 }) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
+  const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<SummaryChartsData[]>([]);
 

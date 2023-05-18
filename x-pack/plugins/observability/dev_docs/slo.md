@@ -10,9 +10,9 @@ We currently support the following SLI:
 - APM Transaction Duration, known as APM Latency
 - Custom KQL
 
-For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, a list of good status codes needs to be provided to discriminate the good and bad responses (events). The API supports an optional kql filter to further filter the apm data.
+For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, we use the `event.outcome` as a way to discriminate the good and the bad responses(events). The API supports an optional kql filter to further filter the apm data.
 
-The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query.
+The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom 'timestampField' can be provided to override the default @timestamp field.
 
 ## SLO configuration
 
@@ -22,7 +22,7 @@ We support **calendar aligned** and **rolling** time windows. Any duration great
 
 **Rolling time window:** Requires a duration, e.g. `1w` for one week, and `isRolling: true`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
 
-**Calendar aligned time window:** Requires a duration, e.g. `1M` for one month, and a `calendar.startTime` date in ISO 8601 in UTC, which marks the beginning of the first period. From start time and the duration, the system will compute the different time windows. For example, starting the calendar on the **01/01/2022** with a monthly duration, if today is the **24/10/2022**, the window associated is: `[2022-10-01T00:00:00Z, 2022-11-01T00:00:00Z]`
+**Calendar aligned time window:** Requires a duration, limited to `1M` for monthly or `1w` for weekly, and `isCalendar: true`.
 
 ### Budgeting method
 
@@ -43,7 +43,6 @@ If a **timeslices** budgeting method is used, we also need to define the **times
 
 The default settings should be sufficient for most users, but if needed, the following properties can be overwritten:
 
-- **timestampField**: The date time field to use from the source index
 - **syncDelay**: The ingest delay in the source data
 - **frequency**: How often do we query the source data
 
@@ -70,7 +69,6 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"],
 			"index": "metrics-apm*"
 		}
 	},
@@ -88,7 +86,7 @@ curl --request POST \
 </details>
 
 <details>
-<summary>95% availability for GET /api quarterly aligned</summary>
+<summary>95% availability for GET /api monthly aligned</summary>
 
 ```
 curl --request POST \
@@ -106,15 +104,12 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"],
 			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
-		"duration": "1q",
-		"calendar": {
-            "startTime": "2022-06-01T00:00:00.000Z"
-        }
+		"duration": "1M",
+		"isCalendar": true
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -144,7 +139,6 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"],
 			"index": "metrics-apm*"
 		}
 	},
@@ -263,10 +257,8 @@ curl --request POST \
 		}
 	},
 	"timeWindow": {
-		"duration": "7d",
-		"calendar": {
-			"startTime": "2022-01-01T00:00:00.000Z"
-		}
+		"duration": "1w",
+		"isCalendar": true
 	},
 	"budgetingMethod": "timeslices",
 	"objective": {
@@ -299,7 +291,8 @@ curl --request POST \
 			"index": "high-cardinality-data-fake_logs*",
 			"good": "latency < 300",
 			"total": "",
-			"filter": "labels.groupId: group-0"
+			"filter": "labels.groupId: group-0",
+			"timestampField": "custom_timestamp"
 		}
 	},
 	"timeWindow": {

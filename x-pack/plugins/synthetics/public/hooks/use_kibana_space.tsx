@@ -6,7 +6,8 @@
  */
 import type { Space } from '@kbn/spaces-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ClientPluginsStart } from '../plugin';
 
 export const useKibanaSpace = () => {
@@ -17,7 +18,7 @@ export const useKibanaSpace = () => {
     loading,
     error,
   } = useFetcher<Promise<Space>>(() => {
-    return services.spaces?.getActiveSpace();
+    return services.spaces?.getActiveSpace() ?? Promise.resolve({ id: DEFAULT_SPACE_ID } as Space);
   }, [services.spaces]);
 
   return {

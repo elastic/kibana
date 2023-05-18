@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Control, Controller, FieldPath } from 'react-hook-form';
+import React, { ReactNode } from 'react';
+import { Control, Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
@@ -20,6 +20,8 @@ export interface Props {
   label: string;
   name: FieldPath<CreateSLOInput>;
   placeholder: string;
+  required?: boolean;
+  tooltip?: ReactNode;
 }
 
 export function QueryBuilder({
@@ -29,20 +31,39 @@ export function QueryBuilder({
   label,
   name,
   placeholder,
+  required,
+  tooltip,
 }: Props) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
 
+  const { getFieldState } = useFormContext();
+
   const { dataView } = useCreateDataView({ indexPatternString });
 
   return (
-    <EuiFormRow label={label} fullWidth>
+    <EuiFormRow
+      label={
+        !!tooltip ? (
+          <span>
+            {label} {tooltip}
+          </span>
+        ) : (
+          label
+        )
+      }
+      isInvalid={getFieldState(name).invalid}
+      fullWidth
+    >
       <Controller
-        shouldUnregister={true}
+        shouldUnregister
         defaultValue=""
         name={name}
         control={control}
-        render={({ field }) => (
+        rules={{
+          required: Boolean(required),
+        }}
+        render={({ field, fieldState }) => (
           <QueryStringInput
             appName="Observability"
             bubbleSubmitEvent={false}
@@ -61,6 +82,7 @@ export function QueryBuilder({
             disableLanguageSwitcher
             indexPatterns={dataView ? [dataView] : []}
             isDisabled={!indexPatternString}
+            isInvalid={fieldState.invalid}
             languageSwitcherPopoverAnchorPosition="rightDown"
             placeholder={placeholder}
             query={{ query: String(field.value), language: 'kuery' }}

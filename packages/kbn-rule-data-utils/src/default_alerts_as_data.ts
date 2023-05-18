@@ -40,6 +40,9 @@ const ALERT_FLAPPING = `${ALERT_NAMESPACE}.flapping` as const;
 // kibana.alert.flapping_history - whether the alert is currently in a flapping state
 const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
 
+// kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
+const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
+
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
 const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 
@@ -82,11 +85,17 @@ const ALERT_RULE_PARAMETERS = `${ALERT_RULE_NAMESPACE}.parameters` as const;
 // kibana.alert.rule.producer - rule type producer for rule that generated this alert
 const ALERT_RULE_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
 
+// kibana.alert.rule.revision - current revision of the rule that generated this alert
+const ALERT_RULE_REVISION = `${ALERT_RULE_NAMESPACE}.revision` as const;
+
 // kibana.alert.rule.tags - rule tags for rule that generated this alert
 const ALERT_RULE_TAGS = `${ALERT_RULE_NAMESPACE}.tags` as const;
 
 // kibana.alert.rule_type_id - rule type id for rule that generated this alert
 const ALERT_RULE_TYPE_ID = `${ALERT_RULE_NAMESPACE}.rule_type_id` as const;
+
+// kibana.alert.url - url which will redirect users to a page related to the given alert
+const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
 
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
@@ -104,6 +113,7 @@ const fields = {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -113,12 +123,14 @@ const fields = {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
@@ -139,6 +151,7 @@ export {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -148,12 +161,14 @@ export {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,

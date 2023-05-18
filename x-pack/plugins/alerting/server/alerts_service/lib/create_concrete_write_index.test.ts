@@ -167,6 +167,37 @@ describe('createConcreteWriteIndex', () => {
     expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
   });
 
+  it(`should retry getting index on transient ES error`, async () => {
+    clusterClient.indices.getAlias.mockImplementation(async () => ({}));
+    const error = new Error(`fail`) as EsError;
+    error.meta = {
+      body: {
+        error: {
+          type: 'resource_already_exists_exception',
+        },
+      },
+    };
+    clusterClient.indices.create.mockRejectedValueOnce(error);
+    clusterClient.indices.get
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+      .mockImplementationOnce(async () => ({
+        '.internal.alerts-test.alerts-default-000001': {
+          aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
+        },
+      }));
+
+    await createConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      indexPatterns: IndexPatterns,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.indices.get).toHaveBeenCalledTimes(3);
+    expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
+  });
+
   it(`should log and throw error if ES throws resource_already_exists_exception error and existing index is not the write index`, async () => {
     clusterClient.indices.getAlias.mockImplementation(async () => ({}));
     const error = new Error(`fail`) as EsError;
@@ -263,6 +294,42 @@ describe('createConcreteWriteIndex', () => {
 
     expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
     expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
+  });
+
+  it(`should retry simulateIndexTemplate on transient ES errors`, async () => {
+    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+    clusterClient.indices.simulateIndexTemplate
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+      .mockImplementation(async () => SimulateTemplateResponse);
+
+    await createConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      indexPatterns: IndexPatterns,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(4);
+  });
+
+  it(`should retry getting alias on transient ES errors`, async () => {
+    clusterClient.indices.getAlias
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+      .mockImplementation(async () => GetAliasResponse);
+    clusterClient.indices.simulateIndexTemplate.mockImplementation(
+      async () => SimulateTemplateResponse
+    );
+
+    await createConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      indexPatterns: IndexPatterns,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.indices.getAlias).toHaveBeenCalledTimes(3);
   });
 
   it(`should retry settings update on transient ES errors`, async () => {

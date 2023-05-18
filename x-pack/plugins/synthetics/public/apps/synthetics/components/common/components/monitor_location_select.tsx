@@ -11,7 +11,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -79,6 +79,7 @@ export const MonitorLocationSelect = ({
                       closeLocationList();
                       onChange(location.id, location.label);
                     }}
+                    disabled={selectedLocation?.id === location.id}
                   >
                     {location.label}
                   </EuiContextMenuItem>
@@ -130,7 +131,7 @@ export const MonitorLocationSelect = ({
     return (
       <EuiDescriptionList
         compressed={compressed}
-        listItems={[{ title: LOCATION_LABEL, description: <EuiLoadingContent lines={1} /> }]}
+        listItems={[{ title: LOCATION_LABEL, description: <EuiSkeletonText lines={1} /> }]}
       />
     );
   }

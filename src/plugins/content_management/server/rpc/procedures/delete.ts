@@ -7,31 +7,20 @@
  */
 import { rpcSchemas } from '../../../common/schemas';
 import type { DeleteIn } from '../../../common';
-import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { validateRequestVersion } from './utils';
+import { getStorageContext } from './utils';
 
 export const deleteProc: ProcedureDefinition<Context, DeleteIn<string>> = {
   schemas: rpcSchemas.delete,
-  fn: async (ctx, { contentTypeId, id, version: _version, options }) => {
-    const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
-    const version = validateRequestVersion(_version, contentDefinition.version.latest);
+  fn: async (ctx, { contentTypeId, id, version, options }) => {
+    const storageContext = getStorageContext({
+      contentTypeId,
+      version,
+      ctx,
+    });
 
-    // Execute CRUD
-    const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
-    const storageContext: StorageContext = {
-      requestHandlerContext: ctx.requestHandlerContext,
-      version: {
-        request: version,
-        latest: contentDefinition.version.latest,
-      },
-      utils: {
-        getTransforms: ctx.getTransformsFactory(contentTypeId),
-      },
-    };
-    const result = await crudInstance.delete(storageContext, id, options);
-
-    return result;
+    const crudInstance = ctx.contentRegistry.getCrud(contentTypeId);
+    return crudInstance.delete(storageContext, id, options);
   },
 };

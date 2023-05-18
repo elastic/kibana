@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/assetManager-plugin",
-  "owner": "@jasonrhodes",
+  "owner": "@elastic/infra-monitoring-ui",
   "description": "Asset manager plugin for entity assets (inventory, topology, etc)",
   "plugin": {
     "id": "assetManager",

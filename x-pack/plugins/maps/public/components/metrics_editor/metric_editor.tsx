@@ -18,6 +18,9 @@ import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { ValidatedNumberInput } from '../validated_number_input';
+import { getMaskI18nLabel } from '../../classes/layers/vector_layer/mask';
+import { MaskExpression } from './mask_expression';
+import { inputStrings } from '../../connected_components/input_strings';
 
 function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
   if (!fields) {
@@ -43,6 +46,8 @@ function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
 }
 
 interface Props {
+  bucketsName?: string;
+  isJoin: boolean;
   metric: AggDescriptor;
   fields: DataViewField[];
   onChange: (metric: AggDescriptor) => void;
@@ -52,7 +57,9 @@ interface Props {
 }
 
 export function MetricEditor({
+  bucketsName,
   fields,
+  isJoin,
   metricsFilter,
   metric,
   onChange,
@@ -64,6 +71,8 @@ export function MetricEditor({
       return;
     }
 
+    // Intentionally not adding mask.
+    // Changing aggregation likely changes value range so keeping old mask does not seem relevent
     const descriptor = {
       type: metricAggregationType,
       label: metric.label,
@@ -93,6 +102,8 @@ export function MetricEditor({
     if (!fieldName || metric.type === AGG_TYPE.COUNT) {
       return;
     }
+    // Intentionally not adding mask.
+    // Changing field likely changes value range so keeping old mask does not seem relevent
     onChange({
       label: metric.label,
       type: metric.type,
@@ -131,9 +142,7 @@ export function MetricEditor({
         })}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
-            defaultMessage: 'Select field',
-          })}
+          placeholder={inputStrings.fieldSelectPlaceholder}
           value={metric.field ? metric.field : null}
           onChange={onFieldChange}
           fields={filterFieldsForAgg(fields, metric.type)}
@@ -223,6 +232,11 @@ export function MetricEditor({
       {fieldSelect}
       {percentileSelect}
       {labelInput}
+
+      <EuiFormRow label={getMaskI18nLabel({ bucketsName, isJoin })} display="columnCompressed">
+        <MaskExpression fields={fields} isJoin={isJoin} metric={metric} onChange={onChange} />
+      </EuiFormRow>
+
       {removeButton}
     </Fragment>
   );

@@ -46,6 +46,7 @@ describe('metric toolbar', () => {
     progressDirection: 'vertical',
     maxCols: 5,
     color: 'static-color',
+    icon: 'compute',
     palette,
     showBar: true,
     trendlineLayerId: 'second',

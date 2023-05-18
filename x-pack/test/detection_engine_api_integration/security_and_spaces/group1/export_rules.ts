@@ -8,7 +8,7 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -20,7 +20,7 @@ import {
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
-  waitForRuleSuccessOrStatus,
+  waitForRulePartialFailure,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -54,19 +54,13 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should validate exported rule schema when its exported by its rule_id', async () => {
         const ruleId = 'rule-1';
 
-        const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
+        await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-        await waitForRuleSuccessOrStatus(
+        await waitForRulePartialFailure({
           supertest,
           log,
-          rule.id,
-          RuleExecutionStatus['partial failure']
-        );
-        // to properly execute the test on rule's data with runtime fields some delay is needed as
-        // ES Search API may return outdated data
-        // it causes a reliable delay so exported rule's SO contains runtime fields returned via ES Search API
-        // and will be removed after addressing this issue
-        await new Promise((r) => setTimeout(r, 1000));
+          ruleId,
+        });
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -86,26 +80,19 @@ export default ({ getService }: FtrProviderContext): void => {
         const ruleId1 = 'rule-1';
         const ruleId2 = 'rule-2';
 
-        const rule1 = await createRule(supertest, log, getSimpleRule(ruleId1, true));
-        const rule2 = await createRule(supertest, log, getSimpleRule(ruleId2, true));
+        await createRule(supertest, log, getSimpleRule(ruleId1, true));
+        await createRule(supertest, log, getSimpleRule(ruleId2, true));
 
-        await waitForRuleSuccessOrStatus(
+        await waitForRulePartialFailure({
           supertest,
           log,
-          rule1.id,
-          RuleExecutionStatus['partial failure']
-        );
-        await waitForRuleSuccessOrStatus(
+          ruleId: ruleId1,
+        });
+        await waitForRulePartialFailure({
           supertest,
           log,
-          rule2.id,
-          RuleExecutionStatus['partial failure']
-        );
-        // to properly execute the test on rule's data with runtime fields some delay is needed as
-        // ES Search API may return outdated data
-        // it causes a reliable delay so exported rule's SO contains runtime fields returned via ES Search API
-        // and will be removed after addressing this issue
-        await new Promise((r) => setTimeout(r, 1000));
+          ruleId: ruleId2,
+        });
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -222,10 +209,17 @@ export default ({ getService }: FtrProviderContext): void => {
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
           actions: [
-            { ...action1, uuid: firstRule.actions[0].uuid },
-            { ...action2, uuid: firstRule.actions[1].uuid },
+            {
+              ...action1,
+              uuid: firstRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+            {
+              ...action2,
+              uuid: firstRule.actions[1].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
           ],
-          throttle: 'rule',
         };
         expect(firstRule).toEqual(outputRule1);
       });
@@ -272,16 +266,137 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-2'),
-          actions: [{ ...action, uuid: firstRule.actions[0].uuid }],
-          throttle: 'rule',
+          actions: [
+            {
+              ...action,
+              uuid: firstRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+          ],
         };
         const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
-          actions: [{ ...action, uuid: secondRule.actions[0].uuid }],
-          throttle: 'rule',
+          actions: [
+            {
+              ...action,
+              uuid: secondRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+          ],
         };
         expect(firstRule).toEqual(outputRule1);
         expect(secondRule).toEqual(outputRule2);
+      });
+
+      it('should export actions connectors with the rule', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const action = {
+          group: 'default',
+          id: hookAction.id,
+          action_type_id: hookAction.actionTypeId,
+          params: {},
+        };
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action],
+        };
+
+        await createRule(supertest, log, rule1);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const connectorsObjectParsed = JSON.parse(body.toString().split(/\n/)[1]);
+        const exportDetailsParsed = JSON.parse(body.toString().split(/\n/)[2]);
+
+        expect(connectorsObjectParsed).toEqual(
+          expect.objectContaining({
+            attributes: {
+              actionTypeId: '.webhook',
+              config: {
+                hasAuth: true,
+                headers: null,
+                method: 'post',
+                url: 'http://localhost',
+              },
+              isMissingSecrets: true,
+              name: 'Some connector',
+              secrets: {},
+            },
+            references: [],
+            type: 'action',
+          })
+        );
+        expect(exportDetailsParsed).toEqual({
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
+          exported_count: 2,
+          exported_rules_count: 1,
+          missing_exception_list_item_count: 0,
+          missing_exception_list_items: [],
+          missing_exception_lists: [],
+          missing_exception_lists_count: 0,
+          missing_rules: [],
+          missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 1,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
+        });
+      });
+      it('should export rule without the action connector if it is Preconfigured Connector', async () => {
+        const action = {
+          group: 'default',
+          id: 'my-test-email',
+          action_type_id: '.email',
+          params: {},
+        };
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action],
+        };
+
+        await createRule(supertest, log, rule1);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportDetailsParsed = JSON.parse(body.toString().split(/\n/)[1]);
+
+        expect(exportDetailsParsed).toEqual({
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
+          exported_count: 1,
+          exported_rules_count: 1,
+          missing_exception_list_item_count: 0,
+          missing_exception_list_items: [],
+          missing_exception_lists: [],
+          missing_exception_lists_count: 0,
+          missing_rules: [],
+          missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 0,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
+        });
       });
 
       /**
@@ -340,9 +455,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
@@ -417,6 +532,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -426,9 +542,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
@@ -534,6 +650,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -543,9 +660,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
 
           const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
@@ -559,6 +676,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -568,9 +686,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
@@ -585,7 +703,8 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 };
 
-function expectToMatchRuleSchema(obj: unknown): void {
+function expectToMatchRuleSchema(obj: RuleResponse): void {
+  expect(obj.throttle).toBeUndefined();
   expect(obj).toEqual({
     id: expect.any(String),
     rule_id: expect.any(String),
@@ -621,7 +740,6 @@ function expectToMatchRuleSchema(obj: unknown): void {
     language: expect.any(String),
     index: expect.arrayContaining([]),
     query: expect.any(String),
-    throttle: expect.any(String),
     actions: expect.arrayContaining([]),
   });
 }

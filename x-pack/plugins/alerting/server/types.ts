@@ -22,11 +22,13 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { type FieldMap } from '@kbn/alerts-as-data-utils';
+import { Alert, type FieldMap } from '@kbn/alerts-as-data-utils';
+import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
 import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
+import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
   Rule,
@@ -50,6 +52,8 @@ import {
   IntervalSchedule,
   RuleLastRun,
   SanitizedRule,
+  AlertsFilter,
+  AlertsFilterTimeframe,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -62,6 +66,7 @@ export type { RuleTypeParams };
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
   getRulesSettingsClient: () => RulesSettingsClient;
+  getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -114,6 +119,7 @@ export interface RuleExecutorOptions<
   state: State;
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
+  maintenanceWindowIds?: string[];
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -132,7 +138,7 @@ export type ExecutorType<
 ) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
-  validate: (object: unknown) => Params;
+  validate: (object: Partial<Params>) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
@@ -143,27 +149,32 @@ export interface GetSummarizedAlertsFnOpts {
   ruleId: string;
   spaceId: string;
   excludedAlertInstanceIds: string[];
+  alertsFilter?: AlertsFilter | null;
 }
 
-// TODO - add type for these alerts when we determine which alerts-as-data
-// fields will be made available in https://github.com/elastic/kibana/issues/143741
+export type AlertHit = Alert & {
+  _id: string;
+  _index: string;
+};
+export interface SummarizedAlertsChunk {
+  count: number;
+  data: AlertHit[];
+}
 export interface SummarizedAlerts {
-  new: {
-    count: number;
-    data: unknown[];
-  };
-  ongoing: {
-    count: number;
-    data: unknown[];
-  };
-  recovered: {
-    count: number;
-    data: unknown[];
-  };
+  new: SummarizedAlertsChunk;
+  ongoing: SummarizedAlertsChunk;
+  recovered: SummarizedAlertsChunk;
+}
+export interface CombinedSummarizedAlerts extends SummarizedAlerts {
+  all: SummarizedAlertsChunk;
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
-  rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
+  rule: Pick<SanitizedRule<Params>, 'id'> &
+    Omit<Partial<SanitizedRule<Params>>, 'viewInAppRelativeUrl'>;
+  // Optional time bounds
+  start?: number;
+  end?: number;
 }
 export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
   opts: GetViewInAppRelativeUrlFnOpts<Params>
@@ -204,6 +215,13 @@ export interface IRuleTypeAlerts {
   useLegacyAlerts?: boolean;
 
   /**
+   * Optional flag to indicate that resources should be space-aware. When set to
+   * true, alerts-as-data resources will be created for every space where a rule
+   * of this type runs.
+   */
+  isSpaceAware?: boolean;
+
+  /**
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
@@ -220,8 +238,8 @@ export interface RuleType<
 > {
   id: string;
   name: string;
-  validate?: {
-    params?: RuleTypeParamsValidator<Params>;
+  validate: {
+    params: RuleTypeParamsValidator<Params>;
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
@@ -269,6 +287,15 @@ export type UntypedRuleType = RuleType<
   AlertInstanceContext
 >;
 
+export interface RawAlertsFilter extends AlertsFilter {
+  query?: {
+    kql: string;
+    filters: Filter[];
+    dsl: string;
+  };
+  timeframe?: AlertsFilterTimeframe;
+}
+
 export interface RawRuleAction extends SavedObjectAttributes {
   uuid: string;
   group: string;
@@ -280,6 +307,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
   };
+  alertsFilter?: RawAlertsFilter;
 }
 
 export interface RuleMeta extends SavedObjectAttributes {
@@ -339,6 +367,7 @@ export interface RawRule extends SavedObjectAttributes {
   updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
+  apiKeyCreatedByUser?: boolean | null;
   throttle?: string | null;
   notifyWhen?: RuleNotifyWhenType | null;
   muteAll: boolean;
@@ -383,6 +412,8 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+
+export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
 export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;

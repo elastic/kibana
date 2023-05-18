@@ -84,7 +84,7 @@ const sampleId = 'case-id';
 const defaultPostCase = {
   isLoading: false,
   isError: false,
-  postCase,
+  mutateAsync: postCase,
 };
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
@@ -98,7 +98,7 @@ const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
 const defaultPostPushToService = {
   isLoading: false,
   isError: false,
-  pushCaseToExternalService,
+  mutateAsync: pushCaseToExternalService,
 };
 
 const sampleDataWithoutTags = {
@@ -152,7 +152,7 @@ describe('Create case', () => {
       ...sampleDataWithoutTags,
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
-    useCreateAttachmentsMock.mockImplementation(() => ({ createAttachments }));
+    useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
@@ -226,7 +226,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
+      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, tags: sampleTags } });
     });
 
     it('should post a case on submit click with the selected severity', async () => {
@@ -258,8 +258,10 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        severity: CaseSeverity.HIGH,
+        request: {
+          ...sampleDataWithoutTags,
+          severity: CaseSeverity.HIGH,
+        },
       });
     });
 
@@ -313,8 +315,10 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        settings: { syncAlerts: false },
+        request: {
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        },
       });
     });
 
@@ -343,8 +347,10 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        settings: { syncAlerts: false },
+        request: {
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        },
       });
     });
 
@@ -359,8 +365,9 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
 
       expect(screen.getByTestId('caseSeverity')).toBeTruthy();
-      // there should be 2 low elements. one for the options popover and one for the displayed one.
-      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(2);
+      // ID removed for options dropdown here:
+      // https://github.com/elastic/eui/pull/6630#discussion_r1123657852
+      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(1);
 
       await waitForComponentToUpdate();
     });
@@ -397,18 +404,20 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        connector: {
-          fields: {
-            impact: null,
-            severity: null,
-            urgency: null,
-            category: null,
-            subcategory: null,
+        request: {
+          ...sampleDataWithoutTags,
+          connector: {
+            fields: {
+              impact: null,
+              severity: null,
+              urgency: null,
+              category: null,
+              subcategory: null,
+            },
+            id: 'servicenow-1',
+            name: 'My SN connector',
+            type: '.servicenow',
           },
-          id: 'servicenow-1',
-          name: 'My SN connector',
-          type: '.servicenow',
         },
       });
     });
@@ -448,7 +457,7 @@ describe('Create case', () => {
       });
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
-      expect(postCase).toBeCalledWith(sampleDataWithoutTags);
+      expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
     });
   });
 
@@ -500,12 +509,14 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        connector: {
-          id: 'resilient-2',
-          name: 'My Connector 2',
-          type: '.resilient',
-          fields: { incidentTypes: ['21'], severityCode: '4' },
+        request: {
+          ...sampleDataWithoutTags,
+          connector: {
+            id: 'resilient-2',
+            name: 'My Resilient connector',
+            type: '.resilient',
+            fields: { incidentTypes: ['21'], severityCode: '4' },
+          },
         },
       });
 
@@ -513,7 +524,7 @@ describe('Create case', () => {
         caseId: sampleId,
         connector: {
           id: 'resilient-2',
-          name: 'My Connector 2',
+          name: 'My Resilient connector',
           type: '.resilient',
           fields: { incidentTypes: ['21'], severityCode: '4' },
         },
@@ -571,6 +582,7 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments = [
       {
         alertId: '1234',
@@ -612,7 +624,7 @@ describe('Create case', () => {
 
     expect(createAttachments).toHaveBeenCalledWith({
       caseId: 'case-id',
-      data: attachments,
+      attachments,
       caseOwner: 'securitySolution',
     });
   });
@@ -622,6 +634,7 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments: CaseAttachments = [];
 
     mockedContext.render(
@@ -765,8 +778,10 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        assignees: [{ uid: userProfiles[0].uid }],
+        request: {
+          ...sampleDataWithoutTags,
+          assignees: [{ uid: userProfiles[0].uid }],
+        },
       });
     });
 

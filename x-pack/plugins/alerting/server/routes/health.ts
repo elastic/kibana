@@ -30,13 +30,6 @@ const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
     execution_health: alertingFrameworkHealth.executionHealth,
     read_health: alertingFrameworkHealth.readHealth,
   },
-  alerting_framework_heath: {
-    // Legacy: pre-v8.0 typo
-    _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
-    decryption_health: alertingFrameworkHealth.decryptionHealth,
-    execution_health: alertingFrameworkHealth.executionHealth,
-    read_health: alertingFrameworkHealth.readHealth,
-  },
 });
 
 export const healthRoute = (

@@ -36,3 +36,5 @@ post:
                 - success
     '400':
       $ref: ../components/responses/error.yaml
+    '409':
+      $ref: ../components/responses/error.yaml

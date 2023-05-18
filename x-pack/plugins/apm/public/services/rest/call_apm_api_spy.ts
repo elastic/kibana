@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { once } from 'lodash';
 import * as createCallApmApi from './create_call_apm_api';
 import type { AbstractAPMClient } from './create_call_apm_api';
+import { type APIEndpoint } from '../../../server';
 
 export type CallApmApiSpy = jest.SpyInstance<
   Promise<any>,
@@ -22,3 +23,38 @@ export const getCreateCallApmApiSpy = () =>
   ) as unknown as CreateCallApmApiSpy;
 export const getCallApmApiSpy = () =>
   jest.spyOn(createCallApmApi, 'callApmApi') as unknown as CallApmApiSpy;
+
+type MockApmApiCall = <TEndpoint extends APIEndpoint>(
+  endpoint: TEndpoint,
+  fn: (
+    params: createCallApmApi.APIClientRequestParamsOf<TEndpoint>
+  ) => createCallApmApi.APIReturnType<TEndpoint>
+) => void;
+
+const getSpy = once(() => {
+  const spy = getCallApmApiSpy();
+
+  const cache: Record<string, Function> = {};
+
+  const response: MockApmApiCall = (endpoint, fn) => {
+    cache[endpoint] = fn;
+  };
+
+  spy.mockImplementation((endpoint, params) => {
+    const fn = cache[endpoint];
+
+    if (fn) {
+      return Promise.resolve(fn(params));
+    }
+
+    throw new Error('No cached response defined for ' + endpoint);
+  });
+
+  return {
+    response,
+  };
+});
+
+export const mockApmApiCallResponse: MockApmApiCall = (...args) => {
+  getSpy().response(...args);
+};

@@ -21,7 +21,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const esClient = getService('es');
   const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
@@ -33,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       name: 'Latency threshold | synth-go',
       params: {
         serviceName: 'synth-go',
-        transactionType: '',
+        transactionType: undefined,
         windowSize: 99,
         windowUnit: 'y',
         threshold: 100,
@@ -90,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-        await esDeleteAllIndices('.alerts*');
+        await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
       });
 
       it('returns the correct number of alerts', async () => {

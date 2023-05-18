@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PostInitState } from '../state/types';
+import { PostInitState, PostDocInitState, OutdatedDocumentsSearchState } from '../state/types';
 
 export const createPostInitState = (): PostInitState => ({
   controlState: 'INIT',
@@ -18,4 +18,26 @@ export const createPostInitState = (): PostInitState => ({
   aliasActions: [],
   previousMappings: { properties: {} },
   currentIndexMeta: {},
+  skipDocumentMigration: false,
+});
+
+export const createPostDocInitState = (): PostDocInitState => ({
+  ...createPostInitState(),
+  excludeOnUpgradeQuery: { bool: {} },
+  excludeFromUpgradeFilterHooks: {},
+  outdatedDocumentsQuery: { bool: {} },
+  transformRawDocs: jest.fn(),
+});
+
+export const createOutdatedDocumentSearchState = (): OutdatedDocumentsSearchState => ({
+  ...createPostDocInitState(),
+  pitId: '42',
+  lastHitSortValue: undefined,
+  corruptDocumentIds: [],
+  transformErrors: [],
+  hasTransformedDocs: false,
+  progress: {
+    processed: undefined,
+    total: undefined,
+  },
 });

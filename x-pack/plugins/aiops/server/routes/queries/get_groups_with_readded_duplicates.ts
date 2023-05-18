@@ -32,6 +32,8 @@ export function getGroupsWithReaddedDuplicates(
             return {
               fieldName: d.fieldName,
               fieldValue: d.fieldValue,
+              pValue: d.pValue,
+              docCount: d.doc_count,
               duplicate,
             };
           })

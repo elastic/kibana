@@ -14,4 +14,10 @@ export interface AlertListItem {
   isMuted: boolean;
   sortPriority: number;
   flapping: boolean;
+  maintenanceWindowIds?: string[];
+}
+
+export interface RefreshToken {
+  resolve: () => void;
+  reject: () => void;
 }

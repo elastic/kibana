@@ -43,7 +43,6 @@ describe('CreateSLO', () => {
           ...sloParams,
           id: expect.any(String),
           settings: {
-            timestampField: '@timestamp',
             syncDelay: oneMinute(),
             frequency: oneMinute(),
           },
@@ -52,7 +51,8 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        })
+        }),
+        { throwOnConflict: true }
       );
       expect(mockTransformManager.install).toHaveBeenCalledWith(
         expect.objectContaining({ ...sloParams, id: expect.any(String) })
@@ -66,7 +66,6 @@ describe('CreateSLO', () => {
         indicator: createAPMTransactionErrorRateIndicator(),
         tags: ['one', 'two'],
         settings: {
-          timestampField: '@timestamp2',
           syncDelay: fiveMinute(),
         },
       });
@@ -80,7 +79,6 @@ describe('CreateSLO', () => {
           ...sloParams,
           id: expect.any(String),
           settings: {
-            timestampField: '@timestamp2',
             syncDelay: fiveMinute(),
             frequency: oneMinute(),
           },
@@ -89,7 +87,8 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        })
+        }),
+        { throwOnConflict: true }
       );
     });
   });

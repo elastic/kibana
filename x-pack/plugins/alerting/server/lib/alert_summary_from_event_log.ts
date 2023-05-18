@@ -40,6 +40,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       average: 0,
       valuesWithTimestamp: {},
     },
+    revision: rule.revision,
   };
 
   const alerts = new Map<string, AlertStatus>();
@@ -79,10 +80,15 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     const alertId = event?.kibana?.alerting?.instance_id;
     if (alertId === undefined) continue;
 
-    const status = getAlertStatus(alerts, alertId);
+    const alertUuid = event?.kibana?.alert?.uuid;
+    const status = getAlertStatus(alerts, alertId, alertUuid);
 
     if (event?.kibana?.alert?.flapping) {
       status.flapping = true;
+    }
+
+    if (event?.kibana?.alert?.maintenance_window_ids?.length) {
+      status.maintenanceWindowIds = event.kibana.alert.maintenance_window_ids as string[];
     }
 
     switch (action) {
@@ -149,10 +155,15 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
 }
 
 // return an alert status object, creating and adding to the map if needed
-function getAlertStatus(alerts: Map<string, AlertStatus>, alertId: string): AlertStatus {
+function getAlertStatus(
+  alerts: Map<string, AlertStatus>,
+  alertId: string,
+  alertUuid?: string
+): AlertStatus {
   if (alerts.has(alertId)) return alerts.get(alertId)!;
 
   const status: AlertStatus = {
+    uuid: alertUuid,
     status: 'OK',
     muted: false,
     actionGroupId: undefined,

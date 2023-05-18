@@ -149,8 +149,8 @@ export default function ({ getService }: FtrProviderContext) {
       actionId = indexedData.actions[0].action_id;
     });
 
-    after(() => {
-      endpointTestResources.unloadEndpointData(indexedData);
+    after(async () => {
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     describe('with minimal_all', () => {

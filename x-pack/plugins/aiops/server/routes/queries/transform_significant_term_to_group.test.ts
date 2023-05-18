@@ -10,7 +10,7 @@ import { significantTerms } from '../../../common/__mocks__/artificial_logs/sign
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
-import { dropDuplicates, groupDuplicates } from './fetch_frequent_item_sets';
+import { groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
 import { getMissingSignificantTerms } from './get_missing_significant_terms';
@@ -18,8 +18,6 @@ import { transformSignificantTermToGroup } from './transform_significant_term_to
 
 describe('getMissingSignificantTerms', () => {
   it('get missing significant terms', () => {
-    const deduplicatedSignificantTerms = dropDuplicates(significantTerms, duplicateIdentifier);
-
     const groupedSignificantTerms = groupDuplicates(significantTerms, duplicateIdentifier).filter(
       (g) => g.group.length > 1
     );
@@ -32,7 +30,7 @@ describe('getMissingSignificantTerms', () => {
     );
 
     const missingSignificantTerms = getMissingSignificantTerms(
-      deduplicatedSignificantTerms,
+      significantTerms,
       groupsWithReaddedDuplicates
     );
 
@@ -43,9 +41,17 @@ describe('getMissingSignificantTerms', () => {
 
     expect(transformed).toEqual({
       docCount: 1981,
-      group: [{ duplicate: false, fieldName: 'user', fieldValue: 'Peter' }],
+      group: [
+        {
+          docCount: 1981,
+          duplicate: 1,
+          fieldName: 'user',
+          fieldValue: 'Peter',
+          pValue: 2.62555579103777e-21,
+        },
+      ],
       id: '817080373',
-      pValue: 2.7454255728359757e-21,
+      pValue: 2.62555579103777e-21,
     });
   });
 });

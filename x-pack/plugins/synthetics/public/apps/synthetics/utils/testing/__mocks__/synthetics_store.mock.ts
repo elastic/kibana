@@ -141,6 +141,10 @@ export const mockState: SyntheticsAppState = {
     status: null,
     error: null,
   },
+  globalParams: {
+    addError: null,
+    editError: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {
@@ -175,6 +179,7 @@ function getMonitorDetailsMockSlice() {
   return {
     lastRun: {
       loading: false,
+      loaded: true,
       data: {
         summary: { up: 1, down: 0 },
         agent: {
@@ -416,7 +421,6 @@ function getMonitorDetailsMockSlice() {
       playwright_options: '',
       __ui: {
         script_source: { is_generated_script: false, file_name: '' },
-        is_zip_url_tls_enabled: false,
         is_tls_enabled: false,
       },
       params: '',
@@ -424,22 +428,21 @@ function getMonitorDetailsMockSlice() {
       'source.inline.script':
         "step('Goto one pixel image', async () => {\\n    await page.goto('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==');\\n});",
       'source.project.content': '',
-      'source.zip_url.url': '',
-      'source.zip_url.username': '',
-      'source.zip_url.password': '',
-      'source.zip_url.folder': '',
-      'source.zip_url.proxy_url': '',
       urls: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
       screenshots: 'on',
       synthetics_args: [],
       'filter_journeys.match': '',
       'filter_journeys.tags': [],
       ignore_https_errors: false,
-      'throttling.is_enabled': true,
-      'throttling.download_speed': '5',
-      'throttling.upload_speed': '3',
-      'throttling.latency': '20',
-      'throttling.config': '5d/3u/20l',
+      throttling: {
+        value: {
+          download: '5',
+          upload: '3',
+          latency: '20',
+        },
+        label: 'Regular 3G',
+        id: 'three_g',
+      },
       'ssl.certificate_authorities': '',
       'ssl.certificate': '',
       'ssl.key': '',

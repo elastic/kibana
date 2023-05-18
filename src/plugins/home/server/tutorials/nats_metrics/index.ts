@@ -58,6 +58,6 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['message_queue'],
+    integrationBrowserCategories: ['message_queue', 'observability'],
   };
 }

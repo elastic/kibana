@@ -66,6 +66,12 @@ const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
 const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 const yesterdayToString = new Date(yesterday.getTime()).toDateString();
 
+const getActions = (testBed: TestBed) => ({
+  openSortSelect() {
+    testBed.find('tableSortSelectBtn').at(0).simulate('click');
+  },
+});
+
 describe('TableListView', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -306,6 +312,36 @@ describe('TableListView', () => {
       expect(lastRowTitle).toBe('Item 19');
     });
 
+    test('should allow changing the number of rows in the table', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      expect(tableCellsValues.length).toBe(requiredProps.initialPageSize);
+
+      // Changing the "Rows per page" also sends the "sort" column information and thus updates the sorting.
+      // We test that the "sort by" column has not changed before and after changing the number of rows
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated');
+
+      // Open the "Rows per page" drop down
+      find('tablePaginationPopoverButton').simulate('click');
+      find('tablePagination-10-rows').simulate('click');
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      expect(tableCellsValues.length).toBe(10);
+
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated'); // Still the same
+    });
+
     test('should navigate to page 2', async () => {
       let testBed: TestBed;
 
@@ -349,12 +385,6 @@ describe('TableListView', () => {
         memoryRouter: { wrapComponent: true },
       }
     );
-
-    const getActions = (testBed: TestBed) => ({
-      openSortSelect() {
-        testBed.find('tableSortSelectBtn').at(0).simulate('click');
-      },
-    });
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -1035,6 +1065,111 @@ describe('TableListView', () => {
         ['Item 1tag-1', yesterdayToString],
       ]);
       expect(router?.history.location?.search).toBe('?sort=title&sortdir=desc');
+    });
+  });
+
+  describe('row item actions', () => {
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: twoDaysAgo.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 1',
+          description: 'Item 1 description',
+        },
+        references: [],
+      },
+      {
+        id: '456',
+        updatedAt: yesterday.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 2',
+          description: 'Item 2 description',
+        },
+        references: [],
+      },
+    ];
+
+    const setupTest = async (props?: Partial<TableListViewProps>) => {
+      let testBed: TestBed | undefined;
+      const deleteItems = jest.fn();
+      await act(async () => {
+        testBed = await setup({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          deleteItems,
+          ...props,
+        });
+      });
+
+      testBed!.component.update();
+      return { testBed: testBed!, deleteItems };
+    };
+
+    test('should allow select items to be deleted', async () => {
+      const {
+        testBed: { table, find, exists, component, form },
+        deleteItems,
+      } = await setupTest();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', 'Item 2Item 2 description', yesterdayToString], // First empty col is the "checkbox"
+        ['', 'Item 1Item 1 description', twoDaysAgoToString],
+      ]);
+
+      const selectedHit = hits[1];
+
+      expect(exists('deleteSelectedItems')).toBe(false);
+      act(() => {
+        // Select the second item
+        form.selectCheckBox(`checkboxSelectRow-${selectedHit.id}`);
+      });
+      component.update();
+      // Delete button is now visible
+      expect(exists('deleteSelectedItems')).toBe(true);
+
+      // Click delete and validate that confirm modal opens
+      expect(component.exists('.euiModal--confirmation')).toBe(false);
+      act(() => {
+        find('deleteSelectedItems').simulate('click');
+      });
+      component.update();
+      expect(component.exists('.euiModal--confirmation')).toBe(true);
+
+      await act(async () => {
+        find('confirmModalConfirmButton').simulate('click');
+      });
+      expect(deleteItems).toHaveBeenCalledWith([selectedHit]);
+    });
+
+    test('should allow to disable the "delete" action for a row', async () => {
+      const reasonMessage = 'This file cannot be deleted.';
+
+      const {
+        testBed: { find },
+      } = await setupTest({
+        rowItemActions: (obj) => {
+          if (obj.id === hits[1].id) {
+            return {
+              delete: {
+                enabled: false,
+                reason: reasonMessage,
+              },
+            };
+          }
+        },
+      });
+
+      const firstCheckBox = find(`checkboxSelectRow-${hits[0].id}`);
+      const secondCheckBox = find(`checkboxSelectRow-${hits[1].id}`);
+
+      expect(firstCheckBox.props().disabled).toBe(false);
+      expect(secondCheckBox.props().disabled).toBe(true);
+      // EUI changes the check "title" from "Select this row" to the reason to disable the checkbox
+      expect(secondCheckBox.props().title).toBe(reasonMessage);
     });
   });
 });

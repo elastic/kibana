@@ -21,6 +21,7 @@ export const API_ACTION_NAME = {
   PING: 'ping',
   RESET_ALL: 'reset_all',
   RESET_ERRORS: 'reset_errors',
+  RESET_GROUPS: 'reset_groups',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
@@ -119,6 +120,14 @@ export function resetAllAction(): ApiActionResetAll {
   return { type: API_ACTION_NAME.RESET_ALL };
 }
 
+interface ApiActionResetGroups {
+  type: typeof API_ACTION_NAME.RESET_GROUPS;
+}
+
+export function resetGroupsAction(): ApiActionResetGroups {
+  return { type: API_ACTION_NAME.RESET_GROUPS };
+}
+
 interface ApiActionUpdateLoadingState {
   type: typeof API_ACTION_NAME.UPDATE_LOADING_STATE;
   payload: {
@@ -148,4 +157,5 @@ export type AiopsExplainLogRateSpikesApiAction =
   | ApiActionPing
   | ApiActionResetAll
   | ApiActionResetErrors
+  | ApiActionResetGroups
   | ApiActionUpdateLoadingState;

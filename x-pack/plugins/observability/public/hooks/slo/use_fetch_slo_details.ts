@@ -15,7 +15,9 @@ import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 
 export interface UseFetchSloDetailsResponse {
+  isInitialLoading: boolean;
   isLoading: boolean;
+  isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
   slo: SLOWithSummaryResponse | undefined;
@@ -24,7 +26,15 @@ export interface UseFetchSloDetailsResponse {
   ) => Promise<QueryObserverResult<GetSLOResponse | undefined, unknown>>;
 }
 
-export function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
+
+export function useFetchSloDetails({
+  sloId,
+  shouldRefetch,
+}: {
+  sloId?: string;
+  shouldRefetch?: boolean;
+}): UseFetchSloDetailsResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
@@ -42,14 +52,18 @@ export function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
           // ignore error for retrieving slos
         }
       },
+      keepPreviousData: true,
       enabled: Boolean(sloId),
+      refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
       refetchOnWindowFocus: false,
     }
   );
 
   return {
     slo: data,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    isLoading,
+    isInitialLoading,
+    isRefetching,
     isSuccess,
     isError,
     refetch,

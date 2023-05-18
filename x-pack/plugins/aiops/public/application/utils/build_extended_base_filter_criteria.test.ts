@@ -27,15 +27,24 @@ const selectedGroupMock: GroupTableItem = {
   id: '21289599',
   docCount: 20468,
   pValue: 2.2250738585072626e-308,
-  group: [
-    { fieldName: 'error.message', fieldValue: 'rate limit exceeded' },
-    { fieldName: 'message', fieldValue: 'too many requests' },
-    { fieldName: 'user_agent.original.keyword', fieldValue: 'Mozilla/5.0' },
-  ],
-  repeatedValues: [
-    { fieldName: 'beat.hostname.keyword', fieldValue: 'ip-192-168-1-1' },
-    { fieldName: 'beat.name.keyword', fieldValue: 'i-1234' },
-    { fieldName: 'docker.container.id.keyword', fieldValue: 'asdf' },
+  uniqueItemsCount: 3,
+  groupItemsSortedByUniqueness: [
+    { fieldName: 'error.message', fieldValue: 'rate limit exceeded', docCount: 10, pValue: 0.05 },
+    { fieldName: 'message', fieldValue: 'too many requests', docCount: 10, pValue: 0.05 },
+    {
+      fieldName: 'user_agent.original.keyword',
+      fieldValue: 'Mozilla/5.0',
+      docCount: 10,
+      pValue: 0.05,
+    },
+    {
+      fieldName: 'beat.hostname.keyword',
+      fieldValue: 'ip-192-168-1-1',
+      docCount: 10,
+      pValue: 0.05,
+    },
+    { fieldName: 'beat.name.keyword', fieldValue: 'i-1234', docCount: 10, pValue: 0.05 },
+    { fieldName: 'docker.container.id.keyword', fieldValue: 'asdf', docCount: 10, pValue: 0.05 },
   ],
   histogram: [],
 };

@@ -8,18 +8,14 @@
 
 import { useSearchSession } from './use_search_session';
 import { renderHook } from '@testing-library/react-hooks';
-import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { getDiscoverStateContainer } from '../services/discover_state';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 describe('test useSearchSession', () => {
   test('getting the next session id', async () => {
-    const { history } = createSearchSessionMock();
-    const stateContainer = getDiscoverStateContainer({
+    const stateContainer = getDiscoverStateMock({
       savedSearch: savedSearchMock,
-      history,
-      services: discoverServiceMock,
     });
 
     const nextId = 'id';
@@ -29,7 +25,6 @@ describe('test useSearchSession', () => {
       return useSearchSession({
         services: discoverServiceMock,
         stateContainer,
-        savedSearch: savedSearchMock,
       });
     });
     expect(stateContainer.searchSessionManager.getNextSearchSessionId()).toBe('id');

@@ -448,12 +448,14 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`searching for ${search} in options list`);
     await this.optionsListPopoverAssertOpen();
     await this.testSubjects.setValue(`optionsList-control-search-input`, search);
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverClearSearch() {
     this.log.debug(`clearing search from options list`);
     await this.optionsListPopoverAssertOpen();
     await this.find.clickByCssSelector('.euiFormControlLayoutClearButton');
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverSetSort(sort: OptionsListSortingType) {
@@ -464,14 +466,14 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('optionsListControl__sortingOptionsPopover');
     });
-
     await this.testSubjects.click(`optionsList__sortOrder_${sort.direction}`);
     await this.testSubjects.click(`optionsList__sortBy_${sort.by}`);
-
     await this.testSubjects.click('optionsListControl__sortingOptionsButton');
     await this.retry.try(async () => {
       await this.testSubjects.missingOrFail(`optionsListControl__sortingOptionsPopover`);
     });
+
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverSelectExists() {
@@ -484,7 +486,6 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverSelectOption(availableOption: string) {
     this.log.debug(`selecting ${availableOption} from options list`);
     await this.optionsListPopoverSearchForOption(availableOption);
-    await this.optionsListPopoverWaitForLoading();
 
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
@@ -492,7 +493,6 @@ export class DashboardPageControls extends FtrService {
     });
 
     await this.optionsListPopoverClearSearch();
-    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverClearSelections() {
@@ -516,7 +516,10 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListWaitForLoading(controlId: string) {
     this.log.debug(`wait for ${controlId} to load`);
-    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
+    const enabled = await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
+    if (!enabled) {
+      throw new Error(`${controlId} did not finish loading within the given time limit`);
+    }
   }
 
   public async optionsListPopoverWaitForLoading() {

@@ -21,7 +21,7 @@ import {
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapAttributes } from '../content_management';
 
 const GROUP_BY_DELIMITER = '_groupby_';
 
@@ -53,11 +53,7 @@ function parseLegacyAggKey(legacyAggKey: string): { aggType: AGG_TYPE; aggFieldN
   };
 }
 
-export function migrateJoinAggKey({
-  attributes,
-}: {
-  attributes: MapSavedObjectAttributes;
-}): MapSavedObjectAttributes {
+export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes }): MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }
@@ -85,8 +81,8 @@ export function migrateJoinAggKey({
         return;
       }
 
-      const legacyJoinFields = new Map<string, JoinDescriptor>();
-      vectorLayerDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+      const legacyJoinFields = new Map<string, Partial<JoinDescriptor>>();
+      vectorLayerDescriptor.joins.forEach((joinDescriptor: Partial<JoinDescriptor>) => {
         _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
           const legacyAggKey = getLegacyAggKey({
             aggType: aggDescriptor.type,
@@ -108,13 +104,13 @@ export function migrateJoinAggKey({
         const style: any = vectorLayerDescriptor.style!.properties[key as VECTOR_STYLES];
         if (_.get(style, 'options.field.origin') === FIELD_ORIGIN.JOIN) {
           const joinDescriptor = legacyJoinFields.get(style.options.field.name);
-          if (joinDescriptor) {
+          if (joinDescriptor?.right?.id) {
             const { aggType, aggFieldName } = parseLegacyAggKey(style.options.field.name);
             // Update legacy join agg key to new join agg key
             style.options.field.name = getJoinAggKey({
               aggType,
               aggFieldName,
-              rightSourceId: joinDescriptor.right.id!,
+              rightSourceId: joinDescriptor.right.id,
             });
           }
         }

@@ -35,7 +35,11 @@ import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  AuditLogger,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -54,7 +58,11 @@ import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, INTEGRATIONS_PLUGIN_ID } from '../common';
+import {
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INTEGRATIONS_PLUGIN_ID,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+} from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import type { MessageSigningServiceInterface } from './services/security';
@@ -111,6 +119,11 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { getRequestStore } from './services/request_store';
+import {
+  UninstallTokenService,
+  type UninstallTokenServiceInterface,
+} from './services/security/uninstall_token_service';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -154,6 +167,8 @@ export interface FleetAppContext {
   telemetryEventsSender: TelemetryEventsSender;
   bulkActionsResolver: BulkActionsResolver;
   messageSigningService: MessageSigningServiceInterface;
+  auditLogger?: AuditLogger;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export type FleetSetupContract = void;
@@ -203,6 +218,7 @@ export interface FleetStartContract {
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
 
   messageSigningService: MessageSigningServiceInterface;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export class FleetPlugin
@@ -362,39 +378,42 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
-        return {
-          get agentClient() {
-            const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
+        const requestStore = getRequestStore();
 
-            return {
-              asCurrentUser: agentService.asScoped(request),
-              asInternalUser: agentService.asInternalUser,
-            };
-          },
-          get packagePolicyService() {
-            const service = plugin.setupPackagePolicyService();
+        return requestStore.run(request, () => {
+          return {
+            get agentClient() {
+              const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
 
-            return {
-              asCurrentUser: service.asScoped(request),
-              asInternalUser: service.asInternalUser,
-            };
-          },
-          authz,
+              return {
+                asCurrentUser: agentService.asScoped(request),
+                asInternalUser: agentService.asInternalUser,
+              };
+            },
+            get packagePolicyService() {
+              const service = plugin.setupPackagePolicyService();
 
-          get internalSoClient() {
-            // Use a lazy getter to avoid constructing this client when not used by a request handler
-            return getInternalSoClient();
-          },
-          get spaceId() {
-            return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-          },
+              return {
+                asCurrentUser: service.asScoped(request),
+                asInternalUser: service.asInternalUser,
+              };
+            },
+            authz,
+            get internalSoClient() {
+              // Use a lazy getter to avoid constructing this client when not used by a request handler
+              return getInternalSoClient();
+            },
+            get spaceId() {
+              return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+            },
 
-          get limitedToPackages() {
-            if (routeAuthz && routeAuthz.granted) {
-              return routeAuthz.scopeDataToPackages;
-            }
-          },
-        };
+            get limitedToPackages() {
+              if (routeAuthz && routeAuthz.granted) {
+                return routeAuthz.scopeDataToPackages;
+              }
+            },
+          };
+        });
       }
     );
 
@@ -432,6 +451,11 @@ export class FleetPlugin
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
     );
+    const uninstallTokenService = new UninstallTokenService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      })
+    );
 
     appContextService.start({
       elasticsearch: core.elasticsearch,
@@ -456,6 +480,7 @@ export class FleetPlugin
       telemetryEventsSender: this.telemetryEventsSender,
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
+      uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
 
@@ -543,6 +568,7 @@ export class FleetPlugin
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
       messageSigningService,
+      uninstallTokenService,
     };
   }
 

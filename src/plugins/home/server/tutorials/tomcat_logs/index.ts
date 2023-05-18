@@ -56,6 +56,6 @@ export function tomcatLogsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['web', 'observability'],
   };
 }

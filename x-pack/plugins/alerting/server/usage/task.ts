@@ -6,11 +6,11 @@
  */
 
 import { Logger, CoreSetup } from '@kbn/core/server';
-import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
 
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
@@ -23,15 +23,15 @@ import {
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
+export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeAlertingTelemetry(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  kibanaIndex: string,
   eventLogIndex: string
 ) {
-  registerAlertingTelemetryTask(logger, core, taskManager, kibanaIndex, eventLogIndex);
+  registerAlertingTelemetryTask(logger, core, taskManager, eventLogIndex);
 }
 
 export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -44,20 +44,13 @@ function registerAlertingTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  kibanaIndex: string,
   eventLogIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(
-        logger,
-        core,
-        kibanaIndex,
-        eventLogIndex,
-        taskManager.index
-      ),
+      createTaskRunner: telemetryTaskRunner(logger, core, eventLogIndex, taskManager.index),
     },
   });
 }
@@ -69,6 +62,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
       taskType: TELEMETRY_TASK_TYPE,
       state: {},
       params: {},
+      schedule: SCHEDULE,
     });
   } catch (e) {
     logger.debug(`Error scheduling task, received ${e.message}`);
@@ -78,7 +72,6 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
-  kibanaIndex: string,
   eventLogIndex: string,
   taskManagerIndex: string
 ) {
@@ -92,13 +85,18 @@ export function telemetryTaskRunner(
           },
         ]) => client.asInternalUser
       );
+    const getAlertIndex = () =>
+      core
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.getIndexForType('alert'));
 
     return {
       async run() {
         const esClient = await getEsClient();
+        const alertIndex = await getAlertIndex();
         return Promise.all([
-          getTotalCountAggregations({ esClient, kibanaIndex, logger }),
-          getTotalCountInUse({ esClient, kibanaIndex, logger }),
+          getTotalCountAggregations({ esClient, alertIndex, logger }),
+          getTotalCountInUse({ esClient, alertIndex, logger }),
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
@@ -189,7 +187,9 @@ export function telemetryTaskRunner(
                   percentile_num_alerts_by_type_per_day:
                     dailyExecutionCounts.alertsPercentilesByType,
                 },
-                runAt: getNextMidnight(),
+                // Useful for setting a schedule for the old tasks that don't have one
+                // or to update the schedule if ever the frequency changes in code
+                schedule: SCHEDULE,
               };
             }
           )
@@ -197,14 +197,12 @@ export function telemetryTaskRunner(
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
-              runAt: getNextMidnight(),
+              // Useful for setting a schedule for the old tasks that don't have one
+              // or to update the schedule if ever the frequency changes in code
+              schedule: SCHEDULE,
             };
           });
       },
     };
   };
-}
-
-function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
 }

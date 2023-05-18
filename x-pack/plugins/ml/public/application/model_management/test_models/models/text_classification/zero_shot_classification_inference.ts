@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { estypes } from '@elastic/elasticsearch';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
@@ -16,7 +17,6 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 
 import { getZeroShotClassificationInput } from './zero_shot_classification_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
-import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../common/constants/trained_models';
 
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION;
@@ -37,9 +37,10 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   constructor(
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
-    inputType: INPUT_TYPE
+    inputType: INPUT_TYPE,
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType);
+    super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize(
       [this.labelsText$.pipe(map((labelsText) => labelsText !== ''))],

@@ -10,13 +10,16 @@ import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CasesStart, CasesSetup } from '@kbn/cases-plugin/server';
+import { FilesSetup } from '@kbn/files-plugin/server';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
+import { registerCaseFixtureFileKinds } from './files';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   cases: CasesSetup;
+  files: FilesSetup;
 }
 
 export interface FixtureStartDeps {
@@ -36,6 +39,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     deps.cases.attachmentFramework.registerPersistableState(getPersistableStateAttachment());
 
     registerRoutes(core, this.log);
+    registerCaseFixtureFileKinds(deps.files);
   }
 
   public start(core: CoreStart, plugins: FixtureStartDeps) {}

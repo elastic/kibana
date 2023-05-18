@@ -7,16 +7,14 @@
 
 import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
-import memoizeOne from 'memoize-one';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import {
+import type {
   Datasource,
-  DatasourceLayers,
   DatasourceMap,
   IndexPattern,
   IndexPatternMap,
@@ -28,9 +26,10 @@ import {
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
+import type { DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import { getDatasourceLayers } from '../../state_management/utils';
 
 function getIndexPatterns(
   references?: SavedObjectReference[],
@@ -283,30 +282,6 @@ export function initializeDatasources({
   return states;
 }
 
-export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
-  datasourceStates: DatasourceStates,
-  datasourceMap: DatasourceMap,
-  indexPatterns: DataViewsState['indexPatterns']
-) {
-  const datasourceLayers: DatasourceLayers = {};
-  Object.keys(datasourceMap)
-    .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)
-    .forEach((id) => {
-      const datasourceState = datasourceStates[id].state;
-      const datasource = datasourceMap[id];
-
-      const layers = datasource.getLayers(datasourceState);
-      layers.forEach((layer) => {
-        datasourceLayers[layer] = datasourceMap[id].getPublicAPI({
-          state: datasourceState,
-          layerId: layer,
-          indexPatterns,
-        });
-      });
-    });
-  return datasourceLayers;
-});
-
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
@@ -404,10 +379,14 @@ export async function persistedStateToExpression(
 
 export function getMissingIndexPattern(
   currentDatasource: Datasource | null | undefined,
-  currentDatasourceState: { state: unknown } | null,
+  currentDatasourceState: { isLoading: boolean; state: unknown } | null,
   indexPatterns: IndexPatternMap
 ) {
-  if (currentDatasourceState?.state == null || currentDatasource == null) {
+  if (
+    currentDatasourceState?.isLoading ||
+    currentDatasourceState?.state == null ||
+    currentDatasource == null
+  ) {
     return [];
   }
   const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state, indexPatterns);

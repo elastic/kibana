@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -24,6 +24,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { AuthorizationContext } from '../../../../lib/authorization';
+import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import {
   isLatestTransform,
   isPivotTransform,
@@ -38,12 +40,20 @@ import { isManagedTransform } from '../../../../common/managed_transforms_utils'
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
 
+const TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG = i18n.translate(
+  'xpack.transform.transformList.needsReauthorizationBadge.insufficientPermissions',
+  {
+    defaultMessage: 'This transform was created with insufficient permissions.',
+  }
+);
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
   transformNodes: number,
   transformSelection: TransformListRow[]
 ) => {
+  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
     transformNodes,
@@ -150,7 +160,31 @@ export const useColumns = (
       ),
       width: '30px',
       render: (item) => {
-        return Array.isArray(item.alerting_rules) ? (
+        const needsReauth = needsReauthorization(item);
+
+        const actionMsg = canStartStopTransform
+          ? i18n.translate(
+              'xpack.transform.transformList.needsReauthorizationBadge.reauthorizeTooltip',
+              {
+                defaultMessage: 'Reauthorize to start transforms.',
+              }
+            )
+          : i18n.translate(
+              'xpack.transform.transformList.needsReauthorizationBadge.contactAdminTooltip',
+              {
+                defaultMessage: 'Contact your administrator to request the required permissions.',
+              }
+            );
+        const needsReauthTooltipIcon = needsReauth ? (
+          <>
+            <EuiToolTip content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}>
+              <EuiIcon size="s" color="warning" type={'alert'} />
+            </EuiToolTip>
+            &nbsp;
+          </>
+        ) : null;
+
+        const alertingRulesTooltipIcon = Array.isArray(item.alerting_rules) ? (
           <EuiToolTip
             position="bottom"
             content={
@@ -165,6 +199,12 @@ export const useColumns = (
           </EuiToolTip>
         ) : (
           <span />
+        );
+        return (
+          <>
+            {needsReauthTooltipIcon}
+            {alertingRulesTooltipIcon}
+          </>
         );
       },
     },

@@ -10,14 +10,14 @@ import { getValuesDescending } from './get_values_descending';
 
 describe('getValuesDescending', () => {
   it('get descending values for field response_code', () => {
-    expect(getValuesDescending(frequentItemSets, 'response_code')).toEqual(['500', '200', '404']);
+    expect(getValuesDescending(frequentItemSets, 'response_code')).toEqual(['500']);
   });
 
   it('get descending values for field url', () => {
-    expect(getValuesDescending(frequentItemSets, 'url')).toEqual(['home.php']);
+    expect(getValuesDescending(frequentItemSets, 'url')).toEqual(['home.php', 'login.php']);
   });
 
   it('get descending values for field user', () => {
-    expect(getValuesDescending(frequentItemSets, 'user')).toEqual(['Peter', 'Mary', 'Paul']);
+    expect(getValuesDescending(frequentItemSets, 'user')).toEqual(['Peter']);
   });
 });

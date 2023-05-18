@@ -130,8 +130,8 @@ function handleResultForCalendarAlignedAndOccurrences(
     const sliValue = computeSLI({ good, total });
 
     const durationCalendarPeriod = moment(dateRange.to).diff(dateRange.from, 'minutes');
-    const bucketDate = moment(bucket.key_as_string).endOf('day');
-    const durationSinceBeginning = bucketDate.isAfter(dateRange.to)
+    const bucketDate = moment(bucket.key_as_string);
+    const durationSinceBeginning = bucketDate.isSameOrAfter(dateRange.to)
       ? durationCalendarPeriod
       : moment(bucketDate).diff(dateRange.from, 'minutes');
 
@@ -183,8 +183,10 @@ function handleResultForRolling(slo: SLO, buckets: DailyAggBucket[]): Historical
     .duration(slo.timeWindow.duration.value, toMomentUnitOfTime(slo.timeWindow.duration.unit))
     .asDays();
 
+  const { bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingWindowDurationInDays);
+
   return buckets
-    .slice(-rollingWindowDurationInDays)
+    .slice(-bucketsPerDay * rollingWindowDurationInDays)
     .map((bucket: DailyAggBucket): HistoricalSummary => {
       const good = bucket.cumulative_good?.value ?? 0;
       const total = bucket.cumulative_total?.value ?? 0;
@@ -204,6 +206,9 @@ function handleResultForRolling(slo: SLO, buckets: DailyAggBucket[]): Historical
 function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearchBody {
   const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(slo.timeWindow.duration.value, unit).asDays();
+
+  const { fixedInterval, bucketsPerDay } =
+    getFixedIntervalAndBucketsPerDay(timeWindowDurationInDays);
 
   return {
     size: 0,
@@ -227,7 +232,7 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
       daily: {
         date_histogram: {
           field: '@timestamp',
-          fixed_interval: '1d',
+          fixed_interval: fixedInterval,
           extended_bounds: {
             min: dateRange.from.toISOString(),
             max: 'now/d',
@@ -261,7 +266,7 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
           cumulative_good: {
             moving_fn: {
               buckets_path: 'good',
-              window: timeWindowDurationInDays,
+              window: timeWindowDurationInDays * bucketsPerDay,
               shift: 1,
               script: 'MovingFunctions.sum(values)',
             },
@@ -269,7 +274,7 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
           cumulative_total: {
             moving_fn: {
               buckets_path: 'total',
-              window: timeWindowDurationInDays,
+              window: timeWindowDurationInDays * bucketsPerDay,
               shift: 1,
               script: 'MovingFunctions.sum(values)',
             },
@@ -281,9 +286,8 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
 }
 
 function getDateRange(slo: SLO) {
-  const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
-
   if (rollingTimeWindowSchema.is(slo.timeWindow)) {
+    const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
     const now = moment();
     return {
       from: now
@@ -299,4 +303,20 @@ function getDateRange(slo: SLO) {
   }
 
   assertNever(slo.timeWindow);
+}
+
+export function getFixedIntervalAndBucketsPerDay(durationInDays: number): {
+  fixedInterval: string;
+  bucketsPerDay: number;
+} {
+  if (durationInDays <= 7) {
+    return { fixedInterval: '1h', bucketsPerDay: 24 };
+  }
+  if (durationInDays <= 30) {
+    return { fixedInterval: '4h', bucketsPerDay: 6 };
+  }
+  if (durationInDays <= 90) {
+    return { fixedInterval: '12h', bucketsPerDay: 2 };
+  }
+  return { fixedInterval: '1d', bucketsPerDay: 1 };
 }

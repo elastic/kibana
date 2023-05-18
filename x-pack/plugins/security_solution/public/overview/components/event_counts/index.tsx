@@ -18,9 +18,10 @@ import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import {
-  hostNameExistsFilter,
+  fieldNameExistsFilter,
   sourceOrDestinationIpExistsFilter,
 } from '../../../common/components/visualization_actions/utils';
+import { SecurityPageName } from '../../../../common/constants';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters: Filter[];
@@ -46,7 +47,7 @@ const EventCountsComponent: React.FC<Props> = ({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
-        filters: [...filters, ...hostNameExistsFilter],
+        filters: [...filters, ...fieldNameExistsFilter(SecurityPageName.hosts)],
       }),
     [filters, indexPattern, query, uiSettings]
   );

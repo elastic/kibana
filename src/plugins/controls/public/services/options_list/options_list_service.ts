@@ -9,6 +9,8 @@
 import { memoize } from 'lodash';
 
 import dateMath from '@kbn/datemath';
+import { CoreStart } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
@@ -24,10 +26,12 @@ import { ControlsPluginStartDeps } from '../../types';
 import { ControlsOptionsListService } from './types';
 
 class OptionsListService implements ControlsOptionsListService {
+  private core: CoreStart;
   private data: ControlsDataService;
   private http: ControlsHTTPService;
 
-  constructor(requiredServices: OptionsListServiceRequiredServices) {
+  constructor(core: CoreStart, requiredServices: OptionsListServiceRequiredServices) {
+    this.core = core;
     ({ data: this.data, http: this.http } = requiredServices);
   }
 
@@ -85,7 +89,8 @@ class OptionsListService implements ControlsOptionsListService {
     const { query, filters, dataView, timeRange, field, ...passThroughProps } = request;
     const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
     const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
-    const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [])];
+    const config = getEsQueryConfig(this.core.uiSettings);
+    const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [], config)];
 
     return {
       ...passThroughProps,
@@ -99,7 +104,7 @@ class OptionsListService implements ControlsOptionsListService {
   private cachedAllowExpensiveQueries = memoize(async () => {
     const { allowExpensiveQueries } = await this.http.get<{
       allowExpensiveQueries: boolean;
-    }>('/api/kibana/controls/optionsList/getClusterSettings');
+    }>('/api/kibana/controls/optionsList/getExpensiveQueriesSetting');
     return allowExpensiveQueries;
   });
 
@@ -145,5 +150,5 @@ export type OptionsListServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const optionsListServiceFactory: OptionsListServiceFactory = (core, requiredServices) => {
-  return new OptionsListService(requiredServices);
+  return new OptionsListService(core.coreStart, requiredServices);
 };

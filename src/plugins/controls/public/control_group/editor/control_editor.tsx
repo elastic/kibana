@@ -16,6 +16,7 @@
 
 import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
+import useAsync from 'react-use/lib/useAsync';
 
 import {
   EuiFlyoutHeader,
@@ -35,7 +36,7 @@ import {
   EuiSwitch,
   EuiTextColor,
 } from '@elastic/eui';
-import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -46,14 +47,14 @@ import { ControlGroupStrings } from '../control_group_strings';
 import {
   ControlEmbeddable,
   ControlWidth,
-  DataControlFieldRegistry,
   DataControlInput,
   IEditableControlFactory,
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { pluginServices } from '../../services';
 import { getDataControlFieldRegistry } from './data_control_editor_tools';
-import { useControlGroupContainerContext } from '../control_group_renderer';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
+
 interface EditControlProps {
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
@@ -69,12 +70,6 @@ interface EditControlProps {
   getRelevantDataViewId?: () => string | undefined;
   setLastUsedDataViewId?: (newDataViewId: string) => void;
   onTypeEditorChange: (partial: Partial<DataControlInput>) => void;
-}
-
-interface ControlEditorState {
-  dataViewListItems: DataViewListItem[];
-  selectedDataView?: DataView;
-  selectedField?: DataViewField;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -101,12 +96,8 @@ export const ControlEditor = ({
     controls: { getControlFactory },
   } = pluginServices.getServices();
 
-  const { useEmbeddableSelector: select } = useControlGroupContainerContext();
-  const editorConfig = select((state) => state.componentState.editorConfig);
-
-  const [state, setState] = useState<ControlEditorState>({
-    dataViewListItems: [],
-  });
+  const controlGroup = useControlGroupContainer();
+  const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
 
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title ?? '');
@@ -116,47 +107,54 @@ export const ControlEditor = ({
   const [selectedField, setSelectedField] = useState<string | undefined>(
     embeddable ? embeddable.getInput().fieldName : undefined
   );
-
-  const [fieldRegistry, setFieldRegistry] = useState<DataControlFieldRegistry>();
-  useEffect(() => {
-    (async () => {
-      if (state.selectedDataView?.id) {
-        setFieldRegistry(await getDataControlFieldRegistry(await get(state.selectedDataView.id)));
-      }
-    })();
-  }, [state.selectedDataView?.id, get]);
+  const [selectedDataViewId, setSelectedDataViewId] = useState<string>();
 
   useMount(() => {
     let mounted = true;
     if (selectedField) setDefaultTitle(selectedField);
 
     (async () => {
-      const dataViewListItems = await getIdsWithTitle();
+      if (!mounted) return;
+
       const initialId =
         embeddable?.getInput().dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
-      let dataView: DataView | undefined;
       if (initialId) {
         onTypeEditorChange({ dataViewId: initialId });
-        dataView = await get(initialId);
+        setSelectedDataViewId(initialId);
       }
-      if (!mounted) return;
-      setState((s) => ({
-        ...s,
-        selectedDataView: dataView,
-        dataViewListItems,
-      }));
     })();
     return () => {
       mounted = false;
     };
   });
 
+  const { loading: dataViewListLoading, value: dataViewListItems = [] } = useAsync(() => {
+    return getIdsWithTitle();
+  });
+
+  const {
+    loading: dataViewLoading,
+    value: { selectedDataView, fieldRegistry } = {
+      selectedDataView: undefined,
+      fieldRegistry: undefined,
+    },
+  } = useAsync(async () => {
+    if (!selectedDataViewId) {
+      return;
+    }
+    const dataView = await get(selectedDataViewId);
+    const registry = await getDataControlFieldRegistry(dataView);
+    return {
+      selectedDataView: dataView,
+      fieldRegistry: registry,
+    };
+  }, [selectedDataViewId]);
+
   useEffect(
-    () => setControlEditorValid(Boolean(selectedField) && Boolean(state.selectedDataView)),
-    [selectedField, setControlEditorValid, state.selectedDataView]
+    () => setControlEditorValid(Boolean(selectedField) && Boolean(selectedDataView)),
+    [selectedField, setControlEditorValid, selectedDataView]
   );
 
-  const { selectedDataView: dataView } = state;
   const controlType =
     selectedField && fieldRegistry && fieldRegistry[selectedField].compatibleControlTypes[0];
   const factory = controlType && getControlFactory(controlType);
@@ -178,47 +176,47 @@ export const ControlEditor = ({
           {!editorConfig?.hideDataViewSelector && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getDataViewTitle()}>
               <DataViewPicker
-                dataViews={state.dataViewListItems}
-                selectedDataViewId={dataView?.id}
+                dataViews={dataViewListItems}
+                selectedDataViewId={selectedDataViewId}
                 onChangeDataViewId={(dataViewId) => {
                   setLastUsedDataViewId?.(dataViewId);
-                  if (dataViewId === dataView?.id) return;
-
+                  if (dataViewId === selectedDataViewId) return;
                   onTypeEditorChange({ dataViewId });
                   setSelectedField(undefined);
-                  get(dataViewId).then((newDataView) => {
-                    setState((s) => ({ ...s, selectedDataView: newDataView }));
-                  });
+                  setSelectedDataViewId(dataViewId);
                 }}
                 trigger={{
                   label:
-                    state.selectedDataView?.getName() ??
+                    selectedDataView?.getName() ??
                     ControlGroupStrings.manageControl.getSelectDataViewMessage(),
                 }}
+                selectableProps={{ isLoading: dataViewListLoading }}
               />
             </EuiFormRow>
           )}
-          {fieldRegistry && (
-            <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
-              <FieldPicker
-                filterPredicate={(field: DataViewField) => Boolean(fieldRegistry[field.name])}
-                selectedFieldName={selectedField}
-                dataView={dataView}
-                onSelectField={(field) => {
-                  onTypeEditorChange({
-                    fieldName: field.name,
-                  });
-                  const newDefaultTitle = field.displayName ?? field.name;
-                  setDefaultTitle(newDefaultTitle);
-                  setSelectedField(field.name);
-                  if (!currentTitle || currentTitle === defaultTitle) {
-                    setCurrentTitle(newDefaultTitle);
-                    updateTitle(newDefaultTitle);
-                  }
-                }}
-              />
-            </EuiFormRow>
-          )}
+          <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
+            <FieldPicker
+              filterPredicate={(field: DataViewField) => {
+                const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
+                return Boolean(fieldRegistry?.[field.name]) && customPredicate;
+              }}
+              selectedFieldName={selectedField}
+              dataView={selectedDataView}
+              onSelectField={(field) => {
+                onTypeEditorChange({
+                  fieldName: field.name,
+                });
+                const newDefaultTitle = field.displayName ?? field.name;
+                setDefaultTitle(newDefaultTitle);
+                setSelectedField(field.name);
+                if (!currentTitle || currentTitle === defaultTitle) {
+                  setCurrentTitle(newDefaultTitle);
+                  updateTitle(newDefaultTitle);
+                }
+              }}
+              selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
+            />
+          </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
             {factory ? (
               <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -284,7 +282,7 @@ export const ControlEditor = ({
                 <CustomSettings
                   onChange={onTypeEditorChange}
                   initialInput={embeddable?.getInput()}
-                  fieldType={fieldRegistry[selectedField].field.type}
+                  fieldType={fieldRegistry?.[selectedField].field.type}
                 />
               </EuiFormRow>
             )}

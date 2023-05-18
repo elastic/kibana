@@ -36,6 +36,7 @@ import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -137,6 +138,11 @@ export interface QueryStringInputProps {
    * Override whether autocomplete suggestions are restricted by time range.
    */
   timeRangeForSuggestionsOverride?: boolean;
+
+  /**
+   * Add additional filters used for suggestions
+   */
+  filtersForSuggestions?: Filter[];
 }
 
 interface State {
@@ -279,6 +285,8 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           selectionEnd,
           signal: this.abortController.signal,
           useTimeRange: this.props.timeRangeForSuggestionsOverride,
+          boolFilter: buildQueryFromFilters(this.props.filtersForSuggestions, undefined).filter,
+          method: this.props.filtersForSuggestions?.length ? 'terms_agg' : undefined,
         })) || [];
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
@@ -824,8 +832,9 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
+              {/* EUI TODO: This will need to be fixed before the Emotion conversion */}
               {this.props.iconType ? (
-                <div className="euiFormControlLayoutIcons">
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--left">
                   <EuiIcon
                     className="euiFormControlLayoutCustomIcon__icon"
                     aria-hidden="true"
@@ -834,7 +843,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 </div>
               ) : null}
               {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--right">
                   <button
                     type="button"
                     className="euiFormControlLayoutClearButton"

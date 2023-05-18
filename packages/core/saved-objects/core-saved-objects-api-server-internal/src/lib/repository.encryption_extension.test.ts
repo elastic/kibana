@@ -22,8 +22,9 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { kibanaMigratorMock } from '../mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  ISavedObjectsEncryptionExtension,
-  SavedObjectsRawDocSource,
+  MAIN_SAVED_OBJECT_INDEX,
+  type ISavedObjectsEncryptionExtension,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import {
   bulkCreateSuccess,
@@ -41,13 +42,10 @@ import {
   mockVersion,
   mockVersionProps,
   MULTI_NAMESPACE_ENCRYPTED_TYPE,
-  TypeIdTuple,
   updateSuccess,
+  type TypeIdTuple,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
-
-// BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
-// so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
 describe('SavedObjectsRepository Encryption Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -633,7 +631,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           total: 2,
           hits: [
             {
-              _index: '.kibana',
+              _index: MAIN_SAVED_OBJECT_INDEX,
               _id: `${space ? `${space}:` : ''}${encryptedSO.type}:${encryptedSO.id}`,
               _score: 1,
               ...mockVersionProps,
@@ -643,7 +641,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
               },
             },
             {
-              _index: '.kibana',
+              _index: MAIN_SAVED_OBJECT_INDEX,
               _id: `${space ? `${space}:` : ''}index-pattern:logstash-*`,
               _score: 2,
               ...mockVersionProps,

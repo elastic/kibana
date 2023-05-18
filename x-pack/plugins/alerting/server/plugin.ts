@@ -59,6 +59,7 @@ import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
 import { RulesSettingsClientFactory } from './rules_settings_client_factory';
+import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
 import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
@@ -94,6 +95,7 @@ import {
   errorResult,
 } from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
+import { maintenanceWindowFeature } from './maintenance_window_feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -129,6 +131,7 @@ export interface PluginSetupContract {
       RecoveryActionGroupId
     >
   ): void;
+
   getSecurityHealth: () => Promise<SecurityHealth>;
   getConfig: () => AlertingRulesConfig;
   frameworkAlerts: PublicFrameworkAlertsService;
@@ -187,6 +190,7 @@ export class AlertingPlugin {
   private readonly rulesClientFactory: RulesClientFactory;
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
+  private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -194,7 +198,7 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
-  private alertsService?: AlertsService;
+  private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -202,8 +206,10 @@ export class AlertingPlugin {
     this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
+    this.alertsService = null;
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
+    this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
@@ -214,7 +220,6 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
   ): PluginSetupContract {
-    const kibanaIndex = core.savedObjects.getKibanaIndex();
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
@@ -224,12 +229,15 @@ export class AlertingPlugin {
         management: {
           insightsAndAlerting: {
             triggersActions: true,
+            maintenanceWindows: true,
           },
         },
       };
     });
 
     plugins.features.registerKibanaFeature(rulesSettingsFeature);
+
+    plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -276,13 +284,7 @@ export class AlertingPlugin {
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
       const eventLogIndex = this.eventLogService.getIndexPattern();
-      initializeAlertingTelemetry(
-        this.telemetryLogger,
-        core,
-        plugins.taskManager,
-        kibanaIndex,
-        eventLogIndex
-      );
+      initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, eventLogIndex);
     }
 
     // Usage counter for telemetry
@@ -393,9 +395,12 @@ export class AlertingPlugin {
       },
       frameworkAlerts: {
         enabled: () => this.config.enableFrameworkAlerts,
-        getContextInitializationPromise: (context: string): Promise<InitializationPromise> => {
+        getContextInitializationPromise: (
+          context: string,
+          namespace: string
+        ): Promise<InitializationPromise> => {
           if (this.alertsService) {
-            return this.alertsService.getContextInitializationPromise(context);
+            return this.alertsService.getContextInitializationPromise(context, namespace);
           }
 
           return Promise.resolve(errorResult(`Framework alerts service not available`));
@@ -413,6 +418,7 @@ export class AlertingPlugin {
       rulesClientFactory,
       alertingAuthorizationClientFactory,
       rulesSettingsClientFactory,
+      maintenanceWindowClientFactory,
       security,
       licenseState,
     } = this;
@@ -467,6 +473,12 @@ export class AlertingPlugin {
       securityPluginStart: plugins.security,
     });
 
+    maintenanceWindowClientFactory.initialize({
+      logger: this.logger,
+      savedObjectsService: core.savedObjects,
+      securityPluginStart: plugins.security,
+    });
+
     const getRulesClientWithRequest = (request: KibanaRequest) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
@@ -482,6 +494,10 @@ export class AlertingPlugin {
 
     const getRulesSettingsClientWithRequest = (request: KibanaRequest) => {
       return rulesSettingsClientFactory!.create(request);
+    };
+
+    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
+      return maintenanceWindowClientFactory!.create(request);
     };
 
     taskRunnerFactory.initialize({
@@ -501,6 +517,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
+      alertsService: this.alertsService,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
@@ -509,6 +526,7 @@ export class AlertingPlugin {
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
+      getMaintenanceWindowClientWithRequest,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
@@ -539,7 +557,12 @@ export class AlertingPlugin {
   private createRouteHandlerContext = (
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
-    const { ruleTypeRegistry, rulesClientFactory, rulesSettingsClientFactory } = this;
+    const {
+      ruleTypeRegistry,
+      rulesClientFactory,
+      rulesSettingsClientFactory,
+      maintenanceWindowClientFactory,
+    } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
@@ -548,6 +571,9 @@ export class AlertingPlugin {
         },
         getRulesSettingsClient: () => {
           return rulesSettingsClientFactory.createWithAuthorization(request);
+        },
+        getMaintenanceWindowClient: () => {
+          return maintenanceWindowClientFactory.createWithAuthorization(request);
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>

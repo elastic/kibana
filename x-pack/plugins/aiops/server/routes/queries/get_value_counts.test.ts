@@ -11,20 +11,16 @@ import { getValueCounts } from './get_value_counts';
 describe('getValueCounts', () => {
   it('get value counts for field response_code', () => {
     expect(getValueCounts(frequentItemSets, 'response_code')).toEqual({
-      '200': 1,
-      '404': 1,
       '500': 3,
     });
   });
 
   it('get value counts for field url', () => {
-    expect(getValueCounts(frequentItemSets, 'url')).toEqual({ 'home.php': 6 });
+    expect(getValueCounts(frequentItemSets, 'url')).toEqual({ 'home.php': 2, 'login.php': 2 });
   });
 
   it('get value counts for field user', () => {
     expect(getValueCounts(frequentItemSets, 'user')).toEqual({
-      Mary: 1,
-      Paul: 1,
       Peter: 3,
     });
   });

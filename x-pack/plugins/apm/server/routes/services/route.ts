@@ -240,22 +240,13 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
   handler: async (resources): Promise<ServiceMetadataDetails> => {
     const apmEventClient = await getApmEventClient(resources);
     const infraMetricsClient = createInfraMetricsClient(resources);
-    const { params, config } = resources;
+    const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
-
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-      kuery: '',
-    });
 
     const serviceMetadataDetails = await getServiceMetadataDetails({
       serviceName,
       apmEventClient,
-      searchAggregatedTransactions,
       start,
       end,
     });
@@ -523,9 +514,15 @@ const serviceThroughputRoute = createApmServerRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({ transactionType: t.string }),
+      t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
       t.partial({ transactionName: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
+      t.intersection([
+        environmentRt,
+        kueryRt,
+        rangeRt,
+        offsetRt,
+        serviceTransactionDataSourceRt,
+      ]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -536,7 +533,7 @@ const serviceThroughputRoute = createApmServerRoute({
     previousPeriod: ServiceThroughputResponse;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const { params, config } = resources;
+    const { params } = resources;
     const { serviceName } = params.path;
     const {
       environment,
@@ -546,23 +543,21 @@ const serviceThroughputRoute = createApmServerRoute({
       offset,
       start,
       end,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
     } = params.query;
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      config,
-      apmEventClient,
-      kuery,
-      start,
-      end,
-    });
 
     const commonProps = {
       environment,
       kuery,
-      searchAggregatedTransactions,
       serviceName,
       apmEventClient,
       transactionType,
       transactionName,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([

@@ -1,0 +1,220 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import type { Type } from '@kbn/config-schema';
+import type { ApiVersion } from '@kbn/core-http-common';
+import type { MaybePromise } from '@kbn/utility-types';
+import type {
+  RouteConfig,
+  RouteMethod,
+  RequestHandler,
+  IKibanaResponse,
+  RouteConfigOptions,
+  RouteValidatorFullConfig,
+  RequestHandlerContextBase,
+  RouteValidationFunction,
+} from '../..';
+
+type RqCtx = RequestHandlerContextBase;
+
+export type { ApiVersion };
+
+/**
+ * Configuration for a versioned route
+ * @experimental
+ */
+export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
+  RouteConfig<unknown, unknown, unknown, Method>,
+  'validate' | 'options'
+> & {
+  options?: Omit<RouteConfigOptions<Method>, 'access'>;
+  /** See {@link RouteConfigOptions<RouteMethod>['access']} */
+  access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
+};
+
+/**
+ * Create an {@link VersionedRoute | versioned route}.
+ *
+ * @param config - The route configuration
+ * @returns A versioned route
+ * @experimental
+ */
+export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCtx = RqCtx> = (
+  config: VersionedRouteConfig<Method>
+) => VersionedRoute<Method, Ctx>;
+
+/**
+ * A router, very similar to {@link IRouter} that will return an {@link VersionedRoute}
+ * instead.
+ *
+ * @example
+ * const versionedRoute = versionedRouter
+ *   .post({
+ *     access: 'internal',
+ *     path: '/api/my-app/foo/{id?}',
+ *     options: { timeout: { payload: 60000 } },
+ *   })
+ *   .addVersion(
+ *     {
+ *       version: '1',
+ *       validate: {
+ *         request: {
+ *           query: schema.object({
+ *             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+ *           }),
+ *           params: schema.object({
+ *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+ *           }),
+ *           body: schema.object({ foo: schema.string() }),
+ *         },
+ *         response: {
+ *           200: {
+ *             body: schema.object({ foo: schema.string() }),
+ *           },
+ *         },
+ *       },
+ *     },
+ *     async (ctx, req, res) => {
+ *       await ctx.fooService.create(req.body.foo, req.params.id, req.query.name);
+ *       return res.ok({ body: { foo: req.body.foo } });
+ *     }
+ *   )
+ *   // BREAKING CHANGE: { foo: string } => { fooString: string } in body
+ *   .addVersion(
+ *     {
+ *       version: '2',
+ *       validate: {
+ *         request: {
+ *           query: schema.object({
+ *             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+ *           }),
+ *           params: schema.object({
+ *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+ *           }),
+ *           body: schema.object({ fooString: schema.string() }),
+ *         },
+ *         response: {
+ *           200: {
+ *             body: schema.object({ fooName: schema.string() }),
+ *           },
+ *         },
+ *       },
+ *     },
+ *     async (ctx, req, res) => {
+ *       await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
+ *       return res.ok({ body: { fooName: req.body.fooString } });
+ *     }
+ *   )
+ *   // BREAKING CHANGES: Enforce min/max length on fooString
+ *   .addVersion(
+ *     {
+ *       version: '3',
+ *       validate: {
+ *         request: {
+ *           query: schema.object({
+ *             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+ *           }),
+ *           params: schema.object({
+ *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+ *           }),
+ *           body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
+ *         },
+ *         response: {
+ *           200: {
+ *             body: schema.object({ fooName: schema.string() }),
+ *           },
+ *         },
+ *       },
+ *     },
+ *     async (ctx, req, res) => {
+ *       await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
+ *       return res.ok({ body: { fooName: req.body.fooString } });
+ *     }
+ *   );
+
+ * @experimental
+ */
+export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
+  /** @experimental */
+  get: VersionedRouteRegistrar<'get', Ctx>;
+  /** @experimental */
+  put: VersionedRouteRegistrar<'put', Ctx>;
+  /** @experimental */
+  post: VersionedRouteRegistrar<'post', Ctx>;
+  /** @experimental */
+  patch: VersionedRouteRegistrar<'patch', Ctx>;
+  /** @experimental */
+  delete: VersionedRouteRegistrar<'delete', Ctx>;
+}
+
+/** @experimental */
+export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+
+/** @experimental */
+export interface VersionedRouteResponseValidation {
+  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
+  unsafe?: { body?: boolean };
+}
+
+/**
+ * Versioned route validation
+ * @experimental
+ */
+interface FullValidationConfig<P, Q, B> {
+  /**
+   * Validation to run against route inputs: params, query and body
+   * @experimental
+   */
+  request?: VersionedRouteRequestValidation<P, Q, B>;
+  /**
+   * Validation to run against route output
+   * @note This validation is only intended to run in development. Do not use this
+   *       for setting default values!
+   * @experimental
+   */
+  response?: VersionedRouteResponseValidation;
+}
+
+/**
+ * Options for a versioned route. Probably needs a lot more options like sunsetting
+ * of an endpoint etc.
+ * @experimental
+ */
+export interface AddVersionOpts<P, Q, B> {
+  /**
+   * Version to assign to this route
+   * @experimental
+   */
+  version: ApiVersion;
+  /**
+   * Validation for this version of a route
+   * @experimental
+   */
+  validate: false | FullValidationConfig<P, Q, B>;
+}
+
+/**
+ * A versioned route
+ * @experimental
+ */
+export interface VersionedRoute<
+  Method extends RouteMethod = RouteMethod,
+  Ctx extends RqCtx = RqCtx
+> {
+  /**
+   * Add a new version of this route
+   * @param opts {@link AddVersionOpts | Options} for this version of a route
+   * @param handler The request handler for this version of a route
+   * @returns A versioned route, allows for fluent chaining of version declarations
+   * @experimental
+   */
+  addVersion<P = unknown, Q = unknown, B = unknown>(
+    options: AddVersionOpts<P, Q, B>,
+    handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => MaybePromise<IKibanaResponse>
+  ): VersionedRoute<Method, Ctx>;
+}

@@ -7,25 +7,32 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import type { ModelVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  VirtualVersionMap,
+  SavedObjectsMigrationConfigType,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
+import { VersionedTransformer } from '../../document_migrator';
 
 /**
  * The set of static, precomputed values and services used by the ZDT migration
  */
 export interface MigratorContext {
+  /** The migration configuration */
+  readonly migrationConfig: SavedObjectsMigrationConfigType;
   /** The current Kibana version */
   readonly kibanaVersion: string;
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
   /** Name of the types that are living in the index */
   readonly types: string[];
-  /** Model versions for the registered types */
-  readonly typeModelVersions: ModelVersionMap;
+  /** Virtual versions for the registered types */
+  readonly typeVirtualVersions: VirtualVersionMap;
   /** The client to use for communications with ES */
   readonly elasticsearchClient: ElasticsearchClient;
   /** The maximum number of retries to attempt for a failing action */
@@ -34,8 +41,14 @@ export interface MigratorContext {
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
   /** SO serializer to use for migration */
   readonly serializer: ISavedObjectsSerializer;
+  /** The doc migrator to use */
+  readonly documentMigrator: VersionedTransformer;
   /** The SO type registry to use for the migration */
   readonly typeRegistry: ISavedObjectTypeRegistry;
   /** List of types that are no longer registered */
   readonly deletedTypes: string[];
+  /** If true, corrupted objects will be discarded instead of failing the migration */
+  readonly discardCorruptObjects: boolean;
+  /** The node roles of the Kibana instance */
+  readonly nodeRoles: NodeRoles;
 }

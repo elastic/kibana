@@ -21,6 +21,8 @@ const baseAllowlistFields: AllowlistFields = {
   pe: true,
   uptime: true,
   Ext: {
+    ancestry: true,
+    api: true,
     architecture: true,
     code_signature: true,
     dll: true,
@@ -57,6 +59,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     malware_signature: true,
     pe: true,
     Ext: {
+      code_signature: true,
       device: true,
       load_index: true,
       relative_file_creation_time: true,
@@ -147,6 +150,8 @@ export const endpointAllowlistFields: AllowlistFields = {
     version: true,
   },
   host: {
+    architecture: true,
+    id: true,
     os: true,
   },
   package_version: true,

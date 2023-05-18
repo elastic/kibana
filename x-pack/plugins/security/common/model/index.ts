@@ -35,7 +35,12 @@ export { shouldProviderUseLoginForm } from './authentication_provider';
 export type { BuiltinESPrivileges } from './builtin_es_privileges';
 export type { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
 export type { FeaturesPrivileges } from './features_privileges';
-export type { Role, RoleIndexPrivilege, RoleKibanaPrivilege } from './role';
+export type {
+  Role,
+  RoleIndexPrivilege,
+  RoleRemoteIndexPrivilege,
+  RoleKibanaPrivilege,
+} from './role';
 export {
   copyRole,
   isRoleDeprecated,

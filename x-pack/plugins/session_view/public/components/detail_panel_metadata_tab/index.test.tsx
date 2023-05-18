@@ -136,7 +136,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
 
       // expand host os accordion
-      renderResult.queryByText('Host OS')?.click();
+      renderResult.queryByText('OS')?.click();
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
@@ -182,7 +182,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryAllByText('name').length).toBe(2);
 
       // expand host os accordion
-      renderResult.queryByText('Host OS')?.click();
+      renderResult.queryByText('OS')?.click();
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();

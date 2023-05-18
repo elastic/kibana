@@ -7,13 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
+import {
+  defaultColumnHeaderType,
+  tableDefaults,
+  dataTableSelectors,
+} from '@kbn/securitysolution-data-table';
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../common/store';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { defaultColumnHeaderType, tableDefaults } from '../../../common/store/data_table/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { dataTableSelectors } from '../../../common/store/data_table';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';

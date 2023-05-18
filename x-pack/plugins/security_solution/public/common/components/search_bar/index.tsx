@@ -295,7 +295,23 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, []);
 
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
-
+    const onTimeRangeChange = useCallback(
+      ({ query, dateRange }) => {
+        const isQuickSelection = dateRange.from.includes('now') || dateRange.to.includes('now');
+        updateSearch({
+          end: dateRange.to,
+          filterManager,
+          id,
+          isInvalid: false,
+          isQuickSelection,
+          query,
+          setTablesActivePageToZero,
+          start: dateRange.from,
+          updateTime: true,
+        });
+      },
+      [filterManager, id, setTablesActivePageToZero, updateSearch]
+    );
     return (
       <div data-test-subj={`${id}DatePicker`}>
         <SearchBar
@@ -307,6 +323,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           onQuerySubmit={onQuerySubmit}
           onRefresh={onRefresh}
           onSaved={onSaved}
+          onTimeRangeChange={onTimeRangeChange}
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
           showFilterBar={!hideFilterBar}

@@ -59,20 +59,21 @@ describe('Add endpoint exception from rule details', () => {
     deleteAlertsAndRules();
     // create rule with exception
     createEndpointExceptionList().then((response) => {
-      createRule({
-        ...getNewRule(),
-        query: 'event.code:*',
-        index: ['auditbeat*'],
-        exceptions_list: [
-          {
-            id: response.body.id,
-            list_id: response.body.list_id,
-            type: response.body.type,
-            namespace_type: response.body.namespace_type,
-          },
-        ],
-        rule_id: '2',
-      });
+      createRule(
+        getNewRule({
+          query: 'event.code:*',
+          index: ['auditbeat*'],
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: response.body.list_id,
+              type: response.body.type,
+              namespace_type: response.body.namespace_type,
+            },
+          ],
+          rule_id: '2',
+        })
+      );
     });
   });
 

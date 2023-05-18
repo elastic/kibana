@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v5 as uuidv5 } from 'uuid';
+import { omit } from 'lodash';
+import { safeLoad } from 'js-yaml';
+import deepEqual from 'fast-deep-equal';
 
+import { SavedObjectsUtils } from '@kbn/core/server';
 import type {
   KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import { v5 as uuidv5 } from 'uuid';
-import { omit } from 'lodash';
-import { safeLoad } from 'js-yaml';
 
 import type { NewOutput, Output, OutputSOAttributes, AgentPolicy } from '../types';
 import {
@@ -33,6 +35,7 @@ import {
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
+import { auditLoggingService } from './audit_logging';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -161,9 +164,10 @@ async function validateTypeChanges(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   id: string,
-  data: Partial<Output>,
+  data: Nullable<Partial<OutputSOAttributes>>,
   originalOutput: Output,
-  defaultDataOutputId: string | null
+  defaultDataOutputId: string | null,
+  fromPreconfiguration: boolean
 ) {
   const mergedIsDefault = data.is_default ?? originalOutput.is_default;
   const fleetServerPolicies = await findPoliciesWithFleetServer(soClient, id, mergedIsDefault);
@@ -176,18 +180,42 @@ async function validateTypeChanges(
     // Validate no policy with fleet server use that policy
     validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
   }
-  // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
-  if (data?.type === outputType.Logstash && mergedIsDefault) {
+  await updateFleetServerPoliciesDataOutputId(
+    soClient,
+    esClient,
+    data,
+    mergedIsDefault,
+    defaultDataOutputId,
+    fleetServerPolicies,
+    fromPreconfiguration
+  );
+}
+
+async function updateFleetServerPoliciesDataOutputId(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  data: Nullable<Partial<OutputSOAttributes>>,
+  isDefault: boolean,
+  defaultDataOutputId: string | null,
+  fleetServerPolicies: AgentPolicy[],
+  fromPreconfiguration: boolean
+) {
+  // if a logstash output is updated to become default
+  // if fleet server policies don't have data_output_id
+  // update them to use the default output
+  if (data?.type === outputType.Logstash && isDefault) {
     for (const policy of fleetServerPolicies) {
-      await agentPolicyService.update(
-        soClient,
-        esClient,
-        policy.id,
-        { data_output_id: defaultDataOutputId },
-        {
-          force: true,
-        }
-      );
+      if (!policy.data_output_id) {
+        await agentPolicyService.update(
+          soClient,
+          esClient,
+          policy.id,
+          {
+            data_output_id: defaultDataOutputId,
+          },
+          { force: fromPreconfiguration }
+        );
+      }
     }
   }
 }
@@ -198,19 +226,39 @@ class OutputService {
   }
 
   private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
-    return await this.encryptedSoClient.find<OutputSOAttributes>({
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
+
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return outputs;
   }
 
   private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
-    return await this.encryptedSoClient.find<OutputSOAttributes>({
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default_monitoring'],
       search: 'true',
     });
+
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return outputs;
   }
 
   public async ensureDefaultOutput(
@@ -280,6 +328,7 @@ class OutputService {
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...omit(output, 'ssl') };
+    const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
@@ -289,37 +338,24 @@ class OutputService {
         );
       }
     }
-
-    if (data.type === outputType.Logstash) {
-      const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
-      const fleetServerPolicies = await findPoliciesWithFleetServer(soClient);
-      // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
-      if (data.is_default) {
-        for (const policy of fleetServerPolicies) {
-          await agentPolicyService.update(
-            soClient,
-            esClient,
-            policy.id,
-            { data_output_id: defaultDataOutputId },
-            {
-              force: true,
-            }
-          );
-        }
-      } else {
-        // prevent changing an ES output to logstash if it's used by fleet server policies
-        validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
-      }
-    }
+    const fleetServerPolicies = await findPoliciesWithFleetServer(soClient);
+    await updateFleetServerPoliciesDataOutputId(
+      soClient,
+      esClient,
+      data,
+      data.is_default,
+      defaultDataOutputId,
+      fleetServerPolicies,
+      options?.fromPreconfiguration ?? false
+    );
 
     // ensure only default output exists
     if (data.is_default) {
-      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
-      if (defaultDataOuputId) {
+      if (defaultDataOutputId) {
         await this.update(
           soClient,
           esClient,
-          defaultDataOuputId,
+          defaultDataOutputId,
           { is_default: false },
           { fromPreconfiguration: options?.fromPreconfiguration ?? false }
         );
@@ -363,9 +399,17 @@ class OutputService {
       }
     }
 
+    const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'create',
+      id,
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
+
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
-      id: options?.id ? outputIdToUuid(options.id) : undefined,
+      id,
     });
 
     return outputSavedObjectToOutput(newSo);
@@ -403,6 +447,14 @@ class OutputService {
       sortOrder: 'desc',
     });
 
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
@@ -420,6 +472,14 @@ class OutputService {
       search: escapeSearchQueryPhrase(proxyId),
     });
 
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
@@ -433,6 +493,12 @@ class OutputService {
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id: outputSO.id,
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -470,6 +536,12 @@ class OutputService {
       id
     );
 
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id: outputIdToUuid(id),
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
+
     return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
@@ -483,18 +555,38 @@ class OutputService {
     }
   ) {
     const originalOutput = await this.get(soClient, id);
+    if (originalOutput.is_preconfigured) {
+      if (!fromPreconfiguration) {
+        const allowEditFields = originalOutput.allow_edit ?? [];
 
-    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
-      throw new OutputUnauthorizedError(
-        `Preconfigured output ${id} cannot be updated outside of kibana config file.`
-      );
+        const allKeys = Array.from(new Set([...Object.keys(data)])) as Array<keyof Output>;
+        for (const key of allKeys) {
+          if (
+            (!!originalOutput[key] || !!data[key]) &&
+            !allowEditFields.includes(key) &&
+            !deepEqual(originalOutput[key], data[key])
+          ) {
+            throw new OutputUnauthorizedError(
+              `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
+            );
+          }
+        }
+      }
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    await validateTypeChanges(soClient, esClient, id, data, originalOutput, defaultDataOutputId);
+    await validateTypeChanges(
+      soClient,
+      esClient,
+      id,
+      updateData,
+      originalOutput,
+      defaultDataOutputId,
+      fromPreconfiguration
+    );
 
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
@@ -557,6 +649,12 @@ class OutputService {
         updateData.shipper = null;
       }
     }
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: outputIdToUuid(id),
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
 
     const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,

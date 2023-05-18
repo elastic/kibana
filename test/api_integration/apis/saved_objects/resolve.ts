@@ -42,7 +42,9 @@ export default function ({ getService }: FtrProviderContext) {
                 created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_object.version,
                 migrationVersion: resp.body.saved_object.migrationVersion,
-                coreMigrationVersion: '7.14.0',
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_object.typeMigrationVersion,
+                managed: resp.body.saved_object.managed,
                 attributes: {
                   title: 'Count of requests',
                   description: '',
@@ -64,6 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
               outcome: 'exactMatch',
             });
             expect(resp.body.saved_object.migrationVersion).to.be.ok();
+            expect(resp.body.saved_object.typeMigrationVersion).to.be.ok();
+            expect(resp.body.saved_object.managed).to.not.be.ok();
           }));
 
       describe('doc does not exist', () => {

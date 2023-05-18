@@ -224,7 +224,7 @@ The API returns the following:
   "execution_status": {
     "last_execution_date": "2022-06-08T17:20:31.632Z",
     "status": "pending"
-  }
+  },
   "actions": [
     {
       "group": "threshold met",

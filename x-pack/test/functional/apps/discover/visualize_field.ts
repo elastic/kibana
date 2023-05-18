@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should visualize correctly text based language queries', async () => {
+    it('should visualize correctly text based language queries in Discover', async () => {
       await PageObjects.discover.selectTextBaseLang('SQL');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -138,8 +138,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+      expect(await testSubjects.exists('heatmapChart')).to.be(true);
 
-      await testSubjects.click('textBased-visualize');
+      await PageObjects.discover.chooseLensChart('Donut');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('partitionVisChart')).to.be(true);
+    });
+
+    it('should visualize correctly text based language queries in Lens', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedTextLangEditor-expand');
+      await testSubjects.click('unifiedHistogramEditVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -157,8 +173,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await testSubjects.click('textBased-visualize');
+      await testSubjects.click('unifiedTextLangEditor-expand');
+      await testSubjects.click('unifiedHistogramEditVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 

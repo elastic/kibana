@@ -52,7 +52,7 @@ describe('Export rules', () => {
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createRule({ ...getNewRule(), name: 'Rule to export' }).as('ruleResponse');
+    createRule(getNewRule({ name: 'Rule to export' })).as('ruleResponse');
   });
 
   it('exports a custom rule', function () {
@@ -65,7 +65,7 @@ describe('Export rules', () => {
 
   it('creates an importable file from executed rule', () => {
     // Rule needs to be enabled to make sure it has been executed so rule's SO contains runtime fields like `execution_summary`
-    createRule({ ...getNewRule(), name: 'Enabled rule to export', enabled: true });
+    createRule(getNewRule({ name: 'Enabled rule to export', enabled: true }));
     waitForRuleExecution('Enabled rule to export');
 
     exportRule('Enabled rule to export');
@@ -128,19 +128,20 @@ describe('Export rules', () => {
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) =>
-        createRule({
-          ...getNewRule(),
-          name: 'rule with exceptions',
-          exceptions_list: [
-            {
-              id: response.body.id,
-              list_id: exceptionList.list_id,
-              type: exceptionList.type,
-              namespace_type: exceptionList.namespace_type,
-            },
-          ],
-          rule_id: '2',
-        })
+        createRule(
+          getNewRule({
+            name: 'rule with exceptions',
+            exceptions_list: [
+              {
+                id: response.body.id,
+                list_id: exceptionList.list_id,
+                type: exceptionList.type,
+                namespace_type: exceptionList.namespace_type,
+              },
+            ],
+            rule_id: '2',
+          })
+        )
       );
     });
 

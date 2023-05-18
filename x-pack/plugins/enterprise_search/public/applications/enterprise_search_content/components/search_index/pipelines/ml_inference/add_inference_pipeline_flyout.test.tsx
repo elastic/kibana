@@ -319,7 +319,7 @@ describe('AddInferencePipelineFlyout', () => {
         <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
       );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
-      const cancelBtn = wrapper.find(EuiButtonEmpty).at(1);
+      const cancelBtn = wrapper.find(EuiButtonEmpty).at(0);
       expect(cancelBtn.prop('children')).toBe('Cancel');
       cancelBtn.prop('onClick')!({} as any);
       expect(onClose).toHaveBeenCalledTimes(1);
@@ -336,7 +336,7 @@ describe('AddInferencePipelineFlyout', () => {
         <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
       );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
-      const cancelBtn = wrapper.find(EuiButtonEmpty).at(1);
+      const cancelBtn = wrapper.find(EuiButtonEmpty).at(0);
       expect(cancelBtn.prop('children')).toBe('Cancel');
       cancelBtn.prop('onClick')!({} as any);
       expect(onClose).toHaveBeenCalledTimes(1);
@@ -353,7 +353,7 @@ describe('AddInferencePipelineFlyout', () => {
         <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
       );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
-      const cancelBtn = wrapper.find(EuiButtonEmpty).at(1);
+      const cancelBtn = wrapper.find(EuiButtonEmpty).at(0);
       expect(cancelBtn.prop('children')).toBe('Cancel');
       cancelBtn.prop('onClick')!({} as any);
       expect(onClose).toHaveBeenCalledTimes(1);
@@ -370,7 +370,7 @@ describe('AddInferencePipelineFlyout', () => {
         <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
       );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
-      const backBtn = wrapper.find(EuiButtonEmpty).at(0);
+      const backBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(backBtn.prop('children')).toBe('Back');
       backBtn.prop('onClick')!({} as any);
       expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
@@ -389,7 +389,7 @@ describe('AddInferencePipelineFlyout', () => {
         <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
       );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
-      const backBtn = wrapper.find(EuiButtonEmpty).at(0);
+      const backBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(backBtn.prop('children')).toBe('Back');
       backBtn.prop('onClick')!({} as any);
       expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
@@ -408,7 +408,7 @@ describe('AddInferencePipelineFlyout', () => {
         <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
       );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
-      const backBtn = wrapper.find(EuiButtonEmpty).at(0);
+      const backBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(backBtn.prop('children')).toBe('Back');
       backBtn.prop('onClick')!({} as any);
       expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(

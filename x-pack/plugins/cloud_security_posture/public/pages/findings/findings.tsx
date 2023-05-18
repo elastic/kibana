@@ -18,8 +18,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Redirect, Switch, useHistory, useLocation } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { NoFindingsStates } from '../../components/no_findings_states';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { Vulnerabilities } from '../vulnerabilities';
@@ -27,13 +25,6 @@ import { Vulnerabilities } from '../vulnerabilities';
 export const Findings = () => {
   const history = useHistory();
   const location = useLocation();
-  const getSetupStatus = useCspSetupStatusApi();
-
-  const hasFindings =
-    getSetupStatus.data?.indicesDetails[0].status === 'not-empty' ||
-    getSetupStatus.data?.kspm.status === 'indexed' ||
-    getSetupStatus.data?.cspm.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates posturetype={'cspm'} />;
 
   const navigateToVulnerabilitiesTab = () => {
     history.push({ pathname: findingsNavigation.vulnerabilities.path });
@@ -68,6 +59,13 @@ export const Findings = () => {
                   display: block;
                 `}
                 label="Beta"
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.csp.findings.betaLabel"
+                    defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features."
+                  />
+                }
+                tooltipPosition="bottom"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -78,8 +76,8 @@ export const Findings = () => {
           isSelected={location.pathname !== findingsNavigation.vulnerabilities.path}
         >
           <FormattedMessage
-            id="xpack.csp.findings.tabs.configurations"
-            defaultMessage="Configurations"
+            id="xpack.csp.findings.tabs.misconfigurations"
+            defaultMessage="Misconfigurations"
           />
         </EuiTab>
       </EuiTabs>

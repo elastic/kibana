@@ -262,12 +262,4 @@ describe('discover sidebar', function () {
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
   });
-
-  it('should render the Visualize in Lens button in text based languages mode', async () => {
-    const compInViewerMode = await mountComponent(getCompProps(), {
-      query: { sql: 'SELECT * FROM test' },
-    });
-    const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
-    expect(visualizeField.length).toBe(1);
-  });
 });

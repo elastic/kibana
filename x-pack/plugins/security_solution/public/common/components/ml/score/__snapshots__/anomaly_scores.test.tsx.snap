@@ -3,6 +3,7 @@
 exports[`anomaly_scores renders correctly against snapshot 1`] = `
 <Fragment>
   <EuiFlexGroup
+    data-test-subj="anomaly-scores"
     gutterSize="none"
     responsive={false}
   >
@@ -10,7 +11,6 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       endDate="3000-01-01T00:00:00.000Z"
       index={0}
       interval="day"
-      jobKey="job-1-16.193669439507826-process.name-du"
       jobName="job-1"
       key="job-1-16.193669439507826-process.name-du"
       narrowDateRange={[MockFunction]}
@@ -86,7 +86,6 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       endDate="3000-01-01T00:00:00.000Z"
       index={1}
       interval="day"
-      jobKey="job-2-16.193669439507826-process.name-ls"
       jobName="job-2"
       key="job-2-16.193669439507826-process.name-ls"
       narrowDateRange={[MockFunction]}

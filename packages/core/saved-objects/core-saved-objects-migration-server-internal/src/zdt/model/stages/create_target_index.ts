@@ -15,11 +15,10 @@ import { isTypeof } from '../../actions';
 import { getAliasActions } from '../../utils';
 import type { ModelStage } from '../types';
 
-export const createTargetIndex: ModelStage<'CREATE_TARGET_INDEX', 'UPDATE_ALIASES' | 'FATAL'> = (
-  state,
-  res,
-  context
-) => {
+export const createTargetIndex: ModelStage<
+  'CREATE_TARGET_INDEX',
+  'UPDATE_ALIASES' | 'INDEX_STATE_UPDATE_DONE' | 'FATAL'
+> = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
     if (isTypeof(left, 'index_not_green_timeout')) {
@@ -48,10 +47,11 @@ export const createTargetIndex: ModelStage<'CREATE_TARGET_INDEX', 'UPDATE_ALIASE
 
   return {
     ...state,
-    controlState: 'UPDATE_ALIASES',
+    controlState: aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
     previousMappings: state.indexMappings,
     currentIndexMeta,
     aliases: [],
     aliasActions,
+    skipDocumentMigration: true,
   };
 };

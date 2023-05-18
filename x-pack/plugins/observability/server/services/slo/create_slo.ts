@@ -27,7 +27,7 @@ export class CreateSLO {
     validateSLO(slo);
 
     await this.resourceInstaller.ensureCommonResourcesInstalled();
-    await this.repository.save(slo);
+    await this.repository.save(slo, { throwOnConflict: true });
 
     let sloTransformId;
     try {
@@ -55,9 +55,8 @@ export class CreateSLO {
     const now = new Date();
     return {
       ...params,
-      id: uuidv1(),
+      id: params.id ?? uuidv1(),
       settings: {
-        timestampField: params.settings?.timestampField ?? '@timestamp',
         syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },

@@ -17,7 +17,6 @@ describe('ExpandableFlyout', () => {
   const registeredPanels: Panel[] = [
     {
       key: 'key',
-      width: 500,
       component: () => <div>{'component'}</div>,
     },
   ];

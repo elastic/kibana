@@ -72,7 +72,6 @@ export function readFieldCapsResponse(
   fieldCapsResponse: estypes.FieldCapsResponse
 ): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
-
   const kibanaFormattedCaps = Object.keys(capsByNameThenType).reduce<{
     array: FieldDescriptor[];
     hash: Record<string, FieldDescriptor>;
@@ -90,17 +89,15 @@ export function readFieldCapsResponse(
         );
       });
 
-      const timeSeriesMetricProp = uniq(types.map((t) => capsByType[t].time_series_metric));
-      const isTimeSeriesCounter = !!timeSeriesMetricProp.find((item) => item === 'counter');
+      const isAggregatable = types.some((type) => {
+        return (
+          !!capsByType[type].aggregatable ||
+          (!!capsByType[type].non_aggregatable_indices &&
+            capsByType[type].non_aggregatable_indices!.length > 0)
+        );
+      });
 
-      const isAggregatable =
-        types.some((type) => {
-          return (
-            !!capsByType[type].aggregatable ||
-            (!!capsByType[type].non_aggregatable_indices &&
-              capsByType[type].non_aggregatable_indices!.length > 0)
-          );
-        }) && !isTimeSeriesCounter;
+      const timeSeriesMetricProp = uniq(types.map((t) => capsByType[t].time_series_metric));
 
       // If there are multiple types but they all resolve to the same kibana type
       // ignore the conflict and carry on (my wayward son)

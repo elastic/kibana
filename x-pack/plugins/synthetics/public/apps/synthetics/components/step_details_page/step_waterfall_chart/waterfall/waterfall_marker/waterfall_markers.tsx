@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { MarkerItems, useWaterfallContext } from '../context/waterfall_context';
@@ -23,7 +23,7 @@ export const LAYOUT_SHIFT = 'layoutShift';
 
 export function WaterfallChartMarkers() {
   const theme = useTheme();
-  const { markerItems } = useWaterfallContext();
+  const { markerItems, showCustomMarks } = useWaterfallContext();
 
   const markerItemsByOffset = useMemo(
     () =>
@@ -38,8 +38,10 @@ export function WaterfallChartMarkers() {
     let lastOffset: number;
     const recognizedMarkerItemsByOffset = Array.from(markerItemsByOffset.entries()).reduce(
       (acc, [offset, items]) => {
-        // Remove unrecognized marks e.g. custom marks
-        const vitalMarkers = items.filter(({ id }) => getMarkersInfo(id, theme) !== undefined);
+        // Remove unrecognized marks e.g. custom marks if `showCustomMarks` is false
+        const vitalMarkers = showCustomMarks
+          ? items
+          : items.filter(({ id }) => getMarkersInfo(id, theme) !== undefined);
 
         const hasMultipleMarksAtOffset = vitalMarkers.some(({ id }) => id !== LAYOUT_SHIFT);
         const isLastOffsetTooClose = lastOffset && Math.abs(offset - lastOffset) < 100; // 100ms
@@ -79,7 +81,7 @@ export function WaterfallChartMarkers() {
         dash: markersInfo?.dash,
       };
     });
-  }, [markerItemsByOffset, theme]);
+  }, [markerItemsByOffset, showCustomMarks, theme]);
 
   if (!markerItems) {
     return null;

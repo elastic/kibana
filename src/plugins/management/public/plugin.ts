@@ -71,11 +71,14 @@ export class ManagementPlugin
 
   private hasAnyEnabledApps = true;
 
+  private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home, share }: ManagementSetupDependencies) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
+    const managementPlugin = this;
 
     if (home) {
       home.featureCatalogue.register({
@@ -111,6 +114,7 @@ export class ManagementPlugin
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+          isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
         });
       },
     });
@@ -121,7 +125,7 @@ export class ManagementPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: ManagementStartDependencies) {
+  public start(core: CoreStart, _plugins: ManagementStartDependencies): ManagementStart {
     this.managementSections.start({ capabilities: core.application.capabilities });
     this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
@@ -136,6 +140,9 @@ export class ManagementPlugin
       });
     }
 
-    return {};
+    return {
+      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
+        this.isSidebarEnabled$.next(isSidebarEnabled),
+    };
   }
 }

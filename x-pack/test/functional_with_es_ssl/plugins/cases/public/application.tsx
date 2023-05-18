@@ -49,8 +49,8 @@ const attachments = [{ type: CommentType.user as const, comment: 'test' }];
 const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   const { cases } = props;
 
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout();
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal();
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   return (
     <EuiPageTemplate template="empty">
@@ -77,7 +77,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={() => selectCaseModal.open({ attachments })}
+                  onClick={() => selectCaseModal.open({ getAttachments: () => attachments })}
                   data-test-subj="case-fixture-attach-to-existing-case"
                 >
                   {'Attach to an existing case'}

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
+import { CsvGenerator } from '@kbn/generate-csv';
 import type { TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import { getFieldFormats } from '../../services';
 import type { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
-import { CsvGenerator } from '../csv_searchsource/generate_csv';
 
 type RunTaskFnType = RunTaskFn<TaskPayloadCsvFromSavedObject>;
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _logger) => {
   const config = reporting.getConfig();
-  const encryptionKey = config.get('encryptionKey');
-  const csvConfig = config.get('csv');
+  const { encryptionKey, csv: csvConfig } = config;
 
   return async function runTask(jobId, job, cancellationToken, stream) {
     const logger = _logger.get(`execute:${jobId}`);

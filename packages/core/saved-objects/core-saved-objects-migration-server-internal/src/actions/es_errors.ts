@@ -17,7 +17,8 @@ export const isWriteBlockException = (errorCause?: estypes.ErrorCause): boolean 
 export const isIncompatibleMappingException = (errorCause?: estypes.ErrorCause): boolean => {
   return (
     errorCause?.type === 'strict_dynamic_mapping_exception' ||
-    errorCause?.type === 'mapper_parsing_exception'
+    errorCause?.type === 'mapper_parsing_exception' ||
+    errorCause?.type === 'document_parsing_exception'
   );
 };
 

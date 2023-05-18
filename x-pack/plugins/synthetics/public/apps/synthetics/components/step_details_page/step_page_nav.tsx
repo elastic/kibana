@@ -11,7 +11,7 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiText,
   EuiPopover,
 } from '@elastic/eui';
@@ -57,23 +57,27 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
     checkGroupId: data?.details?.next?.checkGroup,
   });
 
-  if (testRunPage && data?.details?.previous?.checkGroup && data?.details?.next?.checkGroup) {
-    prevHref = getTestRunDetailLink({
-      basePath,
-      monitorId,
-      locationId: selectedLocation?.id,
-      checkGroup: data?.details?.previous?.checkGroup,
-    });
-    nextHref = getTestRunDetailLink({
-      basePath,
-      monitorId,
-      locationId: selectedLocation?.id,
-      checkGroup: data?.details?.next?.checkGroup,
-    });
+  if (testRunPage) {
+    if (data?.details?.previous?.checkGroup) {
+      prevHref = getTestRunDetailLink({
+        basePath,
+        monitorId,
+        locationId: selectedLocation?.id,
+        checkGroup: data?.details?.previous?.checkGroup,
+      });
+    }
+    if (data?.details?.next?.checkGroup) {
+      nextHref = getTestRunDetailLink({
+        basePath,
+        monitorId,
+        locationId: selectedLocation?.id,
+        checkGroup: data?.details?.next?.checkGroup,
+      });
+    }
   }
 
   if (!startedAt) {
-    startedAt = <EuiLoadingContent lines={1} />;
+    startedAt = <EuiSkeletonText lines={1} />;
   }
 
   return (

@@ -4,16 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+
 import type { SavedObject } from '@kbn/core/server';
 
+import type { CasesClient } from '../client';
+import type { CasesClientArgs } from '../types';
 import type {
   AlertResponse,
-  AllCommentsResponse,
+  Comments,
   AttributesTypeAlerts,
-  CommentResponse,
-  CommentsResponse,
+  Comment,
+  CommentsFindResponse,
 } from '../../../common/api';
-import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
+import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
+
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  FindCommentsArgsRt,
+  CommentType,
+  CommentsRt,
+  CommentRt,
+  CommentsFindResponseRt,
+  excess,
+  throwErrors,
+} from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -23,12 +42,9 @@ import {
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import type { CasesClientArgs } from '../types';
-import { combineFilters, stringToKueryNode } from '../utils';
+import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-import type { CasesClient } from '../client';
-import type { FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
+import { validateFindCommentsPagination } from './validators';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -98,59 +114,46 @@ export const getAllAlertsAttachToCase = async (
  * Retrieves the attachments for a case entity. This support pagination.
  */
 export async function find(
-  { caseID, queryParams }: FindArgs,
+  data: FindCommentsArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentsResponse> {
+): Promise<CommentsFindResponse> {
   const {
-    unsecuredSavedObjectsClient,
-    services: { caseService },
+    services: { attachmentService },
     logger,
     authorization,
   } = clientArgs;
+
+  const { caseID, queryParams } = pipe(
+    excess(FindCommentsArgsRt).decode(data),
+    fold(throwErrors(Boom.badRequest), identity)
+  );
+
+  validateFindCommentsPagination(queryParams);
 
   try {
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findComments);
 
-    const id = caseID;
-    const { filter, ...queryWithoutFilter } = queryParams ?? {};
+    const filter = combineFilters([
+      buildFilter({
+        filters: [CommentType.user],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      }),
+      authorizationFilter,
+    ]);
 
-    // if the fields property was defined, make sure we include the 'owner' field in the response
-    const fields = includeFieldsRequiredForAuthentication(queryWithoutFilter.fields);
-
-    // combine any passed in filter property and the filter for the appropriate owner
-    const combinedFilter = combineFilters([stringToKueryNode(filter), authorizationFilter]);
-
-    const args = queryParams
-      ? {
-          caseService,
-          unsecuredSavedObjectsClient,
-          id,
-          options: {
-            // We need this because the default behavior of getAllCaseComments is to return all the comments
-            // unless the page and/or perPage is specified. Since we're spreading the query after the request can
-            // still override this behavior.
-            page: DEFAULT_PAGE,
-            perPage: DEFAULT_PER_PAGE,
-            sortField: 'created_at',
-            filter: combinedFilter,
-            ...queryWithoutFilter,
-            fields,
-          },
-        }
-      : {
-          caseService,
-          unsecuredSavedObjectsClient,
-          id,
-          options: {
-            page: DEFAULT_PAGE,
-            perPage: DEFAULT_PER_PAGE,
-            sortField: 'created_at',
-            filter: combinedFilter,
-          },
-        };
-
-    const theComments = await caseService.getAllCaseComments(args);
+    const theComments = await attachmentService.find({
+      options: {
+        page: queryParams?.page ?? DEFAULT_PAGE,
+        perPage: queryParams?.perPage ?? DEFAULT_PER_PAGE,
+        ...(queryParams?.sortOrder && { sortOrder: queryParams?.sortOrder }),
+        sortField: 'created_at',
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseID },
+        filter,
+      },
+    });
 
     ensureSavedObjectsAreAuthorized(
       theComments.saved_objects.map((comment) => ({
@@ -159,7 +162,7 @@ export async function find(
       }))
     );
 
-    return CommentsResponseRt.encode(transformComments(theComments));
+    return CommentsFindResponseRt.encode(transformComments(theComments));
   } catch (error) {
     throw createCaseError({
       message: `Failed to find comments case id: ${caseID}: ${error}`,
@@ -175,7 +178,7 @@ export async function find(
 export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentResponse> {
+): Promise<Comment> {
   const {
     services: { attachmentService },
     logger,
@@ -192,7 +195,7 @@ export async function get(
       operation: Operations.getComment,
     });
 
-    return CommentResponseRt.encode(flattenCommentSavedObject(comment));
+    return CommentRt.encode(flattenCommentSavedObject(comment));
   } catch (error) {
     throw createCaseError({
       message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
@@ -208,7 +211,7 @@ export async function get(
 export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
-): Promise<AllCommentsResponse> {
+): Promise<Comments> {
   const {
     services: { caseService },
     logger,
@@ -232,7 +235,7 @@ export async function getAll(
       comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
     );
 
-    return AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects));
+    return CommentsRt.encode(flattenCommentSavedObjects(comments.saved_objects));
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

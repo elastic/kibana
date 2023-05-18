@@ -13,11 +13,10 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { stringHash } from '@kbn/ml-string-hash';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import { buildRandomSamplerAggregation } from './build_random_sampler_aggregation';
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { fetchAggIntervals } from './fetch_agg_intervals';
-import { getRandomSamplerAggregationsResponsePath } from './get_random_sampler_aggregations_response_path';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
 import type {
   AggCardinality,
@@ -141,6 +140,7 @@ export type FieldsForHistograms = Array<
  * @param samplerShardSize shard_size parameter of the sampler aggregation
  * @param runtimeMappings optional runtime mappings
  * @param randomSamplerProbability optional random sampler probability
+ * @param randomSamplerSeed optional random sampler seed
  * @returns an array of histogram data for each supplied field
  */
 export const fetchHistogramsForFields = async (
@@ -151,7 +151,8 @@ export const fetchHistogramsForFields = async (
   samplerShardSize: number,
   runtimeMappings?: estypes.MappingRuntimeFields,
   abortSignal?: AbortSignal,
-  randomSamplerProbability?: number
+  randomSamplerProbability?: number,
+  randomSamplerSeed?: number
 ) => {
   if (
     samplerShardSize >= 1 &&
@@ -170,7 +171,8 @@ export const fetchHistogramsForFields = async (
       samplerShardSize,
       runtimeMappings,
       abortSignal,
-      randomSamplerProbability
+      randomSamplerProbability,
+      randomSamplerSeed
     )),
     ...fields.filter(isNumericHistogramFieldWithColumnStats).reduce((p, field) => {
       const { interval, min, max, fieldName } = field;
@@ -213,6 +215,11 @@ export const fetchHistogramsForFields = async (
     return [];
   }
 
+  const { wrap, unwrap } = createRandomSamplerWrapper({
+    probability: randomSamplerProbability ?? 1,
+    seed: randomSamplerSeed,
+  });
+
   const body = await client.search(
     {
       index: indexPattern,
@@ -222,7 +229,7 @@ export const fetchHistogramsForFields = async (
         aggs:
           randomSamplerProbability === undefined
             ? buildSamplerAggregation(chartDataAggs, samplerShardSize)
-            : buildRandomSamplerAggregation(chartDataAggs, randomSamplerProbability),
+            : wrap(chartDataAggs),
         size: 0,
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
@@ -233,8 +240,13 @@ export const fetchHistogramsForFields = async (
   const aggsPath =
     randomSamplerProbability === undefined
       ? getSamplerAggregationsResponsePath(samplerShardSize)
-      : getRandomSamplerAggregationsResponsePath(randomSamplerProbability);
-  const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
+      : [];
+  const aggregations =
+    aggsPath.length > 0
+      ? get(body.aggregations, aggsPath)
+      : randomSamplerProbability !== undefined && body.aggregations !== undefined
+      ? unwrap(body.aggregations)
+      : body.aggregations;
 
   return fields.map((field) => {
     const id = stringHash(field.fieldName);

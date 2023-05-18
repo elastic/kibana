@@ -34,6 +34,7 @@ export async function runDockerGenerator(
     image: boolean;
     ironbank?: boolean;
     cloud?: boolean;
+    serverless?: boolean;
     dockerBuildDate?: string;
   }
 ) {
@@ -47,13 +48,14 @@ export async function runDockerGenerator(
   if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
+  if (flags.serverless) imageFlavor += '-serverless';
 
   // General docker var config
   const license = 'Elastic License';
   const configuredNamespace = config.getDockerNamespace();
   const imageNamespace = configuredNamespace
     ? configuredNamespace
-    : flags.cloud
+    : flags.cloud || flags.serverless
     ? 'kibana-ci'
     : 'kibana';
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
@@ -104,6 +106,7 @@ export async function runDockerGenerator(
     dockerBuildDate,
     baseImage: flags.baseImage,
     cloud: flags.cloud,
+    serverless: flags.serverless,
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
@@ -129,6 +132,14 @@ export async function runDockerGenerator(
   // into kibana-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
     await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
+  }
+
+  // Copy serverless-only configuration files
+  if (flags.serverless) {
+    await mkdirp(resolve(dockerBuildDir, 'config'));
+    await copyAll(config.resolveFromRepo('config'), resolve(dockerBuildDir, 'config'), {
+      select: ['serverless*.yml'],
+    });
   }
 
   // Copy all the needed resources into kibana-docker folder

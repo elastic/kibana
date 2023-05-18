@@ -24,21 +24,26 @@ import {
   getSelectorsAndResponsesFromYaml,
   getDefaultSelectorByType,
   getDefaultResponseByType,
+  getTotalsByType,
 } from '../../common/utils';
 import { SelectorType, Selector, Response, ViewDeps } from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
+import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
 
 interface AddSelectorButtonProps {
   type: 'Selector' | 'Response';
   onSelectType(type: SelectorType): void;
+  selectors: Selector[];
+  responses: Response[];
 }
 
 /**
  * dual purpose button for adding selectors and responses by type
  */
-const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
+const AddButton = ({ type, onSelectType, selectors, responses }: AddSelectorButtonProps) => {
+  const totalsByType = useMemo(() => getTotalsByType(selectors, responses), [responses, selectors]);
   const [isPopoverOpen, setPopover] = useState(false);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -65,6 +70,7 @@ const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
       key={`addFile${type}`}
       icon="document"
       onClick={addFile}
+      disabled={totalsByType.file >= MAX_SELECTORS_AND_RESPONSES_PER_TYPE}
       data-test-subj={`cloud-defend-btnAddFile${type}`}
     >
       {isSelector ? i18n.fileSelector : i18n.fileResponse}
@@ -73,6 +79,7 @@ const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
       key={`addProcess${type}`}
       icon="gear"
       onClick={addProcess}
+      disabled={totalsByType.process >= MAX_SELECTORS_AND_RESPONSES_PER_TYPE}
       data-test-subj={`cloud-defend-btnAddProcess${type}`}
     >
       {isSelector ? i18n.processSelector : i18n.processResponse}
@@ -251,8 +258,8 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         delete updatedSelector.hasErrors;
       }
 
-      const updatedSelectors: Selector[] = [...selectors];
-      let updatedResponses: Response[] = [...responses];
+      const updatedSelectors: Selector[] = JSON.parse(JSON.stringify(selectors));
+      let updatedResponses: Response[] = JSON.parse(JSON.stringify(responses));
 
       if (old.name !== updatedSelector.name) {
         // update all references to this selector in responses
@@ -275,7 +282,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         });
       }
 
-      updatedSelectors[index] = updatedSelector;
+      updatedSelectors[index] = JSON.parse(JSON.stringify(updatedSelector));
       onUpdateYaml(updatedSelectors, updatedResponses);
     },
     [onUpdateYaml, responses, selectors]
@@ -283,8 +290,12 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
 
   const onResponseChange = useCallback(
     (updatedResponse: Response, index: number) => {
-      const updatedResponses: Response[] = [...responses];
-      updatedResponses[index] = updatedResponse;
+      if (updatedResponse.hasErrors === false) {
+        delete updatedResponse.hasErrors;
+      }
+
+      const updatedResponses: Response[] = JSON.parse(JSON.stringify(responses));
+      updatedResponses[index] = JSON.parse(JSON.stringify(updatedResponse));
       onUpdateYaml(selectors, updatedResponses);
     },
     [onUpdateYaml, responses, selectors]
@@ -307,6 +318,11 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
       </EuiFlexItem>
 
       {selectors.map((selector, i) => {
+        const usedByResponse = !!responses.find(
+          (response) =>
+            response.match.includes(selector.name) || response?.exclude?.includes(selector.name)
+        );
+
         return (
           <EuiFlexItem key={i}>
             <ControlGeneralViewSelector
@@ -314,6 +330,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
               index={i}
               selector={selector}
               selectors={selectors}
+              usedByResponse={usedByResponse}
               onDuplicate={onDuplicateSelector}
               onRemove={onRemoveSelector}
               onChange={onSelectorChange}
@@ -322,7 +339,12 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         );
       })}
 
-      <AddButton type="Selector" onSelectType={onAddSelector} />
+      <AddButton
+        type="Selector"
+        onSelectType={onAddSelector}
+        selectors={selectors}
+        responses={responses}
+      />
 
       <EuiSpacer size="m" />
 
@@ -350,7 +372,12 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
           </EuiFlexItem>
         );
       })}
-      <AddButton type="Response" onSelectType={onAddResponse} />
+      <AddButton
+        type="Response"
+        onSelectType={onAddResponse}
+        selectors={selectors}
+        responses={responses}
+      />
       <EuiSpacer size="m" />
     </EuiFlexGroup>
   );

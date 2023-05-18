@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
@@ -52,6 +53,8 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       showNewVisModal,
     },
   } = pluginServices.getServices();
+
+  const { euiTheme } = useEuiTheme();
 
   const embeddableFactories = useMemo(
     () => Array.from(embeddable.getEmbeddableFactories()),
@@ -262,6 +265,8 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   };
   return (
     <ToolbarPopover
+      zIndex={Number(euiTheme.levels.header) - 1}
+      repositionOnScroll
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Select type',

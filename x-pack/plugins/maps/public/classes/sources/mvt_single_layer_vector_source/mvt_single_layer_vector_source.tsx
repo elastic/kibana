@@ -208,10 +208,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return [];
   }
 
-  async getTooltipProperties(
-    properties: GeoJsonProperties,
-    featureId?: string | number
-  ): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const tooltips = [];
     for (const key in properties) {
       if (properties.hasOwnProperty(key)) {
@@ -240,12 +237,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return {};
   }
 
-  showJoinEditor(): boolean {
+  supportsJoins(): boolean {
     return false;
-  }
-
-  getJoinsDisabledReason(): string | null {
-    return null;
   }
 
   getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {

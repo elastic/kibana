@@ -5,62 +5,97 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useLocation, useHistory } from 'react-router-dom';
 import {
-  EuiAvatar,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCheckbox,
   EuiFlexGroup,
-  EuiFormLabel,
-  EuiPanel,
-  EuiSelect,
+  EuiIconTip,
   EuiSpacer,
-  EuiTimeline,
-  EuiTimelineItem,
-  EuiTitle,
+  EuiSteps,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
-import { useSectionFormValidation } from '../helpers/use_section_form_validation';
-import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
-import { SloEditFormDescription } from './slo_edit_form_description';
-import { SloEditFormObjectives } from './slo_edit_form_objectives';
+import { useShowSections } from '../hooks/use_show_sections';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
+import { useSectionFormValidation } from '../hooks/use_section_form_validation';
+import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
+import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
+import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 import {
   transformValuesToCreateSLOInput,
   transformSloResponseToCreateSloInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config/paths';
-import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
-import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
-import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
+import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { sloFeatureId } from '../../../../common';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
 }
 
-const maxWidth = 775;
+export const maxWidth = 775;
+
+const CREATE_RULE_SEARCH_PARAM = 'create-rule';
 
 export function SloEditForm({ slo }: Props) {
   const {
+    notifications,
     application: { navigateToUrl },
     http: { basePath },
-    notifications: { toasts },
+    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
+  const history = useHistory();
+  const { search } = useLocation();
+
+  const { data: rules, isInitialLoading } = useFetchRulesForSlo({
+    sloIds: slo?.id ? [slo.id] : undefined,
+  });
+
+  const urlStateStorage = createKbnUrlStateStorage({
+    history,
+    useHash: false,
+    useHashQuery: false,
+  });
+
+  const urlParams = urlStateStorage.get<CreateSLOInput>('_a');
+
+  const searchParams = new URLSearchParams(search);
+
+  const isEditMode = slo !== undefined;
+
+  const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
+  const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
+
+  if (searchParams.has(CREATE_RULE_SEARCH_PARAM) && isEditMode && !isAddRuleFlyoutOpen) {
+    setIsAddRuleFlyoutOpen(true);
+  }
+
+  useEffect(() => {
+    if (isEditMode && rules && rules[slo.id].length) {
+      setIsCreateRuleCheckboxChecked(false);
+    }
+  }, [isEditMode, rules, slo]);
+
   const methods = useForm({
-    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
+    defaultValues: { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...urlParams },
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
-  const { control, watch, getFieldState, getValues, formState } = methods;
+  const { watch, getFieldState, getValues, formState, trigger } = methods;
 
-  const { isIndicatorSectionValid, isDescriptionSectionValid, isObjectiveSectionValid } =
+  const { isIndicatorSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
     useSectionFormValidation({
       getFieldState,
       getValues,
@@ -68,220 +103,212 @@ export function SloEditForm({ slo }: Props) {
       watch,
     });
 
+  const { showDescriptionSection, showObjectiveSection } = useShowSections(
+    isEditMode,
+    formState.isValidating,
+    isIndicatorSectionValid,
+    isObjectiveSectionValid
+  );
+
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
 
-  const isEditMode = slo !== undefined;
+  const handleCopyToJson = async () => {
+    const isValid = await trigger();
+    if (!isValid) {
+      return;
+    }
+    const values = transformValuesToCreateSLOInput(getValues());
+    try {
+      await copyTextToClipboard(JSON.stringify(values, null, 2));
+      notifications.toasts.add({
+        title: i18n.translate('xpack.observability.slo.sloEdit.copyJsonNotification', {
+          defaultMessage: 'JSON copied to clipboard',
+        }),
+      });
+    } catch (e) {
+      notifications.toasts.add({
+        title: i18n.translate('xpack.observability.slo.sloEdit.copyJsonFailedNotification', {
+          defaultMessage: 'Could not copy JSON to clipboard',
+        }),
+      });
+    }
+  };
+
+  const copyTextToClipboard = async (text: string) => {
+    if (!window.navigator?.clipboard) {
+      throw new Error('Could not copy to clipboard!');
+    }
+    await window.navigator.clipboard.writeText(text);
+  };
 
   const handleSubmit = async () => {
+    const isValid = await trigger();
+    if (!isValid) {
+      return;
+    }
+
     const values = getValues();
 
     if (isEditMode) {
-      try {
-        const processedValues = transformValuesToUpdateSLOInput(values);
+      const processedValues = transformValuesToUpdateSLOInput(values);
 
+      if (isCreateRuleCheckboxChecked) {
         await updateSlo({ sloId: slo.id, slo: processedValues });
-
-        toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.sloEdit.update.success', {
-            defaultMessage: 'Successfully updated {name}',
-            values: { name: getValues().name },
-          })
+        navigate(
+          basePath.prepend(
+            `${paths.observability.sloEdit(slo.id)}?${CREATE_RULE_SEARCH_PARAM}=true`
+          )
         );
-
-        navigateToUrl(basePath.prepend(paths.observability.slos));
-      } catch (error) {
-        toasts.addError(new Error(error), {
-          title: i18n.translate('xpack.observability.slo.sloEdit.creation.error', {
-            defaultMessage: 'Something went wrong',
-          }),
-        });
+      } else {
+        updateSlo({ sloId: slo.id, slo: processedValues });
+        navigate(basePath.prepend(paths.observability.slos));
       }
     } else {
-      try {
-        const processedValues = transformValuesToCreateSLOInput(values);
+      const processedValues = transformValuesToCreateSLOInput(values);
 
-        await createSlo({ slo: processedValues });
-
-        toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.sloEdit.creation.success', {
-            defaultMessage: 'Successfully created {name}',
-            values: { name: getValues().name },
-          })
+      if (isCreateRuleCheckboxChecked) {
+        const { id } = await createSlo({ slo: processedValues });
+        navigate(
+          basePath.prepend(`${paths.observability.sloEdit(id)}?${CREATE_RULE_SEARCH_PARAM}=true`)
         );
-        navigateToUrl(basePath.prepend(paths.observability.slos));
-      } catch (error) {
-        toasts.addError(new Error(error), {
-          title: i18n.translate('xpack.observability.slo.sloEdit.creation.error', {
-            defaultMessage: 'Something went wrong',
-          }),
-        });
+      } else {
+        createSlo({ slo: processedValues });
+        navigate(basePath.prepend(paths.observability.slos));
       }
     }
   };
 
-  const getIndicatorTypeForm = () => {
-    switch (watch('indicator.type')) {
-      case 'sli.kql.custom':
-        return <CustomKqlIndicatorTypeForm />;
-      case 'sli.apm.transactionDuration':
-        return <ApmLatencyIndicatorTypeForm />;
-      case 'sli.apm.transactionErrorRate':
-        return <ApmAvailabilityIndicatorTypeForm />;
-      default:
-        return null;
-    }
+  const navigate = useCallback(
+    (url: string) => setTimeout(() => navigateToUrl(url)),
+    [navigateToUrl]
+  );
+
+  const handleChangeCheckbox = () => {
+    setIsCreateRuleCheckboxChecked(!isCreateRuleCheckboxChecked);
+  };
+
+  const handleCloseRuleFlyout = async () => {
+    navigateToUrl(basePath.prepend(paths.observability.slos));
   };
 
   return (
-    <FormProvider {...methods}>
-      <EuiTimeline data-test-subj="sloForm">
-        <EuiTimelineItem
-          verticalAlign="top"
-          icon={
-            <EuiAvatar
-              color={
-                isIndicatorSectionValid
-                  ? euiThemeVars.euiColorSuccess
-                  : euiThemeVars.euiColorPrimary
-              }
-              iconType={isIndicatorSectionValid ? 'check' : ''}
-              name={isIndicatorSectionValid ? 'Check' : '1'}
-            />
-          }
-        >
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-            <EuiTitle>
-              <h2>
-                {i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
+    <>
+      <FormProvider {...methods}>
+        <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="sloForm">
+          <EuiSteps
+            steps={[
+              {
+                title: i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
                   defaultMessage: 'Define SLI',
-                })}
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="xl" />
-
-            <EuiFormLabel>
-              {i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
-                defaultMessage: 'SLI type',
-              })}
-            </EuiFormLabel>
-
-            <Controller
-              name="indicator.type"
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { ref, ...field } }) => (
-                <EuiSelect
-                  data-test-subj="sloFormIndicatorTypeSelect"
-                  {...field}
-                  options={SLI_OPTIONS}
-                />
-              )}
-            />
-
-            <EuiSpacer size="xxl" />
-
-            {getIndicatorTypeForm()}
-
-            <EuiSpacer size="m" />
-          </EuiPanel>
-        </EuiTimelineItem>
-
-        <EuiTimelineItem
-          icon={
-            <EuiAvatar
-              color={
-                isObjectiveSectionValid
-                  ? euiThemeVars.euiColorSuccess
-                  : euiThemeVars.euiColorPrimary
-              }
-              iconType={isObjectiveSectionValid ? 'check' : ''}
-              name={isObjectiveSectionValid ? 'Check' : '2'}
-            />
-          }
-          verticalAlign="top"
-        >
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-            <EuiTitle>
-              <h2>
-                {i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
+                }),
+                children: <SloEditFormIndicatorSection />,
+                status: isIndicatorSectionValid ? 'complete' : 'incomplete',
+              },
+              {
+                title: i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
                   defaultMessage: 'Set objectives',
-                })}
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="xl" />
-
-            <SloEditFormObjectives />
-
-            <EuiSpacer size="xl" />
-          </EuiPanel>
-        </EuiTimelineItem>
-
-        <EuiTimelineItem
-          verticalAlign="top"
-          icon={
-            <EuiAvatar
-              name={isDescriptionSectionValid ? 'Check' : '3'}
-              iconType={isDescriptionSectionValid ? 'check' : ''}
-              color={
-                isDescriptionSectionValid
-                  ? euiThemeVars.euiColorSuccess
-                  : euiThemeVars.euiColorPrimary
-              }
-            />
-          }
-        >
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-            <EuiTitle>
-              <h2>
-                {i18n.translate('xpack.observability.slo.sloEdit.description.title', {
+                }),
+                children: showObjectiveSection ? <SloEditFormObjectiveSection /> : null,
+                status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
+              },
+              {
+                title: i18n.translate('xpack.observability.slo.sloEdit.description.title', {
                   defaultMessage: 'Describe SLO',
-                })}
-              </h2>
-            </EuiTitle>
+                }),
+                children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,
+                status:
+                  showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
+              },
+            ]}
+          />
 
-            <EuiSpacer size="xl" />
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiCheckbox
+              id="createNewRuleCheckbox"
+              checked={isCreateRuleCheckboxChecked}
+              disabled={isInitialLoading}
+              data-test-subj="createNewRuleCheckbox"
+              label={
+                <>
+                  <span>
+                    {i18n.translate('xpack.observability.slo.sloEdit.createAlert.title', {
+                      defaultMessage: 'Create an',
+                    })}{' '}
+                    <strong>
+                      {i18n.translate('xpack.observability.slo.sloEdit.createAlert.ruleName', {
+                        defaultMessage: 'SLO burn rate alert rule',
+                      })}
+                    </strong>
+                  </span>{' '}
+                  <EuiIconTip
+                    content={
+                      'Selecting this will allow you to create a new alert rule for this SLO upon saving.'
+                    }
+                    position="top"
+                  />
+                </>
+              }
+              onChange={handleChangeCheckbox}
+            />
+          </EuiFlexGroup>
 
-            <SloEditFormDescription />
+          <EuiSpacer size="m" />
 
-            <EuiSpacer size="xl" />
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiButton
+              color="primary"
+              data-test-subj="sloFormSubmitButton"
+              fill
+              isLoading={isCreateSloLoading || isUpdateSloLoading}
+              onClick={handleSubmit}
+            >
+              {isEditMode
+                ? i18n.translate('xpack.observability.slo.sloEdit.editSloButton', {
+                    defaultMessage: 'Update SLO',
+                  })
+                : i18n.translate('xpack.observability.slo.sloEdit.createSloButton', {
+                    defaultMessage: 'Create SLO',
+                  })}
+            </EuiButton>
 
-            <EuiFlexGroup direction="row" gutterSize="s">
-              <EuiButton
-                color="primary"
-                data-test-subj="sloFormSubmitButton"
-                fill
-                disabled={!formState.isValid}
-                isLoading={isCreateSloLoading || isUpdateSloLoading}
-                onClick={handleSubmit}
-              >
-                {isEditMode
-                  ? i18n.translate('xpack.observability.slo.sloEdit.editSloButton', {
-                      defaultMessage: 'Update SLO',
-                    })
-                  : i18n.translate('xpack.observability.slo.sloEdit.createSloButton', {
-                      defaultMessage: 'Create SLO',
-                    })}
-              </EuiButton>
+            <EuiButton
+              color="ghost"
+              data-test-subj="sloFormCancelButton"
+              fill
+              disabled={isCreateSloLoading || isUpdateSloLoading}
+              onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
+            >
+              {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButton>
 
-              <EuiButton
-                color="ghost"
-                data-test-subj="sloFormCancelButton"
-                fill
-                onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
-              >
-                {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButton>
-            </EuiFlexGroup>
+            <EuiButtonEmpty
+              color="primary"
+              iconType="copyClipboard"
+              data-test-subj="sloFormCopyJsonButton"
+              disabled={isCreateSloLoading || isUpdateSloLoading}
+              onClick={handleCopyToJson}
+            >
+              {i18n.translate('xpack.observability.slo.sloEdit.copyJsonButton', {
+                defaultMessage: 'Copy JSON',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+      </FormProvider>
 
-            <EuiSpacer size="xl" />
-          </EuiPanel>
-        </EuiTimelineItem>
-      </EuiTimeline>
-    </FormProvider>
+      {isAddRuleFlyoutOpen && slo ? (
+        <AddRuleFlyout
+          canChangeTrigger={false}
+          consumer={sloFeatureId}
+          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
+          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          onClose={handleCloseRuleFlyout}
+          onSave={handleCloseRuleFlyout}
+        />
+      ) : null}
+    </>
   );
 }

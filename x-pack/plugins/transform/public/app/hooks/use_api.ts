@@ -7,12 +7,14 @@
 
 import { useMemo } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
+import {
+  ReauthorizeTransformsRequestSchema,
+  ReauthorizeTransformsResponseSchema,
+} from '../../../common/api_schemas/reauthorize_transforms';
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {
   DeleteTransformsRequestSchema,
@@ -34,6 +36,10 @@ import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
+import type {
+  ScheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsResponseSchema,
+} from '../../../common/api_schemas/schedule_now_transforms';
 import type {
   GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
@@ -162,6 +168,18 @@ export const useApi = () => {
           return e;
         }
       },
+      async reauthorizeTransforms(
+        reqBody: ReauthorizeTransformsRequestSchema
+      ): Promise<ReauthorizeTransformsResponseSchema | IHttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}reauthorize_transforms`, {
+            body: JSON.stringify(reqBody),
+          });
+        } catch (e) {
+          return e;
+        }
+      },
+
       async resetTransforms(
         reqBody: ResetTransformsRequestSchema
       ): Promise<ResetTransformsResponseSchema | IHttpFetchError> {
@@ -195,6 +213,17 @@ export const useApi = () => {
           return e;
         }
       },
+      async scheduleNowTransforms(
+        transformsInfo: ScheduleNowTransformsRequestSchema
+      ): Promise<ScheduleNowTransformsResponseSchema | IHttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}schedule_now_transforms`, {
+            body: JSON.stringify(transformsInfo),
+          });
+        } catch (e) {
+          return e;
+        }
+      },
       async getTransformAuditMessages(
         transformId: TransformId,
         sortField: string,
@@ -209,13 +238,6 @@ export const useApi = () => {
               sortDirection,
             },
           });
-        } catch (e) {
-          return e;
-        }
-      },
-      async esSearch(payload: any): Promise<estypes.SearchResponse | IHttpFetchError> {
-        try {
-          return await http.post(`${API_BASE_PATH}es_search`, { body: JSON.stringify(payload) });
         } catch (e) {
           return e;
         }

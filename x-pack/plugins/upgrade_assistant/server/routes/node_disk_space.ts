@@ -88,9 +88,10 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
               const rawLowDiskWatermarkPercentageValue = Number(
                 lowDiskWatermarkSetting!.replace('%', '')
               );
+              // ES interprets this setting as a threshold for used disk space; we want free disk space
+              const freeDiskSpaceAllocated = 100 - rawLowDiskWatermarkPercentageValue;
 
-              // If the percentage available is < the low disk watermark setting, mark node as having low disk space
-              if (percentageAvailable < rawLowDiskWatermarkPercentageValue) {
+              if (percentageAvailable < freeDiskSpaceAllocated) {
                 nodesWithLowDiskSpace.push({
                   nodeId,
                   nodeName: node.name || nodeId,

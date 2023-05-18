@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React, { useState } from 'react';
@@ -21,24 +21,6 @@ import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 import { RedirectTo } from '../redirect_to';
 import { FlameGraphSearchPanel } from './flame_graph_search_panel';
 import { FlameGraphNormalizationOptions } from './normalization_menu';
-
-export function FlameGraphInformationWindowSwitch({
-  showInformationWindow,
-  onChange,
-}: {
-  showInformationWindow: boolean;
-  onChange: () => void;
-}) {
-  return (
-    <EuiSwitch
-      checked={showInformationWindow}
-      onChange={onChange}
-      label={i18n.translate('xpack.profiling.flameGraph.showInformationWindow', {
-        defaultMessage: 'Show information window',
-      })}
-    />
-  );
-}
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const {
@@ -67,8 +49,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   const baselineScale: number = get(query, 'baseline', 1);
   const comparisonScale: number = get(query, 'comparison', 1);
 
-  const totalSeconds =
-    (new Date(timeRange.end).getTime() - new Date(timeRange.start).getTime()) / 1000;
+  const totalSeconds = timeRange.inSeconds.end - timeRange.inSeconds.start;
   const totalComparisonSeconds =
     (new Date(comparisonTimeRange.end!).getTime() -
       new Date(comparisonTimeRange.start!).getTime()) /
@@ -93,15 +74,15 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       return Promise.all([
         fetchElasticFlamechart({
           http,
-          timeFrom: new Date(timeRange.start).getTime() / 1000,
-          timeTo: new Date(timeRange.end).getTime() / 1000,
+          timeFrom: timeRange.inSeconds.start,
+          timeTo: timeRange.inSeconds.end,
           kuery,
         }),
-        comparisonTimeRange.start && comparisonTimeRange.end
+        comparisonTimeRange.inSeconds.start && comparisonTimeRange.inSeconds.end
           ? fetchElasticFlamechart({
               http,
-              timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
-              timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
+              timeFrom: comparisonTimeRange.inSeconds.start,
+              timeTo: comparisonTimeRange.inSeconds.end,
               kuery: comparisonKuery,
             })
           : Promise.resolve(undefined),
@@ -113,11 +94,11 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       });
     },
     [
-      timeRange.start,
-      timeRange.end,
+      timeRange.inSeconds.start,
+      timeRange.inSeconds.end,
       kuery,
-      comparisonTimeRange.start,
-      comparisonTimeRange.end,
+      comparisonTimeRange.inSeconds.start,
+      comparisonTimeRange.inSeconds.end,
       comparisonKuery,
       fetchElasticFlamechart,
     ]
@@ -174,8 +155,6 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
             comparisonMode={comparisonMode}
             normalizationMode={normalizationMode}
             normalizationOptions={normalizationOptions}
-            showInformationWindow={showInformationWindow}
-            onChangeShowInformationWindow={toggleShowInformationWindow}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -196,9 +175,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
                   : comparisonScale
               }
               showInformationWindow={showInformationWindow}
-              onInformationWindowClose={() => {
-                setShowInformationWindow(false);
-              }}
+              toggleShowInformationWindow={toggleShowInformationWindow}
             />
           </AsyncComponent>
           {children}

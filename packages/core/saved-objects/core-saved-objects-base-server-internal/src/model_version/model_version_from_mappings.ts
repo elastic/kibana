@@ -7,45 +7,60 @@
  */
 
 import type { IndexMapping, IndexMappingMeta } from '../mappings';
-import type { ModelVersionMap } from './version_map';
-import { assertValidModelVersion } from './conversion';
+import type { VirtualVersionMap } from './version_map';
+import { assertValidVirtualVersion } from './conversion';
+
+export interface GetModelVersionsFromMappingsOpts {
+  mappings: IndexMapping;
+  source: 'mappingVersions' | 'docVersions';
+  /** if specified, will filter the types with the provided list */
+  knownTypes?: string[];
+}
 
 /**
  * Build the version map from the specified source of the provided mappings.
  */
-export const getModelVersionsFromMappings = ({
+export const getVirtualVersionsFromMappings = ({
   mappings,
   source,
-}: {
-  mappings: IndexMapping;
-  source: 'mappingVersions' | 'docVersions';
-}): ModelVersionMap | undefined => {
+  knownTypes,
+}: GetModelVersionsFromMappingsOpts): VirtualVersionMap | undefined => {
   if (!mappings._meta) {
     return undefined;
   }
 
-  return getModelVersionsFromMappingMeta({
+  return getVirtualVersionsFromMappingMeta({
     meta: mappings._meta,
     source,
+    knownTypes,
   });
 };
+
+export interface GetModelVersionsFromMappingMetaOpts {
+  meta: IndexMappingMeta;
+  source: 'mappingVersions' | 'docVersions';
+  /** if specified, will filter the types with the provided list */
+  knownTypes?: string[];
+}
 
 /**
  * Build the version map from the specified source of the provided mappings meta.
  */
-export const getModelVersionsFromMappingMeta = ({
+export const getVirtualVersionsFromMappingMeta = ({
   meta,
   source,
-}: {
-  meta: IndexMappingMeta;
-  source: 'mappingVersions' | 'docVersions';
-}): ModelVersionMap | undefined => {
+  knownTypes,
+}: GetModelVersionsFromMappingMetaOpts): VirtualVersionMap | undefined => {
   const indexVersions = source === 'mappingVersions' ? meta.mappingVersions : meta.docVersions;
   if (!indexVersions) {
     return undefined;
   }
-  return Object.entries(indexVersions).reduce<ModelVersionMap>((map, [type, rawVersion]) => {
-    map[type] = assertValidModelVersion(rawVersion);
+  const typeSet = knownTypes ? new Set(knownTypes) : undefined;
+
+  return Object.entries(indexVersions).reduce<VirtualVersionMap>((map, [type, rawVersion]) => {
+    if (!typeSet || typeSet.has(type)) {
+      map[type] = assertValidVirtualVersion(rawVersion);
+    }
     return map;
   }, {});
 };

@@ -42,6 +42,7 @@ export type {
   RuleDefinitionProps,
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
+  NotifyWhenSelectOptions,
 } from './types';
 
 export type {
@@ -68,6 +69,8 @@ export {
 } from './application/sections/action_connector_form';
 
 export type { ConnectorFormSchema } from './application/sections/action_connector_form';
+
+export { getCategory } from './application/sections/field_browser/helpers';
 
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 
@@ -100,7 +103,7 @@ export function plugin(context: PluginInitializerContext) {
 }
 
 export { useKibana } from './common';
-export type { AggregationType, Comparator } from './common';
+export type { AggregationType, Comparator, ValidNormalizedTypes } from './common';
 
 export {
   WhenExpression,
@@ -145,3 +148,5 @@ export const getNotifyWhenOptions = async () => {
   const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');
   return NOTIFY_WHEN_OPTIONS;
 };
+
+export { transformRule } from './application/lib/rule_api/common_transformations';

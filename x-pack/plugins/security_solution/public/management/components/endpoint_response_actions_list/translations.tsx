@@ -93,6 +93,9 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
   status: i18n.translate('xpack.securitySolution.responseActionsList.list.status', {
     defaultMessage: 'Status',
   }),
+  rule: i18n.translate('xpack.securitySolution.responseActionsList.list.rule', {
+    defaultMessage: 'Rule',
+  }),
 });
 
 export const UX_MESSAGES = Object.freeze({
@@ -164,6 +167,12 @@ export const UX_MESSAGES = Object.freeze({
         records: totalItemCount,
       },
     }),
+  triggeredByRule: i18n.translate(
+    'xpack.securitySolution.responseActionsList.list.rule.triggeredByRule',
+    {
+      defaultMessage: 'Triggered by rule',
+    }
+  ),
 });
 
 export const FILTER_NAMES = Object.freeze({
@@ -179,6 +188,9 @@ export const FILTER_NAMES = Object.freeze({
   users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
     defaultMessage: 'Filter by username',
   }),
+  automated: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.automated', {
+    defaultMessage: 'Automated',
+  }),
 });
 
 export const ARIA_LABELS = Object.freeze({
@@ -192,3 +204,8 @@ export const ARIA_LABELS = Object.freeze({
     defaultMessage: 'Expand',
   }),
 });
+
+export const EXECUTE_FILE_LINK_TITLE = i18n.translate(
+  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
+  { defaultMessage: 'Click here to download full output' }
+);

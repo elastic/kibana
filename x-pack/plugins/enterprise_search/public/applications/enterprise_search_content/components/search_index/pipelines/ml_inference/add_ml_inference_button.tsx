@@ -31,7 +31,7 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
       <EuiToolTip
         content={i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButton.mlPermissions.disabledTooltip',
-          { defaultMessage: 'You do not have permission to Machine Learning on this cluster.' }
+          { defaultMessage: 'You do not have permission to use Machine Learning on this cluster.' }
         )}
       >
         <AddButton ingestionMethod={ingestionMethod} disabled />
@@ -77,10 +77,11 @@ const AddButton: React.FC<{
   onClick?: () => void;
 }> = ({ disabled, ingestionMethod, onClick }) => (
   <EuiButton
+    fullWidth
     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
-    color="success"
+    color={disabled ? undefined : 'success'}
     disabled={disabled}
-    iconType="plusInCircle"
+    iconType={disabled ? 'lock' : 'plusInCircle'}
     onClick={onClick}
   >
     {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {

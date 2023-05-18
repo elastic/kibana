@@ -5,75 +5,89 @@
  * 2.0.
  */
 
-import { FieldCapsResponse, FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import {
-  EnterpriseSearchEngineDetails,
+  EnterpriseSearchEngine,
   EnterpriseSearchEngineFieldCapabilities,
   SchemaField,
 } from '../../../common/types/engines';
 
+import { availableIndices } from './available_indices';
+
 export const fetchEngineFieldCapabilities = async (
   client: IScopedClusterClient,
-  engine: EnterpriseSearchEngineDetails
+  engine: EnterpriseSearchEngine
 ): Promise<EnterpriseSearchEngineFieldCapabilities> => {
-  const { created, name, updated } = engine;
+  const { name, updated_at_millis, indices } = engine;
   const fieldCapabilities = await client.asCurrentUser.fieldCaps({
     fields: '*',
+    filters: '-metadata',
     include_unmapped: true,
-    index: getEngineIndexAliasName(name),
+    index: await availableIndices(client, indices),
   });
   const fields = parseFieldsCapabilities(fieldCapabilities);
   return {
-    created,
-    field_capabilities: fieldCapabilities,
     fields,
     name,
-    updated,
+    updated_at_millis,
   };
 };
 
-const ensureIndices = (indices: string | string[] | undefined): string[] => {
+const ensureIndices = (indices: string[] | string | undefined): string[] => {
   if (!indices) return [];
   return Array.isArray(indices) ? indices : [indices];
 };
 
-export const parseFieldsCapabilities = (
-  fieldCapsResponse: FieldCapsResponse,
-  prefix: string = ''
-): SchemaField[] => {
+export const parseFieldsCapabilities = (fieldCapsResponse: FieldCapsResponse): SchemaField[] => {
   const { fields, indices: indexOrIndices } = fieldCapsResponse;
-  const inThisPass: Array<[string, Record<string, FieldCapsFieldCapability>]> = Object.entries(
-    fields
-  )
-    .filter(([key]) => key.startsWith(prefix))
-    .map(([key, value]) => [key.replace(prefix, ''), value]);
+  const indices = ensureIndices(indexOrIndices);
 
-  const atThisLevel = inThisPass.filter(([key]) => !key.includes('.'));
+  return Object.entries(fields)
+    .map(([fieldName, typesObject]) => {
+      const typeValues = Object.values(typesObject);
+      const type = calculateType(Object.keys(typesObject));
 
-  return atThisLevel.map(([name, value]) => {
-    const type = calculateType(Object.keys(value));
-    let indices = Object.values(value).flatMap((fieldCaps) => {
-      return ensureIndices(fieldCaps.indices).map((index) => ({
-        name: index,
-        type: fieldCaps.type,
-      }));
-    });
+      const indicesToType = typeValues.reduce(
+        (acc: Record<string, string>, { type: indexType, indices: typeIndexOrIndices }) => {
+          const typeIndices = ensureIndices(typeIndexOrIndices);
+          typeIndices.forEach((index) => {
+            acc[index] = indexType;
+          });
+          return acc;
+        },
+        {}
+      );
 
-    indices =
-      indices.length === 0
-        ? ensureIndices(indexOrIndices).map((index) => ({ name: index, type }))
-        : indices;
+      const fieldIndices =
+        Object.keys(indicesToType).length > 0
+          ? indices.map((index) => {
+              const indexType = indicesToType[index] || 'unmapped';
+              return {
+                name: index,
+                type: indexType,
+              };
+            })
+          : indices.map((index) => ({
+              name: index,
+              type,
+            }));
 
-    const subFields = parseFieldsCapabilities(fieldCapsResponse, `${prefix}${name}.`);
-    return {
-      fields: subFields,
-      indices,
-      name,
-      type,
-    };
-  });
+      const searchable = Object.values(typesObject).some((t) => t.searchable);
+      const aggregatable = Object.values(typesObject).some((t) => t.aggregatable);
+      const metadataField = Object.values(typesObject).every((t) => t.metadata_field);
+
+      return {
+        aggregatable,
+        indices: fieldIndices,
+        name: fieldName,
+        searchable,
+        type,
+        ...(metadataField === undefined ? {} : { metadata_field: metadataField }),
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name)) as SchemaField[];
 };
 
 const calculateType = (types: string[]): string => {
@@ -88,6 +102,3 @@ const calculateType = (types: string[]): string => {
   // Otherwise there is a conflict
   return 'conflict';
 };
-
-// Note: This will likely need to be modified when engines move to es module
-const getEngineIndexAliasName = (engineName: string): string => `search-engine-${engineName}`;

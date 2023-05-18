@@ -329,21 +329,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "maxWidth": "fill",
               },
               "grid": Object {
-                "cellHeight": Object {
-                  "max": 30,
-                  "min": 12,
-                },
-                "cellWidth": Object {
-                  "max": 30,
-                  "min": 0,
-                },
                 "stroke": Object {
                   "color": "gray",
                   "width": 1,
                 },
               },
-              "maxColumnWidth": 30,
-              "maxRowHeight": 30,
               "xAxisLabel": Object {
                 "fontFamily": "Sans-Serif",
                 "fontSize": 12,
