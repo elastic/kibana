@@ -129,7 +129,11 @@ export const ProjectHeader = ({
       </EuiHeader>
       {headerActionMenuMounter.mount && (
         <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
-          <EuiHeaderSection>
+          {/* TODO: This puts a group of nav menu items on the right edge of the screen,
+              but it should be possible for apps customize the layout in a grid and use spacers between items.
+              https://github.com/elastic/kibana/issues/158034 */}
+          <EuiHeaderSection />
+          <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
               <HeaderActionMenu mounter={headerActionMenuMounter} />
             </EuiHeaderSectionItem>
