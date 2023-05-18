@@ -25,7 +25,6 @@ import {
 import { isPackageLimited } from '../../../../common/services';
 import type {
   PackageUsageStats,
-  PackagePolicySOAttributes,
   Installable,
   PackageDataStreamTypes,
 } from '../../../../common/types';
@@ -36,7 +35,7 @@ import type {
   EpmPackageAdditions,
   GetCategoriesRequest,
 } from '../../../../common/types';
-import type { Installation, PackageInfo } from '../../../types';
+import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
   FleetError,
   PackageFailedVerificationError,

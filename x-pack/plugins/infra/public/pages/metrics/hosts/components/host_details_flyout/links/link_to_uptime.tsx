@@ -14,12 +14,12 @@ import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
 import type { HostNodeRow } from '../../../hooks/use_hosts_table';
 
-interface LinkTUptimeProps {
+export interface LinkToUptimeProps {
   nodeType: InventoryItemType;
   node: HostNodeRow;
 }
 
-export const LinkToUptime = ({ nodeType, node }: LinkTUptimeProps) => {
+export const LinkToUptime = ({ nodeType, node }: LinkToUptimeProps) => {
   const { share } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
 

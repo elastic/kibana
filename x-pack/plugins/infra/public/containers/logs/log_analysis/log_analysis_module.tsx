@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
