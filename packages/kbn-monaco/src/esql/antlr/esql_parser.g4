@@ -49,6 +49,7 @@ whereBooleanExpression
     | regexBooleanExpression
     | left=booleanExpression operator=AND right=booleanExpression
     | left=booleanExpression operator=OR right=booleanExpression
+    | valueExpression (NOT)? IN LP valueExpression (COMMA valueExpression)* RP
     | WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
     ;
 

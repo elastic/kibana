@@ -56,6 +56,7 @@ describe('autocomplete_listener', () => {
       '>=',
       'like',
       'rlike',
+      'in',
     ]);
     testSuggestions('from a | stats a=avg("field") | where a ', [
       '==',
@@ -66,6 +67,7 @@ describe('autocomplete_listener', () => {
       '>=',
       'like',
       'rlike',
+      'in',
     ]);
     testSuggestions('from a | stats a=avg("b") | where "c" ', [
       '==',
@@ -76,6 +78,7 @@ describe('autocomplete_listener', () => {
       '>=',
       'like',
       'rlike',
+      'in',
     ]);
     testSuggestions('from a | where "field" >= "field1" and  "field2 == ', ['FieldIdentifier']);
   });
