@@ -66,8 +66,8 @@ import { TextBlock } from '../../../../rule_monitoring/components/basic/text/tex
 import * as i18n from './translations';
 import {
   EXECUTION_LOG_COLUMNS,
-  GET_MESSAGE_COLUMN,
-  GET_EXECUTION_LOG_METRICS_COLUMNS,
+  getMessageColumn,
+  getExecutionLogMetricsColumns,
   expanderColumn,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
@@ -422,9 +422,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     const columns = [...EXECUTION_LOG_COLUMNS];
 
     if (showMetricColumns) {
-      columns.push(GET_MESSAGE_COLUMN('20%'), ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks));
+      columns.push(getMessageColumn('20%'), ...getExecutionLogMetricsColumns(docLinks));
     } else {
-      columns.push(GET_MESSAGE_COLUMN('50%'));
+      columns.push(getMessageColumn('50%'));
     }
 
     columns.push(

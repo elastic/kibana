@@ -109,7 +109,7 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResul
   },
 ];
 
-export const GET_MESSAGE_COLUMN = (width: string) => ({
+export const getMessageColumn = (width: string) => ({
   field: 'security_message',
   name: (
     <TableHeaderTooltipCell
@@ -139,7 +139,7 @@ export const GET_MESSAGE_COLUMN = (width: string) => ({
   width,
 });
 
-export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
+export const getExecutionLogMetricsColumns = (
   docLinks: DocLinksStart
 ): Array<EuiBasicTableColumn<RuleExecutionResult>> => [
   {
