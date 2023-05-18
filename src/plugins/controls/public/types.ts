@@ -43,7 +43,6 @@ export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
   TControlEmbeddableOutput extends ControlOutput = ControlOutput
 > = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
-  error$: Observable<string | undefined>;
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
 };

@@ -28,45 +28,7 @@ import {
 } from '../embeddable/control_group_container';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { distinctUntilChanged } from 'rxjs';
-import { isEqual } from 'lodash';
-import { ControlInput, ControlOutput } from '../../types';
-
-interface ControlFrameErrorProps {
-  error: string;
-}
-
-const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
-  console.log('render frame error');
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const popoverButton = (
-    <EuiButtonEmpty
-      color="danger"
-      iconSize="m"
-      iconType="error"
-      onClick={() => setPopoverOpen((open) => !open)}
-      className={'errorEmbeddableCompact__button'}
-      textProps={{ className: 'errorEmbeddableCompact__text' }}
-    >
-      <FormattedMessage
-        id="controls.frame.error.message"
-        defaultMessage="An error occurred. View more"
-      />
-    </EuiButtonEmpty>
-  );
-
-  return (
-    <EuiPopover
-      button={popoverButton}
-      isOpen={isPopoverOpen}
-      className="errorEmbeddableCompact__popover"
-      anchorClassName="errorEmbeddableCompact__popoverAnchor"
-      closePopover={() => setPopoverOpen(false)}
-    >
-      <Markdown markdown={error} openLinksInNewTab={true} data-test-subj="errorMessageMarkdown" />
-    </EuiPopover>
-  );
-};
+import { ControlError } from './control_error_component';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -82,9 +44,10 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [fatalError, setFatalError] = useState<string | undefined>();
+  const [fatalError, setFatalError] = useState<Error>();
 
   const controlGroup = useControlGroupContainer();
+
   const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
   const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
   const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
@@ -101,33 +64,19 @@ export const ControlFrame = ({
 
   useEffect(() => {
     if (embeddableRoot.current) {
-      console.log('render', fatalError);
-      if (!fatalError) embeddable?.render(embeddableRoot.current);
+      embeddable?.render(embeddableRoot.current);
     }
     const inputSubscription = embeddable
       ?.getInput$()
-      .pipe(distinctUntilChanged((a: ControlInput, b: ControlInput) => isEqual(a.title, b.title)))
-      .subscribe((newInput: ControlInput) => {
-        console.log(newInput.title);
-        setTitle(newInput.title);
-      });
-    const test = embeddable?.error$?.subscribe((message) => {
-      console.log('error$', message);
-      setFatalError(message);
+      .subscribe((newInput) => setTitle(newInput.title));
+    const errorSubscription = embeddable?.getOutput$().subscribe({
+      error: setFatalError,
     });
-
-    // const errorSubscription = embeddable
-    //   ?.getOutput$()
-    //   .pipe(distinctUntilChanged((a: ControlOutput, b: ControlOutput) => isEqual(a.error, b.error)))
-    //   .subscribe({
-    //     error: setFatalError,
-    //   });
     return () => {
-      test?.unsubscribe();
       inputSubscription?.unsubscribe();
-      // errorSubscription?.unsubscribe();
+      errorSubscription?.unsubscribe();
     };
-  }, [embeddable, embeddableRoot, fatalError]);
+  }, [embeddable, embeddableRoot]);
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
@@ -167,11 +116,13 @@ export const ControlFrame = ({
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
-        />
+        >
+          {fatalError && <ControlError error={fatalError} />}
+        </div>
       )}
       {fatalError && (
         <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
-          {<ControlFrameError error={fatalError} />}
+          {<ControlError error={fatalError} />}
         </div>
       )}
       {!embeddable && (

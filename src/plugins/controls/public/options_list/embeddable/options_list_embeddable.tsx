@@ -94,8 +94,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private dataView?: DataView;
   private field?: FieldSpec;
 
-  public error$ = new Subject<string | undefined>();
-
   // state management
   public select: OptionsListReduxEmbeddableTools['select'];
   public getState: OptionsListReduxEmbeddableTools['getState'];
@@ -249,8 +247,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             })
           );
       } catch (e) {
-        // this.dispatch.setRecoverableError(e.message);
-        this.error$.next(e.message);
+        this.dispatch.setRecoverableError(e.message);
+        // this.error$.next(e.message);
       }
 
       this.dispatch.setDataViewId(this.dataView?.id);
@@ -271,8 +269,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         this.field = originalField.toSpec();
       } catch (e) {
         // this.onFatalError(e);
-        // this.dispatch.setRecoverableError(e.message);
-        this.error$.next(e.message);
+        this.dispatch.setRecoverableError(e.message);
+        // this.error$.next(e.message);
       }
       this.dispatch.setField(this.field);
     }
@@ -338,8 +336,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         }
         // console.log('fatal error here');
         // this.onFatalError(response.error);
-        // this.dispatch.setRecoverableError(response.error.message);
-        this.error$.next(response.error.message);
+        this.dispatch.setRecoverableError(response.error.message);
+        // this.error$.next(response.error.message);
         return;
       }
 
@@ -373,14 +371,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       // publish filter
       const newFilters = await this.buildFilter();
       batch(() => {
-        this.error$.next(undefined);
-
+        this.dispatch.setRecoverableError(undefined);
         this.dispatch.setLoading(false);
         this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
-        this.error$.next(undefined);
+        this.dispatch.setRecoverableError(undefined);
         this.dispatch.updateQueryResults({
           availableOptions: [],
         });
