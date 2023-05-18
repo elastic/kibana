@@ -283,7 +283,7 @@ export default async () => {
           CYPRESS_CONFIG_FILE: argv.configFile,
         },
       });
-      subprocess.stdout.pipe(process.stdout);
+      // subprocess.stdout.pipe(process.stdout);
 
       try {
         const { stdout } = await subprocess;
@@ -369,7 +369,7 @@ export default async () => {
       //   cleanupServerPorts({ esPort, kibanaPort });
       // });
     },
-    { concurrency: 2 }
+    { concurrency: 1 }
   ).then((results) => {
     console.error('results', results);
     // renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
