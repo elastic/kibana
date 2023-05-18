@@ -43,7 +43,17 @@ describe('autocomplete_listener', () => {
 
   describe('where', () => {
     testSuggestions('from a | where ', ['is_null', 'cidr_match', 'FieldIdentifier']);
-    testSuggestions('from a | where "field" ', ['==', '!=', '<', '>', '<=', '>=', 'like', 'rlike']);
+    testSuggestions('from a | where "field" ', [
+      '==',
+      '!=',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      'like',
+      'rlike',
+      'in',
+    ]);
     testSuggestions('from a | where "field" >= ', ['FieldIdentifier']);
     testSuggestions('from a | where "field" >= "field1" ', ['or', 'and', '|']);
     testSuggestions('from a | where "field" >= "field1" and ', ['FieldIdentifier']);
