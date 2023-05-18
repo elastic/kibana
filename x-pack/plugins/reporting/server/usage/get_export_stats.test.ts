@@ -414,19 +414,6 @@ test('Incorporate error code stats', () => {
           invalid_layout_parameters_error: 0,
         },
       },
-      csv_searchsource_immediate: {
-        available: true,
-        total: 3,
-        output_size: sizesAggResponse,
-        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
-        app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
-        error_codes: {
-          authentication_expired_error: 5,
-          queue_timeout_error: 1,
-          unknown_error: 0,
-          kibana_shutting_down_error: 1,
-        },
-      },
     },
     featureMap,
     exportTypesHandler
@@ -457,15 +444,6 @@ test('Incorporate error code stats', () => {
       "queue_timeout_error": 1,
       "unknown_error": 0,
       "visual_reporting_soft_disabled_error": 1,
-    }
-  `);
-
-  expect(result.csv_searchsource_immediate.error_codes).toMatchInlineSnapshot(`
-    Object {
-      "authentication_expired_error": 5,
-      "kibana_shutting_down_error": 1,
-      "queue_timeout_error": 1,
-      "unknown_error": 0,
     }
   `);
 });

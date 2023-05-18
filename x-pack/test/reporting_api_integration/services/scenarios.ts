@@ -11,7 +11,6 @@ import {
   API_MIGRATE_ILM_POLICY_URL,
 } from '@kbn/reporting-plugin/common/constants';
 import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
-import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { JobParamsPNGDeprecated } from '@kbn/reporting-plugin/server/export_types/png/types';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/export_types/printable_pdf/types';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -135,13 +134,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const downloadCsv = async (username: string, password: string, job: JobParamsDownloadCSV) => {
-    return await supertestWithoutAuth
-      .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'xxx')
-      .send(job);
-  };
   const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
@@ -277,7 +269,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     createDataAnalyst,
     createTestReportingUserRole,
     createTestReportingUser,
-    downloadCsv,
     generatePdf,
     generatePng,
     generateCsv,

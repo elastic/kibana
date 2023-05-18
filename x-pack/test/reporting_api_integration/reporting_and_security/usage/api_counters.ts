@@ -179,7 +179,6 @@ export default function ({ getService }: FtrProviderContext) {
           postPdf(),
           postPdf(),
           postPdf(),
-          downloadCsv(),
         ]);
 
         await waitOnAggregation();
@@ -197,12 +196,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('CSV', async () => {
         expect(getUsageCount(stats, 'post /api/reporting/generate/csv_searchsource')).to.be(2);
-      });
-
-      it('Download CSV', async () => {
-        expect(
-          getUsageCount(stats, 'post /api/reporting/v1/generate/immediate/csv_searchsource')
-        ).to.be(1);
       });
     });
 
@@ -244,20 +237,5 @@ export default function ({ getService }: FtrProviderContext) {
       reportingAPI.postJobJSON(`/api/reporting/generate/printablePdfV2`, {
         jobParams: createPdfV2Params(1600),
       });
-
-    const downloadCsv = () =>
-      reportingAPI.downloadCsv(
-        reportingAPI.REPORTING_USER_USERNAME,
-        reportingAPI.REPORTING_USER_PASSWORD,
-        {
-          searchSource: {
-            query: { query: '', language: 'kuery' },
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            filter: [],
-          },
-          browserTimezone: 'UTC',
-          title: 'testfooyu78yt90-',
-        }
-      );
   });
 }

@@ -38,8 +38,6 @@ export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
 type JobTypeDeclaration = typeof jobTypes;
 export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
 
-export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
-
 // This is deprecated because it lacks support for runtime fields
 // but the extension points are still needed for pre-existing scripted automation, until 8.0
 export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
@@ -110,7 +108,3 @@ export const REPORT_TABLE_ROW_ID = 'reportJobRow';
 // automation that have no version value in the job params, we assume the
 // intended version is 7.14.0
 export const UNVERSIONED_VERSION = '7.14.0';
-
-// hacky endpoint: download CSV without queueing a report
-// FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
-export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;

@@ -49,7 +49,6 @@ interface QueueTimesMetrics {
  */
 type BaseJobTypes =
   | 'csv_searchsource'
-  | 'csv_searchsource_immediate'
   | 'csv_v2'
   | 'PNG'
   | 'PNGV2'
@@ -140,10 +139,6 @@ export type AppCounts = {
 
 export interface JobTypes {
   csv_searchsource: AvailableTotal & {
-    metrics: MetricsStatsCsv;
-    error_codes: ErrorCodesStatsCsv;
-  };
-  csv_searchsource_immediate: AvailableTotal & {
     metrics: MetricsStatsCsv;
     error_codes: ErrorCodesStatsCsv;
   };

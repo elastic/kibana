@@ -14,7 +14,6 @@ import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
-  API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
   getRedirectAppPath,
@@ -187,14 +186,6 @@ export class ReportingAPIClient implements IReportingAPI {
     add(resp.job.id);
 
     return new Job(resp.job);
-  }
-
-  public async createImmediateReport(baseParams: BaseParams) {
-    const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
-    return this.http.post(`${API_GENERATE_IMMEDIATE}`, {
-      asResponse: true,
-      body: JSON.stringify(params),
-    });
   }
 
   public getDecoratedJobParams<T extends AppParams>(baseParams: T): BaseParams {
