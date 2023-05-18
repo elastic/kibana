@@ -219,13 +219,11 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       try {
         this.field = this.dataView?.getFieldByName(fieldName);
         if (this.field === undefined) {
-          this.onFatalError(
-            new Error(
-              i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
-                defaultMessage: 'Could not locate field: {fieldName}',
-                values: { fieldName },
-              })
-            )
+          throw new Error(
+            i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
+              defaultMessage: 'Could not locate field: {fieldName}',
+              values: { fieldName },
+            })
           );
         }
 

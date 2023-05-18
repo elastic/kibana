@@ -7,7 +7,6 @@
  */
 
 import { ReactNode } from 'react';
-import { Observable } from 'rxjs';
 
 import { Filter } from '@kbn/es-query';
 import {

@@ -248,7 +248,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           );
       } catch (e) {
         this.dispatch.setRecoverableError(e.message);
-        // this.error$.next(e.message);
       }
 
       this.dispatch.setDataViewId(this.dataView?.id);
@@ -268,9 +267,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
         this.field = originalField.toSpec();
       } catch (e) {
-        // this.onFatalError(e);
         this.dispatch.setRecoverableError(e.message);
-        // this.error$.next(e.message);
       }
       this.dispatch.setField(this.field);
     }
@@ -334,10 +331,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           // from prematurely setting loading to `false` and updating the suggestions to show "No results"
           return;
         }
-        // console.log('fatal error here');
-        // this.onFatalError(response.error);
         this.dispatch.setRecoverableError(response.error.message);
-        // this.error$.next(response.error.message);
         return;
       }
 
