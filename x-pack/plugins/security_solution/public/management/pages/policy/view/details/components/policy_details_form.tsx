@@ -43,11 +43,11 @@ export const PolicyDetailsForm = memo<PolicyDetailsFormProps>(
 
         <PolicyFormMalware policyDetails={policyDetails} />
 
-        <PolicyFormRansomware policyDetails={policyDetails} />
-
         <PolicyFormMemoryProtection policyDetails={policyDetails} />
 
         <PolicyFormBehaviourProtection policyDetails={policyDetails} />
+
+        <PolicyFormRansomware policyDetails={policyDetails} />
 
         <PolicyFormAttackSurfaceReduction policyDetails={policyDetails} />
 
