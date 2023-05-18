@@ -42,7 +42,13 @@ describe('<Navigation />', () => {
             <Navigation.Item id="item1">Title in children</Navigation.Item>
             <Navigation.Item id="item2" title="Title in props" />
             {/* Title will be read from the deeplink */}
-            <Navigation.Item link="item3" />
+            <Navigation.Item id="item3-a" link="item3" />
+            {/* Title will be read from the props */}
+            <Navigation.Item id="item3-b" link="item3" title="Override the deeplink with props" />
+            {/* Title will be read from the children */}
+            <Navigation.Item id="item3-c" link="item3">
+              Override the deeplink with children
+            </Navigation.Item>
             {/* Should not appear */}
             <Navigation.Item link="disabled" title="Should NOT be there" />
           </Navigation>
@@ -54,7 +60,7 @@ describe('<Navigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTree] = lastCall;
 
-      expect(navTree).toMatchObject({
+      expect(navTree).toEqual({
         navigationTree: [
           {
             id: 'item1',
@@ -65,8 +71,30 @@ describe('<Navigation />', () => {
             title: 'Title in props',
           },
           {
-            id: 'item3',
+            id: 'item3-a',
             title: 'Title from deeplink!',
+            deepLink: {
+              id: 'item3',
+              title: 'Title from deeplink!',
+              baseUrl: '',
+              url: '',
+              href: '',
+            },
+          },
+          {
+            id: 'item3-b',
+            title: 'Override the deeplink with props',
+            deepLink: {
+              id: 'item3',
+              title: 'Title from deeplink!',
+              baseUrl: '',
+              url: '',
+              href: '',
+            },
+          },
+          {
+            id: 'item3-c',
+            title: 'Override the deeplink with children',
             deepLink: {
               id: 'item3',
               title: 'Title from deeplink!',

@@ -31,14 +31,10 @@ function createInternalNavNode(
 ): InternalNavigationNode | null {
   const { children, link, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
-
-  let title = navNode.title ?? deepLink?.title;
-
-  if (!title && typeof children === 'string') {
-    title = children;
-  }
-
   const isLinkActive = isNodeActive({ link, deepLink });
+
+  const titleFromDeepLinkOrChildren = typeof children === 'string' ? children : deepLink?.title;
+  let title = navNode.title ?? titleFromDeepLinkOrChildren;
 
   if (!title || title.trim().length === 0) {
     if (isLinkActive) {
