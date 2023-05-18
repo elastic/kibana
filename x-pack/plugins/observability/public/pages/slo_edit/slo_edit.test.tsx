@@ -31,7 +31,7 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_breadcrumbs');
+jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
