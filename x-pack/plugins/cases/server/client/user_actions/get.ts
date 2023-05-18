@@ -12,6 +12,7 @@ import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import type { UserActionGet } from './types';
 import { extractAttributes } from './utils';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export const get = async (
   { caseId }: UserActionGet,
@@ -34,9 +35,9 @@ export const get = async (
       operation: Operations.getUserActions,
     });
 
-    const resultsToEncode = extractAttributes(userActions);
+    const res = extractAttributes(userActions);
 
-    return CaseUserActionsDeprecatedResponseRt.encode(resultsToEncode);
+    return decodeOrThrow(CaseUserActionsDeprecatedResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve user actions case id: ${caseId}: ${error}`,
