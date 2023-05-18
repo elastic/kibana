@@ -8,18 +8,13 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 
-import { useNavigation as useNavigationServices } from '../../../services';
 import { NodeProps } from '../types';
 import { useInitNavnode } from '../use_init_navnode';
 
 function NavigationItemComp(node: NodeProps) {
-  const { navLinks$ } = useNavigationServices();
-  const deepLinks = useObservable(navLinks$, []);
-
   const { children, onRemove } = node;
-  const { navNode, isActive } = useInitNavnode(node, { deepLinks });
+  const { navNode, isActive } = useInitNavnode(node);
   const { title, deepLink } = navNode;
 
   // Note: temporary UI. In future PR we'll have an EUI component here

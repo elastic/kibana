@@ -8,6 +8,9 @@
 
 import { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+
+import { useNavigation as useNavigationServices } from '../../services';
 import { InternalNavigationNode, NodeProps, RegisterFunction, UnRegisterFunction } from './types';
 import { useRegisterTreeNode } from './use_register_tree_node';
 import {
@@ -45,13 +48,7 @@ function createInternalNavNode(
   };
 }
 
-export const useInitNavnode = (
-  node: NodeProps,
-  { deepLinks }: { deepLinks: Readonly<ChromeNavLink[]> }
-) => {
-  const { id } = getIdFromNavigationNode(node);
-  validateNode(node, id);
-
+export const useInitNavnode = (node: NodeProps) => {
   /**
    * Map of children nodes
    */
@@ -70,7 +67,16 @@ export const useInitNavnode = (
    * with the order of the DOM elements
    */
   const orderChildrenRef = useRef<Record<string, number>>({});
+  /**
+   * Index to keep track of the order of the children when they mount.
+   */
   const idx = useRef(0);
+
+  const { id } = getIdFromNavigationNode(node);
+  validateNode(node, id);
+
+  const { navLinks$ } = useNavigationServices();
+  const deepLinks = useObservable(navLinks$, []);
 
   const navNode = useMemo(() => {
     if (typeof node.children === 'string' && !node.title) {

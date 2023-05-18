@@ -9,9 +9,6 @@
 import React, { createContext, useCallback, useMemo, useContext } from 'react';
 
 import { EuiButton } from '@elastic/eui';
-import useObservable from 'react-use/lib/useObservable';
-
-import { useNavigation as useNavigationServices } from '../../../services';
 import { useInitNavnode } from '../use_init_navnode';
 import { NodeProps, RegisterFunction } from '../types';
 
@@ -32,11 +29,8 @@ export function useNavigationGroup<T extends boolean = true>(
 }
 
 function NavigationGroupComp(node: NodeProps) {
-  const { navLinks$ } = useNavigationServices();
-  const deepLinks = useObservable(navLinks$, []);
-
   const { children, onRemove } = node;
-  const { navNode, isActive, registerChildNode } = useInitNavnode(node, { deepLinks });
+  const { navNode, isActive, registerChildNode } = useInitNavnode(node);
   const { title, deepLink } = navNode;
 
   const wrapTextWithLink = useCallback(
