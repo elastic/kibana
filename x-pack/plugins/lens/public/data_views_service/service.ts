@@ -112,7 +112,9 @@ export const createIndexPatternService = ({
       cache: IndexPatternMap | undefined
     ) => {
       // TODO - extract this routine into a function and unit test?
-      if (!spec.id) {
+      const dataView = await dataViews.create(spec);
+
+      if (!dataView.id) {
         showLoadingDataViewError(
           new Error(
             i18n.translate('xpack.lens.indexPattern.noIdError', {
@@ -122,9 +124,9 @@ export const createIndexPatternService = ({
         );
         return;
       }
-      const dataView = await dataViews.create(spec);
+
       const indexPatterns = await ensureIndexPattern({
-        id: dataView.id!,
+        id: dataView.id,
         onError: showLoadingDataViewError,
         dataViews,
         cache,
