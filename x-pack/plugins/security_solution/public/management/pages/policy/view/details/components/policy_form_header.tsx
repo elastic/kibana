@@ -26,7 +26,7 @@ export const PolicyFormHeader = memo(() => {
   return (
     <HeaderContainer $top={`${bottom}px`}>
       <PolicyFormRowLayout
-        label={<>&nbsp;</>}
+        label={''}
         windows={<PlatformIdentifier type="windows" />}
         linux={<PlatformIdentifier type="linux" />}
         macos={<PlatformIdentifier type="macos" />}

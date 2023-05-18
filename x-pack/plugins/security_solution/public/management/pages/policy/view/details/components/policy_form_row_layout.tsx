@@ -7,9 +7,10 @@
 
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { FeatureNotSupported } from './feature_not_supported';
+import { usePocUrlOptions } from './poc_options';
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .formRowLabel {
@@ -18,6 +19,16 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 
   .formRowValue {
     width: calc((100% - 170px) / 3);
+  }
+
+  &.titlesAboveContent {
+    .formRowLabel {
+      width: 100%;
+    }
+
+    .formRowValue {
+      width: 33%;
+    }
   }
 `;
 
@@ -37,10 +48,43 @@ export const PolicyFormRowLayout = memo<PolicyFormRowLayoutProps>(
       );
     }
 
+    const {
+      urlParams: { sectionTitlesAboveContent },
+    } = usePocUrlOptions();
+
+    if (sectionTitlesAboveContent) {
+      return (
+        <div className="policyFormRow">
+          {label && (
+            <EuiTitle size="xs">
+              <h5>{label}</h5>
+            </EuiTitle>
+          )}
+          <EuiFlexGroupStyled responsive={false} className="titlesAboveContent" gutterSize="l">
+            {all ? (
+              <EuiFlexItem>{all}</EuiFlexItem>
+            ) : (
+              <>
+                <EuiFlexItem grow={false} className="formRowValue">
+                  {windows ?? <FeatureNotSupported />}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="formRowValue">
+                  {macos ?? <FeatureNotSupported />}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="formRowValue">
+                  {linux ?? <FeatureNotSupported />}
+                </EuiFlexItem>
+              </>
+            )}
+          </EuiFlexGroupStyled>
+        </div>
+      );
+    }
+
     return (
       <EuiFlexGroupStyled responsive={false} className="policyFormRow" gutterSize="m">
         <EuiFlexItem grow={false} className="formRowLabel">
-          {label}
+          {label || <>&nbsp;</>}
         </EuiFlexItem>
         {all ? (
           <EuiFlexItem>{all}</EuiFlexItem>

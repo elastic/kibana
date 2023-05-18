@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { PocOptions } from './poc_options';
 import { PolicyFormAntivirusRegistration } from './policy_form_antivirus_registration';
 import { PolicyFormEventCollection } from './policy_form_event_collection';
 import { PolicyFormAttackSurfaceReduction } from './policy_form_attack_surface_reduction';
@@ -57,6 +58,13 @@ export const PolicyDetailsForm = memo<PolicyDetailsFormProps>(
 
         <EuiSpacer size="xxl" />
         <PolicyFormAdvancedSettings policyDetails={policyDetails} />
+
+        <EuiSpacer size="xxl" />
+        <EuiSpacer size="xxl" />
+        <EuiSpacer size="xxl" />
+        <EuiSpacer size="xxl" />
+        <EuiHorizontalRule />
+        <PocOptions />
       </FormContainer>
     );
   }
