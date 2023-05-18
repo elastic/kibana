@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LinkDescriptor } from '@kbn/observability-plugin/public';
+import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { InventoryItemType } from '../../../common/inventory_models/types';
