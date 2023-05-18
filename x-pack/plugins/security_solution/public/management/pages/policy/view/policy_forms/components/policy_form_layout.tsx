@@ -38,8 +38,8 @@ import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/end
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../../../common/components/page_wrapper';
-import { PolicyDetailsForm } from '../../policy_details_form';
 import { ConfirmUpdate } from './policy_form_confirm_update';
+import { PolicyDetailsForm } from '../../details/components/policy_details_form';
 
 export const PolicyFormLayout = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -162,7 +162,12 @@ export const PolicyFormLayout = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
-      <PolicyDetailsForm />
+
+      {/* <PolicyDetailsForm />*/}
+
+      {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+      <PolicyDetailsForm policyDetails={policyItem!} />
+
       <EuiSpacer size="xxl" />
       <EuiBottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">

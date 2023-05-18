@@ -16,7 +16,7 @@ import { PolicyFormMemoryProtection } from './policy_form_memory_protection';
 import { PolicyFormRansomware } from './policy_form_ransomware';
 import { PolicyFormMalware } from './policy_form_malware';
 import { PolicyFormHeader } from './policy_form_header';
-import type { PolicyData } from '../../../../../../../common/endpoint/types';
+import type { MaybeImmutable, PolicyData } from '../../../../../../../common/endpoint/types';
 import { PolicyFormAdvancedSettings } from './policy_form_advanced_settings';
 
 const FormContainer = styled.div`
@@ -28,33 +28,37 @@ const FormContainer = styled.div`
 `;
 
 export interface PolicyDetailsFormProps {
-  policyDetails: PolicyData;
+  policyDetails: MaybeImmutable<PolicyData>;
 }
 
-export const PolicyDetailsForm = memo<PolicyDetailsFormProps>(({ policyDetails }) => {
-  return (
-    <FormContainer>
-      <PolicyFormHeader />
+export const PolicyDetailsForm = memo<PolicyDetailsFormProps>(
+  ({ policyDetails: _policyDetails }) => {
+    const policyDetails = _policyDetails as PolicyData;
 
-      <EuiSpacer />
+    return (
+      <FormContainer>
+        <PolicyFormHeader />
 
-      <PolicyFormMalware policyDetails={policyDetails} />
+        <EuiSpacer />
 
-      <PolicyFormRansomware policyDetails={policyDetails} />
+        <PolicyFormMalware policyDetails={policyDetails} />
 
-      <PolicyFormMemoryProtection policyDetails={policyDetails} />
+        <PolicyFormRansomware policyDetails={policyDetails} />
 
-      <PolicyFormBehaviourProtection policyDetails={policyDetails} />
+        <PolicyFormMemoryProtection policyDetails={policyDetails} />
 
-      <PolicyFormAttackSurfaceReduction policyDetails={policyDetails} />
+        <PolicyFormBehaviourProtection policyDetails={policyDetails} />
 
-      <PolicyFormEventCollection policyDetails={policyDetails} />
+        <PolicyFormAttackSurfaceReduction policyDetails={policyDetails} />
 
-      <PolicyFormAntivirusRegistration policyDetails={policyDetails} />
+        <PolicyFormEventCollection policyDetails={policyDetails} />
 
-      <EuiSpacer size="xxl" />
-      <PolicyFormAdvancedSettings policyDetails={policyDetails} />
-    </FormContainer>
-  );
-});
+        <PolicyFormAntivirusRegistration policyDetails={policyDetails} />
+
+        <EuiSpacer size="xxl" />
+        <PolicyFormAdvancedSettings policyDetails={policyDetails} />
+      </FormContainer>
+    );
+  }
+);
 PolicyDetailsForm.displayName = 'PolicyDetailsForm';
