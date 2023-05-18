@@ -1024,7 +1024,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      it('creates alerts if wildcard is used in queries signals with the single indicator that matched', async () => {
+      // https://github.com/elastic/kibana/issues/149920
+      // generates same number of alerts similarly to "enriches signals with the single indicator that matches" test
+      it('generates alerts with single match if queries contain field path wildcards', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           // still matches all documents as default *:*
           query: 'agent.ty*:auditbeat',
@@ -1549,7 +1551,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // https://github.com/elastic/kibana/issues/149920
       // creates same number of alerts similarly to "generates multiple signals with multiple matches" test
-      it('generates alerts if queries contain field path wildcards', async () => {
+      it('generates alerts with multiple matches if queries contain field path wildcards', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           // source.po* matches port source.port field
           query: '(source.po*:57324 and source.ip:45.115.45.3) or destination.ip:159.89.119.67', // narrow our query to a single record that matches two indicators
