@@ -101,11 +101,6 @@ Object {
                     },
                     Object {
                       "term": Object {
-                        "type": "osquery-manager-usage-metric",
-                      },
-                    },
-                    Object {
-                      "term": Object {
                         "type": "osquery-usage-metric",
                       },
                     },
@@ -324,11 +319,6 @@ Object {
                     Object {
                       "term": Object {
                         "type": "ml-telemetry",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "type": "osquery-manager-usage-metric",
                       },
                     },
                     Object {
@@ -559,11 +549,6 @@ Object {
                     },
                     Object {
                       "term": Object {
-                        "type": "osquery-manager-usage-metric",
-                      },
-                    },
-                    Object {
-                      "term": Object {
                         "type": "osquery-usage-metric",
                       },
                     },
@@ -790,11 +775,6 @@ Object {
                     Object {
                       "term": Object {
                         "type": "ml-telemetry",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "type": "osquery-manager-usage-metric",
                       },
                     },
                     Object {
@@ -1065,11 +1045,6 @@ Object {
                     },
                     Object {
                       "term": Object {
-                        "type": "osquery-manager-usage-metric",
-                      },
-                    },
-                    Object {
-                      "term": Object {
                         "type": "osquery-usage-metric",
                       },
                     },
@@ -1299,11 +1274,6 @@ Object {
                     Object {
                       "term": Object {
                         "type": "ml-telemetry",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "type": "osquery-manager-usage-metric",
                       },
                     },
                     Object {
