@@ -5,13 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { SecurityPageName } from '../../app/types';
-import { HeaderPage } from '../../common/components/header_page';
-import { useRootNavLink } from '../../common/links/nav_links';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { LandingLinksImages } from '../components/landing_links_images';
-import { EXPLORE_PAGE_TITLE } from './translations';
+import { i18n } from '@kbn/i18n';
+import { SecurityPageName } from '../app/types';
+import { HeaderPage } from '../common/components/header_page';
+import { useRootNavLink } from '../common/links/nav_links';
+import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
+import { SpyRoute } from '../common/utils/route/spy_routes';
+import { LandingLinksImages } from '../common/components/landing_links/landing_links_images';
+
+const EXPLORE_PAGE_TITLE = i18n.translate('xpack.securitySolution.explore.landing.pageTitle', {
+  defaultMessage: 'Explore',
+});
 
 export const ExploreLandingPage = () => {
   const exploreLinks = useRootNavLink(SecurityPageName.exploreLanding)?.links ?? [];

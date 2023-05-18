@@ -19,10 +19,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import {
+  FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+} from '../../common/constants/epm';
 import { type PLATFORM_TYPE } from '../hooks';
 import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
+import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';
 
 interface Props {
   linuxCommand: string;
@@ -32,6 +37,7 @@ interface Props {
   linuxRpmCommand: string;
   k8sCommand: string;
   hasK8sIntegration: boolean;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   hasK8sIntegrationMultiPage: boolean;
   isManaged?: boolean;
   hasFleetServer?: boolean;
@@ -53,6 +59,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxRpmCommand,
   k8sCommand,
   hasK8sIntegration,
+  cloudSecurityIntegration,
   hasK8sIntegrationMultiPage,
   isManaged,
   enrollToken,
@@ -61,10 +68,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   onCopy,
 }) => {
   const getInitialPlatform = useCallback(() => {
-    if (hasK8sIntegration) return 'kubernetes';
+    if (
+      hasK8sIntegration ||
+      (cloudSecurityIntegration?.integrationType ===
+        FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE &&
+        isManaged)
+    )
+      return 'kubernetes';
 
     return 'linux';
-  }, [hasK8sIntegration]);
+  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType, isManaged]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
@@ -96,6 +109,28 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       title={i18n.translate('xpack.fleet.enrollmentInstructions.k8sCallout', {
         defaultMessage:
           'We recommend adding the Kubernetes integration to your agent policy in order to get useful metrics and logs from your Kubernetes clusters.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const k8sCSPMCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.placeHolderCallout', {
+        defaultMessage:
+          'We strongly advise against deploying CSPM within a Kubernetes cluster. Doing so may lead to redundant data fetching, which can cause increased consumption costs within your Elastic account and potentially trigger API rate limiting in your cloud account(s).',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const macCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
+        defaultMessage:
+          'We recommend against deploying this integration within Mac as it is currently not being supported.',
       })}
       color="warning"
       iconType="warning"
@@ -139,6 +174,24 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
+        {platform === 'mac' &&
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+            <>
+              {macCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {platform === 'kubernetes' &&
+          cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE && (
+            <>
+              {k8sCSPMCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
         {platform === 'kubernetes' && !hasK8sIntegration && (
           <>
             {k8sCallout}
