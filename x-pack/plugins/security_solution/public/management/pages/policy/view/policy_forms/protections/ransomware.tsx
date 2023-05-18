@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SecurityPageName } from '../../../../../../app/types';
-import type { Immutable } from '../../../../../../../common/endpoint/types';
+import type {
+  Immutable,
+  AdditionalOnSwitchChangeParams,
+} from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import type { RansomwareProtectionOSes } from '../../../types';
 import { ConfigForm } from '../../components/config_form';
@@ -20,6 +24,7 @@ import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_
 import { RadioButtons } from '../components/radio_buttons';
 import { UserNotification } from '../components/user_notification';
 import { ProtectionSwitch } from '../components/protection_switch';
+import { policyConfig } from '../../../store/policy_details/selectors';
 
 /** The Ransomware Protections form for policy details
  *  which will configure for all relevant OSes.
@@ -34,6 +39,17 @@ export const Ransomware = React.memo(() => {
     }
   );
 
+  const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
+  const [expandOptions, setExpandOptions] = useState(
+    policyDetailsConfig.windows.malware.mode !== 'off'
+  );
+
+  const handleProtectionSwitchChange = useCallback((args: AdditionalOnSwitchChangeParams) => {
+    setExpandOptions((prevState) => !prevState);
+
+    return args.policyConfigData;
+  }, []);
+
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.ransomware', {
@@ -42,28 +58,38 @@ export const Ransomware = React.memo(() => {
       supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="ransomwareProtectionsForm"
       rightCorner={
-        <ProtectionSwitch protectionLabel={protectionLabel} protection={protection} osList={OSes} />
+        <ProtectionSwitch
+          protectionLabel={protectionLabel}
+          protection={protection}
+          osList={OSes}
+          switchChecked={expandOptions}
+          additionalOnSwitchChange={handleProtectionSwitchChange}
+        />
       }
     >
-      <RadioButtons protection={protection} osList={OSes} />
-      <UserNotification protection={protection} osList={OSes} />
-      <EuiSpacer size="m" />
-      <EuiCallOut iconType="iInCircle">
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.details.detectionRulesMessage"
-          defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
-          values={{
-            detectionRulesLink: (
-              <LinkToApp appId={APP_UI_ID} deepLinkId={SecurityPageName.rules}>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
-                  defaultMessage="related detection rules"
-                />
-              </LinkToApp>
-            ),
-          }}
-        />
-      </EuiCallOut>
+      {expandOptions && (
+        <>
+          <RadioButtons protection={protection} osList={OSes} />
+          <UserNotification protection={protection} osList={OSes} />
+          <EuiSpacer size="m" />
+          <EuiCallOut iconType="iInCircle">
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.details.detectionRulesMessage"
+              defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
+              values={{
+                detectionRulesLink: (
+                  <LinkToApp appId={APP_UI_ID} deepLinkId={SecurityPageName.rules}>
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
+                      defaultMessage="related detection rules"
+                    />
+                  </LinkToApp>
+                ),
+              }}
+            />
+          </EuiCallOut>
+        </>
+      )}
     </ConfigForm>
   );
 });
