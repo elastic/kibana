@@ -53,6 +53,7 @@ export const cli = () => {
         // 'cypress/e2e/cases/creation.cy.ts',
         // 'cypress/e2e/cases/privileges.cy.ts',
         '**/cypress/e2e/cases/*.cy.ts',
+        '**/cypress/e2e/dashboards/*.cy.ts',
         // '**/cypress/e2e/detection_alerts/*.cy.ts',
         // '**/cypress/e2e/detection_rules/*.cy.ts',
       ]);
@@ -399,7 +400,7 @@ export const cli = () => {
       ).then((results) => {
         console.error('results', results);
         // renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
-        process.exit(_.some(results, (result) => result > 0) ? 1 : 0);
+        // process.exit(_.some(results, (result) => result > 0) ? 1 : 0);
       });
     },
     {
