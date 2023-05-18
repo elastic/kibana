@@ -129,6 +129,7 @@ describe('Legacy Alerts Client', () => {
     await alertsClient.initializeExecution({
       maxAlerts: 1000,
       ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
@@ -157,6 +158,7 @@ describe('Legacy Alerts Client', () => {
     await alertsClient.initializeExecution({
       maxAlerts: 1000,
       ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
@@ -177,6 +179,7 @@ describe('Legacy Alerts Client', () => {
     await alertsClient.initializeExecution({
       maxAlerts: 1000,
       ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
@@ -197,6 +200,7 @@ describe('Legacy Alerts Client', () => {
     await alertsClient.initializeExecution({
       maxAlerts: 1000,
       ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
@@ -243,6 +247,7 @@ describe('Legacy Alerts Client', () => {
     await alertsClient.initializeExecution({
       maxAlerts: 1000,
       ruleLabel: `ruleLogPrefix`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,

@@ -28,6 +28,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
   type PatternFiringAlert = Alert;
 
+  const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
   const fieldsToOmitInComparison = [
     '@timestamp',
@@ -37,6 +38,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
   describe('alerts as data', () => {
     afterEach(() => objectRemover.removeAll());
+    after(async () => {
+      await es.deleteByQuery({ index: alertsAsDataIndex, query: { match_all: {} } });
+    });
 
     it('should write alert docs during rule execution', async () => {
       const pattern = {
@@ -351,7 +355,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
   async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
-      index: '.alerts-test.patternfiring.alerts-default',
+      index: alertsAsDataIndex,
       body: { query: { match_all: {} } },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;

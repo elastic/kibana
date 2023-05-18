@@ -21,7 +21,10 @@ import {
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  RulesSettingsFlappingProperties,
+} from '../../common/rules_settings';
 import {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -44,6 +47,7 @@ export class LegacyAlertsClient<
 > implements IAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private maxAlerts: number = DEFAULT_MAX_ALERTS;
+  private flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS;
   private ruleLogPrefix: string = '';
 
   // Alerts from the previous execution that are deserialized from the task state
@@ -82,10 +86,12 @@ export class LegacyAlertsClient<
   public async initializeExecution({
     maxAlerts,
     ruleLabel,
+    flappingSettings,
     activeAlertsFromState,
     recoveredAlertsFromState,
   }: InitializeExecutionOpts) {
     this.maxAlerts = maxAlerts;
+    this.flappingSettings = flappingSettings;
     this.ruleLogPrefix = ruleLabel;
 
     for (const id of keys(activeAlertsFromState)) {
@@ -191,7 +197,10 @@ export class LegacyAlertsClient<
     return {};
   }
 
-  public async getAlertsToSerialize() {
+  public async getAlertsToSerialize(shouldSetFlapping: boolean = true) {
+    if (shouldSetFlapping) {
+      this.setFlapping();
+    }
     return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.active,
       this.processedAlerts.recovered
@@ -210,9 +219,9 @@ export class LegacyAlertsClient<
     return getPublicAlertFactory(this.alertFactory!);
   }
 
-  public setFlapping(flappingSettings: RulesSettingsFlappingProperties) {
+  public setFlapping() {
     setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      flappingSettings,
+      this.flappingSettings,
       this.processedAlerts.active,
       this.processedAlerts.recovered
     );

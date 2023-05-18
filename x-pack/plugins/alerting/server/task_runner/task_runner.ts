@@ -288,6 +288,9 @@ export class TaskRunner<
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
+    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
+    const flappingSettings = await rulesSettingsClient.flapping().get();
+
     const alertsClientParams = {
       logger: this.logger,
       ruleType: this.ruleType as UntypedNormalizedRuleType,
@@ -317,6 +320,7 @@ export class TaskRunner<
     await alertsClient.initializeExecution({
       maxAlerts: this.maxAlerts,
       ruleLabel,
+      flappingSettings,
       activeAlertsFromState: alertRawInstances,
       recoveredAlertsFromState: alertRecoveredRawInstances,
     });
@@ -341,8 +345,6 @@ export class TaskRunner<
       ...wrappedClientOptions,
       searchSourceClient,
     });
-    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
-    const flappingSettings = await rulesSettingsClient.flapping().get();
     const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
 
     let activeMaintenanceWindows: MaintenanceWindow[] = [];
@@ -527,8 +529,6 @@ export class TaskRunner<
         });
       }
     });
-
-    alertsClient.setFlapping(flappingSettings);
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};

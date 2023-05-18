@@ -54,7 +54,6 @@ export interface IAlertsClient<
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
   }>;
-  setFlapping(flappingSettings: RulesSettingsFlappingProperties): void;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -69,6 +68,7 @@ export interface ProcessAndLogAlertsOpts {
 export interface InitializeExecutionOpts {
   maxAlerts: number;
   ruleLabel: string;
+  flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
 }

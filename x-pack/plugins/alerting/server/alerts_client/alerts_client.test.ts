@@ -97,6 +97,7 @@ describe('Alerts Client', () => {
       const opts = {
         maxAlerts,
         ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
       };
@@ -157,6 +158,7 @@ describe('Alerts Client', () => {
       const opts = {
         maxAlerts,
         ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
       };
@@ -213,6 +215,7 @@ describe('Alerts Client', () => {
       const opts = {
         maxAlerts,
         ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
       };
@@ -257,6 +260,7 @@ describe('Alerts Client', () => {
       const opts = {
         maxAlerts,
         ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
       };
@@ -299,6 +303,7 @@ describe('Alerts Client', () => {
       await alertsClient.initializeExecution({
         maxAlerts,
         ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
       });
@@ -472,6 +477,7 @@ describe('Alerts Client', () => {
       await alertsClient.initializeExecution({
         maxAlerts,
         ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {
           '1': {
             state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
@@ -701,6 +707,7 @@ describe('Alerts Client', () => {
       await alertsClient.initializeExecution({
         maxAlerts,
         ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {
           '1': {
             state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },

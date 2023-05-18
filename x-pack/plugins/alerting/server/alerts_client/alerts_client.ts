@@ -11,12 +11,7 @@ import { chunk, flatMap, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleAlertData,
-  RulesSettingsFlappingProperties,
-} from '../types';
+import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
@@ -187,7 +182,7 @@ export class AlertsClient<
     });
 
     const { alertsToReturn, recoveredAlertsToReturn } =
-      await this.legacyAlertsClient.getAlertsToSerialize();
+      await this.legacyAlertsClient.getAlertsToSerialize(false);
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
@@ -258,37 +253,43 @@ export class AlertsClient<
       }
     }
 
-    await esClient.bulk({
-      refresh: 'wait_for',
-      index: indexTemplateAndPattern.alias,
-      require_alias: true,
-      body: flatMap(
-        [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert: Alert & AlertData) => [
-          {
-            index: {
-              _id: alert.kibana.alert.uuid,
-              // If we know the concrete index for this alert, specify it
-              ...(this.fetchedAlerts.indices[alert.kibana.alert.uuid]
-                ? {
-                    _index: this.fetchedAlerts.indices[alert.kibana.alert.uuid],
-                    require_alias: false,
-                  }
-                : {}),
+    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex];
+    if (alertsToIndex.length > 0) {
+      await esClient.bulk({
+        refresh: 'wait_for',
+        index: indexTemplateAndPattern.alias,
+        require_alias: true,
+        body: flatMap(
+          [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert: Alert & AlertData) => [
+            {
+              index: {
+                _id: alert.kibana.alert.uuid,
+                // If we know the concrete index for this alert, specify it
+                ...(this.fetchedAlerts.indices[alert.kibana.alert.uuid]
+                  ? {
+                      _index: this.fetchedAlerts.indices[alert.kibana.alert.uuid],
+                      require_alias: false,
+                    }
+                  : {}),
+              },
             },
-          },
-          alert,
-        ])
-      ),
-    });
+            alert,
+          ])
+        ),
+      });
+    }
 
-    return { alertsToReturn, recoveredAlertsToReturn };
+    // The flapping value that is persisted inside the task manager state (and used in the next execution)
+    // is different than the value that should be written to the alert document. For this reason, we call
+    // getAlertsToSerialize() twice, once before building and bulk indexing alert docs and once after to return
+    // the value for task state serialization
+
+    // This will be a blocker if ever we want to stop serializing alert data inside the task state and just use
+    // the fetched alert document.
+    return await this.legacyAlertsClient.getAlertsToSerialize();
   }
 
   public getExecutorServices() {
     return this.legacyAlertsClient.getExecutorServices();
-  }
-
-  public setFlapping(flappingSettings: RulesSettingsFlappingProperties) {
-    return this.legacyAlertsClient.setFlapping(flappingSettings);
   }
 }
