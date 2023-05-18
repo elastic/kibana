@@ -133,6 +133,42 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alert-details",
+        "id": "def-common.useAlertsHistory",
+        "type": "Function",
+        "tags": [],
+        "label": "useAlertsHistory",
+        "description": [],
+        "signature": [
+          "({ featureIds, ruleId, dateRange, http }: ",
+          "Props",
+          ") => ",
+          "UseAlertsHistory"
+        ],
+        "path": "x-pack/packages/observability/alert_details/src/hooks/use_alerts_history.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alert-details",
+            "id": "def-common.useAlertsHistory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ featureIds, ruleId, dateRange, http }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/packages/observability/alert_details/src/hooks/use_alerts_history.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
