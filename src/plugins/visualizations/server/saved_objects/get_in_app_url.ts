@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { VisualizationSavedObject } from '../../common/content_management';
 import { isVisTypeReadOnly } from './read_only_vis_type_registry';
 
-export function getInAppUrl(obj) {
+export function getInAppUrl(obj: VisualizationSavedObject) {
   let visType: string | undefined;
   if (obj.attributes.visState) {
     try {
