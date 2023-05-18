@@ -10,7 +10,7 @@ import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { LandingImageCards } from '../../../landing_pages/components/landing_links_images';
+import { LandingImageCards } from '../../../common/components/landing_links/landing_links_images';
 import { SecurityPageName } from '../../../../common/constants';
 import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
 import { useRootNavLink } from '../../../common/links/nav_links';
