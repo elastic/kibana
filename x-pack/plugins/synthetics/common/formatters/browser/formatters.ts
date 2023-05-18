@@ -34,13 +34,12 @@ export const throttlingFormatter: Formatter = (fields) => {
 
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
-  [ConfigKey.PARAMS]: null,
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
-  [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,
-  [ConfigKey.PORT]: stringToJsonFormatter,
-  [ConfigKey.URLS]: stringToJsonFormatter,
+  [ConfigKey.TEXT_ASSERTION]: null,
+  [ConfigKey.PORT]: null,
+  [ConfigKey.URLS]: null,
   [ConfigKey.METADATA]: objectToJsonFormatter,
   [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
   [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,

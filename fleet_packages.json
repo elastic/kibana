@@ -24,7 +24,7 @@
 [
   {
     "name": "apm",
-    "version": "8.8.0-preview-1680182372",
+    "version": "8.8.0-preview-1684290282",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
@@ -48,7 +48,7 @@
   },
   {
     "name": "synthetics",
-    "version": "0.12.1"
+    "version": "1.0.1"
   },
   {
     "name": "security_detection_engine",
