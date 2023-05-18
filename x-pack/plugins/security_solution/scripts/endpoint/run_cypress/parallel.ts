@@ -277,11 +277,10 @@ export const cli = () => {
             const functionalTestRunner = new FunctionalTestRunner(
               log,
               config,
-              EsVersion.getDefault(),
-              abortCtrl.signal
+              EsVersion.getDefault()
             );
 
-            const customEnv = await functionalTestRunner.run();
+            const customEnv = await functionalTestRunner.run(abortCtrl.signal);
 
             console.error('customEnv', customEnv);
 
@@ -396,7 +395,7 @@ export const cli = () => {
             // });
           });
         },
-        { concurrency: 4 }
+        { concurrency: 3 }
       ).then((results) => {
         console.error('results', results);
         // renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
