@@ -8,14 +8,16 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   calendarAlignedTimeWindowSchema,
+  DurationUnit,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
+import { assertNever } from '@kbn/std';
 
 import {
-  getSLOSummaryTransformId,
   SLO_DESTINATION_INDEX_NAME,
+  getSLOSummaryTransformId,
   SLO_SUMMARY_INDEX_NAME,
 } from '../../../assets/constants';
 import { SLO } from '../../../domain/models';
@@ -26,6 +28,21 @@ export interface SummaryTransformGenerator {
 
 export class DefaultSummaryTransformGenerator implements SummaryTransformGenerator {
   generate(slo: SLO): TransformPutTransformRequest {
+    let aggregations = {};
+    if (rollingTimeWindowSchema.is(slo.timeWindow)) {
+      aggregations = generateAggregationsForRolling(slo);
+    } else if (calendarAlignedTimeWindowSchema.is(slo.timeWindow)) {
+      if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+        aggregations = generateAggregationsForCalendarAndTimeslices(slo);
+      } else if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+        aggregations = generateAggregationsForCalendarAndOccurrences(slo);
+      } else {
+        assertNever(slo.budgetingMethod);
+      }
+    } else {
+      assertNever(slo.timeWindow);
+    }
+
     return {
       transform_id: getSLOSummaryTransformId(slo.id, slo.revision),
       description: `Summary data for SLO: ${slo.name}`,
@@ -43,14 +60,10 @@ export class DefaultSummaryTransformGenerator implements SummaryTransformGenerat
           bool: {
             filter: [
               {
-                term: {
-                  'slo.id': slo.id,
-                },
+                term: { 'slo.id': slo.id },
               },
               {
-                term: {
-                  'slo.revision': slo.revision,
-                },
+                term: { 'slo.revision': slo.revision },
               },
               {
                 range: {
@@ -62,10 +75,8 @@ export class DefaultSummaryTransformGenerator implements SummaryTransformGenerat
                   }),
                   ...(calendarAlignedTimeWindowSchema.is(slo.timeWindow) && {
                     '@timestamp': {
-                      gte: `now/${slo.timeWindow.duration.unit}`,
-                      lte: `now+${slo.timeWindow.duration.format()}/${
-                        slo.timeWindow.duration.unit
-                      }`, // now + 1w/w or now + 1M/M
+                      gte: `now/${slo.timeWindow.duration.unit}`, // "now/w" or "now/M"
+                      lte: `now/m`,
                     },
                   }),
                 },
@@ -87,100 +98,7 @@ export class DefaultSummaryTransformGenerator implements SummaryTransformGenerat
             },
           },
         },
-        aggregations: {
-          period: {
-            range: {
-              field: '@timestamp',
-              keyed: true,
-              ranges: [
-                {
-                  key: 'last',
-                },
-              ],
-            },
-            aggs: {
-              ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-                good_events: {
-                  sum: {
-                    field: 'slo.numerator',
-                  },
-                },
-                total_events: {
-                  sum: {
-                    field: 'slo.denominator',
-                  },
-                },
-              }),
-              ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-                good_events: {
-                  sum: {
-                    field: 'slo.isGoodSlice',
-                  },
-                },
-                total_events: {
-                  value_count: {
-                    field: 'slo.isGoodSlice',
-                  },
-                },
-              }),
-              objective: {
-                max: {
-                  field: 'objective',
-                },
-              },
-              sli_value: {
-                bucket_script: {
-                  buckets_path: {
-                    goodEvents: 'good_events',
-                    totalEvents: 'total_events',
-                  },
-                  // handle totalEvents === 0 => return no_data (-1)
-                  script: 'params.goodEvents / params.totalEvents',
-                },
-              },
-              error_budget_initial: {
-                bucket_script: {
-                  buckets_path: {
-                    objective: 'objective',
-                  },
-                  script: '1 - params.objective',
-                },
-              },
-              error_budget_consumed: {
-                bucket_script: {
-                  buckets_path: {
-                    sli_value: 'sli_value',
-                    objective: 'objective',
-                  },
-                  // handle sli_value = -1
-                  script: '(1 - params.sli_value) / (1 - params.objective)',
-                },
-              },
-              error_budget_remaining: {
-                bucket_script: {
-                  buckets_path: {
-                    sli_value: 'sli_value',
-                    objective: 'objective',
-                  },
-                  // handle sli_value = -1
-                  script: '1 - (1 - params.sli_value) / (1 - params.objective)',
-                },
-              },
-              status: {
-                bucket_script: {
-                  buckets_path: {
-                    sli_value: 'sli_value',
-                    objective: 'objective',
-                    error_budget_remaining: 'error_budget_remaining',
-                  },
-                  // handle sli_value = -1
-                  script:
-                    'if (params.sli_value >= params.objective) { return 4 } else if (params.error_budget_remaining > 0) { return 2 } else { return 1 }',
-                },
-              },
-            },
-          },
-        },
+        aggregations,
       },
       dest: { index: SLO_SUMMARY_INDEX_NAME },
       frequency: '1m',
@@ -200,4 +118,348 @@ export class DefaultSummaryTransformGenerator implements SummaryTransformGenerat
       },
     };
   }
+}
+
+function generateAggregationsForRolling(slo: SLO) {
+  return {
+    period: {
+      range: {
+        field: '@timestamp',
+        keyed: true,
+        ranges: [
+          {
+            key: 'last',
+          },
+        ],
+      },
+      aggs: {
+        ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+          good_events: {
+            sum: {
+              field: 'slo.numerator',
+            },
+          },
+          total_events: {
+            sum: {
+              field: 'slo.denominator',
+            },
+          },
+        }),
+        ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+          good_events: {
+            sum: {
+              field: 'slo.isGoodSlice',
+            },
+          },
+          total_events: {
+            value_count: {
+              field: 'slo.isGoodSlice',
+            },
+          },
+        }),
+        objective: {
+          max: {
+            field: 'objective',
+          },
+        },
+        sli_value: {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'good_events',
+              totalEvents: 'total_events',
+            },
+            script:
+              'if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }',
+          },
+        },
+        error_budget_initial: {
+          bucket_script: {
+            buckets_path: {
+              objective: 'objective',
+            },
+            script: '1 - params.objective',
+          },
+        },
+        error_budget_consumed: {
+          bucket_script: {
+            buckets_path: {
+              sliValue: 'sli_value',
+              errorBudgetInitial: 'error_budget_initial',
+            },
+            script:
+              'if (params.sliValue == -1) { return 0 } else { return (1 - params.sliValue) / params.errorBudgetInitial }',
+          },
+        },
+        error_budget_remaining: {
+          bucket_script: {
+            buckets_path: {
+              errorBudgetConsummed: 'error_budget_consumed',
+            },
+            script: '1 - params.errorBudgetConsummed',
+          },
+        },
+        status: {
+          bucket_script: {
+            buckets_path: {
+              sliValue: 'sli_value',
+              objective: 'objective',
+              errorBudgetRemaining: 'error_budget_remaining',
+            },
+            script:
+              'if (params.sliValue == -1) { return 0 } else if (params.sliValue >= params.objective) { return 4 } else if (params.errorBudgetRemaining > 0) { return 2 } else { return 1 }',
+          },
+        },
+      },
+    },
+  };
+}
+
+function generateAggregationsForCalendarAndTimeslices(slo: SLO) {
+  return {
+    period: {
+      range: {
+        field: '@timestamp',
+        keyed: true,
+        ranges: [
+          {
+            key: 'last',
+          },
+        ],
+      },
+      aggs: {
+        total_slices_in_period: {
+          bucket_script: {
+            buckets_path: {},
+            script: {
+              params: {
+                calendar: slo.timeWindow.duration.unit === DurationUnit.Week ? 'week' : 'month',
+                slice_unit: slo.objective.timesliceWindow!.unit,
+                slice_duration: slo.objective.timesliceWindow!.value,
+              },
+              source: `
+                if (params.calendar == "month") {
+                  Date d = new Date(); 
+                  Instant instant = Instant.ofEpochMilli(d.getTime());
+                  LocalDateTime now = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+                  LocalDateTime startOfMonth = now
+                    .withDayOfMonth(1)
+                    .withHour(0)
+                    .withMinute(0)
+                    .withSecond(0);
+                  LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
+                  
+                  long slices = 1;
+                  if (params.slice_unit == "h") {
+                    slices = Duration.between(startOfMonth, startOfNextMonth).toHours() / params.slice_duration
+                  } else if (params.slice_unit == "m") {
+                    slices = Duration.between(startOfMonth, startOfNextMonth).toMinutes() / params.slice_duration
+                  }
+                  
+                  return Math.ceil(slices);
+                } else if (params.calendar == "week") {
+                  int slices = 1;
+                  if (params.slice_unit == "h") {
+                    slices = 7 * 24 / params.slice_duration
+                  } else if (params.slice_unit == "m") {
+                    slices = 7 * 24 * 60 / params.slice_duration
+                  }
+                  
+                  return Math.ceil(slices);
+                }
+              `,
+            },
+          },
+        },
+        good_events: {
+          sum: {
+            field: 'slo.isGoodSlice',
+          },
+        },
+        total_events: {
+          value_count: {
+            field: 'slo.isGoodSlice',
+          },
+        },
+        objective: {
+          max: {
+            field: 'objective',
+          },
+        },
+        sli_value: {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'good_events',
+              totalEvents: 'total_events',
+            },
+            script:
+              'if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }',
+          },
+        },
+        error_budget_initial: {
+          bucket_script: {
+            buckets_path: {
+              objective: 'objective',
+            },
+            script: '1 - params.objective',
+          },
+        },
+        error_budget_consumed: {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'good_events',
+              totalEvents: 'total_events',
+              totalSlicesInPeriod: 'total_slices_in_period',
+              errorBudgetInitial: 'error_budget_initial',
+            },
+            script:
+              'if (params.totalEvents == 0) { return 0 } else { return (params.totalEvents - params.goodEvents) / (params.totalSlicesInPeriod * params.errorBudgetInitial) }',
+          },
+        },
+        error_budget_remaining: {
+          bucket_script: {
+            buckets_path: {
+              errorBudgetConsumed: 'error_budget_consumed',
+            },
+            script: '1 - params.errorBudgetConsumed',
+          },
+        },
+        status: {
+          bucket_script: {
+            buckets_path: {
+              sliValue: 'sli_value',
+              objective: 'objective',
+              errorBudgetRemaining: 'error_budget_remaining',
+            },
+            script:
+              'if (params.sliValue == -1) { return 0 } else if (params.sliValue >= params.objective) { return 4 } else if (params.errorBudgetRemaining > 0) { return 2 } else { return 1 }',
+          },
+        },
+      },
+    },
+  };
+}
+
+function generateAggregationsForCalendarAndOccurrences(slo: SLO) {
+  return {
+    period: {
+      range: {
+        field: '@timestamp',
+        keyed: true,
+        ranges: [
+          {
+            key: 'last',
+          },
+        ],
+      },
+      aggs: {
+        total_events_estimated: {
+          bucket_script: {
+            buckets_path: {
+              totalEvents: 'total_events',
+            },
+            script: {
+              params: {
+                calendar: slo.timeWindow.duration.unit === DurationUnit.Week ? 'week' : 'month',
+              },
+              source: `
+                if (params.calendar == "month") {
+                  Date d = new Date(); 
+                  Instant instant = Instant.ofEpochMilli(d.getTime());
+              
+                  LocalDateTime now = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+                  LocalDateTime startOfMonth = now
+                    .withDayOfMonth(1)
+                    .withHour(0)
+                    .withMinute(0)
+                    .withSecond(0);
+                  LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
+      
+                  long elapsedDuration = Duration.between(startOfMonth, now).toMinutes();
+                  long monthDuration = Duration.between(startOfMonth, startOfNextMonth).toMinutes();
+                  return params.totalEvents / elapsedDuration * monthDuration;
+                } else if (params.calendar == "week") {
+                  Date d = new Date(); 
+                  Instant instant = Instant.ofEpochMilli(d.getTime());
+              
+                  LocalDateTime now = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+                  LocalDateTime startOfWeek = now
+                    .with(DayOfWeek.MONDAY)
+                    .withHour(0)
+                    .withMinute(0)
+                    .withSecond(0);
+                  long elapsedDuration = Duration.between(startOfWeek, now).toMinutes();
+                  long weekDuration = 7 * 24 * 60;
+                  return params.totalEvents / elapsedDuration * weekDuration;
+                }
+              `,
+            },
+          },
+        },
+        good_events: {
+          sum: {
+            field: 'slo.numerator',
+          },
+        },
+        total_events: {
+          sum: {
+            field: 'slo.denominator',
+          },
+        },
+        objective: {
+          max: {
+            field: 'objective',
+          },
+        },
+        sli_value: {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'good_events',
+              totalEvents: 'total_events',
+            },
+            script:
+              'if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }',
+          },
+        },
+        error_budget_initial: {
+          bucket_script: {
+            buckets_path: {
+              objective: 'objective',
+            },
+            script: '1 - params.objective',
+          },
+        },
+        error_budget_consumed: {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'good_events',
+              totalEvents: 'total_events',
+              totalEventsEstimated: 'total_events_estimated',
+              errorBudgetInitial: 'error_budget_initial',
+            },
+            script:
+              'if (params.totalEvents == 0) { return 0 } else { return (params.totalEvents - params.goodEvents) / (params.totalEventsEstimated * params.errorBudgetInitial) }',
+          },
+        },
+        error_budget_remaining: {
+          bucket_script: {
+            buckets_path: {
+              errorBudgetConsumed: 'error_budget_consumed',
+            },
+            script: '1 - params.errorBudgetConsumed',
+          },
+        },
+        status: {
+          bucket_script: {
+            buckets_path: {
+              sliValue: 'sli_value',
+              objective: 'objective',
+              errorBudgetRemaining: 'error_budget_remaining',
+            },
+            script:
+              'if (params.sliValue == -1) { return 0 } else if (params.sliValue >= params.objective) { return 4 } else if (params.errorBudgetRemaining > 0) { return 2 } else { return 1 }',
+          },
+        },
+      },
+    },
+  };
 }
