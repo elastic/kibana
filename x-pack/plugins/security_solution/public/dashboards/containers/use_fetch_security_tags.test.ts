@@ -69,7 +69,11 @@ describe('useFetchSecurityTags', () => {
   test('should return Security Solution tags', async () => {
     mockGet.mockResolvedValue(DEFAULT_TAGS_RESPONSE);
 
-    const expected = DEFAULT_TAGS_RESPONSE.map((tag) => ({ id: tag.id, ...tag.attributes }));
+    const expected = DEFAULT_TAGS_RESPONSE.map((tag) => ({
+      id: tag.id,
+      type: 'tag',
+      ...tag.attributes,
+    }));
     const { result } = await asyncRenderUseCreateSecurityDashboardLink();
 
     expect(mockPut).not.toHaveBeenCalled();

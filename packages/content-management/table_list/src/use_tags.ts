@@ -8,7 +8,9 @@
 import { useCallback, useMemo } from 'react';
 import { Query } from '@elastic/eui';
 
+import type { Tag as TagReference } from '@kbn/saved-objects-tagging-plugin/common';
 import type { Tag } from './types';
+
 import type { UserContentCommonSchema } from './table_list_view';
 
 type QueryUpdater = (query: Query, tag: Tag) => Query;
@@ -22,7 +24,7 @@ export function useTags({
   query: Query;
   updateQuery: (query: Query) => void;
   items: UserContentCommonSchema[];
-  fixedTagReferences?: Tag[] | null;
+  fixedTagReferences?: TagReference[] | null;
 }) {
   // Return a map of tag.id to an array of saved object ids having that tag
   // { 'abc-123': ['saved_object_id_1', 'saved_object_id_2', ...] }

@@ -30,6 +30,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 
+import type { Tag as TagReference } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   Table,
   ConfirmDeleteModal,
@@ -43,7 +44,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
-import { RowActions, TableItemsRowActions, TagReference } from './types';
+import { RowActions, TableItemsRowActions } from './types';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {

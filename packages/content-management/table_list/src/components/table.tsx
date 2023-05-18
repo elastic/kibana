@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import type { Tag as TagReference } from '@kbn/saved-objects-tagging-plugin/common';
 import { useServices } from '../services';
 import type { Action } from '../actions';
 import type {
@@ -28,7 +29,8 @@ import type {
   Props as TableListViewProps,
   UserContentCommonSchema,
 } from '../table_list_view';
-import type { TableItemsRowActions, Tag } from '../types';
+import type { TableItemsRowActions } from '../types';
+
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
@@ -60,7 +62,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
   tableItemsRowActions: TableItemsRowActions;
-  fixedTagReferences?: Tag[] | null;
+  fixedTagReferences?: TagReference[] | null;
 }
 
 export function Table<T extends UserContentCommonSchema>({

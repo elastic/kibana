@@ -140,6 +140,7 @@ describe('Dashboards landing', () => {
       expect((DashboardListingTable as jest.Mock).mock.calls[0][0].fixedTagReferences).toEqual(
         DEFAULT_TAGS_RESPONSE.map((res) => ({
           id: res.id,
+          type: 'tag',
           ...res.attributes,
         }))
       );

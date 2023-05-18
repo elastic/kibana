@@ -14,14 +14,6 @@ export interface Tag {
   type: string;
 }
 
-export interface TagReference {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  type: string;
-}
-
 export type TableRowAction = 'delete';
 
 export type RowActions = {
