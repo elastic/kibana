@@ -610,7 +610,7 @@ describe('TableListView', () => {
       },
     ];
 
-    test('should have an "inpect" button if the content editor is enabled', async () => {
+    test('should have an "inspect" button if the content editor is enabled', async () => {
       let testBed: TestBed;
 
       await act(async () => {
@@ -626,6 +626,63 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
       expect(tableCellsValues[0][2]).toBe('View Item 1 details');
       expect(tableCellsValues[1][2]).toBe('View Item 2 details');
+    });
+  });
+
+  describe('render PageTemplateHeader', () => {
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: twoDaysAgo.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 1',
+          description: 'Item 1 description',
+        },
+        references: [],
+      },
+      {
+        id: '456',
+        // This is the latest updated and should come first in the table
+        updatedAt: yesterday.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 2',
+          description: 'Item 2 description',
+        },
+        references: [],
+      },
+    ];
+
+    test('should render PageTemplateHeader', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setup({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { exists, component } = testBed!;
+      component.update();
+
+      expect(exists('top-nav')).toBeTruthy();
+    });
+
+    test('should not render PageTemplateHeader if withPageTemplateHeader is false', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setup({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          withPageTemplateHeader: false,
+        });
+      });
+
+      const { exists, component } = testBed!;
+      component.update();
+
+      expect(exists('top-nav')).toBeFalsy();
     });
   });
 
@@ -670,6 +727,55 @@ describe('TableListView', () => {
         references: [],
       },
     ];
+
+    test('should render default query if fixedTagReferences is provided', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+          fixedTagReferences: [{ id: 'id-tag-1', name: 'tag-1', description: '', color: '' }],
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      const expected = 'tag:(tag-1)';
+
+      expect(getSearchBoxValue()).toBe(expected);
+    });
+
+    test('should not able to remove the default selected tag if fixedTagReferences is provided', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+          fixedTagReferences: [{ id: 'id-tag-1', name: 'tag-1', description: '', color: '' }],
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      await act(async () => {
+        find('tag-id-tag-1').simulate('click');
+      });
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      const expected = 'tag:(tag-1)';
+
+      expect(getSearchBoxValue()).toBe(expected);
+    });
 
     test('should filter by tag from the table', async () => {
       let testBed: TestBed;

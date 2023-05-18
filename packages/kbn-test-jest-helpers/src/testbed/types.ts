@@ -100,7 +100,7 @@ export interface TestBed<T = string> {
      * Select or unselect a form checkbox.
      *
      * @param dataTestSubject The test subject of the checkbox (can be a nested path. e.g. "myForm.mySelect").
-     * @param isChecked Defines if the checkobx is active or not
+     * @param isChecked Defines if the checkbox is active or not
      */
     selectCheckBox: (checkboxTestSubject: T, isChecked?: boolean) => void;
     /**

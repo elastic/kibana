@@ -12,6 +12,7 @@ import {
   SECURITY_TAG_DESCRIPTION,
   SECURITY_TAG_NAME,
 } from '../../../common/constants';
+import { DEFAULT_TAGS_RESPONSE } from '../../common/containers/tags/__mocks__/api';
 import { useKibana } from '../../common/lib/kibana';
 import { useFetchSecurityTags } from './use_fetch_security_tags';
 
@@ -66,11 +67,12 @@ describe('useFetchSecurityTags', () => {
   });
 
   test('should return Security Solution tags', async () => {
-    const mockFoundTags = [{ id: 'tagId', name: 'Security Solution', description: '', color: '' }];
-    mockGet.mockResolvedValue(mockFoundTags);
+    mockGet.mockResolvedValue(DEFAULT_TAGS_RESPONSE);
+
+    const expected = DEFAULT_TAGS_RESPONSE.map((tag) => ({ id: tag.id, ...tag.attributes }));
     const { result } = await asyncRenderUseCreateSecurityDashboardLink();
 
     expect(mockPut).not.toHaveBeenCalled();
-    expect(result.current.tags).toEqual(expect.objectContaining(mockFoundTags));
+    expect(result.current.tags).toEqual(expect.objectContaining(expected));
   });
 });
