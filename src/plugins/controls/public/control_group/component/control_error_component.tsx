@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 
 interface ControlErrorProps {
@@ -37,18 +37,20 @@ export const ControlError = ({ error }: ControlErrorProps) => {
   );
 
   return (
-    <EuiPopover
-      button={popoverButton}
-      isOpen={isPopoverOpen}
-      className="errorEmbeddableCompact__popover"
-      anchorClassName="errorEmbeddableCompact__popoverAnchor"
-      closePopover={() => setPopoverOpen(false)}
-    >
-      <Markdown
-        markdown={errorMessage}
-        openLinksInNewTab={true}
-        data-test-subj="errorMessageMarkdown"
-      />
-    </EuiPopover>
+    <I18nProvider>
+      <EuiPopover
+        button={popoverButton}
+        isOpen={isPopoverOpen}
+        className="errorEmbeddableCompact__popover"
+        anchorClassName="errorEmbeddableCompact__popoverAnchor"
+        closePopover={() => setPopoverOpen(false)}
+      >
+        <Markdown
+          markdown={errorMessage}
+          openLinksInNewTab={true}
+          data-test-subj="errorMessageMarkdown"
+        />
+      </EuiPopover>
+    </I18nProvider>
   );
 };

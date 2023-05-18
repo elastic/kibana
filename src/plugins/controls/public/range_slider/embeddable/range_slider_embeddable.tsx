@@ -199,7 +199,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
         this.dataView = await this.dataViewsService.get(dataViewId);
-
         if (!this.dataView) {
           throw new Error(
             i18n.translate('controls.rangeSlider.errors.dataViewNotFound', {
@@ -208,16 +207,15 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
             })
           );
         }
-
         this.dispatch.setDataViewId(this.dataView.id);
       } catch (e) {
         this.dispatch.setRecoverableError(e.message);
       }
     }
 
-    if (!this.field || this.field.name !== fieldName) {
+    if (this.dataView && (!this.field || this.field.name !== fieldName)) {
       try {
-        this.field = this.dataView?.getFieldByName(fieldName);
+        this.field = this.dataView.getFieldByName(fieldName);
         if (this.field === undefined) {
           throw new Error(
             i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
