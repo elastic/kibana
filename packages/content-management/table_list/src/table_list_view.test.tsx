@@ -736,7 +736,9 @@ describe('TableListView', () => {
       await act(async () => {
         testBed = await setupTagFiltering({
           findItems,
-          fixedTagReferences: [{ id: 'id-tag-1', name: 'tag-1', description: '', color: '' }],
+          fixedTagReferences: [
+            { id: 'id-tag-1', name: 'tag-1', description: '', color: '', type: 'tag' },
+          ],
         });
       });
 
@@ -758,7 +760,9 @@ describe('TableListView', () => {
       await act(async () => {
         testBed = await setupTagFiltering({
           findItems,
-          fixedTagReferences: [{ id: 'id-tag-1', name: 'tag-1', description: '', color: '' }],
+          fixedTagReferences: [
+            { id: 'id-tag-1', name: 'tag-1', description: '', color: '', type: 'tag' },
+          ],
         });
       });
 

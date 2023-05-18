@@ -43,7 +43,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
-import { RowActions, TableItemsRowActions, Tag } from './types';
+import { RowActions, TableItemsRowActions, TagReference } from './types';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -108,7 +108,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   contentEditor?: ContentEditorConfig;
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
-  fixedTagReferences?: Tag[] | null;
+  fixedTagReferences?: TagReference[] | null;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -244,14 +244,30 @@ const appendQuery = (q: Query, tagName: string) => {
   return q.addOrFieldValue('tag', tagName, true, 'eq');
 };
 
-const getDefaultQuery = (initialQuery: string, fixedTagReferences: Tag[] | null | undefined) => {
+const getDefaultQuery = (
+  initialQuery: string,
+  fixedTagReferences: TagReference[] | null | undefined
+) => {
   const query = new Query(Ast.create([]), undefined, initialQuery);
-
+  const uniqueQueryArray = fixedTagReferences?.reduce<string[]>((acc, { name }) => {
+    if (name && acc.indexOf(name) === -1) {
+      acc.push(name);
+    }
+    return acc;
+  }, []);
   return (
-    fixedTagReferences?.reduce((q, ref) => {
-      return appendQuery(q, ref.name);
+    uniqueQueryArray?.reduce((q, ref) => {
+      return appendQuery(q, ref);
     }, query) ?? query
   );
+};
+
+const getFindItemReference = (
+  references: SavedObjectsFindOptionsReference[] | undefined,
+  fixedTagReferences?: TagReference[] | null | undefined
+): SavedObjectsFindOptionsReference[] | undefined => {
+  const fixedTagFindReferences = fixedTagReferences?.map(({ id, type }) => ({ id, type })) ?? [];
+  return [...(references ?? []), ...fixedTagFindReferences];
 };
 
 function TableListViewComp<T extends UserContentCommonSchema>({
@@ -404,7 +420,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           };
 
       const response = await findItems(searchQueryParsed, {
-        references,
+        references: getFindItemReference(references, fixedTagReferences),
         referencesToExclude,
       });
 
@@ -426,7 +442,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems]);
+  }, [searchQueryParser, searchQuery.text, findItems, fixedTagReferences]);
 
   const updateQuery = useCallback(
     (query: Query) => {

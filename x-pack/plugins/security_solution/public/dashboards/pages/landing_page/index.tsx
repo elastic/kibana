@@ -28,14 +28,15 @@ const getInitialFilterString = (securityTags: Tag[] | null | undefined) => {
   if (!securityTags) {
     return;
   }
-  const queryArray = securityTags?.reduce<string[]>((acc, { name }) => {
-    if (name) {
-      acc.push(`"${name}"`);
+  const uniqueQueryArray = securityTags?.reduce<string[]>((acc, { name }) => {
+    const nameString = `"${name}"`;
+    if (name && acc.indexOf(nameString) === -1) {
+      acc.push(nameString);
     }
     return acc;
   }, []);
 
-  const query = [...new Set(queryArray)].join(' or');
+  const query = [uniqueQueryArray].join(' or');
   return `tag:(${query})`;
 };
 

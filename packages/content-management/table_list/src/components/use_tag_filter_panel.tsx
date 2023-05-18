@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import type { MouseEvent } from 'react';
 import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType } from '@elastic/eui';
@@ -39,6 +39,12 @@ export interface Params {
   fixedTagReferences?: Tag[] | null;
 }
 
+const getTotalActiveFilters = (options: TagOptionItem[], fixedTagReferences?: Tag[] | null) =>
+  Math.max(
+    fixedTagReferences?.length ?? 0,
+    options.filter((option) => option.checked === 'on').length ?? 0
+  );
+
 export const useTagFilterPanel = ({
   query,
   tagsToTableItemMap,
@@ -55,7 +61,10 @@ export const useTagFilterPanel = ({
   const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
-  const totalActiveFilters = Object.keys(tagSelection).length;
+  const totalActiveFilters = useMemo(
+    () => getTotalActiveFilters(options, fixedTagReferences),
+    [fixedTagReferences, options]
+  );
 
   const onSelectChange = useCallback(
     (updatedOptions: TagOptionItem[]) => {

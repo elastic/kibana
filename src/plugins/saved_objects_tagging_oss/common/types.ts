@@ -7,10 +7,11 @@
  */
 
 export interface Tag {
+  color: string;
+  description: string;
   id: string;
   name: string;
-  description: string;
-  color: string;
+  type: string;
 }
 
 export interface TagAttributes {

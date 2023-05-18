@@ -70,7 +70,9 @@ test('fixedTagReferences is passed through', async () => {
   pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
 
   let component: ReactWrapper;
-  const fixedTagReferences = [{ id: 'mockTagId', name: 'mockTagName', description: '', color: '' }];
+  const fixedTagReferences = [
+    { id: 'mockTagId', name: 'mockTagName', description: '', color: '', type: 'tag' },
+  ];
 
   await act(async () => {
     ({ component } = mountWith({ props: { fixedTagReferences } }));
