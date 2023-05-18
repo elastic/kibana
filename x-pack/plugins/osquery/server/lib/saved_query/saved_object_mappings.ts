@@ -12,7 +12,27 @@ import {
   savedQuerySavedObjectType,
   packSavedObjectType,
   packAssetSavedObjectType,
+  usageMetricSavedObjectType
 } from '../../../common/types';
+
+export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
+  properties: {
+    count: {
+      type: 'long',
+    },
+    errors: {
+      type: 'long',
+    },
+  },
+};
+
+export const usageMetricType: SavedObjectsType = {
+  name: usageMetricSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: usageMetricSavedObjectMappings,
+};
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
   dynamic: false,

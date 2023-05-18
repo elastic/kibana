@@ -83,6 +83,7 @@
           "namespace": "2f4316de49999235636386fe51dc06c1",
           "namespaces": "2f4316de49999235636386fe51dc06c1",
           "originId": "2f4316de49999235636386fe51dc06c1",
+          "osquery-manager-usage-metric": "4dc4f647d27247c002f56f22742175fe",
           "osquery-pack": "37af487fae033ccd92295fd20d1952f0",
           "osquery-pack-asset": "989d30eeccb25d62980739dc7790a875",
           "osquery-saved-query": "6bf77cfe41a55adb3a00d58e96d72ce9",
@@ -2480,6 +2481,16 @@
         },
         "originId": {
           "type": "keyword"
+        },
+        "osquery-manager-usage-metric": {
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "errors": {
+              "type": "long"
+            }
+          }
         },
         "osquery-pack": {
           "properties": {
