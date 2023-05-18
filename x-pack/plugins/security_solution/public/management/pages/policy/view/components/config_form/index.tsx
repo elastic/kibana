@@ -8,6 +8,7 @@
 import type { FC, ReactNode } from 'react';
 import React, { memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +18,8 @@ import {
   EuiShowFor,
   EuiPanel,
   EuiSpacer,
+  EuiTextColor,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { ThemeContext } from 'styled-components';
@@ -72,6 +75,24 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
           {supportedOss.length === 3 && (
             <EuiFlexItem grow={2}>
               <EuiText size="s">{'Settings will be used across all platforms'}</EuiText>
+            </EuiFlexItem>
+          )}
+
+          {osRestriction && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="row" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
+                      defaultMessage="Restrictions"
+                    />
+                  </EuiTextColor>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip type="warning" color="warning" content={osRestriction} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
 
