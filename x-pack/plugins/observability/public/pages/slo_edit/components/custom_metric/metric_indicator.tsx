@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFieldArray } from 'react-hook-form';
 import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
-import { range, first, xor, omit } from 'lodash';
+import { range, first, xor } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 
@@ -59,8 +59,8 @@ function createOptions(fields: Field[]): Option[] {
     .sort((a, b) => String(a.label).localeCompare(b.label));
 }
 
-function createEquationFromMetric(metrics: MetricCustomMetricDef['metrics']) {
-  return metrics.map((row) => row.name).join(' + ');
+function createEquationFromMetric(names: string[]) {
+  return names.join(' + ');
 }
 
 export function MetricIndicator({
@@ -76,7 +76,11 @@ export function MetricIndicator({
 
   const metricFields = (indexFields ?? []).filter((field) => field.type === 'number');
 
-  const { fields: metrics, replace } = useFieldArray({
+  const {
+    fields: metrics,
+    append,
+    remove,
+  } = useFieldArray({
     control,
     name: `indicator.params.${type}.metrics`,
   });
@@ -95,29 +99,25 @@ export function MetricIndicator({
   const disableAdd = metrics?.length === MAX_VARIABLES;
   const disableDelete = metrics?.length === 1;
 
-  const setDefaultEquationIfUnchanged = (
-    previousMetrics: MetricCustomMetricDef['metrics'],
-    nextMetrics: MetricCustomMetricDef['metrics']
-  ) => {
-    const defaultEquation = createEquationFromMetric(previousMetrics);
+  const setDefaultEquationIfUnchanged = (previousNames: string[], nextNames: string[]) => {
+    const defaultEquation = createEquationFromMetric(previousNames);
     if (defaultEquation === equation) {
-      setValue(`indicator.params.${type}.equation`, createEquationFromMetric(nextMetrics));
+      setValue(`indicator.params.${type}.equation`, createEquationFromMetric(nextNames));
     }
   };
 
-  const handleDeleteMetric = (name: string) => () => {
-    const nextMetrics = metrics.filter((row) => row.name !== name) ?? [NEW_CUSTOM_METRIC];
-    const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_CUSTOM_METRIC];
-    setDefaultEquationIfUnchanged(metrics, finalMetrics);
-    replace(finalMetrics.map((metric) => omit(metric, 'id')));
+  const handleDeleteMetric = (index: number) => () => {
+    const currentVars = metrics.map((m) => m.name) ?? ['A'];
+    const deletedVar = currentVars[index];
+    setDefaultEquationIfUnchanged(currentVars, xor(currentVars, [deletedVar]));
+    remove(index);
   };
 
   const handleAddMetric = () => {
-    const currentVars = metrics.map((m) => m.name) ?? [];
+    const currentVars = metrics.map((m) => m.name) ?? ['A'];
     const name = first(xor(VAR_NAMES, currentVars))!;
-    const nextMetrics = [...(metrics || []), { ...NEW_CUSTOM_METRIC, name }];
-    setDefaultEquationIfUnchanged(metrics, nextMetrics);
-    replace(nextMetrics.map((metric) => omit(metric, 'id')));
+    setDefaultEquationIfUnchanged(currentVars, [...currentVars, name]);
+    append({ ...NEW_CUSTOM_METRIC, name });
   };
 
   return (
@@ -131,7 +131,7 @@ export function MetricIndicator({
                 {metricLabel} {metric.name} {metricTooltip}
               </span>
             }
-            key={metric.name}
+            key={metric.id}
           >
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem>
@@ -191,7 +191,7 @@ export function MetricIndicator({
                   iconType="trash"
                   color="danger"
                   style={{ marginBottom: '0.2em' }}
-                  onClick={handleDeleteMetric(metric.name)}
+                  onClick={handleDeleteMetric(index)}
                   disabled={disableDelete}
                   title={i18n.translate(
                     'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
