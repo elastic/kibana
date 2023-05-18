@@ -16,14 +16,9 @@ import {
 } from '../../../common/mock';
 import { createStore } from '../../../common/store';
 import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
-import {
-  ALERTS_PATH,
-  ALERT_DETAILS_REDIRECT_PATH,
-  DEFAULT_ALERTS_INDEX,
-} from '../../../../common/constants';
+import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
 import { mockHistory } from '../../../common/utils/route/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { ALERTS } from '@kbn/cases-plugin/public/common/translations';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 
