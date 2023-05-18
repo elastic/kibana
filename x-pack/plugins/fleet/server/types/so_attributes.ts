@@ -135,3 +135,9 @@ export interface OutputSOAttributes {
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
 }
+
+export interface SettingsSOAttributes {
+  has_seen_add_data_notice?: boolean;
+  fleet_server_hosts?: string[];
+  prerelease_integrations_enabled: boolean;
+}

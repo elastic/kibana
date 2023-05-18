@@ -66,7 +66,6 @@ export type {
   TemplateMap,
   TemplateMapEntry,
   Settings,
-  SettingsSOAttributes,
   InstallType,
   InstallSource,
   InstallResult,
