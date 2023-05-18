@@ -110,8 +110,8 @@ const navTree: ChromeProjectNavigationNode[] = [
 const baseDeeplink: ChromeNavLink = {
   id: 'foo',
   title: 'Title from deep link',
-  url: '',
   href: 'https://elastic.co',
+  url: '',
   baseUrl: '',
 };
 
