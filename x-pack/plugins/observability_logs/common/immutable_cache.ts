@@ -18,7 +18,7 @@ export class ImmutableCache<KeyType, ValueType> implements IImmutableCache<KeyTy
     this.cache = cache ?? {};
   }
 
-  public get(key: KeyType) {
+  public get(key: KeyType): ValueType | undefined {
     const serializedKey = this.serialize(key);
     return this.cache[serializedKey];
   }

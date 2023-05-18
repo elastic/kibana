@@ -15,22 +15,17 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPanel,
   EuiPopover,
-  EuiSkeletonText,
-  EuiText,
-  EuiToolTip,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { dynamic } from '../../../common/dynamic';
 import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   INTEGRATION_PANEL_ID,
@@ -42,10 +37,6 @@ import {
   sortOptions,
   sortOrdersLabel,
   uncategorizedLabel,
-  noDataStreamsLabel,
-  noDataStreamsDescriptionLabel,
-  noDataStreamsRetryLabel,
-  errorLabel,
 } from './constants';
 import { getPopoverButtonStyles } from './data_stream_selector.utils';
 
@@ -58,6 +49,12 @@ import {
   SearchIntegrationsParams,
 } from '../../hooks/use_integrations';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
+import type { DataStreamSelectionHandler } from '../../customizations/custom_data_stream_selector';
+
+/**
+ * Lazy load hidden components
+ */
+const DataStreamsList = dynamic(() => import('./data_streams_list'));
 
 export interface DataStreamSelectorProps {
   title: string;
@@ -76,15 +73,13 @@ export interface DataStreamSelectorProps {
   /* Triggered when retrying to load the data streams */
   onStreamsReload: () => void;
   /* Triggered when a data stream entry is selected */
-  onStreamSelected: (dataStream: any) => Promise<void>;
+  onStreamSelected: DataStreamSelectionHandler;
 }
 
 type CurrentPanelId =
   | typeof INTEGRATION_PANEL_ID
   | typeof UNCATEGORIZED_STREAMS_PANEL_ID
   | `integration-${string}`;
-
-type StreamSelectionHandler = (stream: DataStream) => void;
 
 export function DataStreamSelector({
   title,
@@ -117,7 +112,7 @@ export function DataStreamSelector({
     setCurrentPanel(panelId as CurrentPanelId);
   };
 
-  const handleStreamSelection = useCallback<StreamSelectionHandler>(
+  const handleStreamSelection = useCallback<DataStreamSelectionHandler>(
     (dataStream) => {
       onStreamSelected(dataStream);
       closePopover();
@@ -179,7 +174,7 @@ export function DataStreamSelector({
       title: uncategorizedLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
       content: (
-        <DataStreamList
+        <DataStreamsList
           dataStreams={uncategorizedStreams}
           error={dataStreamsError}
           isLoading={isLoadingStreams}
@@ -285,81 +280,6 @@ const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) =>
   );
 };
 
-interface DataStreamListProps {
-  dataStreams: DataStream[] | null;
-  error: Error | null;
-  isLoading: boolean;
-  onStreamClick: StreamSelectionHandler;
-  onRetry: () => void;
-}
-
-const DataStreamList = ({
-  dataStreams,
-  error,
-  isLoading,
-  onStreamClick,
-  onRetry,
-}: DataStreamListProps) => {
-  const isEmpty = dataStreams == null || dataStreams.length <= 0;
-  const hasError = error !== null;
-
-  if (isLoading) {
-    return (
-      <EuiPanel>
-        <EuiSkeletonText lines={7} isLoading contentAriaLabel={uncategorizedLabel} />
-      </EuiPanel>
-    );
-  }
-
-  if (isEmpty) {
-    return (
-      <EuiEmptyPrompt
-        iconType="search"
-        paddingSize="m"
-        title={<h2>{noDataStreamsLabel}</h2>}
-        titleSize="s"
-        body={<p>{noDataStreamsDescriptionLabel}</p>}
-      />
-    );
-  }
-
-  if (hasError) {
-    return (
-      <EuiEmptyPrompt
-        iconType="warning"
-        iconColor="danger"
-        paddingSize="m"
-        title={<h2>{noDataStreamsLabel}</h2>}
-        titleSize="s"
-        body={
-          <FormattedMessage
-            id="xpack.observabilityLogs.dataStreamSelector.noDataStreamsError"
-            defaultMessage="An {error} occurred while getting your data streams. Please retry."
-            values={{
-              error: (
-                <EuiToolTip content={error.message}>
-                  <EuiText color="danger">{errorLabel}</EuiText>
-                </EuiToolTip>
-              ),
-            }}
-          />
-        }
-        actions={[<EuiButton onClick={onRetry}>{noDataStreamsRetryLabel}</EuiButton>]}
-      />
-    );
-  }
-
-  return (
-    <>
-      {dataStreams.map((stream) => (
-        <EuiContextMenuItem key={stream.name} onClick={() => onStreamClick(stream)}>
-          {stream.name}
-        </EuiContextMenuItem>
-      ))}
-    </>
-  );
-};
-
 interface IntegrationsTree {
   items: EuiContextMenuPanelItemDescriptor[];
   panels: EuiContextMenuPanelDescriptor[];
@@ -367,7 +287,7 @@ interface IntegrationsTree {
 
 interface IntegrationsTreeParams {
   list: Integration[];
-  onStreamSelected: StreamSelectionHandler;
+  onStreamSelected: DataStreamSelectionHandler;
   spyRef: RefCallback<HTMLButtonElement>;
 }
 

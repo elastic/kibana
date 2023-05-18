@@ -21,6 +21,8 @@ interface CustomDataStreamSelectorProps {
   stateContainer: DiscoverStateContainer;
 }
 
+export type DataStreamSelectionHandler = (stream: DataStream) => void;
+
 export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
@@ -42,7 +44,7 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     searchDataStreams,
   } = useDataStreamsContext();
 
-  const handleStreamSelection = (dataStream: DataStream) => {
+  const handleStreamSelection: DataStreamSelectionHandler = (dataStream) => {
     return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream);
   };
 

@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
+import { dynamic } from '../../common/dynamic';
 import type { CustomDataStreamSelectorBuilderProps } from './custom_data_stream_selector';
 
-const LazyCustomDataStreamSelector = lazy(() => import('./custom_data_stream_selector'));
+const LazyCustomDataStreamSelector = dynamic(() => import('./custom_data_stream_selector'));
 
-export function createLazyCustomDataStreamSelector(props: CustomDataStreamSelectorBuilderProps) {
-  return () => (
-    <Suspense fallback={null}>
-      <LazyCustomDataStreamSelector {...props} />
-    </Suspense>
-  );
-}
+export const createLazyCustomDataStreamSelector =
+  (props: CustomDataStreamSelectorBuilderProps) => () =>
+    <LazyCustomDataStreamSelector {...props} />;
