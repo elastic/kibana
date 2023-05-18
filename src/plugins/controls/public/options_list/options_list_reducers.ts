@@ -103,7 +103,7 @@ export const optionsListReducers = {
     state.componentState.invalidSelections = invalidSelections;
     state.componentState.validSelections = validSelections;
   },
-  setRecoverableError: (
+  setErrorMessage: (
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<string | undefined>
   ) => {

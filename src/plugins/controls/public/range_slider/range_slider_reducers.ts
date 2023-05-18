@@ -40,7 +40,7 @@ export const rangeSliderReducers = {
   ) => {
     state.output.dataViewId = action.payload;
   },
-  setRecoverableError: (
+  setErrorMessage: (
     state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<string | undefined>
   ) => {

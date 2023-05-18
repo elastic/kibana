@@ -247,7 +247,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             })
           );
       } catch (e) {
-        this.dispatch.setRecoverableError(e.message);
+        this.dispatch.setErrorMessage(e.message);
       }
 
       this.dispatch.setDataViewId(this.dataView?.id);
@@ -267,7 +267,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
         this.field = originalField.toSpec();
       } catch (e) {
-        this.dispatch.setRecoverableError(e.message);
+        this.dispatch.setErrorMessage(e.message);
       }
       this.dispatch.setField(this.field);
     }
@@ -331,7 +331,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           // from prematurely setting loading to `false` and updating the suggestions to show "No results"
           return;
         }
-        this.dispatch.setRecoverableError(response.error.message);
+        this.dispatch.setErrorMessage(response.error.message);
         return;
       }
 
@@ -365,13 +365,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       // publish filter
       const newFilters = await this.buildFilter();
       batch(() => {
-        this.dispatch.setRecoverableError(undefined);
+        this.dispatch.setErrorMessage(undefined);
         this.dispatch.setLoading(false);
         this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
-        this.dispatch.setRecoverableError(undefined);
+        this.dispatch.setErrorMessage(undefined);
         this.dispatch.updateQueryResults({
           availableOptions: [],
         });

@@ -140,7 +140,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       .catch((e) => {
         batch(() => {
           this.dispatch.setLoading(false);
-          this.dispatch.setRecoverableError(e.message);
+          this.dispatch.setErrorMessage(e.message);
         });
       })
       .then(async () => {
@@ -171,7 +171,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.subscriptions.add(
       dataFetchPipe.subscribe(async () =>
         this.runRangeSliderQuery().catch((e) => {
-          this.dispatch.setRecoverableError(e.message);
+          this.dispatch.setErrorMessage(e.message);
         })
       )
     );
@@ -209,7 +209,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         }
         this.dispatch.setDataViewId(this.dataView.id);
       } catch (e) {
-        this.dispatch.setRecoverableError(e.message);
+        this.dispatch.setErrorMessage(e.message);
       }
     }
 
@@ -227,7 +227,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
         this.dispatch.setField(this.field?.toSpec());
       } catch (e) {
-        this.dispatch.setRecoverableError(e.message);
+        this.dispatch.setErrorMessage(e.message);
       }
     }
 
@@ -373,7 +373,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         this.dispatch.setIsInvalid(!ignoreParentSettings?.ignoreValidations && hasEitherSelection);
         this.dispatch.setDataViewId(dataView.id);
         this.dispatch.publishFilters([]);
-        this.dispatch.setRecoverableError(undefined);
+        this.dispatch.setErrorMessage(undefined);
       });
       return;
     }
@@ -429,7 +429,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
           this.dispatch.setIsInvalid(true);
           this.dispatch.setDataViewId(dataView.id);
           this.dispatch.publishFilters([]);
-          this.dispatch.setRecoverableError(undefined);
+          this.dispatch.setErrorMessage(undefined);
         });
         return;
       }
@@ -440,13 +440,13 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.dispatch.setIsInvalid(false);
       this.dispatch.setDataViewId(dataView.id);
       this.dispatch.publishFilters([rangeFilter]);
-      this.dispatch.setRecoverableError(undefined);
+      this.dispatch.setErrorMessage(undefined);
     });
   };
 
   public reload = () => {
     this.runRangeSliderQuery().catch((e) => {
-      this.dispatch.setRecoverableError(e.message);
+      this.dispatch.setErrorMessage(e.message);
     });
   };
 
