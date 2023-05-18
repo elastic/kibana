@@ -487,7 +487,7 @@ x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_onboarding @elastic/apm-ui
 x-pack/plugins/observability @elastic/actionable-observability
-x-pack/plugins/observability_shared @elastic/actionable-observability
+x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
 packages/kbn-optimizer @elastic/kibana-operations
@@ -792,16 +792,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/serverless_security/ @elastic/appex-sharedux
 
-### Observability Plugins
-
-# Observability Shared App
-x-pack/plugins/observability_shared @elastic/observability-ui
-
-# Observability App
-x-pack/plugins/observability @elastic/actionable-observability
-
-# Observability App > Overview page
-x-pack/plugins/observability/public/pages/overview @elastic/observability-ui
+### Observability packages
 
 # Observability App > Alert Details
 x-pack/packages/observability/alert_details @elastic/actionable-observability
@@ -846,13 +837,6 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/synthetics @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/field_value_suggestions @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/core_web_vitals @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/load_when_in_view @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/filter_value_label @elastic/uptime
-/x-pack/plugins/observability/public/utils/observability_data_views @elastic/uptime
-/x-pack/plugins/observability/e2e @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -860,7 +844,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
 # Observability onboarding tour
-/x-pack/plugins/observability/public/components/shared/tour @elastic/platform-onboarding
+/x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
 /x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
 
 ### END Observability Plugins
@@ -1230,7 +1214,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/apm/**/*.scss @elastic/observability-design
 /x-pack/plugins/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
-/x-pack/plugins/observability/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
