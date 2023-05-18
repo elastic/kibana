@@ -19,8 +19,6 @@ export DISPLAY=:99
 
 echo "--- Security Solution tests (Chrome)"
 
-sudo sysctl -w vm.max_map_count=262144
-
 yarn --cwd x-pack/plugins/security_solution cypress:run-as-ci-parallel
 
 # node scripts/functional_tests \
