@@ -24,6 +24,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { PluginStart as DataViewsPublicPluginStart } from '@kbn/data-views-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 import { VIS_TYPE } from '../common/constants';
 import { VisTypeTimeseriesConfig } from '../config';
 import { getVisData } from './lib/get_vis_data';
@@ -48,7 +49,7 @@ export interface LegacySetup {
 
 interface VisTypeTimeseriesPluginSetupDependencies {
   home?: HomeServerPluginSetup;
-  visualizations: unknown;
+  visualizations: VisualizationsServerSetup;
 }
 
 interface VisTypeTimeseriesPluginStartDependencies {
@@ -128,7 +129,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     visDataRoutes(router, framework);
     fieldsRoutes(router, framework);
 
-    const { readOnly } = this.initializerContext.config.get();
+    const { readOnly } = this.initializerContext.config.get<VisTypeTimeseriesConfig>();
     if (readOnly) {
       plugins.visualizations.registerReadOnlyVisType(VIS_TYPE);
     }
