@@ -396,7 +396,7 @@ export const cli = () => {
             // });
           });
         },
-        { concurrency: 1 }
+        { concurrency: 3 }
       ).then((results) => {
         console.error('results', results);
         // renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
