@@ -7,17 +7,28 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import { PlatformIcon } from '../../../../../components/endpoint_responder/components/platforms';
 import { PolicyFormRowLayout } from './policy_form_row_layout';
 
+const HeaderContainer = styled.div`
+  position: sticky;
+  top: 94px;
+  z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
+  padding-top: 5px;
+  background-color: ${({ theme: { eui } }) => eui.euiHeaderBackgroundColor};
+`;
+
 export const PolicyFormHeader = memo(() => {
   return (
-    <PolicyFormRowLayout
-      label={<>&nbsp;</>}
-      windows={<PlatformIdentifier type="windows" />}
-      linux={<PlatformIdentifier type="linux" />}
-      macos={<PlatformIdentifier type="macos" />}
-    />
+    <HeaderContainer>
+      <PolicyFormRowLayout
+        label={<>&nbsp;</>}
+        windows={<PlatformIdentifier type="windows" />}
+        linux={<PlatformIdentifier type="linux" />}
+        macos={<PlatformIdentifier type="macos" />}
+      />
+    </HeaderContainer>
   );
 });
 PolicyFormHeader.displayName = 'PolicyFormHeader';

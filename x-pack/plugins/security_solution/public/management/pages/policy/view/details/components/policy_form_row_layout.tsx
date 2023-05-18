@@ -38,7 +38,7 @@ export const PolicyFormRowLayout = memo<PolicyFormRowLayoutProps>(
     }
 
     return (
-      <EuiFlexGroupStyled responsive={false} className="policyFormRow" gutterSize="s">
+      <EuiFlexGroupStyled responsive={false} className="policyFormRow" gutterSize="m">
         <EuiFlexItem grow={false} className="formRowLabel">
           {label}
         </EuiFlexItem>
