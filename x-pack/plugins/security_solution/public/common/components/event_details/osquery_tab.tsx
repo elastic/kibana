@@ -9,7 +9,6 @@ import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { ResponseActionsEmptyPrompt } from '../response_actions/response_actions_empty_prompt';
 import type { RawEventData } from './types';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -51,7 +50,7 @@ export const useOsqueryTab = ({
   ecsData?: Ecs;
 }) => {
   const {
-    services: { osquery, application },
+    services: { osquery },
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
@@ -105,14 +104,8 @@ export const useOsqueryTab = ({
     content: (
       <>
         <TabContentWrapper data-test-subj="osqueryViewWrapper">
-          {!application?.capabilities?.osquery?.read ? (
-            <ResponseActionsEmptyPrompt type="osquery" />
-          ) : (
-            <>
-              <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
-              <EuiSpacer size="s" />
-            </>
-          )}
+          <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
+          <EuiSpacer size="s" />
         </TabContentWrapper>
       </>
     ),

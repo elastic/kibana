@@ -102,8 +102,3 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 };
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
-
-export const OSQUERY_BASE = '.logs-osquery_manager';
-export const OSQUERY_ACTIONS_DS = `${OSQUERY_BASE}.actions`;
-export const OSQUERY_RESULTS_DS = `${OSQUERY_BASE}.results`;
-export const OSQUERY_ACTIONS_INDEX = `${OSQUERY_ACTIONS_DS}-*`;

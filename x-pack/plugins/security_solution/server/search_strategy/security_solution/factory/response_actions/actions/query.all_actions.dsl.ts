@@ -8,11 +8,9 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
 import type { ActionRequestOptions } from '../../../../../../common/search_strategy/security_solution/response_actions';
-import {
-  ENDPOINT_ACTIONS_INDEX,
-  OSQUERY_ACTIONS_INDEX,
-} from '../../../../../../common/endpoint/constants';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 
 export const buildActionsQuery = ({
   alertIds,

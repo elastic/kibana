@@ -7,8 +7,8 @@
 
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
 import type { LogsEndpointActionWithHosts } from '../../../endpoint/types';
-import type { LogsOsqueryAction } from './actions';
 import type { ResponseActionsQueries } from '.';
 
 export enum Direction {

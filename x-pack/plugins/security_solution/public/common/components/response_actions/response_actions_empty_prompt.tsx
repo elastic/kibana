@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 
 interface ResponseActionsEmptyPromptProps {
-  type: 'endpoint' | 'osquery';
+  type: 'endpoint';
 }
 
 export const ResponseActionsEmptyPrompt = ({ type }: ResponseActionsEmptyPromptProps) => {
@@ -21,11 +21,6 @@ export const ResponseActionsEmptyPrompt = ({ type }: ResponseActionsEmptyPromptP
         return {
           icon: 'logoSecurity',
           name: 'Elastic Defend',
-        };
-      case 'osquery':
-        return {
-          icon: 'logoOsquery',
-          name: 'Osquery',
         };
     }
   }, [type]);

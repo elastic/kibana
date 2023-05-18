@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ResponseActionsResults } from '../response_actions/response_actions_results';
