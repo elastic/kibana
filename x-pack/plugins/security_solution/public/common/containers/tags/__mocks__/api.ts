@@ -6,13 +6,16 @@
  */
 
 export const MOCK_TAG_ID = 'securityTagId';
+export const MOCK_TAG_NAME = 'test tag';
 
 export const DEFAULT_TAGS_RESPONSE = [
   {
     id: MOCK_TAG_ID,
-    name: 'test tag',
-    description: 'test tag description',
-    color: '#2c7b82',
+    attributes: {
+      name: MOCK_TAG_NAME,
+      description: 'test tag description',
+      color: '#2c7b82',
+    },
   },
 ];
 

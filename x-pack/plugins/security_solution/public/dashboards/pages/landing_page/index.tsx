@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../../../common/components/landing_links/landing_links_images';
-import { SecurityPageName, SECURITY_TAG_NAME } from '../../../../common/constants';
+import { SecurityPageName } from '../../../../common/constants';
 import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
 import { useRootNavLink } from '../../../common/links/nav_links';
 import { Title } from '../../../common/components/header_page/title';
@@ -23,8 +24,26 @@ import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 import { useCreateSecurityDashboardLink } from '../../hooks/use_create_security_dashboard_link';
 import { useSecurityTags } from '../../context/dashboard_context';
 
-const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
-  const { isLoading, url } = useCreateSecurityDashboardLink();
+const getInitialFilterString = (securityTags: Tag[] | null | undefined) => {
+  if (!securityTags) {
+    return;
+  }
+  const queryArray = securityTags?.reduce<string[]>((acc, { name }) => {
+    if (name) {
+      acc.push(`"${name}"`);
+    }
+    return acc;
+  }, []);
+
+  const query = [...new Set(queryArray)].join(' or');
+  return `tag:(${query})`;
+};
+
+const Header: React.FC<{ canCreateDashboard: boolean; isLoading: boolean; url: string }> = ({
+  canCreateDashboard,
+  isLoading,
+  url,
+}) => {
   const { navigateTo } = useNavigateTo();
   return (
     <EuiFlexGroup gutterSize="none" direction="row">
@@ -85,10 +104,15 @@ export const DashboardsLandingPage = () => {
   );
 
   const securityTags = useSecurityTags();
+  const initialFilter = useMemo(() => getInitialFilterString(securityTags), [securityTags]);
 
   return (
     <SecuritySolutionPageWrapper noPadding>
-      <Header canCreateDashboard={canCreateDashboard} />
+      <Header
+        canCreateDashboard={canCreateDashboard}
+        isLoading={loadingCreateDashboardUrl}
+        url={createDashboardUrl}
+      />
       <EuiSpacer size="xl" />
 
       <EuiTitle size="xxxs">
@@ -98,7 +122,7 @@ export const DashboardsLandingPage = () => {
       <LandingImageCards items={dashboardLinks} />
       <EuiSpacer size="m" />
 
-      {canReadDashboard && (
+      {canReadDashboard && securityTags && (
         <>
           <DashboardListingTable
             disableCreateDashboardButton={loadingCreateDashboardUrl}
@@ -108,7 +132,7 @@ export const DashboardsLandingPage = () => {
             restrictPageSectionWidth={false}
             fixedTagReferences={securityTags}
             withPageTemplateHeader={false}
-            initialFilter={`tag:("${SECURITY_TAG_NAME}")`}
+            initialFilter={initialFilter}
             urlStateEnabled={false}
           >
             <EuiTitle size="xxxs">
