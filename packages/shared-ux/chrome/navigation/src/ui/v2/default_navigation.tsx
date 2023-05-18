@@ -45,7 +45,7 @@ export const DefaultNavigation: FC<Props> = ({ navTree }) => {
         }
 
         return (
-          <React.Fragment key={item.id}>
+          <React.Fragment key={id}>
             {item.children ? (
               <Navigation.Group
                 id={item.id}
