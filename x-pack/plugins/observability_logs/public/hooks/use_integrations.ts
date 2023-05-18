@@ -18,7 +18,7 @@ interface IntegrationsContextDeps {
 
 export interface SearchIntegrationsParams {
   name?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder: 'asc' | 'desc';
 }
 
 export type SearchIntegrations = (params: SearchIntegrationsParams) => void;
