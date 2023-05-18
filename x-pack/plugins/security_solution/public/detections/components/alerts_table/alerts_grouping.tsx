@@ -149,6 +149,12 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           setStoragePageSize(newArr);
           return newArr;
         });
+        // set page index to 0 when page size is changed
+        setPageIndex((currentIndex) => {
+          const newArr = [...currentIndex];
+          newArr[groupingLevel] = 0;
+          return newArr;
+        });
       }
     },
     [setStoragePageSize]

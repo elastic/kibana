@@ -413,6 +413,7 @@ packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-management
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-app-services
+x-pack/packages/kbn-infra-forge @elastic/actionable-observability
 x-pack/plugins/infra @elastic/infra-monitoring-ui
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
 src/plugins/input_control_vis @elastic/kibana-presentation
@@ -457,6 +458,7 @@ packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
+x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
@@ -952,6 +954,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/.telemetryrc.json @elastic/kibana-core
 /src/plugins/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
 /x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
+x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @elastic/kibana-telemetry @shahinakmal
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization @elastic/kibana-core
