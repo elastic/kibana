@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ConnectorMappings } from '../../../common/api';
+import type { GetDefaultMappingsResponse } from '../../../common/api';
+import { decodeOrThrow, GetDefaultMappingsResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { MappingsArgs } from './types';
@@ -15,7 +15,7 @@ import type { MappingsArgs } from './types';
 export const getMappings = async (
   { connector }: MappingsArgs,
   clientArgs: CasesClientArgs
-): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']> => {
+): Promise<GetDefaultMappingsResponse> => {
   const {
     unsecuredSavedObjectsClient,
     services: { connectorMappingsService },
@@ -33,7 +33,13 @@ export const getMappings = async (
       },
     });
 
-    return myConnectorMappings.saved_objects;
+    const res = myConnectorMappings.saved_objects.map((so) => ({
+      id: so.id,
+      version: so.version,
+      ...so.attributes,
+    }));
+
+    return decodeOrThrow(GetDefaultMappingsResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve mapping connector id: ${connector.id} type: ${connector.type}: ${error}`,

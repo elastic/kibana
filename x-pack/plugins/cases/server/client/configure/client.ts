@@ -11,7 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
@@ -22,9 +22,9 @@ import type {
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
-  ConnectorMappings,
   ConnectorMappingsAttributes,
   GetConfigureFindRequest,
+  GetDefaultMappingsResponse,
 } from '../../../common/api';
 import {
   CaseConfigurationsResponseRt,
@@ -33,6 +33,7 @@ import {
   excess,
   GetConfigureFindRequestRt,
   throwErrors,
+  FindActionConnectorResponseRt,
 } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -50,6 +51,7 @@ import type {
   ICasesConfigureRequest,
   ICasesConfigureResponse,
 } from '../typedoc_interfaces';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Defines the internal helper functions.
@@ -57,9 +59,7 @@ import type {
  * @ignore
  */
 export interface InternalConfigureSubClient {
-  getMappings(
-    params: MappingsArgs
-  ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']>;
+  getMappings(params: MappingsArgs): Promise<GetDefaultMappingsResponse>;
   createMappings(params: CreateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
   updateMappings(params: UpdateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
 }
@@ -99,8 +99,7 @@ export interface ConfigureSubClient {
  * @ignore
  */
 export const createInternalConfigurationSubClient = (
-  clientArgs: CasesClientArgs,
-  casesClientInternal: CasesClientInternal
+  clientArgs: CasesClientArgs
 ): InternalConfigureSubClient => {
   const configureSubClient: InternalConfigureSubClient = {
     getMappings: (params: MappingsArgs) => getMappings(params, clientArgs),
@@ -176,7 +175,7 @@ async function get(
           connector: null,
         };
 
-        let mappings: SavedObjectsFindResponse<ConnectorMappings>['saved_objects'] = [];
+        let mappings: GetDefaultMappingsResponse = [];
 
         if (connector != null) {
           try {
@@ -193,7 +192,7 @@ async function get(
         return {
           ...caseConfigureWithoutConnector,
           connector,
-          mappings: mappings.length > 0 ? mappings[0].attributes.mappings : [],
+          mappings: mappings.length > 0 ? [mappings[0]] : [],
           version: configuration.version ?? '',
           error,
           id: configuration.id,
@@ -201,7 +200,7 @@ async function get(
       }
     );
 
-    return CaseConfigurationsResponseRt.encode(configurations);
+    return decodeOrThrow(CaseConfigurationsResponseRt)(configurations);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -217,9 +216,11 @@ export async function getConnectors({
       {}
     );
 
-    return (await actionsClient.getAll()).filter((action) =>
+    const res = (await actionsClient.getAll()).filter((action) =>
       isConnectorSupported(action, actionTypes)
     );
+
+    return decodeOrThrow(FindActionConnectorResponseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get connectors: ${error}`, error, logger });
   }
@@ -296,7 +297,7 @@ async function update(
         connector: connector != null ? connector : configuration.attributes.connector,
       });
 
-      mappings = resMappings.length > 0 ? resMappings[0].attributes.mappings : [];
+      mappings = resMappings.length > 0 ? [resMappings[0]] : [];
 
       if (connector != null) {
         if (resMappings.length !== 0) {
@@ -333,7 +334,7 @@ async function update(
       originalConfiguration: configuration,
     });
 
-    return CaseConfigureResponseRt.encode({
+    const res = {
       ...configuration.attributes,
       ...patch.attributes,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
@@ -341,7 +342,9 @@ async function update(
       version: patch.version ?? '',
       error,
       id: patch.id,
-    });
+    };
+
+    return decodeOrThrow(CaseConfigureResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get patch configure in route: ${error}`,
@@ -443,7 +446,7 @@ async function create(
       id: savedObjectID,
     });
 
-    return CaseConfigureResponseRt.encode({
+    const res = {
       ...post.attributes,
       // Reserve for future implementations
       connector: post.attributes.connector,
@@ -451,7 +454,9 @@ async function create(
       version: post.version ?? '',
       error,
       id: post.id,
-    });
+    };
+
+    return decodeOrThrow(CaseConfigureResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to create case configuration: ${error}`,

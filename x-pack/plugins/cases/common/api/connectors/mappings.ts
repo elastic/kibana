@@ -49,6 +49,8 @@ const ConnectorFieldRt = rt.type({
 
 export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
 
-const GetDefaultMappingsResponseRt = rt.array(ConnectorMappingsAttributesRT);
+export const GetDefaultMappingsResponseRt = rt.array(
+  rt.intersection([ConnectorMappingsAttributesRT, rt.type({ id: rt.string, version: rt.string })])
+);
 
 export type GetDefaultMappingsResponse = rt.TypeOf<typeof GetDefaultMappingsResponseRt>;

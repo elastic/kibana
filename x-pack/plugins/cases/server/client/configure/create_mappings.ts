@@ -7,6 +7,7 @@
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { ConnectorMappingsAttributes } from '../../../common/api';
+import { ConnectorMappingsRt, decodeOrThrow } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { CreateMappingsArgs } from './types';
@@ -41,7 +42,10 @@ export const createMappings = async (
       refresh,
     });
 
-    return theMapping.attributes.mappings;
+    const res = theMapping.attributes;
+    const decodedRes = decodeOrThrow(ConnectorMappingsRt)(res);
+
+    return decodedRes.mappings;
   } catch (error) {
     throw createCaseError({
       message: `Failed to create mapping connector id: ${connector.id} type: ${connector.type}: ${error}`,
