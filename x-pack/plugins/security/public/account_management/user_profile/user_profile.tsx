@@ -29,7 +29,7 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart, ToastInput, ToastOptions } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient, ToastInput, ToastOptions } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -546,10 +546,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const isCloudUser = user.elastic_cloud_user;
 
-  const settingsService = services.settings;
-  const uiSettings = settingsService.client;
-  const isThemeOverridden = uiSettings.isOverridden('theme:darkMode');
-  const isOverriddenThemeDarkMode = uiSettings.get<boolean>('theme:darkMode');
+  const isDarkModeOverride = determineIfDarkModeOverride(services.settings.client);
 
   const rightSideItems = [
     {
@@ -678,13 +675,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   onShowPasswordForm={() => setShowChangePasswordForm(true)}
                 />
                 {isCloudUser ? null : (
-                  <UserSettingsEditor
-                    formik={formik}
-                    isDarkModeOverride={determineIfDarkModeOverride(
-                      isThemeOverridden,
-                      isOverriddenThemeDarkMode
-                    )}
-                  />
+                  <UserSettingsEditor formik={formik} isDarkModeOverride={isDarkModeOverride} />
                 )}
               </Form>
             </EuiPageTemplate>
@@ -919,9 +910,9 @@ function renderHelpText(isOverridden: boolean) {
   }
 }
 
-function determineIfDarkModeOverride(
-  isThemeOverridden: boolean,
-  isOverriddenThemeDarkMode: boolean
-) {
+function determineIfDarkModeOverride(settingsClient: IUiSettingsClient) {
+  const isThemeOverridden = settingsClient.isOverridden('theme:darkMode');
+  const isOverriddenThemeDarkMode = settingsClient.get<boolean>('theme:darkMode');
+
   return isThemeOverridden && isOverriddenThemeDarkMode;
 }
