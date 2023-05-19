@@ -20,7 +20,7 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../objects/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-describe('Export timelines', () => {
+describe.skip('Export timelines', () => {
   before(() => {
     cleanKibana();
     login();

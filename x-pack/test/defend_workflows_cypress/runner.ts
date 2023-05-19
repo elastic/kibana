@@ -54,15 +54,15 @@ async function withFleetAgent(
 }
 
 export async function DefendWorkflowsCypressCliTestRunner(context: FtrProviderContext) {
-  await startDefendWorkflowsCypress(context, 'dw:run');
+  return startDefendWorkflowsCypress(context, 'dw:run');
 }
 
 export async function DefendWorkflowsCypressVisualTestRunner(context: FtrProviderContext) {
-  await startDefendWorkflowsCypress(context, 'dw:open');
+  return startDefendWorkflowsCypress(context, 'dw:open');
 }
 
 export async function DefendWorkflowsCypressEndpointTestRunner(context: FtrProviderContext) {
-  await withFleetAgent(context, (runnerEnv) =>
+  return withFleetAgent(context, (runnerEnv) =>
     startDefendWorkflowsCypress(context, 'dw:endpoint:open', runnerEnv)
   );
 }
@@ -78,17 +78,16 @@ function startDefendWorkflowsCypress(
 
   const env = {
     FORCE_COLOR: '1',
-    CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-    CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
-    CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
-    CYPRESS_FLEET_SERVER_URL: fleetServerUrl,
-    CYPRESS_KIBANA_URL: Url.format({
+    ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+    ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+    ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
+    FLEET_SERVER_URL: fleetServerUrl,
+    KIBANA_URL: Url.format({
       protocol: config.get('servers.kibana.protocol'),
       hostname: config.get('servers.kibana.hostname'),
       port: config.get('servers.kibana.port'),
     }),
-    CYPRESS_ENDPOINT_VM_NAME: runnerEnv?.agentVmName,
-    // ...process.env,
+    ENDPOINT_VM_NAME: runnerEnv?.agentVmName,
   };
 
   return env;

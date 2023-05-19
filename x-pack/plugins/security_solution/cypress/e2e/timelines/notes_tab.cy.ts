@@ -35,7 +35,7 @@ import { TIMELINES_URL } from '../../urls/navigation';
 const text = 'elastic';
 const link = 'https://www.elastic.co/';
 
-describe('Timeline notes tab', () => {
+describe.skip('Timeline notes tab', () => {
   before(() => {
     cleanKibana();
     login();

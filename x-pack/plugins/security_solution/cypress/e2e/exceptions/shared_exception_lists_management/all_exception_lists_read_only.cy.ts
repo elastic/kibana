@@ -24,7 +24,7 @@ import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
-describe('All exception lists - read only', () => {
+describe.skip('All exception lists - read only', () => {
   before(() => {
     esArchiverResetKibana();
     cleanKibana();

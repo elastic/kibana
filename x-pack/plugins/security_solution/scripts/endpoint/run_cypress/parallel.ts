@@ -65,11 +65,15 @@ export const cli = () => {
 
       console.error('process.argv', argv);
 
+      const cypressConfigFile = await import(require.resolve(`../../../${argv.configFile}`));
+
       const files = retrieveIntegrations(
         argv?.spec
           ? argv?.spec.includes(',')
             ? argv?.spec.split(',')
             : [argv?.spec]
+          : cypressConfigFile?.e2e?.specPattern
+          ? cypressConfigFile?.e2e?.specPattern
           : [
               // 'cypress/e2e/cases/creation.cy.ts',
               // 'cypress/e2e/cases/privileges.cy.ts',
@@ -80,8 +84,10 @@ export const cli = () => {
             ]
       );
 
-      // console.error('process', process);
-      // console.error('process.argv', argv);
+      if (!files.length) {
+        throw new Error('No files found');
+      }
+
       console.error('files', files);
 
       const esPorts: number[] = [9200, 9220];
@@ -118,9 +124,10 @@ export const cli = () => {
         return fleetServerPort;
       };
 
-      const cleanupServerPorts = ({ esPort, kibanaPort }) => {
+      const cleanupServerPorts = ({ esPort, kibanaPort, fleetServerPort }) => {
         _.pull(esPorts, esPort);
         _.pull(kibanaPorts, kibanaPort);
+        _.pull(fleetServerPorts, fleetServerPort);
       };
 
       const parseTestFileConfig = (
@@ -365,7 +372,7 @@ export const cli = () => {
 
             await procs.stop('kibana');
             shutdownEs();
-            cleanupServerPorts({ esPort, kibanaPort });
+            cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
 
             // return pRetry(
             //   () =>
