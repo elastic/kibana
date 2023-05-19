@@ -54,7 +54,7 @@ interface CreateRuntimeServicesOptions {
 export const createRuntimeServices = async ({
   kibanaUrl,
   elasticsearchUrl,
-  fleetServerUrl,
+  fleetServerUrl = 'https://localhost:8220',
   username: _username,
   password: _password,
   log = new ToolingLog(),

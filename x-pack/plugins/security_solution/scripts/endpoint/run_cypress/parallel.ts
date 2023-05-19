@@ -47,7 +47,7 @@ const retrieveIntegrations = (
     : 1,
   chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
     ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-    : 1
+    : 0
 ) => {
   const integrationsPaths = globby.sync(specPattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
