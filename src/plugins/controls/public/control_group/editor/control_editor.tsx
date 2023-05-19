@@ -172,7 +172,7 @@ export const ControlEditor = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
-        <EuiForm>
+        <EuiForm fullWidth>
           {!editorConfig?.hideDataViewSelector && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getDataViewTitle()}>
               <DataViewPicker
