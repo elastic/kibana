@@ -90,8 +90,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        synthtraceEsClient.clean();
         await es.indices.delete({ index: 'traces-apm-default' });
+        await synthtraceEsClient.clean();
       });
 
       it('returns a list of items with mapping issues', async () => {

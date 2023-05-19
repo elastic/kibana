@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiCode,
-  EuiIcon,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCode, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
 export function DiagnosticsInvalidFieldMappings() {
