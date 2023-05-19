@@ -32,7 +32,7 @@ export const retrieveRiskInputs = async ({
         should: indices.map((index) => ({
           bool: buildBoolQueryForIdsOfIndex(
             index,
-            inputsByIndex[index].map((input) => input._id)
+            inputsByIndex[index].map((input) => input.id)
           ),
         })),
 
