@@ -14,6 +14,7 @@
 import React from 'react';
 import { useObservable } from 'react-use';
 import { i18n } from '@kbn/i18n';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../../lib/kibana';
 import { useBreadcrumbs } from '../breadcrumbs';
 import { SecuritySideNav } from '../security_side_nav';
@@ -22,7 +23,7 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
   defaultMessage: 'Security',
 });
 
-export const useSecuritySolutionNavigation = () => {
+export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] => {
   const { isSidebarEnabled$ } = useKibana().services;
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
 
