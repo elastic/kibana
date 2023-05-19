@@ -224,11 +224,11 @@ function addSeverityAndEventTypeInBody(bodyString: string,severity: string,event
   resultObj['hits']['hits'] = {};
   resultObj['hits']['hits']["_source"] = {};
   resultObj['hits']['hits']["_source"]["rawData"] = bodyObj;
-  resultObj['hits']['hits']["_source"]["event"]={};
-  resultObj['hits']['hits']["_source"]["event"]["type"] = eventType;
-  resultObj['hits']['hits']["_source"]["kibana"] ={};
-  resultObj['hits']['hits']["_source"]["kibana"]["alert"]={};
-  resultObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] = severity;
+  // resultObj['hits']['hits']["_source"]["event"]={};
+  resultObj['hits']['hits']["_source"]["event.type"] = eventType;
+  // resultObj['hits']['hits']["_source"]["kibana"] ={};
+  // resultObj['hits']['hits']["_source"]["kibana"]["alert"]={};
+  resultObj['hits']['hits']["_source"]["kibana.alert.severity"] = severity;
   result = JSON.stringify(resultObj)
   return result
 }

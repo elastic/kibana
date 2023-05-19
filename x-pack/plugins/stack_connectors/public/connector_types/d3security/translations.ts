@@ -8,31 +8,31 @@
 import { i18n } from '@kbn/i18n';
 
 export const D3_URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.methodTextFieldLabel',
+  'xpack.stackConnectors.components.d3security.urlFieldLabel',
   {
     defaultMessage: 'URL',
   }
 );
 export const D3_EventType_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.methodTextFieldLabel',
+  'xpack.stackConnectors.components.d3security.eventTypeFieldLabel',
   {
     defaultMessage: 'Event Type',
   }
 );
 export const D3_Severity_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.methodTextFieldLabel',
+  'xpack.stackConnectors.components.d3security.severityFieldLabel',
   {
     defaultMessage: 'Severity',
   }
 );
 export const D3_TOKEN_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.methodTextFieldLabel',
+  'xpack.stackConnectors.components.d3security.tokenFieldLabel',
   {
     defaultMessage: 'Token',
   }
 );
 export const BODY_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookBodyText',
+  'xpack.stackConnectors.components.d3security.requiredBodyTextField',
   {
     defaultMessage: 'Body is required.',
   }

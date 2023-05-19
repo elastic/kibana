@@ -14,8 +14,6 @@ import {
   SecretsFieldSchema,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-
-
 const configFormSchema: ConfigFieldSchema[] = [
   { id: 'url', label: i18n.D3_URL_LABEL, isUrlField: true },
 ];
@@ -25,17 +23,14 @@ const secretsFormSchema: SecretsFieldSchema[] = [
 ];
 
 const D3SecurityConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
-
   return (
-      <>
-          <SimpleConnectorForm
-            isEdit={isEdit}
-            readOnly={readOnly}
-            configFormSchema={configFormSchema}
-            secretsFormSchema={secretsFormSchema} />
-
-    
-      </>
+    <>
+      <SimpleConnectorForm
+        isEdit={isEdit}
+        readOnly={readOnly}
+        configFormSchema={configFormSchema}
+        secretsFormSchema={secretsFormSchema} />
+    </>
   );
 };
 

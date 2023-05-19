@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
+        'actions:.d3security',
         'actions:.cases-webhook',
         'actions:.email',
         'actions:.index',
