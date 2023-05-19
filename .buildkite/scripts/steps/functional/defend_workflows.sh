@@ -2,12 +2,10 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
-
-.buildkite/scripts/bootstrap.sh
-node scripts/build_kibana_platform_plugins.js
+source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-defend-workflows-cypress
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 Xvfb -screen 0 1680x946x24 :99 &
 
