@@ -213,7 +213,7 @@ export const cli = () => {
             const config = await readConfigFile(
               log,
               EsVersion.getDefault(),
-              argv.ftrConfigFile,
+              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile,
               {
                 servers: {
                   elasticsearch: {
@@ -477,7 +477,6 @@ export const cli = () => {
         },
         { concurrency: 3 }
       ).then((results) => {
-        // console.error('results', results);
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
 
         const hasFailedTests = _.some(results, (result) => result.failures > 0);
@@ -486,7 +485,7 @@ export const cli = () => {
           throw new Error('1');
         }
 
-        // process.exit(_.some(results, (result) => result.failures > 0) ? 1 : 0);
+        return 0;
       });
     },
     {
