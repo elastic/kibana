@@ -13,4 +13,4 @@ export DISPLAY=:99
 
 echo "--- Response Ops Cypress Tests on Security Solution"
 
-yarn --cwd x-pack/plugins/security_solution cypress:run:responseops
+yarn --cwd x-pack/plugins/security_solution cypress:run:respops
