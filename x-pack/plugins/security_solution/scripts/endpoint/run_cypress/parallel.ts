@@ -42,8 +42,8 @@ import { getLocalhostRealIp } from '../common/localhost_services';
 
 const retrieveIntegrations = (
   specPattern: string[],
-  chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10) + 1
+  chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
     : 1,
   chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
     ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
@@ -54,7 +54,7 @@ const retrieveIntegrations = (
 
   console.error('integrationsPaths', integrationsPaths, chunksTotal, chunkSize, chunkIndex);
 
-  return _.chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
+  return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
 };
 
 export const cli = () => {
