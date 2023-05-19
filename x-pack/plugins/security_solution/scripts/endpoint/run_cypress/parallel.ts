@@ -42,15 +42,19 @@ import { getLocalhostRealIp } from '../common/localhost_services';
 
 const retrieveIntegrations = (
   specPattern: string[],
-  chunksTotal: string = '1',
-  chunkIndex: string = '1'
+  chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB
+    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10) + 1
+    : 1,
+  chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+    : 1
 ) => {
   const integrationsPaths = globby.sync(specPattern);
-  const chunkSize = Math.ceil(integrationsPaths.length / parseInt(chunksTotal, 10));
+  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
   console.error('integrationsPaths', integrationsPaths, chunksTotal, chunkSize, chunkIndex);
 
-  return _.chunk(integrationsPaths, chunkSize)[parseInt(chunkIndex, 10) - 1];
+  return _.chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
 };
 
 export const cli = () => {
@@ -71,9 +75,7 @@ export const cli = () => {
               '**/cypress/e2e/dashboards/*.cy.ts',
               '**/cypress/e2e/detection_alerts/*.cy.ts',
               // '**/cypress/e2e/detection_rules/*.cy.ts',
-            ],
-        process.env.CLI_NUMBER,
-        process.env.CLI_COUNT
+            ]
       );
 
       // console.error('process', process);
