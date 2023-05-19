@@ -60,7 +60,8 @@ export const THREAT_ITEM_ENTRY_DELETE_BUTTON = '[data-test-subj="itemEntryDelete
 
 export const THREAT_MATCH_OR_BUTTON = '[data-test-subj="orButton"]';
 
-export const THREAT_COMBO_BOX_INPUT = '[data-test-subj="fieldAutocompleteComboBox"]';
+export const THREAT_COMBO_BOX_INPUT =
+  '[data-test-subj="stepDefineRule"] [data-test-subj="fieldAutocompleteComboBox"]';
 
 export const INVALID_MATCH_CONTENT = 'All matches require both a field and threat index field.';
 

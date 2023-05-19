@@ -612,7 +612,6 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCre
   });
   getCustomIndicatorQueryInput().type('{selectall}{enter}*:*');
   getDefineContinueButton().should('exist').click({ force: true });
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {

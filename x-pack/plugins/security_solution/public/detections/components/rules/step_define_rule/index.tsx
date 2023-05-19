@@ -779,7 +779,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     'data-test-subj': 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
                     euiFieldProps: {
                       disabled: isLoading,
-                      label: i18n.getSavedQueryCheckboxLabel(queryBar.title),
+                      label: queryBar.title
+                        ? i18n.getSavedQueryCheckboxLabel(queryBar.title)
+                        : i18n.getSavedQueryCheckboxLabelWithoutName(),
                     },
                   }}
                 />

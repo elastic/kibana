@@ -85,14 +85,20 @@ export const SAVED_QUERY_FORM_ROW_LABEL = i18n.translate(
   }
 );
 
-export const getSavedQueryCheckboxLabel = (savedQueryName: string | undefined) =>
+export const getSavedQueryCheckboxLabel = (savedQueryName: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldShouldLoadQueryDynamicallyLabel',
     {
-      defaultMessage: savedQueryName
-        ? 'Load saved query "{savedQueryName}" dynamically on each rule execution'
-        : 'Load saved query dynamically on each rule execution',
+      defaultMessage: 'Load saved query "{savedQueryName}" dynamically on each rule execution',
       values: { savedQueryName },
+    }
+  );
+
+export const getSavedQueryCheckboxLabelWithoutName = () =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldShouldLoadQueryDynamicallyLabelWithoutName',
+    {
+      defaultMessage: 'Load saved query dynamically on each rule execution',
     }
   );
 
