@@ -8,8 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { Query } from '@elastic/eui';
 
-import type { Tag as TagReference } from '@kbn/saved-objects-tagging-plugin/common';
-import type { Tag } from './types';
+import type { Tag, TagReference } from './types';
 
 import type { UserContentCommonSchema } from './table_list_view';
 

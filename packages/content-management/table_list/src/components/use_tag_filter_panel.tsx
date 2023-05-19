@@ -10,8 +10,7 @@ import type { MouseEvent } from 'react';
 import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType } from '@elastic/eui';
 
-import type { Tag as TagReference } from '@kbn/saved-objects-tagging-plugin/common';
-import type { Tag } from '../types';
+import type { Tag, TagReference } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 

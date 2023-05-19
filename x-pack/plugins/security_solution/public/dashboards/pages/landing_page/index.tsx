@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } fro
 import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../../../common/components/landing_links/landing_links_images';
@@ -22,9 +21,10 @@ import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemet
 import { DASHBOARDS_PAGE_TITLE } from '../translations';
 import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 import { useCreateSecurityDashboardLink } from '../../hooks/use_create_security_dashboard_link';
+import type { TagReference } from '../../context/dashboard_context';
 import { useSecurityTags } from '../../context/dashboard_context';
 
-const getInitialFilterString = (securityTags: Tag[] | null | undefined) => {
+const getInitialFilterString = (securityTags: TagReference[] | null | undefined) => {
   if (!securityTags) {
     return;
   }

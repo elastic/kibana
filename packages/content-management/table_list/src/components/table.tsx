@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { Tag as TagReference } from '@kbn/saved-objects-tagging-plugin/common';
 import { useServices } from '../services';
 import type { Action } from '../actions';
 import type {
@@ -29,7 +28,7 @@ import type {
   Props as TableListViewProps,
   UserContentCommonSchema,
 } from '../table_list_view';
-import type { TableItemsRowActions } from '../types';
+import type { TableItemsRowActions, TagReference } from '../types';
 
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
@@ -53,7 +52,6 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   dispatch: Dispatch<Action<T>>;
   entityName: string;
   entityNamePlural: string;
-  fixedTag?: string;
   hasUpdatedAtMetadata: boolean;
   isFetchingItems: boolean;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
@@ -73,7 +71,6 @@ export function Table<T extends UserContentCommonSchema>({
   dispatch,
   entityName,
   entityNamePlural,
-  fixedTag,
   hasUpdatedAtMetadata,
   isFetchingItems,
   items,
