@@ -57,16 +57,12 @@ const AlertsTab = ({
 }) => (
   <>
     {ALERTS_TAB}
-    {totalAlerts
-      ? totalAlerts > 0 && (
-          <StyledNotificationBadge
-            data-test-subj="case-view-alerts-stats-badge"
-            color={activeTab === CASE_VIEW_PAGE_TABS.ALERTS ? 'accent' : 'subdued'}
-          >
-            {totalAlerts}
-          </StyledNotificationBadge>
-        )
-      : null}
+    <StyledNotificationBadge
+      data-test-subj="case-view-alerts-stats-badge"
+      color={activeTab === CASE_VIEW_PAGE_TABS.ALERTS ? 'accent' : 'subdued'}
+    >
+      {totalAlerts || 0}
+    </StyledNotificationBadge>
     {isExperimental && (
       <ExperimentalBadge
         label={EXPERIMENTAL_LABEL}

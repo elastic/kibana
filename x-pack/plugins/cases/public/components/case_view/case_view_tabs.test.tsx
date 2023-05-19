@@ -150,12 +150,6 @@ describe('CaseViewTabs', () => {
     ).not.toMatch(/accent/);
   });
 
-  it('the alerts tab count should not be displayed when the total alerts is equal to zero', async () => {
-    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
-
-    expect(screen.queryByTestId('case-view-alerts-stats-badge')).not.toBeInTheDocument();
-  });
-
   it('navigates to the activity tab when the activity tab is clicked', async () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     appMockRenderer.render(<CaseViewTabs {...caseProps} />);
