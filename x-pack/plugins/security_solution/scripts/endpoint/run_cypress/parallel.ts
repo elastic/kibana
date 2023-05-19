@@ -34,11 +34,8 @@ import * as parser from '@babel/parser';
 import type {
   ExpressionStatement,
   Identifier,
-  NumericLiteral,
   ObjectExpression,
-  StringLiteral,
   ObjectProperty,
-  CallExpression,
 } from '@babel/types';
 // import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
