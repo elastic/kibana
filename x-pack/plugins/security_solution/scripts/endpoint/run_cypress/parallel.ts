@@ -15,7 +15,6 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
-// import cypress from 'cypress';
 
 import {
   FunctionalTestRunner,
@@ -41,23 +40,44 @@ import type {
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../common/localhost_services';
 
+const retrieveIntegrations = (
+  specPattern: string[],
+  chunksTotal: string = '1',
+  chunkIndex: string = '1'
+) => {
+  const integrationsPaths = globby.sync(specPattern);
+  const chunkSize = Math.ceil(integrationsPaths.length / parseInt(chunksTotal, 10));
+
+  console.error('integrationsPaths', integrationsPaths, chunksTotal, chunkSize, chunkIndex);
+
+  return _.chunk(integrationsPaths, chunkSize)[parseInt(chunkIndex, 10) - 1];
+};
+
 export const cli = () => {
   run(
     async (extraoptions) => {
       console.error('extraoptions', extraoptions);
       const { argv } = yargs(process.argv.slice(2));
 
-      const files = await globby([
-        // 'cypress/e2e/cases/creation.cy.ts',
-        // 'cypress/e2e/cases/privileges.cy.ts',
-        '**/cypress/e2e/cases/*.cy.ts',
-        '**/cypress/e2e/dashboards/*.cy.ts',
-        '**/cypress/e2e/detection_alerts/*.cy.ts',
-        // '**/cypress/e2e/detection_rules/*.cy.ts',
-      ]);
+      console.error('process.argv', argv);
+
+      const files = retrieveIntegrations(
+        argv?.spec
+          ? [argv.spec as string]
+          : [
+              // 'cypress/e2e/cases/creation.cy.ts',
+              // 'cypress/e2e/cases/privileges.cy.ts',
+              '**/cypress/e2e/cases/*.cy.ts',
+              '**/cypress/e2e/dashboards/*.cy.ts',
+              '**/cypress/e2e/detection_alerts/*.cy.ts',
+              // '**/cypress/e2e/detection_rules/*.cy.ts',
+            ],
+        process.env.CLI_NUMBER,
+        process.env.CLI_COUNT
+      );
 
       // console.error('process', process);
-      console.error('process.argv', argv);
+      // console.error('process.argv', argv);
       console.error('files', files);
 
       const esPorts: number[] = [9200, 9220];
@@ -451,11 +471,18 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: 4 }
+        { concurrency: 3 }
       ).then((results) => {
         // console.error('results', results);
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
-        // process.exit(_.some(results, (result) => result > 0) ? 1 : 0);
+
+        const hasFailedTests = _.some(results, (result) => result.failures > 0);
+
+        if (hasFailedTests) {
+          throw new Error('1');
+        }
+
+        // process.exit(_.some(results, (result) => result.failures > 0) ? 1 : 0);
       });
     },
     {

@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import { resolve } from 'path';
-import globby from 'globby';
-
 import Url from 'url';
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
-
 import semver from 'semver';
-import { FtrProviderContext } from './ftr_provider_context';
 
-const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
-  const pattern = resolve(__dirname, '../../plugins/security_solution/cypress/e2e/**/*.cy.ts');
-  const integrationsPaths = globby.sync(pattern);
-  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
-
-  return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
-};
+import { FtrProviderContext } from '../common/ftr_provider_context';
+export type { FtrProviderContext } from '../common/ftr_provider_context';
 
 export async function SecuritySolutionConfigurableCypressTestRunner(
   { getService }: FtrProviderContext,
@@ -70,46 +60,6 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
   //     wait: true,
   //   });
   // });
-}
-
-/**
- * Takes total CI jobs number(totalCiJobs) between which tests will be split and sequential number of the job(ciJobNumber).
- * This helper will split file list cypress integrations into chunks, and run integrations in chunk which match ciJobNumber
- * If both totalCiJobs === 1 && ciJobNumber === 1, this function will run all existing tests, without splitting them
- * @param context FtrProviderContext
- * @param {number} totalCiJobs - total number of jobs between which tests will be split
- * @param {number} ciJobNumber - number of job
- * @returns
- */
-export async function SecuritySolutionCypressCliTestRunnerCI(
-  context: FtrProviderContext,
-  totalCiJobs: number,
-  ciJobNumber: number
-) {
-  const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:spec', {
-    SPEC_LIST: integrations.join(','),
-  });
-}
-
-export async function SecuritySolutionCypressCliResponseOpsTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:respops');
-}
-
-export async function SecuritySolutionCypressCliCasesTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:cases');
-}
-
-export async function SecuritySolutionCypressCliTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run');
-}
-
-export async function SecuritySolutionCypressCliFirefoxTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:firefox');
-}
-
-export async function SecuritySolutionCypressVisualTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:open');
 }
 
 export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
