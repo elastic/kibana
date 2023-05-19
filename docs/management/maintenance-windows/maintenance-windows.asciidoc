@@ -1,9 +1,10 @@
 [[maintenance-windows]]
 == Maintenance windows
-:description: Maintenance windows enable you to suppress rule notifications.
-:tags-products: [kibana, alerting] 
-:tags-content-type: [overview] 
-:tags-user-goals: [manage]
+
+:frontmatter-description: Maintenance windows enable you to suppress rule notifications.
+:frontmatter-tags-products: [kibana, alerting] 
+:frontmatter-tags-content-type: [overview] 
+:frontmatter-tags-user-goals: [manage]
 
 preview::[]
 

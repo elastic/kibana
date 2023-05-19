@@ -1,13 +1,11 @@
-[role="xpack"]
 [[reporting-getting-started]]
 = Reporting and sharing
 
 [partintro]
 
 --
-
-:keywords: analyst, concept, task, reporting
-:description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
+:frontmatter-description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
+:frontmatter-tags-products: [kibana]
 
 {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads.
 
