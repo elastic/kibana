@@ -25,6 +25,7 @@ import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
+import type { BrowserFields } from '@kbn/timelines-plugin/common';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
@@ -35,7 +36,6 @@ import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useKibana } from '../../../../common/lib/kibana';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import {
   filterRuleFieldsForType,
@@ -103,12 +103,16 @@ interface StepDefineRuleProps extends RuleStepProps {
   form: FormHook<DefineStepRule>;
   optionsSelected: EqlOptionsSelected;
   setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptionsSelected>>;
+  indexPattern: DataViewBase;
+  isIndexPatternLoading: boolean;
+  browserFields: BrowserFields;
 }
 
 interface StepDefineRuleReadOnlyProps {
   addPadding: boolean;
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: DefineStepRule;
+  indexPattern: DataViewBase;
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -146,6 +150,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   form,
   optionsSelected,
   setOptionsSelected,
+  indexPattern,
+  isIndexPatternLoading,
+  browserFields,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -250,34 +257,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
-    useFetchIndex(index);
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
-
-  const { data } = useKibana().services;
-
-  // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
-  // when the index pattern changes
-  // when we select new dataView
-  // when we choose some other dataSourceType
-  useEffect(() => {
-    if (dataSourceType === DataSourceType.IndexPatterns) {
-      if (!isIndexPatternLoading) {
-        setIndexPattern(initIndexPattern);
-      }
-    }
-
-    if (dataSourceType === DataSourceType.DataView) {
-      const fetchDataView = async () => {
-        if (dataViewId != null) {
-          const dv = await data.dataViews.get(dataViewId);
-          setIndexPattern(dv);
-        }
-      };
-
-      fetchDataView();
-    }
-  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern]);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -790,7 +769,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <EuiSpacer size="s" />
               <RuleTypeEuiFormRow
                 label={i18n.SAVED_QUERY_FORM_ROW_LABEL}
-                $isVisible={Boolean(queryBar?.saved_id && queryBar?.title)}
+                $isVisible={Boolean(queryBar?.saved_id)}
                 fullWidth
               >
                 <CommonUseField
@@ -800,9 +779,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     'data-test-subj': 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
                     euiFieldProps: {
                       disabled: isLoading,
-                      label: queryBar?.title
-                        ? i18n.getSavedQueryCheckboxLabel(queryBar.title)
-                        : undefined,
+                      label: i18n.getSavedQueryCheckboxLabel(queryBar.title),
                     },
                   }}
                 />
@@ -972,6 +949,7 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   addPadding,
   defaultValues: data,
   descriptionColumns,
+  indexPattern,
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
 
@@ -981,6 +959,7 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
         columns={descriptionColumns}
         schema={filterRuleFieldsForType(schema, data.ruleType)}
         data={filterRuleFieldsForType(dataForDescription, data.ruleType)}
+        indexPatterns={indexPattern}
       />
     </StepContentWrapper>
   );

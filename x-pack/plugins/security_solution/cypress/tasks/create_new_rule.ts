@@ -99,7 +99,6 @@ import {
   NEW_TERMS_HISTORY_SIZE,
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
-  CONTINUE_BUTTON,
   CREATE_WITHOUT_ENABLING_BTN,
   RULE_INDICES,
   ALERTS_INDEX_BUTTON,
@@ -365,10 +364,6 @@ export const removeAlertsIndex = () => {
   });
 };
 
-export const continueWithNextSection = () => {
-  cy.get(CONTINUE_BUTTON).should('exist').click();
-};
-
 export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
@@ -378,7 +373,6 @@ export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
     .first()
     .type(rule.query || '');
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
@@ -467,7 +461,6 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
   cy.get(TOAST_ERROR).should('not.exist');
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-  cy.get(`${RULES_CREATION_FORM} ${EQL_QUERY_INPUT}`).should('not.exist');
 };
 
 export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {

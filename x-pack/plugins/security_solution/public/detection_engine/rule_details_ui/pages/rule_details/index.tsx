@@ -135,6 +135,8 @@ import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
+import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
+import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -308,6 +310,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     fetchDataViewTitle();
   }, [data.dataViews, defineRuleData?.dataViewId]);
 
+  const { indexPattern: ruleIndexPattern } = useRuleIndexPattern({
+    dataSourceType: defineRuleData?.dataSourceType ?? DataSourceType.IndexPatterns,
+    index: defineRuleData?.index ?? [],
+    dataViewId: defineRuleData?.dataViewId,
+  });
+
   const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
     useDataTableFilters(TableId.alertsOnRuleDetailsPage);
 
@@ -315,7 +323,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
-  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
+  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery({
+    savedQueryId: rule?.saved_id,
     ruleType: rule?.type,
   });
 
@@ -765,6 +774,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                               ...defineRuleData,
                               queryBar: savedQueryBar ?? defineRuleData.queryBar,
                             }}
+                            indexPattern={ruleIndexPattern}
                           />
                         )}
                       </StepPanel>

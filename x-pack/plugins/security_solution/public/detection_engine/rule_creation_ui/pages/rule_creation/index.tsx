@@ -81,7 +81,7 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { NextStep } from '../../../../detections/components/rules/next_step';
-import { useRuleForms } from '../form';
+import { useRuleForms, useRuleIndexPattern } from '../form';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -237,6 +237,11 @@ const CreateRulePageComponent: React.FC = () => {
     };
     fetchDV();
   }, [dataViews]);
+  const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
+    dataSourceType: defineStepData.dataSourceType,
+    index: defineStepData.index,
+    dataViewId: defineStepData.dataViewId,
+  });
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -470,6 +475,9 @@ const CreateRulePageComponent: React.FC = () => {
                               form={defineStepForm}
                               optionsSelected={eqlOptionsSelected}
                               setOptionsSelected={setEqlOptionsSelected}
+                              indexPattern={indexPattern}
+                              isIndexPatternLoading={isIndexPatternLoading}
+                              browserFields={browserFields}
                             />
                             <NextStep
                               dataTestSubj="define-continue"
@@ -486,6 +494,7 @@ const CreateRulePageComponent: React.FC = () => {
                               addPadding={true}
                               defaultValues={defineStepData}
                               descriptionColumns="singleSplit"
+                              indexPattern={indexPattern}
                             />
                           </div>
                         </EuiAccordion>

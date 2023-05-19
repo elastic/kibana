@@ -75,8 +75,6 @@ export const DATA_VIEW_COMBO_BOX =
 
 export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
 
-export const CONTINUE_BUTTON = '[data-test-subj$=-continue]';
-
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';

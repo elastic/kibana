@@ -64,7 +64,7 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { useRuleForms } from '../form';
+import { useRuleForms, useRuleIndexPattern } from '../form';
 
 const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   const [, dispatchToaster] = useStateToaster();
@@ -134,7 +134,8 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   });
 
   const loading = userInfoLoading || listsConfigLoading;
-  const { isSavedQueryLoading, savedQuery } = useGetSavedQuery(rule?.saved_id, {
+  const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
+    savedQueryId: rule?.saved_id,
     ruleType: rule?.type,
     onError: noop,
   });
@@ -171,6 +172,12 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   });
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
+  const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
+    dataSourceType: defineStepData.dataSourceType,
+    index: defineStepData.index,
+    dataViewId: defineStepData.dataViewId,
+  });
+
   const tabs = useMemo(
     () => [
       {
@@ -199,6 +206,9 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   optionsSelected={eqlOptionsSelected}
                   setOptionsSelected={setEqlOptionsSelected}
                   key="defineStep"
+                  indexPattern={indexPattern}
+                  isIndexPatternLoading={isIndexPatternLoading}
+                  browserFields={browserFields}
                 />
               )}
               <EuiSpacer />
@@ -305,6 +315,9 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
       defineStepForm,
       eqlOptionsSelected,
       setEqlOptionsSelected,
+      indexPattern,
+      isIndexPatternLoading,
+      browserFields,
       aboutStepData,
       defineStepData,
       aboutStepForm,
@@ -377,6 +390,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
         onClick={() => onTabClick(tab)}
         isSelected={tab.id === activeStep}
         disabled={tab.disabled}
+        data-test-subj={tab['data-test-subj']}
       >
         {tab.name}
       </EuiTab>
