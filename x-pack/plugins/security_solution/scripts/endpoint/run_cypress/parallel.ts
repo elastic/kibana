@@ -67,7 +67,9 @@ export const cli = () => {
 
       const files = retrieveIntegrations(
         argv?.spec
-          ? [argv.spec as string]
+          ? argv?.spec.includes(',')
+            ? argv?.spec.split(',')
+            : [argv?.spec]
           : [
               // 'cypress/e2e/cases/creation.cy.ts',
               // 'cypress/e2e/cases/privileges.cy.ts',

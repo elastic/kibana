@@ -20,10 +20,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const hostIp = getLocalhostRealIp();
 
-  // console.error('dupa', kibanaCommonTestsConfig.getAll());
-
-  // console.error('xxx', xpackFunctionalTestsConfig.getAll());
-
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
