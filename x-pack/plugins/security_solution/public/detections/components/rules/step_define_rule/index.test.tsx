@@ -300,6 +300,9 @@ describe('StepDefineRule', () => {
         threatIndicesConfig={[]}
         optionsSelected={eqlOptionsSelected}
         setOptionsSelected={setEqlOptionsSelected}
+        indexPattern={{ fields: [], title: '' }}
+        isIndexPatternLoading={false}
+        browserFields={{}}
       />
     );
   };
