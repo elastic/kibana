@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFieldArray } from 'react-hook-form';
-import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
+import { CreateSLOInput } from '@kbn/slo-schema';
 import { range, first, xor } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
@@ -48,10 +48,6 @@ const validateEquation = (value: string) => {
   const result = value.match(INVALID_EQUATION_REGEX);
   return result === null;
 };
-
-type MetricCustomMetricDef =
-  | MetricCustomIndicatorSchema['params']['good']
-  | MetricCustomIndicatorSchema['params']['total'];
 
 function createOptions(fields: Field[]): Option[] {
   return fields
