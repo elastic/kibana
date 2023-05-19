@@ -149,7 +149,6 @@ export class ProcRunner {
    *  Stop a named proc
    */
   async stop(name: string, signal: NodeJS.Signals = 'SIGTERM') {
-    console.error('STOP', name, signal);
     const proc = this.getProc(name);
     if (proc) {
       await proc.stop(signal);
@@ -174,7 +173,6 @@ export class ProcRunner {
    *  @return {Promise}
    */
   async teardown(signal: NodeJS.Signals | 'exit' = 'exit') {
-    console.error('TEARDONW', signal);
     if (this.closing) {
       return;
     }
