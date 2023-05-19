@@ -66,7 +66,7 @@ const manifest = (root: string, configsRelativePath: string) =>
 const ftrConfigsManifest: FtrConfigsManifest = pipe(
   manifest(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL),
   E.fold(
-    (_: any) => ({} as FtrConfigsManifest),
+    (_: any) => _,
     (x: FtrConfigsManifest) => x
   )
 );
