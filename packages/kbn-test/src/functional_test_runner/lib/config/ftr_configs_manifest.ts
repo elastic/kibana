@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import execa from 'execa';
 import Path from 'path';
 import Fs from 'fs';
 import { execSync } from 'child_process';
@@ -30,57 +29,36 @@ interface FtrConfigsManifest {
 }
 
 // eslint-disable-next-line no-console
-console.log(`REPO_ROOT: ${REPO_ROOT}`);
+console.log(`--- REPO_ROOT: ${REPO_ROOT}`);
 // eslint-disable-next-line no-console
-console.log(`cwd: ${process.cwd()}`);
+console.log(`--- cwd: ${process.cwd()}`);
 
-ls('.');
-ls(REPO_ROOT);
-// REPO_ROOT: /var/lib/buildkite-agent/builds/kb-n2-4-spot-816c5d0c23ef2bc6/elastic/kibana-pull-request/kibana
-// cwd:       /var/lib/buildkite-agent/builds/kb-n2-4-spot-816c5d0c23ef2bc6/elastic/kibana-pull-request/kibana
-ls(`${REPO_ROOT}/.buildkite`);
-// ls(
-//   '/var/lib/buildkite-agent/builds/kb-n2-4-spot-8d94c28da2235528/elastic/kibana-pull-request/kibana-build-xpack/'
-// );
-// ls(
-//   '/var/lib/buildkite-agent/builds/kb-n2-4-spot-8d94c28da2235528/elastic/kibana-pull-request/kibana-build-xpack/.buildkite/'
-// );
+const parentDir = (root: string) => (x: string) =>
+  execSync(`dirname ${x}`, { cwd: root, encoding: 'utf8' });
+const ls = (root: string) => (x: string) => execSync(`ls ${x}`, { cwd: root, encoding: 'utf8' });
+// const lsMsg = (root: string) => (x: string) => {
+//   // eslint-disable-next-line no-console
+//   console.log(`--- Contents of: ${Path.resolve(root, x)}\n`);
+//   return ls(x);
+// };
 
-// const paths = [
-//   REPO_ROOT,
-//   `${REPO_ROOT}/.buildkite`,
-// ]
-
-const parentDir = (x: string) => execSync(`dirname ${x}`, { cwd: REPO_ROOT, encoding: 'utf8' });
 let repoRootParent;
-
+let repoRootParentContents;
 // eslint-disable-next-line no-console
 console.log('\n--- Show some path info!');
 
 try {
-  repoRootParent = parentDir(REPO_ROOT);
+  repoRootParent = parentDir(REPO_ROOT)(REPO_ROOT);
+  repoRootParentContents = ls(REPO_ROOT)(repoRootParent);
   // eslint-disable-next-line no-console
-  console.log(`\n### repoRootParent: \n  ${repoRootParent}`);
+  console.log(`\n### Parent Directory of REPO_ROOT: ${repoRootParent}
+### Contents of ${repoRootParent}
+${repoRootParentContents}
+`);
 } catch (e) {
   // eslint-disable-next-line no-console
   console.error(`\n### Error looking at paths e: \n  ${e}`);
 }
-
-async function ls(dir: string) {
-  try {
-    const { stdout } = await execa('ls', ['-la', dir]);
-    // eslint-disable-next-line no-console
-    console.log(`--- ls of ${dir}`);
-    // eslint-disable-next-line no-console
-    console.log(`ls ${dir}:\n${stdout}\n`);
-    // eslint-disable-next-line no-console
-    console.log(`### END ls of ${dir}`);
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(`ls ${dir}: ERROR: ${e}`);
-  }
-}
-
 const loadManifest = (a: string, b: string) => () =>
   JsYaml.safeLoad(Fs.readFileSync(Path.resolve(a, b), 'utf8'));
 const manifest = (root: string, configsRelativePath: string) =>
