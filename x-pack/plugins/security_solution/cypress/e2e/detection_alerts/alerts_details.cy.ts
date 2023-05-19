@@ -30,7 +30,7 @@ import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../helpers/common';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 
-describe.skip('Alert details flyout', () => {
+describe('Alert details flyout', () => {
   describe('Basic functions', () => {
     before(() => {
       cleanKibana();

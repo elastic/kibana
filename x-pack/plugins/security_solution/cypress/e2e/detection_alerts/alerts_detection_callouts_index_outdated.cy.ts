@@ -24,7 +24,7 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe.skip('Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set', () => {
+describe('Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set', () => {
   const NEED_ADMIN_FOR_UPDATE_CALLOUT = 'need-admin-for-update-rules';
 
   before(() => {

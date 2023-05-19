@@ -13,4 +13,4 @@ export DISPLAY=:99
 
 echo "--- Security Solution tests (Chrome)"
 
-yarn --cwd x-pack/plugins/security_solution cypress:run:reporter
+yarn --cwd x-pack/plugins/security_solution cypress:run

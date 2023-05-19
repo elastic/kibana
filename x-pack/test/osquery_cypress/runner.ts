@@ -30,7 +30,7 @@ async function withFleetAgent(
   const fleetServerUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
     hostname: config.get('servers.kibana.hostname'),
-    port: config.get('servers.kibana.port'),
+    port: config.get('servers.fleetserver.port'),
   });
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');

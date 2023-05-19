@@ -37,7 +37,7 @@ import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_r
 const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
 const exceptionList = getExceptionList();
 
-describe.skip('Export rules', () => {
+describe('Export rules', () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   before(() => {

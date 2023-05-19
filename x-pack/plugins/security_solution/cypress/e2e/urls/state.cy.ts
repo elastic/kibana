@@ -69,7 +69,7 @@ const ABSOLUTE_DATE = {
   firefoxStartTimeTyped: '2019-08-01T14:33:29',
 };
 
-describe.skip('url state', () => {
+describe('url state', () => {
   beforeEach(() => {
     login();
   });

@@ -46,7 +46,7 @@ const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_ALERTS = 2;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-describe.skip('Entity Analytics Dashboard', () => {
+describe('Entity Analytics Dashboard', () => {
   before(() => {
     cleanKibana();
   });

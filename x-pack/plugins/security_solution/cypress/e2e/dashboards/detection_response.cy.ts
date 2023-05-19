@@ -35,7 +35,7 @@ import { navigateFromHeaderTo } from '../../tasks/security_header';
 import { closeTimeline } from '../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
 
-describe.skip('Detection response view', () => {
+describe('Detection response view', () => {
   before(() => {
     cleanKibana();
   });

@@ -18,7 +18,6 @@ export default defineCypressConfig({
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
-  numTestsKeptInMemory: 0,
   e2e: {
     // baseUrl: 'http://localhost:5601',
     experimentalRunAllSpecs: true,
