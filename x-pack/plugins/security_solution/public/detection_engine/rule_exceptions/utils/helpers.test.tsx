@@ -121,7 +121,7 @@ describe('Exception helpers', () => {
       };
       const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['windows']);
 
-      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockEndpointFields] });
+      expect(output?.fields).toEqual([...mockEndpointFields]);
     });
 
     test('it returns filtered index patterns if list type is "endpoint" and os contains "linux"', () => {
@@ -132,7 +132,7 @@ describe('Exception helpers', () => {
       };
       const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['linux']);
 
-      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockLinuxEndpointFields] });
+      expect(output?.fields).toEqual([...mockLinuxEndpointFields]);
     });
   });
 

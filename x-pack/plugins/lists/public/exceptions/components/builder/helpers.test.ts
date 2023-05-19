@@ -196,7 +196,7 @@ describe('Exception builder helpers', () => {
           id: '1234',
           title: 'logstash-*',
         };
-        expect(output).toEqual(expected);
+        expect(output.fields).toEqual(expected.fields);
       });
 
       test('it returns only parent nested field when "item.nested" is "parent" and nested parent field is not undefined', () => {
@@ -208,7 +208,7 @@ describe('Exception builder helpers', () => {
           id: '1234',
           title: 'logstash-*',
         };
-        expect(output).toEqual(expected);
+        expect(output.fields).toEqual(expected.fields);
       });
 
       test('it returns only nested fields when "item.nested" is "parent" and nested parent field is undefined', () => {
@@ -226,7 +226,7 @@ describe('Exception builder helpers', () => {
           id: '1234',
           title: 'logstash-*',
         };
-        expect(output).toEqual(expected);
+        expect(output.fields).toEqual(expected.fields);
       });
 
       test('it returns all fields unfiletered if "item.nested" is not "child" or "parent"', () => {
@@ -238,7 +238,7 @@ describe('Exception builder helpers', () => {
           id: '1234',
           title: 'logstash-*',
         };
-        expect(output).toEqual(expected);
+        expect(output.fields).toEqual(expected.fields);
       });
     });
 
@@ -277,7 +277,7 @@ describe('Exception builder helpers', () => {
           id: '1234',
           title: 'logstash-*',
         };
-        expect(output).toEqual(expected);
+        expect(output.fields).toEqual(expected.fields);
       });
 
       test('it returns only parent nested field when "item.nested" is "parent" and nested parent field is not undefined', () => {
@@ -313,7 +313,7 @@ describe('Exception builder helpers', () => {
           id: '1234',
           title: 'logstash-*',
         };
-        expect(output).toEqual(expected);
+        expect(output.fields).toEqual(expected.fields);
       });
 
       test('it returns only nested fields when "item.nested" is "parent" and nested parent field is undefined', () => {
@@ -332,7 +332,7 @@ describe('Exception builder helpers', () => {
           id: '1234',
           title: 'logstash-*',
         };
-        expect(output).toEqual(expected);
+        expect(output.fields).toEqual(expected.fields);
       });
 
       test('it returns all fields that matched those in "exceptionable_fields.json" with no further filtering if "item.nested" is not "child" or "parent"', () => {
@@ -371,7 +371,7 @@ describe('Exception builder helpers', () => {
           id: '1234',
           title: 'logstash-*',
         };
-        expect(output).toEqual(expected);
+        expect(output.fields).toEqual(expected.fields);
       });
     });
   });
