@@ -12,6 +12,8 @@ import Fs from 'fs';
 import { execSync } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 import JsYaml from 'js-yaml';
+import * as E from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 export const FTR_CONFIGS_MANIFEST_REL = '.buildkite/ftr_configs.yml';
 
@@ -63,7 +65,6 @@ try {
   // eslint-disable-next-line no-console
   console.error(`\n### Error looking at paths e: \n  ${e}`);
 }
-process.exit(999);
 
 async function ls(dir: string) {
   try {
@@ -80,10 +81,17 @@ async function ls(dir: string) {
   }
 }
 
-const ftrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
-  Fs.readFileSync(Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL), 'utf8')
+const loadManifest = (a: string, b: string) => () =>
+  JsYaml.safeLoad(Fs.readFileSync(Path.resolve(a, b), 'utf8'));
+const manifest = (root: string, configsRelativePath: string) =>
+  E.tryCatch(loadManifest(root, configsRelativePath), E.toError);
+const ftrConfigsManifest: FtrConfigsManifest = pipe(
+  manifest(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL),
+  E.fold(
+    (_: any) => ({} as FtrConfigsManifest),
+    (x: FtrConfigsManifest) => x
+  )
 );
-
 export const FTR_CONFIGS_MANIFEST_PATHS = [
   Object.values(ftrConfigsManifest.enabled),
   Object.values(ftrConfigsManifest.disabled),
