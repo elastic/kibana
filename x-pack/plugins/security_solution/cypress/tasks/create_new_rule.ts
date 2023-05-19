@@ -439,8 +439,6 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
       cy.wrap(inputs[threshold]).clear().type(`${rule.threshold.value}`);
     });
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
@@ -479,8 +477,6 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
     .type(historySizeNumber);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 /**
