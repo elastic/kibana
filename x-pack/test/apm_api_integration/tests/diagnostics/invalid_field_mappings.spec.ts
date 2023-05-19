@@ -16,6 +16,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
   const supertest = getService('supertest');
   const es = getService('es');
+  const synthtraceKibanaClient = getService('synthtraceKibanaClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -91,6 +92,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await es.indices.delete({ index: 'traces-apm-default' });
+        const latestVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
+        await synthtraceKibanaClient.installApmPackage(latestVersion);
         await synthtraceEsClient.clean();
       });
 

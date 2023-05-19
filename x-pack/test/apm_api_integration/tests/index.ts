@@ -26,7 +26,6 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
 
   describe('APM API tests', function () {
     const filePattern = getGlobPattern();
-    console.log({ filePattern });
     const tests = globby.sync(filePattern, { cwd });
 
     if (envGrepFiles) {
@@ -38,12 +37,11 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
       );
     }
 
-    tests.forEach((test) => {
-      describe(test, function () {
-        loadTestFile(require.resolve(`./${test}`));
+    tests.forEach((testName) => {
+      describe(testName, () => {
+        loadTestFile(require.resolve(`./${testName}`));
+        registry.run();
       });
     });
-
-    registry.run();
   });
 }
