@@ -33,32 +33,54 @@ export const OPEN_SNOOZE_PANEL_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Open snooze panel' }
 );
 
-const SECONDS = i18n.translate('xpack.formatters.timeUnit.seconds', {
-  defaultMessage: 'seconds',
-});
+const getSecondsTranslation = (value: number) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.seconds', {
+    defaultMessage: '{value, plural, one {# second} other {# seconds}}',
+    values: { value },
+  });
 
-const MINUTES = i18n.translate('xpack.formatters.timeUnit.minutes', {
-  defaultMessage: 'minutes',
-});
+const getMinutesTranslation = (value: number) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.minutes', {
+    defaultMessage: '{value, plural, one {# minute} other {# minutes}}',
+    values: { value },
+  });
 
-const HOURS = i18n.translate('xpack.formatters.timeUnit.hours', {
-  defaultMessage: 'hours',
-});
+const getHoursTranslation = (value: number) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.hours', {
+    defaultMessage: '{value, plural, one {# hour} other {# hours}}',
+    values: { value },
+  });
 
-const DAYS = i18n.translate('xpack.formatters.timeUnit.days', {
-  defaultMessage: 'days',
-});
+const getDaysTranslation = (value: number) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.days', {
+    defaultMessage: '{value, plural, one {# day} other {# days}}',
+    values: { value },
+  });
 
-const WEEKS = i18n.translate('xpack.formatters.timeUnit.weeks', {
-  defaultMessage: 'weeks',
-});
+const getWeeksTranslation = (value: number) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.weeks', {
+    defaultMessage: '{value, plural, one {# week} other {# weeks}}',
+    values: { value },
+  });
 
-const MONTHS = i18n.translate('xpack.formatters.timeUnit.months', {
-  defaultMessage: 'months',
-});
+const getMonthsTranslation = (value: number) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.months', {
+    defaultMessage: '{value, plural, one {# month} other {# months}}',
+    values: { value },
+  });
 
-const YEARS = i18n.translate('xpack.formatters.timeUnit.years', {
-  defaultMessage: 'years',
-});
+const getYearsTranslation = (value: number) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.years', {
+    defaultMessage: '{value, plural, one {# year} other {# years}}',
+    values: { value },
+  });
 
-export const TIME_UNITS = { SECONDS, MINUTES, HOURS, DAYS, WEEKS, MONTHS, YEARS };
+export const UNITS_TRANSLATION = {
+  getSecondsTranslation,
+  getMinutesTranslation,
+  getHoursTranslation,
+  getDaysTranslation,
+  getWeeksTranslation,
+  getMonthsTranslation,
+  getYearsTranslation,
+};

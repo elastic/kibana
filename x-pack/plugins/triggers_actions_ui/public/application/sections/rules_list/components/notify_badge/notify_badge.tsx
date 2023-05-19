@@ -29,29 +29,33 @@ import {
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
-  TIME_UNITS,
+  UNITS_TRANSLATION,
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
 
-function getTimeRemaining(endtime: Date) {
+function getTimeRemaining(endtime: Date): string {
   const duration = moment.duration(moment(endtime).diff(moment()));
-  const units = [
-    { name: TIME_UNITS.YEARS, value: duration.years() },
-    { name: TIME_UNITS.MONTHS, value: duration.months() },
-    { name: TIME_UNITS.WEEKS, value: duration.weeks() },
-    { name: TIME_UNITS.DAYS, value: duration.days() },
-    { name: TIME_UNITS.HOURS, value: duration.hours() },
-    { name: TIME_UNITS.MINUTES, value: duration.minutes() },
-    { name: TIME_UNITS.SECONDS, value: duration.seconds() },
-  ];
-  const nonZeroUnits = units.filter((unit) => unit.value !== 0);
-  const formattedUnits = nonZeroUnits.map((unit) => `${unit.value} ${unit.name}`);
-  const lastUnit = formattedUnits.pop();
-  if (formattedUnits.length > 0) {
-    const joinedUnits = formattedUnits.join(', ');
-    return `${joinedUnits} and ${lastUnit}`;
-  }
-  return lastUnit;
+  const timeValues = {
+    years: UNITS_TRANSLATION.getYearsTranslation(duration.years()),
+    months: UNITS_TRANSLATION.getMonthsTranslation(duration.months()),
+    weeks: UNITS_TRANSLATION.getWeeksTranslation(duration.weeks()),
+    days: UNITS_TRANSLATION.getDaysTranslation(duration.days()),
+    hours: UNITS_TRANSLATION.getHoursTranslation(duration.hours()),
+    minutes: UNITS_TRANSLATION.getMinutesTranslation(duration.minutes()),
+    seconds: UNITS_TRANSLATION.getSecondsTranslation(duration.seconds()),
+  };
+  const timeComponents = Object.entries(timeValues)
+    .filter(([unit, value]) => value !== '' && value !== `0 ${unit}`)
+    .map(([unit, value]) => `${value}`)
+    .join(', ');
+  const lastComponentIndex = timeComponents.lastIndexOf(', ');
+  const formattedTime =
+    lastComponentIndex === -1
+      ? timeComponents
+      : timeComponents.slice(0, lastComponentIndex) +
+        ' and' +
+        timeComponents.slice(lastComponentIndex + 1);
+  return formattedTime;
 }
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = ({
@@ -125,7 +129,12 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     if (isSnoozed && snoozeTimeLeft) {
       return (
         <EuiToolTip
-          title={'Time Remaining'}
+          title={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining',
+            {
+              defaultMessage: 'Time remaining',
+            }
+          )}
           content={
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -272,9 +281,20 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         : isPopoverOpen || showTooltipInline
         ? undefined
         : snoozeTimeLeft;
-
     return (
-      <EuiToolTip title={tooltipContent ? 'Time Remaining' : undefined} content={tooltipContent}>
+      <EuiToolTip
+        title={
+          tooltipContent
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining',
+                {
+                  defaultMessage: 'Time remaining',
+                }
+              )
+            : undefined
+        }
+        content={tooltipContent}
+      >
         {button}
       </EuiToolTip>
     );
