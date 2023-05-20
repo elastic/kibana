@@ -99,6 +99,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
       options,
     });
 
+    // cast is necessary since its the full object and not just the changes
     return response.item as SavedObject<DataViewAttributes>;
   }
 
@@ -122,6 +123,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     >({
       contentTypeId: DataViewSOType,
       id,
+      options: { force: true },
     });
   }
 }

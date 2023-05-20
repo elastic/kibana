@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { getIndexPatternLoad } from './expressions';
 import {
   DataViewsPublicPluginSetup,
@@ -50,7 +51,9 @@ export class DataViewsPublicPlugin
       version: {
         latest: LATEST_VERSION,
       },
-      name: 'data view',
+      name: i18n.translate('dataViews.contentManagementType', {
+        defaultMessage: 'Data view',
+      }),
     });
 
     return {};

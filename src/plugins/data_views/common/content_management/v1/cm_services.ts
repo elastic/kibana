@@ -21,7 +21,7 @@ import { serializedFieldFormatSchema, fieldSpecSchema } from '../../schemas';
 const dataViewAttributesSchema = schema.object(
   {
     title: schema.string(),
-    type: schema.maybe(schema.string()),
+    type: schema.maybe(schema.literal('rollup')),
     timeFieldName: schema.maybe(schema.string()),
     sourceFilters: schema.maybe(
       schema.arrayOf(

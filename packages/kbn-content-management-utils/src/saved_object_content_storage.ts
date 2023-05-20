@@ -342,9 +342,14 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     return value;
   }
 
-  async delete(ctx: StorageContext, id: string): Promise<Types['DeleteOut']> {
+  async delete(
+    ctx: StorageContext,
+    id: string,
+    // force is necessary to delete saved objects that exist in multiple namespaces
+    options?: { force: boolean }
+  ): Promise<Types['DeleteOut']> {
     const soClient = await savedObjectClientFromRequest(ctx);
-    await soClient.delete(this.savedObjectType, id);
+    await soClient.delete(this.savedObjectType, id, { force: options?.force ?? false });
     return { success: true };
   }
 
