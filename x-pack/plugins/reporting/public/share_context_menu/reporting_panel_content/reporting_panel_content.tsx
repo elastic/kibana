@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { FormattedMessage, IntlShape, injectI18n } from '@kbn/i18n-react';
 import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import url from 'url';
@@ -55,7 +55,7 @@ export interface ReportingPanelProps {
   theme: ThemeServiceSetup;
 }
 
-export type Props = ReportingPanelProps & { intl: InjectedIntl };
+export type Props = ReportingPanelProps & { intl: IntlShape };
 
 interface State {
   isStale: boolean;

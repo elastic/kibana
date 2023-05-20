@@ -7,19 +7,20 @@
  */
 
 import React, { ComponentType } from 'react';
-import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
+import { useI18n } from '@kbn/i18n-react';
 import { EuiFormRow } from '@elastic/eui';
 import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
 
-export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
+export interface IndexPatternSelectFormRowUiProps {
   onChange: (opt: any) => void;
   indexPatternId: string;
   controlIndex: number;
   IndexPatternSelect: ComponentType<IndexPatternSelectProps>;
-};
+}
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
-  const { controlIndex, indexPatternId, intl, onChange } = props;
+  const intl = useI18n();
+  const { controlIndex, indexPatternId, onChange } = props;
   const selectId = `indexPatternSelect-${controlIndex}`;
 
   return (
@@ -43,4 +44,4 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
   );
 }
 
-export const IndexPatternSelectFormRow = injectI18n(IndexPatternSelectFormRowUi);
+export const IndexPatternSelectFormRow = React.memo(IndexPatternSelectFormRowUi);

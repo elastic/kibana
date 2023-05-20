@@ -8,15 +8,12 @@
 
 import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
-import IntlRelativeFormat from 'intl-relativeformat';
+// import IntlRelativeFormat from 'intl-relativeformat';
 
 import { Translation } from '../translation';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
-
-// Add all locale data to `IntlMessageFormat`.
-import './locales';
 
 const EN_LOCALE = 'en';
 const translationsForLocale: Record<string, Translation> = {};
@@ -27,7 +24,7 @@ let currentLocale = EN_LOCALE;
 let formats = EN_FORMATS;
 
 IntlMessageFormat.defaultLocale = defaultLocale;
-IntlRelativeFormat.defaultLocale = defaultLocale;
+// IntlRelativeFormat.defaultLocale = defaultLocale;
 
 /**
  * Returns message by the given message id.
@@ -112,7 +109,7 @@ export function setDefaultLocale(locale: string) {
 
   defaultLocale = normalizeLocale(locale);
   IntlMessageFormat.defaultLocale = defaultLocale;
-  IntlRelativeFormat.defaultLocale = defaultLocale;
+  // IntlRelativeFormat.defaultLocale = defaultLocale;
 }
 
 export function getDefaultLocale() {

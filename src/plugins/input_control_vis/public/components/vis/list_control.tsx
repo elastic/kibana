@@ -9,7 +9,7 @@
 import React, { PureComponent } from 'react';
 import _ from 'lodash';
 
-import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
+import { injectI18n, IntlShape } from '@kbn/i18n-react';
 import { EuiFieldText, EuiComboBox, EuiThemeProvider } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormRow } from './form_row';
@@ -18,7 +18,7 @@ interface ListControlUiState {
   isLoading: boolean;
 }
 
-export type ListControlUiProps = InjectedIntlProps & {
+export interface ListControlUiProps {
   id: string;
   label: string;
   selectedOptions: any[];
@@ -32,7 +32,8 @@ export type ListControlUiProps = InjectedIntlProps & {
   stageFilter: (controlIndex: number, value: any) => void;
   fetchOptions?: (searchValue: string) => void;
   isDarkMode?: boolean;
-};
+  intl: IntlShape;
+}
 
 class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState> {
   static defaultProps = {

@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { useI18n, FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTabs,
   EuiTab,
@@ -39,10 +39,10 @@ function MetricSeriesUi(props) {
     disableAdd,
     selectedTab,
     visible,
-    intl,
     uiRestrictions,
   } = props;
 
+  const intl = useI18n();
   const { euiTheme } = useEuiTheme();
 
   const defaults = { label: '' };
@@ -218,4 +218,4 @@ MetricSeriesUi.propTypes = {
   indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };
 
-export const MetricSeries = injectI18n(MetricSeriesUi);
+export const MetricSeries = React.memo(MetricSeriesUi);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { IntlShape, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -20,7 +20,7 @@ interface Props {
   values?: string[];
   onChange: (values: string[]) => void;
   onParamsUpdate: (value: string) => void;
-  intl: InjectedIntl;
+  intl: IntlShape;
   fullWidth?: boolean;
   compressed?: boolean;
   disabled?: boolean;

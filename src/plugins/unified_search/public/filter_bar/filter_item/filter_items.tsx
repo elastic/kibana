@@ -9,7 +9,6 @@
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexItem } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -31,8 +30,6 @@ export interface FilterItemsProps {
   onFiltersUpdated?: (filters: Filter[]) => void;
   /** A list of all dataviews that are used for the filters */
   indexPatterns: DataView[];
-  /** This is injected by the lazer loader */
-  intl: InjectedIntl;
   /** Controls whether or not filter suggestions are influenced by the global time */
   timeRangeForSuggestionsOverride?: boolean;
   /** adds additional filters to be used for suggestions */
@@ -68,7 +65,6 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
       >
         <FilterItem
           id={`${i}`}
-          intl={props.intl}
           filter={filter}
           onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
@@ -101,7 +97,6 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
   return <>{renderItems()}</>;
 });
 
-const FilterItems = injectI18n(FilterItemsUI);
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default FilterItems;
+export default FilterItemsUI;

@@ -7,20 +7,19 @@
 
 import React from 'react';
 
-import { shallow, mount, ReactWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { I18nProvider, __IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider, createIntl, createIntlCache } from '@kbn/i18n-react';
 
 // Use fake component to extract `intl` property to use in tests.
-const { intl } = (
-  mount(
-    <I18nProvider>
-      <br />
-    </I18nProvider>
-  ).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>
-)
-  .instance()
-  .getChildContext();
+const intlCache = createIntlCache();
+const intl = createIntl(
+  {
+    locale: 'en-US',
+    defaultLocale: 'en-US',
+  },
+  intlCache
+);
 
 /**
  * This helper shallow wraps a component with @kbn/i18n's <I18nProvider> which

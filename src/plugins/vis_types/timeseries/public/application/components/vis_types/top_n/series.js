@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 import {
   EuiTabs,
   EuiTab,
@@ -27,7 +27,7 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
 import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
-export const TopNSeries = injectI18n(function (props) {
+export const TopNSeries = (props) => {
   const {
     panel,
     model,
@@ -40,10 +40,10 @@ export const TopNSeries = injectI18n(function (props) {
     disableAdd,
     selectedTab,
     visible,
-    intl,
     uiRestrictions,
   } = props;
 
+  const intl = useI18n();
   const { euiTheme } = useEuiTheme();
 
   const handleChange = createTextHandler(onChange);
@@ -181,7 +181,7 @@ export const TopNSeries = injectI18n(function (props) {
       {body}
     </div>
   );
-});
+};
 
 TopNSeries.propTypes = {
   className: PropTypes.string,

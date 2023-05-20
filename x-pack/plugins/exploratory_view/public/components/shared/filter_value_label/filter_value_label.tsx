@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n-react';
 import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
 import { FilterItem } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -71,8 +70,6 @@ export function FilterValueLabel({
   removeFilter,
   allowExclusion = true,
 }: FilterValueLabelProps) {
-  const FilterItemI18n = injectI18n(FilterItem);
-
   const filter = buildFilterLabel({ field, value, label, dataView, negate });
 
   const {
@@ -80,7 +77,7 @@ export function FilterValueLabel({
   } = useKibana();
 
   return dataView ? (
-    <FilterItemI18n
+    <FilterItem
       indexPatterns={[dataView]}
       id={`${field}-${value}-${negate}`}
       filter={filter}

@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { useI18n, FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTabs,
   EuiTab,
@@ -37,11 +37,11 @@ function MarkdownSeriesUi(props) {
     disableAdd,
     selectedTab,
     visible,
-    intl,
     name,
     uiRestrictions,
   } = props;
 
+  const intl = useI18n();
   const { euiTheme } = useEuiTheme();
 
   const defaults = { label: '', var_name: '' };
@@ -207,4 +207,4 @@ MarkdownSeriesUi.propTypes = {
   indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };
 
-export const MarkdownSeries = injectI18n(MarkdownSeriesUi);
+export const MarkdownSeries = React.memo(MarkdownSeriesUi);

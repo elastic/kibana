@@ -29,7 +29,7 @@ import {
   EuiFieldNumber,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 import { PalettePicker } from '../../palette_picker';
 import { getCharts } from '../../../../services';
@@ -38,7 +38,8 @@ import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 import { tsvbEditorRowStyles } from '../../../styles/common.styles';
 
-export const TimeseriesConfig = injectI18n(function (props) {
+export const TimeseriesConfig = (props) => {
+  const intl = useI18n();
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const handleNumberChange = createNumberHandler(props.onChange);
@@ -53,7 +54,6 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const { euiTheme } = useEuiTheme();
-  const { intl } = props;
   const stackedOptions = [
     {
       label: intl.formatMessage({
@@ -571,7 +571,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
       </EuiFlexGroup>
     </div>
   );
-});
+};
 
 TimeseriesConfig.propTypes = {
   fields: PropTypes.object,

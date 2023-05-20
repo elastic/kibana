@@ -13,21 +13,20 @@
  * intl context around them.
  */
 
-import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import { I18nProvider, IntlShape, createIntl, createIntlCache } from '@kbn/i18n-react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 
-// Use fake component to extract `intl` property to use in tests.
-const { intl } = (
-  mount(
-    <I18nProvider>
-      <br />
-    </I18nProvider>
-  ).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>
-)
-  .instance()
-  .getChildContext();
+const intlCache = createIntlCache();
+const intl = createIntl(
+  {
+    locale: 'en-US',
+    defaultLocale: 'en-US',
+  },
+  intlCache
+);
 
 function getOptions(context = {}, childContextTypes = {}, props = {}) {
   return {
@@ -37,7 +36,7 @@ function getOptions(context = {}, childContextTypes = {}, props = {}) {
     },
     childContextTypes: {
       ...childContextTypes,
-      intl: intlShape,
+      intl: PropTypes.object.isRequired,
     },
     ...props,
   };
@@ -48,9 +47,7 @@ function getOptions(context = {}, childContextTypes = {}, props = {}) {
  */
 // This function is exported solely to fix the types output in TS 4.5.2, likely a bug
 // Otherwise, InjectedIntl is missing from the output
-export function nodeWithIntlProp<T>(
-  node: ReactElement<T>
-): ReactElement<T & { intl: InjectedIntl }> {
+export function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: IntlShape }> {
   return React.cloneElement<any>(node, { intl });
 }
 

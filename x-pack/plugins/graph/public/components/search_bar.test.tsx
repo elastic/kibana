@@ -21,7 +21,7 @@ import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
+import { I18nProvider, IntlShape } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
 
@@ -84,7 +84,7 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
 describe('search_bar', () => {
   let dispatchSpy: jest.Mock;
   let instance: ReactWrapper<
-    SearchBarProps & { intl: InjectedIntl },
+    SearchBarProps & { intl: IntlShape },
     Readonly<{}>,
     Component<{}, {}, any>
   >;

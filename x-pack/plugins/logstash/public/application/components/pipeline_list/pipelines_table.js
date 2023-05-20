@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { useI18n, FormattedMessage } from '@kbn/i18n-react';
 import { PIPELINE_LIST } from './constants';
 
 function getColumns(openPipeline, clonePipeline) {
@@ -98,8 +98,8 @@ function PipelinesTableUi({
   pipelines,
   selection,
   pageIndex,
-  intl,
 }) {
+  const intl = useI18n();
   const pagination = {
     pageIndex,
     initialPageSize: PIPELINE_LIST.INITIAL_PAGE_SIZE,
@@ -201,4 +201,4 @@ function PipelinesTableUi({
   );
 }
 
-export const PipelinesTable = injectI18n(PipelinesTableUi);
+export const PipelinesTable = React.memo(PipelinesTableUi);

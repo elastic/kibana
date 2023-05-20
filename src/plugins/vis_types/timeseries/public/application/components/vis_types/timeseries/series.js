@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { FormattedMessage, use18n } from '@kbn/i18n-react';
 import {
   EuiTabs,
   EuiTab,
@@ -27,7 +27,7 @@ import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
-const TimeseriesSeriesUI = injectI18n(function (props) {
+const TimeseriesSeriesUI = (props) => {
   const {
     panel,
     fields,
@@ -38,12 +38,12 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
     selectedTab,
     onChange,
     visible,
-    intl,
     name,
     uiRestrictions,
     seriesQuantity,
   } = props;
 
+  const intl = use18n();
   const { euiTheme } = useEuiTheme();
 
   const defaults = {
@@ -188,7 +188,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
       {body}
     </div>
   );
-});
+};
 
 TimeseriesSeriesUI.propTypes = {
   className: PropTypes.string,
@@ -215,4 +215,4 @@ TimeseriesSeriesUI.propTypes = {
   seriesQuantity: PropTypes.object,
 };
 
-export const TimeseriesSeries = injectI18n(TimeseriesSeriesUI);
+export const TimeseriesSeries = React.memo(TimeseriesSeriesUI);

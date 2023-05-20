@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent, ChangeEvent } from 'react';
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage, IntlShape } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,
@@ -49,7 +49,7 @@ interface ControlEditorUiProps {
   deps: InputControlVisDependencies;
 }
 
-class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlProps> {
+class ControlEditorUi extends PureComponent<ControlEditorUiProps & { intl: IntlShape }> {
   changeLabel = (event: ChangeEvent<HTMLInputElement>) => {
     this.props.handleLabelChange(this.props.controlIndex, event.target.value);
   };

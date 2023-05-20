@@ -292,26 +292,26 @@ React component as a pure function:
 
 ```js
 import React from 'react';
-import { injectI18n, intlShape } from '@kbn/i18n-react';
+import { useI18n } from '@kbn/i18n-react';
 
-export const MyComponent = injectI18n({ intl }) => (
-  <input
-    type="text"
-    placeholder={intl.formatMessage(
-      {
-        id: 'welcome',
-        defaultMessage: 'Hello {name}, you have {unreadCount, number}\
-{unreadCount, plural, one {message} other {messages}}',
-        description: 'Message description',
-      },
-      { name, unreadCount }
-    )}
-  />
-));
+export const MyComponent = () => {
+  const intl = useI18n();
 
-MyComponent.WrappedComponent.propTypes = {
-  intl: intlShape.isRequired,
-};
+  return (
+    <input
+      type="text"
+      placeholder={intl.formatMessage(
+        {
+          id: 'welcome',
+          defaultMessage: 'Hello {name}, you have {unreadCount, number}\
+  {unreadCount, plural, one {message} other {messages}}',
+          description: 'Message description',
+        },
+        { name, unreadCount }
+      )}
+    />
+  );
+}
 ```
 
 React component as a class:
