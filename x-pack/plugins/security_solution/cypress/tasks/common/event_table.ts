@@ -22,6 +22,6 @@ export const selectAllEvents = () => {
 };
 
 export const bulkInvestigateSelectedEventsInTimeline = () => {
-  cy.get(SELECTED_ALERTS).trigger('click');
+  cy.get(SELECTED_ALERTS).click();
   cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).click();
 };

@@ -76,7 +76,7 @@ describe('Row renderers', () => {
     // In cases where the click handler is not present on the page just yet, this will cause the button to be clicked
     // multiple times until it sees that the click took effect. You could go through the whole list but I just check
     // for the first to be unchecked and then assume the click was successful
-    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).trigger('click');
+    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).click();
 
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().should('not.be.checked');
 

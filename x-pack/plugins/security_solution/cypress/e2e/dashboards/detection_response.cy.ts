@@ -118,7 +118,7 @@ describe('Detection response view', () => {
             .should('be.visible')
             .then((hostNameEl) => {
               const hostName = hostNameEl.text();
-              sub.trigger('click');
+              sub.click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               cy.url().should((urlString) => {
                 const url = new URL(urlString);
@@ -146,7 +146,7 @@ describe('Detection response view', () => {
             .first()
             .should('be.visible')
             .then((hostNameEl) => {
-              cy.get(HOST_TABLE_ROW_SEV(severityVal)).first().trigger('click');
+              cy.get(HOST_TABLE_ROW_SEV(severityVal)).first().click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               const hostName = hostNameEl.text();
               waitForAlerts();
@@ -172,7 +172,7 @@ describe('Detection response view', () => {
             .should('be.visible')
             .then((userNameEl) => {
               const userName = userNameEl.text();
-              sub.trigger('click');
+              sub.click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               cy.url().should((urlString) => {
                 const url = new URL(urlString);
@@ -201,7 +201,7 @@ describe('Detection response view', () => {
             .should('be.visible')
             .then((userNameEl) => {
               const userName = userNameEl.text();
-              cy.get(USER_TABLE_ROW_SEV(severityVal)).trigger('click');
+              cy.get(USER_TABLE_ROW_SEV(severityVal)).click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               waitForAlerts();
               cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
@@ -225,7 +225,7 @@ describe('Detection response view', () => {
             .first()
             .should('be.visible')
             .then((ruleNameEl) => {
-              sub.trigger('click');
+              sub.click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               const ruleName = ruleNameEl.text();
               waitForAlerts();
@@ -239,17 +239,12 @@ describe('Detection response view', () => {
         });
     });
     it('should redirect to "View Open Alerts" correctly', () => {
-      cy.get(RULE_TABLE_VIEW_ALL_OPEN_ALERTS_BTN)
-        .first()
-        .should('be.visible')
-        .then((sub) => {
-          sub.trigger('click');
-          waitToNavigateAwayFrom(DASHBOARDS_URL);
-          waitForAlerts();
-          cy.get(CONTROL_FRAMES).should('have.length', 1);
-          cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
-          cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
-        });
+      cy.get(RULE_TABLE_VIEW_ALL_OPEN_ALERTS_BTN).first().click();
+      waitToNavigateAwayFrom(DASHBOARDS_URL);
+      waitForAlerts();
+      cy.get(CONTROL_FRAMES).should('have.length', 1);
+      cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
+      cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
     });
   });
 });

@@ -62,9 +62,8 @@ describe('Timeline search and filters', () => {
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.get(TIMELINE_SEARCH_OR_FILTER)
-        .pipe(($el) => $el.trigger('click'))
-        .should('exist');
+      cy.get(TIMELINE_SEARCH_OR_FILTER).click();
+      cy.get(TIMELINE_SEARCH_OR_FILTER).should('exist');
     });
 
     it('should be able to update timeline kqlMode with filter', () => {

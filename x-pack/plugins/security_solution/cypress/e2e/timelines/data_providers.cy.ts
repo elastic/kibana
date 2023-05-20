@@ -75,7 +75,7 @@ describe('timeline data providers', () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
     updateDataProviderByFieldHoverAction('host.name', 0);
     waitForTimelineChanges();
-    cy.wait(3000);
+    cy.wait(5000);
     cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()

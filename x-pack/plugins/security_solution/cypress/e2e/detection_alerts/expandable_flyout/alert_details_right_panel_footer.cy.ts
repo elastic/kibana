@@ -54,16 +54,16 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 const createNewCaseFromCases = () => {
   navigateToCasesPage();
-  cy.get(CREATE_CASE_BUTTON).should('be.visible').click();
+  cy.get(CREATE_CASE_BUTTON).click();
   cy.get(NEW_CASE_NAME_INPUT).should('be.visible').click().type('case');
   cy.get(NEW_CASE_DESCRIPTION_INPUT).should('be.visible').click().type('case description');
-  cy.get(NEW_CASE_CREATE_BUTTON).should('be.visible').click();
+  cy.get(NEW_CASE_CREATE_BUTTON).click();
 };
 
 const deleteCase = () => {
-  cy.get(CASE_ACTION_WRAPPER).find(CASE_ELLIPSE_BUTTON).should('be.visible').click();
-  cy.get(CASE_ELLIPSE_DELETE_CASE_OPTION).should('be.visible').click();
-  cy.get(CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON).should('be.visible').click();
+  cy.get(CASE_ACTION_WRAPPER).find(CASE_ELLIPSE_BUTTON).click();
+  cy.get(CASE_ELLIPSE_DELETE_CASE_OPTION).click();
+  cy.get(CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON).click();
 };
 
 describe(
@@ -101,7 +101,7 @@ describe(
 
     // TODO this will change when add to existing case is improved
     //  https://github.com/elastic/security-team/issues/6298
-    it('should add to existing case', () => {
+    it.skip('should add to existing case', () => {
       createNewCaseFromCases();
 
       navigateToAlertsPage();

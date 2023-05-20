@@ -50,6 +50,7 @@ describe('Detections > Callouts', () => {
   context('indicating read-only access to resources', () => {
     context('On Detections home page', () => {
       beforeEach(() => {
+        login(ROLES.reader);
         loadPageAsReadOnlyUser(ALERTS_URL);
       });
 
@@ -71,6 +72,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
+        login(ROLES.reader);
         createRule(getNewRule());
         loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForPageTitleToBeShown();
@@ -101,6 +103,7 @@ describe('Detections > Callouts', () => {
   context('indicating read-write access to resources', () => {
     context('On Detections home page', () => {
       beforeEach(() => {
+        login(ROLES.platform_engineer);
         loadPageAsPlatformEngineer(ALERTS_URL);
       });
 
@@ -111,6 +114,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rules Management page', () => {
       beforeEach(() => {
+        login(ROLES.platform_engineer);
         loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
@@ -121,6 +125,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
+        login(ROLES.platform_engineer);
         createRule(getNewRule());
         loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForPageTitleToBeShown();

@@ -56,7 +56,7 @@ describe('Histogram legend hover actions', () => {
     );
     cy.get(ALERTS_COUNT).should('not.exist');
 
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).trigger('click');
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).click();
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
   });
 

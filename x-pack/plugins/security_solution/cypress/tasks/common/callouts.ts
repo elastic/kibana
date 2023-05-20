@@ -17,7 +17,7 @@ export const waitForCallOutToBeShown = (id: string, color: string) => {
 
 export const dismissCallOut = (id: string) => {
   getCallOut(id).within(() => {
-    cy.get(CALLOUT_DISMISS_BTN).should('be.visible').click();
+    cy.get(CALLOUT_DISMISS_BTN).click();
     cy.root().should('not.exist');
   });
 };

@@ -19,7 +19,7 @@ export const closesModal = () => {
 export const clickInspectButton = (container: string) => {
   cy.get(`${container} ${INSPECT_BUTTON_ICON}`).should('exist');
   cy.get(`${container} ${INSPECT_BUTTON_ICON}`).invoke('show');
-  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
+  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).click();
 };
 
 const LOADER_ARIA = '[aria-label="Loading"]';
@@ -35,9 +35,7 @@ export const openTableInspectModal = (table: InspectTableMetadata) => {
 
   if (table.altInspectId) {
     cy.get(table.altInspectId).invoke('show');
-    cy.get(table.altInspectId).trigger('click', {
-      force: true,
-    });
+    cy.get(table.altInspectId).click();
   } else {
     clickInspectButton(table.id);
   }

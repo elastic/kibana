@@ -128,7 +128,7 @@ export const addNameAndDescriptionToTimeline = (
 };
 
 export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  cy.get(NOTES_TAB_BUTTON).trigger('click');
+  cy.get(NOTES_TAB_BUTTON).click();
   cy.get(NOTES_TEXT_AREA).should('exist');
 
   return cy.get(NOTES_TAB_BUTTON);
@@ -239,11 +239,7 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE)
-    .should('be.visible')
-    .then((el) => {
-      cy.wrap(el).trigger('click');
-    });
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).click();
 };
 
 export const addNewCase = () => {
@@ -332,7 +328,7 @@ export const openTimelineFieldsBrowser = () => {
 
 export const openTimelineInspectButton = () => {
   cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
-  cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
+  cy.get(TIMELINE_INSPECT_BUTTON).click();
 };
 
 export const openTimelineFromSettings = () => {

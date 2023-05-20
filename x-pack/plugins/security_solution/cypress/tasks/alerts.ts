@@ -87,7 +87,7 @@ export const addExceptionFromFirstAlert = () => {
 
 export const openAddEndpointExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
-  cy.get(ADD_ENDPOINT_EXCEPTION_BTN).trigger('click');
+  cy.get(ADD_ENDPOINT_EXCEPTION_BTN).click();
   cy.get(FIELD_INPUT).should('be.visible');
 };
 
@@ -121,7 +121,7 @@ export const expandFirstAlertActions = () => {
 
   const click = ($el: JQuery<HTMLElement>) => {
     count++;
-    return $el.trigger('click');
+    return $el.click();
   };
 
   /*
@@ -197,10 +197,10 @@ export const clearAllSelections = () => {
   cy.get(OPTION_LISTS_EXISTS).then(($el) => {
     if ($el.attr('aria-checked', 'false')) {
       // check it
-      $el.trigger('click');
+      $el.click();
     }
     // uncheck it
-    $el.trigger('click');
+    $el.click();
   });
 };
 
@@ -329,7 +329,7 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
 };
 
 export const closeAnalyzer = () => {
-  cy.get(CLOSE_OVERLAY).should('be.visible').trigger('click');
+  cy.get(CLOSE_OVERLAY).click();
 };
 
 export const clickAlertsHistogramLegend = () => {
@@ -466,10 +466,9 @@ export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) =
 };
 
 export const openSessionViewerFromAlertTable = (rowIndex: number = 0) => {
-  cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).should('be.visible');
-  cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).trigger('click');
+  cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).click();
 };
 
 export const closeSessionViewerFromAlertTable = () => {
-  cy.get(CLOSE_OVERLAY).trigger('click');
+  cy.get(CLOSE_OVERLAY).click();
 };

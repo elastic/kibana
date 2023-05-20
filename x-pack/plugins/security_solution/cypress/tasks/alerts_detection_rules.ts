@@ -246,10 +246,9 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
 export const loadPrebuiltDetectionRules = () => {
   cy.log('load prebuilt detection rules');
   waitTillPrebuiltRulesReadyToInstall();
-  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 })
-    .should('be.enabled')
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.disabled');
+  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('be.enabled');
+  cy.get(LOAD_PREBUILT_RULES_BTN).click();
+  cy.get(LOAD_PREBUILT_RULES_BTN).should('be.disabled');
 };
 
 /**
@@ -278,10 +277,8 @@ export const reloadDeletedRules = () => {
  */
 export const selectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX)
-      .eq(i)
-      .pipe(($el) => $el.trigger('click'))
-      .should('be.checked');
+    cy.get(RULE_CHECKBOX).eq(i).click();
+    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
   }
 };
 
@@ -301,11 +298,9 @@ export const unselectRuleByName = (ruleName: string) => {
  */
 export const unselectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX)
-      .eq(i)
-      .should('be.checked')
-      .pipe(($el) => $el.trigger('click'))
-      .should('not.be.checked');
+    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+    cy.get(RULE_CHECKBOX).eq(i).click();
+    cy.get(RULE_CHECKBOX).eq(i).should('not.be.checked');
   }
 };
 
@@ -392,9 +387,10 @@ export const checkAutoRefresh = (ms: number, condition: string) => {
 
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click', { force: true }).selectFile(rulesFile).trigger('change');
-  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
+  cy.get(INPUT_FILE).click();
+  cy.get(INPUT_FILE).selectFile(rulesFile);
+  cy.get(INPUT_FILE).trigger('change');
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click();
   cy.get(INPUT_FILE).should('not.exist');
 };
 
@@ -485,9 +481,8 @@ export const expectToContainRule = (
 };
 
 const selectOverwriteRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX)
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.checked');
+  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).click();
+  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).should('be.checked');
 };
 
 export const expectManagementTableRules = (ruleNames: string[]): void => {
@@ -499,23 +494,24 @@ export const expectManagementTableRules = (ruleNames: string[]): void => {
 };
 
 const selectOverwriteExceptionsRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX)
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.checked');
+  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).click();
+  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).should('be.checked');
 };
+
 const selectOverwriteConnectorsRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX)
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.checked');
+  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).click();
+  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).should('be.checked');
 };
+
 export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click', { force: true }).selectFile(rulesFile).trigger('change');
+  cy.get(INPUT_FILE).click();
+  cy.get(INPUT_FILE).selectFile(rulesFile);
+  cy.get(INPUT_FILE).trigger('change');
   selectOverwriteRulesImport();
   selectOverwriteExceptionsRulesImport();
   selectOverwriteConnectorsRulesImport();
-  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click();
   cy.get(INPUT_FILE).should('not.exist');
 };
 

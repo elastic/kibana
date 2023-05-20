@@ -58,9 +58,9 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
   });
 
   beforeEach(() => {
-    login();
     deleteAlertsAndRules();
     esArchiverResetKibana();
+    login();
 
     postDataView(DATA_VIEW_ID);
 

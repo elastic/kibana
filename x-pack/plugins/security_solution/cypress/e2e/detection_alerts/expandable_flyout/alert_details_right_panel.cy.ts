@@ -74,7 +74,7 @@ describe(
       cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').and('have.text', 'JSON');
     });
 
-    it('should display tab content when switching tabs in the right section', () => {
+    it.skip('should display tab content when switching tabs in the right section', () => {
       openOverviewTab();
       // we shouldn't need to test anything here as it's covered with the new overview_tab file
 
