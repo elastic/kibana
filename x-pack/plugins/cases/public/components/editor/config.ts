@@ -19,6 +19,7 @@ const theme: InitialConfigType['theme'] = {
   rtl: 'rtl',
   placeholder: 'editor-placeholder',
   paragraph: 'editor-paragraph',
+  quote: 'euiMarkdownFormat__blockquote',
 };
 
 const onError = (error: Error) => {

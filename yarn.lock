@@ -5788,7 +5788,7 @@
   resolved "https://registry.yarnpkg.com/@lexical/rich-text/-/rich-text-0.10.0.tgz#47e7566967b3b05c4b7ec8a9b3a61324b5ea2eb3"
   integrity sha512-mkg+8h5qh09daCc8+PhzHjczSVhlTOkrr8S4oma89mfQZ/CODJYd0tOOd9y/8JaDrBddTqjd4xTjXwEEJzVA4g==
 
-"@lexical/selection@0.10.0":
+"@lexical/selection@0.10.0", "@lexical/selection@^0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@lexical/selection/-/selection-0.10.0.tgz#9005f7518acd518de2aec4d9cd49670b312d25b9"
   integrity sha512-dziT1fb+/x8S3PUHI6BuF4DPML2njCDdyY7l9uTgzN9jGXxo9bzy+ySgRRN8IgjWQb8jkntAqkYIWTj4/3Jr7Q==

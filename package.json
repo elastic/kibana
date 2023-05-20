@@ -721,6 +721,7 @@
     "@lexical/markdown": "^0.10.0",
     "@lexical/react": "^0.10.0",
     "@lexical/rich-text": "^0.10.0",
+    "@lexical/selection": "^0.10.0",
     "@lexical/table": "^0.10.0",
     "@lexical/utils": "^0.10.0",
     "@loaders.gl/core": "^2.3.1",
