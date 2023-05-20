@@ -112,4 +112,15 @@
   ol {
     list-style: decimal inside;
   }
+
+  code {
+    font-family: 'Roboto Mono',Menlo,Courier,monospace;
+    font-size: 0.9em;
+    padding-block: 0.2em;
+    padding-inline: 0.5em;
+    background: #F1F4FA;
+    border-radius: 4px;
+    font-weight: 700;
+    color: #765b96;
+  }
 }

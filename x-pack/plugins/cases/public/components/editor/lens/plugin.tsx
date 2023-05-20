@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodeToNearestRoot } from '@lexical/utils';
 import type { LexicalCommand } from 'lexical';
 import { COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical';
-import { useEffect } from 'react';
+import {
+  $createCodeNode,
+  $isCodeNode,
+  getDefaultCodeLanguage,
+  getCodeLanguages,
+} from '@lexical/code';
 
 import { $createLensNode, LensNode } from './node';
 

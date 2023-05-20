@@ -21,6 +21,7 @@ import { ActionBar } from './toolbar';
 import { Footer } from './footer';
 import { LensPlugin } from './lens/plugin';
 import { MentionsPlugin } from './mentions/plugin';
+import { CodeHighlightPlugin } from './codehighlight/plugin';
 
 const onChange = (editorState: EditorState) => {};
 
@@ -44,6 +45,7 @@ const EditorComponent: React.FC = () => {
           <HistoryPlugin />
           <LensPlugin />
           <MentionsPlugin />
+          <CodeHighlightPlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <Footer />
         </div>

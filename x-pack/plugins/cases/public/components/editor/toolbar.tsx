@@ -49,23 +49,23 @@ const listButtons = [
 
 const quoteCodeLinkButtons = [
   {
-    id: 'mdQuote',
+    id: 'quote' as const,
     label: 'Quote',
     name: 'quote',
     iconType: 'quote',
   },
   {
-    id: 'mdCode',
+    id: 'code' as const,
     label: 'Code',
     name: 'inlineCode',
     iconType: 'editorCodeBlock',
   },
-  {
-    id: 'mdLink',
-    label: 'Link',
-    name: 'link',
-    iconType: 'editorLink',
-  },
+  // {
+  //   id: 'mdLink',
+  //   label: 'Link',
+  //   name: 'link',
+  //   iconType: 'editorLink',
+  // },
 ];
 
 const ActionBarComponent: React.FC = () => {
@@ -102,7 +102,9 @@ const ActionBarComponent: React.FC = () => {
           <EuiToolTip key={item.id} content={item.label} delay="long">
             <EuiButtonIcon
               color="text"
-              onClick={() => {}}
+              onClick={() => {
+                editor.dispatchCommand(FORMAT_TEXT_COMMAND, item.id);
+              }}
               iconType={item.iconType}
               aria-label={item.label}
             />
