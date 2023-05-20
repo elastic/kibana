@@ -20,6 +20,7 @@ import { editorConfig } from './config';
 import { ActionBar } from './toolbar';
 import { Footer } from './footer';
 import { LensPlugin } from './lens/plugin';
+import { MentionsPlugin } from './mentions/plugin';
 
 const onChange = (editorState: EditorState) => {};
 
@@ -42,6 +43,7 @@ const EditorComponent: React.FC = () => {
           <OnChangePlugin onChange={onChange} />
           <HistoryPlugin />
           <LensPlugin />
+          <MentionsPlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <Footer />
         </div>

@@ -12,6 +12,7 @@ import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { LensNode } from './lens/node';
+import { MentionNode } from './mentions/node';
 
 const theme: InitialConfigType['theme'] = {
   ltr: 'ltr',
@@ -37,6 +38,7 @@ const EDITOR_NODES = [
   TableCellNode,
   TableRowNode,
   LensNode,
+  MentionNode,
 ];
 
 export const editorConfig: InitialConfigType = {

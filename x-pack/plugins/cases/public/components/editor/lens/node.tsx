@@ -214,6 +214,6 @@ export function $createLensNode(): LensNode {
   return new LensNode();
 }
 
-export function $isFigmaNode(node: LensNode | LexicalNode | null | undefined): node is LensNode {
+export function $isLensNode(node: LensNode | LexicalNode | null | undefined): node is LensNode {
   return node instanceof LensNode;
 }
