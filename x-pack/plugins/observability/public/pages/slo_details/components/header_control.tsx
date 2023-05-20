@@ -18,7 +18,7 @@ import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../config/paths';
+import { paths } from '../../../routes/routes';
 import {
   transformSloResponseToCreateSloInput,
   transformValuesToCreateSLOInput,

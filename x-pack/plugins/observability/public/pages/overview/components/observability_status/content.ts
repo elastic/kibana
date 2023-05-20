@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, DocLinksStart } from '@kbn/core/public';
 import { ObservabilityFetchDataPlugins } from '../../../../typings/fetch_overview_data';
-import { paths } from '../../../../config/paths';
+import { paths } from '../../../../routes/routes';
 
 export interface ObservabilityStatusContent {
   id: ObservabilityFetchDataPlugins | 'alert';

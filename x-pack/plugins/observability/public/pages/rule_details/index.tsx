@@ -61,7 +61,7 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { PageTitle } from './components';
 import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/routes';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';

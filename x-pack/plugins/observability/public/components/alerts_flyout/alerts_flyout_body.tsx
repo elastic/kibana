@@ -31,7 +31,7 @@ import moment from 'moment-timezone';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { asDuration, toMicroseconds } from '../../../common/utils/formatters';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/routes';
 import { translations } from '../../config/translations';
 import { formatAlertEvaluationValue } from '../../utils/format_alert_evaluation_value';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';

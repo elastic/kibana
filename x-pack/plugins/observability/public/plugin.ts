@@ -52,7 +52,7 @@ import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public'
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
-import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
+import { observabilityAppId, observabilityFeatureId } from '../common';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
@@ -60,6 +60,14 @@ import {
 } from './rules/create_observability_rule_type_registry';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import {
+  ALERTS_PATH,
+  CASES_PATH,
+  OBSERVABILITY_BASE_PATH,
+  OVERVIEW_PATH,
+  RULES_PATH,
+  SLOS_PATH,
+} from './routes/routes';
 
 export interface ConfigSchema {
   unsafe: {
@@ -134,7 +142,7 @@ export class Plugin
         defaultMessage: 'Alerts',
       }),
       order: 8001,
-      path: '/alerts',
+      path: ALERTS_PATH,
       navLinkStatus: AppNavLinkStatus.hidden,
       deepLinks: [
         {
@@ -142,7 +150,7 @@ export class Plugin
           title: i18n.translate('xpack.observability.rulesLinkTitle', {
             defaultMessage: 'Rules',
           }),
-          path: '/alerts/rules',
+          path: RULES_PATH,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
       ],
@@ -154,10 +162,10 @@ export class Plugin
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       order: 8002,
-      path: '/slos',
+      path: SLOS_PATH,
     },
     getCasesDeepLinks({
-      basePath: casesPath,
+      basePath: CASES_PATH,
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
@@ -222,8 +230,9 @@ export class Plugin
     };
 
     const appUpdater$ = this.appUpdater$;
+
     const app = {
-      appRoute: '/app/observability',
+      appRoute: OBSERVABILITY_BASE_PATH,
       category,
       deepLinks: this.deepLinks,
       euiIconType,
@@ -265,7 +274,7 @@ export class Plugin
             'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
         }),
         icon: 'logoObservability',
-        path: '/app/observability/',
+        path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
       });
     }
@@ -280,7 +289,7 @@ export class Plugin
               defaultMessage: 'Overview',
             }),
             app: observabilityAppId,
-            path: '/overview',
+            path: OVERVIEW_PATH,
           };
 
           // Reformat the visible links to be NavigationEntry objects instead of

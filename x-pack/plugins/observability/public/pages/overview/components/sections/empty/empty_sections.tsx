@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
-import { paths } from '../../../../../config/paths';
+import { paths } from '../../../../../routes/routes';
 import { ObservabilityAppServices } from '../../../../../application/types';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';

@@ -10,7 +10,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { translations } from '../../config/translations';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/routes';
 import type { TopAlert } from '../../typings/alerts';
 
 interface FlyoutProps {

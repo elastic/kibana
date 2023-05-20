@@ -23,7 +23,7 @@ import { SlosPage } from './slos';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/routes';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

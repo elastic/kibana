@@ -22,7 +22,7 @@ import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { useFetchApmSuggestions } from '../../hooks/slo/use_fetch_apm_suggestions';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { buildSlo } from '../../data/slo/slo';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/routes';
 import { SloEditPage } from './slo_edit';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 

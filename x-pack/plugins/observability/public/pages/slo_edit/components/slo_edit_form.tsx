@@ -35,7 +35,7 @@ import {
   transformSloResponseToCreateSloInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
-import { paths } from '../../../config/paths';
+import { paths } from '../../../routes/routes';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { sloFeatureId } from '../../../../common';

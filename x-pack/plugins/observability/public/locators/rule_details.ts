@@ -15,6 +15,7 @@ import {
   EXECUTION_TAB,
   SEARCH_BAR_URL_STORAGE_KEY,
 } from '../pages/rule_details/constants';
+import { RULES_PATH } from '../routes/routes';
 import type { TabId } from '../pages/rule_details/types';
 import type { AlertStatus } from '../../common/typings';
 
@@ -28,7 +29,7 @@ export interface RuleDetailsLocatorParams extends SerializableRecord {
 }
 
 export const getRuleDetailsPath = (ruleId: string) => {
-  return `/alerts/rules/${encodeURI(ruleId)}`;
+  return `${RULES_PATH}/${encodeURI(ruleId)}`;
 };
 
 export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetailsLocatorParams> {

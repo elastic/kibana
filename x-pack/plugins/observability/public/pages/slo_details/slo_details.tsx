@@ -23,7 +23,7 @@ import PageNotFound from '../404';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/routes';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
 import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
