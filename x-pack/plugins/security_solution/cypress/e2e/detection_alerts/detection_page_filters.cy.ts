@@ -116,6 +116,13 @@ describe('Detections : Page Filters', () => {
   });
 
   context('Alert Page Filters Customization ', () => {
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlerts();
+      resetFilters();
+    });
+
     it('should be able to delete Controls', () => {
       waitForPageFilters();
       editFilterGroupControls();

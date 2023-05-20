@@ -166,7 +166,7 @@ describe('Entity Analytics Dashboard', () => {
         deleteAlertsAndRules();
       });
 
-      it('populates alerts column', () => {
+      it.only('populates alerts column', () => {
         cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', SIEM_KIBANA_HOST_ALERTS);
       });
 

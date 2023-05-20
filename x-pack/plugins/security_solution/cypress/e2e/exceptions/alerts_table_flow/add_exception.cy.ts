@@ -65,15 +65,18 @@ describe('Exceptions Table', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
-  });
 
-  beforeEach(() => {
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+  });
+
+  beforeEach(() => {
+    login();
+    visitWithoutDateRange(EXCEPTIONS_URL);
   });
 
   it('Exports exception list', function () {

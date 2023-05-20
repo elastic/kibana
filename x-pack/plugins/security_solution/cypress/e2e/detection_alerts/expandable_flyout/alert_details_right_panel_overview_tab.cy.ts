@@ -120,7 +120,12 @@ describe(
     });
 
     describe('investigation section', () => {
-      before(() => {
+      beforeEach(() => {
+        login();
+        visit(ALERTS_URL);
+        waitForAlertsToPopulate();
+        expandFirstAlertExpandableFlyout();
+        openOverviewTab();
         toggleOverviewTabDescriptionSection();
         toggleOverviewTabInvestigationSection();
       });
@@ -160,7 +165,12 @@ describe(
     });
 
     describe('insights section', () => {
-      before(() => {
+      beforeEach(() => {
+        login();
+        visit(ALERTS_URL);
+        waitForAlertsToPopulate();
+        expandFirstAlertExpandableFlyout();
+        openOverviewTab();
         toggleOverviewTabDescriptionSection();
         toggleOverviewTabInsightsSection();
       });
@@ -220,7 +230,12 @@ describe(
     });
 
     describe('visualizations section', () => {
-      before(() => {
+      beforeEach(() => {
+        login();
+        visit(ALERTS_URL);
+        waitForAlertsToPopulate();
+        expandFirstAlertExpandableFlyout();
+        openOverviewTab();
         toggleOverviewTabInsightsSection();
         toggleOverviewTabVisualizationsSection();
       });

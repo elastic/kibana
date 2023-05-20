@@ -674,32 +674,27 @@ export const selectNewTermsRuleType = () => {
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
-  cy.waitUntil(
+  cy.recurse(
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
 
       cy.get(EMPTY_ALERT_TABLE).should('not.exist');
-
-      return !!cy
-        .get(ALERTS_TABLE_COUNT)
-        .invoke('text')
-        .then(parseInt)
-        .should('be.gte', alertCountThreshold);
+      return cy.get(ALERTS_TABLE_COUNT).invoke('text').then(parseInt);
     },
-    { interval: 500, timeout: 12000 }
+    (alertsTableCount) => alertsTableCount >= alertCountThreshold
   );
   waitForAlerts();
 };
 
 export const waitForTheRuleToBeExecuted = () => {
-  cy.waitUntil(() => {
-    cy.get(REFRESH_BUTTON).click({ force: true });
-    return cy
-      .get(RULE_STATUS)
-      .invoke('text')
-      .then((ruleStatus) => ruleStatus === 'succeeded');
-  });
+  cy.recurse(
+    () => {
+      cy.get(REFRESH_BUTTON).click({ force: true });
+      return cy.get(RULE_STATUS);
+    },
+    (ruleStatus) => ruleStatus === 'succeeded'
+  );
 };
 
 export const selectAndLoadSavedQuery = (queryName: string, queryValue: string) => {
