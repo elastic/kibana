@@ -72,8 +72,8 @@ describe('Detection rules, threshold', () => {
   });
 
   beforeEach(() => {
-    login();
     deleteAlertsAndRules();
+    login();
     visitWithoutDateRange(RULE_CREATION);
   });
 

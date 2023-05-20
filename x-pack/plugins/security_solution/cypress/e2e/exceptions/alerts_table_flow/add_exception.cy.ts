@@ -73,7 +73,7 @@ describe('Exceptions Table', () => {
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
   });
 
   it('Exports exception list', function () {

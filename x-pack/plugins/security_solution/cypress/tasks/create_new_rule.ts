@@ -679,7 +679,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
 
-      cy.get(EMPTY_ALERT_TABLE).should('have.length.above', 0);
+      cy.get(EMPTY_ALERT_TABLE).should('not.exist');
 
       return !!cy
         .get(ALERTS_TABLE_COUNT)

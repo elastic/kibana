@@ -44,20 +44,19 @@ describe('timeline data providers', () => {
     populateTimeline();
   });
 
-  it('displays the data provider action menu when Enter is pressed', (done) => {
-    addDataProvider({ field: 'host.name', operator: 'exists' }).then(() => {
-      cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
-      cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
-        .pipe(($el) => $el.trigger('focus'))
-        .should('exist');
-      cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
-        .first()
-        .parent()
-        .type('{enter}');
+  it('displays the data provider action menu when Enter is pressed', () => {
+    addDataProvider({ field: 'host.name', operator: 'exists' });
 
-      cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
-      done();
-    });
+    cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
+    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
+      .pipe(($el) => $el.trigger('focus'))
+      .should('exist');
+    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
+      .first()
+      .parent()
+      .type('{enter}');
+
+    cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
 
   it('persists timeline when data provider is updated by dragging a field from data grid', () => {
@@ -72,7 +71,8 @@ describe('timeline data providers', () => {
       });
   });
 
-  it('presists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
+  it('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
+    addDataProvider({ field: 'host.name', operator: 'exists' });
     updateDataProviderByFieldHoverAction('host.name', 0);
     waitForTimelineChanges();
     cy.wait(1000);
