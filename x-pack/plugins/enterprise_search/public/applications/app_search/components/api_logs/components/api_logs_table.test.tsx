@@ -7,7 +7,7 @@
 
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
-// NOTE: We're mocking FormattedRelative here because it (currently) has
+// NOTE: We're mocking FormattedRelativeTime here because it (currently) has
 // console warn issues, and it allows us to skip mocking dates
 jest.mock('@kbn/i18n-react', () => ({
   ...(jest.requireActual('@kbn/i18n-react') as object),

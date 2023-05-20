@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
@@ -100,7 +100,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
         id="xpack.fleet.agentHealth.checkInTooltipText"
         defaultMessage="Last checked in {lastCheckIn}"
         values={{
-          lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
+          lastCheckIn: <FormattedRelativeTime value={msLastCheckIn} />,
         }}
       />
     </>

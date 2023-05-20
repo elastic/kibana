@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { ApiLogsLogic } from '..';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
@@ -53,7 +53,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
         defaultMessage: 'Time',
       }),
       width: '20%',
-      render: (dateString: string) => <FormattedRelative value={new Date(dateString)} />,
+      render: (dateString: string) => <FormattedRelativeTime value={new Date(dateString)} />,
     },
     {
       field: 'full_request_path',

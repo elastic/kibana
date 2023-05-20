@@ -12,12 +12,12 @@ import { LastUpdatedAt } from '.';
 
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn();
-  FormattedRelative.mockImplementation(() => '2 minutes ago');
+  const FormattedRelativeTime = jest.fn();
+  FormattedRelativeTime.mockImplementation(() => '2 minutes ago');
 
   return {
     ...originalModule,
-    FormattedRelative,
+    FormattedRelativeTime,
   };
 });
 

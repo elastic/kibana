@@ -22,7 +22,7 @@ import { promisify } from 'util';
 import normalize from 'normalize-path';
 import path from 'path';
 import chalk from 'chalk';
-import parser from 'intl-messageformat-parser';
+import { parse as parser } from 'intl-messageformat-parser';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 

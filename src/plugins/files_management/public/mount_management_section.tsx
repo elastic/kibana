@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
+import { I18nProvider, FormattedRelativeTime } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
@@ -41,7 +41,7 @@ export const mountManagementSection = (
           {...{
             core: coreStart as unknown as TableListViewKibanaDependencies['core'],
             toMountPoint,
-            FormattedRelative,
+            FormattedRelativeTime,
           }}
         >
           <FilesManagementAppContextProvider

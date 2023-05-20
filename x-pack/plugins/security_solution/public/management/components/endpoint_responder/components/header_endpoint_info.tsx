@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
 import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
@@ -88,7 +88,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
                 id="xpack.securitySolution.responder.header.lastSeen"
                 defaultMessage="Last seen {date}"
                 values={{
-                  date: <FormattedRelative value={endpointDetails.metadata['@timestamp']} />,
+                  date: <FormattedRelativeTime value={endpointDetails.metadata['@timestamp']} />,
                 }}
               />
             </EuiText>

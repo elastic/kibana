@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { IconWithCount } from './icon_with_count';
@@ -93,7 +93,7 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
                     data-test-subj="recent-cases-creation-relative-time"
                   >
                     <LocalizedDateTooltip date={new Date(c.createdAt)}>
-                      <FormattedRelative value={c.createdAt} />
+                      <FormattedRelativeTime value={c.createdAt} />
                     </LocalizedDateTooltip>
                   </EuiText>
                 </EuiFlexItem>

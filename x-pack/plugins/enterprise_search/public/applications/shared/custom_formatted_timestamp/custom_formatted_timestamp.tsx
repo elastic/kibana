@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { FormattedDateTime } from '../formatted_date_time';
 
@@ -21,7 +21,7 @@ export const CustomFormattedTimestamp: React.FC<CustomFormattedTimestampProps> =
   const date = new Date(timestamp);
   const isDateToday = date >= new Date(new Date(Date.now()).toDateString());
   return isDateToday ? (
-    <FormattedRelative value={date} />
+    <FormattedRelativeTime value={date} />
   ) : (
     <FormattedDateTime date={date} hideTime />
   );

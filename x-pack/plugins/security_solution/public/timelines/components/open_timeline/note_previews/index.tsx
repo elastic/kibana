@@ -15,7 +15,7 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -214,7 +214,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 'data-test-subj': 'note-preview-description',
                 id: 'note-preview-description',
                 timestamp: timeline.updated ? (
-                  <FormattedRelative data-test-subj="updated" value={new Date(timeline.updated)} />
+                  <FormattedRelativeTime data-test-subj="updated" value={new Date(timeline.updated)} />
                 ) : (
                   getEmptyValue()
                 ),
@@ -248,7 +248,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
             username: defaultToEmptyTag(note.updatedBy),
             event: i18n.ADDED_A_NOTE,
             timestamp: note.updated ? (
-              <FormattedRelative data-test-subj="updated" value={new Date(note.updated)} />
+              <FormattedRelativeTime data-test-subj="updated" value={new Date(note.updated)} />
             ) : (
               getEmptyValue()
             ),

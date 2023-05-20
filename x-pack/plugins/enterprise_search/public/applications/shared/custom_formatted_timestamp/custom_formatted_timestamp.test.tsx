@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { FormattedDateTime } from '../formatted_date_time';
 

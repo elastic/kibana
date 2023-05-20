@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiTextColor } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import * as i18n from './translations';
@@ -20,7 +20,7 @@ interface UserActionAvatarProps {
 const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatarProps) => (
   <>
     <LocalizedDateTooltip date={new Date(createdAt)}>
-      <FormattedRelative
+      <FormattedRelativeTime
         data-test-subj="user-action-title-creation-relative-time"
         value={createdAt}
       />
@@ -31,7 +31,7 @@ const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatar
         {' ('}
         {i18n.EDITED_FIELD}{' '}
         <LocalizedDateTooltip date={new Date(updatedAt)}>
-          <FormattedRelative
+          <FormattedRelativeTime
             data-test-subj="user-action-title-edited-relative-time"
             value={updatedAt}
           />

@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { useDateFormat, useTimeZone, useUiSetting$ } from '../../common/lib/kibana';
 import { getOrEmptyTagFromValue } from '../empty_value';
@@ -149,7 +149,7 @@ export const FormattedRelativePreferenceDate = ({
       {moment(date).add(1, 'hours').isBefore(new Date()) ? (
         <PreferenceFormattedDate data-test-subj="preference-time" value={date} stripMs={stripMs} />
       ) : (
-        <FormattedRelative data-test-subj="relative-time" value={date} />
+        <FormattedRelativeTime data-test-subj="relative-time" value={date} />
       )}
     </LocalizedDateTooltip>
   );

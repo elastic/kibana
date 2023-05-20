@@ -326,7 +326,7 @@
             "tags": [],
             "label": "FormattedRelative",
             "description": [
-              "The <FormattedRelative /> component from the @kbn/i18n-react package"
+              "The <FormattedRelativeTime /> component from the @kbn/i18n-react package"
             ],
             "signature": [
               "typeof ReactIntl.FormattedRelative"

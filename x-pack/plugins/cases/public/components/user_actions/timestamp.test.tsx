@@ -13,13 +13,13 @@ import { UserActionTimestamp } from './timestamp';
 
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn();
-  FormattedRelative.mockImplementationOnce(() => '2 days ago');
-  FormattedRelative.mockImplementation(() => '20 hours ago');
+  const FormattedRelativeTime = jest.fn();
+  FormattedRelativeTime.mockImplementationOnce(() => '2 days ago');
+  FormattedRelativeTime.mockImplementation(() => '20 hours ago');
 
   return {
     ...originalModule,
-    FormattedRelative,
+    FormattedRelativeTime,
   };
 });
 

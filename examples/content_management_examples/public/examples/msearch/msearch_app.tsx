@@ -11,7 +11,7 @@ import { ContentClientProvider, type ContentClient } from '@kbn/content-manageme
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
+import { FormattedRelativeTime, I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { MSearchTable } from './msearch_table';
 
@@ -31,7 +31,7 @@ export const MSearchApp = (props: {
             http: props.core.http,
           }}
           toMountPoint={toMountPoint}
-          FormattedRelative={FormattedRelative}
+          FormattedRelativeTime={FormattedRelativeTime}
           savedObjectsTagging={props.savedObjectsTagging.getTaggingApi()}
         >
           <MSearchTable />

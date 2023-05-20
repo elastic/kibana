@@ -8,7 +8,7 @@
 
 import React, { FC, useContext, useMemo, useCallback } from 'react';
 import type { Observable } from 'rxjs';
-import type { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
@@ -150,8 +150,8 @@ export interface TableListViewKibanaDependencies {
       getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
     };
   };
-  /** The <FormattedRelative /> component from the @kbn/i18n-react package */
-  FormattedRelative: typeof FormattedRelative;
+  /** The <FormattedRelativeTime /> component from the @kbn/i18n-react package */
+  FormattedRelativeTime: typeof FormattedRelativeTime;
 }
 
 /**
@@ -161,7 +161,12 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
   children,
   ...services
 }) => {
-  const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
+  const {
+    core,
+    toMountPoint,
+    savedObjectsTagging,
+    FormattedRelativeTime: FormattedRelativeTimeService,
+  } = services;
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
@@ -232,7 +237,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
             core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
           }}
           searchQueryParser={searchQueryParser}
-          DateFormatterComp={(props) => <FormattedRelative {...props} />}
+          DateFormatterComp={(props) => <FormattedRelativeTimeService {...props} />}
           currentAppId$={core.application.currentAppId$}
           navigateToUrl={core.application.navigateToUrl}
           getTagList={getTagList}

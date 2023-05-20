@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 interface LastUpdatedAtProps {
   updatedAt: number;
@@ -31,7 +31,7 @@ export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, update
     ) : (
       <EuiFlexItem grow={false}>
         <>{UPDATED} </>
-        <FormattedRelative data-test-subj="last-updated-at-date" value={new Date(updatedAt)} />
+        <FormattedRelativeTime data-test-subj="last-updated-at-date" value={new Date(updatedAt)} />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

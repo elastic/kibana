@@ -21,7 +21,7 @@ import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
