@@ -214,7 +214,10 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 'data-test-subj': 'note-preview-description',
                 id: 'note-preview-description',
                 timestamp: timeline.updated ? (
-                  <FormattedRelativeTime data-test-subj="updated" value={new Date(timeline.updated)} />
+                  <FormattedRelativeTime
+                    data-test-subj="updated"
+                    value={new Date(timeline.updated)}
+                  />
                 ) : (
                   getEmptyValue()
                 ),

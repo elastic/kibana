@@ -6,7 +6,6 @@
  */
 
 import { EuiText, EuiToolTip } from '@elastic/eui';
-import { FormattedRelativeTime } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import * as i18n from './translations';

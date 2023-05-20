@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { FormattedRelativeTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
 

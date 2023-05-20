@@ -9,8 +9,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { FormattedRelativeTime } from '@kbn/i18n-react';
-
 import { FormattedDateTime } from '../formatted_date_time';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
