@@ -69,10 +69,10 @@ describe('EQL rules', () => {
 
   beforeEach(() => {
     login();
-    deleteAlertsAndRules();
+    // deleteAlertsAndRules();
   });
 
-  describe('Detection rules, EQL', () => {
+  describe.only('Detection rules, EQL', () => {
     const rule = getEqlRule();
     const expectedUrls = rule.references?.join('');
     const expectedFalsePositives = rule.false_positives?.join('');

@@ -691,7 +691,7 @@ export const waitForTheRuleToBeExecuted = () => {
   cy.recurse(
     () => {
       cy.get(REFRESH_BUTTON).click({ force: true });
-      return cy.get(RULE_STATUS);
+      return cy.get(RULE_STATUS).invoke('text');
     },
     (ruleStatus) => ruleStatus === 'succeeded'
   );
