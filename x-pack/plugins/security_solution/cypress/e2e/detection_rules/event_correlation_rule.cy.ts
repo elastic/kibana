@@ -47,7 +47,7 @@ import {
   goToRuleDetails,
   goToTheRuleDetailsOf,
 } from '../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
