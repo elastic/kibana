@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { navTabsHostDetails } from '../../../../explore/hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
-import { TabNavigationComponent } from '.';
+import { TabNavigationComponent } from './tab_navigation';
 import type { TabNavigationProps } from './types';
 
 const mockUseRouteSpy = jest.fn();
