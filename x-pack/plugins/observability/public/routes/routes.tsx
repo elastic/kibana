@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
@@ -20,18 +19,45 @@ import { SlosPage } from '../pages/slos/slos';
 import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
-import { casesPath } from '../../common';
 
-export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
+export const OBSERVABILITY_BASE_PATH = '/app/observability';
 
-type DecodeParams<TParams extends Params | undefined> = {
-  [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
+export const ROOT_PATH = '/';
+export const LANDING_PATH = '/landing';
+export const OVERVIEW_PATH = '/overview';
+export const ALERTS_PATH = '/alerts';
+export const ALERT_DETAIL_PATH = '/alerts/:alertId';
+export const EXPLORATORY_VIEW_PATH = '/exploratory-view'; // has been moved to its own app. Keeping around for redirecting purposes.
+export const RULES_PATH = '/alerts/rules';
+export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId';
+export const SLOS_PATH = '/slos';
+export const SLOS_WELCOME_PATH = '/slos/welcome';
+export const SLO_DETAIL_PATH = '/slos/:sloId';
+export const SLO_CREATE_PATH = '/slos/create';
+export const SLO_EDIT = '/slos/edit/:sloId';
+export const CASES_PATH = '/cases';
+
+export const paths = {
+  observability: {
+    alerts: `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}`,
+    alertDetails: (alertId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURI(alertId)}`,
+    rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,
+    ruleDetails: (ruleId: string) => `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(ruleId)}`,
+    slos: `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}`,
+    slosWelcome: `${OBSERVABILITY_BASE_PATH}${SLOS_WELCOME_PATH}`,
+    sloCreate: `${OBSERVABILITY_BASE_PATH}${SLO_CREATE_PATH}`,
+    sloEdit: (sloId: string) => `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}`,
+    sloDetails: (sloId: string) => `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}`,
+  },
+  management: {
+    rules: '/app/management/insightsAndAlerting/triggersActions/rules',
+    ruleDetails: (ruleId: string) =>
+      `/app/management/insightsAndAlerting/triggersActions/rule/${encodeURI(ruleId)}`,
+    alertDetails: (alertId: string) =>
+      `/app/management/insightsAndAlerting/triggersActions/alert/${encodeURI(alertId)}`,
+  },
 };
-
-export interface Params {
-  query?: t.HasProps;
-  path?: t.HasProps;
-}
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -51,21 +77,21 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
 }
 
 export const routes = {
-  '/': {
+  [ROOT_PATH]: {
     handler: () => {
-      return <SimpleRedirect to="/overview" />;
+      return <SimpleRedirect to={OVERVIEW_PATH} />;
     },
     params: {},
     exact: true,
   },
-  '/landing': {
+  [LANDING_PATH]: {
     handler: () => {
-      return <SimpleRedirect to="/overview" />;
+      return <SimpleRedirect to={OVERVIEW_PATH} />;
     },
     params: {},
     exact: true,
   },
-  '/overview': {
+  [OVERVIEW_PATH]: {
     handler: () => {
       return (
         <DatePickerContextProvider>
@@ -76,14 +102,14 @@ export const routes = {
     params: {},
     exact: true,
   },
-  [casesPath]: {
+  [CASES_PATH]: {
     handler: () => {
       return <CasesPage />;
     },
     params: {},
     exact: false,
   },
-  '/alerts': {
+  [ALERTS_PATH]: {
     handler: () => {
       return <AlertsPage />;
     },
@@ -92,63 +118,63 @@ export const routes = {
     },
     exact: true,
   },
-  '/exploratory-view': {
+  [EXPLORATORY_VIEW_PATH]: {
     handler: () => {
-      return <SimpleRedirect to="/" redirectToApp="exploratory-view" />;
+      return <SimpleRedirect to="/" redirectToApp={EXPLORATORY_VIEW_PATH.replace('/', '')} />;
     },
     params: {},
     exact: true,
   },
-  '/alerts/rules': {
+  [RULES_PATH]: {
     handler: () => {
       return <RulesPage />;
     },
     params: {},
     exact: true,
   },
-  '/alerts/rules/:ruleId': {
+  [RULE_DETAIL_PATH]: {
     handler: () => {
       return <RuleDetailsPage />;
     },
     params: {},
     exact: true,
   },
-  '/alerts/:alertId': {
+  [ALERT_DETAIL_PATH]: {
     handler: () => {
       return <AlertDetails />;
     },
     params: {},
     exact: true,
   },
-  '/slos': {
+  [SLOS_PATH]: {
     handler: () => {
       return <SlosPage />;
     },
     params: {},
     exact: true,
   },
-  '/slos/create': {
+  [SLO_CREATE_PATH]: {
     handler: () => {
       return <SloEditPage />;
     },
     params: {},
     exact: true,
   },
-  '/slos/welcome': {
+  [SLOS_WELCOME_PATH]: {
     handler: () => {
       return <SlosWelcomePage />;
     },
     params: {},
     exact: true,
   },
-  '/slos/edit/:sloId': {
+  [SLO_EDIT]: {
     handler: () => {
       return <SloEditPage />;
     },
     params: {},
     exact: true,
   },
-  '/slos/:sloId': {
+  [SLO_DETAIL_PATH]: {
     handler: () => {
       return <SloDetailsPage />;
     },
