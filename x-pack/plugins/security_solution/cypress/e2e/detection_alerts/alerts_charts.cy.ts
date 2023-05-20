@@ -24,8 +24,9 @@ import {
 } from '../../screens/search_bar';
 import { TOASTER } from '../../screens/alerts_detection_rules';
 
-describe('Histogram legend hover actions', { testIsolation: false }, () => {
+describe('Histogram legend hover actions', () => {
   const ruleConfigs = getNewRule();
+
   before(() => {
     cleanKibana();
   });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { closeTimeline } from '../../tasks/timeline';
 import { getNewRule } from '../../objects/rule';
 import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../screens/timeline';
 import { FILTER_BADGE } from '../../screens/alerts';
@@ -27,18 +26,17 @@ import {
 } from '../../screens/alerts_details';
 import { verifyInsightCount } from '../../tasks/alerts_details';
 
-describe('Investigate in timeline', { testIsolation: false }, () => {
+describe('Investigate in timeline', () => {
   before(() => {
     cleanKibana();
-    login();
     createRule(getNewRule());
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
   });
 
   describe('From alerts table', () => {
-    after(() => {
-      closeTimeline();
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
     it('should open new timeline from alerts table', () => {
@@ -54,12 +52,11 @@ describe('Investigate in timeline', { testIsolation: false }, () => {
   });
 
   describe('From alerts details flyout', () => {
-    before(() => {
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
       expandFirstAlert();
-    });
-
-    afterEach(() => {
-      closeTimeline();
     });
 
     it('should open a new timeline from a prevalence field', () => {

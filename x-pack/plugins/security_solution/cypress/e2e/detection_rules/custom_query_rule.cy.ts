@@ -111,8 +111,8 @@ import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/naviga
 describe('Custom query rules', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   describe('Custom detection rules creation', () => {
     const expectedNumberOfRules = 1;
 
@@ -123,6 +123,7 @@ describe('Custom query rules', () => {
           return response.body.data.persistTimeline.timeline.savedObjectId;
         })
         .as('timelineId');
+      login();
     });
 
     it('Creates and enables a new rule', function () {
@@ -240,6 +241,7 @@ describe('Custom query rules', () => {
         createRule(getNewRule({ rule_id: 'rule1', enabled: true, max_signals: 500 }));
         createRule(getNewOverrideRule({ rule_id: 'rule2', enabled: true, max_signals: 500 }));
         createRule(getExistingRule({ rule_id: 'rule3', enabled: true }));
+        login();
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
@@ -351,7 +353,9 @@ describe('Custom query rules', () => {
         deleteConnectors();
         createRule(getExistingRule({ rule_id: 'rule1', enabled: true }));
       });
+
       beforeEach(() => {
+        login();
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 

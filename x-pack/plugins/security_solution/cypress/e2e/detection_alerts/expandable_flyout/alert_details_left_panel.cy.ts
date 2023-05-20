@@ -54,8 +54,11 @@ describe(
   () => {
     before(() => {
       cleanKibana();
-      login();
       createRule(getNewRule());
+    });
+
+    beforeEach(() => {
+      login();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
@@ -89,7 +92,7 @@ describe(
       cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB_CONTENT).should('be.visible');
     });
 
-    describe('visualiza tab', () => {
+    describe('visualize tab', () => {
       it('should display a button group with 2 button in the visualize tab', () => {
         openVisualizeTab();
         cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)

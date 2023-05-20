@@ -44,7 +44,6 @@ const getExceptionList2 = () => ({
 describe('Exceptions Table', () => {
   before(() => {
     esArchiverResetKibana();
-    login();
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
@@ -66,16 +65,15 @@ describe('Exceptions Table', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
+  });
 
+  beforeEach(() => {
+    login();
     visitWithoutDateRange(EXCEPTIONS_URL);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
-  });
-
-  beforeEach(() => {
-    login();
   });
 
   it('Exports exception list', function () {

@@ -16,11 +16,13 @@ import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../../tasks/common/callouts';
 
 const loadPageAsReadOnlyUser = (url: string) => {
+  login(ROLES.reader);
   waitForPageWithoutDateRange(url, ROLES.reader);
   waitForPageTitleToBeShown();
 };
 
 const loadPageAsPlatformEngineer = (url: string) => {
+  login(ROLES.platform_engineer);
   waitForPageWithoutDateRange(url, ROLES.platform_engineer);
   waitForPageTitleToBeShown();
 };
@@ -42,9 +44,6 @@ describe('Detections > Callouts', () => {
     // Otherwise the app will be disabled and show a "welcome"-like page.
     login(ROLES.platform_engineer);
     visitWithoutDateRange(ALERTS_URL);
-
-    // After that we can login as a read-only user.
-    login(ROLES.reader);
   });
 
   context('indicating read-only access to resources', () => {

@@ -98,17 +98,16 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
   });
 };
 
-describe('Detections : Page Filters', { testIsolation: false }, () => {
+describe('Detections : Page Filters', () => {
   before(() => {
     cleanKibana();
-    login();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
-    visit(ALERTS_URL);
-    waitForAlerts();
-    waitForPageFilters();
   });
 
-  afterEach(() => {
+  beforeEach(() => {
+    login();
+    visit(ALERTS_URL);
+    waitForAlerts();
     resetFilters();
   });
 
@@ -116,10 +115,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
     assertFilterControlsWithFilterObject();
   });
 
-  context('Alert Page Filters Customization ', { testIsolation: false }, () => {
-    beforeEach(() => {
-      resetFilters();
-    });
+  context('Alert Page Filters Customization ', () => {
     it('should be able to delete Controls', () => {
       waitForPageFilters();
       editFilterGroupControls();
@@ -129,6 +125,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
       });
       discardFilterGroupControls();
     });
+
     it('should be able to add new Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
@@ -143,6 +140,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
+
     it('should be able to edit Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
@@ -153,6 +151,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
+
     it('should not sync to the URL in edit mode but only in view mode', () => {
       cy.url().then((urlString) => {
         editFilterGroupControls();
@@ -219,7 +218,6 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
 
   it(`Alert list is updated when the alerts are updated`, () => {
     // mark status of one alert to be acknowledged
-    cy.visit(ALERTS_URL);
     selectCountTable();
     cy.get(ALERTS_COUNT)
       .invoke('text')
@@ -238,8 +236,6 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
   });
 
   it(`URL is updated when filters are updated`, () => {
-    cy.visit(ALERTS_URL);
-
     cy.on('url:changed', (urlString) => {
       const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
         if (filter.title === 'Severity') {
@@ -258,8 +254,6 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
-    // change severity filter to high
-    cy.visit(ALERTS_URL);
     cy.get(OPTION_LIST_VALUES(1)).click();
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
@@ -293,6 +287,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
     saveFilterGroupControls();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
+
   it('Changed banner should hide on discarding changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
 

@@ -40,9 +40,13 @@ export const addsHostGeoContinentNameToTimeline = () => {
 };
 
 export const clearFieldsBrowser = () => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT)
-    .type('{selectall}{backspace}')
-    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
+
+  cy.waitUntil(() =>
+    cy
+      .get(FIELDS_BROWSER_FILTER_INPUT)
+      .then((subject) => !subject.hasClass('euiFieldSearch-isLoading'))
+  );
 };
 
 export const closeFieldsBrowser = () => {
@@ -51,10 +55,13 @@ export const closeFieldsBrowser = () => {
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT)
-    .clear()
-    .type(fieldName)
-    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).clear().type(fieldName);
+
+  cy.waitUntil(() =>
+    cy
+      .get(FIELDS_BROWSER_FILTER_INPUT)
+      .then((subject) => !subject.hasClass('euiFieldSearch-isLoading'))
+  );
 };
 
 export const toggleCategoryFilter = () => {

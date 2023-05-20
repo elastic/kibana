@@ -142,10 +142,8 @@ export const deleteRuleFromDetailsPage = () => {
   // the DOM to queue up and once we detect that the element is visible it can then become invisible later
   cy.wait(1000);
   cy.get(ALL_ACTIONS).click();
-  cy.get(RULE_DETAILS_DELETE_BTN).should('be.visible');
-  cy.get(RULE_DETAILS_DELETE_BTN)
-    .pipe(($el) => $el.trigger('click'))
-    .should(($el) => expect($el).to.be.not.visible);
+  cy.get(RULE_DETAILS_DELETE_BTN).click();
+  cy.get(RULE_DETAILS_DELETE_BTN).should('not.be.visible');
 };
 
 export const duplicateSelectedRulesWithoutExceptions = () => {

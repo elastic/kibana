@@ -58,12 +58,8 @@ export const addsFieldsToTimeline = (search: string, fields: string[]) => {
 };
 
 export const openExceptionFlyoutFromEmptyViewerPrompt = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
-      return $el.find(FIELD_INPUT);
-    })
-    .should('be.visible');
+  cy.get(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).click();
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const searchForExceptionItem = (query: string) => {
@@ -76,12 +72,8 @@ export const searchForExceptionItem = (query: string) => {
 };
 
 export const addExceptionFlyoutFromViewerHeader = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).trigger('click');
-      return $el.find(FIELD_INPUT);
-    })
-    .should('be.visible');
+  cy.get(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).click();
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const addExceptionFromRuleDetails = (exception: Exception) => {

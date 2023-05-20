@@ -49,7 +49,7 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../tasks/create_new_case';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { loginWithUser, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL, OVERVIEW_URL } from '../../urls/navigation';
 
@@ -70,7 +70,7 @@ describe('Cases', () => {
   });
 
   it('Creates a new case with timeline and opens the timeline', function () {
-    login();
+    loginWithUser({ username: 'elastic', password: 'changeme' });
     visitWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);

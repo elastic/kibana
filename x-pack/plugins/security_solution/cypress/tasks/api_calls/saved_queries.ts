@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { rootRequest } from '../common';
+
 export const createSavedQuery = (
   title: string,
   query: string,
   filterKey: string = 'agent.hostname'
 ) =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: '/api/saved_query/_create',
     body: {
@@ -36,16 +38,20 @@ export const createSavedQuery = (
 
 export const deleteSavedQueries = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'query',
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'query',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   });

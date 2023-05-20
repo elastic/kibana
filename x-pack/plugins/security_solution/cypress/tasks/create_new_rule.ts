@@ -678,16 +678,14 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
-      return cy.root().then(($el) => {
-        const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
-        if (emptyTableState.length > 0) {
-          cy.log('Table is empty', emptyTableState.length);
-          return false;
-        }
-        const countEl = $el.find(ALERTS_TABLE_COUNT);
-        const alertCount = parseInt(countEl.text(), 10) || 0;
-        return alertCount >= alertCountThreshold;
-      });
+
+      cy.get(EMPTY_ALERT_TABLE).should('have.length.above', 0);
+
+      return !!cy
+        .get(ALERTS_TABLE_COUNT)
+        .invoke('text')
+        .then(parseInt)
+        .should('be.gte', alertCountThreshold);
     },
     { interval: 500, timeout: 12000 }
   );

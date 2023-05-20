@@ -67,7 +67,7 @@ import { getExceptionList } from '../../../objects/exception';
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe('Exceptions flyout', { testIsolation: false }, () => {
+describe('Exceptions flyout', () => {
   before(() => {
     esArchiverResetKibana();
     // this is a made-up index that has just the necessary
@@ -76,7 +76,6 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     esArchiverLoad('exceptions');
     esArchiverLoad('conflicts_1');
     esArchiverLoad('conflicts_2');
-    login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createRule(
         getNewRule({
@@ -93,6 +92,8 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
         })
       )
     );
+    login();
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   beforeEach(() => {
@@ -101,10 +102,6 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');
     goToExceptionsTab();
-  });
-
-  afterEach(() => {
-    closeExceptionBuilderFlyout();
   });
 
   after(() => {

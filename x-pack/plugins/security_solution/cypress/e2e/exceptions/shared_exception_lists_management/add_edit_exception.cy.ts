@@ -22,17 +22,16 @@ import {
   RULE_ACTION_LINK_RULE_SWITCH,
 } from '../../../screens/exceptions';
 
-describe.skip('Add/edit exception from exception management page', () => {
+describe('Add/edit exception from exception management page', () => {
   before(() => {
     esArchiverResetKibana();
     esArchiverLoad('exceptions');
-    login();
-    visitWithoutDateRange(EXCEPTIONS_URL);
     createRule(getNewRule());
   });
 
   beforeEach(() => {
     login();
+    visitWithoutDateRange(EXCEPTIONS_URL);
   });
 
   after(() => {

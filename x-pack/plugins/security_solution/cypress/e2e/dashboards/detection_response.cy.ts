@@ -23,7 +23,6 @@ import {
   USER_TABLE_ROW_TOTAL_ALERTS,
   USER_TABLE_USER_NAME_BTN,
 } from '../../screens/detection_response';
-import { DETECTION_RESPONSE } from '../../screens/security_header';
 import { QUERY_TAB_BUTTON, TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../screens/timeline';
 import { waitForAlerts } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
@@ -31,8 +30,6 @@ import { cleanKibana } from '../../tasks/common';
 import { investigateDashboardItemInTimeline } from '../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../tasks/kibana_navigation';
 import { login, visit } from '../../tasks/login';
-import { navigateFromHeaderTo } from '../../tasks/security_header';
-import { closeTimeline } from '../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
 
 describe('Detection response view', () => {
@@ -46,11 +43,7 @@ describe('Detection response view', () => {
     visit(DETECTIONS_RESPONSE_URL);
   });
 
-  context('Open in timeline', { testIsolation: false }, () => {
-    afterEach(() => {
-      closeTimeline();
-    });
-
+  context('Open in timeline', () => {
     it(`opens timeline with correct query count for hosts by alert severity table`, () => {
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS)
         .first()
@@ -113,11 +106,7 @@ describe('Detection response view', () => {
     });
   });
 
-  context('Redirection to AlertPage', { testIsolation: false }, () => {
-    afterEach(() => {
-      navigateFromHeaderTo(DETECTION_RESPONSE);
-    });
-
+  context('Redirection to AlertPage', () => {
     it('should redirect to alert page with host and status as the filters', () => {
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS)
         .first()

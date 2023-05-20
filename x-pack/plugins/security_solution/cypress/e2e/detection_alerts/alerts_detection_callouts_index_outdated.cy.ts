@@ -15,7 +15,8 @@ import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
 
-const loadPageAsPlatformEngineerUser = (url: string) => {
+const loadPageAsSocManagerUser = (url: string) => {
+  login(ROLES.soc_manager);
   waitForPageWithoutDateRange(url, ROLES.soc_manager);
   waitForPageTitleToBeShown();
 };
@@ -33,7 +34,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
     login(ROLES.platform_engineer);
     visitWithoutDateRange(ALERTS_URL);
     // After that we can login as a soc manager.
-    login(ROLES.soc_manager);
+    // login(ROLES.soc_manager);
   });
 
   context(
@@ -53,7 +54,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       });
       context('On Detections home page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(ALERTS_URL);
+          loadPageAsSocManagerUser(ALERTS_URL);
         });
 
         it('We show the need admin primary callout', () => {
@@ -63,7 +64,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rules Management page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+          loadPageAsSocManagerUser(DETECTIONS_RULE_MANAGEMENT_URL);
         });
 
         it('We show 1 primary callout of need admin', () => {
@@ -74,7 +75,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       context('On Rule Details page', () => {
         beforeEach(() => {
           createRule(getNewRule({ rule_id: 'rule_testing' }));
-          loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+          loadPageAsSocManagerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
         });
@@ -103,7 +104,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       });
       context('On Detections home page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(ALERTS_URL);
+          loadPageAsSocManagerUser(ALERTS_URL);
         });
 
         it('We show the need admin primary callout', () => {
@@ -113,7 +114,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rules Management page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+          loadPageAsSocManagerUser(DETECTIONS_RULE_MANAGEMENT_URL);
         });
 
         it('We show 1 primary callout of need admin', () => {
@@ -124,7 +125,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       context('On Rule Details page', () => {
         beforeEach(() => {
           createRule(getNewRule({ rule_id: 'rule_testing' }));
-          loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+          loadPageAsSocManagerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
         });
@@ -153,7 +154,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       });
       context('On Detections home page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(ALERTS_URL);
+          loadPageAsSocManagerUser(ALERTS_URL);
         });
 
         it('We show the need admin primary callout', () => {
@@ -163,7 +164,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rules Management page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+          loadPageAsSocManagerUser(DETECTIONS_RULE_MANAGEMENT_URL);
         });
 
         it('We show 1 primary callout of need admin', () => {
@@ -174,7 +175,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       context('On Rule Details page', () => {
         beforeEach(() => {
           createRule(getNewRule({ rule_id: 'rule_testing' }));
-          loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+          loadPageAsSocManagerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
         });

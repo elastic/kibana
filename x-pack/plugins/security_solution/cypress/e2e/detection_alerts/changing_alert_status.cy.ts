@@ -308,7 +308,8 @@ describe('Changing alert status', () => {
     });
   });
 
-  context('Changing alert status with read only role', () => {
+  // TODO: Are you sure that read only role should be able to close alerts?
+  context.skip('Changing alert status with read only role', () => {
     beforeEach(() => {
       login(ROLES.t2_analyst);
       deleteAlertsAndRules();

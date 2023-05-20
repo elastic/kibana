@@ -12,8 +12,6 @@ import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
   clickIdToggleField,
-  closeTimeline,
-  createNewTimeline,
   expandFirstTimelineEventDetails,
   populateTimeline,
   clickTimestampToggleField,
@@ -32,11 +30,6 @@ describe('toggle column in timeline', () => {
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
-  });
-
-  afterEach(() => {
-    createNewTimeline();
-    closeTimeline();
   });
 
   it('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {

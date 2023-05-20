@@ -180,11 +180,13 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
 
 describe('Bulk editing index patterns of rules with index patterns and rules with a data view', () => {
   const customRulesNumber = 2;
+
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     esArchiverResetKibana();
 

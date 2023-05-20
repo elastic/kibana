@@ -37,8 +37,11 @@ describe(
   () => {
     before(() => {
       cleanKibana();
-      login();
       createRule(getNewRule());
+    });
+
+    beforeEach(() => {
+      login();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();

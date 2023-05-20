@@ -257,6 +257,7 @@ describe('Persistent rules table state', () => {
 
     describe('and on the rules monitoring tab', () => {
       beforeEach(() => {
+        login();
         visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
       });
 
@@ -271,6 +272,10 @@ describe('Persistent rules table state', () => {
   });
 
   describe('upon state format upgrade', async () => {
+    beforeEach(() => {
+      login();
+    });
+
     describe('and having state in the url', () => {
       it('ignores unsupported state key', () => {
         visitRulesTableWithState({
