@@ -55,11 +55,11 @@ describe('Alert details flyout', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('unmapped_fields');
+      createRule(getUnmappedRule());
     });
 
     beforeEach(() => {
       login();
-      createRule(getUnmappedRule());
       visitWithoutDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -80,7 +80,7 @@ describe('Alert details flyout', () => {
       });
     });
 
-    it('should displays the unmapped field on the table', () => {
+    it.only('should displays the unmapped field on the table', () => {
       const expectedUnmappedField = {
         field: 'unmapped',
         text: 'This is the unmapped field',

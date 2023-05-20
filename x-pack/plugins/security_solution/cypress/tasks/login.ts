@@ -157,14 +157,10 @@ export const loginWithUser = (user: User) => {
 
 const loginWithRole = async (role: ROLES) => {
   postRoleAndUser(role);
-  const theUrl = Url.format({
-    auth: `${role}:changeme`,
-    username: role,
-    password: 'changeme',
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
-  } as UrlObject);
+  const theUrl = new URL(String(Cypress.config().baseUrl));
+  theUrl.username = role;
+  theUrl.password = Cypress.env(ELASTICSEARCH_PASSWORD);
+
   cy.log(`origin: ${theUrl}`);
   cy.session(role, () => {
     cy.request({

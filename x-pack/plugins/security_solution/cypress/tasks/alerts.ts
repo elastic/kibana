@@ -144,8 +144,8 @@ export const expandFirstAlertActions = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).click();
   cy.get(EXPAND_ALERT_BTN).should('be.visible');
+  cy.get(EXPAND_ALERT_BTN).first().click();
 };
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();

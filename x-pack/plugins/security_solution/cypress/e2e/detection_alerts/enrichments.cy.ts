@@ -34,7 +34,6 @@ describe('Enrichment', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risk_users');
-    login();
   });
 
   after(() => {
@@ -46,6 +45,7 @@ describe('Enrichment', () => {
       esArchiverLoad('risk_hosts');
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'rule1' }));
+      login();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
