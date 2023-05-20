@@ -30,7 +30,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
   before(() => {
     // First, we have to open the app on behalf of a privpenileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
-    login(ROLES.platform_engineer);
+    login();
     visitWithoutDateRange(ALERTS_URL);
     // After that we can login as a soc manager.
     login(ROLES.soc_manager);

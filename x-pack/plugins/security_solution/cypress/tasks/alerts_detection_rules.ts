@@ -481,7 +481,7 @@ export const expectToContainRule = (
 };
 
 const selectOverwriteRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).click();
+  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).should('be.checked');
 };
 
@@ -494,12 +494,12 @@ export const expectManagementTableRules = (ruleNames: string[]): void => {
 };
 
 const selectOverwriteExceptionsRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).click();
+  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).should('be.checked');
 };
 
 const selectOverwriteConnectorsRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).click();
+  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).should('be.checked');
 };
 

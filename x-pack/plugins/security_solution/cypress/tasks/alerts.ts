@@ -133,6 +133,7 @@ export const expandFirstAlertActions = () => {
    *
    * */
 
+  cy.wait(2000);
   cy.get(TIMELINE_CONTEXT_MENU_BTN)
     .first()
     .should('be.visible')
@@ -266,7 +267,8 @@ export const goToOpenedAlerts = () => {
 
 export const openFirstAlert = () => {
   expandFirstAlertActions();
-  cy.get(OPEN_ALERT_BTN).should('be.visible').click({ force: true });
+  cy.get(OPEN_ALERT_BTN).should('be.visible');
+  cy.get(OPEN_ALERT_BTN).click({ force: true });
 };
 
 export const openAlerts = () => {

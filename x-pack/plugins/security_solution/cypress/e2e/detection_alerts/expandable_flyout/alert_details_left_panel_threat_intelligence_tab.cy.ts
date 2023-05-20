@@ -9,6 +9,8 @@ import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { expandFirstAlertExpandableFlyout } from '../../../tasks/document_expandable_flyout';
 import { login, visit } from '../../../tasks/login';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 describe(
@@ -17,6 +19,7 @@ describe(
   () => {
     before(() => {
       cleanKibana();
+      createRule(getNewRule());
       login();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
