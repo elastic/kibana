@@ -20,13 +20,12 @@ import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { paths } from '../../config/paths';
-import type { ObservabilityAppServices } from '../../application/types';
 
 export function SlosPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();

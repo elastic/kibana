@@ -26,7 +26,6 @@ import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../config/paths';
-import type { ObservabilityAppServices } from '../../application/types';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -46,7 +45,7 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     uiSettings,
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
