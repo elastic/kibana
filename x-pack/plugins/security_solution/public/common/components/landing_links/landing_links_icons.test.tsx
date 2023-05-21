@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../../app/types';
-import type { NavigationLink } from '../../links';
+import type { NavigationLink } from '../../links/types';
 import { TestProviders } from '../../mock';
 import { LandingLinksIcons } from './landing_links_icons';
 import * as telemetry from '../../lib/telemetry';

@@ -6,5 +6,4 @@
  */
 
 export * from './links';
-export * from './deep_links';
 export * from './types';

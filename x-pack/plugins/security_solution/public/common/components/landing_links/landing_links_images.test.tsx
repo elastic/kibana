@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
 import { SecurityPageName } from '../../../app/types';
-import type { NavigationLink } from '../../links';
+import type { NavigationLink } from '../../links/types';
 import { TestProviders } from '../../mock';
 import { LandingLinksImages, LandingImageCards } from './landing_links_images';
 import * as telemetry from '../../lib/telemetry';

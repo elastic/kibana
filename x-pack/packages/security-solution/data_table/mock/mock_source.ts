@@ -8,7 +8,7 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BrowserFields } from '@kbn/timelines-plugin/common';
 
-export const DEFAULT_INDEX_PATTERN = [
+const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
   'auditbeat-*',
   'endgame-*',

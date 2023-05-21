@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { TabNavigationProps } from './types';
 
-// export { TabNavigation } from './tab_navigation';
 const TabNavigationLazy = React.lazy(() => import('./tab_navigation'));
 
 export const TabNavigation = (props: TabNavigationProps) => (

@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import { NavItemBetaBadge } from '../navigation/nav_item_beta_badge';
 import { SecuritySolutionLinkAnchor, withSecuritySolutionLink } from '../links';
-import type { NavigationLink } from '../../links';
+import type { NavigationLink } from '../../links/types';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 
 interface LandingLinksImagesProps {
