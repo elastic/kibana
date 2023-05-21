@@ -14,7 +14,7 @@ import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
-import type { TopAlert } from '../../typings/alerts';
+import type { TopAlert } from '../../types/alerts';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;

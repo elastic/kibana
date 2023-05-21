@@ -7,7 +7,7 @@
 
 import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 
-import { ChartData } from '../../typings/slo';
+import { ChartData } from '../../types/slos';
 
 type DataType = 'error_budget_remaining' | 'error_budget_consumed' | 'sli_value';
 

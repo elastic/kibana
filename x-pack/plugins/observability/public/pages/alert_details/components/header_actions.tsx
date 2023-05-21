@@ -16,7 +16,7 @@ import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { ObservabilityAppServices } from '../../../application/types';
-import type { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../types/alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;

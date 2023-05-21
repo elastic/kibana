@@ -29,7 +29,7 @@ import { paths } from '../../../config/paths';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
-import type { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../types/alerts';
 
 const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
 

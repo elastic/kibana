@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { assertNever } from '@kbn/std';
-import { Duration, DurationUnit } from '../../typings';
+import { Duration, DurationUnit } from '../../types/slos';
 
 export function toDuration(duration: string): Duration {
   const durationValue = duration.substring(0, duration.length - 1);

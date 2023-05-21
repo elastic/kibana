@@ -13,7 +13,7 @@ import React from 'react';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { toDurationLabel } from '../../../utils/slo/labels';
-import { ChartData } from '../../../typings/slo';
+import { ChartData } from '../../../types/slos';
 import { WideChart } from './wide_chart';
 
 export interface Props {

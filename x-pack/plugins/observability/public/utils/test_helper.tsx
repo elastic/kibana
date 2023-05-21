@@ -21,7 +21,10 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
-import { Subset } from '../typings';
+
+export type Subset<K> = {
+  [attr in keyof K]?: K[attr] extends object ? Subset<K[attr]> : K[attr];
+};
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();

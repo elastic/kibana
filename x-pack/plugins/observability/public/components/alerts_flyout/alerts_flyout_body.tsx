@@ -35,7 +35,7 @@ import { asDuration, toMicroseconds } from '../../../common/utils/formatters';
 import { paths } from '../../config/paths';
 import { formatAlertEvaluationValue } from '../../utils/format_alert_evaluation_value';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
-import type { TopAlert } from '../../typings/alerts';
+import type { TopAlert } from '../../types/alerts';
 
 interface FlyoutProps {
   alert: TopAlert;

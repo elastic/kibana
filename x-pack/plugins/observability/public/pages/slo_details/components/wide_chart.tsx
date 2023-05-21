@@ -21,7 +21,7 @@ import numeral from '@elastic/numeral';
 import moment from 'moment';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
-import { ChartData } from '../../../typings';
+import { ChartData } from '../../../types';
 import { useKibana } from '../../../utils/kibana_react';
 
 type ChartType = 'area' | 'line';

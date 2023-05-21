@@ -19,7 +19,7 @@ import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_tec
 import { parseExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
-import type { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../types/alerts';
 
 export const parseAlert =
   (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>

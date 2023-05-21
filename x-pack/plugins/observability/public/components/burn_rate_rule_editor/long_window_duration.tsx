@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
 
 import { toMinutes } from '../../utils/slo/duration';
-import { Duration } from '../../typings';
+import { Duration } from '../../types';
 
 interface Props {
   shortWindowDuration: Duration;

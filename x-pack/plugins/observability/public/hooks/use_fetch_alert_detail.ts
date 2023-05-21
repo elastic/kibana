@@ -14,7 +14,7 @@ import { usePluginContext } from './use_plugin_context';
 import { ObservabilityRuleTypeRegistry } from '..';
 import { useDataFetcher } from './use_data_fetcher';
 import { parseAlert } from '../pages/alerts/helpers/parse_alert';
-import type { TopAlert } from '../typings/alerts';
+import type { TopAlert } from '../types/alerts';
 
 interface AlertDetailParams {
   id: string;

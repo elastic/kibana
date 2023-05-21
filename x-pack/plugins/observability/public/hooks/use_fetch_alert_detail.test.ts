@@ -11,7 +11,7 @@ import * as pluginContext from './use_plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '..';
 import { PluginContextValue } from '../context/plugin_context/plugin_context';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
-import type { TopAlert } from '../typings/alerts';
+import type { TopAlert } from '../types/alerts';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 

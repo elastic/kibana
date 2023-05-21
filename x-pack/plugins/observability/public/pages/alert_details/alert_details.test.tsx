@@ -14,8 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
-import { Subset } from '../../typings';
-import { render } from '../../utils/test_helper';
+import { render, Subset } from '../../utils/test_helper';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';

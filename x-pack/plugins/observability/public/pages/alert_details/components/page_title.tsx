@@ -28,7 +28,7 @@ import {
 import moment from 'moment';
 import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
-import { TopAlert } from '../../../typings/alerts';
+import { TopAlert } from '../../../types/alerts';
 
 export interface PageTitleProps {
   alert: TopAlert | null;

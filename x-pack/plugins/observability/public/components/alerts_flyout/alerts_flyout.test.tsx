@@ -10,7 +10,7 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { render } from '../../utils/test_helper';
 import { AlertsFlyout } from './alerts_flyout';
-import type { TopAlert } from '../../typings/alerts';
+import type { TopAlert } from '../../types/alerts';
 
 describe('AlertsFlyout', () => {
   jest

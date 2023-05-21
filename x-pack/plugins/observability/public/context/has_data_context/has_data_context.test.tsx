@@ -11,7 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { registerDataHandler, unregisterDataHandler } from './data_handler';
 import { useHasData } from '../../hooks/use_has_data';
-import { HasData, ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
+import { HasData, ObservabilityFetchDataPlugins } from '../../pages/overview/types';
 import { HasDataContextProvider } from './has_data_context';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';

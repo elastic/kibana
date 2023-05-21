@@ -29,7 +29,7 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import type { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../types/alerts';
 
 export const tags: string[] = ['tag1', 'tag2', 'tag3'];
 

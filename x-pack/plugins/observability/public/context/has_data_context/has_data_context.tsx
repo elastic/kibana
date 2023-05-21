@@ -22,7 +22,7 @@ import {
 import { getDataHandler } from './data_handler';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from './get_observability_alerts';
-import { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
+import { ObservabilityFetchDataPlugins } from '../../pages/overview/types';
 import { ApmIndicesConfig } from '../../../common/typings';
 import { ObservabilityAppServices } from '../../application/types';
 

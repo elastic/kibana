@@ -7,7 +7,7 @@
 import React from 'react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { TopAlert } from '../../typings/alerts';
+import type { TopAlert } from '../../types/alerts';
 
 interface FlyoutProps {
   alert: TopAlert;

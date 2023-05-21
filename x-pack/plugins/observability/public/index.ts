@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110905
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 import {
@@ -50,8 +47,7 @@ export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_a
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
-export * from './typings';
-import { TopAlert } from './typings/alerts';
+import { TopAlert } from './types/alerts';
 import { AlertSummary } from './pages/alert_details/components/alert_summary';
 import { AlertSummaryField } from './pages/alert_details/components/alert_summary';
 export type { TopAlert, AlertSummary, AlertSummaryField };
