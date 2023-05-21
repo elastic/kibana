@@ -9,14 +9,12 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../hooks/use_plugin_context';
-import { HeaderMenu } from '../pages/overview/components/header_menu';
 
 export function LoadingObservability() {
   const { ObservabilityPageTemplate } = usePluginContext();
 
   return (
     <ObservabilityPageTemplate pageSectionProps={{ alignment: 'center' }} showSolutionNav={false}>
-      <HeaderMenu />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />

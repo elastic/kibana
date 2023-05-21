@@ -292,8 +292,16 @@ export const createNewTimeline = () => {
   cy.get(CREATE_NEW_TIMELINE).eq(0).click();
 };
 
+export const openCreateTimelineOptionsPopover = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
+};
+
+export const closeCreateTimelineOptionsPopover = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').type('{esc}');
+};
+
 export const createNewTimelineTemplate = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  openCreateTimelineOptionsPopover();
   cy.get(CREATE_NEW_TIMELINE_TEMPLATE).click();
 };
 
@@ -333,8 +341,7 @@ export const openTimelineInspectButton = () => {
 
 export const openTimelineFromSettings = () => {
   const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
-  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').pipe(click);
+  openCreateTimelineOptionsPopover();
   cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).pipe(click);
 };
