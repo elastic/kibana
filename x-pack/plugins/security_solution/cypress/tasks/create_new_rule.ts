@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse'
+import { recurse } from 'cypress-recurse';
 import { isArray, parseInt } from 'lodash';
 
 import type {
