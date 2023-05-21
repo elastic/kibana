@@ -13,7 +13,7 @@ import Url from 'url';
 import type { ROLES } from '../../common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
-import { LOADING_INDICATOR } from '../screens/security_header';
+import { LOADING_INDICATOR_HIDDEN, LOADING_INDICATOR } from '../screens/security_header';
 import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
 /**
@@ -353,8 +353,8 @@ export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, 
       disableNewFeaturesTours(win);
     },
   });
-  cy.get(LOADING_INDICATOR).should('exist');
-  return cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
+  return cy.get(LOADING_INDICATOR_HIDDEN).should('exist');
 };
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
