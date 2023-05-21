@@ -8,11 +8,11 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { paths } from '../../config/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';

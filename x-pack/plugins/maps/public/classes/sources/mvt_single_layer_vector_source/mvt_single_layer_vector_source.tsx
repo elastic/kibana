@@ -237,12 +237,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return {};
   }
 
-  showJoinEditor(): boolean {
+  supportsJoins(): boolean {
     return false;
-  }
-
-  getJoinsDisabledReason(): string | null {
-    return null;
   }
 
   getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {

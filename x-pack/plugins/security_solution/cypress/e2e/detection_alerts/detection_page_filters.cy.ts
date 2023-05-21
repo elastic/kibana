@@ -11,9 +11,11 @@ import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
   FILTER_GROUP_CHANGED_BANNER,
+  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
+  FILTER_GROUP_CONTROL_ACTION_EDIT,
 } from '../../screens/common/filter_group';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -36,6 +38,7 @@ import { navigateFromHeaderTo } from '../../tasks/security_header';
 import { ALERTS, CASES } from '../../screens/security_header';
 import {
   addNewFilterGroupControlValues,
+  cancelFieldEditing,
   deleteFilterGroupControl,
   discardFilterGroupControls,
   editFilterGroupControl,
@@ -278,6 +281,7 @@ describe('Detections : Page Filters', () => {
 
   it('Custom filters from URLS are populated & changed banner is displayed', () => {
     visitAlertsPageWithCustomFilters(customFilters);
+    waitForPageFilters();
 
     assertFilterControlsWithFilterObject(customFilters);
 
@@ -286,7 +290,7 @@ describe('Detections : Page Filters', () => {
 
   it('Changed banner should hide on saving changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
-
+    waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
     saveFilterGroupControls();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
@@ -294,7 +298,7 @@ describe('Detections : Page Filters', () => {
 
   it('Changed banner should hide on discarding changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
-
+    waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
     discardFilterGroupControls();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
@@ -302,7 +306,23 @@ describe('Detections : Page Filters', () => {
 
   it('Changed banner should hide on Reset', () => {
     visitAlertsPageWithCustomFilters(customFilters);
+    waitForPageFilters();
     resetFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
+  });
+
+  it('Number fields are not visible in field edit panel', () => {
+    const idx = 3;
+    const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
+    editFilterGroupControls();
+    cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
+    cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).click();
+    cy.get(FILTER_FIELD_TYPE).click();
+    cy.get(FIELD_TYPES.STRING).should('be.visible');
+    cy.get(FIELD_TYPES.BOOLEAN).should('be.visible');
+    cy.get(FIELD_TYPES.IP).should('be.visible');
+    cy.get(FIELD_TYPES.NUMBER).should('not.exist');
+    cancelFieldEditing();
+    discardFilterGroupControls();
   });
 });
