@@ -198,6 +198,8 @@ export const cli = () => {
 
       const hostRealIp = await getLocalhostRealIp();
 
+      const isOpen = argv._[0] === 'open';
+
       await pMap(
         files,
         // files.slice(0, 2),
@@ -340,7 +342,7 @@ export const cli = () => {
 
             console.error('customEnv', customEnv);
 
-            if (argv._[0] === 'open') {
+            if (isOpen) {
               await cypress.open({
                 configFile: require.resolve(`../../../${argv.configFile}`),
                 config: {
@@ -420,7 +422,7 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: 3 }
+        { concurrency: !isOpen ? 3 : 1 }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
 

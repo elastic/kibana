@@ -10,10 +10,11 @@ import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigatio
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
+import { login, waitForPageWithoutDateRange } from '../../tasks/login';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../../tasks/common/callouts';
+import { deleteAlertsIndex } from '../../tasks/common';
 
 const loadPageAsReadOnlyUser = (url: string) => {
   waitForPageWithoutDateRange(url, ROLES.reader);
@@ -37,20 +38,10 @@ const waitForPageTitleToBeShown = () => {
 describe('Detections > Callouts', () => {
   const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
-  before(() => {
-    // First, we have to open the app on behalf of a privileged user in order to initialize it.
-    // Otherwise the app will be disabled and show a "welcome"-like page.
-    login(ROLES.platform_engineer);
-    visitWithoutDateRange(ALERTS_URL);
-    waitForPageTitleToBeShown();
-
-    // After that we can login as a read-only user.
-    login(ROLES.reader);
-  });
-
   context('indicating read-only access to resources', () => {
     context('On Detections home page', () => {
       beforeEach(() => {
+        deleteAlertsIndex();
         login(ROLES.reader);
         loadPageAsReadOnlyUser(ALERTS_URL);
       });
@@ -73,6 +64,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
+        deleteAlertsIndex();
         login(ROLES.reader);
         createRule(getNewRule());
         loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
@@ -104,6 +96,7 @@ describe('Detections > Callouts', () => {
   context('indicating read-write access to resources', () => {
     context('On Detections home page', () => {
       beforeEach(() => {
+        deleteAlertsIndex();
         login(ROLES.platform_engineer);
         loadPageAsPlatformEngineer(ALERTS_URL);
       });
@@ -126,6 +119,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
+        deleteAlertsIndex();
         login(ROLES.platform_engineer);
         createRule(getNewRule());
         loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);

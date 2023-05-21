@@ -79,7 +79,6 @@ import { visit } from './login';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
-  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).should('be.visible');
   cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
@@ -225,11 +224,11 @@ export const goToClosedAlerts = () => {
 };
 
 export const goToManageAlertsDetectionRules = () => {
-  cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click({ force: true });
+  cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click();
 };
 
 export const goToOpenedAlertsOnRuleDetailsPage = () => {
-  cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(OPENED_ALERTS_FILTER_BTN).click();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };

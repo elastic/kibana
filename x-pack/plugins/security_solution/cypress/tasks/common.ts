@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LOADING_INDICATOR } from '../screens/security_header';
+import { LOADING_INDICATOR, LOADING_INDICATOR_HIDDEN } from '../screens/security_header';
 
 const primaryButton = 0;
 
@@ -159,6 +159,15 @@ export const deleteTimelines = () => {
   });
 };
 
+export const deleteAlertsIndex = () => {
+  rootRequest({
+    method: 'POST',
+    url: '/api/index_management/indices/delete',
+    body: { indices: ['.internal.alerts-security.alerts-default-000001'] },
+    failOnStatusCode: false,
+  });
+};
+
 export const deleteCases = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   rootRequest({
@@ -215,6 +224,7 @@ export const postDataView = (dataSource: string) => {
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    failOnStatusCode: false,
   });
 };
 
@@ -230,6 +240,6 @@ export const deleteDataView = (dataSource: string) => {
 export const scrollToBottom = () => cy.scrollTo('bottom');
 
 export const waitForPageToBeLoaded = () => {
-  cy.get(LOADING_INDICATOR).should('exist');
+  cy.get(LOADING_INDICATOR_HIDDEN).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
 };

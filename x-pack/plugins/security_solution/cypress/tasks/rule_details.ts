@@ -90,7 +90,6 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).should('exist');
   cy.get(EXCEPTIONS_TAB).click();
 };
 
@@ -100,7 +99,6 @@ export const viewExpiredExceptionItems = () => {
 };
 
 export const goToEndpointExceptionsTab = () => {
-  cy.get(ENDPOINT_EXCEPTIONS_TAB).should('exist');
   cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
 };
 

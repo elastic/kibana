@@ -12,9 +12,8 @@ import Url from 'url';
 
 import type { ROLES } from '../../common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../common/constants';
-import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
-import { LOADING_INDICATOR_HIDDEN, LOADING_INDICATOR } from '../screens/security_header';
 import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
+import { waitForPageToBeLoaded } from './common';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -316,9 +315,10 @@ const disableNewFeaturesTours = (window: Window) => {
  */
 
 export const waitForPage = (url: string) => {
-  visit(
+  cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
   );
+  waitForPageToBeLoaded();
 };
 
 export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, role?: ROLES) => {
@@ -353,29 +353,29 @@ export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, 
       disableNewFeaturesTours(win);
     },
   });
-  cy.get(LOADING_INDICATOR).should('not.exist');
-  return cy.get(LOADING_INDICATOR_HIDDEN).should('exist');
+  waitForPageToBeLoaded();
 };
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
-  visit(role ? getUrlWithRoute(role, url) : url, {
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
     onBeforeLoad: disableNewFeaturesTours,
   });
+  waitForPageToBeLoaded();
 };
 
 export const visitWithUser = (url: string, user: User) => {
-  visit(constructUrlWithUser(user, url), {
+  cy.visit(constructUrlWithUser(user, url), {
     onBeforeLoad: disableNewFeaturesTours,
   });
+  waitForPageToBeLoaded();
 };
 
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
-  visit(role ? getUrlWithRoute(role, route) : route, {
+  cy.visit(role ? getUrlWithRoute(role, route) : route, {
     onBeforeLoad: disableNewFeaturesTours,
   });
-  cy.get('[data-test-subj="headerGlobalNav"]');
-  cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
+  waitForPageToBeLoaded();
 };
 
 export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
@@ -389,9 +389,11 @@ export const visitUserDetailsPage = (userName = 'test') => {
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  visit(role ? getUrlWithRoute(role, url) : url);
+  cy.visit(role ? getUrlWithRoute(role, url) : url);
+  waitForPageToBeLoaded();
 };
 
 export const logout = () => {
   cy.visit(LOGOUT_URL);
 };
+
