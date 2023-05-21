@@ -6,7 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import { get, isArray } from 'lodash';
+import get from 'lodash/get';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
@@ -169,11 +169,11 @@ export const hasCapabilities = <T>(
   linkCapabilities: LinkCapabilities,
   userCapabilities: Capabilities
 ): boolean => {
-  if (!isArray(linkCapabilities)) {
+  if (!Array.isArray(linkCapabilities)) {
     return !!get(userCapabilities, linkCapabilities, false);
   } else {
     return linkCapabilities.some((linkCapabilityKeyOr) => {
-      if (isArray(linkCapabilityKeyOr)) {
+      if (Array.isArray(linkCapabilityKeyOr)) {
         return linkCapabilityKeyOr.every((linkCapabilityKeyAnd) =>
           get(userCapabilities, linkCapabilityKeyAnd, false)
         );

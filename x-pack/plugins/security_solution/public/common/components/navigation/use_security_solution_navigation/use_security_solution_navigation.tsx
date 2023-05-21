@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../../lib/kibana';
