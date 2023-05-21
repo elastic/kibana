@@ -28,7 +28,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
   const NEED_ADMIN_FOR_UPDATE_CALLOUT = 'need-admin-for-update-rules';
 
   before(() => {
-    // First, we have to open the app on behalf of a privpenileged user in order to initialize it.
+    // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
     login();
     visitWithoutDateRange(ALERTS_URL);

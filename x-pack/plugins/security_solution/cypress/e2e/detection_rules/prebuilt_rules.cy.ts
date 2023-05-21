@@ -34,7 +34,7 @@ import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-describe.skip('Prebuilt rules', () => {
+describe('Prebuilt rules', () => {
   before(() => {
     cleanKibana();
   });

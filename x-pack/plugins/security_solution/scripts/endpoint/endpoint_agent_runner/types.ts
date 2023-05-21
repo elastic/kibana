@@ -10,7 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 export interface StartRuntimeServicesOptions {
   kibanaUrl: string;
   elasticUrl: string;
-  fleetServerUrl: string;
+  fleetServerUrl?: string;
   username: string;
   password: string;
   version?: string;

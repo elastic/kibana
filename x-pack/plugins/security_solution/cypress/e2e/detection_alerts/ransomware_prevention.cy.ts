@@ -15,7 +15,7 @@ import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../screens/timelin
 import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
 
-describe.skip('Ransomware Prevention Alerts', () => {
+describe('Ransomware Prevention Alerts', () => {
   before(() => {
     login();
     esArchiverLoad('ransomware_prevention');

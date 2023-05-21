@@ -48,9 +48,7 @@ describe('timeline data providers', () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
 
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
-    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
-      .pipe(($el) => $el.trigger('focus'))
-      .should('exist');
+    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`).focus();
     cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
       .first()
       .parent()
@@ -66,7 +64,7 @@ describe('timeline data providers', () => {
     cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()
-      .then((hostname) => {
+      .within((hostname) => {
         cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostname.text()}"`);
       });
   });
@@ -75,11 +73,11 @@ describe('timeline data providers', () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
     updateDataProviderByFieldHoverAction('host.name', 0);
     waitForTimelineChanges();
-    cy.wait(10000);
+    cy.wait(1000);
     cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()
-      .then((hostname) => {
+      .within((hostname) => {
         cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should((dataProviderContainer) => {
           expect(dataProviderContainer).to.contain(`host.name: "${hostname.text()}"`);
         });

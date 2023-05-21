@@ -11,7 +11,7 @@ import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { TABLE_CELL, TABLE_ROWS } from '../../screens/alerts_details';
 
-describe.skip('risk tab', () => {
+describe('risk tab', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risk_hosts');

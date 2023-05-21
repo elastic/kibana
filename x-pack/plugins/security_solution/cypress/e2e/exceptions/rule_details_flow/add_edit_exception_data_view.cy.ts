@@ -54,7 +54,7 @@ import {
 } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-describe.skip('Add exception using data views from rule details', () => {
+describe('Add exception using data views from rule details', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception List Item';
 

@@ -52,7 +52,7 @@ Note that the rule we are using for testing purposes has the following character
   - Integration: unknown
 */
 
-describe.skip('Related integrations', () => {
+describe('Related integrations', () => {
   before(() => {
     cleanKibana();
     login();

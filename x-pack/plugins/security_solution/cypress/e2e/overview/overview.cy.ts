@@ -17,7 +17,7 @@ import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timeline
 import { getTimeline } from '../../objects/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-describe.skip('Overview Page', () => {
+describe('Overview Page', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('overview');

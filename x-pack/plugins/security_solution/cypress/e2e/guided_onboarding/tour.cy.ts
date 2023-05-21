@@ -28,7 +28,7 @@ import { login, visit } from '../../tasks/login';
 import { quitGlobalTour, startAlertsCasesTour } from '../../tasks/api_calls/tour';
 import { AlertsCasesTourSteps } from '../../../public/common/components/guided_onboarding_tour/tour_config';
 
-describe.skip('Guided onboarding tour', () => {
+describe('Guided onboarding tour', () => {
   before(() => {
     cleanKibana();
     login();

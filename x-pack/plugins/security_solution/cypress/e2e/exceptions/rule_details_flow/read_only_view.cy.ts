@@ -28,7 +28,7 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-describe.skip('Exceptions viewer read only', () => {
+describe('Exceptions viewer read only', () => {
   const exceptionList = getExceptionList();
 
   before(() => {

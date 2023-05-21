@@ -353,6 +353,7 @@ export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, 
       disableNewFeaturesTours(win);
     },
   });
+  cy.get(LOADING_INDICATOR).should('exist');
   return cy.get(LOADING_INDICATOR).should('not.exist');
 };
 

@@ -340,39 +340,41 @@ export const cli = () => {
 
             console.error('customEnv', customEnv);
 
-            // await cypress.open({
-            //   configFile: require.resolve(`../../../${argv.configFile}`),
-            //   config: {
-            //     e2e: {
-            //       baseUrl: `http://localhost:${kibanaPort}`,
-            //     },
-            //   },
-            //   env: customEnv,
-            //   // ...commonCypressConfig,
-            // });
-
-            try {
-              result = await cypress.run({
-                browser: 'chrome',
-                spec: filePath,
-                configFile: argv.configFile,
-                reporter: argv.reporter,
-                reporterOptions: argv.reporterOptions,
+            if (argv._[0] === 'open') {
+              await cypress.open({
+                configFile: require.resolve(`../../../${argv.configFile}`),
                 config: {
                   e2e: {
                     baseUrl: `http://localhost:${kibanaPort}`,
                   },
-                  numTestsKeptInMemory: 0,
                   env: customEnv,
                 },
+                // ...commonCypressConfig,
               });
-            } catch (error) {
-              result = error;
+            } else {
+              try {
+                result = await cypress.run({
+                  browser: 'chrome',
+                  spec: filePath,
+                  configFile: argv.configFile,
+                  reporter: argv.reporter,
+                  reporterOptions: argv.reporterOptions,
+                  config: {
+                    e2e: {
+                      baseUrl: `http://localhost:${kibanaPort}`,
+                    },
+                    numTestsKeptInMemory: 0,
+                    env: customEnv,
+                  },
+                });
+              } catch (error) {
+                result = error;
+              }
             }
 
             await procs.stop('kibana');
             shutdownEs();
-            cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
+            cleanupServerPorts({ esPort, kibanaPort });
 
             // return pRetry(
             //   () =>
@@ -418,7 +420,7 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: 3 }
+        { concurrency: 1 }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
 

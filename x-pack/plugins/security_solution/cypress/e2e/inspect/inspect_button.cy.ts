@@ -24,7 +24,7 @@ import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe.skip('Inspect Explore pages', () => {
+describe('Inspect Explore pages', () => {
   before(() => {
     esArchiverLoad('risk_users');
     esArchiverLoad('risk_hosts');

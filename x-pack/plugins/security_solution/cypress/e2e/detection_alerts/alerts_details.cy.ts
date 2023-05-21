@@ -80,7 +80,7 @@ describe('Alert details flyout', () => {
       });
     });
 
-    it.only('should displays the unmapped field on the table', () => {
+    it('should displays the unmapped field on the table', () => {
       const expectedUnmappedField = {
         field: 'unmapped',
         text: 'This is the unmapped field',
@@ -161,7 +161,7 @@ describe('Alert details flyout', () => {
     });
   });
 
-  describe.skip('Localstorage management', () => {
+  describe('Localstorage management', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('query_alert');
@@ -187,7 +187,7 @@ describe('Alert details flyout', () => {
       interval: 500,
     };
 
-    it.skip('should store the flyout state in localstorage', () => {
+    it('should store the flyout state in localstorage', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
       const localStorageCheck = () =>
         cy.getAllLocalStorage().then((storage) => {

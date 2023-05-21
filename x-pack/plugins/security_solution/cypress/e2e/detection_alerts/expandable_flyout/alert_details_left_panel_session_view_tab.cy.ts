@@ -17,7 +17,7 @@ import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-describe.skip(
+describe(
   'Alert details expandable flyout left panel session view',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {

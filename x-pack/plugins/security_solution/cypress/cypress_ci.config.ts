@@ -14,7 +14,7 @@ export default defineCypressConfig({
   pageLoadTimeout: 150000,
   numTestsKeptInMemory: 0,
   retries: {
-    runMode: 2,
+    runMode: 1,
   },
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,

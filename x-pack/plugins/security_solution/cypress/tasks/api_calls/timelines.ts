@@ -120,7 +120,7 @@ export const favoriteTimeline = ({
   templateTimelineId?: string;
   templateTimelineVersion?: number;
 }) =>
-  cy.request({
+  rootRequest({
     method: 'PATCH',
     url: 'api/timeline/_favorite',
     body: {

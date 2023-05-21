@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// import { resolve } from 'path';
 import Url from 'url';
-// import { withProcRunner } from '@kbn/dev-proc-runner';
 import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
 import { AgentManager } from './agent';
@@ -26,7 +24,9 @@ async function withFleetAgent(
 
   const elasticUrl = Url.format(config.get('servers.elasticsearch'));
   const kibanaUrl = Url.format(config.get('servers.kibana'));
-  const fleetServerUrl = Url.format(config.get('servers.fleetserver'));
+  const fleetServerUrl = config.get('servers.fleetserver')
+    ? Url.format(config.get('servers.fleetserver'))
+    : undefined;
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
 
@@ -72,16 +72,16 @@ function startDefendWorkflowsCypress(
   cypressCommand: 'dw:endpoint:open' | 'dw:open' | 'dw:run',
   runnerEnv?: RunnerEnv
 ) {
-  // const log = context.getService('log');
   const config = context.getService('config');
-  const fleetServerUrl = Url.format(config.get('servers.fleetserver'));
 
   const env = {
     FORCE_COLOR: '1',
     ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
     ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
-    FLEET_SERVER_URL: fleetServerUrl,
+    FLEET_SERVER_URL: config.get('servers.fleetserver')
+      ? Url.format(config.get('servers.fleetserver'))
+      : undefined,
     KIBANA_URL: Url.format({
       protocol: config.get('servers.kibana.protocol'),
       hostname: config.get('servers.kibana.hostname'),
@@ -91,40 +91,4 @@ function startDefendWorkflowsCypress(
   };
 
   return env;
-
-  // return withProcRunner(log, async (procs) => {
-  //   await procs.run('cypress', {
-  //     cmd: 'yarn',
-  //     args: [`cypress:${cypressCommand}`],
-  //     cwd: resolve(__dirname, '../../plugins/security_solution'),
-  //     env: {
-  //       FORCE_COLOR: '1',
-  //       // TODO:PT Delete baseUrl + protocol + hostname + hostname and use "standard" env. variables
-  //       // eslint-disable-next-line @typescript-eslint/naming-convention
-  //       CYPRESS_baseUrl: Url.format({
-  //         protocol: config.get('servers.kibana.protocol'),
-  //         hostname: config.get('servers.kibana.hostname'),
-  //         port: config.get('servers.kibana.port'),
-  //       }),
-  //       // eslint-disable-next-line @typescript-eslint/naming-convention
-  //       CYPRESS_protocol: config.get('servers.kibana.protocol'),
-  //       // eslint-disable-next-line @typescript-eslint/naming-convention
-  //       CYPRESS_hostname: config.get('servers.kibana.hostname'),
-  //       // eslint-disable-next-line @typescript-eslint/naming-convention
-  //       CYPRESS_configport: config.get('servers.kibana.port'),
-  //       CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-  //       CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
-  //       CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
-  //       CYPRESS_FLEET_SERVER_URL: fleetServerUrl,
-  //       CYPRESS_KIBANA_URL: Url.format({
-  //         protocol: config.get('servers.kibana.protocol'),
-  //         hostname: config.get('servers.kibana.hostname'),
-  //         port: config.get('servers.kibana.port'),
-  //       }),
-  //       CYPRESS_ENDPOINT_VM_NAME: runnerEnv?.agentVmName,
-  //       ...process.env,
-  //     },
-  //     wait: true,
-  //   });
-  // });
 }

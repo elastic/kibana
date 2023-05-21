@@ -68,7 +68,7 @@ import { getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe.skip('Custom query rules', () => {
+describe('Custom query rules', () => {
   before(() => {
     login();
   });

@@ -23,15 +23,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
-    servers: {
-      ...xpackFunctionalTestsConfig.get('servers'),
-      fleetserver: {
-        protocol: 'https',
-        hostname: hostIp,
-        port: 8220,
-      },
-    },
-
     services,
 
     esTestCluster: {
