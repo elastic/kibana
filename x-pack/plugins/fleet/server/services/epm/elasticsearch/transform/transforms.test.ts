@@ -298,7 +298,12 @@ _meta:
                 },
               },
               mappings: {
-                properties: { '@timestamp': { type: 'date' } },
+                properties: {
+                  '@timestamp': {
+                    ignore_malformed: false,
+                    type: 'date',
+                  },
+                },
                 dynamic_templates: [
                   {
                     strings_as_keyword: {
@@ -581,7 +586,12 @@ _meta:
                 },
               },
               mappings: {
-                properties: { '@timestamp': { type: 'date' } },
+                properties: {
+                  '@timestamp': {
+                    ignore_malformed: false,
+                    type: 'date',
+                  },
+                },
                 dynamic_templates: [
                   {
                     strings_as_keyword: {
@@ -844,7 +854,14 @@ _meta:
           body: {
             template: {
               settings: { index: { mapping: { total_fields: { limit: '10000' } } } },
-              mappings: { properties: { '@timestamp': { type: 'date' } } },
+              mappings: {
+                properties: {
+                  '@timestamp': {
+                    ignore_malformed: false,
+                    type: 'date',
+                  },
+                },
+              },
             },
             _meta: meta,
           },
