@@ -6,12 +6,10 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
-import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
@@ -24,27 +22,12 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 import { PluginContext } from '../context/plugin_context/plugin_context';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
-import { routes } from '../routes/routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
+import { LoadingObservability } from '../components/loading_observability';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 
-function App() {
-  return (
-    <>
-      <Switch>
-        {Object.keys(routes).map((key) => {
-          const path = key as keyof typeof routes;
-          const { handler, exact } = routes[path];
-          const Wrapper = () => {
-            return handler();
-          };
-          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
-        })}
-      </Switch>
-    </>
-  );
-}
+const App = lazy(() => import('./app'));
 
 export const renderApp = ({
   core,
@@ -71,13 +54,6 @@ export const renderApp = ({
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
 
-  core.chrome.setHelpExtension({
-    appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
-      defaultMessage: 'Observability',
-    }),
-    links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
-  });
-
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
 
@@ -85,6 +61,7 @@ export const renderApp = ({
 
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+
   ReactDOM.render(
     <EuiErrorBoundary>
       <ApplicationUsageTrackingProvider>
@@ -112,7 +89,9 @@ export const renderApp = ({
                     <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
                       <QueryClientProvider client={queryClient}>
                         <HasDataContextProvider>
-                          <App />
+                          <Suspense fallback={<LoadingObservability />}>
+                            <App />
+                          </Suspense>
                         </HasDataContextProvider>
                         <HideableReactQueryDevTools />
                       </QueryClientProvider>

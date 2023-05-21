@@ -210,11 +210,18 @@ export class Plugin
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
-      const { renderApp } = await import('./application');
+      const { renderApp } = await import('./application/render_app');
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
+      coreStart.chrome.setHelpExtension({
+        appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
+          defaultMessage: 'Observability',
+        }),
+        links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
+      });
 
       return renderApp({
         core: coreStart,

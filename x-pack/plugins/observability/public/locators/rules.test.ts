@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RulesLocatorDefinition, RULES_PATH } from './rules';
+import { RULES_PATH } from '../routes/routes';
+import { RulesLocatorDefinition } from './rules';
 
 describe('RulesLocator', () => {
   const locator = new RulesLocatorDefinition();

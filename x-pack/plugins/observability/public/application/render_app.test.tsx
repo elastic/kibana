@@ -14,7 +14,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
-import { renderApp } from '.';
+import { renderApp } from './render_app';
 
 describe('renderApp', () => {
   const originalConsole = global.console;
