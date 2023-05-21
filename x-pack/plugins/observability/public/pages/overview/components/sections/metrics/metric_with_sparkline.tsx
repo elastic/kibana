@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 import { ThemeContext } from 'styled-components';
 
-import { NumberOrNull } from '../../../../..';
+import { NumberOrNull } from '../../../types';
 
 interface Props {
   id: string;

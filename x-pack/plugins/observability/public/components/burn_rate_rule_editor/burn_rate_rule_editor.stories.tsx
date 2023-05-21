@@ -9,7 +9,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
-import { BurnRateRuleParams } from '../../types';
+import { BurnRateRuleParams } from '../../types/slos';
 import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
 
 export default {

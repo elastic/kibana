@@ -14,7 +14,7 @@ import { SLOResponse } from '@kbn/slo-schema';
 
 import { toDuration, toMinutes } from '../../utils/slo/duration';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
-import { BurnRateRuleParams, Duration, DurationUnit } from '../../types';
+import { BurnRateRuleParams, Duration, DurationUnit } from '../../types/slos';
 import { SloSelector } from './slo_selector';
 import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';

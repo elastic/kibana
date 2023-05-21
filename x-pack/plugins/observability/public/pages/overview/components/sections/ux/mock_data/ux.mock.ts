@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UxFetchDataResponse } from '../../../../../../types';
+import { UxFetchDataResponse } from '../../../../types';
 
 export const response: UxFetchDataResponse = {
   appLink: '/app/ux',

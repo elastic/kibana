@@ -22,7 +22,7 @@ import {
   MetricsFetchDataSeries,
   NumberOrNull,
   StringOrNull,
-} from '../../../../..';
+} from '../../../types';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';

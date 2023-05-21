@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { ObservabilityFetchDataPlugins } from '../../../../../types';
+import { ObservabilityFetchDataPlugins } from '../../../types';
 
 export interface Section {
   id: ObservabilityFetchDataPlugins | 'alert';
