@@ -277,7 +277,7 @@ export const reloadDeletedRules = () => {
  */
 export const selectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).click();
+    cy.get(RULE_CHECKBOX).eq(i).check();
     cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
   }
 };
@@ -286,7 +286,7 @@ export const unselectRuleByName = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName)
     .parents(RULES_ROW)
     .find(EUI_CHECKBOX)
-    .click()
+    .uncheck()
     .should('not.be.checked');
 };
 
@@ -299,7 +299,7 @@ export const unselectRuleByName = (ruleName: string) => {
 export const unselectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
     cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
-    cy.get(RULE_CHECKBOX).eq(i).click();
+    cy.get(RULE_CHECKBOX).eq(i).uncheck();
     cy.get(RULE_CHECKBOX).eq(i).should('not.be.checked');
   }
 };

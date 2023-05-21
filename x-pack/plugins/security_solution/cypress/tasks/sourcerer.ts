@@ -10,6 +10,7 @@ import { HOSTS_URL } from '../urls/navigation';
 import { visit, waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
+import { rootRequest } from './common';
 
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {
@@ -133,7 +134,7 @@ export const refreshUntilAlertsIndexExists = async () => {
 export const deleteRuntimeField = (dataView: string, fieldName: string) => {
   const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;
 
-  cy.request({
+  rootRequest({
     url: deleteRuntimeFieldPath,
     method: 'DELETE',
     headers: { 'kbn-xsrf': 'cypress-creds' },

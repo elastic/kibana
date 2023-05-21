@@ -64,7 +64,7 @@ describe('timeline data providers', () => {
     cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()
-      .within((hostname) => {
+      .then((hostname) => {
         cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostname.text()}"`);
       });
   });
@@ -77,7 +77,7 @@ describe('timeline data providers', () => {
     cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()
-      .within((hostname) => {
+      .then((hostname) => {
         cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should((dataProviderContainer) => {
           expect(dataProviderContainer).to.contain(`host.name: "${hostname.text()}"`);
         });

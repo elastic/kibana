@@ -336,7 +336,7 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   cy.get(propertySelector).eq(rowIndex).realHover();
-  cy.get(actionSelector).first().click({ force: true });
+  cy.get(actionSelector).first().click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);

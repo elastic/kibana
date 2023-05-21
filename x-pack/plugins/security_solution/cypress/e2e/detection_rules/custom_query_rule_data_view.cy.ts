@@ -69,10 +69,6 @@ import { getDetails } from '../../tasks/rule_details';
 import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Custom query rules', () => {
-  before(() => {
-    login();
-  });
-
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');
@@ -91,6 +87,7 @@ describe('Custom query rules', () => {
       if (rule.data_view_id != null) {
         postDataView(rule.data_view_id);
       }
+      login();
     });
 
     it('Creates and enables a new rule', function () {
@@ -150,6 +147,7 @@ describe('Custom query rules', () => {
         .should('match', /^[1-9].+$/);
       cy.get(ALERT_GRID_CELL).contains(rule.name);
     });
+
     it('Creates and edits a new rule with a data view', function () {
       visit(RULE_CREATION);
       fillDefineCustomRuleAndContinue(rule);

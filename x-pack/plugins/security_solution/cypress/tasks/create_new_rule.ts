@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse'
 import { isArray, parseInt } from 'lodash';
 
 import type {
@@ -674,7 +675,7 @@ export const selectNewTermsRuleType = () => {
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
-  cy.recurse(
+  recurse(
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
@@ -688,11 +689,12 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
 };
 
 export const waitForTheRuleToBeExecuted = () => {
-  cy.recurse(
+  recurse(
     () => {
       cy.get(REFRESH_BUTTON).click({ force: true });
       return cy.get(RULE_STATUS).invoke('text');
     },
+    // @ts-expect-error
     (ruleStatus) => ruleStatus === 'succeeded'
   );
 };

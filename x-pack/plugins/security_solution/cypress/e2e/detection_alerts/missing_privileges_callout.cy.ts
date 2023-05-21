@@ -42,6 +42,7 @@ describe('Detections > Callouts', () => {
     // Otherwise the app will be disabled and show a "welcome"-like page.
     login(ROLES.platform_engineer);
     visitWithoutDateRange(ALERTS_URL);
+    waitForPageTitleToBeShown();
 
     // After that we can login as a read-only user.
     login(ROLES.reader);
