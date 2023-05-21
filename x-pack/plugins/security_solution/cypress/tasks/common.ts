@@ -35,6 +35,7 @@ export const rootRequest = <T = unknown>(
 export const drag = (subject: JQuery<HTMLElement>) => {
   const subjectLocation = subject[0].getBoundingClientRect();
 
+  // Use cypress-real-events
   cy.wrap(subject)
     .trigger('mousedown', {
       button: primaryButton,

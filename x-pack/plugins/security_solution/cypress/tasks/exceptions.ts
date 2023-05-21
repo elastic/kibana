@@ -65,7 +65,7 @@ export const searchExceptionEntryFieldWithPrefix = (fieldPrefix: string, index =
 };
 
 export const showFieldConflictsWarningTooltipWithMessage = (message: string, index = 0) => {
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON).eq(index).trigger('mouseover');
+  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON).eq(index).realHover();
   cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP).should('be.visible');
   cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP).should('have.text', message);
 };

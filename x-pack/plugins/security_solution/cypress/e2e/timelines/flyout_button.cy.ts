@@ -61,12 +61,10 @@ describe('timeline flyout button', () => {
     cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/153771
-  it.skip('the `(+)` button popover menu owns focus', () => {
-    cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-    cy.get(`${CREATE_NEW_TIMELINE}`)
-      .pipe(($el) => $el.trigger('focus'))
-      .should('have.focus');
+  it('the `(+)` button popover menu owns focus', () => {
+    cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
+    cy.get(CREATE_NEW_TIMELINE).focus();
+    cy.get(CREATE_NEW_TIMELINE).should('have.focus');
     cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').type('{esc}');
     cy.get(CREATE_NEW_TIMELINE).should('not.exist');
   });
@@ -76,7 +74,7 @@ describe('timeline flyout button', () => {
     cy.get('[data-test-subj="nav-search-input"]').focus();
     cy.get('[data-test-subj="nav-search-input"]').should('be.focused');
     cy.get('[data-test-subj="nav-search-option"]').should('be.visible');
-    cy.get('[data-test-subj="nav-search-option"]').first().trigger('mouseenter');
+    cy.get('[data-test-subj="nav-search-option"]').first().realHover();
     // check that at least one item is visible in the search bar after mousing over, i.e. it's still usable.
     cy.get('[data-test-subj="nav-search-option"]').its('length').should('be.gte', 1);
     closeTimelineUsingCloseButton();

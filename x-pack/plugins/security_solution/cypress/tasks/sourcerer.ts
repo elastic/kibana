@@ -7,7 +7,7 @@
 
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
 import { HOSTS_URL } from '../urls/navigation';
-import { waitForPage } from './login';
+import { visit, waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
 
@@ -96,7 +96,7 @@ export const resetSourcerer = () => {
 export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check({ force: true });
 
 export const addIndexToDefault = (index: string) => {
-  cy.visit(`/app/management/kibana/settings?query=category:(securitySolution)`);
+  visit(`/app/management/kibana/settings?query=category:(securitySolution)`);
   cy.get(SOURCERER.siemDefaultIndexInput)
     .invoke('val')
     .then((patterns) => {

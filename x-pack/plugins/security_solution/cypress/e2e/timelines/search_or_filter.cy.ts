@@ -12,6 +12,7 @@ import {
   TIMELINE_KQLMODE_SEARCH,
   TIMELINE_SEARCH_OR_FILTER,
 } from '../../screens/timeline';
+import { LOADING_INDICATOR } from '../../screens/security_header';
 import { cleanKibana } from '../../tasks/common';
 
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
@@ -61,7 +62,7 @@ describe('Timeline search and filters', () => {
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.get(LOADING_INDICATOR).should('not.exist');
       cy.get(TIMELINE_SEARCH_OR_FILTER).click();
       cy.get(TIMELINE_SEARCH_OR_FILTER).should('exist');
     });

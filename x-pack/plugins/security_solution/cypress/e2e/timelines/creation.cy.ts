@@ -101,7 +101,7 @@ describe('Timelines', (): void => {
         createNewTimeline();
         cy.get(TIMELINE_PANEL).should('be.visible');
         cy.get(EDIT_TIMELINE_BTN).should('be.disabled');
-        cy.get(EDIT_TIMELINE_BTN).first().trigger('mouseover', { force: true });
+        cy.get(EDIT_TIMELINE_BTN).first().realHover();
         cy.get(EDIT_TIMELINE_TOOLTIP).should('be.visible');
         cy.get(EDIT_TIMELINE_TOOLTIP).should(
           'have.text',

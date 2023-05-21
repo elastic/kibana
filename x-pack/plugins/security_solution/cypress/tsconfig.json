@@ -13,6 +13,8 @@
       "cypress",
       "cypress-file-upload",
       "cypress-pipe",
+      "cypress-real-events",
+      "cypress-recurse",
       "node",
     ],
   },

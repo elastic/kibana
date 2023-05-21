@@ -238,7 +238,7 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
-  cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
+  cy.get(fieldSelector).eq(rowNumber).realHover();
   cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).click();
 };
 

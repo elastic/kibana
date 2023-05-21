@@ -117,31 +117,15 @@ export const closeAlerts = () => {
 export const expandFirstAlertActions = () => {
   waitForAlerts();
 
-  let count = 0;
+  cy.get('.euiLoadingChart').should('not.exist');
 
-  const click = ($el: JQuery<HTMLElement>) => {
-    count++;
-    return $el.click();
-  };
-
-  /*
-   *
-   * Sometimes it takes some time for UI to attach event listener to
-   * TIMELINE_CONTEXT_MENU_BTN and cypress is too fast to click.
-   * Becuase of this popover does not open when click.
-   * pipe().should() makes sure that pipe function is repeated until should becomes true
-   *
-   * */
-
-  cy.wait(2000);
-  cy.get(TIMELINE_CONTEXT_MENU_BTN)
-    .first()
-    .should('be.visible')
-    .pipe(click)
-    .should('have.attr', 'data-popover-open', 'true')
-    .then(() => {
-      cy.log(`Clicked ${count} times`);
-    });
+  cy.recurse(
+    () => {
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+      return cy.get(TIMELINE_CONTEXT_MENU_BTN).first();
+    },
+    (x) => x
+  ).should('have.attr', 'data-popover-open', 'true');
 };
 
 export const expandFirstAlert = () => {
@@ -351,7 +335,7 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
+  cy.get(propertySelector).eq(rowIndex).realHover();
   cy.get(actionSelector).first().click({ force: true });
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {

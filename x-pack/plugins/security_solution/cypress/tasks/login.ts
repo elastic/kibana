@@ -13,6 +13,7 @@ import Url from 'url';
 import type { ROLES } from '../../common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
+import { LOADING_INDICATOR } from '../screens/security_header';
 import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
 /**
@@ -315,7 +316,7 @@ const disableNewFeaturesTours = (window: Window) => {
  */
 
 export const waitForPage = (url: string) => {
-  cy.visit(
+  visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
   );
 };
@@ -340,7 +341,7 @@ export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, 
     },
   });
 
-  return cy.visit(role ? getUrlWithRoute(role, url) : url, {
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
     ...options,
     qs: {
       ...options.qs,
@@ -352,23 +353,24 @@ export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, 
       disableNewFeaturesTours(win);
     },
   });
+  return cy.get(LOADING_INDICATOR).should('not.exist');
 };
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
-  cy.visit(role ? getUrlWithRoute(role, url) : url, {
+  visit(role ? getUrlWithRoute(role, url) : url, {
     onBeforeLoad: disableNewFeaturesTours,
   });
 };
 
 export const visitWithUser = (url: string, user: User) => {
-  cy.visit(constructUrlWithUser(user, url), {
+  visit(constructUrlWithUser(user, url), {
     onBeforeLoad: disableNewFeaturesTours,
   });
 };
 
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
-  cy.visit(role ? getUrlWithRoute(role, route) : route, {
+  visit(role ? getUrlWithRoute(role, route) : route, {
     onBeforeLoad: disableNewFeaturesTours,
   });
   cy.get('[data-test-subj="headerGlobalNav"]');
@@ -386,7 +388,7 @@ export const visitUserDetailsPage = (userName = 'test') => {
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
+  visit(role ? getUrlWithRoute(role, url) : url);
 };
 
 export const logout = () => {

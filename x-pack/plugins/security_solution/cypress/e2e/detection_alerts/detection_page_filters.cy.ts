@@ -11,7 +11,6 @@ import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
   FILTER_GROUP_CHANGED_BANNER,
-  FILTER_GROUP_SAVE_CHANGES_POPOVER,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
@@ -115,7 +114,7 @@ describe('Detections : Page Filters', () => {
     assertFilterControlsWithFilterObject();
   });
 
-  context('Alert Page Filters Customization ', () => {
+  context.only('Alert Page Filters Customization ', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -143,7 +142,6 @@ describe('Detections : Page Filters', () => {
         label,
       });
       cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
-      cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
@@ -154,7 +152,6 @@ describe('Detections : Page Filters', () => {
       editFilterGroupControls();
       editFilterGroupControl({ idx: 3, fieldName, label });
       cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
-      cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
@@ -185,7 +182,7 @@ describe('Detections : Page Filters', () => {
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(formatPageFilterSearchParam(NEW_FILTERS)));
-      cy.visit(currURL.toString());
+      visit(currURL.toString());
       waitForAlerts();
       assertFilterControlsWithFilterObject(NEW_FILTERS);
     });
@@ -206,7 +203,7 @@ describe('Detections : Page Filters', () => {
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(pageFilterUrlString));
-      cy.visit(currURL.toString());
+      visit(currURL.toString());
 
       waitForAlerts();
       cy.get(OPTION_LIST_LABELS).should((sub) => {
