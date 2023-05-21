@@ -14,12 +14,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { PluginContext } from '../context/plugin_context/plugin_context';
-import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../services/rules/create_observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
 
 export type Subset<K> = {
@@ -57,7 +56,7 @@ const queryClient = new QueryClient({
 
 export const render = (component: React.ReactNode, config: Subset<ConfigSchema> = {}) => {
   return testLibRender(
-    <IntlProvider locale="en-US" messages={translations.messages}>
+    <IntlProvider locale="en-US">
       <KibanaContextProvider
         services={{
           ...core,

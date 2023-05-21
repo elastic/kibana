@@ -26,7 +26,7 @@ import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.m
 import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
-import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../services/rules/create_observability_rule_type_registry_mock';
 import { ApmIndicesConfig } from '../../../common/typings';
 import { ConfigSchema } from '../../plugin';
 

@@ -63,8 +63,8 @@ export type {
   ObservabilityRuleTypeFormatter,
   ObservabilityRuleTypeModel,
   ObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
-export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
+} from './services/rules/create_observability_rule_type_registry';
+export { createObservabilityRuleTypeRegistryMock } from './services/rules/create_observability_rule_type_registry_mock';
 
 export { DatePickerContextProvider } from './context/date_picker_context/date_picker_context';
 

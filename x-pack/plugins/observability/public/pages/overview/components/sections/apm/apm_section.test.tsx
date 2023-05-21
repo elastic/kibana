@@ -16,7 +16,7 @@ import * as hasDataHook from '../../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
 import { AppMountParameters } from '@kbn/core/public';
-import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/observability_rule_type_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../../services/rules/create_observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 jest.mock('react-router-dom', () => ({

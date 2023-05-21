@@ -57,9 +57,9 @@ import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
+} from './services/rules/create_observability_rule_type_registry';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
-import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { registerObservabilityRuleTypes } from './services/rules/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
