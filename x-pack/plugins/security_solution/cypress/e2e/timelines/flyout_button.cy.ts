@@ -65,7 +65,7 @@ describe('timeline flyout button', () => {
     openCreateTimelineOptionsPopover();
     cy.get(CREATE_NEW_TIMELINE).focus();
     cy.get(CREATE_NEW_TIMELINE).should('have.focus');
-    closeCreateTimelineOptionsPopover()
+    closeCreateTimelineOptionsPopover();
     cy.get(CREATE_NEW_TIMELINE).should('not.exist');
   });
 
