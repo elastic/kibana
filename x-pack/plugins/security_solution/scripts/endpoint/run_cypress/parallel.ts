@@ -229,9 +229,9 @@ export const cli = () => {
                   kibana: {
                     port: kibanaPort,
                   },
-                  fleetserver: {
-                    port: fleetServerPort,
-                  },
+                  // fleetserver: {
+                  //   port: fleetServerPort,
+                  // },
                 },
                 kbnTestServer: {
                   serverArgs: [
@@ -374,7 +374,7 @@ export const cli = () => {
 
             await procs.stop('kibana');
             shutdownEs();
-            cleanupServerPorts({ esPort, kibanaPort });
+            cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
 
             // return pRetry(
             //   () =>
@@ -420,7 +420,7 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: 1 }
+        { concurrency: 3 }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
 
