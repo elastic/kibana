@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import type { TabNavigationProps } from './types';
-
-const TabNavigationLazy = React.lazy(() => import('./tab_navigation'));
-
-export const TabNavigation = (props: TabNavigationProps) => (
-  <React.Suspense fallback={<EuiLoadingSpinner size="l" />}>
-    <TabNavigationLazy {...props} />
-  </React.Suspense>
-);
+export { TabNavigation } from './tab_navigation';

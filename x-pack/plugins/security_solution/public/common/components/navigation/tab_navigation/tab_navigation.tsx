@@ -112,6 +112,3 @@ export const TabNavigation = React.memo(TabNavigationComponent, (prevProps, next
 );
 
 TabNavigation.displayName = 'TabNavigation';
-
-// eslint-disable-next-line import/no-default-export
-export default TabNavigation;
