@@ -15,6 +15,7 @@ import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { CasesContextStoreAction } from './cases_context_reducer';
 import type {
   CasesFeaturesAllRequired,
@@ -32,6 +33,7 @@ import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
 import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
 import { isRegisteredOwner } from '../../files';
+import { casesQueryClient } from './query_client';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
@@ -147,14 +149,16 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   );
 
   return isCasesContextValue(value) ? (
-    <CasesContext.Provider value={value}>
-      {applyFilesContext(
-        <>
-          <CasesGlobalComponents state={state} />
-          {children}
-        </>
-      )}
-    </CasesContext.Provider>
+    <QueryClientProvider client={casesQueryClient}>
+      <CasesContext.Provider value={value}>
+        {applyFilesContext(
+          <>
+            <CasesGlobalComponents state={state} />
+            {children}
+          </>
+        )}
+      </CasesContext.Provider>
+    </QueryClientProvider>
   ) : null;
 };
 CasesProvider.displayName = 'CasesProvider';

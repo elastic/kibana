@@ -19,11 +19,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CLOUD_FORMATION_PLATFORM_OPTION, type PLATFORM_TYPE } from '../hooks';
+import {
+  FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+} from '../../common/constants/epm';
+import { type PLATFORM_TYPE } from '../hooks';
 import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
-import { CloudFormationInstructions } from './agent_enrollment_flyout/cloud_formation_instructions';
+import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';
 
 interface Props {
   linuxCommand: string;
@@ -33,13 +37,13 @@ interface Props {
   linuxRpmCommand: string;
   k8sCommand: string;
   hasK8sIntegration: boolean;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   hasK8sIntegrationMultiPage: boolean;
   isManaged?: boolean;
   hasFleetServer?: boolean;
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
-  cloudFormationTemplateUrl?: string | null;
 }
 
 // Otherwise the copy button is over the text
@@ -55,21 +59,25 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxRpmCommand,
   k8sCommand,
   hasK8sIntegration,
+  cloudSecurityIntegration,
   hasK8sIntegrationMultiPage,
   isManaged,
   enrollToken,
   hasFleetServer,
   fullCopyButton,
   onCopy,
-  cloudFormationTemplateUrl,
 }) => {
   const getInitialPlatform = useCallback(() => {
-    if (cloudFormationTemplateUrl) return 'cloudFormation';
-
-    if (hasK8sIntegration) return 'kubernetes';
+    if (
+      hasK8sIntegration ||
+      (cloudSecurityIntegration?.integrationType ===
+        FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE &&
+        isManaged)
+    )
+      return 'kubernetes';
 
     return 'linux';
-  }, [cloudFormationTemplateUrl, hasK8sIntegration]);
+  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType, isManaged]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
@@ -80,12 +88,8 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   const getPlatformOptions = useCallback(() => {
     const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
 
-    if (cloudFormationTemplateUrl) {
-      return platformOptions.concat(CLOUD_FORMATION_PLATFORM_OPTION);
-    }
-
     return platformOptions;
-  }, [cloudFormationTemplateUrl, isReduced]);
+  }, [isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -111,6 +115,28 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const k8sCSPMCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.placeHolderCallout', {
+        defaultMessage:
+          'We strongly advise against deploying CSPM within a Kubernetes cluster. Doing so may lead to redundant data fetching, which can cause increased consumption costs within your Elastic account and potentially trigger API rate limiting in your cloud account(s).',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const macCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
+        defaultMessage:
+          'We recommend against deploying this integration within Mac as it is currently not being supported.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
   const commandsByPlatform: Record<PLATFORM_TYPE, string> = {
     linux: linuxCommand,
     mac: macCommand,
@@ -118,7 +144,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
-    cloudFormation: '',
   };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -149,6 +174,24 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
+        {platform === 'mac' &&
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+            <>
+              {macCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {platform === 'kubernetes' &&
+          cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE && (
+            <>
+              {k8sCSPMCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
         {platform === 'kubernetes' && !hasK8sIntegration && (
           <>
             {k8sCallout}
@@ -165,16 +208,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
           </>
         )}
-        {platform === 'cloudFormation' && cloudFormationTemplateUrl && (
-          <>
-            <CloudFormationInstructions
-              cloudFormationTemplateUrl={cloudFormationTemplateUrl}
-              enrollmentAPIKey={enrollToken}
-            />
-            <EuiSpacer size="s" />
-          </>
-        )}
-        {!hasK8sIntegrationMultiPage && platform !== 'cloudFormation' && (
+        {!hasK8sIntegrationMultiPage && (
           <>
             {platform === 'kubernetes' && (
               <EuiText>

@@ -20,10 +20,12 @@ export const TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY =
 const isDismissed = () => localStorage.getItem(TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY) === 'true';
 
 export const useTextExpansionCallOutData = ({
+  isCompact = false,
   isDismissable = false,
 }: TextExpansionCallOutProps): TextExpansionCallOutState => {
   const { ingestionMethod } = useValues(IndexViewLogic);
-  const { isCreateButtonDisabled, isStartButtonDisabled } = useValues(TextExpansionCalloutLogic);
+  const { isCreateButtonDisabled, isModelRunningSingleThreaded, isStartButtonDisabled } =
+    useValues(TextExpansionCalloutLogic);
 
   const [show, setShow] = useState<boolean>(() => {
     if (!isDismissable) return true;
@@ -52,8 +54,10 @@ export const useTextExpansionCallOutData = ({
   return {
     dismiss,
     ingestionMethod,
+    isCompact,
     isCreateButtonDisabled,
     isDismissable,
+    isSingleThreaded: isModelRunningSingleThreaded,
     isStartButtonDisabled,
     show,
   };
