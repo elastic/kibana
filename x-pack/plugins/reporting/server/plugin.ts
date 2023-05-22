@@ -16,10 +16,12 @@ import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
 import { registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { ReportingStore } from './lib';
+import { CsvExportType } from './export_types/csv_v2/types';
+import { getExportTypesRegistry, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
+  ExportTypeDefinition,
   ReportingRequestHandlerContext,
   ReportingSetup,
   ReportingSetupDeps,
@@ -36,15 +38,20 @@ export class ReportingPlugin
 {
   private logger: Logger;
   private reportingCore?: ReportingCore;
+  private exportTypesRegistry = getExportTypesRegistry();
+  private csvExport: CsvExportType;
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
     this.logger = initContext.logger.get();
+    this.csvExport = new CsvExportType(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http, status } = core;
+
     const reportingCore = new ReportingCore(core, this.logger, this.initContext);
     this.reportingCore = reportingCore;
+    this.csvExport.setup(core, { basePath: http.basePath, spaces: plugins.spaces });
 
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
@@ -73,6 +80,11 @@ export class ReportingPlugin
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
+    /* Previously export type registry was handled in core.ts, with the export type classes, 
+    /* this still needs to be registered with the export type registry until all export type 
+    /* classes are created and then can do a clean break away from the registry
+     */
+    this.exportTypesRegistry.register(this.csvExport as unknown as ExportTypeDefinition);
 
     // Routes
     registerRoutes(reportingCore, this.logger);
@@ -113,6 +125,13 @@ export class ReportingPlugin
         ...plugins,
       });
 
+      this.csvExport.start(core, {
+        savedObjects,
+        uiSettings,
+        esClient: elasticsearch.client,
+        data: plugins.data,
+        discover: plugins.discover,
+      });
       // Note: this must be called after ReportingCore.pluginStart
       await store.start();
 

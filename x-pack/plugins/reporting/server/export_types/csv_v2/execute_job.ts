@@ -10,12 +10,16 @@ import type { TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import { getFieldFormats } from '../../services';
 import type { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
+import { CsvExportType } from './types';
 
 type RunTaskFnType = RunTaskFn<TaskPayloadCsvFromSavedObject>;
 
-export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _logger) => {
+export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (
+  reporting: CsvExportType,
+  _logger
+) => {
   const config = reporting.getConfig();
-  const { encryptionKey, csv: csvConfig } = config;
+  const { encryptionKey, csvConfig } = config;
 
   return async function runTask(jobId, job, cancellationToken, stream) {
     const logger = _logger.get(`execute:${jobId}`);
