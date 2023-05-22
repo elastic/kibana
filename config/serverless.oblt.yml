@@ -5,7 +5,7 @@ enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.securitySolution.enabled: false
 
-## Enable the Serverless Obsersability plugin
+## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
 
 # Onboarding
@@ -22,3 +22,6 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
+
+## APM Serverless Onboarding flow
+xpack.apm.serverlessOnboarding: true

@@ -57,6 +57,7 @@ const configSchema = schema.object({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
   enabled: schema.boolean({ defaultValue: true }),
+  serverlessOnboarding: schema.boolean({ defaultValue: false }),
 });
 
 // plugin config
@@ -115,6 +116,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     serviceMapEnabled: true,
     ui: true,
     latestAgentVersionsUrl: true,
+    serverlessOnboarding: true,
   },
   schema: configSchema,
 };
