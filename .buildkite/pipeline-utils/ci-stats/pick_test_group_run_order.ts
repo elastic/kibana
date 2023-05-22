@@ -463,7 +463,7 @@ export async function pickTestGroupRunOrder() {
                   : -1
               )
               .map(
-                //({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                // ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                 ({ title, key }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
