@@ -41,7 +41,7 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     { serverless }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    serverless.setSideNavComponent(createComponent(core));
+    serverless.setSideNavComponent(createComponent(core, { serverless }));
     return {};
   }
 
