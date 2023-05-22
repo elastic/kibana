@@ -42,12 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     const params: Record<string, string> = {};
 
     before(async () => {
-      await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.12.0')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await testPrivateLocations.installSyntheticsPackage();
 
       _browserMonitorJson = getFixtureJson('browser_monitor');
       _httpMonitorJson = getFixtureJson('http_monitor');
