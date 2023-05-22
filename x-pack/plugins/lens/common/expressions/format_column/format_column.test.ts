@@ -47,6 +47,7 @@ describe('format_column', () => {
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
       params: {
+        formatOverride: true,
         pattern: '0,0.00',
       },
     });
@@ -58,6 +59,7 @@ describe('format_column', () => {
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
       params: {
+        formatOverride: true,
         pattern: '0,0.00000',
       },
     });
@@ -77,6 +79,7 @@ describe('format_column', () => {
         suffixString: 'ABC',
         id: 'number',
         params: {
+          formatOverride: true,
           pattern: '0,0.00000',
         },
       },
@@ -88,9 +91,7 @@ describe('format_column', () => {
     const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 0 });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
-      params: {
-        pattern: '0,0',
-      },
+      params: { formatOverride: true, pattern: '0,0' },
     });
   });
 
@@ -227,9 +228,11 @@ describe('format_column', () => {
       expect(result.columns[0].meta.params).toEqual({
         id: 'wrapper',
         params: {
+          formatOverride: true,
           wrapperParam: 123,
           id: 'number',
           params: {
+            formatOverride: true,
             pattern: '0,0.00000',
           },
           pattern: '0,0.00000',
@@ -256,7 +259,9 @@ describe('format_column', () => {
           paramsPerField: [
             {
               id: 'number',
+              formatOverride: true,
               params: {
+                formatOverride: true,
                 pattern: '0,0.00000',
               },
               pattern: '0,0.00000',
