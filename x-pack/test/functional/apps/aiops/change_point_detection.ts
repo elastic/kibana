@@ -48,7 +48,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(result[0].type).to.eql('distribution_change');
     });
 
-    it('shows multiple results when split field is selected', async () => {});
+    it('shows multiple results when split field is selected', async () => {
+      await aiops.changePointDetectionPage.clickUseFullDataButton();
+      await aiops.changePointDetectionPage.selectMetricField(0, 'products.discount_amount');
+      await aiops.changePointDetectionPage.selectSplitField(0, 'geoip.city_name');
+      const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
+      expect(result.length).to.eql(5);
+      // assert asc sorting by p_value is applied
+      expect(parseFloat(result[0].pValue)).to.be.lessThan(parseFloat(result[4].pValue));
+    });
 
     it('supports a quick filter action', async () => {});
 

@@ -50,7 +50,7 @@ export function ChangePointDetectionPageProvider(
       );
       expect(comboBoxSelectedOptions).to.eql(
         expectedIdentifier,
-        `Expected the metric field to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        `Expected a metric field to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
       );
     },
 
@@ -60,6 +60,24 @@ export function ChangePointDetectionPageProvider(
         value
       );
       await this.assertMetricFieldSelection(panelIndex, [value]);
+    },
+
+    async assertSplitFieldSelection(panelIndex: number = 0, expectedIdentifier: string[]) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        `aiopsChangePointPanel_${panelIndex} > aiopsChangePointSplitField > comboBoxInput`
+      );
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected a split field to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
+    },
+
+    async selectSplitField(panelIndex: number = 0, value: string) {
+      await comboBox.set(
+        `aiopsChangePointPanel_${panelIndex} > aiopsChangePointSplitField > comboBoxInput`,
+        value
+      );
+      await this.assertSplitFieldSelection(panelIndex, [value]);
     },
 
     async clickUseFullDataButton() {
