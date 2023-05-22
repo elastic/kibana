@@ -654,23 +654,7 @@ describe('Case', () => {
 
   describe('CasesBulkGetResponseRt', () => {
     const defaultRequest = {
-      cases: [
-        {
-          id: 'basic-case-id',
-          created_at: '2020-02-19T23:06:33.798Z',
-          created_by: {
-            full_name: 'Leslie Knope',
-            username: 'lknope',
-            email: 'leslie.knope@elastic.co',
-          },
-          owner: 'cases',
-          description: 'Security banana Issue',
-          status: CaseStatuses.open,
-          title: 'Another horrible breach!!',
-          totalComments: 1,
-          version: 'WzQ3LDFd',
-        },
-      ],
+      cases: [basicCase],
       errors: [
         {
           error: 'error',
@@ -684,7 +668,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasesBulkGetResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -693,9 +677,21 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasesBulkGetResponseRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from cases', () => {
+      const query = CasesBulkGetResponseRt.decode({
+        ...defaultRequest,
+        cases: [{ ...defaultRequest.cases[0], foo: 'bar' }],
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, cases: defaultRequest.cases },
       });
     });
 
@@ -705,7 +701,7 @@ describe('Case', () => {
         errors: [{ ...defaultRequest.errors[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
