@@ -24,6 +24,7 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { asyncForEach } from '@kbn/std';
 
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
@@ -57,7 +58,7 @@ import { InfraBackendLibs } from '../../infra_types';
 import {
   AdditionalContext,
   flattenAdditionalContext,
-  getAlertDetailsUrl,
+  getAlertUrl,
   getContextForRecoveredAlerts,
   getGroupByObject,
   unflattenObject,
@@ -168,7 +169,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           viewInAppUrl,
         };
 
-        actions.forEach((actionSet) => {
+        asyncForEach(actions, async (actionSet) => {
           const { actionGroup, context } = actionSet;
 
           const alertInstanceId = (context.group || id) as string;
@@ -178,7 +179,12 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           alert.scheduleActions(actionGroup, {
             ...sharedContext,
             ...context,
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertDetailsUrl: await getAlertUrl(
+              alertUuid,
+              spaceId,
+              libs.alertsLocator,
+              libs.basePath.publicBaseUrl
+            ),
           });
         });
       }
@@ -1024,7 +1030,12 @@ const processRecoveredAlerts = async ({
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
-      alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
+      alertDetailsUrl: await getAlertUrl(
+        alertUuid,
+        spaceId,
+        libs.alertsLocator,
+        libs.basePath.publicBaseUrl
+      ),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),

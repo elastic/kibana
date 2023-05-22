@@ -37,6 +37,7 @@ import {
   validGroupByForContext,
   flattenAdditionalContext,
   getGroupByObject,
+  getAlertUrl,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -151,14 +152,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl:
-            (
-              await libs.alertsLocator?.getLocation({
-                baseUrl: libs.basePath.publicBaseUrl || '',
-                spaceId,
-                kuery: `kibana.alert.uuid: "${alertUuid}"`,
-              })
-            )?.path || '',
+          alertDetailsUrl: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            libs.alertsLocator,
+            libs.basePath.publicBaseUrl
+          ),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -318,14 +317,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl:
-            (
-              await libs.alertsLocator?.getLocation({
-                baseUrl: libs.basePath.publicBaseUrl || '',
-                spaceId,
-                kuery: `kibana.alert.uuid: "${alertUuid}"`,
-              })
-            )?.path || '',
+          alertDetailsUrl: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            libs.alertsLocator,
+            libs.basePath.publicBaseUrl
+          ),
           alertState: stateToAlertMessage[nextState],
           group,
           groupByKeys: groupByKeysObjectMapping[group],
@@ -376,14 +373,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
       alert.setContext({
-        alertDetailsUrl:
-          (
-            await libs.alertsLocator?.getLocation({
-              baseUrl: libs.basePath.publicBaseUrl || '',
-              spaceId,
-              kuery: `kibana.alert.uuid: "${alertUuid}"`,
-            })
-          )?.path || '',
+        alertDetailsUrl: await getAlertUrl(
+          alertUuid,
+          spaceId,
+          libs.alertsLocator,
+          libs.basePath.publicBaseUrl
+        ),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],

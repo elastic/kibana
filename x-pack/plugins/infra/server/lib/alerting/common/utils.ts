@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
@@ -148,6 +150,23 @@ export const getAlertDetailsUrl = (
   spaceId: string,
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
+
+export const getAlertUrl = async (
+  alertUuid: string,
+  spaceId: string,
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>,
+  publicBaseUrl?: string
+) => {
+  if (!publicBaseUrl || !alertsLocator) return '';
+
+  return (
+    await alertsLocator.getLocation({
+      baseUrl: publicBaseUrl,
+      spaceId,
+      kuery: `kibana.alert.uuid: "${alertUuid}"`,
+    })
+  ).path;
+};
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;

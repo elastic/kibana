@@ -35,7 +35,7 @@ import {
   AdditionalContext,
   createScopedLogger,
   flattenAdditionalContext,
-  getAlertDetailsUrl,
+  getAlertUrl,
   getContextForRecoveredAlerts,
   getViewInInventoryAppUrl,
   UNGROUPED_FACTORY_KEY,
@@ -135,7 +135,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
           alert.scheduleActions(actionGroupId, {
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertDetailsUrl: await getAlertUrl(
+              alertUuid,
+              spaceId,
+              libs.alertsLocator,
+              libs.basePath.publicBaseUrl
+            ),
             alertState: stateToAlertMessage[AlertStates.ERROR],
             group: UNGROUPED_FACTORY_KEY,
             metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -262,7 +267,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           scheduledActionsCount++;
 
           const context = {
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertDetailsUrl: await getAlertUrl(
+              alertUuid,
+              spaceId,
+              libs.alertsLocator,
+              libs.basePath.publicBaseUrl
+            ),
             alertState: stateToAlertMessage[nextState],
             group,
             reason,
@@ -297,7 +307,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const originalActionGroup = getOriginalActionGroup(alertHits);
 
         alert.setContext({
-          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          alertDetailsUrl: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            libs.alertsLocator,
+            libs.basePath.publicBaseUrl
+          ),
           alertState: stateToAlertMessage[AlertStates.OK],
           group: recoveredAlertId,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
