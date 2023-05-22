@@ -22,9 +22,9 @@ import type {
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
-  ConnectorMappingsAttributes,
   GetConfigureFindRequest,
-  GetDefaultMappingsResponse,
+  ConnectorMappingResponse,
+  ConnectorMappings,
 } from '../../../common/api';
 import {
   CaseConfigurationsResponseRt,
@@ -59,9 +59,9 @@ import { decodeOrThrow } from '../../../common/api/runtime_types';
  * @ignore
  */
 export interface InternalConfigureSubClient {
-  getMappings(params: MappingsArgs): Promise<GetDefaultMappingsResponse>;
-  createMappings(params: CreateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
-  updateMappings(params: UpdateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
+  getMappings(params: MappingsArgs): Promise<ConnectorMappingResponse | null>;
+  createMappings(params: CreateMappingsArgs): Promise<ConnectorMappingResponse>;
+  updateMappings(params: UpdateMappingsArgs): Promise<ConnectorMappingResponse>;
 }
 
 /**
@@ -175,7 +175,7 @@ async function get(
           connector: null,
         };
 
-        let mappings: GetDefaultMappingsResponse = [];
+        let mappings: ConnectorMappingResponse | null = null;
 
         if (connector != null) {
           try {
@@ -192,7 +192,7 @@ async function get(
         return {
           ...caseConfigureWithoutConnector,
           connector,
-          mappings: mappings.length > 0 ? [mappings[0]] : [],
+          mappings: mappings != null ? mappings.mappings : [],
           version: configuration.version ?? '',
           error,
           id: configuration.id,
@@ -289,7 +289,7 @@ async function update(
 
     let error = null;
     const updateDate = new Date().toISOString();
-    let mappings: ConnectorMappingsAttributes[] = [];
+    let mappings: ConnectorMappings = [];
     const { connector, ...queryWithoutVersionAndConnector } = queryWithoutVersion;
 
     try {
@@ -297,21 +297,25 @@ async function update(
         connector: connector != null ? connector : configuration.attributes.connector,
       });
 
-      mappings = resMappings.length > 0 ? [resMappings[0]] : [];
+      mappings = resMappings !== null ? resMappings.mappings : [];
 
       if (connector != null) {
-        if (resMappings.length !== 0) {
-          mappings = await casesClientInternal.configuration.updateMappings({
-            connector,
-            mappingId: resMappings[0].id,
-            refresh: false,
-          });
+        if (resMappings !== null) {
+          mappings = (
+            await casesClientInternal.configuration.updateMappings({
+              connector,
+              mappingId: resMappings.id,
+              refresh: false,
+            })
+          ).mappings;
         } else {
-          mappings = await casesClientInternal.configuration.createMappings({
-            connector,
-            owner: configuration.attributes.owner,
-            refresh: false,
-          });
+          mappings = (
+            await casesClientInternal.configuration.createMappings({
+              connector,
+              owner: configuration.attributes.owner,
+              refresh: false,
+            })
+          ).mappings;
         }
       }
     } catch (e) {
@@ -419,14 +423,16 @@ async function create(
     });
 
     const creationDate = new Date().toISOString();
-    let mappings: ConnectorMappingsAttributes[] = [];
+    let mappings: ConnectorMappings = [];
 
     try {
-      mappings = await casesClientInternal.configuration.createMappings({
-        connector: configuration.connector,
-        owner: configuration.owner,
-        refresh: false,
-      });
+      mappings = (
+        await casesClientInternal.configuration.createMappings({
+          connector: configuration.connector,
+          owner: configuration.owner,
+          refresh: false,
+        })
+      ).mappings;
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message

@@ -52,12 +52,12 @@ export const CaseConfigureAttributesRt = rt.intersection([
 
 export const CaseConfigureResponseRt = rt.intersection([
   CaseConfigureAttributesRt,
-  ConnectorMappingsRt,
   rt.type({
     id: rt.string,
     version: rt.string,
     error: rt.union([rt.string, rt.null]),
     owner: rt.string,
+    mappings: ConnectorMappingsRt,
   }),
 ]);
 

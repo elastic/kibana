@@ -6,19 +6,22 @@
  */
 
 import { decodeOrThrow } from '../runtime_types';
-import { ConnectorMappingsPartialRt } from './mappings';
+import { ConnectorMappingsAttributesPartialRt } from './mappings';
 
 describe('mappings', () => {
-  describe('ConnectorMappingsPartialRt', () => {
+  describe('ConnectorMappingsAttributesPartialRt', () => {
     it('strips excess fields from the object', () => {
-      const res = decodeOrThrow(ConnectorMappingsPartialRt)({ bananas: 'yes', owner: 'hi' });
+      const res = decodeOrThrow(ConnectorMappingsAttributesPartialRt)({
+        bananas: 'yes',
+        owner: 'hi',
+      });
       expect(res).toMatchObject({
         owner: 'hi',
       });
     });
 
     it('does not throw when the object is empty', () => {
-      expect(() => decodeOrThrow(ConnectorMappingsPartialRt)({})).not.toThrow();
+      expect(() => decodeOrThrow(ConnectorMappingsAttributesPartialRt)({})).not.toThrow();
     });
   });
 });

@@ -12,6 +12,7 @@ const ActionTypeRt = rt.union([
   rt.literal('nothing'),
   rt.literal('overwrite'),
 ]);
+
 const CaseFieldRt = rt.union([
   rt.literal('title'),
   rt.literal('description'),
@@ -20,39 +21,35 @@ const CaseFieldRt = rt.union([
 ]);
 
 const ThirdPartyFieldRt = rt.union([rt.string, rt.literal('not_mapped')]);
+
 export type ActionType = rt.TypeOf<typeof ActionTypeRt>;
 export type CaseField = rt.TypeOf<typeof CaseFieldRt>;
 export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRt>;
 
-const ConnectorMappingsAttributesRt = rt.type({
+const ConnectorMappingRt = rt.type({
   action_type: ActionTypeRt,
   source: CaseFieldRt,
   target: ThirdPartyFieldRt,
 });
 
-export const ConnectorMappingsRt = rt.type({
-  mappings: rt.array(ConnectorMappingsAttributesRt),
+export const ConnectorMappingsRt = rt.array(ConnectorMappingRt);
+
+export const ConnectorMappingsAttributesRt = rt.type({
+  mappings: ConnectorMappingsRt,
   owner: rt.string,
 });
 
-export const ConnectorMappingsPartialRt = rt.exact(rt.partial(ConnectorMappingsRt.props));
+export const ConnectorMappingsAttributesPartialRt = rt.exact(
+  rt.partial(ConnectorMappingsAttributesRt.props)
+);
 
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
 export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
 
-const FieldTypeRt = rt.union([rt.literal('text'), rt.literal('textarea')]);
-
-const ConnectorFieldRt = rt.type({
+export const ConnectorMappingResponseRt = rt.strict({
   id: rt.string,
-  name: rt.string,
-  required: rt.boolean,
-  type: FieldTypeRt,
+  version: rt.string,
+  mappings: ConnectorMappingsRt,
 });
 
-export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
-
-export const GetDefaultMappingsResponseRt = rt.array(
-  rt.intersection([ConnectorMappingsAttributesRt, rt.type({ id: rt.string, version: rt.string })])
-);
-
-export type GetDefaultMappingsResponse = rt.TypeOf<typeof GetDefaultMappingsResponseRt>;
+export type ConnectorMappingResponse = rt.TypeOf<typeof ConnectorMappingResponseRt>;

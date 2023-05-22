@@ -6,7 +6,8 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { ConnectorMappings } from '../../../common/api';
+import type { ConnectorMappingsAttributes } from '../../../common/api';
+import { ConnectorMappingsAttributesRt } from '../../../common/api';
 
 export interface ConnectorMappingsPersistedAttributes {
   mappings: Array<{
@@ -17,5 +18,8 @@ export interface ConnectorMappingsPersistedAttributes {
   owner: string;
 }
 
-export type ConnectorMappingsTransformed = ConnectorMappings;
-export type ConnectorMappingsSavedObjectTransformed = SavedObject<ConnectorMappingsTransformed>;
+export const ConnectorMappingsAttributesTransformedRt = ConnectorMappingsAttributesRt;
+
+export type ConnectorMappingsAttributesTransformed = ConnectorMappingsAttributes;
+export type ConnectorMappingsSavedObjectTransformed =
+  SavedObject<ConnectorMappingsAttributesTransformed>;

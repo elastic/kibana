@@ -8,8 +8,8 @@
 import type {
   Comment,
   CommentResponseAlertsType,
-  ConnectorMappingsAttributes,
   CaseUserActionsDeprecatedResponse,
+  ConnectorMappings,
 } from '../../../common/api';
 import {
   CommentType,
@@ -242,7 +242,7 @@ export const basicParams = {
   ...entity,
 };
 
-export const mappings: ConnectorMappingsAttributes[] = [
+export const mappings: ConnectorMappings = [
   {
     source: 'title',
     target: 'short_description',
