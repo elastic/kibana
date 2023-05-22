@@ -5,56 +5,6 @@
     "functions": [
       {
         "parentPluginId": "observability",
-        "id": "def-public.ActionMenu",
-        "type": "Function",
-        "tags": [],
-        "label": "ActionMenu",
-        "description": [],
-        "signature": [
-          "(props: Props) => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ActionMenu.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.ActionMenuDivider",
-        "type": "Function",
-        "tags": [],
-        "label": "ActionMenuDivider",
-        "description": [],
-        "signature": [
-          "() => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.AlertSummary",
         "type": "Function",
         "tags": [],
@@ -259,39 +209,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.createEsParams",
-        "type": "Function",
-        "tags": [],
-        "label": "createEsParams",
-        "description": [],
-        "signature": [
-          "(params: T) => T"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.createEsParams.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.createObservabilityRuleTypeRegistryMock",
         "type": "Function",
         "tags": [],
@@ -332,7 +249,13 @@
         "description": [],
         "signature": [
           "() => (options?: ",
-          "Options",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.Options",
+            "text": "Options"
+          },
           ") => ",
           "LinkProps"
         ],
@@ -351,11 +274,11 @@
         "label": "DatePicker",
         "description": [],
         "signature": [
-          "(props: ",
+          "({\n  rangeFrom,\n  rangeTo,\n  refreshPaused,\n  refreshInterval,\n  width = 'restricted',\n  onTimeRangeRefresh,\n}: ",
           "DatePickerProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "path": "x-pack/plugins/observability/public/pages/overview/components/date_picker/date_picker.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -364,12 +287,12 @@
             "id": "def-public.DatePicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{\n  rangeFrom,\n  rangeTo,\n  refreshPaused,\n  refreshInterval,\n  width = 'restricted',\n  onTimeRangeRefresh,\n}",
             "description": [],
             "signature": [
               "DatePickerProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/date_picker/date_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -388,7 +311,7 @@
         "signature": [
           "({ children }: { children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }) => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+        "path": "x-pack/plugins/observability/public/context/date_picker_context/date_picker_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -399,7 +322,7 @@
             "tags": [],
             "label": "{ children }",
             "description": [],
-            "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+            "path": "x-pack/plugins/observability/public/context/date_picker_context/date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -413,116 +336,11 @@
                 "signature": [
                   "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
                 ],
-                "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+                "path": "x-pack/plugins/observability/public/context/date_picker_context/date_picker_context.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.FieldValueSelection",
-        "type": "Function",
-        "tags": [],
-        "label": "FieldValueSelection",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "FieldValueSelectionProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.FieldValueSelection.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FieldValueSelectionProps"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.FieldValueSuggestions",
-        "type": "Function",
-        "tags": [],
-        "label": "FieldValueSuggestions",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "FieldValueSuggestionsProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.FieldValueSuggestions.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FieldValueSuggestionsProps"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.FilterValueLabel",
-        "type": "Function",
-        "tags": [],
-        "label": "FilterValueLabel",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "FilterValueLabelProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.FilterValueLabel.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FilterValueLabelProps"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -769,7 +587,7 @@
           "CoreVitalProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "path": "x-pack/plugins/observability/public/components/core_web_vitals/get_core_web_vitals_lazy.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -783,90 +601,10 @@
             "signature": [
               "CoreVitalProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/get_core_web_vitals_lazy.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.HeaderMenuPortal",
-        "type": "Function",
-        "tags": [],
-        "label": "HeaderMenuPortal",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "HeaderMenuPortalProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.HeaderMenuPortal.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "HeaderMenuPortalProps"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.InspectorContextProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "InspectorContextProvider",
-        "description": [],
-        "signature": [
-          "({ children }: { children: React.ReactNode; }) => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/context/inspector/inspector_context.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.InspectorContextProvider.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children }",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/context/inspector/inspector_context.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.InspectorContextProvider.$1.children",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "children",
-                "description": [],
-                "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
-                ],
-                "path": "x-pack/plugins/observability/public/context/inspector/inspector_context.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -932,74 +670,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.LoadWhenInView",
-        "type": "Function",
-        "tags": [],
-        "label": "LoadWhenInView",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "LoadWhenInViewProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.LoadWhenInView.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "LoadWhenInViewProps"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.NavigationWarningPromptProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "NavigationWarningPromptProvider",
-        "description": [],
-        "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/utils/navigation_warning_prompt/context.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.NavigationWarningPromptProvider.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children }",
-            "description": [],
-            "signature": [
-              "{ children?: React.ReactNode; }"
-            ],
-            "path": "x-pack/plugins/observability/public/utils/navigation_warning_prompt/context.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.ObservabilityAlertSearchBar",
         "type": "Function",
         "tags": [],
@@ -1010,7 +680,7 @@
           "ObservabilityAlertSearchBarProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "path": "x-pack/plugins/observability/public/components/alert_search_bar/get_alert_search_bar_lazy.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1024,279 +694,7 @@
             "signature": [
               "ObservabilityAlertSearchBarProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.Prompt",
-        "type": "Function",
-        "tags": [],
-        "label": "Prompt",
-        "description": [],
-        "signature": [
-          "({ prompt }: React.PropsWithChildren<Props>) => null"
-        ],
-        "path": "x-pack/plugins/observability/public/utils/navigation_warning_prompt/prompt.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.Prompt.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ prompt }",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
-            "path": "x-pack/plugins/observability/public/utils/navigation_warning_prompt/prompt.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.Section",
-        "type": "Function",
-        "tags": [],
-        "label": "Section",
-        "description": [],
-        "signature": [
-          "string & ",
-          "StyledComponentBase",
-          "<\"div\", any, {}, never> & ",
-          "NonReactStatics",
-          "<never, {}>"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.SectionLink",
-        "type": "Function",
-        "tags": [],
-        "label": "SectionLink",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "EuiListGroupItemProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SectionLink.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "EuiListGroupItemProps"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.SectionLinks",
-        "type": "Function",
-        "tags": [],
-        "label": "SectionLinks",
-        "description": [],
-        "signature": [
-          "({ children, ...props }: { children?: React.ReactNode; } & ",
-          "CommonProps",
-          " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
-          "EuiListGroupItemProps",
-          "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
-          "Property",
-          ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SectionLinks.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ children, ...props }",
-            "description": [],
-            "signature": [
-              "{ children?: React.ReactNode; } & ",
-              "CommonProps",
-              " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
-              "EuiListGroupItemProps",
-              "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
-              "Property",
-              ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.SectionSpacer",
-        "type": "Function",
-        "tags": [],
-        "label": "SectionSpacer",
-        "description": [],
-        "signature": [
-          "() => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.SectionSubtitle",
-        "type": "Function",
-        "tags": [],
-        "label": "SectionSubtitle",
-        "description": [],
-        "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SectionSubtitle.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children }",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.SectionSubtitle.$1.children",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "children",
-                "description": [],
-                "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
-                ],
-                "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.SectionTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "SectionTitle",
-        "description": [],
-        "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SectionTitle.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children }",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.SectionTitle.$1.children",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "children",
-                "description": [],
-                "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
-                ],
-                "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.shouldHandleLinkEvent",
-        "type": "Function",
-        "tags": [],
-        "label": "shouldHandleLinkEvent",
-        "description": [],
-        "signature": [
-          "(e: React.MouseEvent<Element, MouseEvent> | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => boolean"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.shouldHandleLinkEvent.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "e",
-            "description": [],
-            "signature": [
-              "React.MouseEvent<Element, MouseEvent> | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+            "path": "x-pack/plugins/observability/public/components/alert_search_bar/get_alert_search_bar_lazy.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1342,393 +740,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.useBreadcrumbs",
-        "type": "Function",
-        "tags": [],
-        "label": "useBreadcrumbs",
-        "description": [],
-        "signature": [
-          "(extraCrumbs: ",
-          "EuiBreadcrumbProps",
-          "[], app?: { id: string; label: string; } | undefined) => void"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useBreadcrumbs.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "extraCrumbs",
-            "description": [],
-            "signature": [
-              "EuiBreadcrumbProps",
-              "[]"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useBreadcrumbs.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "app",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.useBreadcrumbs.$2.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.useBreadcrumbs.$2.label",
-                "type": "string",
-                "tags": [],
-                "label": "label",
-                "description": [],
-                "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useChartTheme",
-        "type": "Function",
-        "tags": [],
-        "label": "useChartTheme",
-        "description": [],
-        "signature": [
-          "() => ",
-          "RecursivePartial",
-          "<",
-          "Theme",
-          ">[]"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_chart_theme.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useEsSearch",
-        "type": "Function",
-        "tags": [],
-        "label": "useEsSearch",
-        "description": [],
-        "signature": [
-          "<DocumentSource extends unknown, TParams extends ",
-          "SearchRequest",
-          ">(params: TParams, fnDeps: any[], options: { inspector?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IInspectorInfo",
-            "text": "IInspectorInfo"
-          },
-          " | undefined; name: string; }) => { data: ",
-          {
-            "pluginId": "@kbn/es-types",
-            "scope": "common",
-            "docId": "kibKbnEsTypesPluginApi",
-            "section": "def-common.ESSearchResponse",
-            "text": "ESSearchResponse"
-          },
-          "<DocumentSource, TParams, { restTotalHitsAsInt: false; }>; loading: boolean; }"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useEsSearch.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "TParams"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useEsSearch.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "fnDeps",
-            "description": [],
-            "signature": [
-              "any[]"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useEsSearch.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.useEsSearch.$3.inspector",
-                "type": "Object",
-                "tags": [],
-                "label": "inspector",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.IInspectorInfo",
-                    "text": "IInspectorInfo"
-                  },
-                  " | undefined"
-                ],
-                "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.useEsSearch.$3.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useFetcher",
-        "type": "Function",
-        "tags": [],
-        "label": "useFetcher",
-        "description": [],
-        "signature": [
-          "(fn: ({}: { signal: AbortSignal; }) => TReturn, fnDeps: any[], options: { preservePreviousData?: boolean | undefined; }) => ",
-          "FetcherResult",
-          "<InferResponseType<TReturn>> & { refetch: () => void; }"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useFetcher.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "fn",
-            "description": [],
-            "signature": [
-              "({}: { signal: AbortSignal; }) => TReturn"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useFetcher.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "fnDeps",
-            "description": [],
-            "signature": [
-              "any[]"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useFetcher.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.useFetcher.$3.preservePreviousData",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "preservePreviousData",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useInspectorContext",
-        "type": "Function",
-        "tags": [],
-        "label": "useInspectorContext",
-        "description": [],
-        "signature": [
-          "() => ",
-          "InspectorContextValue"
-        ],
-        "path": "x-pack/plugins/observability/public/context/inspector/use_inspector_context.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useLinkProps",
-        "type": "Function",
-        "tags": [],
-        "label": "useLinkProps",
-        "description": [],
-        "signature": [
-          "({ app, pathname, hash, search }: ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.LinkDescriptor",
-            "text": "LinkDescriptor"
-          },
-          ", options?: ",
-          "Options",
-          ") => ",
-          "LinkProps"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useLinkProps.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ app, pathname, hash, search }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.LinkDescriptor",
-                "text": "LinkDescriptor"
-              }
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useLinkProps.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "Options"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useTheme",
-        "type": "Function",
-        "tags": [],
-        "label": "useTheme",
-        "description": [],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          }
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_theme.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.useTimeBuckets",
         "type": "Function",
         "tags": [],
@@ -1745,23 +756,6 @@
           }
         ],
         "path": "x-pack/plugins/observability/public/hooks/use_time_buckets.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.useTimeZone",
-        "type": "Function",
-        "tags": [],
-        "label": "useTimeZone",
-        "description": [],
-        "signature": [
-          "() => string"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_time_zone.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2530,73 +1524,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.LinkDescriptor",
-        "type": "Interface",
-        "tags": [],
-        "label": "LinkDescriptor",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.LinkDescriptor.app",
-            "type": "string",
-            "tags": [],
-            "label": "app",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.LinkDescriptor.pathname",
-            "type": "string",
-            "tags": [],
-            "label": "pathname",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.LinkDescriptor.hash",
-            "type": "string",
-            "tags": [],
-            "label": "hash",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.LinkDescriptor.search",
-            "type": "Object",
-            "tags": [],
-            "label": "search",
-            "description": [],
-            "signature": [
-              "Search | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.LogsFetchDataResponse",
         "type": "Interface",
         "tags": [],
@@ -2984,74 +1911,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.NavigationSection",
-        "type": "Interface",
-        "tags": [],
-        "label": "NavigationSection",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.NavigationSection.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.NavigationSection.sortKey",
-            "type": "number",
-            "tags": [],
-            "label": "sortKey",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.NavigationSection.entries",
-            "type": "Array",
-            "tags": [],
-            "label": "entries",
-            "description": [],
-            "signature": [
-              "NavigationEntry",
-              "[]"
-            ],
-            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.NavigationSection.isBetaFeature",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isBetaFeature",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.ObservabilityFetchDataResponse",
         "type": "Interface",
         "tags": [],
@@ -3320,7 +2179,13 @@
               "{ navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
-              "NavigationSection",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.NavigationSection",
+                "text": "NavigationSection"
+              },
               "[]>) => void; }; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -4473,7 +3338,7 @@
         "tags": [],
         "label": "UXMetrics",
         "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+        "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4487,7 +3352,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4501,7 +3366,7 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4515,7 +3380,7 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4526,7 +3391,7 @@
             "tags": [],
             "label": "tbt",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4540,7 +3405,7 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4551,7 +3416,7 @@
             "tags": [],
             "label": "coreVitalPages",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4565,7 +3430,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4579,7 +3444,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4593,7 +3458,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4601,64 +3466,8 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.FETCH_STATUS",
-        "type": "Enum",
-        "tags": [],
-        "label": "FETCH_STATUS",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.AddInspectorRequest",
-        "type": "Type",
-        "tags": [],
-        "label": "AddInspectorRequest",
-        "description": [],
-        "signature": [
-          "(result: ",
-          "FetcherResult",
-          "<{ mainStatisticsData?: { _inspect?: ",
-          "InspectResponse",
-          " | undefined; } | undefined; _inspect?: ",
-          "InspectResponse",
-          " | undefined; }>) => void"
-        ],
-        "path": "x-pack/plugins/observability/public/context/inspector/inspector_context.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.AddInspectorRequest.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "result",
-            "description": [],
-            "signature": [
-              "FetcherResult",
-              "<{ mainStatisticsData?: { _inspect?: ",
-              "InspectResponse",
-              " | undefined; } | undefined; _inspect?: ",
-              "InspectResponse",
-              " | undefined; }>"
-            ],
-            "path": "x-pack/plugins/observability/public/context/inspector/inspector_context.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "observability",
         "id": "def-public.apmServiceGroupMaxNumberOfServices",
@@ -4852,27 +3661,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.LazyObservabilityPageTemplateProps",
-        "type": "Type",
-        "tags": [],
-        "label": "LazyObservabilityPageTemplateProps",
-        "description": [],
-        "signature": [
-          "Pick<",
-          "KibanaPageTemplateProps",
-          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
-          "EuiPageSectionProps",
-          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
-          "_EuiPageBottomBarProps",
-          " | undefined; }"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/page_template/lazy_page_template.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.NumberOrNull",
         "type": "Type",
         "tags": [],
@@ -5004,44 +3792,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.SectionLinkProps",
-        "type": "Type",
-        "tags": [],
-        "label": "SectionLinkProps",
-        "description": [],
-        "signature": [
-          "CommonProps",
-          " & Omit<(",
-          "DisambiguateSet",
-          "<(",
-          "DisambiguateSet",
-          "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
-          "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>), React.HTMLAttributes<HTMLSpanElement>> & React.HTMLAttributes<HTMLSpanElement>) | (",
-          "DisambiguateSet",
-          "<React.HTMLAttributes<HTMLSpanElement>, (",
-          "DisambiguateSet",
-          "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
-          "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>)> & ((",
-          "DisambiguateSet",
-          "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
-          "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
-          "IconType",
-          " | undefined; iconProps?: Omit<",
-          "EuiIconProps",
-          ", \"type\"> | undefined; icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; showToolTip?: boolean | undefined; extraAction?: ",
-          "EuiListGroupItemExtraActionProps",
-          " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; }"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.StringOrNull",
         "type": "Type",
         "tags": [],
@@ -5153,7 +3903,13 @@
           "text": "ObservabilityRuleTypeFormatter"
         },
         " | undefined; list: () => string[]; }; useRulesLink: (options?: ",
-        "Options",
+        {
+          "pluginId": "observabilityShared",
+          "scope": "public",
+          "docId": "kibObservabilitySharedPluginApi",
+          "section": "def-public.Options",
+          "text": "Options"
+        },
         ") => ",
         "LinkProps",
         "; rulesLocator: ",
@@ -5219,7 +3975,13 @@
           "text": "ObservabilityRuleTypeFormatter"
         },
         " | undefined; list: () => string[]; }; useRulesLink: (options?: ",
-        "Options",
+        {
+          "pluginId": "observabilityShared",
+          "scope": "public",
+          "docId": "kibObservabilitySharedPluginApi",
+          "section": "def-public.Options",
+          "text": "Options"
+        },
         ") => ",
         "LinkProps",
         "; }"
@@ -8577,7 +7339,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
           "TransformGetTransformStatsResponse",
           "; dataSample: string | ",
           "SearchResponse",
@@ -8735,6 +7497,46 @@
           "StringC",
           "; timestampField: ",
           "StringC",
+          "; }>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"sli.metric.custom\">; params: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; filter: ",
+          "StringC",
+          "; good: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>>; equation: ",
+          "StringC",
+          "; }>; total: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>>; equation: ",
+          "StringC",
+          "; }>; timestampField: ",
+          "StringC",
           "; }>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
@@ -8763,11 +7565,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; calendar: ",
-          "TypeC",
-          "<{ startTime: ",
-          "Type",
-          "<Date, string, unknown>; }>; }>]>; budgetingMethod: ",
+          ", string, unknown>; isCalendar: ",
+          "LiteralC",
+          "<boolean>; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -8827,7 +7627,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8857,7 +7657,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8905,7 +7705,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9149,6 +7949,46 @@
           "StringC",
           "; timestampField: ",
           "StringC",
+          "; }>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"sli.metric.custom\">; params: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; filter: ",
+          "StringC",
+          "; good: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>>; equation: ",
+          "StringC",
+          "; }>; total: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>>; equation: ",
+          "StringC",
+          "; }>; timestampField: ",
+          "StringC",
           "; }>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
@@ -9177,11 +8017,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; calendar: ",
-          "TypeC",
-          "<{ startTime: ",
-          "Type",
-          "<Date, string, unknown>; }>; }>]>; budgetingMethod: ",
+          ", string, unknown>; isCalendar: ",
+          "LiteralC",
+          "<boolean>; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -9209,7 +8047,9 @@
           },
           ", string, unknown>; }>]>; }>, ",
           "PartialC",
-          "<{ settings: ",
+          "<{ id: ",
+          "StringC",
+          "; settings: ",
           "PartialC",
           "<{ syncDelay: ",
           "Type",
@@ -9355,7 +8195,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
           "TransformGetTransformStatsResponse",
           "; dataSample: string | ",
           "SearchResponse",
@@ -9513,6 +8353,46 @@
           "StringC",
           "; timestampField: ",
           "StringC",
+          "; }>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"sli.metric.custom\">; params: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; filter: ",
+          "StringC",
+          "; good: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>>; equation: ",
+          "StringC",
+          "; }>; total: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>>; equation: ",
+          "StringC",
+          "; }>; timestampField: ",
+          "StringC",
           "; }>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
@@ -9541,11 +8421,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; calendar: ",
-          "TypeC",
-          "<{ startTime: ",
-          "Type",
-          "<Date, string, unknown>; }>; }>]>; budgetingMethod: ",
+          ", string, unknown>; isCalendar: ",
+          "LiteralC",
+          "<boolean>; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -9605,7 +8483,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9635,7 +8513,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9683,7 +8561,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; isCalendar: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9927,6 +8805,46 @@
           "StringC",
           "; timestampField: ",
           "StringC",
+          "; }>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"sli.metric.custom\">; params: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; filter: ",
+          "StringC",
+          "; good: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>>; equation: ",
+          "StringC",
+          "; }>; total: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>>; equation: ",
+          "StringC",
+          "; }>; timestampField: ",
+          "StringC",
           "; }>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
@@ -9955,11 +8873,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; calendar: ",
-          "TypeC",
-          "<{ startTime: ",
-          "Type",
-          "<Date, string, unknown>; }>; }>]>; budgetingMethod: ",
+          ", string, unknown>; isCalendar: ",
+          "LiteralC",
+          "<boolean>; }>]>; budgetingMethod: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -9987,7 +8903,9 @@
           },
           ", string, unknown>; }>]>; }>, ",
           "PartialC",
-          "<{ settings: ",
+          "<{ id: ",
+          "StringC",
+          "; settings: ",
           "PartialC",
           "<{ syncDelay: ",
           "Type",
@@ -12065,124 +10983,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.uiSettings.profilingElasticsearchPlugin",
-            "type": "Object",
-            "tags": [],
-            "label": "[profilingElasticsearchPlugin]",
-            "description": [],
-            "path": "x-pack/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.name",
-                "type": "Any",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.description",
-                "type": "Any",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingElasticsearchPlugin.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "\"boolean\""
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-server.uiSettings.syntheticsThrottlingEnabled",
             "type": "Object",
             "tags": [],
@@ -13179,21 +11979,6 @@
           "\"observability\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.profilingElasticsearchPlugin",
-        "type": "string",
-        "tags": [],
-        "label": "profilingElasticsearchPlugin",
-        "description": [],
-        "signature": [
-          "\"observability:profilingElasticsearchPlugin\""
-        ],
-        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
