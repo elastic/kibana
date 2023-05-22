@@ -215,10 +215,5 @@ export class CoreAppsService {
       '/node_modules/@kbn/ui-framework/dist/{path*}',
       fromRoot('node_modules/@kbn/ui-framework/dist')
     );
-
-    core.http.registerStaticDir(
-      '/observabilityOnboarding/{path*}',
-      fromRoot('x-pack/plugins/observability_onboarding/public/assets')
-    );
   }
 }

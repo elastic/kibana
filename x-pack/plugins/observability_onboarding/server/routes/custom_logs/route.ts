@@ -49,7 +49,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
     const scriptDownloadUrl = getKibanaUrl(
       coreStart,
-      '/observabilityOnboarding/standalone_agent_setup.sh'
+      '/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh'
     );
     const apiEndpoint = getKibanaUrl(
       coreStart,
