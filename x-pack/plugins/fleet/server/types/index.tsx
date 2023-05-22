@@ -8,7 +8,6 @@
 export type {
   Agent,
   AgentMetadata,
-  AgentSOAttributes,
   AgentStatus,
   AgentType,
   AgentAction,
@@ -22,12 +21,10 @@ export type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   DryRunPackagePolicy,
-  PackagePolicySOAttributes,
   FullAgentPolicyInput,
   FullAgentPolicy,
   FullAgentPolicyOutput,
   AgentPolicy,
-  AgentPolicySOAttributes,
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
   AgentPolicyStatus,
@@ -35,16 +32,12 @@ export type {
   ShipperOutput,
   Output,
   NewOutput,
-  OutputSOAttributes,
   OutputType,
   EnrollmentAPIKey,
-  EnrollmentAPIKeySOAttributes,
   NewFleetServerHost,
   FleetServerHost,
-  FleetServerHostSOAttributes,
   NewFleetProxy,
   FleetProxy,
-  FleetProxySOAttributes,
   Installation,
   EpmPackageInstallStatus,
   InstallationStatus,
@@ -73,7 +66,6 @@ export type {
   TemplateMap,
   TemplateMapEntry,
   Settings,
-  SettingsSOAttributes,
   InstallType,
   InstallSource,
   InstallResult,
@@ -119,4 +111,5 @@ export interface PackageVerificationResult {
 export * from './models';
 export * from './rest_spec';
 export * from './extensions';
+export * from './so_attributes';
 export type { FleetRequestHandler, FleetRequestHandlerContext } from './request_context';

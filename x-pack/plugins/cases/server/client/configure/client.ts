@@ -60,7 +60,9 @@ export interface InternalConfigureSubClient {
   getMappings(
     params: MappingsArgs
   ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']>;
+
   createMappings(params: CreateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
+
   updateMappings(params: UpdateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
 }
 
@@ -72,10 +74,12 @@ export interface ConfigureSubClient {
    * Retrieves the external connector configuration for a particular case owner.
    */
   get(params: GetConfigureFindRequest): Promise<ICasesConfigureResponse | {}>;
+
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
   getConnectors(): Promise<FindActionResult[]>;
+
   /**
    * Updates a particular configuration with new values.
    *
@@ -86,6 +90,7 @@ export interface ConfigureSubClient {
     configurationId: string,
     configurations: ICasesConfigurePatch
   ): Promise<ICasesConfigureResponse>;
+
   /**
    * Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
    */
@@ -212,10 +217,10 @@ export async function getConnectors({
   logger,
 }: CasesClientArgs): Promise<FindActionResult[]> {
   try {
-    const actionTypes = (await actionsClient.listTypes()).reduce(
-      (types, type) => ({ ...types, [type.id]: type }),
-      {}
-    );
+    const actionTypes = (await actionsClient.listTypes()).reduce((types, type) => {
+      types[type.id] = type;
+      return types;
+    }, {} as Record<string, ActionType>);
 
     return (await actionsClient.getAll()).filter((action) =>
       isConnectorSupported(action, actionTypes)

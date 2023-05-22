@@ -45,14 +45,23 @@ interface UninstallTokenSOAggregation {
 
 export interface UninstallTokenServiceInterface {
   getTokenForPolicyId(policyId: string): Promise<string>;
+
   getTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>>;
+
   getAllTokens(): Promise<Record<string, string>>;
+
   getHashedTokenForPolicyId(policyId: string): Promise<string>;
+
   getHashedTokensForPolicyIds(policyIds?: string[]): Promise<Record<string, string>>;
+
   getAllHashedTokens(): Promise<Record<string, string>>;
+
   generateTokenForPolicyId(policyId: string, force?: boolean): Promise<string>;
+
   generateTokensForPolicyIds(policyIds: string[], force?: boolean): Promise<Record<string, string>>;
+
   generateTokensForAllPolicies(force?: boolean): Promise<Record<string, string>>;
+
   encryptTokens(): Promise<void>;
 }
 
@@ -127,7 +136,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         const id = latest?.hits?.hits?.at(0)?._id;
         if (!id) return acc;
         const filterStr = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${id}"`;
-        return [...acc, filterStr];
+        acc.push(filterStr);
+        return acc;
       }, [] as string[])
       .join(' or ');
 
@@ -152,10 +162,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         return acc;
       }
 
-      return {
-        ...acc,
-        [policyId]: token,
-      };
+      acc[policyId] = token;
+      return acc;
     }, {} as Record<string, string>);
 
     return tokensMap;
@@ -190,11 +198,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
     const tokensMap = await this.getTokensForPolicyIds(policyIds);
     return Object.entries(tokensMap).reduce((acc, [policyId, token]) => {
-      if (!policyId || !token) {
-        return acc;
+      if (policyId && token) {
+        acc[policyId] = this.hashToken(token);
       }
-      return { ...acc, [policyId]: this.hashToken(token) };
-    }, {});
+      return acc;
+    }, {} as Record<string, string>);
   }
 
   /**
@@ -264,13 +272,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       ...newTokensMap,
     };
 
-    return Object.entries(tokensMap).reduce(
-      (acc, [policyId, token]) => ({
-        ...acc,
-        [policyId]: this.hashToken(token),
-      }),
-      {}
-    );
+    return Object.entries(tokensMap).reduce((acc, [policyId, token]) => {
+      acc[policyId] = this.hashToken(token);
+      return acc;
+    }, {} as Record<string, string>);
   }
 
   /**
@@ -374,7 +379,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private generateToken(): string {
-    return randomBytes(32).toString('hex');
+    return randomBytes(16).toString('hex');
   }
 
   private hashToken(token: string): string {

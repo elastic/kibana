@@ -31,6 +31,7 @@ import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
   KQLCustomTransformGenerator,
+  MetricCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
@@ -45,6 +46,7 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
   'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
   'sli.kql.custom': new KQLCustomTransformGenerator(),
+  'sli.metric.custom': new MetricCustomTransformGenerator(),
 };
 
 const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerContext) => {

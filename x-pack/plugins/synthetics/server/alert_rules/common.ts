@@ -4,19 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment, { Moment } from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { getMonitorSummary } from './status_rule/message_utils';
 import {
   SyntheticsCommonState,
-  SyntheticsCommonStateType,
+  SyntheticsCommonStateCodec,
+  SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
+import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import { AlertOverviewStatus } from './status_rule/status_rule_executor';
+import type { MonitorSummaryStatusRule } from './status_rule/types';
 
 export const updateState = (
   state: SyntheticsCommonState,
@@ -24,7 +28,7 @@ export const updateState = (
   meta?: SyntheticsCommonState['meta']
 ): SyntheticsCommonState => {
   const now = new Date().toISOString();
-  const decoded = SyntheticsCommonStateType.decode(state);
+  const decoded = SyntheticsCommonStateCodec.decode(state);
   if (!isRight(decoded)) {
     const triggerVal = isTriggeredNow ? now : undefined;
     return {
@@ -62,6 +66,30 @@ export const generateAlertMessage = (messageTemplate: string, fields: Record<str
   return Mustache.render(messageTemplate, { context: { ...fields }, state: { ...fields } });
 };
 
+export const getFullViewInAppMessage = (
+  basePath: IBasePath,
+  spaceId: string,
+  relativeViewInAppUrl: string
+) => {
+  const relativeLinkLabel = i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.relativeLink.label',
+    {
+      defaultMessage: `- Relative link`,
+    }
+  );
+  const absoluteLinkLabel = i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.absoluteLink.label',
+    {
+      defaultMessage: `- Link`,
+    }
+  );
+  if (basePath.publicBaseUrl) {
+    return `${absoluteLinkLabel}: ${getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl)}`;
+  } else {
+    return `${relativeLinkLabel}: ${getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl)}`;
+  }
+};
+
 export const getViewInAppUrl = (
   basePath: IBasePath,
   spaceId: string,
@@ -74,6 +102,46 @@ export const getAlertDetailsUrl = (
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
+export const getRelativeViewInAppUrl = ({
+  configId,
+  stateId,
+  locationId,
+}: {
+  configId: string;
+  stateId: string;
+  locationId: string;
+}) => {
+  const relativeViewInAppUrl = getSyntheticsErrorRouteFromMonitorId({
+    configId,
+    stateId,
+    locationId,
+  });
+
+  return relativeViewInAppUrl;
+};
+
+export const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
+  const diffInDays = endsAt.diff(startedAt, 'days');
+  if (diffInDays > 1) {
+    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.days', {
+      defaultMessage: '{value} days',
+      values: { value: diffInDays },
+    });
+  }
+  const diffInHours = endsAt.diff(startedAt, 'hours');
+  if (diffInHours > 1) {
+    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.hours', {
+      defaultMessage: '{value} hours',
+      values: { value: diffInHours },
+    });
+  }
+  const diffInMinutes = endsAt.diff(startedAt, 'minutes');
+  return i18n.translate('xpack.synthetics.errorDetails.errorDuration.mins', {
+    defaultMessage: '{value} mins',
+    values: { value: diffInMinutes },
+  });
+};
+
 export const setRecoveredAlertsContext = ({
   alertFactory,
   basePath,
@@ -81,6 +149,8 @@ export const setRecoveredAlertsContext = ({
   spaceId,
   staleDownConfigs,
   upConfigs,
+  dateFormat,
+  tz,
 }: {
   alertFactory: RuleExecutorServices['alertFactory'];
   basePath?: IBasePath;
@@ -88,40 +158,122 @@ export const setRecoveredAlertsContext = ({
   spaceId?: string;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
+  dateFormat: string;
+  tz: string;
 }) => {
   const { getRecoveredAlerts } = alertFactory.done();
   for (const alert of getRecoveredAlerts()) {
     const recoveredAlertId = alert.getId();
     const alertUuid = getAlertUuid?.(recoveredAlertId) || undefined;
 
-    const state = alert.getState() as SyntheticsCommonState;
+    const state = alert.getState() as SyntheticsCommonState & SyntheticsMonitorStatusAlertState;
 
     let recoveryReason = '';
+    let recoveryStatus = i18n.translate(
+      'xpack.synthetics.alerts.monitorStatus.defaultRecovery.status',
+      {
+        defaultMessage: `has recovered`,
+      }
+    );
     let isUp = false;
+    let linkMessage = '';
+    let monitorSummary: MonitorSummaryStatusRule | null = null;
+    let lastErrorMessage;
 
     if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
-      const { idWithLocation } = state;
+      const { idWithLocation, locationId } = state;
       const downConfig = staleDownConfigs[idWithLocation];
+      const { ping, configId } = downConfig;
+      monitorSummary = getMonitorSummary(
+        ping,
+        RECOVERED_LABEL,
+        locationId,
+        configId,
+        dateFormat,
+        tz
+      );
+      lastErrorMessage = monitorSummary.lastErrorMessage;
+
       if (downConfig.isDeleted) {
-        recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.deleteMonitor', {
-          defaultMessage: `Monitor has been deleted`,
-        });
+        recoveryStatus = i18n.translate(
+          'xpack.synthetics.alerts.monitorStatus.deleteMonitor.status',
+          {
+            defaultMessage: `has been deleted`,
+          }
+        );
+        recoveryReason = i18n.translate(
+          'xpack.synthetics.alerts.monitorStatus.deleteMonitor.reason',
+          {
+            defaultMessage: `the monitor has been deleted`,
+          }
+        );
       } else if (downConfig.isLocationRemoved) {
-        recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.removedLocation', {
-          defaultMessage: `Location has been removed from the monitor`,
-        });
+        recoveryStatus = i18n.translate(
+          'xpack.synthetics.alerts.monitorStatus.removedLocation.status',
+          {
+            defaultMessage: `has recovered`,
+          }
+        );
+        recoveryReason = i18n.translate(
+          'xpack.synthetics.alerts.monitorStatus.removedLocation.reason',
+          {
+            defaultMessage: `this location has been removed from the monitor`,
+          }
+        );
       }
     }
 
     if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
-      isUp = Boolean(upConfigs[state.idWithLocation]) || false;
-      recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck', {
-        defaultMessage: `Monitor has recovered with status Up`,
+      const { idWithLocation, configId, locationId } = state;
+      // pull the last error from state, since it is not available on the up ping
+      lastErrorMessage = state.lastErrorMessage;
+
+      const upConfig = upConfigs[idWithLocation];
+      isUp = Boolean(upConfig) || false;
+      const ping = upConfig.ping;
+
+      monitorSummary = getMonitorSummary(
+        ping,
+        RECOVERED_LABEL,
+        locationId,
+        configId,
+        dateFormat,
+        tz
+      );
+
+      // When alert is flapping, the stateId is not available on ping.state.ends.id, use state instead
+      const stateId = ping.state?.ends?.id || state.stateId;
+      const upTimestamp = ping['@timestamp'];
+      const checkedAt = moment(upTimestamp).tz(tz).format(dateFormat);
+      recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
+        defaultMessage: `is now up`,
       });
+      recoveryReason = i18n.translate(
+        'xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithoutDuration',
+        {
+          defaultMessage: `the monitor is now up again. It ran successfully at {checkedAt}`,
+          values: {
+            checkedAt,
+          },
+        }
+      );
+
+      if (basePath && spaceId && stateId) {
+        const relativeViewInAppUrl = getRelativeViewInAppUrl({
+          configId,
+          locationId,
+          stateId,
+        });
+        linkMessage = getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl);
+      }
     }
 
     alert.setContext({
       ...state,
+      ...(monitorSummary ? monitorSummary : {}),
+      lastErrorMessage,
+      recoveryStatus,
+      linkMessage,
       ...(isUp ? { status: 'up' } : {}),
       ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
       ...(basePath && spaceId && alertUuid
@@ -130,3 +282,7 @@ export const setRecoveredAlertsContext = ({
     });
   }
 };
+
+export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.recoveredLabel', {
+  defaultMessage: 'recovered',
+});

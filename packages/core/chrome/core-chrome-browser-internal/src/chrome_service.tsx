@@ -177,10 +177,24 @@ export class ChromeService {
     };
 
     const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
+      const chromeStyle = chromeStyle$.getValue();
+      if (chromeStyle !== 'project') {
+        // Helps ensure callers go through the serverless plugin to get here.
+        throw new Error(
+          `Invalid ChromeStyle value of "${chromeStyle}". setProjectSideNavComponent requires ChromeStyle set to "project".`
+        );
+      }
       projectNavigation.setProjectSideNavComponent(component);
     };
 
     const setProjectNavigation = (config: ChromeProjectNavigation) => {
+      const chromeStyle = chromeStyle$.getValue();
+      if (chromeStyle !== 'project') {
+        // Helps ensure callers go through the serverless plugin to get here.
+        throw new Error(
+          `Invalid ChromeStyle value of "${chromeStyle}". setProjectNavigation requires ChromeStyle set to "project".`
+        );
+      }
       projectNavigation.setProjectNavigation(config);
     };
 

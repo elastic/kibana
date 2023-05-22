@@ -46,7 +46,6 @@ interface UnwrappedEmbeddableFactory {
 export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => {
   const {
     embeddable,
-    settings: { uiSettings },
     visualizations: {
       getAliases: getVisTypeAliases,
       getByGroup: getVisTypesByGroup,
@@ -75,8 +74,6 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
     });
   }, [embeddableFactories]);
 
-  const LABS_ENABLED = uiSettings.get('visualize:enableLabs');
-
   const createNewAggsBasedVis = useCallback(
     (visType?: BaseVisType) => () =>
       showNewVisModal({
@@ -99,9 +96,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
         }
         return 0;
       })
-      .filter(
-        ({ hidden, stage }: BaseVisType) => !(hidden || (!LABS_ENABLED && stage === 'experimental'))
-      );
+      .filter(({ hidden, stage }: BaseVisType) => !hidden);
 
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
