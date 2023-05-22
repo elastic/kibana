@@ -29,7 +29,7 @@ import type {
   FileCustomMeta,
   FleetFile,
   FleetFileClientInterface,
-  FleetFileType,
+  FleetFileTransferDirection,
   FleetFileUpdatableFields,
   HapiReadableStream,
   HostUploadedFileMetadata,
@@ -48,7 +48,7 @@ export class FleetFilesClient implements FleetFileClientInterface {
     private esClient: ElasticsearchClient,
     private logger: Logger,
     packageName: string,
-    private type: FleetFileType,
+    private type: FleetFileTransferDirection,
     maxSizeBytes?: number
   ) {
     if (!packageName) {

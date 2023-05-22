@@ -67,7 +67,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import { FleetFilesClient } from './services/files/client';
 
-import type { FleetFileClientInterface, FleetFileType } from './services/files/types';
+import type { FleetFileClientInterface, FleetFileTransferDirection } from './services/files/types';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -231,7 +231,7 @@ export interface FleetStartContract {
     /** The integration package name */
     packageName: string,
     /** Type of file */
-    type: FleetFileType,
+    type: FleetFileTransferDirection,
     /** Max size for files created when `type` is `to-host` */
     maxSizeBytes?: number
   ) => FleetFileClientInterface;

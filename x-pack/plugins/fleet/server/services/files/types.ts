@@ -16,7 +16,7 @@ import type { BaseFileMetadata, FileCompression, FileStatus } from '@kbn/shared-
  * Use `to-host` when interacting with files that are being sent to the host
  * (via fleet-server)
  */
-export type FleetFileType = 'from-host' | 'to-host';
+export type FleetFileTransferDirection = 'from-host' | 'to-host';
 
 export interface FleetFileClientInterface {
   /** Creates a new file. Only applicable when type of file is `to-host`. */

@@ -25,7 +25,7 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { File } from '@kbn/files-plugin/common';
 
-import type { FleetFileType, HapiReadableStream } from '../..';
+import type { FleetFileTransferDirection, HapiReadableStream } from '../..';
 
 import type { FileCustomMeta } from './types';
 
@@ -48,7 +48,9 @@ describe('When using FleetFilesClient', () => {
   let fleetFilesIndexSearchResponse: estypes.SearchResponse<HostUploadedFileMetadata>;
   let fleetFileDataIndexSearchResponse: estypes.SearchResponse;
 
-  const getFleetFilesInstance = (type: FleetFileType = 'from-host'): FleetFilesClient => {
+  const getFleetFilesInstance = (
+    type: FleetFileTransferDirection = 'from-host'
+  ): FleetFilesClient => {
     loggerMock = loggingSystemMock.createLogger();
 
     return new FleetFilesClient(esClientMock, loggerMock, 'foo', type, 12345);
@@ -98,24 +100,9 @@ describe('When using FleetFilesClient', () => {
         return fleetFileDataIndexSearchResponse;
       }
 
-      return {
-        took: 3,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 1,
-            relation: 'eq',
-          },
-          max_score: 0,
-          hits: [],
-        },
-      };
+      throw new Error(
+        `esClientMock.search(): no mock implemented for route: ${JSON.stringify(searchRequest)}`
+      );
     });
   });
 
@@ -269,6 +256,10 @@ describe('When using FleetFilesClient', () => {
         },
       });
 
+      // NOTE: the data below does not match the update done above in this test. Thats ok, since
+      // the client that actually does the update (from the Files plugin) is mocked, and it would
+      // not return the actual updated content.
+      // Goal of this test is just to ensure that `FleetFilesClient.update()` returns a `FleetFile`.
       expect(file).toEqual({
         actionId: '123',
         agents: ['abc'],
@@ -340,7 +331,7 @@ describe('When using FleetFilesClient', () => {
     });
   });
 
-  describe('#downlaod() method', () => {
+  describe('#download() method', () => {
     it('should should return expected response', async () => {
       await expect(getFleetFilesInstance().download('123')).resolves.toEqual({
         stream: expect.any(Readable),
