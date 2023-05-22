@@ -20,7 +20,7 @@ import {
   AlertActions,
   Props as AlertActionsProps,
 } from '../../pages/alerts/components/alert_actions';
-import { useGetAlertFlyoutComponents } from '../use_get_alert_flyout_components';
+import { useGetAlertFlyoutComponents } from '../alerts_flyout/use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import type { ConfigSchema } from '../../plugin';
 import type { TopAlert } from '../../typings/alerts';

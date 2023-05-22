@@ -360,20 +360,8 @@ export const CasesBulkGetRequestRt = rt.type({
   ids: rt.array(rt.string),
 });
 
-export const CasesBulkGetResponseFieldsRt = rt.type({
-  id: rt.string,
-  description: rt.string,
-  title: rt.string,
-  owner: rt.string,
-  version: rt.string,
-  totalComments: rt.number,
-  status: CaseStatusRt,
-  created_at: rt.string,
-  created_by: UserRt,
-});
-
 export const CasesBulkGetResponseRt = rt.type({
-  cases: rt.array(CasesBulkGetResponseFieldsRt),
+  cases: CasesRt,
   errors: rt.array(
     rt.type({
       error: rt.string,
