@@ -26,6 +26,7 @@ import { updateAppLinks } from '../../../links';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { AlertDetailRouteType } from '../../../../detections/pages/alert_details/types';
 import { UsersTableType } from '../../../../explore/users/store/model';
+import { UpsellingService } from '../../../lib/upsellings';
 
 jest.mock('../../../hooks/use_selector');
 
@@ -200,6 +201,7 @@ describe('Navigation Breadcrumbs', () => {
           crud: true,
         },
       },
+      upselling: new UpsellingService(),
     });
   });
 
