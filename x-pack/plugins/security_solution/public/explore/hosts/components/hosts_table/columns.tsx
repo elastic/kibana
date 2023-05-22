@@ -42,12 +42,9 @@ export const getHostsColumns = (
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              value={hostName[0]}
-              field={{
-                name: 'host.name',
-                type: 'keyword',
-                searchable: true,
-                aggregatable: true,
+              data={{
+                value: hostName[0],
+                field: 'host.name',
               }}
             >
               <HostDetailsLink hostName={hostName[0]} />
@@ -101,12 +98,9 @@ export const getHostsColumns = (
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              value={hostOsName[0]}
-              field={{
-                name: 'host.os.name',
-                type: 'keyword',
-                searchable: true,
-                aggregatable: true,
+              data={{
+                value: hostOsName[0],
+                field: 'host.os.name',
               }}
             >
               {hostOsName}
@@ -130,12 +124,9 @@ export const getHostsColumns = (
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              value={hostOsVersion[0]}
-              field={{
-                name: 'host.os.version',
-                type: 'keyword',
-                searchable: true,
-                aggregatable: true,
+              data={{
+                value: hostOsVersion[0],
+                field: 'host.os.version',
               }}
             >
               {hostOsVersion}

@@ -126,10 +126,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'host.name',
+              data={{
                 value: host,
-                type: 'keyword',
+                field: 'host.name',
               }}
             >
               {host}
@@ -284,5 +283,3 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
     </>
   );
 };
-
-UserDetails.displayName = 'UserDetails';

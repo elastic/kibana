@@ -75,6 +75,7 @@ export const getUseCellActionsHook = (tableId: TableId) => {
               };
             });
 
+      // TODO BUG, wrap value and fields in an object
       const values = (finalData as TimelineNonEcsData[][]).map((row) =>
         row.map((rowData) => rowData.value ?? [])
       );

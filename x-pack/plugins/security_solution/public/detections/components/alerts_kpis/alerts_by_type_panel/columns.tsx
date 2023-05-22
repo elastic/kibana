@@ -60,12 +60,9 @@ export const getAlertsTypeTableColumns = (
                     visibleCellActions={4}
                     showActionTooltips
                     triggerId={SecurityCellActionsTrigger.DEFAULT}
-                    value={'denied'}
-                    field={{
-                      name: 'event.type',
-                      type: 'keyword',
-                      searchable: true,
-                      aggregatable: true,
+                    data={{
+                      value: 'denied',
+                      field: 'event.type',
                     }}
                     metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
                   >

@@ -54,14 +54,9 @@ export const getRowItemsWithActions = ({
           visibleCellActions={5}
           showActionTooltips
           triggerId={SecurityCellActionsTrigger.DEFAULT}
-          value={value}
-          field={{
-            name: fieldName,
-
-            esTypes,
-            type: fieldType,
-            aggregatable,
-            searchable,
+          data={{
+            value,
+            field: fieldName,
           }}
         >
           <>{render ? render(value) : defaultToEmptyTag(value)}</>
@@ -123,10 +118,6 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
             <MoreContainer
               fieldName={fieldName}
               idPrefix={idPrefix}
-              isAggregatable={isAggregatable}
-              isSearchable={isSearchable}
-              fieldType={fieldType}
-              esTypes={esTypes}
               values={values}
               overflowIndexStart={overflowIndexStart}
               moreMaxHeight="none"

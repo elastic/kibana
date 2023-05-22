@@ -78,7 +78,10 @@ describe('createToggleColumnCellActionFactory', () => {
 
     it('should add column', async () => {
       const name = 'fake-field-name';
-      await toggleColumnAction.execute({ ...context, field: { ...context.field, name } });
+      await toggleColumnAction.execute({
+        ...context,
+        data: [{ ...context.data[0], field: { ...context.data[0].field, name } }],
+      });
       expect(mockDispatch).toHaveBeenCalledWith(
         dataTableActions.upsertColumn({
           column: {

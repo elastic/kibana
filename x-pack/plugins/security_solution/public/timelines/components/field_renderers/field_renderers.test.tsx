@@ -29,7 +29,6 @@ import { mockData } from '../../../explore/network/components/details/mock';
 import type { AutonomousSystem } from '../../../../common/search_strategy';
 import { FlowTarget } from '../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/lib/kibana/kibana_react', () => {
@@ -282,8 +281,6 @@ describe('Field Renderers', () => {
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
-            isAggregatable={false}
-            isSearchable={false}
           />
         </TestProviders>
       );
@@ -300,8 +297,6 @@ describe('Field Renderers', () => {
             overflowIndexStart={0}
             values={rowItems}
             fieldName="mock.attr"
-            isAggregatable={false}
-            isSearchable={false}
           />
         </TestProviders>
       );
@@ -320,8 +315,6 @@ describe('Field Renderers', () => {
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
-            isAggregatable={false}
-            isSearchable={false}
           />
         </TestProviders>
       );
@@ -338,8 +331,6 @@ describe('Field Renderers', () => {
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
-            isAggregatable={false}
-            isSearchable={false}
           />
         </TestProviders>
       );
@@ -358,8 +349,6 @@ describe('Field Renderers', () => {
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
-            isAggregatable={false}
-            isSearchable={false}
           />
         </TestProviders>
       );
@@ -381,8 +370,6 @@ describe('Field Renderers', () => {
             render={renderFn}
             values={rowItems}
             fieldName="mock.attr"
-            isAggregatable={false}
-            isSearchable={false}
           />
         </TestProviders>
       );
@@ -399,11 +386,7 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <DefaultFieldRendererOverflow
-            esTypes={[ES_FIELD_TYPES.KEYWORD]}
-            fieldType={KBN_FIELD_TYPES.STRING}
             idPrefix={idPrefix}
-            isAggregatable={true}
-            isSearchable={false}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             rowItems={rowItems}
@@ -422,11 +405,7 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <DefaultFieldRendererOverflow
-            esTypes={[ES_FIELD_TYPES.KEYWORD]}
-            fieldType={KBN_FIELD_TYPES.STRING}
             idPrefix={idPrefix}
-            isAggregatable={true}
-            isSearchable={false}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             rowItems={rowItems}

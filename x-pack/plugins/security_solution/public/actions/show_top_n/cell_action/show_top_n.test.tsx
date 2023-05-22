@@ -40,13 +40,17 @@ describe('createShowTopNCellActionFactory', () => {
   const showTopNAction = showTopNActionFactory({ id: 'testAction' });
 
   const context = {
-    value: 'the-value',
-    field: {
-      name: 'user.name',
-      type: 'keyword',
-      aggregatable: true,
-      searchable: true,
-    },
+    data: [
+      {
+        value: 'the-value',
+        field: {
+          name: 'user.name',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+        },
+      },
+    ],
     trigger: { id: 'trigger' },
     nodeRef: {
       current: element,
@@ -75,7 +79,11 @@ describe('createShowTopNCellActionFactory', () => {
       expect(
         await showTopNAction.isCompatible({
           ...context,
-          field: { ...context.field, esTypes: ['text'] },
+          data: [
+            {
+              field: { ...context.data[0].field, esTypes: ['text'] },
+            },
+          ],
         })
       ).toEqual(false);
     });
@@ -84,7 +92,11 @@ describe('createShowTopNCellActionFactory', () => {
       expect(
         await showTopNAction.isCompatible({
           ...context,
-          field: { ...context.field, aggregatable: false },
+          data: [
+            {
+              field: { ...context.data[0].field, aggregatable: false },
+            },
+          ],
         })
       ).toEqual(false);
     });

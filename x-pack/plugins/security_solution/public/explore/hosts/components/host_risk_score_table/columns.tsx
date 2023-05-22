@@ -42,12 +42,9 @@ export const getHostRiskScoreColumns = ({
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}
-            value={hostName}
-            field={{
-              name: 'host.name',
-              type: 'keyword',
-              searchable: true,
-              aggregatable: true,
+            data={{
+              value: hostName,
+              field: 'host.name',
             }}
             metadata={{
               telemetry: CELL_ACTIONS_TELEMETRY,

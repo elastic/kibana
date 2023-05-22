@@ -29,8 +29,19 @@ export const createFilterOutCellActionFactory = ({
 
   return genericFilterOutActionFactory.combine<SecurityCellAction>({
     type: SecurityCellActionType.FILTER,
-    isCompatible: async ({ field }) => fieldHasCellActions(field.name),
-    execute: async ({ field, metadata, value }) => {
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        fieldHasCellActions(field.name)
+      );
+    },
+    execute: async ({ data, metadata }) => {
+      const field = data[0]?.field;
+      const value = data[0]?.value;
+
+      if (!field) return;
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterIn with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterIn : addFilterOut;
 

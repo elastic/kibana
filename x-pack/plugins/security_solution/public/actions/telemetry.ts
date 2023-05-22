@@ -22,7 +22,7 @@ export const enhanceActionWithTelemetry = (
     telemetry.reportCellActionClicked({
       actionId: rest.id,
       displayName: rest.getDisplayName(context),
-      fieldName: context.field.name,
+      fieldName: context.data.map(({ field }) => field.name).join(', '),
       metadata: context.metadata,
     });
 

@@ -21,13 +21,12 @@ import {
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { CellActionsMode } from '@kbn/cell-actions';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -87,7 +86,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
   const columns = useMemo(() => getTableColumns(openUserInAlerts), [openUserInAlerts]);
 
   return (
-    <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+    <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>
       <EuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID}
@@ -150,12 +149,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
       <SecurityCellActions
-        value={userName}
-        field={{
-          name: 'user.name',
-          type: 'keyword',
-          aggregatable: true,
-          searchable: true,
+        data={{
+          value: userName,
+          field: 'user.name',
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -180,11 +176,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'user.name',
+            data={{
               value: userName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -215,11 +209,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'user.name',
+            data={{
               value: userName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -247,11 +239,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'user.name',
+            data={{
               value: userName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -279,11 +269,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'user.name',
+            data={{
               value: userName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}

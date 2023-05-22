@@ -27,7 +27,6 @@ import type {
 } from '../../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
-import { browserFieldToFieldSpec } from '../../../types';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -74,12 +73,8 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   isReadOnly,
 }) => {
   const metadata = useMemo(() => ({ scopeId }), [scopeId]);
-  const field = useMemo(
-    () => (data ? browserFieldToFieldSpec(browserField, data) : null),
-    [browserField, data]
-  );
 
-  if (!data || !value || !field) return null;
+  if (!data || !value) return null;
   const key = `alert-details-value-formatted-field-value-${scopeId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
 
   return (
@@ -108,8 +103,10 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
       <EuiFlexItem>
         {value && !isReadOnly && (
           <SecurityCellActions
-            field={field}
-            value={value}
+            data={{
+              field: data.field,
+              value,
+            }}
             triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
             mode={CellActionsMode.INLINE}
             metadata={metadata}

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 
 interface Props {
@@ -17,13 +16,9 @@ interface Props {
 export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) => {
   return (
     <SecurityCellActions
-      value={entityValue}
-      field={{
-        name: entityName,
-        type: KBN_FIELD_TYPES.STRING,
-        esTypes: [ES_FIELD_TYPES.KEYWORD],
-        aggregatable: true,
-        searchable: true,
+      data={{
+        field: entityName,
+        value: entityValue,
       }}
       triggerId={SecurityCellActionsTrigger.DEFAULT}
       mode={CellActionsMode.HOVER_DOWN}

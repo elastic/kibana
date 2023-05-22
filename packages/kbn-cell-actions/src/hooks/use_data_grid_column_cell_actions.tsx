@@ -43,7 +43,7 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   const bulkContexts: CellActionCompatibilityContext[] = useMemo(
     () =>
       fields?.map((field) => ({
-        field, // we are getting the actions for the whole column field, so the compatibility check will be done without the value
+        data: [{ field }], // we are getting the actions for the whole column field, so the compatibility check will be done without the value
         trigger: { id: triggerId },
         metadata,
       })) ?? [],
@@ -104,8 +104,12 @@ const createColumnCellAction = ({
       // rowIndex refers to all pages, we need to use the row index relative to the page to get the value
       const value = values[rowIndex % values.length];
       return {
-        value,
-        field,
+        data: [
+          {
+            field,
+            value,
+          },
+        ],
         trigger: { id: triggerId },
         nodeRef,
         metadata,

@@ -17,7 +17,6 @@ import type { EventFieldsData } from './types';
 import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
-import { browserFieldToFieldSpec } from '../../types';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -69,15 +68,12 @@ export const getColumns = ({
           truncateText: false,
           width: '132px',
           render: (values: string[] | null | undefined, data: EventFieldsData) => {
-            const fieldFromBrowserField = getFieldFromBrowserField(
-              [data.category, 'fields', data.field],
-              browserFields
-            );
-
             return (
               <SecurityCellActions
-                value={values}
-                field={browserFieldToFieldSpec(fieldFromBrowserField, data)}
+                data={{
+                  field: data.field,
+                  value: values,
+                }}
                 triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
                 mode={CellActionsMode.INLINE}
                 visibleCellActions={3}

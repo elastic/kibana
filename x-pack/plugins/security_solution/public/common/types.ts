@@ -8,8 +8,6 @@
 import type { ResponseErrorAttributes } from '@kbn/core/server';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { BrowserField } from './containers/source';
-import type { FieldsData } from './components/event_details/types';
 
 export interface ServerApiError {
   statusCode: number;
@@ -33,20 +31,3 @@ export interface SecuritySolutionDataViewBase extends DataViewBase {
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 export type Refetch = () => void;
-
-/**
- * Converts a legacy BrowserField type to a FieldSpec type
- */
-export const browserFieldToFieldSpec = (
-  browserField: BrowserField | undefined,
-  data: FieldsData
-): FieldSpec => ({
-  name: browserField?.name ?? data.field,
-  type: browserField?.type ?? data.type,
-  aggregatable: browserField?.aggregatable ?? false,
-  searchable: browserField?.searchable ?? false,
-  esTypes: browserField?.esTypes,
-  subType: browserField?.subType,
-  readFromDocValues: browserField?.readFromDocValues,
-  runtimeField: browserField?.runtimeField,
-});

@@ -337,6 +337,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
             searchable: column.searchable ?? false,
           }));
 
+      // TODO BUG, wrap value and fields in an object
       const values = data.map(({ data: columnData }) =>
         columnData.map((rowData) => rowData.value ?? [])
       );

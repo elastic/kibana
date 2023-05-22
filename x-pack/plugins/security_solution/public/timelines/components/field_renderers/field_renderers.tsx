@@ -12,7 +12,6 @@ import React, { useCallback, Fragment, useMemo, useState, useContext } from 'rea
 import styled from 'styled-components';
 
 import type { HostEcs } from '@kbn/securitysolution-ecs';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -194,8 +193,6 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
 
 interface DefaultFieldRendererProps {
   attrName: string;
-  fieldType?: KBN_FIELD_TYPES;
-  esTypes?: ES_FIELD_TYPES[];
   displayCount?: number;
   idPrefix: string;
   isDraggable?: boolean;
@@ -206,8 +203,6 @@ interface DefaultFieldRendererProps {
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
-  fieldType = KBN_FIELD_TYPES.STRING,
-  esTypes = [ES_FIELD_TYPES.KEYWORD],
   displayCount = 1,
   idPrefix,
   isDraggable = false,
@@ -255,11 +250,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
             attrName={attrName}
-            fieldType={fieldType}
-            esTypes={esTypes}
             idPrefix={idPrefix}
-            isAggregatable={true}
-            isSearchable={true}
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
             render={render}
@@ -281,12 +272,8 @@ DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
 interface DefaultFieldRendererOverflowProps {
   attrName: string;
-  fieldType: KBN_FIELD_TYPES;
-  esTypes: ES_FIELD_TYPES[];
   rowItems: string[];
   idPrefix: string;
-  isAggregatable: boolean;
-  isSearchable: boolean;
   render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
@@ -294,30 +281,15 @@ interface DefaultFieldRendererOverflowProps {
 
 interface MoreContainerProps {
   fieldName: string;
-  fieldType?: KBN_FIELD_TYPES;
-  esTypes?: ES_FIELD_TYPES[];
   values: string[];
   idPrefix: string;
-  isAggregatable: boolean;
-  isSearchable: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
 }
 
 export const MoreContainer = React.memo<MoreContainerProps>(
-  ({
-    fieldName,
-    fieldType = KBN_FIELD_TYPES.STRING,
-    esTypes = [ES_FIELD_TYPES.KEYWORD],
-    idPrefix,
-    isAggregatable,
-    isSearchable,
-    moreMaxHeight,
-    overflowIndexStart,
-    render,
-    values,
-  }) => {
+  ({ fieldName, idPrefix, moreMaxHeight, overflowIndexStart, render, values }) => {
     const { timelineId } = useContext(TimelineContext);
 
     const moreItemsWithHoverActions = useMemo(
@@ -334,13 +306,9 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   visibleCellActions={5}
                   showActionTooltips
                   triggerId={SecurityCellActionsTrigger.DEFAULT}
-                  value={value}
-                  field={{
-                    name: fieldName,
-                    type: fieldType,
-                    esTypes,
-                    aggregatable: isAggregatable,
-                    searchable: isSearchable,
+                  data={{
+                    value,
+                    field: fieldName,
                   }}
                   metadata={{
                     scopeId: timelineId ?? undefined,
@@ -354,18 +322,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           return acc;
         }, []),
-      [
-        values,
-        overflowIndexStart,
-        idPrefix,
-        fieldName,
-        fieldType,
-        esTypes,
-        isAggregatable,
-        isSearchable,
-        timelineId,
-        render,
-      ]
+      [values, overflowIndexStart, idPrefix, fieldName, timelineId, render]
     );
 
     return (
@@ -387,18 +344,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({
-    attrName,
-    idPrefix,
-    moreMaxHeight,
-    overflowIndexStart = 5,
-    render,
-    rowItems,
-    fieldType,
-    esTypes,
-    isAggregatable,
-    isSearchable,
-  }) => {
+  ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
@@ -439,10 +385,6 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               values={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
-              fieldType={fieldType}
-              esTypes={esTypes}
-              isAggregatable={isAggregatable}
-              isSearchable={isSearchable}
             />
           </EuiPopover>
         )}

@@ -152,12 +152,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
       <SecurityCellActions
-        value={hostName}
-        field={{
-          name: 'host.name',
-          type: 'keyword',
-          aggregatable: true,
-          searchable: true,
+        data={{
+          value: hostName,
+          field: 'host.name',
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -182,11 +179,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'host.name',
+            data={{
               value: hostName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -217,11 +212,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="hostSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'host.name',
+            data={{
               value: hostName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -249,11 +242,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'host.name',
+            data={{
               value: hostName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -281,11 +272,9 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="hostSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'host.name',
+            data={{
               value: hostName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}

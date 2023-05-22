@@ -21,6 +21,10 @@ const FIELD: FieldSpec = {
   searchable: true,
   aggregatable: true,
 };
+const DATA = {
+  field: FIELD,
+  value: VALUE,
+};
 
 jest.mock('./hover_actions_popover', () => ({
   HoverActionsPopover: jest.fn((props) => (
@@ -34,12 +38,7 @@ describe('CellActions', () => {
 
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <CellActions
-          mode={CellActionsMode.INLINE}
-          triggerId={TRIGGER_ID}
-          field={FIELD}
-          value={VALUE}
-        >
+        <CellActions mode={CellActionsMode.INLINE} triggerId={TRIGGER_ID} data={DATA}>
           Field value
         </CellActions>
       </CellActionsProvider>
@@ -58,12 +57,7 @@ describe('CellActions', () => {
 
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <CellActions
-          mode={CellActionsMode.INLINE}
-          triggerId={TRIGGER_ID}
-          field={FIELD}
-          value={VALUE}
-        >
+        <CellActions mode={CellActionsMode.INLINE} triggerId={TRIGGER_ID} data={DATA}>
           Field value
         </CellActions>
       </CellActionsProvider>
@@ -82,12 +76,7 @@ describe('CellActions', () => {
 
     const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <CellActions
-          mode={CellActionsMode.HOVER_DOWN}
-          triggerId={TRIGGER_ID}
-          field={FIELD}
-          value={VALUE}
-        >
+        <CellActions mode={CellActionsMode.HOVER_DOWN} triggerId={TRIGGER_ID} data={DATA}>
           Field value
         </CellActions>
       </CellActionsProvider>
@@ -107,12 +96,7 @@ describe('CellActions', () => {
 
     const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <CellActions
-          mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={TRIGGER_ID}
-          field={FIELD}
-          value={VALUE}
-        >
+        <CellActions mode={CellActionsMode.HOVER_RIGHT} triggerId={TRIGGER_ID} data={DATA}>
           Field value
         </CellActions>
       </CellActionsProvider>

@@ -43,14 +43,20 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
   }): CellActionTemplate<SecurityCellAction> => ({
     type: SecurityCellActionType.SHOW_TOP_N,
     getIconType: () => ICON,
-    getDisplayName: ({ field }) => SHOW_TOP(field.name),
-    getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
-    isCompatible: async ({ field }) =>
-      fieldHasCellActions(field.name) &&
-      (field.esTypes ?? []).every(
-        (esType) => !UNSUPPORTED_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)
-      ) &&
-      !!field.aggregatable,
+    getDisplayName: ({ data }) => SHOW_TOP(data[0]?.field.name),
+    getDisplayNameTooltip: ({ data }) => SHOW_TOP(data[0]?.field.name),
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        fieldHasCellActions(field.name) &&
+        (field.esTypes ?? []).every(
+          (esType) => !UNSUPPORTED_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)
+        ) &&
+        !!field.aggregatable
+      );
+    },
     execute: async (context) => {
       if (!context.nodeRef.current) return;
 

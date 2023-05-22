@@ -69,18 +69,41 @@ DefaultWithControls.args = {
   showActionTooltips: true,
   mode: CellActionsMode.INLINE,
   triggerId: TRIGGER_ID,
-  field: FIELD,
+  data: [
+    {
+      field: FIELD,
+      value: '',
+    },
+  ],
   visibleCellActions: 3,
 };
 
 export const CellActionInline = ({}: {}) => (
-  <CellActions mode={CellActionsMode.INLINE} triggerId={TRIGGER_ID} field={FIELD} value={VALUE}>
+  <CellActions
+    mode={CellActionsMode.INLINE}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+  >
     Field value
   </CellActions>
 );
 
 export const CellActionHoverPopoverDown = ({}: {}) => (
-  <CellActions mode={CellActionsMode.HOVER_DOWN} triggerId={TRIGGER_ID} field={FIELD} value={VALUE}>
+  <CellActions
+    mode={CellActionsMode.HOVER_DOWN}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+  >
     Hover me
   </CellActions>
 );
@@ -89,8 +112,12 @@ export const CellActionHoverPopoverRight = ({}: {}) => (
   <CellActions
     mode={CellActionsMode.HOVER_RIGHT}
     triggerId={TRIGGER_ID}
-    field={FIELD}
-    value={VALUE}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
   >
     Hover me
   </CellActions>

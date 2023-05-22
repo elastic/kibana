@@ -126,10 +126,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'user.name',
+              data={{
+                field: 'user.name',
                 value: user,
-                type: 'keyword',
               }}
             >
               {user}

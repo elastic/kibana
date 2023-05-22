@@ -19,7 +19,11 @@ const defaultProps = {
   visibleCellActions: 4,
   actionContext: {
     trigger: { id: 'triggerId' },
-    field: { name: 'fieldName' },
+    data: [
+      {
+        field: { name: 'fieldName' },
+      },
+    ],
   } as CellActionExecutionContext,
   showActionTooltips: false,
 };

@@ -46,12 +46,9 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}
-            value={dnsName}
-            field={{
-              name: 'dns.question.registered_domain',
-              type: 'keyword',
-              aggregatable: true,
-              searchable: true,
+            data={{
+              value: dnsName,
+              field: 'dns.question.registered_domain',
             }}
           >
             {defaultToEmptyTag(dnsName)}

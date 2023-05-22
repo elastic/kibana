@@ -38,9 +38,19 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
       getIconType: () => ADD_TO_TIMELINE_ICON,
       getDisplayName: () => ADD_TO_TIMELINE,
       getDisplayNameTooltip: () => ADD_TO_TIMELINE,
-      isCompatible: async ({ field }) =>
-        fieldHasCellActions(field.name) && isValidDataProviderField(field.name, field.type),
-      execute: async ({ field: { value, type, name }, metadata }) => {
+      isCompatible: async ({ data }) => {
+        const field = data[0]?.field;
+
+        return (
+          data.length === 1 && // TODO Add support for multiple values
+          fieldHasCellActions(field.name) &&
+          isValidDataProviderField(field.name, field.type)
+        );
+      },
+      execute: async ({ data, metadata }) => {
+        const { name, type } = data[0]?.field;
+        const value = data[0]?.value;
+
         const values = Array.isArray(value) ? value : [value];
         const [firstValue, ...andValues] = values;
         const [dataProvider] =

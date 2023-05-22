@@ -25,7 +25,7 @@ type Metadata = Record<string, unknown>;
 
 export type CellActionFieldValue = string | string[] | null | undefined;
 
-export interface CellActionsProps {
+export interface CellActionsData {
   /**
    * The field specification
    */
@@ -35,6 +35,10 @@ export interface CellActionsProps {
    * Common set of properties used by most actions.
    */
   value: CellActionFieldValue;
+}
+
+export interface CellActionsProps {
+  data: CellActionsData | CellActionsData[];
 
   /**
    * The trigger in which the actions are registered.
@@ -72,8 +76,7 @@ export interface CellActionsProps {
 }
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
-  field: FieldSpec;
-  value: CellActionFieldValue;
+  data: CellActionsData[];
 
   /**
    * Ref to the node where the cell action are rendered.
@@ -91,12 +94,13 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
  */
 
 export interface CellActionCompatibilityContext<
-  C extends Omit<CellActionExecutionContext, 'value'> = Omit<CellActionExecutionContext, 'value'>
+  C extends CellActionExecutionContext = CellActionExecutionContext
 > extends ActionExecutionContext {
   /**
-   * The object containing the field name and type, needed for the compatibility check
+   * CellActionsData containing the field spec but not the value for the compatibility check
    */
-  field: C['field'];
+  data: Array<Omit<C['data'][number], 'value'>>; // Typescript is kind of magic
+
   /**
    * Extra configurations for actions.
    */

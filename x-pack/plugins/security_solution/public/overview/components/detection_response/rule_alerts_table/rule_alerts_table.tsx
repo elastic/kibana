@@ -100,12 +100,9 @@ export const getTableColumns: GetTableColumns = ({
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
       <SecurityCellActions
-        value={name}
-        field={{
-          name: ALERT_RULE_NAME,
-          type: 'keyword',
-          aggregatable: true,
-          searchable: true,
+        data={{
+          value: name,
+          field: ALERT_RULE_NAME,
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}

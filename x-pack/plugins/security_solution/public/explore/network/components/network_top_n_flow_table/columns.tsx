@@ -72,12 +72,9 @@ export const getNetworkTopNFlowColumns = (
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              value={ip}
-              field={{
-                name: ipAttr,
-                type: 'keyword',
-                aggregatable: true,
-                searchable: true,
+              data={{
+                value: ip,
+                field: ipAttr,
               }}
             >
               <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
@@ -90,12 +87,9 @@ export const getNetworkTopNFlowColumns = (
                 visibleCellActions={5}
                 showActionTooltips
                 triggerId={SecurityCellActionsTrigger.DEFAULT}
-                value={geo}
-                field={{
-                  name: geoAttrName,
-                  type: 'keyword',
-                  aggregatable: true,
-                  searchable: true,
+                data={{
+                  value: geo,
+                  field: geoAttrName,
                 }}
               >
                 {' '}

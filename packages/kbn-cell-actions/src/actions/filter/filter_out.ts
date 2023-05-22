@@ -22,8 +22,18 @@ export const createFilterOutActionFactory = createCellActionFactory(
     getIconType: () => ICON,
     getDisplayName: () => FILTER_OUT,
     getDisplayNameTooltip: () => FILTER_OUT,
-    isCompatible: async ({ field }) => !!field.name,
-    execute: async ({ field, value }) => {
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        !!field.name
+      );
+    },
+    execute: async ({ data }) => {
+      const field = data[0]?.field;
+      const value = data[0]?.value;
+
       addFilterOut({
         filterManager,
         fieldName: field.name,

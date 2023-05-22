@@ -22,6 +22,13 @@ export const createCopyToClipboardCellActionFactory = ({
   });
   return genericCopyToClipboardActionFactory.combine<SecurityCellAction>({
     type: SecurityCellActionType.COPY,
-    isCompatible: async ({ field }) => fieldHasCellActions(field.name),
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        fieldHasCellActions(field.name)
+      );
+    },
   });
 };
