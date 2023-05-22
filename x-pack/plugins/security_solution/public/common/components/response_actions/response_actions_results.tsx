@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
 import { EndpointResponseActionResults } from './endpoint_action_results';
@@ -58,7 +58,6 @@ export const ResponseActionsResults = React.memo(
               />
             );
           }
-          return null;
           if (action.event?.kind === 'action') {
             const actionTypeId = action.kibana.saved_objects.find(
               (so) => so.type === 'action'
@@ -67,13 +66,13 @@ export const ResponseActionsResults = React.memo(
             const res = actionTypeRegistry.get(actionTypeId);
 
             const ResolvedCOmponent = res.actionResultsFields;
-            console.log({ actionTypeId });
             return (
               <Suspense fallback={<span>Loading...</span>}>
                 <ResolvedCOmponent action={action} />
               </Suspense>
             );
           }
+          return null;
         })}
       </>
     );
