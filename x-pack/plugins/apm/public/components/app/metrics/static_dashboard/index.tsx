@@ -148,7 +148,10 @@ function getLoadFailureToastLabels(props: MetricsDashboardProps, error: Error) {
       {
         defaultMessage:
           'Error while loading dashboard for agent "{agentName}" on runtime "{runtimeName}".',
-        values: { ...props },
+        values: {
+          agentName: props.agentName ?? 'unknown',
+          runtimeName: props.runtimeName ?? 'unknown',
+        },
       }
     ),
     text: error.message,
