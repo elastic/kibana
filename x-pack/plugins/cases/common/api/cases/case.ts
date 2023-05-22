@@ -377,20 +377,8 @@ export const CasesBulkGetRequestRt = rt.strict({
   ids: rt.array(rt.string),
 });
 
-export const CasesBulkGetResponseFieldsRt = rt.strict({
-  id: rt.string,
-  description: rt.string,
-  title: rt.string,
-  owner: rt.string,
-  version: rt.string,
-  totalComments: rt.number,
-  status: CaseStatusRt,
-  created_at: rt.string,
-  created_by: UserRt,
-});
-
 export const CasesBulkGetResponseRt = rt.strict({
-  cases: rt.array(CasesBulkGetResponseFieldsRt),
+  cases: CasesRt,
   errors: rt.array(
     rt.strict({
       error: rt.string,

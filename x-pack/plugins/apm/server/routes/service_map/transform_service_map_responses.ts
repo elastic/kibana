@@ -245,10 +245,8 @@ export function transformServiceMapResponses({
 
   const connectionsById = mappedConnections.reduce(
     (connectionMap, connection) => {
-      return {
-        ...connectionMap,
-        [connection.id]: connection,
-      };
+      connectionMap[connection.id] = connection;
+      return connectionMap;
     },
     {} as Record<string, ConnectionWithId>
   );
