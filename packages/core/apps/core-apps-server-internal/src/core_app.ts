@@ -171,6 +171,7 @@ export class CoreAppsService {
             if (err instanceof ValidationError) {
               return res.badRequest({ body: err });
             }
+            throw err;
           }
 
           return res.ok({ body: { ok: true } });
