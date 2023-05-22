@@ -128,6 +128,7 @@ export const CategoryTable: FC<Props> = ({
           timefilterActiveBounds={timefilterActiveBounds}
           dataView={dataView!}
           openInDiscover={() => openInDiscover(QUERY_MODE.INCLUDE, category)}
+          onClose={onClose}
         />
       );
     }

@@ -6,3 +6,4 @@
  */
 
 export { defineExplainLogRateSpikesRoute } from './explain_log_rate_spikes';
+export { defineUpdateIngestRoute } from './ingest';

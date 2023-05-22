@@ -26,11 +26,14 @@ import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 // import { FieldIcon } from '@kbn/react-field';
 import {
+  EuiAccordion,
   EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
@@ -118,13 +121,20 @@ interface Props {
   results: FindFileStructureResponse;
   setGrokPattern(grokPattern: string): Promise<void>;
   createRuntimeField(grokPattern: string): Promise<void>;
+  updateIngest(
+    pipeline: FindFileStructureResponse['ingest_pipeline'],
+    mappings: FindFileStructureResponse['mappings']
+  ): Promise<void>;
 }
+
+type Tab = 'grok' | 'pipeline';
 
 export const AnalysisMarkup: FC<Props> = ({
   results: resultsIn,
   data,
   setGrokPattern,
   createRuntimeField,
+  updateIngest,
 }) => {
   const [markedUpLines, setMarkedUpLines] = useState<JSX.Element[][]>([]);
   // const [showEditFieldModal, setShowEditFieldModal] = useState(false);
@@ -132,6 +142,7 @@ export const AnalysisMarkup: FC<Props> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState<number | null>(null);
   const [results2, setResults2] = useState(resultsIn);
   const [tempGrokPattern, setTempGrokPattern] = useState(results2.grok_pattern!);
+  const [tab, setTab] = useState<Tab>('grok');
 
   const originalGrokPattern = useMemo(() => resultsIn?.grok_pattern ?? '', [resultsIn]);
 
@@ -327,30 +338,84 @@ export const AnalysisMarkup: FC<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiTitle size="xxxs">
-        <h6>Grok pattern</h6>
-      </EuiTitle>
-      <EuiCodeBlock language="regex" isCopyable>
-        {tempGrokPattern}
-      </EuiCodeBlock>
+      <EuiTabs>
+        <EuiTab isSelected={tab === 'grok'} onClick={() => setTab('grok')}>
+          Grok pattern
+        </EuiTab>
+        <EuiTab isSelected={tab === 'pipeline'} onClick={() => setTab('pipeline')}>
+          Ingest pipeline
+        </EuiTab>
+      </EuiTabs>
 
-      <EuiTitle size="xxxs">
-        <h6>Pipeline</h6>
-      </EuiTitle>
-      <EuiCodeBlock language="text" isCopyable>
-        {JSON.stringify(processPipeline(results2.ingest_pipeline, results2.grok_pattern!), null, 2)}
-      </EuiCodeBlock>
+      {tab === 'grok' ? (
+        <>
+          <EuiSpacer size="m" />
+          {/* <EuiTitle size="xxxs">
+            <h6>Grok pattern</h6>
+          </EuiTitle> */}
+          <EuiCodeBlock language="regex" isCopyable>
+            {escapeGrok(tempGrokPattern)}
+          </EuiCodeBlock>
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => createRuntimeField(tempGrokPattern)}>
-            Create runtime fields
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem />
-      </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => createRuntimeField(tempGrokPattern)}>
+                Create runtime fields
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+        </>
+      ) : null}
+
+      {tab === 'pipeline' ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiAccordion id="additional-section" buttonContent="Ingest pipeline">
+            {/* <EuiTitle size="xxxs">
+              <h6>Pipeline</h6>
+            </EuiTitle> */}
+            <EuiCodeBlock language="json" isCopyable>
+              {JSON.stringify(
+                processPipeline(results2.ingest_pipeline, results2.grok_pattern!),
+                null,
+                2
+              )}
+            </EuiCodeBlock>
+          </EuiAccordion>
+
+          <EuiSpacer size="m" />
+
+          <EuiAccordion id="additional-section" buttonContent="Mappings">
+            {/* <EuiTitle size="xxxs">
+              <h6>Pipeline</h6>
+            </EuiTitle> */}
+            <EuiCodeBlock language="json" isCopyable>
+              {JSON.stringify(processMappings(results2.mappings), null, 2)}
+            </EuiCodeBlock>
+          </EuiAccordion>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() =>
+                  updateIngest(
+                    processPipeline(results2.ingest_pipeline, results2.grok_pattern!),
+                    processMappings(results2.mappings)
+                  )
+                }
+              >
+                Update ingest
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+        </>
+      ) : null}
     </>
   );
 };
@@ -626,6 +691,9 @@ function processLine(
 // function unescapeGrok(grokPattern: string) {
 //   return grokPattern.replace(/\\/g, '');
 // }
+function escapeGrok(grokPattern: string) {
+  return grokPattern.replace(/\\/g, '\\\\');
+}
 
 function processPipeline(
   pipeline: FindFileStructureResponse['ingest_pipeline'],
@@ -635,9 +703,18 @@ function processPipeline(
   if (gg.processors[0].grok?.patterns) {
     const gr = grokPattern.replace(/^%{POSINT:timestamp} /g, '^');
     gg.processors[0].grok.patterns = [gr];
+    gg.processors[0].grok.ignore_missing = true;
+    gg.processors[0].grok.ignore_failure = true;
   }
   gg.processors.splice(1, 1);
   gg.processors.splice(gg.processors.length - 1, 1);
+  return gg;
+}
+
+function processMappings(mappings: FindFileStructureResponse['mappings']) {
+  const gg = cloneDeep(mappings);
+  delete gg.properties['@timestamp'];
+  delete gg.properties.message;
   return gg;
 }
 

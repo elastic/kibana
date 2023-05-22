@@ -36,6 +36,7 @@ interface ExpandedRowProps {
   timefilterActiveBounds: TimeRangeBounds;
   dataView: DataView;
   openInDiscover(): void;
+  onClose(): void;
 }
 
 const DOC_COUNT = 1001;
@@ -46,10 +47,12 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
   timefilterActiveBounds,
   dataView,
   openInDiscover,
+  onClose,
 }) => {
   const {
     fileUpload,
     data: { search },
+    http,
     // dataViews,
   } = useAiopsAppContext();
 
@@ -228,6 +231,27 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
     [createCompositeRuntimeField, createRuntimeField2, openInDiscover]
   );
 
+  const updateIngest = useCallback(
+    async (
+      pipeline: FindFileStructureResponse['ingest_pipeline'],
+      mappings: FindFileStructureResponse['mappings']
+    ) => {
+      const body = JSON.stringify({
+        pipeline,
+        mappings,
+        indexName: dataView.getIndexPattern(),
+      });
+      // console.log(results);
+      await http.fetch({
+        path: `/internal/aiops/update_ingest`,
+        method: 'POST',
+        body,
+      });
+      onClose();
+    },
+    [dataView, http, onClose]
+  );
+
   useEffect(() => {
     setLoading(true);
     getData().then((tempLines) => {
@@ -268,6 +292,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
             results={results}
             setGrokPattern={setGrokPattern}
             createRuntimeField={createRuntimeField}
+            updateIngest={updateIngest}
           />
           <EuiSpacer />
           {/* <FieldsTable
