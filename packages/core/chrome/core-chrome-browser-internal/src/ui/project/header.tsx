@@ -6,15 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { createRef, useState } from 'react';
 import { Router } from 'react-router-dom';
-import { EuiHeader, EuiHeaderLogo, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
+import {
+  EuiHeader,
+  EuiHeaderLogo,
+  EuiHeaderSection,
+  EuiHeaderSectionItem,
+  EuiHeaderSectionItemButton,
+  EuiIcon,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeNavControl,
 } from '@kbn/core-chrome-browser/src';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -37,6 +47,8 @@ interface Props {
   children: React.ReactNode;
 }
 
+const LOCAL_STORAGE_IS_OPEN_KEY = 'PROJECT_NAVIGATION_OPEN' as const;
+
 export const ProjectHeader = ({
   application,
   kibanaDocLink,
@@ -44,6 +56,10 @@ export const ProjectHeader = ({
   children,
   ...observables
 }: Props) => {
+  const [navId] = useState(htmlIdGenerator()());
+  const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
+  const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
+
   const renderLogo = () => (
     <EuiHeaderLogo
       iconType="logoElastic"
@@ -57,7 +73,37 @@ export const ProjectHeader = ({
     <>
       <EuiHeader position="fixed" data-test-subj="kibanaProjectHeader">
         <EuiHeaderSection grow={false}>
-          <EuiHeaderSectionItem border="right">{renderLogo()}</EuiHeaderSectionItem>
+          <EuiHeaderSectionItem border="right">
+            <Router history={application.history}>
+              <ProjectNavigation
+                isOpen={isOpen!}
+                closeNav={() => {
+                  setIsOpen(false);
+                  if (toggleCollapsibleNavRef.current) {
+                    toggleCollapsibleNavRef.current.focus();
+                  }
+                }}
+                button={
+                  <EuiHeaderSectionItemButton
+                    data-test-subj="toggleNavButton"
+                    aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                      defaultMessage: 'Toggle primary navigation',
+                    })}
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-expanded={isOpen!}
+                    aria-pressed={isOpen!}
+                    aria-controls={navId}
+                    ref={toggleCollapsibleNavRef}
+                  >
+                    <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
+                  </EuiHeaderSectionItemButton>
+                }
+              >
+                {children}
+              </ProjectNavigation>
+            </Router>
+          </EuiHeaderSectionItem>
+          <EuiHeaderSectionItem>{renderLogo()}</EuiHeaderSectionItem>
           <EuiHeaderSectionItem>
             <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
           </EuiHeaderSectionItem>
@@ -82,9 +128,6 @@ export const ProjectHeader = ({
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>
-      <Router history={application.history}>
-        <ProjectNavigation>{children}</ProjectNavigation>
-      </Router>
     </>
   );
 };
