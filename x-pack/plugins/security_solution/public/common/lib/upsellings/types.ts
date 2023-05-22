@@ -7,7 +7,7 @@
 
 import type { SecurityPageName } from '../../../../common';
 
-export type PageUpsellings = Partial<Record<SecurityPageName, React.ComponentType>>;
-export type SectionUpsellings = Partial<Record<UpsellingSectionId, React.ComponentType>>;
+export type UpsellingPages = Partial<Record<SecurityPageName, React.ComponentType>>;
+export type UpsellingSections = Partial<Record<UpsellingSectionId, React.ComponentType>>;
 
 export type UpsellingSectionId = 'rules_load_prepackaged_tooltip' | 'rules_response_actions';

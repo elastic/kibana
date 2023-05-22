@@ -11,7 +11,7 @@ import type {
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import type { ServerlessSecuritySkus } from '../common/config';
+import type { ServerlessSecurityPLIs } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSecurityPluginSetup {}
@@ -32,5 +32,5 @@ export interface ServerlessSecurityPluginStartDependencies {
 }
 
 export interface ServerlessSecurityPublicConfig {
-  projectSkus: ServerlessSecuritySkus;
+  projectPLIs: ServerlessSecurityPLIs;
 }
