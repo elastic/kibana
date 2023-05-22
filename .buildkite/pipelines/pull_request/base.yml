@@ -9,6 +9,15 @@ steps:
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
 
+  - command: git clone https://github.com/elastic/security-docs.git; ls -alh .
+    label: Test Git Clone
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-2
+      minCpuPlatform: 'Intel Cascade Lake'
+
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
