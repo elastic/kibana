@@ -7,54 +7,74 @@
 
 /* eslint-disable no-console */
 import _ from 'lodash';
-import logSymbols from 'log-symbols';
+import type { Color, Modifiers } from 'chalk';
 import chalk from 'chalk';
-// import human from 'human-interval';
-// import pkg from '@packages/root';
-// import type { SpecFile } from '@packages/types';
-import type { Table } from 'cli-table3';
-// import humanTime from './human_time';
-import duration from './duration';
-import newlines from './newlines';
-import env from './env';
-import terminal from './terminal';
-// import { getIsCi } from './ci_provider';
-// import * as experiments from '../experiments';
-// import type { Cfg } from '../project-base';
-// import type { Browser } from '../browsers/types';
+import Table from 'cli-table3';
+import type {
+  Table as TableType,
+  TableInstanceOptions,
+  CharName,
+  HorizontalAlignment,
+} from 'cli-table3';
 
-interface Screenshot {
-  width: number;
-  height: number;
-  path: string;
-  specName: string;
-}
+type ChalkColor = typeof Color | typeof Modifiers;
+type CharType = 'border' | 'noBorder' | 'outsideBorder' | 'pageDivider' | 'allBorders';
 
-// export const cloudRecommendationMessage = `
-//   Having trouble debugging your CI failures?
+/**
+ * Colors for the table
+ */
 
-//   Record your runs to Cypress Cloud to watch video recordings for each test,
-//   debug failing and flaky tests, and integrate with your favorite tools.
-// `;
-
-function color(val: any, c: string) {
+function color(val: string | number | null, c: ChalkColor) {
   return chalk[c](val);
 }
 
-export function gray(val: any) {
+export function gray(val: number | string) {
   return color(val, 'gray');
 }
 
-function colorIf(val: any, c: string) {
+function colorIf(val: number | null, c: ChalkColor) {
+  let value: number | string | null = val;
+  let colorString = c;
   if (val === 0 || val == null) {
-    val = '-';
-    c = 'gray';
+    value = '-';
+    colorString = 'gray';
   }
 
-  return color(val, c);
+  return color(value, colorString);
 }
 
-function getWidth(table: Table, index: number) {
+const wrapBordersInGray = (chars: Record<CharName, string>) => {
+  return _.mapValues(chars, (char) => {
+    if (char) {
+      return chalk.gray(char);
+    }
+
+    return char;
+  });
+};
+
+/**
+ * Formatting
+ */
+
+const logEmptyLine = () => console.log('');
+
+const addNewlineAtEveryNChar = (str: string, n: number) => {
+  if (!str) {
+    return str;
+  }
+
+  const result = [];
+  let idx = 0;
+
+  while (idx < str.length) {
+    result.push(str.slice(idx, (idx += n)));
+  }
+
+  return result.join('\n');
+};
+
+function getWidth(table: TableType, index: number) {
   // get the true width of a table's column,
   // based off of calculated table options for that column
   const columnWidth = table.options.colWidths[index];
@@ -68,13 +88,152 @@ function getWidth(table: Table, index: number) {
   throw new Error('Unable to get width for column');
 }
 
-// function formatBrowser(browser: Browser) {
-//   return _.compact([
-//     browser.displayName,
-//     browser.majorVersion,
-//     browser.isHeadless && gray('(headless)'),
-//   ]).join(' ');
-// }
+function formatSymbolSummary(failures: number) {
+  return failures ? chalk.red('✖') : chalk.green('✔');
+}
+
+function formatPath(name: string, n: number | undefined, pathColor: ChalkColor = 'reset') {
+  if (!name) return '';
+
+  let newName = name;
+  const fakeCwdPath = process.env.FAKE_CWD_PATH;
+
+  if (fakeCwdPath && process.env.CYPRESS_INTERNAL_ENV === 'test') {
+    // if we're testing within Cypress, we want to strip out
+    // the current working directory before calculating the stdout tables
+    // this will keep our snapshots consistent everytime we run
+    const cwdPath = process.cwd();
+
+    newName = name.split(cwdPath).join(fakeCwdPath);
+
+    newName = process.platform === 'darwin' && name.startsWith('/private') ? name.slice(8) : name;
+  }
+
+  if (n) {
+    const nameWithNewLines = addNewlineAtEveryNChar(newName, n);
+
+    return `${color(nameWithNewLines, pathColor)}`;
+  }
+
+  return `${color(name, pathColor)}`;
+}
+
+function widestLine(str: string) {
+  let lineWidth = 0;
+
+  for (const line of str.split('\n')) {
+    lineWidth = Math.max(lineWidth, line.length);
+  }
+
+  return lineWidth;
+}
+
+/**
+ * Utils
+ */
+
+function durationInMinutes(ms: number) {
+  const minutes = Math.floor(ms / 60000);
+  const seconds = parseInt(((ms % 60000) / 1000).toFixed(0), 10);
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+}
+
+const getBordersLength = (left: string, right: string) => {
+  return _.chain([left, right]).compact().map(widestLine).sum().value();
+};
+
+const getChars = (type: CharType) => {
+  switch (type) {
+    case 'border':
+      return {
+        'top-mid': '',
+        'top-left': '  ┌',
+        left: '  │',
+        'left-mid': '  ├',
+        middle: '',
+        'mid-mid': '',
+        right: '│',
+        'bottom-mid': '',
+        'bottom-left': '  └',
+      };
+    case 'noBorder':
+      return {
+        top: '',
+        'top-mid': '',
+        'top-left': '',
+        'top-right': '',
+        left: '   ',
+        'left-mid': '',
+        middle: '',
+        mid: '',
+        'mid-mid': '',
+        right: ' ',
+        'right-mid': '',
+        bottom: '',
+        'bottom-left': '',
+        'bottom-mid': '',
+        'bottom-right': '',
+      };
+    case 'outsideBorder':
+      return {
+        // "top": ""
+        'top-left': '  ┌',
+        'top-mid': '',
+        left: '  │',
+        'left-mid': '',
+        middle: '',
+        mid: '',
+        'mid-mid': '',
+        'right-mid': '',
+        'bottom-mid': '',
+        'bottom-left': '  └',
+      };
+    case 'pageDivider':
+      return {
+        top: '─',
+        'top-mid': '',
+        'top-left': '',
+        'top-right': '',
+        bottom: '',
+        'bottom-mid': '',
+        'bottom-left': '',
+        'bottom-right': '',
+        left: '',
+        'left-mid': '',
+        mid: '',
+        'mid-mid': '',
+        right: '',
+        'right-mid': '',
+        middle: '',
+      };
+    case 'allBorders':
+      return {
+        // this is default from cli-table mostly just for debugging,
+        // if you want to see where borders would be drawn
+        top: '─',
+        'top-mid': '┬',
+        'top-left': '┌',
+        'top-right': '┐',
+        bottom: '─',
+        'bottom-mid': '┴',
+        'bottom-left': '└',
+        'bottom-right': '┘',
+        left: '│',
+        'left-mid': '├',
+        mid: '─',
+        'mid-mid': '┼',
+        right: '│',
+        'right-mid': '┤',
+        middle: '│',
+      };
+    default:
+      throw new Error(`Table chars type: "${type}" is not supported`);
+  }
+};
+
+/**
+ * Render
+ */
 
 function formatFooterSummary(results: CypressCommandLine.CypressRunResult) {
   const { totalFailed, runs, totalDuration, totalTests, totalPassed, totalPending, totalSkipped } =
@@ -106,7 +265,7 @@ function formatFooterSummary(results: CypressCommandLine.CypressRunResult) {
   return [
     isCanceled ? '-' : formatSymbolSummary(totalFailed),
     color(phrase, c),
-    gray(duration.format(totalDuration)),
+    gray(durationInMinutes(totalDuration)),
     colorIf(totalTests, 'reset'),
     colorIf(totalPassed, 'green'),
     colorIf(totalFailed, 'red'),
@@ -114,212 +273,6 @@ function formatFooterSummary(results: CypressCommandLine.CypressRunResult) {
     colorIf(totalSkipped, 'blue'),
   ];
 }
-
-function formatSymbolSummary(failures: number) {
-  return failures ? logSymbols.error : logSymbols.success;
-}
-
-function macOSRemovePrivate(str: string) {
-  // consistent snapshots when running system tests on macOS
-  if (process.platform === 'darwin' && str.startsWith('/private')) {
-    return str.slice(8);
-  }
-
-  return str;
-}
-
-// function collectTestResults(
-//   obj: { video?: boolean; screenshots?: Screenshot[]; spec?: any; stats?: any },
-//   estimated: number
-// ) {
-//   return {
-//     name: _.get(obj, 'spec.name'),
-//     relativeToCommonRoot: _.get(obj, 'spec.relativeToCommonRoot'),
-//     tests: _.get(obj, 'stats.tests'),
-//     passes: _.get(obj, 'stats.passes'),
-//     pending: _.get(obj, 'stats.pending'),
-//     failures: _.get(obj, 'stats.failures'),
-//     skipped: _.get(obj, 'stats.skipped'),
-//     duration: humanTime.long(_.get(obj, 'stats.wallClockDuration')),
-//     estimated: estimated && humanTime.long(estimated),
-//     screenshots: obj.screenshots && obj.screenshots.length,
-//     video: Boolean(obj.video),
-//   };
-// }
-
-function formatPath(name: string, n: number | undefined, pathColor = 'reset') {
-  if (!name) return '';
-
-  const fakeCwdPath = env.get('FAKE_CWD_PATH');
-
-  if (fakeCwdPath && env.get('CYPRESS_INTERNAL_ENV') === 'test') {
-    // if we're testing within Cypress, we want to strip out
-    // the current working directory before calculating the stdout tables
-    // this will keep our snapshots consistent everytime we run
-    const cwdPath = process.cwd();
-
-    name = name.split(cwdPath).join(fakeCwdPath);
-
-    name = macOSRemovePrivate(name);
-  }
-
-  // add newLines at each n char and colorize the path
-  if (n) {
-    const nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n);
-
-    return `${color(nameWithNewLines, pathColor)}`;
-  }
-
-  return `${color(name, pathColor)}`;
-}
-
-// function formatNodeVersion(
-//   { resolvedNodeVersion, resolvedNodePath }: Pick<Cfg, 'resolvedNodeVersion' | 'resolvedNodePath'>,
-//   width: number
-// ) {
-//   if (resolvedNodePath)
-//     return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width);
-// }
-
-// function formatRecordParams(
-//   runUrl?: string,
-//   parallel?: boolean,
-//   group?: string,
-//   tag?: string,
-//   autoCancelAfterFailures?: number | false
-// ) {
-//   if (runUrl) {
-//     return `Tag: ${tag || 'false'}, Group: ${group || 'false'}, Parallel: ${Boolean(parallel)}${
-//       autoCancelAfterFailures !== undefined
-//         ? `, Auto Cancel After Failures: ${autoCancelAfterFailures}`
-//         : ''
-//     }`;
-//   }
-// }
-
-// export function displayRunStarting(options: {
-//   browser: Browser;
-//   config: Cfg;
-//   group: string | undefined;
-//   parallel?: boolean;
-//   runUrl?: string;
-//   specPattern: string | RegExp | string[];
-//   specs: SpecFile[];
-//   tag: string | undefined;
-//   autoCancelAfterFailures?: number | false;
-// }) {
-//   const {
-//     browser,
-//     config,
-//     group,
-//     parallel,
-//     runUrl,
-//     specPattern,
-//     specs,
-//     tag,
-//     autoCancelAfterFailures,
-//   } = options;
-
-//   console.log('');
-
-//   terminal.divider('=');
-
-//   console.log('');
-
-//   terminal.header('Run Starting', {
-//     color: ['reset'],
-//   });
-
-//   console.log('');
-
-//   const experimental = experiments.getExperimentsFromResolved(config.resolved);
-//   const enabledExperiments = _.pickBy(experimental, _.property('enabled'));
-//   const hasExperiments =
-//     !process.env.CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS && !_.isEmpty(enabledExperiments);
-
-//   // if we show Node Version, then increase 1st column width
-//   // to include wider 'Node Version:'.
-//   // Without Node version, need to account for possible "Experiments" label
-//   const colWidths = config.resolvedNodePath ? [16, 84] : hasExperiments ? [14, 86] : [12, 88];
-
-//   const table = terminal.table({
-//     colWidths,
-//     type: 'outsideBorder',
-//   }) as Table;
-
-//   if (!specPattern) throw new Error('No specPattern in displayRunStarting');
-
-//   const formatSpecs = (specs) => {
-//     // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-//     const names = _.map(specs, 'relativeToCommonRoot');
-//     const specsTruncated = _.truncate(names.join(', '), { length: 250 });
-
-//     const stringifiedSpecs = [`${names.length} found `, '(', specsTruncated, ')'].join('');
-
-//     return formatPath(stringifiedSpecs, getWidth(table, 1));
-//   };
-
-//   const data = _.chain([
-//     [gray('Cypress:'), pkg.version],
-//     [gray('Browser:'), formatBrowser(browser)],
-//     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
-//     [gray('Specs:'), formatSpecs(specs)],
-//     [
-//       gray('Searched:'),
-//       formatPath(
-//         Array.isArray(specPattern) ? specPattern.join(', ') : String(specPattern),
-//         getWidth(table, 1)
-//       ),
-//     ],
-//     [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag, autoCancelAfterFailures)],
-//     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
-//     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
-//   ])
-//     .filter(_.property(1))
-//     .value();
-
-//   // @ts-expect-error incorrect type in Table
-//   table.push(...data);
-
-//   const heading = table.toString();
-
-//   console.log(heading);
-
-//   console.log('');
-
-//   return heading;
-// }
-
-// export function displaySpecHeader(name: string, curr: number, total: number, estimated: number) {
-//   console.log('');
-
-//   const PADDING = 2;
-
-//   const table = terminal.table({
-//     colWidths: [10, 70, 20],
-//     colAligns: ['left', 'left', 'right'],
-//     type: 'pageDivider',
-//     style: {
-//       'padding-left': PADDING,
-//       'padding-right': 0,
-//     },
-//   });
-
-//   table.push(['', '']);
-//   table.push([
-//     'Running:',
-//     `${formatPath(name, getWidth(table, 1), 'gray')}`,
-//     gray(`(${curr} of ${total})`),
-//   ]);
-
-//   console.log(table.toString());
-
-//   if (estimated) {
-//     const estimatedLabel = `${' '.repeat(PADDING)}Estimated:`;
-
-//     return console.log(estimatedLabel, gray(humanTime.long(estimated)));
-//   }
-// }
 
 export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[]) {
   const parsedResults = _.reduce(
@@ -354,22 +307,27 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
     {} as CypressCommandLine.CypressRunResult
   );
 
-  const logEmptyLine = () => console.log('');
-
   const { runs } = parsedResults;
 
   logEmptyLine();
-  terminal.divider('=');
+  console.log(chalk.gray('='.repeat(100)));
   logEmptyLine();
-  terminal.header('Run Finished', {
-    color: ['reset'],
-  });
+  console.log(`  (${chalk.reset.underline.bold('Run Finished')})`);
 
   if (runs && runs.length) {
-    const colAligns = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right'];
+    const colAligns: HorizontalAlignment[] = [
+      'left',
+      'left',
+      'right',
+      'right',
+      'right',
+      'right',
+      'right',
+      'right',
+    ];
     const colWidths = [3, 41, 11, 9, 9, 9, 9, 9];
 
-    const table1 = terminal.table({
+    const table1 = table({
       colAligns,
       colWidths,
       type: 'noBorder',
@@ -385,13 +343,13 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
       ],
     });
 
-    const table2 = terminal.table({
+    const table2 = table({
       colAligns,
       colWidths,
       type: 'border',
     });
 
-    const table3 = terminal.table({
+    const table3 = table({
       colAligns,
       colWidths,
       type: 'noBorder',
@@ -400,7 +358,7 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
 
     _.each(runs, (run) => {
       const { spec, stats } = run;
-      const ms = duration.format(stats.duration);
+      const ms = durationInMinutes(stats.duration);
       const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1));
 
       if (run.skippedSpec) {
@@ -421,83 +379,95 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
 
     logEmptyLine();
     logEmptyLine();
-    console.log(terminal.renderTables(table1, table2, table3));
+    console.log(renderTables(table1, table2, table3));
     logEmptyLine();
   }
 }
 
-// export function displayResults(obj: { screenshots?: Screenshot[] }, estimated: number) {
-//   const results = collectTestResults(obj, estimated);
+const EXPECTED_SUM = 100;
 
-//   const c = results.failures ? 'red' : 'green';
+const renderTables = (...tables: TableType[]) => {
+  return _.chain([] as TableType[])
+    .concat(tables)
+    .invokeMap('toString')
+    .join('\n')
+    .value();
+};
 
-//   console.log('');
+const table = (options: Partial<TableInstanceOptions> & { type: CharType }) => {
+  const { type } = options;
+  const defaults = {
+    chars: {
+      top: '─',
+      'top-mid': '┬',
+      'top-left': '┌',
+      'top-right': '┐',
+      bottom: '─',
+      'bottom-mid': '┴',
+      'bottom-left': '└',
+      'bottom-right': '┘',
+      left: '│',
+      'left-mid': '├',
+      mid: '─',
+      'mid-mid': '┼',
+      right: '│',
+      'right-mid': '┤',
+      middle: '│',
+    },
+    truncate: '…',
+    colWidths: [],
+    rowHeights: [],
+    colAligns: [],
+    rowAligns: [],
+    style: {
+      'padding-left': 1,
+      'padding-right': 1,
+      head: ['red'],
+      border: ['grey'],
+      compact: false,
+    },
+    head: [],
+  };
 
-//   terminal.header('Results', {
-//     color: [c],
-//   });
+  let { colWidths } = options;
+  let chars = _.defaults(getChars(type), defaults.chars);
 
-//   const table = terminal.table({
-//     colWidths: [14, 86],
-//     type: 'outsideBorder',
-//   });
+  _.defaultsDeep(options, {
+    chars,
+    style: {
+      head: [],
+      border: [],
+      'padding-left': 1,
+      'padding-right': 1,
+    },
+  });
 
-//   const data = _.chain([
-//     ['Tests:', results.tests],
-//     ['Passing:', results.passes],
-//     ['Failing:', results.failures],
-//     ['Pending:', results.pending],
-//     ['Skipped:', results.skipped],
-//     ['Screenshots:', results.screenshots],
-//     ['Video:', results.video],
-//     ['Duration:', results.duration],
-//     estimated ? ['Estimated:', results.estimated] : undefined,
-//     ['Spec Ran:', formatPath(results.relativeToCommonRoot, getWidth(table, 1), c)],
-//   ])
-//     .compact()
-//     .map((arr) => {
-//       const [key, val] = arr;
+  chars = options.chars ?? defaults.chars;
 
-//       return [color(key, 'gray'), color(val, c)];
-//     })
-//     .value();
+  if (colWidths) {
+    const sum = _.sum(colWidths);
 
-//   table.push(...data);
+    if (sum !== EXPECTED_SUM) {
+      throw new Error(`Expected colWidths array to sum to: ${EXPECTED_SUM}, instead got: ${sum}`);
+    }
 
-//   console.log('');
-//   console.log(table.toString());
-//   console.log('');
+    const bordersLength = getBordersLength(chars.left, chars.right);
 
-//   if (obj.screenshots?.length) displayScreenshots(obj.screenshots);
-// }
+    if (bordersLength > 0) {
+      // redistribute the columns to account for borders on each side...
+      // and subtract  borders size from the largest width cell
+      const largestCellWidth = _.max(colWidths);
 
-// function displayScreenshots(screenshots: Screenshot[] = []) {
-//   console.log('');
+      const index = _.indexOf(colWidths, largestCellWidth);
 
-//   terminal.header('Screenshots', { color: ['yellow'] });
+      colWidths = _.clone(colWidths);
 
-//   console.log('');
+      colWidths[index] = (largestCellWidth ?? 0) - bordersLength;
+      options.colWidths = colWidths;
+    }
+  }
 
-//   const table = terminal.table({
-//     colWidths: [3, 82, 15],
-//     colAligns: ['left', 'left', 'right'],
-//     type: 'noBorder',
-//     style: {
-//       'padding-right': 0,
-//     },
-//     chars: {
-//       left: ' ',
-//       right: '',
-//     },
-//   });
+  options.chars = wrapBordersInGray(chars);
 
-//   screenshots.forEach((screenshot) => {
-//     const dimensions = gray(`(${screenshot.width}x${screenshot.height})`);
-
-//     table.push(['-', formatPath(`${screenshot.path}`, getWidth(table, 1)), gray(dimensions)]);
-//   });
-
-//   console.log(table.toString());
-
-//   console.log('');
-// }
+  return new Table(options);
+};

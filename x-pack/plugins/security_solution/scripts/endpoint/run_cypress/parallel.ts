@@ -37,6 +37,7 @@ import type {
   ObjectProperty,
 } from '@babel/types';
 // import pRetry from 'p-retry';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../common/localhost_services';
 
@@ -357,6 +358,7 @@ export const cli = () => {
               try {
                 result = await cypress.run({
                   browser: 'chrome',
+                  headed: true,
                   spec: filePath,
                   configFile: argv.configFile,
                   reporter: argv.reporter,
@@ -427,8 +429,9 @@ export const cli = () => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
 
         const hasFailedTests = _.some(results, (result) => result.failures > 0);
-
-        return process.exit(hasFailedTests ? 1 : 0);
+        if (hasFailedTests) {
+          throw createFailError('Test fail error');
+        }
       });
     },
     {
