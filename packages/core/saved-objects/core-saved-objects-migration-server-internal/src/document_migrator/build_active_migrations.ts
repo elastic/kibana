@@ -48,14 +48,11 @@ export function buildActiveMigrations({
       referenceTransforms,
     });
 
-    if (!typeTransforms.transforms.length) {
-      return migrations;
+    if (typeTransforms.transforms.length) {
+      migrations[type.name] = typeTransforms;
     }
 
-    return {
-      ...migrations,
-      [type.name]: typeTransforms,
-    };
+    return migrations;
   }, {} as ActiveMigrations);
 }
 
