@@ -19,7 +19,15 @@ export interface ActiveMigrations {
  * Structure containing all the required info to perform a type's conversion
  */
 export interface TypeTransforms {
-  /** Derived from the related transforms */
+  /**
+   * Latest non-deferred version for each transform type.
+   * This is the version that will be used to query outdated documents.
+   */
+  immediateVersion: Record<TransformType, string>;
+  /**
+   * Latest version for each transform type, including deferred transforms.
+   * This is the version that will be used to perform the migration.
+   */
   latestVersion: Record<TransformType, string>;
   /** Ordered list of transforms registered for the type **/
   transforms: Transform[];
@@ -37,6 +45,8 @@ export interface Transform {
   transform: TransformFn;
   /** The (optional) downward transformation function */
   transformDown?: TransformFn;
+  /** Whether this transform is deferred */
+  deferred?: boolean;
 }
 
 export enum TransformType {
