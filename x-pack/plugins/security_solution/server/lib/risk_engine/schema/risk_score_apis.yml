@@ -6,7 +6,8 @@ info:
 paths:
   /scores:
     post:
-      description: Returns a list of Risk Scores
+      summary: Retrieve a list of Risk Scores
+      description: Retrieve a list of Risk Scores, sorted by identifier_type and risk score.
       requestBody:
         description: Details about the Risk Scores being requested
         content:
@@ -30,19 +31,25 @@ components:
       type: object
       properties:
         after_keys:
+          description: Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
           $ref: '#/components/schemas/AfterKeys'
         data_view_id:
-          type: string
+          description: The identifier of the Kibana data view to be used when generating risk scores. If unspecified, the Security Alerts data view for the current space will be used.
           example: security-solution-default
+          type: string
         debug:
+          description: If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.
           type: boolean
         filter:
+          description: An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores returned.
           type: array
           items:
             $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
         identifier_type:
+          description: Used to restrict the type of risk scores being returned. If unspecified, both `host` and `user` scores will be returned.
           $ref: '#/components/schemas/IdentifierType'
         range:
+          description: Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
           type: object
           required:
             - start
@@ -53,6 +60,7 @@ components:
             end:
               $ref: '#/components/schemas/KibanaDate'
         weights:
+          description: 'A list of weights to be applied to the scoring calculation.'
           type: array
           items:
             $ref: '#/components/schemas/RiskScoreWeight'
@@ -70,8 +78,10 @@ components:
         - scores
       properties:
         after_keys:
+          description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request.
           $ref: '#/components/schemas/AfterKeys'
         debug:
+          description: Object containing debug information, particularly the internal request and response from elasticsearch
           type: object
           properties:
             request:
@@ -79,7 +89,10 @@ components:
             response:
               type: string
         scores:
-          $ref: '#/components/schemas/RiskScore'
+          type: array
+          description: A list of risk scores
+          items:
+            $ref: '#/components/schemas/RiskScore'
 
     AfterKeys:
       type: object
@@ -126,35 +139,45 @@ components:
           type: string
           format: 'date-time'
           example: '2017-07-21T17:32:28Z'
+          description: The time at which the risk score was calculated.
         identifierField:
           type: string
           example: 'host.name'
+          description: The identifier field defining this risk score. Coupled with `identifierValue`, uniquely identifies the entity being scored.
         identifierValue:
           type: string
           example: 'example.host'
+          description: The identifier value defining this risk score. Coupled with `identifierField`, uniquely identifies the entity being scored.
         level:
           type: string
           example: 'Critical'
+          description: Lexical description of the entity's risk.
         totalScore:
           type: number
           format: double
+          description: The raw numeric value of the given entity's risk score.
         totalScoreNormalized:
           type: number
           format: double
           minimum: 0
           maximum: 100
+          description: The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
         alertsScore:
           type: number
           format: double
+          description: The raw numeric risk score attributed to Security Alerts.
         otherScore:
           type: number
           format: double
+          description: The raw numeric risk score attributed to other data sources
         riskiestInputs:
           type: array
+          description: A list of the 10 highest-risk documents contributing to this risk score. Useful for investigative purposes.
           items:
             $ref: '#/components/schemas/RiskScoreInput'
 
     RiskScoreInput:
+      description: A generic representation of a document contributing to a Risk Score.
       type: object
       properties:
         id:
@@ -169,6 +192,7 @@ components:
           minimum: 0
           maximum: 100
     RiskScoreWeight:
+      description: "Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'alerts')."
       type: object
       required:
         - type
