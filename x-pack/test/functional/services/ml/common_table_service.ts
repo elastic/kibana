@@ -154,7 +154,6 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
 
       await retry.tryForTime(5000, async () => {
         await actionButton.click();
-        await this.waitForTableToStartLoading();
         await this.waitForTableToLoad();
       });
     }
