@@ -142,6 +142,7 @@ import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
+import { useIsExperimentalFeatureEnabled } from '@kbn/security-solution-plugin/public/common/hooks/use_experimental_features';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -649,6 +650,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     confirmRuleDuplication,
   } = useBulkDuplicateExceptionsConfirmation();
 
+  const isAdHocRuleExecutionEnabled = useIsExperimentalFeatureEnabled('adHocRuleExecutionEnabled');
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -753,22 +756,24 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           )}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <ShowAdHocRunnerFlyoutButton
-                          rule={rule}
-                          disabled={
-                            !isExistingRule ||
-                            !hasUserCRUDPermission(canUserCRUD) ||
-                            (isMlRule(rule?.type) && !hasMlPermissions)
-                          }
-                          disabledReason={explainLackOfPermission(
-                            rule,
-                            hasMlPermissions,
-                            hasActionsPrivileges,
-                            canUserCRUD
-                          )}
-                        />
-                      </EuiFlexItem>
+                      {isAdHocRuleExecutionEnabled && (
+                        <EuiFlexItem grow={false}>
+                          <ShowAdHocRunnerFlyoutButton
+                            rule={rule}
+                            disabled={
+                              !isExistingRule ||
+                              !hasUserCRUDPermission(canUserCRUD) ||
+                              (isMlRule(rule?.type) && !hasMlPermissions)
+                            }
+                            disabledReason={explainLackOfPermission(
+                              rule,
+                              hasMlPermissions,
+                              hasActionsPrivileges,
+                              canUserCRUD
+                            )}
+                          />
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}

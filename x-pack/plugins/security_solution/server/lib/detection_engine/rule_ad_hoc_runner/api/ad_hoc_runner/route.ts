@@ -78,7 +78,7 @@ export const adHocRunnerRoute = async (
   security: SetupPlugins['security'],
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  adHocRunnerDataClient: IRuleDataClient,
+  ruleDataClient: IRuleDataClient,
   ruleExecutionLogService: IRuleExecutionLogService,
   getStartServices: StartServicesAccessor<StartPlugins>,
   logger: Logger
@@ -144,7 +144,7 @@ export const adHocRunnerRoute = async (
 
         const adHocRunnerRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
-          ruleDataClient: adHocRunnerDataClient,
+          ruleDataClient,
           ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
           isPreview: false,
           isAdHocRun: true,
@@ -412,7 +412,7 @@ export const adHocRunnerRoute = async (
         // Refreshes alias to ensure index is able to be read before returning
         await coreContext.elasticsearch.client.asInternalUser.indices.refresh(
           {
-            index: adHocRunnerDataClient.indexNameWithNamespace(spaceId),
+            index: ruleDataClient.indexNameWithNamespace(spaceId),
           },
           { ignore: [404] }
         );

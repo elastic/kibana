@@ -134,6 +134,12 @@ export const allowedExperimentalValues = Object.freeze({
    *
    **/
   newUserDetailsFlyout: false,
+
+  /**
+   * Enables a new API and UI for Ad Hoc Rule Execution.
+   * It's a temporary feature flag that will be removed once the feature gets a basic production-ready implementation.
+   */
+  adHocRuleExecutionEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

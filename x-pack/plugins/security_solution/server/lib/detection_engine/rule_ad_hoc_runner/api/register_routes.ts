@@ -23,21 +23,25 @@ export const registerAdHocRunnerRoutes = (
   security: SetupPlugins['security'],
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  adHocRunnerDataClient: IRuleDataClient,
+  ruleDataClient: IRuleDataClient,
   ruleExecutionLogService: IRuleExecutionLogService,
   getStartServices: StartServicesAccessor<StartPlugins>,
   logger: Logger
 ) => {
-  adHocRunnerRoute(
-    router,
-    config,
-    ml,
-    security,
-    ruleOptions,
-    securityRuleTypeOptions,
-    adHocRunnerDataClient,
-    ruleExecutionLogService,
-    getStartServices,
-    logger
-  );
+  const { adHocRuleExecutionEnabled } = config.experimentalFeatures;
+
+  if (adHocRuleExecutionEnabled) {
+    adHocRunnerRoute(
+      router,
+      config,
+      ml,
+      security,
+      ruleOptions,
+      securityRuleTypeOptions,
+      ruleDataClient,
+      ruleExecutionLogService,
+      getStartServices,
+      logger
+    );
+  }
 };
