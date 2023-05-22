@@ -67,6 +67,7 @@ import { AlertsHistogramPanel } from '../../../../detections/components/alerts_k
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepDefineRuleReadOnly } from '../../../../detections/components/rules/step_define_rule';
 import { StepScheduleRuleReadOnly } from '../../../../detections/components/rules/step_schedule_rule';
+import { StepActionsRule } from '../../../../detections/components/rules/step_rule_actions/actions_view';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
@@ -290,7 +291,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
 
-  const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
+  const {
+    aboutRuleData,
+    modifiedAboutRuleDetailsData,
+    defineRuleData,
+    scheduleRuleData,
+    ruleActionsData,
+  } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
       : {
@@ -298,6 +305,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           modifiedAboutRuleDetailsData: null,
           defineRuleData: null,
           scheduleRuleData: null,
+          ruleActionsData: null,
         };
   const [dataViewTitle, setDataViewTitle] = useState<string>();
   useEffect(() => {
@@ -788,6 +796,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             descriptionColumns="singleSplit"
                             defaultValues={scheduleRuleData}
                           />
+                        )}
+                      </StepPanel>
+                    </EuiFlexItem>
+                    <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+                      <StepPanel loading={isLoading} title={'Actions'}>
+                        {ruleActionsData != null && (
+                          <StepActionsRule ruleActionsData={ruleActionsData} />
                         )}
                       </StepPanel>
                     </EuiFlexItem>
