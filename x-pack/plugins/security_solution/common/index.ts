@@ -11,6 +11,8 @@ export {};
 export { APP_UI_ID, SecurityPageName } from './constants';
 export { ELASTIC_SECURITY_RULE_ID } from './detection_engine/constants';
 
+export type { AppFeatureKeys, AppFeatureKey } from './types/app_features';
+
 // Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.
 // If you're using functions/types/etc... internally it's best to import directly from their paths than expose the functions/types/etc... here.
 // You should _only_ expose functions/types/etc... that need to be shared with other plugins here.
