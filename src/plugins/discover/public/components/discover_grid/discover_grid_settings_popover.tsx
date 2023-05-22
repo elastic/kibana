@@ -80,7 +80,7 @@ export function DiscoverGridSettingsPopover({
         <EuiToolTip content={buttonLabel} delay="long">
           <EuiButtonEmpty
             size="xs"
-            iconType="visTable"
+            iconType="editorTable"
             color="text"
             data-test-subj="dscGridSettingsPopoverButton"
             onClick={isPopoverOpen ? closePopover : openPopover}
