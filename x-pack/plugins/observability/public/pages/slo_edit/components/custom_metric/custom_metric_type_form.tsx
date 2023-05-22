@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -24,13 +25,15 @@ import {
 } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { IndexSelection } from '../custom_common/index_selection';
 import { QueryBuilder } from '../common/query_builder';
+import { MetricIndicator } from './metric_indicator';
+export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
 interface Option {
   label: string;
   value: string;
 }
 
-export function CustomKqlIndicatorTypeForm() {
+export function CustomMetricIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
 
   const { isLoading, data: indexFields } = useFetchIndexPatternFields(
@@ -47,7 +50,7 @@ export function CustomKqlIndicatorTypeForm() {
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.label',
+              'xpack.observability.slo.sloEdit.sliType.customMetric.timestampField.label',
               { defaultMessage: 'Timestamp field' }
             )}
             isInvalid={getFieldState('indicator.params.timestampField').invalid}
@@ -63,14 +66,14 @@ export function CustomKqlIndicatorTypeForm() {
                   {...field}
                   async
                   placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
+                    'xpack.observability.slo.sloEdit.sliType.customMetric.timestampField.placeholder',
                     { defaultMessage: 'Select a timestamp field' }
                   )}
                   aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
+                    'xpack.observability.slo.sloEdit.sliType.customMetric.timestampField.placeholder',
                     { defaultMessage: 'Select a timestamp field' }
                   )}
-                  data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
+                  data-test-subj="customMetricIndicatorFormTimestampFieldSelect"
                   isClearable
                   isDisabled={!watch('indicator.params.index')}
                   isInvalid={fieldState.invalid}
@@ -91,7 +94,7 @@ export function CustomKqlIndicatorTypeForm() {
                           {
                             value: field.value,
                             label: field.value,
-                            'data-test-subj': `customKqlIndicatorFormTimestampFieldSelectedValue`,
+                            'data-test-subj': `customMetricIndicatorFormTimestampFieldSelectedValue`,
                           },
                         ]
                       : []
@@ -107,20 +110,23 @@ export function CustomKqlIndicatorTypeForm() {
       <EuiFlexItem>
         <QueryBuilder
           control={control}
-          dataTestSubj="customKqlIndicatorFormQueryFilterInput"
+          dataTestSubj="customMetricIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.queryFilter', {
-            defaultMessage: 'Query filter',
-          })}
+          label={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.queryFilter',
+            {
+              defaultMessage: 'Query filter',
+            }
+          )}
           name="indicator.params.filter"
           placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.customFilter',
+            'xpack.observability.slo.sloEdit.sliType.customMetric.customFilter',
             { defaultMessage: 'Custom filter to apply on the index' }
           )}
           tooltip={
             <EuiIconTip
               content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.customFilter.tooltip',
+                'xpack.observability.slo.sloEdit.sliType.customMetric.customFilter.tooltip',
                 {
                   defaultMessage:
                     'This KQL query can be used to filter the documents with some relevant criteria.',
@@ -131,67 +137,84 @@ export function CustomKqlIndicatorTypeForm() {
           }
         />
       </EuiFlexItem>
-
-      <EuiFlexItem>
-        <QueryBuilder
-          control={control}
-          dataTestSubj="customKqlIndicatorFormGoodQueryInput"
-          indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.goodQuery', {
-            defaultMessage: 'Good query',
-          })}
-          name="indicator.params.good"
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.goodQueryPlaceholder',
-            {
-              defaultMessage: 'Define the good events',
-            }
+      <EuiPanel hasBorder={true}>
+        <MetricIndicator
+          type="good"
+          indexFields={indexFields}
+          isLoadingIndex={isLoading}
+          equationLabel={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.goodEquationLabel',
+            { defaultMessage: 'Good equation' }
           )}
-          required
-          tooltip={
+          metricLabel={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.goodMetricLabel',
+            { defaultMessage: 'Good metric' }
+          )}
+          metricTooltip={
             <EuiIconTip
               content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.goodQuery.tooltip',
+                'xpack.observability.slo.sloEdit.sliType.customMetric.goodMetric.tooltip',
                 {
                   defaultMessage:
-                    'This KQL query should return a subset of events that are considered "good" or "successful" for the purpose of calculating the SLO. The query should filter events based on some relevant criteria, such as status codes, error messages, or other relevant fields.',
+                    'This data from this field will be aggregated with the "sum" aggregation.',
+                }
+              )}
+              position="top"
+            />
+          }
+          equationTooltip={
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.observability.slo.sloEdit.sliType.customMetric.goodEquation.tooltip',
+                {
+                  defaultMessage:
+                    'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
                 }
               )}
               position="top"
             />
           }
         />
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <QueryBuilder
-          control={control}
-          dataTestSubj="customKqlIndicatorFormTotalQueryInput"
-          indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.totalQuery', {
-            defaultMessage: 'Total query',
-          })}
-          name="indicator.params.total"
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.totalQueryPlaceholder',
-            {
-              defaultMessage: 'Define the total events',
-            }
+      </EuiPanel>
+      <EuiPanel hasBorder={true}>
+        <MetricIndicator
+          type="total"
+          indexFields={indexFields}
+          isLoadingIndex={isLoading}
+          equationLabel={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquationLabel',
+            { defaultMessage: 'Total equation' }
           )}
-          tooltip={
+          metricLabel={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetricLabel',
+            { defaultMessage: 'Total metric' }
+          )}
+          metricTooltip={
             <EuiIconTip
               content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.totalQuery.tooltip',
+                'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip',
                 {
                   defaultMessage:
-                    'This KQL query should return all events that are relevant to the SLO calculation, including both good and bad events.',
+                    'This data from this field will be aggregated with the "sum" aggregation.',
+                }
+              )}
+              position="top"
+            />
+          }
+          equationTooltip={
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
+                {
+                  defaultMessage:
+                    'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
                 }
               )}
               position="top"
             />
           }
         />
-      </EuiFlexItem>
+      </EuiPanel>
     </EuiFlexGroup>
   );
 }
