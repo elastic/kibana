@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { DataStream } from '../../common/data_streams';
-import { DataStreamSelector } from '../components/data_stream_selector';
+import { DataStream, SearchStrategy } from '../../common/data_streams';
+import { DataStreamSelector, SearchHandler } from '../components/data_stream_selector';
 import { InternalStateProvider, useDataView } from '../utils/internal_state_container_context';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import {
@@ -31,7 +31,7 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     integrations,
     isLoading: isLoadingIntegrations,
     loadMore,
-    search,
+    search: integrationsSearch,
     searchIntegrations,
   } = useIntegrationsContext();
 
@@ -41,12 +41,23 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     isLoading: isLoadingStreams,
     loadDataStreams,
     reloadDataStreams,
+    search: dataStreamsSearch,
     searchDataStreams,
   } = useDataStreamsContext();
 
   const handleStreamSelection: DataStreamSelectionHandler = (dataStream) => {
     return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream);
   };
+
+  const handleSearch: SearchHandler = (params) => {
+    if (params.strategy === SearchStrategy.DATA_STREAMS) {
+      return searchDataStreams({ name: params.name, sortOrder: params.sortOrder });
+    } else {
+      searchIntegrations(params);
+    }
+  };
+
+  // TODO: handle search states for different strategies
 
   return (
     <DataStreamSelector
@@ -56,12 +67,11 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
       isLoadingIntegrations={isLoadingIntegrations}
       isLoadingStreams={isLoadingStreams}
       onIntegrationsLoadMore={loadMore}
-      onIntegrationsSearch={searchIntegrations}
+      onSearch={handleSearch}
       onStreamSelected={handleStreamSelection}
       onStreamsEntryClick={loadDataStreams}
       onStreamsReload={reloadDataStreams}
-      onStreamsSearch={searchDataStreams}
-      search={search}
+      search={integrationsSearch}
       title={dataView.getName()}
     />
   );

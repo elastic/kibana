@@ -79,15 +79,13 @@ export interface DataStreamSelectorProps {
   isLoadingIntegrations: boolean;
   isLoadingStreams: boolean;
   /* Triggered when a search or sorting is performed on integrations */
-  onIntegrationsSearch: SearchHandler;
+  onSearch: SearchHandler;
   /* Triggered when we reach the bottom of the integration list and want to load more */
   onIntegrationsLoadMore: LoadMoreIntegrations;
   /* Triggered when the uncategorized streams entry is selected */
   onStreamsEntryClick: () => void;
   /* Triggered when retrying to load the data streams */
   onStreamsReload: () => void;
-  /* Triggered when a search or sorting is performed on data streams */
-  onStreamsSearch: SearchHandler;
   /* Triggered when a data stream entry is selected */
   onStreamSelected: DataStreamSelectionHandler;
 }
@@ -96,7 +94,7 @@ export function DataStreamSelector({
   title,
   integrations,
   isLoadingIntegrations,
-  onIntegrationsSearch,
+  onSearch,
   onIntegrationsLoadMore,
   onStreamSelected,
   search,
@@ -104,7 +102,6 @@ export function DataStreamSelector({
   isLoadingStreams,
   onStreamsEntryClick,
   onStreamsReload,
-  onStreamsSearch,
   dataStreams,
 }: DataStreamSelectorProps) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -156,7 +153,7 @@ export function DataStreamSelector({
       items: [dataStreamsItem, ...items],
       panels,
     };
-  }, [integrations, handleStreamSelection, setRef]);
+  }, [integrations, handleStreamSelection, onStreamsEntryClick, setRef]);
 
   const panels = [
     {
@@ -188,12 +185,9 @@ export function DataStreamSelector({
     </DataStreamButton>
   );
 
-  // const handleIntegrationStreamsSearch = setLocalSearch;
-
-  // TODO: Handle search strategy by current panel id
   const handleSearch = (params: SearchParams) => {
     const strategy = getSearchStrategy(currentPanel);
-    return onIntegrationsSearch({
+    return onSearch({
       ...params,
       strategy,
       ...(strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS && { integrationId: currentPanel }),
@@ -201,7 +195,7 @@ export function DataStreamSelector({
   };
   const searchValue = search;
   // const handleSearch =
-  //   currentPanel === INTEGRATION_PANEL_ID ? onIntegrationsSearch : handleIntegrationStreamsSearch;
+  //   currentPanel === INTEGRATION_PANEL_ID ? onSearch : handleIntegrationStreamsSearch;
   // const searchValue = currentPanel === INTEGRATION_PANEL_ID ? search : localSearch;
 
   return (

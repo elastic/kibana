@@ -7,9 +7,9 @@
 
 /* eslint-disable no-console */
 
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Story } from '@storybook/react';
-import React from 'react';
 import { DataStreamSelector, DataStreamSelectorProps } from './data_stream_selector';
 
 export default {
@@ -405,7 +405,7 @@ Basic.args = {
   isLoadingIntegrations: false,
   isLoadingStreams: false,
   onIntegrationsLoadMore: () => console.log('Loading more integrations...'),
-  onIntegrationsSearch: (params) => console.log('Search integrations by: ', params),
+  onSearch: (params) => console.log('Search integrations by: ', params),
   onStreamSelected: (stream) => console.log('Create ad hoc view for stream: ', stream),
   onStreamsEntryClick: () => console.log('Load uncategorized streams...'),
   onStreamsReload: () => console.log('Reloading streams...'),
