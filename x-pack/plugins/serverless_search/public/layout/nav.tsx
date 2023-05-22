@@ -148,6 +148,7 @@ export const createServerlessSearchSideNavComponent =
           activeNavItemId={activeNavItemId}
           homeHref="/app/elasticsearch"
           linkToCloud="projects"
+          dataTestSubj="svlSearchSideNav"
         />
       </NavigationKibanaProvider>
     );
