@@ -27,7 +27,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
-  const { goToStep, goBack, getState } = useWizard();
+  const { goToStep, goBack, getState, CurrentStep } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
@@ -42,6 +42,10 @@ export function InstallElasticAgent() {
 
   const { data: installShipperSetup, status: installShipperSetupStatus } =
     useFetcher((callApi) => {
+      if (CurrentStep !== InstallElasticAgent) {
+        return;
+      }
+
       return callApi(
         'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
         {
@@ -138,8 +142,7 @@ export function InstallElasticAgent() {
                       {getInstallShipperCommand({
                         elasticAgentPlatform,
                         apiKeyEncoded,
-                        statusApiEndpoint:
-                          installShipperSetup?.statusApiEndpoint,
+                        apiEndpoint: installShipperSetup?.apiEndpoint,
                         scriptDownloadUrl:
                           installShipperSetup?.scriptDownloadUrl,
                       })}
@@ -210,19 +213,19 @@ export function InstallElasticAgent() {
 function getInstallShipperCommand({
   elasticAgentPlatform,
   apiKeyEncoded = '$API_KEY',
-  statusApiEndpoint = '$STATUS_API_ENDPOINT',
+  apiEndpoint = '$API_ENDPOINT',
   scriptDownloadUrl = '$SCRIPT_DOWNLOAD_URL',
 }: {
   elasticAgentPlatform: ElasticAgentPlatform;
   apiKeyEncoded: string | undefined;
-  statusApiEndpoint: string | undefined;
+  apiEndpoint: string | undefined;
   scriptDownloadUrl: string | undefined;
 }) {
   const setupScriptFilename = 'standalone-agent-setup.sh';
   const PLATFORM_COMMAND: Record<ElasticAgentPlatform, string> = {
     'linux-tar': oneLine`
       curl ${scriptDownloadUrl} -o ${setupScriptFilename} &&
-      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${statusApiEndpoint}
+      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${apiEndpoint}
     `,
     macos: oneLine`
       curl -O https://elastic.co/agent-setup.sh &&

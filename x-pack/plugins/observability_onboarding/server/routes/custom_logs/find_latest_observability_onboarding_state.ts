@@ -12,24 +12,25 @@ import {
   SavedObservabilityOnboardingState,
 } from '../../saved_objects/observability_onboarding_status';
 
-export async function findObservabilityOnboardingState({
+export async function findLatestObservabilityOnboardingState({
   savedObjectsClient,
-  apiKeyId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  apiKeyId: string;
-}): Promise<SavedObservabilityOnboardingState> {
+}): Promise<SavedObservabilityOnboardingState | undefined> {
   const result = await savedObjectsClient.find<ObservabilityOnboardingState>({
     type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
     page: 1,
     perPage: 1,
-    filter: `${OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE}.attributes.apiKeyId: "${apiKeyId}"`,
+    sortField: `updated_at`,
+    sortOrder: 'desc',
   });
-  return (
-    result.saved_objects.map(({ id, attributes, updated_at: upatedAt }) => ({
-      id,
-      updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
-      ...attributes,
-    }))?.[0] ?? {}
-  );
+  if (result.total === 0) {
+    return undefined;
+  }
+  const { id, updated_at: updatedAt, attributes } = result.saved_objects[0];
+  return {
+    id,
+    updatedAt: updatedAt ? Date.parse(updatedAt) : 0,
+    ...attributes,
+  };
 }

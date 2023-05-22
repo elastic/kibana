@@ -14,28 +14,25 @@ import {
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
-  observabilityOnboardingStateId?: string;
   observabilityOnboardingState: ObservabilityOnboardingState;
+  apiKeyId: string;
 }
 export async function saveObservabilityOnboardingState({
   savedObjectsClient,
-  observabilityOnboardingStateId,
   observabilityOnboardingState,
+  apiKeyId,
 }: Options): Promise<SavedObservabilityOnboardingState> {
+  savedObjectsClient;
   const {
     id,
     attributes,
     updated_at: updatedAt,
-  } = await (observabilityOnboardingStateId
-    ? savedObjectsClient.update(
-        OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-        observabilityOnboardingStateId,
-        observabilityOnboardingState
-      )
-    : savedObjectsClient.create(
-        OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-        observabilityOnboardingState
-      ));
+  } = await savedObjectsClient.update<ObservabilityOnboardingState>(
+    OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+    apiKeyId,
+    observabilityOnboardingState,
+    { upsert: observabilityOnboardingState }
+  );
   return {
     id,
     ...(attributes as ObservabilityOnboardingState),
