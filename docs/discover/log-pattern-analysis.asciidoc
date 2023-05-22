@@ -14,7 +14,7 @@ can use your own data.
 . If you don't see any results, expand the time range, for example, to 
 *Last 15 days*.
 
-. Click the `message` field in the **Available fields** list on the left 
+. Click the `message` field in the **Available fields** list 
 sidebar and click **Run pattern analysis**.
 +
 --
@@ -27,9 +27,9 @@ analysis is complete.
 [role="screenshot"]
 image::images/log-pattern-analysis-results.png["Log pattern analysis results in Discover."]
 
-You can apply filters to one or more patterns. By doing so, Discover only 
-display documents that match the selected patterns. Additionally, you can remove 
-selected patterns from the Discover view, resulting in the display of only those 
+You can apply filters to one or more patterns. By doing so, *Discover* only 
+displays documents that match the selected patterns. Additionally, you can remove 
+selected patterns from *Discover*, resulting in the display of only those 
 documents that don't match the selected pattern. These options enable you to 
 remove unimportant messages and focus on the more important, actionable data 
 during troubleshooting.
