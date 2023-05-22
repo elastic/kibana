@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useHistory } from 'react-router-dom';
+import { CoreStart } from '@kbn/core/public';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
@@ -18,6 +19,7 @@ import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias
 import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
+import { DiscoverServices } from '../../build_services';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -26,13 +28,18 @@ export interface DiscoverMainProps {
    * Central state container
    */
   stateContainer: DiscoverStateContainer;
+
+  /**
+   * Services passed in
+   */
+  providedServices?: Partial<CoreStart> & DiscoverServices;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { stateContainer } = props;
+  const { providedServices, stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
-  const { chrome, docLinks, data, spaces, history } = services;
+  const { chrome, docLinks, data, spaces, history } = services ?? providedServices;
   const usedHistory = useHistory();
   const navigateTo = useCallback(
     (path: string) => {
@@ -52,7 +59,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * State changes (data view, columns), when a text base query result is returned
    */
   useTextBasedQueryLanguage({
-    dataViews: services.dataViews,
+    dataViews: services.dataViews ?? providedServices?.dataViews,
     stateContainer,
   });
   /**

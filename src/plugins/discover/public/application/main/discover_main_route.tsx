@@ -16,6 +16,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { CoreStart } from '@kbn/core/public';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -28,6 +29,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
+import { DiscoverServices } from '../../build_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -35,14 +37,15 @@ interface DiscoverLandingParams {
   id: string;
 }
 
-interface Props {
+export interface Props {
   isDev: boolean;
+  providedServices?: Partial<CoreStart> & DiscoverServices;
 }
 
 export function DiscoverMainRoute(props: Props) {
   const history = useHistory();
   const services = useDiscoverServices();
-  const { isDev } = props;
+  const { isDev, providedServices } = props;
   const {
     core,
     chrome,
@@ -55,7 +58,7 @@ export function DiscoverMainRoute(props: Props) {
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
       history,
-      services,
+      services: services ?? providedServices,
     })
   );
   const [error, setError] = useState<Error>();
@@ -255,3 +258,5 @@ export function DiscoverMainRoute(props: Props) {
     </DiscoverMainProvider>
   );
 }
+
+export default DiscoverMainRoute;
