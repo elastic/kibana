@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { unmountComponentAtNode } from 'react-dom';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -16,6 +16,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { canUseCases } from '../../../client/helpers/can_use_cases';
+import type { CaseUI } from '../../../../common';
 import { CommentType } from '../../../../common';
 import { isLensEmbeddable } from './utils';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
@@ -31,14 +32,14 @@ export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 interface Props {
   embeddable: DashboardVisualizationEmbeddable;
   onSuccess: () => void;
-  onClose: () => void;
+  onClose: (theCase?: CaseUI) => void;
 }
 
 const AddExistingCaseModalWrapper: React.FC<Props> = ({ embeddable, onClose, onSuccess }) => {
   const { attributes, timeRange } = embeddable.getInput();
   const modal = useCasesAddToExistingCaseModal({
-    // onClose,
-    // onSuccess,
+    onClose,
+    onSuccess,
   });
 
   const attachments = [
@@ -103,10 +104,19 @@ export const createAddToExistingCaseLensAction = ({
 
       const targetDomElement = document.createElement('div');
 
-      const cleanupDom = () => {
-        if (targetDomElement != null) {
+      const cleanupDom = (shouldCleanup?: boolean) => {
+        if (targetDomElement != null && shouldCleanup) {
           unmountComponentAtNode(targetDomElement);
         }
+      };
+
+      const onClose = (theCase?: CaseUI, isCreateCase?: boolean) => {
+        const shouldCleanup = theCase == null && !isCreateCase;
+        cleanupDom(shouldCleanup);
+      };
+
+      const onSuccess = () => {
+        cleanupDom(true);
       };
 
       const mount = toMountPoint(
@@ -128,8 +138,8 @@ export const createAddToExistingCaseLensAction = ({
               >
                 <AddExistingCaseModalWrapper
                   embeddable={embeddable}
-                  onClose={cleanupDom}
-                  onSuccess={cleanupDom}
+                  onClose={onClose}
+                  onSuccess={onSuccess}
                 />
               </CasesProvider>
             </Router>

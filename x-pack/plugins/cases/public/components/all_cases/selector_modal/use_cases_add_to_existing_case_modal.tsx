@@ -79,7 +79,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           const content = props.noAttachmentsToaster?.content;
           casesToasts.showInfoToast(title, content);
 
-          return;
+          // return;
         }
 
         startTransaction({ appId, attachments });
@@ -90,29 +90,30 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           attachments,
         });
 
-        if (props.onSuccess) {
-          props.onSuccess(theCase);
-        }
+        // if (props.onSuccess) {
+        //   props.onSuccess(theCase);
+        // }
 
-        casesToasts.showSuccessAttach({
-          theCase,
-          attachments,
-          title: props.successToaster?.title,
-          content: props.successToaster?.content,
-        });
+        // casesToasts.showSuccessAttach({
+        //   theCase,
+        //   attachments,
+        //   title: props.successToaster?.title,
+        //   content: props.successToaster?.content,
+        // });
       } catch (error) {
         // error toast is handled
         // inside the createAttachments method
       }
     },
     [
-      props,
-      closeModal,
-      createNewCaseFlyout,
-      startTransaction,
       appId,
-      createAttachments,
       casesToasts,
+      closeModal,
+      createAttachments,
+      createNewCaseFlyout,
+      props.noAttachmentsToaster?.content,
+      props.noAttachmentsToaster?.title,
+      startTransaction,
     ]
   );
 
@@ -130,11 +131,11 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },
-          onClose: () => {
+          onClose: (theCase?: CaseUI, isCreateCase?: boolean) => {
             closeModal();
 
             if (props.onClose) {
-              return props.onClose();
+              return props.onClose(theCase, isCreateCase);
             }
           },
         },

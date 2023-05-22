@@ -23,7 +23,8 @@ import { AllCasesList } from '../all_cases_list';
 export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   onRowClick?: (theCase?: CaseUI) => void;
-  onClose?: (theCase?: CaseUI) => void;
+  onClose?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
+  onCreateCaseClicked?: () => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -37,19 +38,16 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
   ({ hiddenStatuses, onRowClick, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const closeModal = useCallback(() => {
-      if (onClose) {
-        onClose();
-      }
+      onClose?.();
       setIsModalOpen(false);
     }, [onClose]);
 
     const onClick = useCallback(
-      (theCase?: CaseUI) => {
-        onClose?.(theCase);
+      (theCase?: CaseUI, isCreateCase?: boolean) => {
+        onClose?.(theCase, isCreateCase);
         setIsModalOpen(false);
-        if (onRowClick) {
-          onRowClick(theCase);
-        }
+
+        onRowClick?.(theCase);
       },
       [onClose, onRowClick]
     );
