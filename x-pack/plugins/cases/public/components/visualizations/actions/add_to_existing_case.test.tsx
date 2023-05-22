@@ -7,8 +7,6 @@
 
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
 
-
-
 describe('createAddToExistingCaseLensAction', () => {
   const action = createAddToExistingCaseLensAction({
     core,
