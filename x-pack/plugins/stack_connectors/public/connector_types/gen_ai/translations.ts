@@ -19,7 +19,7 @@ export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.ge
 });
 
 export const API_PROVIDER_HEADING = i18n.translate(
-  'xpack.stackConnectors.components.genAi.providerHeadiner',
+  'xpack.stackConnectors.components.genAi.providerHeading',
   {
     defaultMessage: 'OpenAI provider',
   }
