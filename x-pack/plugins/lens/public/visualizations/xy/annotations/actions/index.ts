@@ -12,7 +12,6 @@ import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
 import { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
-import { getIgnoreFilterAction } from './ignore_filters_action';
 import { getSaveLayerAction } from './save_action';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
 import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
@@ -72,8 +71,6 @@ export const createAnnotationActions = ({
   if (isByReferenceAnnotationsLayer(layer) && annotationLayerHasUnsavedChanges(layer)) {
     actions.push(getRevertChangesAction({ state, layer, setState, core }));
   }
-
-  actions.push(getIgnoreFilterAction({ state, layer, setState }));
 
   return actions;
 };
