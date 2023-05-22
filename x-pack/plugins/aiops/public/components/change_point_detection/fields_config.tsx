@@ -106,7 +106,11 @@ export const FieldsConfig: FC = () => {
           </React.Fragment>
         );
       })}
-      <EuiButton onClick={onAdd} disabled={fieldConfigs.length >= MAX_CHANGE_POINT_CONFIGS}>
+      <EuiButton
+        onClick={onAdd}
+        disabled={fieldConfigs.length >= MAX_CHANGE_POINT_CONFIGS}
+        data-test-subj={'aiopsChangePointAddConfig'}
+      >
         <FormattedMessage
           id="xpack.aiops.changePointDetection.addButtonLabel"
           defaultMessage="Add"

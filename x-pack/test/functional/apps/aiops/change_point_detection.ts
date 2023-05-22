@@ -17,8 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('change point detection', async function () {
-    this.tags(['dima']);
-
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -69,8 +67,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('allows change point selection for detailed view', async () => {
       await aiops.changePointDetectionPage.getTable(0).selectAllRows();
       await aiops.changePointDetectionPage.viewSelected();
+      await aiops.changePointDetectionPage.closeFlyout();
     });
 
-    it('supports multiple configurations for change point detection', async () => {});
+    it('supports multiple configurations for change point detection', async () => {
+      await aiops.changePointDetectionPage.assertPanelExist(0);
+      await aiops.changePointDetectionPage.addChangePointConfig();
+      await aiops.changePointDetectionPage.assertPanelExist(1);
+    });
   });
 }

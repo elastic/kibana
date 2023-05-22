@@ -16,6 +16,7 @@ export function ChangePointDetectionPageProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   return {
     async navigateToIndexPatternSelection() {
@@ -94,6 +95,21 @@ export function ChangePointDetectionPageProvider(
           'aiopsChangePointDetectionViewSelected'
         );
         await testSubjects.existOrFail('aiopsChangePointDetectionSelectedCharts');
+      });
+    },
+
+    async closeFlyout() {
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await testSubjects.missingOrFail('aiopsChangePointDetectionSelectedCharts');
+    },
+
+    async addChangePointConfig() {
+      await testSubjects.click('aiopsChangePointAddConfig');
+    },
+
+    async assertPanelExist(index: number) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(`aiopsChangePointPanel_${index}`);
       });
     },
 
