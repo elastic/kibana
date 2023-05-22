@@ -149,52 +149,22 @@ export async function getPackages(
   return packageListWithoutStatus;
 }
 
-export async function getInstalledPackages(options: {
+interface GetInstalledPackagesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   dataStreamType?: PackageDataStreamTypes;
   nameQuery?: string;
   searchAfter?: SortResults;
   perPage: number;
   sortOrder: 'asc' | 'desc';
-}) {
-  const { savedObjectsClient, searchAfter, perPage, nameQuery, sortOrder, dataStreamType } =
-    options;
+}
+export async function getInstalledPackages(options: GetInstalledPackagesOptions) {
+  const { savedObjectsClient, ...otherOptions } = options;
+  const { dataStreamType } = otherOptions;
 
-  const packageSavedObjects = await savedObjectsClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-    // Pagination
-    perPage,
-    ...(searchAfter && { searchAfter }),
-    // Sort
-    sortField: 'name',
-    sortOrder,
-    // Name filter
-    ...(nameQuery && { searchFields: ['name'] }),
-    ...(nameQuery && { search: `${nameQuery}* | ${nameQuery}` }),
-    filter: nodeBuilder.and([
-      // Filter to installed packages only
-      nodeBuilder.is(
-        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
-        installationStatuses.Installed
-      ),
-      // Filter for a "queryable" marker
-      buildFunctionNode(
-        'nested',
-        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
-        nodeBuilder.is('type', 'index_template')
-      ),
-      // "Type" filter
-      ...(dataStreamType
-        ? [
-            buildFunctionNode(
-              'nested',
-              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
-              nodeBuilder.is('id', buildWildcardNode(`${dataStreamType}-*`))
-            ),
-          ]
-        : []),
-    ]),
-  });
+  const packageSavedObjects = await getInstalledPackageSavedObjects(
+    savedObjectsClient,
+    otherOptions
+  );
 
   const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
     const {
@@ -204,20 +174,7 @@ export async function getInstalledPackages(options: {
       es_index_patterns: esIndexPatterns,
     } = integrationSavedObject.attributes;
 
-    const dataStreams = Object.entries(esIndexPatterns)
-      .map(([key, value]) => {
-        return {
-          name: value,
-          title: key,
-        };
-      })
-      .filter((stream) => {
-        if (!dataStreamType) {
-          return true;
-        } else {
-          return stream.name.startsWith(`${dataStreamType}-`);
-        }
-      });
+    const dataStreams = getInstalledPackageSavedObjectDataStreams(esIndexPatterns, dataStreamType);
 
     return {
       name,
@@ -289,6 +246,79 @@ export async function getPackageSavedObjects(
   }
 
   return result;
+}
+
+export async function getInstalledPackageSavedObjects(
+  savedObjectsClient: SavedObjectsClientContract,
+  options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient'>
+) {
+  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType } = options;
+
+  const result = await savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    // Pagination
+    perPage,
+    ...(searchAfter && { searchAfter }),
+    // Sort
+    sortField: 'name',
+    sortOrder,
+    // Name filter
+    ...(nameQuery && { searchFields: ['name'] }),
+    ...(nameQuery && { search: `${nameQuery}* | ${nameQuery}` }),
+    filter: nodeBuilder.and([
+      // Filter to installed packages only
+      nodeBuilder.is(
+        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
+        installationStatuses.Installed
+      ),
+      // Filter for a "queryable" marker
+      buildFunctionNode(
+        'nested',
+        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+        nodeBuilder.is('type', 'index_template')
+      ),
+      // "Type" filter
+      ...(dataStreamType
+        ? [
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+              nodeBuilder.is('id', buildWildcardNode(`${dataStreamType}-*`))
+            ),
+          ]
+        : []),
+    ]),
+  });
+
+  for (const savedObject of result.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: savedObject.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return result;
+}
+
+function getInstalledPackageSavedObjectDataStreams(
+  indexPatterns: Record<string, string>,
+  dataStreamType?: string
+) {
+  return Object.entries(indexPatterns)
+    .map(([key, value]) => {
+      return {
+        name: value,
+        title: key,
+      };
+    })
+    .filter((stream) => {
+      if (!dataStreamType) {
+        return true;
+      } else {
+        return stream.name.startsWith(`${dataStreamType}-`);
+      }
+    });
 }
 
 export const getInstallations = getPackageSavedObjects;

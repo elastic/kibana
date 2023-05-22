@@ -126,8 +126,7 @@ export const getInstalledListHandler: FleetRequestHandler<
   TypeOf<typeof GetInstalledPackagesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const coreContext = await context.core;
-    const savedObjectsClient = coreContext.savedObjects.client;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
     const res = await getInstalledPackages({
       savedObjectsClient,
       ...request.query,
