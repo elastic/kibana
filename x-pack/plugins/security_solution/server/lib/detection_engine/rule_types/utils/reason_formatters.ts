@@ -123,6 +123,9 @@ created {alertSeverity} alert {alertName}.`,
 export const buildReasonMessageForEqlAlert = (args: BuildReasonMessageArgs) =>
   buildReasonMessageUtil({ ...args, type: 'eql' });
 
+export const buildReasonMessageForEsqlAlert = (args: BuildReasonMessageArgs) =>
+  buildReasonMessageUtil({ ...args, type: 'esql' });
+
 export const buildReasonMessageForMlAlert = (args: BuildReasonMessageArgs) =>
   buildReasonMessageUtil({ ...args, type: 'ml' });
 

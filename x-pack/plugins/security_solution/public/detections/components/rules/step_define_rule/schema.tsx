@@ -24,7 +24,7 @@ import {
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { isMlRule, isEsqlRule } from '../../../../../common/machine_learning/helpers';
 import type { FieldValueQueryBar } from '../query_bar';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
@@ -61,7 +61,9 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
           const skipValidation =
-            isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.IndexPatterns;
+            isMlRule(formData.ruleType) ||
+            isEsqlRule(formData.ruleType) ||
+            formData.dataSourceType !== DataSourceType.IndexPatterns;
 
           if (skipValidation) {
             return;

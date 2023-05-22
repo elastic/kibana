@@ -76,6 +76,7 @@ import {
   isThreatMatchRule,
   isThresholdRule,
   isQueryRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -162,7 +163,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
 
-  const { getFields, getFormData, reset, setFieldValue, validate } = form;
+  const { getFields, getFormData, reset, setFieldValue, validate, getErrors } = form;
   const [formData] = useFormData<DefineStepRule>({
     form,
     watch: [
@@ -424,6 +425,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       if (isEqual(currentQuery.value, defaultCustomQuery.forThreatMatchRules)) {
         currentQuery.reset({
           defaultValue: defaultCustomQuery.forNormalRules,
+        });
+      }
+    }
+
+    if (isEsqlRule(ruleType)) {
+      if (previousRuleType && !isEsqlRule(previousRuleType)) {
+        currentQuery.reset({
+          defaultValue: defaultCustomQuery.forEsqlRules,
         });
       }
     }
@@ -845,8 +854,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
-              <EuiSpacer size="s" />
-              {DataSource}
+              <StyledVisibleContainer isVisible={!isEsqlRule(ruleType)}>
+                <EuiSpacer size="s" />
+                {DataSource}
+              </StyledVisibleContainer>
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <UseField

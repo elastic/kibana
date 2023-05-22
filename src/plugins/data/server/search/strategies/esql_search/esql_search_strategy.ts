@@ -35,7 +35,6 @@ export const esqlSearchStrategyProvider = (
         const rawResponse = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
-
             path: '/_esql',
             body: {
               ...requestParams,

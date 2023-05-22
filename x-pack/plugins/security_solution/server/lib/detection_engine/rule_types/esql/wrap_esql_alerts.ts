@@ -1,0 +1,82 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import objectHash from 'object-hash';
+import type {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
+import type { ConfigType } from '../../../../config';
+import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
+import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
+import type { SignalSource } from '../types';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { buildBulkBody } from '../factories/utils/build_bulk_body';
+
+import type { EsqlTable, EsqlResultRow, EsqlResultColumn } from './esql_request';
+
+const rowToDocument = (
+  columns: EsqlResultColumn[],
+  row: EsqlResultRow
+): Record<string, string | null> => {
+  return columns.reduce<Record<string, string | null>>((acc, column, i) => {
+    acc[column.name] = row[i];
+
+    return acc;
+  }, {});
+};
+
+export const wrapEsqlAlerts = ({
+  results,
+  spaceId,
+  completeRule,
+  mergeStrategy,
+  alertTimestampOverride,
+  ruleExecutionLogger,
+  publicBaseUrl,
+}: {
+  results: EsqlTable;
+  spaceId: string | null | undefined;
+  completeRule: CompleteRule<EsqlRuleParams>;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  alertTimestampOverride: Date | undefined;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string | undefined;
+  // TODO latest fields
+}): Array<WrappedFieldsLatest<any>> => {
+  console.log('>>>>>>> columns', JSON.stringify(results.columns, null, 2));
+
+  return results.values.map((row, i) => {
+    const id = objectHash([completeRule.ruleParams.query, `${spaceId}:${completeRule.alertId}`, i]);
+
+    const document = rowToDocument(results.columns, row);
+    console.log('>>>>>>> row', JSON.stringify(row, null, 2));
+    console.log('>>>>>>> doc', JSON.stringify(document, null, 2));
+    const baseAlert: BaseFieldsLatest = buildBulkBody(
+      spaceId,
+      completeRule,
+      { _source: document },
+      mergeStrategy,
+      [],
+      true,
+      buildReasonMessageForNewTermsAlert,
+      [],
+      alertTimestampOverride,
+      ruleExecutionLogger,
+      id,
+      publicBaseUrl
+    );
+
+    return {
+      _id: id,
+      _index: '',
+      _source: {
+        ...baseAlert,
+      },
+    };
+  });
+};

@@ -20,16 +20,24 @@ export const getQueryFilter = ({
   filters,
   index,
   exceptionFilter,
-}: {
-  query: RuleQuery;
-  language: Language;
-  filters: unknown;
-  index: IndexPatternArray;
-  exceptionFilter: Filter | undefined;
-}): ESBoolQuery => {
+}:
+  | {
+      query: RuleQuery;
+      language: Language | 'esql';
+      filters: unknown;
+      index: IndexPatternArray;
+      exceptionFilter: Filter | undefined;
+    }
+  | {
+      index: undefined;
+      query: RuleQuery;
+      language: 'esql';
+      filters: unknown;
+      exceptionFilter: Filter | undefined;
+    }): ESBoolQuery => {
   const indexPattern: DataViewBase = {
     fields: [],
-    title: index.join(),
+    title: (index ?? []).join(),
   };
 
   const config: EsQueryConfig = {

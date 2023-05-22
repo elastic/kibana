@@ -50,6 +50,7 @@ import type {
 } from '../../../rule_types/types';
 import {
   createEqlAlertType,
+  createEsqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
@@ -392,6 +393,24 @@ export const previewRulesRoute = async (
               eqlAlertType.executor,
               eqlAlertType.id,
               eqlAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'esql':
+            const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));
+            await runExecutors(
+              esqlAlertType.executor,
+              esqlAlertType.id,
+              esqlAlertType.name,
               previewRuleParams,
               () => true,
               {

@@ -395,6 +395,7 @@ const commonRuleParamsKeys = [
   'version',
 ];
 const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id', 'response_actions'];
+const esqlRuleParams = ['filters', 'language', 'query', 'response_actions'];
 const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
 const thresholdRuleParams = ['threshold', ...queryRuleParams];
 
@@ -415,6 +416,8 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return machineLearningRuleParams;
     case 'threshold':
       return thresholdRuleParams;
+    case 'esql':
+      return esqlRuleParams;
     case 'new_terms':
     case 'threat_match':
     case 'query':

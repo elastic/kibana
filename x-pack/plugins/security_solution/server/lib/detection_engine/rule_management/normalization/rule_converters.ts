@@ -30,6 +30,7 @@ import type {
 } from '../../../../../common/detection_engine/rule_schema';
 import {
   EqlPatchParams,
+  EsqlPatchParams,
   MachineLearningPatchParams,
   NewTermsPatchParams,
   QueryPatchParams,
@@ -59,6 +60,8 @@ import type {
   BaseRuleParams,
   EqlRuleParams,
   EqlSpecificRuleParams,
+  EsqlRuleParams,
+  EsqlSpecificRuleParams,
   ThreatRuleParams,
   ThreatSpecificRuleParams,
   QueryRuleParams,
@@ -100,6 +103,14 @@ export const typeSpecificSnakeToCamel = (
         timestampField: params.timestamp_field,
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
+      };
+    }
+    case 'esql': {
+      return {
+        type: params.type,
+        language: params.language,
+        query: params.query,
+        filters: params.filters,
       };
     }
     case 'threat_match': {
@@ -198,6 +209,18 @@ const patchEqlParams = (
     timestampField: params.timestamp_field ?? existingRule.timestampField,
     eventCategoryOverride: params.event_category_override ?? existingRule.eventCategoryOverride,
     tiebreakerField: params.tiebreaker_field ?? existingRule.tiebreakerField,
+  };
+};
+
+const patchEsqlParams = (
+  params: EsqlPatchParams,
+  existingRule: EsqlRuleParams
+): EsqlSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
   };
 };
 
@@ -335,6 +358,13 @@ export const patchTypeSpecificSnakeToCamel = (
         throw parseValidationError(error);
       }
       return patchEqlParams(validated, existingRule);
+    }
+    case 'esql': {
+      const [validated, error] = validateNonExact(params, EsqlPatchParams);
+      if (validated == null) {
+        throw parseValidationError(error);
+      }
+      return patchEsqlParams(validated, existingRule);
     }
     case 'threat_match': {
       const [validated, error] = validateNonExact(params, ThreatMatchPatchParams);
@@ -517,6 +547,14 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         timestamp_field: params.timestampField,
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
+      };
+    }
+    case 'esql': {
+      return {
+        type: params.type,
+        language: params.language,
+        query: params.query,
+        filters: params.filters,
       };
     }
     case 'threat_match': {

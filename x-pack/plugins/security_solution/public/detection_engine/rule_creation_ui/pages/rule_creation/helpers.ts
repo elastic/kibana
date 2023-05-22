@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { has, isEmpty } from 'lodash/fp';
+import { has, isEmpty, get } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
@@ -170,6 +170,19 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatMapping'
   | 'eqlOptions'
 >;
+type EsqlRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
+  | 'index'
+  | 'newTermsFields'
+  | 'historyWindowSize'
+>;
 
 const isMlFields = <T>(
   fields:
@@ -221,6 +234,17 @@ const isEqlFields = <T>(
     | NewTermsRuleFields<T>
 ): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
 
+const isEsqlFields = <T>(
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
+): fields is EsqlRuleFields<T> => get('queryBar.query.language', fields) === 'esql';
+
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
   type: Type
@@ -230,6 +254,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   | MlRuleFields<T>
   | ThresholdRuleFields<T>
   | ThreatMatchRuleFields<T>
+  | EsqlRuleFields<T>
   | NewTermsRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
@@ -298,6 +323,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         ...eqlRuleFields
       } = fields;
       return eqlRuleFields;
+
     case 'new_terms':
       const {
         anomalyThreshold: ___a,
@@ -310,6 +336,22 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         ...newTermsRuleFields
       } = fields;
       return newTermsRuleFields;
+
+    case 'esql':
+      const {
+        anomalyThreshold: _esql_a,
+        machineLearningJobId: _esql_m,
+        threshold: _esql_t,
+        threatIndex: _esql_removedThreatIndex,
+        threatQueryBar: _esql_removedThreatQueryBar,
+        threatMapping: _esql_removedThreatMapping,
+        newTermsFields: _esql_removedNewTermsFields,
+        historyWindowSize: _esql_removedHistoryWindowSize,
+        eqlOptions: _esql__eqlOptions,
+        index: _esql_index,
+        ...esqlRuleFields
+      } = fields;
+      return esqlRuleFields;
   }
   assertUnreachable(type);
 };
@@ -429,6 +471,12 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         timestamp_field: ruleFields.eqlOptions?.timestampField,
         event_category_override: ruleFields.eqlOptions?.eventCategoryField,
         tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+      }
+    : isEsqlFields(ruleFields)
+    ? {
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
       }
     : isNewTermsFields(ruleFields)
     ? {

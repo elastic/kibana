@@ -12,6 +12,7 @@ import {
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
@@ -32,6 +33,7 @@ import { getScheduleNotificationResponseActionsService } from './lib/detection_e
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
+  createEsqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createNewTermsAlertType,
@@ -259,6 +261,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType(ruleOptions)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({
@@ -321,6 +324,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const ruleTypes = [
       LEGACY_NOTIFICATIONS_ID,
       EQL_RULE_TYPE_ID,
+      ESQL_RULE_TYPE_ID,
       INDICATOR_RULE_TYPE_ID,
       ML_RULE_TYPE_ID,
       QUERY_RULE_TYPE_ID,
