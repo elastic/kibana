@@ -24,9 +24,7 @@ jest.mock('../../utils/kibana_react', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('../../hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
+jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   useLoadRuleTypes: jest.fn(),
