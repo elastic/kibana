@@ -102,19 +102,23 @@ function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undef
   // * if format is the legacy Lens bits format then skip this
   // * if format is coming from Lens, then override the pattern with the custom compact one
   // * if format is falling back to the Advanced settings one, then override only if not touched
+  // * if format is not specified it's coming from text based languages, so threat is "number"
   if (
-    serializedFieldFormat?.id &&
-    serializedFieldFormat.id in COMPACT_CUSTOM_PATTERNS_LOOKUP &&
-    (!serializedFieldFormat.params || serializedFieldFormat.params?.formatOverride) &&
-    // due to legacy configuration of lens bit formatter this was set as "number" with a custom format
-    !isBitFormat(serializedFieldFormat)
+    !serializedFieldFormat?.id ||
+    (serializedFieldFormat.id &&
+      serializedFieldFormat.id in COMPACT_CUSTOM_PATTERNS_LOOKUP &&
+      (!serializedFieldFormat.params || serializedFieldFormat.params?.formatOverride) &&
+      // due to legacy configuration of lens bit formatter this was set as "number" with a custom format
+      !isBitFormat(serializedFieldFormat))
   ) {
+    const formatId = serializedFieldFormat?.id || 'number';
     const { uiSettingsKey, patternFn, overrideCheck } =
-      COMPACT_CUSTOM_PATTERNS_LOOKUP[serializedFieldFormat.id as FormatTypesWithCompactVariants];
+      COMPACT_CUSTOM_PATTERNS_LOOKUP[formatId as FormatTypesWithCompactVariants];
     // If the format was set in Lens use the custom pattern
-    if (serializedFieldFormat.params?.formatOverride) {
+    if (serializedFieldFormat?.params?.formatOverride) {
       return {
         ...serializedFieldFormat,
+        id: formatId,
         params: {
           pattern: patternFn(
             (serializedFieldFormat.params.pattern as string) || uiSettings.get(uiSettingsKey)
@@ -129,9 +133,10 @@ function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undef
     // otherwise propose a custom compact format
     return {
       ...serializedFieldFormat,
+      id: formatId,
       params: {
         pattern: patternFn(
-          (serializedFieldFormat.params?.pattern as string) || uiSettings.get(uiSettingsKey)
+          (serializedFieldFormat?.params?.pattern as string) || uiSettings.get(uiSettingsKey)
         ),
       },
     };
