@@ -747,8 +747,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async editDimensionLabel(label: string) {
       await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
     },
-    async editDimensionFormat(format: string) {
+    async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
+      if (options?.decimals != null) {
+        await testSubjects.setValue('indexPattern-dimension-formatDecimals', `${options.decimals}`);
+        // press tab key to remove the range popover of the EUI field
+        await PageObjects.common.pressTabKey();
+      }
+      if (options?.prefix != null) {
+        await testSubjects.setValue('indexPattern-dimension-formatSuffix', options.prefix);
+      }
     },
     async editDimensionColor(color: string) {
       const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
