@@ -35,3 +35,13 @@ export const editGlobalParam = async ({
     ...paramRequest,
   });
 };
+
+export const deleteGlobalParams = async ({
+  ids,
+}: {
+  ids: string[];
+}): Promise<SyntheticsParamSO> => {
+  return apiService.delete(SYNTHETICS_API_URLS.PARAMS, {
+    ids: JSON.stringify(ids),
+  });
+};
