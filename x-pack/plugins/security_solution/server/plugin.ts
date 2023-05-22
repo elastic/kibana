@@ -70,7 +70,6 @@ import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
-import adHocRunner from './lib/detection_engine/routes/index/ad_hoc_runner_policy.json';
 import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -205,7 +204,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
     let previewRuleDataClient: IRuleDataClient | null = null;
-    let adHocRunnerDataClient: IRuleDataClient | null = null;
 
     // rule options are used both to create and preview rules.
     const ruleOptions: CreateRuleOptions = {
@@ -233,19 +231,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
     const previewIlmPolicy = previewPolicy.policy;
-    const adHocRunnerIlmPolicy = adHocRunner.policy;
 
     previewRuleDataClient = ruleDataService.initializeIndex({
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
       ilmPolicy: previewIlmPolicy,
-      secondaryAlias: undefined,
-    });
-
-    // Ad Hoc runner writes to default .alerts-security.alerts-* index as well
-    adHocRunnerDataClient = ruleDataService.initializeIndex({
-      ...ruleDataServiceOptions,
-      ilmPolicy: adHocRunnerIlmPolicy,
       secondaryAlias: undefined,
     });
 
