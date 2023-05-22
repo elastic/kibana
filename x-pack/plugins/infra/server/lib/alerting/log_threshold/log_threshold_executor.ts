@@ -1035,7 +1035,7 @@ const processRecoveredAlerts = async ({
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
-      alertDetailsUrl: await getAlertUrl(spaceId, alertUuid, alertsLocator, basePath.publicBaseUrl),
+      alertDetailsUrl: await getAlertUrl(alertUuid, spaceId, alertsLocator, basePath.publicBaseUrl),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),
