@@ -586,6 +586,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     contentEditor,
     inspectItem,
+    showEditActionForItem,
   ]);
 
   const itemsById = useMemo(() => {
