@@ -8,9 +8,16 @@
 import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { LexicalEditor } from 'lexical';
 import { $getSelection, FORMAT_TEXT_COMMAND, $isRangeSelection } from 'lexical';
 import { $createQuoteNode } from '@lexical/rich-text';
 import { $wrapNodes } from '@lexical/selection';
+import {
+  INSERT_CHECK_LIST_COMMAND,
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+} from '@lexical/list';
+import { TOGGLE_LINK_COMMAND } from '@lexical/link';
 import { INSERT_LENS_COMMAND } from './lens/plugin';
 
 const boldItalicButtons = [
@@ -34,18 +41,27 @@ const listButtons = [
     label: 'Unordered list',
     name: 'ul',
     iconType: 'editorUnorderedList',
+    getOnClick: (editor: LexicalEditor) => () => {
+      editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+    },
   },
   {
     id: 'mdOl',
     label: 'Ordered list',
     name: 'ol',
     iconType: 'editorOrderedList',
+    getOnClick: (editor: LexicalEditor) => () => {
+      editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+    },
   },
   {
     id: 'mdTl',
     label: 'Task list',
     name: 'tl',
     iconType: 'editorChecklist',
+    getOnClick: (editor: LexicalEditor) => () => {
+      editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
+    },
   },
 ];
 
@@ -60,6 +76,10 @@ const ActionBarComponent: React.FC = () => {
         $wrapNodes(selection, () => $createQuoteNode());
       }
     });
+  };
+
+  const insertLink = () => {
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://');
   };
 
   return (
@@ -82,7 +102,7 @@ const ActionBarComponent: React.FC = () => {
           <EuiToolTip key={item.id} content={item.label} delay="long">
             <EuiButtonIcon
               color="text"
-              onClick={() => {}}
+              onClick={item.getOnClick(editor)}
               iconType={item.iconType}
               aria-label={item.label}
             />
@@ -98,6 +118,15 @@ const ActionBarComponent: React.FC = () => {
             onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')}
             iconType="editorCodeBlock"
             aria-label="code"
+          />
+        </EuiToolTip>
+        <EuiToolTip key="code" content="Code" delay="long">
+          <EuiButtonIcon
+            color="text"
+            onClick={insertLink}
+            iconType="link"
+            aria-label="link"
+            size="xs"
           />
         </EuiToolTip>
         <span className="euiMarkdownEditorToolbar__divider" />
