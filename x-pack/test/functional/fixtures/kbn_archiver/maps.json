@@ -1160,3 +1160,42 @@
     "updated_at": "2022-06-08T18:03:37.060Z",
     "version": "WzE0MSwxXQ=="
 }
+
+{
+    "attributes":
+    {
+        "description": "",
+        "kibanaSavedObjectMeta":
+        {
+            "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+        "panelsJSON": "[{\"version\":\"8.9.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"d38ebf11-74ac-4e7b-ae31-42a51cfce4a1\"},\"panelIndex\":\"d38ebf11-74ac-4e7b-ae31-42a51cfce4a1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_d38ebf11-74ac-4e7b-ae31-42a51cfce4a1\"}]",
+        "refreshInterval":
+        {
+            "pause": true,
+            "value": 60000
+        },
+        "timeFrom": "2015-09-20T00:00:00.000Z",
+        "timeRestore": true,
+        "timeTo": "2015-09-20T01:00:00.000Z",
+        "title": "legacy TileMap dashboard",
+        "version": 1
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2023-05-22T16:12:32.001Z",
+    "id": "74c53f10-f8bb-11ed-9b6e-c1b4c0deaa45",
+    "managed": false,
+    "references":
+    [
+        {
+            "id": "Visualization-TileMap",
+            "name": "d38ebf11-74ac-4e7b-ae31-42a51cfce4a1:panel_d38ebf11-74ac-4e7b-ae31-42a51cfce4a1",
+            "type": "visualization"
+        }
+    ],
+    "type": "dashboard",
+    "typeMigrationVersion": "8.7.0",
+    "updated_at": "2023-05-22T16:12:32.001Z",
+    "version": "WzU0LDFd"
+}

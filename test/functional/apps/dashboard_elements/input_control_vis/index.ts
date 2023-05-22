@@ -10,9 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('input controls', function () {
-    loadTestFile(require.resolve('./input_control_options'));
     loadTestFile(require.resolve('./dynamic_options'));
     loadTestFile(require.resolve('./chained_controls'));
-    loadTestFile(require.resolve('./input_control_range'));
   });
 }

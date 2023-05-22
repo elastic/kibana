@@ -20,6 +20,8 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
   pluginsStart = plugins;
   mapsEms = plugins.mapsEms;
   emsSettings = mapsEms.createEMSSettings();
+
+  console.log(getTheme());
 }
 
 let isCloudEnabled = false;

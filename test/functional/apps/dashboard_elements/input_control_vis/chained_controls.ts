@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'visEditor', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
@@ -22,10 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await PageObjects.visualize.initTests();
-      await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.loadSavedVisualization('chained input control', {
-        navigateToVisualize: false,
-      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('legacy input control chained controls');
+      await PageObjects.dashboard.waitForRenderComplete();
       await testSubjects.waitForEnabled('addFilter', 10000);
     });
 
