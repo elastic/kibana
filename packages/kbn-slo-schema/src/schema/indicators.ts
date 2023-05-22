@@ -56,6 +56,31 @@ const kqlCustomIndicatorSchema = t.type({
   }),
 });
 
+const metricCustomValidAggregations = t.keyof({
+  sum: true,
+});
+const metricCustomMetricDef = t.type({
+  metrics: t.array(
+    t.type({
+      name: t.string,
+      aggregation: metricCustomValidAggregations,
+      field: t.string,
+    })
+  ),
+  equation: t.string,
+});
+const metricCustomIndicatorTypeSchema = t.literal('sli.metric.custom');
+const metricCustomIndicatorSchema = t.type({
+  type: metricCustomIndicatorTypeSchema,
+  params: t.type({
+    index: t.string,
+    filter: t.string,
+    good: metricCustomMetricDef,
+    total: metricCustomMetricDef,
+    timestampField: t.string,
+  }),
+});
+
 const indicatorDataSchema = t.type({
   dateRange: dateRangeSchema,
   good: t.number,
@@ -66,6 +91,7 @@ const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
   kqlCustomIndicatorTypeSchema,
+  metricCustomIndicatorTypeSchema,
 ]);
 
 // Validate that a string is a comma separated list of indicator types,
@@ -91,6 +117,7 @@ const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   kqlCustomIndicatorSchema,
+  metricCustomIndicatorSchema,
 ]);
 
 export {
@@ -100,6 +127,8 @@ export {
   apmTransactionErrorRateIndicatorTypeSchema,
   kqlCustomIndicatorSchema,
   kqlCustomIndicatorTypeSchema,
+  metricCustomIndicatorTypeSchema,
+  metricCustomIndicatorSchema,
   indicatorSchema,
   indicatorTypesArraySchema,
   indicatorTypesSchema,
