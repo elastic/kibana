@@ -89,7 +89,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         decodedCode = await unzipFile(hasSourceContent);
       }
 
-      return response.ok({ body: { result, decodedCode } });
+      return response.ok({ body: { result, decodedCode: formatCode(decodedCode) } });
     } catch (getErr) {
       server.logger.error(
         `Unable to inspect Synthetics monitor ${monitorWithDefaults[ConfigKey.NAME]}`
@@ -103,3 +103,22 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     }
   },
 });
+
+const formatCode = (code: string) => {
+  const replacements = [
+    { pattern: /\(\d*,\s*import_synthetics\d*\.step\)/g, replacement: 'step' },
+    { pattern: /\(\d*,\s*import_synthetics\d*\.journey\)/g, replacement: 'journey' },
+    { pattern: /import_synthetics\d*\.monitor/g, replacement: 'monitor' },
+    { pattern: /\(\d*,\s*import_synthetics\d*\.expect\)/g, replacement: 'expect' },
+  ];
+
+  let updated = code;
+  replacements.forEach(({ pattern, replacement }) => {
+    updated = updated.replace(pattern, replacement);
+  });
+
+  return updated.replace(
+    /var import_synthetics\d* = require\("@elastic\/synthetics"\);/,
+    "import { step, journey, monitor, expect } from '@elastic/synthetics';"
+  );
+};
