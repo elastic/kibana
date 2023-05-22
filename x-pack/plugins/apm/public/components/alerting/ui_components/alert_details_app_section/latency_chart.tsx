@@ -15,23 +15,29 @@ import {
   ALERT_EVALUATION_THRESHOLD,
 } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
-import { filterNil } from '../../../../shared/charts/latency_chart';
-import { TimeseriesChart } from '../../../../shared/charts/timeseries_chart';
+import {
+  AlertActiveTimeRangeAnnotation,
+  AlertThresholdAnnotation,
+  AlertThresholdTimeRangeRect,
+  AlertAnnotation,
+} from '@kbn/observability-alert-details';
+import { useEuiTheme } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { filterNil } from '../../../shared/charts/latency_chart';
+import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../../../../shared/charts/transaction_charts/helper';
-import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
-import { getLatencyChartSelector } from '../../../../../selectors/latency_chart_selectors';
-import { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
-import { isLatencyThresholdRuleType } from '../helpers';
-import { AlertActiveRect } from './alert_active_rect';
-import { AlertAnnotation } from './alert_annotation';
-import { AlertThresholdAnnotation } from './alert_threshold_annotation';
-import { AlertThresholdRect } from './alert_threshold_rect';
-import { ApmDocumentType } from '../../../../../../common/document_type';
-import { usePreferredDataSourceAndBucketSize } from '../../../../../hooks/use_preferred_data_source_and_bucket_size';
+} from '../../../shared/charts/transaction_charts/helper';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { isLatencyThresholdRuleType } from './helpers';
+import { ApmDocumentType } from '../../../../../common/document_type';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { DEFAULT_DATE_FORMAT } from './constants';
 
 function LatencyChart({
   alert,
@@ -65,7 +71,10 @@ function LatencyChart({
     numBuckets: 100,
     type: ApmDocumentType.ServiceTransactionMetric,
   });
-
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { uiSettings },
+  } = useKibana();
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (
@@ -108,27 +117,46 @@ function LatencyChart({
       preferred,
     ]
   );
+  const alertEvalThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
+
+  const alertEvalThresholdChartData = alertEvalThreshold
+    ? [
+        <AlertThresholdTimeRangeRect
+          key={'alertThresholdRect'}
+          id={'alertThresholdRect'}
+          threshold={alertEvalThreshold}
+          alertStarted={alert.start}
+          color={euiTheme.colors.danger}
+        />,
+        <AlertThresholdAnnotation
+          id={'alertThresholdAnnotation'}
+          key={'alertThresholdAnnotation'}
+          color={euiTheme.colors.danger}
+          threshold={alertEvalThreshold}
+        />,
+      ]
+    : [];
 
   const getLatencyChartAdditionalData = () => {
     if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
       return [
-        <AlertThresholdRect
+        <AlertActiveTimeRangeAnnotation
+          alertStart={alert.start}
+          color={euiTheme.colors.danger}
+          id={'alertActiveRect'}
           key={'alertThresholdRect'}
-          threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
-          alertStarted={alert.start}
         />,
         <AlertAnnotation
           key={'alertAnnotationStart'}
-          alertStarted={alert.start}
+          id={'alertAnnotationStart'}
+          alertStart={alert.start}
+          color={euiTheme.colors.danger}
+          dateFormat={
+            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) ||
+            DEFAULT_DATE_FORMAT
+          }
         />,
-        <AlertActiveRect
-          key={'alertAnnotationActiveRect'}
-          alertStarted={alert.start}
-        />,
-        <AlertThresholdAnnotation
-          key={'alertThresholdAnnotation'}
-          threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
-        />,
+        ...alertEvalThresholdChartData,
       ];
     }
   };

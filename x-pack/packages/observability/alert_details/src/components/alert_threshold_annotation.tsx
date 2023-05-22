@@ -6,31 +6,39 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { CHART_ANNOTATION_RED_COLOR } from '../constants';
 
-export function AlertThresholdAnnotation({
-  threshold,
-}: {
-  threshold?: number;
-}) {
-  if (!threshold) return <></>;
+interface Props {
+  id: string;
+  threshold: number;
+  color: string;
+}
 
+const ANNOTATION_TITLE = i18n.translate(
+  'observabilityAlertDetails.alertThresholdAnnotation.detailsTooltip',
+  {
+    defaultMessage: 'Alert started',
+  }
+);
+
+export function AlertThresholdAnnotation({ threshold, color, id }: Props) {
   return (
     <LineAnnotation
-      id="annotation_alert_threshold"
+      id={id}
       domainType={AnnotationDomainType.YDomain}
       dataValues={[
         {
           dataValue: threshold,
           header: String(threshold),
+          details: ANNOTATION_TITLE,
         },
       ]}
       style={{
         line: {
           opacity: 0.5,
           strokeWidth: 1,
-          stroke: CHART_ANNOTATION_RED_COLOR,
+          stroke: color,
         },
       }}
     />
