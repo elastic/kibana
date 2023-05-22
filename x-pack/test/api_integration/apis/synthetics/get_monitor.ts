@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         const [{ id: id1 }] = await Promise.all(monitors.map(saveMonitor));
 
         const apiResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS + '/' + id1)
+          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id1))
           .expect(200);
 
         expect(apiResponse.body.attributes).eql({
@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expected404Message = `Monitor id ${invalidMonitorId} not found!`;
 
         const getResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
+          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', invalidMonitorId))
           .set('kbn-xsrf', 'true');
 
         expect(getResponse.status).eql(404);
@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         const veryLargeMonId = new Array(1050).fill('1').join('');
 
         await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS + '/' + veryLargeMonId)
+          .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', veryLargeMonId))
           .set('kbn-xsrf', 'true')
           .expect(400);
       });
