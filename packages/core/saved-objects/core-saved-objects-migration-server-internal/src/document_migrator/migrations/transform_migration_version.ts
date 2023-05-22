@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { TransformFn } from '../types';
+import type { SavedObjectMigration } from '@kbn/core-saved-objects-server';
 
-export const transformMigrationVersion: TransformFn = ({ migrationVersion, ...doc }) => {
-  return {
-    transformedDoc: {
-      ...doc,
-      ...(migrationVersion ? { typeMigrationVersion: migrationVersion[doc.type] ?? '' } : {}),
-    },
-    additionalDocs: [],
-  };
+export const transformMigrationVersion: SavedObjectMigration = {
+  // @todo Remove when deferred migrations are publicly available.
+  // @ts-expect-error
+  deferred: true,
+  transform: ({ migrationVersion, ...doc }) => ({
+    ...doc,
+    ...(migrationVersion ? { typeMigrationVersion: migrationVersion[doc.type] ?? '' } : {}),
+  }),
 };

@@ -18,25 +18,8 @@ import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { lastValueFrom } from 'rxjs';
+import * as runResilientMigratorModule from './run_resilient_migrator';
 import { runResilientMigrator } from './run_resilient_migrator';
-
-jest.mock('./run_resilient_migrator', () => {
-  const actual = jest.requireActual('./run_resilient_migrator');
-
-  return {
-    runResilientMigrator: jest.fn(actual.runResilientMigrator),
-  };
-});
-
-jest.mock('./document_migrator', () => {
-  return {
-    // Create a mock for spying on the constructor
-    DocumentMigrator: jest.fn().mockImplementation((...args) => {
-      const { DocumentMigrator: RealDocMigrator } = jest.requireActual('./document_migrator');
-      return new RealDocMigrator(args[0]);
-    }),
-  };
-});
 
 const mappingsResponseWithoutIndexTypesMap: estypes.IndicesGetMappingResponse = {
   '.kibana_8.7.0_001': {
@@ -70,8 +53,8 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
 
 describe('KibanaMigrator', () => {
   beforeEach(() => {
-    (DocumentMigrator as jest.Mock).mockClear();
-    (runResilientMigrator as jest.MockedFunction<typeof runResilientMigrator>).mockClear();
+    jest.restoreAllMocks();
+    jest.spyOn(runResilientMigratorModule, 'runResilientMigrator');
   });
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
@@ -110,13 +93,11 @@ describe('KibanaMigrator', () => {
     it('calls documentMigrator.migrate', () => {
       const options = mockOptions();
       const kibanaMigrator = new KibanaMigrator(options);
-      const mockDocumentMigrator = { migrate: jest.fn() };
-      // @ts-expect-error `documentMigrator` is readonly.
-      kibanaMigrator.documentMigrator = mockDocumentMigrator;
+      jest.spyOn(DocumentMigrator.prototype, 'migrate').mockImplementation((doc) => doc);
       const doc = {} as any;
 
       expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
-      expect(mockDocumentMigrator.migrate).toBeCalledTimes(1);
+      expect(DocumentMigrator.prototype.migrate).toBeCalledTimes(1);
     });
   });
 

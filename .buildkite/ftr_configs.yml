@@ -79,6 +79,21 @@ disabled:
   # Asset Manager configs, in tech preview, will move to enabled after more stability introduced
   - x-pack/test/api_integration/apis/asset_manager/config.ts
 
+  # Serverless base config files
+  - x-pack/test_serverless/api_integration/config.base.ts
+  - x-pack/test_serverless/functional/config.base.ts
+  - x-pack/test_serverless/shared/config.base.ts
+
+  # Serverless configs, currently only for manual tests runs, CI integration planned
+  - x-pack/test_serverless/api_integration/test_suites/common/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/security/config.ts
+  - x-pack/test_serverless/functional/test_suites/common/config.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
