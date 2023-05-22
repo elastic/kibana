@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
 import type { Client } from '@elastic/elasticsearch';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getESHosts } from './get_es_hosts';
@@ -19,6 +20,7 @@ import {
 } from '../../saved_objects/observability_onboarding_status';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 import { findLatestObservabilityOnboardingState } from './find_latest_observability_onboarding_state';
+import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 
 const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint:
@@ -102,25 +104,10 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         path: { name },
         query: { status },
       },
-      request: {
-        headers: { authorization },
-      },
+      request,
       core,
     } = resources;
-    if (
-      !(
-        typeof authorization === 'string' && authorization.startsWith('ApiKey ')
-      )
-    ) {
-      return {
-        message:
-          'Unable to report setup progress without ApiKey in authorization header.',
-      };
-    }
-    const apiKeyEncoded = authorization.split(' ')[1];
-    const [apiKeyId] = Buffer.from(apiKeyEncoded, 'base64')
-      .toString('utf8')
-      .split(':');
+    const { apiKeyId } = getAuthenticationAPIKey(request);
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
@@ -156,7 +143,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 });
 
 const getStateRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/custom_logs/state',
+  endpoint: 'GET /internal/observability_onboarding/custom_logs/state',
   options: { tags: [] },
   params: t.type({
     query: t.type({
@@ -185,7 +172,7 @@ const getStateRoute = createObservabilityOnboardingServerRoute({
 });
 
 const getLatestStateRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/custom_logs/state/latest',
+  endpoint: 'GET /internal/observability_onboarding/custom_logs/state/latest',
   options: { tags: [] },
   async handler(resources): Promise<{
     savedObservabilityOnboardingState: SavedObservabilityOnboardingState | null;
@@ -201,8 +188,48 @@ const getLatestStateRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
-const cleanStateRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/custom_logs/clean_state',
+const customLogsExistsRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /internal/observability_onboarding/custom_logs/exists',
+  options: { tags: [] },
+  params: t.type({
+    query: t.type({
+      dataset: t.string,
+      namespace: t.string,
+    }),
+  }),
+  async handler(resources): Promise<{ exists: boolean }> {
+    const {
+      core,
+      request,
+      params: {
+        query: { dataset, namespace },
+      },
+    } = resources;
+    const coreStart = await core.start();
+    const esClient =
+      coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+    try {
+      const { hits } = await esClient.search({
+        index: `logs-${dataset}-${namespace}`,
+        terminate_after: 1,
+      });
+      const total = hits.total as { value: number };
+      return { exists: total.value > 0 };
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return { exists: false };
+      }
+      throw Boom.boomify(error, {
+        statusCode: error.statusCode,
+        message: error.message,
+        data: error.body,
+      });
+    }
+  },
+});
+
+const deleteStatesRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'DELETE /internal/observability_onboarding/custom_logs/states',
   options: { tags: [] },
   async handler(resources): Promise<object> {
     const { core } = resources;
@@ -225,5 +252,6 @@ export const customLogsRouteRepository = {
   ...stepProgressUpdateRoute,
   ...getStateRoute,
   ...getLatestStateRoute,
-  ...cleanStateRoute,
+  ...customLogsExistsRoute,
+  ...deleteStatesRoute,
 };

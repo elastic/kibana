@@ -42,36 +42,34 @@ export function InstallElasticAgent() {
 
   const { data: installShipperSetup, status: installShipperSetupStatus } =
     useFetcher((callApi) => {
-      if (CurrentStep !== InstallElasticAgent) {
-        return;
-      }
-
-      return callApi(
-        'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
-        {
-          params: {
-            body: {
-              name: wizardState.datasetName,
-              state: {
-                datasetName: wizardState.datasetName,
-                namespace: wizardState.namespace,
-                customConfigurations: wizardState.customConfigurations,
-                logFilePaths: wizardState.logFilePaths,
+      if (CurrentStep === InstallElasticAgent) {
+        return callApi(
+          'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
+          {
+            params: {
+              body: {
+                name: wizardState.datasetName,
+                state: {
+                  datasetName: wizardState.datasetName,
+                  namespace: wizardState.namespace,
+                  customConfigurations: wizardState.customConfigurations,
+                  logFilePaths: wizardState.logFilePaths,
+                },
               },
             },
-          },
-        }
-      );
+          }
+        );
+      }
     }, []);
 
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
-      if (installShipperSetup?.apiKeyId) {
+      if (CurrentStep === InstallElasticAgent && installShipperSetup) {
         return callApi(
           'GET /api/observability_onboarding/elastic_agent/config',
           {
             headers: {
-              authorization: `ApiKey ${installShipperSetup?.apiKeyEncoded}`,
+              authorization: `ApiKey ${installShipperSetup.apiKeyEncoded}`,
             },
           }
         );
