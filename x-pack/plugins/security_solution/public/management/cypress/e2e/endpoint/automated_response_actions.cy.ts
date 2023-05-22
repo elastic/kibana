@@ -74,8 +74,6 @@ describe('Automated Response Actions', () => {
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
-      // TODO find a more reliable way to check the proper output for the action type than relying on the order
-      // maybe it would make sense to add some agent details to the response, so we can then validate agent vs output
       changeAlertsFilter('event.category: "file"');
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('responseActionsViewTab').click();
