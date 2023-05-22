@@ -54,6 +54,7 @@ export const createContextMock = (
     typeRegistry,
     serializer: serializerMock.create(),
     deletedTypes: ['deleted-type'],
+    batchSize: 1000,
     discardCorruptObjects: false,
     ...parts,
   };
