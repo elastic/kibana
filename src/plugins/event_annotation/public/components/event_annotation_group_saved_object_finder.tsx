@@ -26,7 +26,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
   uiSettings: IUiSettingsClient;
   http: CoreStart['http'];
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  fixedPageSize: number;
+  fixedPageSize?: number;
   onChoose: (value: {
     id: string;
     type: string;

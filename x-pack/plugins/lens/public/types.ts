@@ -1021,8 +1021,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
       persistedState: P,
       mainPalette?: PaletteOutput,
       annotationGroups?: AnnotationGroups,
-      references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext | VisualizeEditorContext
+      references?: SavedObjectReference[]
     ): T;
   };
 

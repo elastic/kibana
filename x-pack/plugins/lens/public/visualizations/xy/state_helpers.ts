@@ -14,18 +14,11 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import { validateQuery } from '@kbn/visualization-ui-components/public';
 import { DataViewsState } from '../../state_management';
-import {
-  FramePublicAPI,
-  DatasourcePublicAPI,
-  VisualizeEditorContext,
-  nonNullable,
-  AnnotationGroups,
-} from '../../types';
+import { FramePublicAPI, DatasourcePublicAPI, nonNullable, AnnotationGroups } from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -223,8 +216,7 @@ export function isPersistedState(state: XYPersistedState | XYState): state is XY
 export function injectReferences(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  references?: SavedObjectReference[]
 ): XYState {
   if (!references || !references.length) {
     return state as XYState;
@@ -254,9 +246,7 @@ export function injectReferences(
         if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
           injectedLayer = {
             ...persistedLayer,
-            indexPatternId:
-              // getIndexPatternIdFromInitialContext(persistedLayer, initialContext) || TODO - was this doing anything?
-              indexPatternIdFromReferences,
+            indexPatternId: indexPatternIdFromReferences,
           };
         } else {
           const annotationGroupId = references?.find(
@@ -307,16 +297,6 @@ export function injectReferences(
       .filter(nonNullable),
   };
 }
-
-// TODO - was this doing anything?
-// function getIndexPatternIdFromInitialContext(
-//   layer: XYPersistedByValueAnnotationLayerConfig,
-//   initialContext?: VisualizeFieldContext | VisualizeEditorContext
-// ) {
-//   if (initialContext && 'isVisualizeAction' in initialContext) {
-//     return layer && 'indexPatternId' in layer ? layer.indexPatternId : undefined;
-//   }
-// }
 
 export function getAnnotationLayerErrors(
   layer: XYAnnotationLayerConfig,

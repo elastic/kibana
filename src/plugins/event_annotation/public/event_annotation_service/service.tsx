@@ -11,7 +11,6 @@ import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { CoreStart, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/public';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import {
@@ -198,15 +197,7 @@ export function getEventAnnotationService(
     updateAnnotationGroup,
     createAnnotationGroup,
     // deleteAnnotationGroup,
-    renderEventAnnotationGroupSavedObjectFinder: (props: {
-      fixedPageSize: number;
-      onChoose: (value: {
-        id: string;
-        type: string;
-        fullName: string;
-        savedObject: SavedObjectCommon<unknown>;
-      }) => void;
-    }) => {
+    renderEventAnnotationGroupSavedObjectFinder: (props) => {
       return (
         <EventAnnotationGroupSavedObjectFinder
           http={core.http}

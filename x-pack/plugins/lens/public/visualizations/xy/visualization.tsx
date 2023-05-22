@@ -23,7 +23,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { isEqual } from 'lodash';
 import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import { generateId } from '../../id_generator';
@@ -47,7 +46,6 @@ import type {
   Suggestion,
   UserMessage,
   AnnotationGroups,
-  VisualizeEditorContext,
 } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
@@ -242,12 +240,11 @@ export const getXyVisualization = ({
     state,
     _mainPalette?,
     annotationGroups?: AnnotationGroups,
-    references?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext
+    references?: SavedObjectReference[]
   ) {
     const finalState =
       state && isPersistedState(state)
-        ? injectReferences(state, annotationGroups!, references, initialContext)
+        ? injectReferences(state, annotationGroups!, references)
         : state;
     return (
       finalState || {

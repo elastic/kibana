@@ -275,7 +275,6 @@ export function initializeVisualization({
   visualizationMap,
   visualizationState,
   references,
-  initialContext,
   annotationGroups,
 }: {
   visualizationState: VisualizationState;
@@ -291,8 +290,7 @@ export function initializeVisualization({
         visualizationState.state,
         undefined,
         annotationGroups,
-        references,
-        initialContext
+        references
       ) ?? visualizationState.state
     );
   }
