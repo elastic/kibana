@@ -7,7 +7,8 @@
 
 import type { RenderContentPanelProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import React from 'react';
-import { BulkAlertTagsPanelComponent } from './alert_bulk_tags';
+import { BulkAlertTagsPanel } from './alert_bulk_tags';
+import * as i18n from './translations';
 
 interface UseBulkAlertTagsItemsProps {
   refetch: () => void;
@@ -16,11 +17,11 @@ interface UseBulkAlertTagsItemsProps {
 export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
   const alertTagsItems = [
     {
-      key: 'sample key',
+      key: 'manage-alert-tags',
       'data-test-subj': 'alert-tags-context-menu-item',
-      name: 'Add tags',
+      name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
       panel: 1,
-      label: 'Add tags',
+      label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
       disableOnQuery: true,
     },
   ];
@@ -28,7 +29,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
   const alertTagsPanels = [
     {
       id: 1,
-      title: 'Add tags',
+      title: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
       renderContent: ({
         selectedIds,
         refresh,
@@ -36,7 +37,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
         clearSelection,
         closePopoverMenu,
       }: RenderContentPanelProps) => (
-        <BulkAlertTagsPanelComponent
+        <BulkAlertTagsPanel
           alertIds={selectedIds}
           refresh={refresh}
           refetchQuery={refetch}

@@ -7,8 +7,8 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiPopoverTitle, EuiSelectable, EuiButton } from '@elastic/eui';
-import type { TimelineItem } from '@kbn/timelines-plugin/common'; // TODO: maybe not the correct import place as this will be deleted?
-import React, { useCallback, useMemo, useState } from 'react';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { TAGS } from '@kbn/rule-data-utils';
 import { intersection, union } from 'lodash';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
@@ -17,6 +17,7 @@ import { DEFAULT_ALERT_TAGS_KEY } from '../../../../../common/constants';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { useSetAlertTags } from './use_set_alert_tags';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
+import * as i18n from './translations';
 
 interface BulkAlertTagsPanelComponentProps {
   alertIds: TimelineItem[];
@@ -26,7 +27,7 @@ interface BulkAlertTagsPanelComponentProps {
   clearSelection?: () => void;
   closePopoverMenu: () => void;
 }
-export const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = ({
+const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = ({
   alertIds,
   refresh,
   refetchQuery,
@@ -65,11 +66,11 @@ export const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentPr
     (updated: number, conflicts: number) => {
       if (conflicts > 0) {
         addWarning({
-          title: 'Warning',
-          text: `${updated} alerts updated successfully, but ${conflicts} didn't due to version conflicts`,
+          title: i18n.UPDATE_ALERT_TAGS_FAILED(conflicts),
+          text: i18n.UPDATE_ALERT_TAGS_FAILED_DETAILED(updated, conflicts),
         });
       } else {
-        addSuccess(`${updated} alerts successfully updated`);
+        addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated));
       }
     },
     [addSuccess, addWarning]
@@ -77,7 +78,7 @@ export const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentPr
 
   const onUpdateFailure = useCallback(
     (error: Error) => {
-      addError(error.message, { title: 'Tags failed to update' });
+      addError(error.message, { title: i18n.UPDATE_ALERT_TAGS_FAILURE });
     },
     [addError]
   );
@@ -105,7 +106,7 @@ export const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentPr
       if (clearSelection) clearSelection();
 
       if (response.version_conflicts && ids.length === 1) {
-        throw new Error('Updated failed due to version conflicts');
+        throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);
       }
 
       onUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0);
@@ -155,13 +156,13 @@ export const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentPr
         allowExclusions
         searchable
         searchProps={{
-          placeholder: 'Search tags',
+          placeholder: i18n.ALERT_TAGS_MENU_SEARCH_PLACEHOLDER,
         }}
-        aria-label={'search them tags'}
+        aria-label={i18n.ALERT_TAGS_MENU_SEARCH_PLACEHOLDER}
         options={selectableAlertTags}
         onChange={handleTagsOnChange}
-        emptyMessage={'im empty fill me up'}
-        noMatchesMessage={'no matches here you absolute fool'}
+        emptyMessage={i18n.ALERT_TAGS_MENU_EMPTY}
+        noMatchesMessage={i18n.ALERT_TAGS_MENU_SEARCH_NO_TAGS_FOUND}
       >
         {(list, search) => (
           <div>
@@ -171,8 +172,10 @@ export const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentPr
         )}
       </EuiSelectable>
       <EuiButton fullWidth size="s" onClick={onTagsUpdate}>
-        {'Update tags'}
+        {i18n.ALERT_TAGS_UPDATE_BUTTON_MESSAGE}
       </EuiButton>
     </>
   );
 };
+
+export const BulkAlertTagsPanel = memo(BulkAlertTagsPanelComponent);

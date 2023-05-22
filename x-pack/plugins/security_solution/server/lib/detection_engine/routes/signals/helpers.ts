@@ -6,16 +6,13 @@
  */
 
 import type { AlertTags } from '../../../../../common/detection_engine/schemas/common';
+import * as i18n from './translations';
 
 export const validateAlertTagsArrays = (tags: AlertTags) => {
   const { tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove } = tags;
   const duplicates = tagsToAdd.filter((tag) => tagsToRemove.includes(tag));
   if (duplicates.length) {
-    return [
-      `Duplicate tags [${JSON.stringify(
-        duplicates
-      )}] were found in the tags_to_add and tags_to_remove parameters`,
-    ];
+    return [i18n.ALERT_TAGS_VALIDATION_ERROR(JSON.stringify(duplicates))];
   }
   return [];
 };

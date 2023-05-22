@@ -6,6 +6,7 @@
  */
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import * as i18n from './translations';
 
 /**
  * as const
@@ -539,7 +540,7 @@ export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
 
 export const DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
 export const DEFAULT_ALERT_TAGS_VALUE = [
-  'False positive',
-  'Duplicate',
-  'Further investigation required',
+  i18n.DUPLICATE,
+  i18n.FALSE_POSITIVE,
+  i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
