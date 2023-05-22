@@ -13,14 +13,13 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
 
   const { syntheticsMonitors, loading } = useMonitorList(search);
 
-  const hasMonitor = Boolean(
-    syntheticsMonitors &&
-      syntheticsMonitors.some(
+  return useMemo(() => {
+    const nameAlreadyExists = Boolean(
+      syntheticsMonitors?.some(
         (monitor) => monitor.name.trim().toLowerCase() === search && monitorId !== monitor.config_id
       )
-  );
+    );
 
-  return useMemo(() => {
     const values = syntheticsMonitors.map((monitor) => ({
       label: monitor.name as string,
       key: monitor.config_id,
@@ -28,10 +27,10 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
     }));
 
     return {
-      values: values.filter((val) => val.key !== monitorId),
       loading,
-      nameAlreadyExists: hasMonitor,
-      validName: hasMonitor ? '' : search,
+      nameAlreadyExists,
+      validName: nameAlreadyExists ? '' : search,
+      values: values.filter((val) => val.key !== monitorId),
     };
-  }, [loading, monitorId, hasMonitor, syntheticsMonitors, search]);
+  }, [loading, monitorId, syntheticsMonitors, search]);
 };
