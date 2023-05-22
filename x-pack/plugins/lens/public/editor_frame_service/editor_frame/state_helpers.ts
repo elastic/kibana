@@ -123,7 +123,8 @@ export async function initializeDataViews(
     })
   );
 
-  for (const group of Object.values(annotationGroups)) {
+  const annotationGroupValues = Object.values(annotationGroups);
+  for (const group of annotationGroupValues) {
     if (group.dataViewSpec?.id) {
       adHocDataViews[group.dataViewSpec.id] = group.dataViewSpec;
     }

@@ -55,7 +55,7 @@ export function AddLayerButton({
       ?.filter(({ canAddViaMenu: hideFromMenu }) => !hideFromMenu);
   }, [visualization, visualizationState, layersMeta]);
 
-  if (supportedLayers == null || !supportedLayers.length) {
+  if (!supportedLayers?.length) {
     return null;
   }
   const annotationPanel = ({
