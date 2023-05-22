@@ -333,7 +333,9 @@ export const createType = (
   hidden: false,
   namespaceType: 'single',
   mappings: {
-    properties: mappings.properties[type].properties! as SavedObjectsMappingProperties,
+    properties: (mappings.properties[type]
+      ? mappings.properties[type].properties!
+      : {}) as SavedObjectsMappingProperties,
   },
   migrations: { '1.1.1': (doc) => doc },
   ...parts,
@@ -580,6 +582,9 @@ export const expectBulkGetResult = (
   attributes: doc._source![type],
   references: doc._source!.references || [],
   migrationVersion: doc._source!.migrationVersion,
+  managed: expect.any(Boolean),
+  coreMigrationVersion: expect.any(String),
+  typeMigrationVersion: expect.any(String),
 });
 
 export const getMockBulkCreateResponse = (

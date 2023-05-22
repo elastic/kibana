@@ -8,7 +8,7 @@ import { invert, mapValues } from 'lodash';
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
 import * as i18n from './translations';
-import { MaintenanceWindowStatus } from '../../../common';
+import { ISO_WEEKDAYS, MaintenanceWindowStatus } from '../../../common';
 
 export type MaintenanceWindowFrequency = Extract<
   Frequency,
@@ -83,8 +83,6 @@ export const CREATE_FORM_CUSTOM_FREQUENCY = (interval: number = 1) => [
     value: Frequency.YEARLY,
   },
 ];
-
-export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
 
 export const WEEKDAY_OPTIONS = ISO_WEEKDAYS.map((n) => ({
   id: String(n),
