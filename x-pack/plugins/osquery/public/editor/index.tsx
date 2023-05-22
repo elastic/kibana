@@ -9,15 +9,17 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
-import type { monaco } from '@kbn/monaco';
-import type { EuiCodeEditorProps } from '../shared_imports';
+import { monaco } from '@kbn/monaco';
 
 import { initializeOsqueryEditor } from './osquery_highlight_rules';
 
 interface OsqueryEditorProps {
   defaultValue: string;
   onChange: (newValue: string) => void;
-  commands?: EuiCodeEditorProps['commands'];
+  commands: Array<{
+    name: string;
+    exec: () => void;
+  }>;
 }
 
 const MIN_HEIGHT = 100;
@@ -59,6 +61,12 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
     const minHeight = 100;
     const maxHeight = 1000;
 
+    commands?.map((command) => {
+      if (command.name === 'submitOnCmdEnter') {
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, command.exec);
+      }
+    });
+
     const updateHeight = () => {
       const contentHeight = Math.min(maxHeight, Math.max(minHeight, editor.getContentHeight()));
       setHeight(contentHeight);
@@ -76,8 +84,6 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
       options={editorOptions}
       height={height + 'px'}
       width="100%"
-      // TODO AFAIK Monaco doesnt support commands, will try to figure it out next
-      // commands={commands}
       editorDidMount={editorDidMount}
     />
   );
