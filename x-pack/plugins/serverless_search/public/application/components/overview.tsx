@@ -35,7 +35,11 @@ import { ApiKeyPanel } from './api_key/api_key';
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
-  const { http, userProfile } = useKibanaServices();
+  const {
+    http,
+    userProfile,
+    application: { navigateToApp },
+  } = useKibanaServices();
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
 
   return (
@@ -227,7 +231,7 @@ export const ElasticsearchOverview = () => {
               footer={
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiButton color="primary" href={http.basePath.prepend('/app/discover')}>
+                    <EuiButton color="primary" onClick={() => navigateToApp('discover')}>
                       {i18n.translate('xpack.serverlessSearch.footer.discoverCard.buttonText', {
                         defaultMessage: 'Explore data in Discover',
                       })}
@@ -262,7 +266,9 @@ export const ElasticsearchOverview = () => {
                   <EuiFlexItem>
                     <EuiButton
                       color="primary"
-                      href={http.basePath.prepend('/app/management/ingest/ingest_pipelines')}
+                      onClick={() =>
+                        navigateToApp('management', { path: '/ingest/ingest_pipelines' })
+                      }
                     >
                       {i18n.translate('xpack.serverlessSearch.footer.pipelinesCard.buttonText', {
                         defaultMessage: 'Configure your ingest pipelines',
