@@ -7,12 +7,10 @@
 
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
-
-import nodejs from './dashboards/nodejs.json';
-
-const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, any> = {
-  nodejs,
-};
+import {
+  AGENT_NAME_DASHBOARD_FILE_MAPPING,
+  loadDashboardFile,
+} from './dashboards/dashboard_catalog';
 
 export interface MetricsDashboardProps {
   agentName?: string;
@@ -30,12 +28,15 @@ function getDashboardFile({ agentName }: MetricsDashboardProps) {
   return dashboardFile;
 }
 
-export function getDashboardPanelMap(
+export async function getDashboardPanelMap(
   props: MetricsDashboardProps
-): DashboardPanelMap | undefined {
-  const panelsRawObj = getDashboardFile(props);
+): Promise<DashboardPanelMap | undefined> {
+  const dashboardFile = getDashboardFile(props);
+  const panelsRawObj = !!dashboardFile
+    ? await loadDashboardFile(dashboardFile)
+    : undefined;
 
-  if (!panelsRawObj) {
+  if (!dashboardFile || !panelsRawObj) {
     return undefined;
   }
 

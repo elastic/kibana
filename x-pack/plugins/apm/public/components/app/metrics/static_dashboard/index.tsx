@@ -17,6 +17,7 @@ import { buildExistsFilter, buildPhraseFilter, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
+import { NotificationsStart } from '@kbn/core/public';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
 import {
   ENVIRONMENT_ALL,
@@ -60,44 +61,50 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
     });
   }, [dataView, serviceName, environment, dashboard]);
 
+  return (
+    <DashboardRenderer
+      getCreationOptions={() =>
+        getCreationOptions(dashboardProps, notifications)
+      }
+      ref={setDashboard}
+    />
+  );
+}
+
+async function getCreationOptions(
+  dashboardProps: MetricsDashboardProps,
+  notifications: NotificationsStart
+) {
   try {
-    const panels = getDashboardPanelMap(dashboardProps);
+    const builder = controlGroupInputBuilder;
+    const controlGroupInput = getDefaultControlGroupInput();
+
+    await builder.addDataControlFromField(controlGroupInput, {
+      dataViewId: APM_STATIC_DATA_VIEW_ID,
+      title: 'Node name',
+      fieldName: 'service.node.name',
+      width: 'medium',
+      grow: true,
+    });
+    const panels = await getDashboardPanelMap(dashboardProps);
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');
     }
 
-    return (
-      <DashboardRenderer
-        getCreationOptions={async () => {
-          const builder = controlGroupInputBuilder;
-          const controlGroupInput = getDefaultControlGroupInput();
-
-          await builder.addDataControlFromField(controlGroupInput, {
-            dataViewId: APM_STATIC_DATA_VIEW_ID,
-            title: 'Node name',
-            fieldName: 'service.node.name',
-            width: 'medium',
-            grow: true,
-          });
-
-          return {
-            useControlGroupIntegration: true,
-            initialInput: {
-              viewMode: ViewMode.VIEW,
-              panels,
-              controlGroupInput,
-            },
-          };
-        }}
-        ref={setDashboard}
-      />
-    );
+    return {
+      useControlGroupIntegration: true,
+      initialInput: {
+        viewMode: ViewMode.VIEW,
+        panels,
+        controlGroupInput,
+      },
+    };
   } catch (error) {
     notifications.toasts.addDanger(
       getLoadFailureToastLabels(dashboardProps, error)
     );
-    return <></>;
+    return {};
   }
 }
 

@@ -33,12 +33,12 @@ export function Metrics() {
     return <ServerlessMetrics />;
   }
 
-  const dashboardFile = hasDashboardFile({
+  const hasStaticDashboard = hasDashboardFile({
     agentName,
     runtimeName,
     serverlessType,
   });
-  if (dashboardFile) {
+  if (hasStaticDashboard) {
     return (
       <JsonMetricsDashboard
         agentName={agentName}
