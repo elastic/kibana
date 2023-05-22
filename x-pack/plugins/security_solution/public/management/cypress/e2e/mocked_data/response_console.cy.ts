@@ -250,10 +250,10 @@ describe('Response console', () => {
       }
     });
 
-    it('should fetch a file download link from response console', () => {
+    it('should get file from response console', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
       openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`get-file --path "/some/path/file.txt"`);
+      inputConsoleCommand(`get-file --path /test/path/test.txt`);
 
       interceptActionRequests((responseBody) => {
         getFileRequestResponse = responseBody;
@@ -263,7 +263,17 @@ describe('Response console', () => {
       cy.wait('@get-file').then(() => {
         sendActionResponse(getFileRequestResponse);
       });
-      cy.contains('File retrieved from the host.', { timeout: 120000 }).should('exist');
+      cy.getByTestSubj('getFileSuccess').within(() => {
+        cy.contains('File retrieved from the host.');
+        cy.contains('(ZIP file passcode: elastic)');
+        cy.contains(
+          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+        cy.contains('Click here to download').click();
+      });
+
+      const downloadsFolder = Cypress.config('downloadsFolder');
+      cy.readFile(`${downloadsFolder}/upload.zip`);
     });
   });
 

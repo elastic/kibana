@@ -1,28 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Should render callout when joins are disabled 1`] = `
-<div>
-  <EuiTitle
-    size="xs"
-  >
-    <h5>
-      <FormattedMessage
-        defaultMessage="Term joins"
-        id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-        values={Object {}}
-      />
-       
-      <JoinDocumentationPopover />
-    </h5>
-  </EuiTitle>
-  <EuiCallOut
-    color="warning"
-  >
-    Simulated disabled reason
-  </EuiCallOut>
-</div>
-`;
-
 exports[`Should render join editor 1`] = `
 <div>
   <EuiTitle
@@ -30,17 +7,14 @@ exports[`Should render join editor 1`] = `
   >
     <h5>
       <FormattedMessage
-        defaultMessage="Term joins"
-        id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
+        defaultMessage="Joins"
+        id="xpack.maps.layerPanel.joinEditor.title"
         values={Object {}}
       />
        
       <JoinDocumentationPopover />
     </h5>
   </EuiTitle>
-  <EuiSpacer
-    size="m"
-  />
   <Join
     join={
       Object {
@@ -55,30 +29,36 @@ exports[`Should render join editor 1`] = `
             },
           ],
           "term": "geo.src",
+          "type": "ES_TERM_SOURCE",
         },
       }
     }
-    layer={
-      MockLayer {
-        "_disableReason": null,
-      }
-    }
+    key="673ff994-fc75-4c67-909b-69fcb0e1060e"
     leftFields={Array []}
     leftSourceName="myLeftJoinField"
     onChange={[Function]}
     onRemove={[Function]}
   />
-  <EuiSpacer
-    size="s"
-  />
-  <EuiTextAlign
-    textAlign="center"
+  <EuiSkeletonText
+    isLoading={false}
+    lines={1}
   >
-    <AddJoinButton
-      addJoin={[Function]}
-      isLayerSourceMvt={false}
-      numJoins={1}
-    />
-  </EuiTextAlign>
+    <EuiTextAlign
+      textAlign="center"
+    >
+      <AddJoinButton
+        disabledReason=""
+        isDisabled={true}
+        label="Add spatial join"
+        onClick={[Function]}
+      />
+      <AddJoinButton
+        disabledReason="Vector tiles can only support a single join."
+        isDisabled={false}
+        label="Add term join"
+        onClick={[Function]}
+      />
+    </EuiTextAlign>
+  </EuiSkeletonText>
 </div>
 `;

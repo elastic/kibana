@@ -21,6 +21,10 @@ import {
   summarySchema,
   tagsSchema,
   timeWindowSchema,
+  metricCustomIndicatorSchema,
+  kqlCustomIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  apmTransactionDurationIndicatorSchema,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -33,7 +37,7 @@ const createSLOParamsSchema = t.type({
       budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
     }),
-    t.partial({ settings: optionalSettingsSchema, tags: tagsSchema }),
+    t.partial({ id: sloIdSchema, settings: optionalSettingsSchema, tags: tagsSchema }),
   ]),
 });
 
@@ -155,6 +159,13 @@ type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 
+type MetricCustomIndicatorSchema = t.TypeOf<typeof metricCustomIndicatorSchema>;
+type KQLCustomIndicatorSchema = t.TypeOf<typeof kqlCustomIndicatorSchema>;
+type APMTransactionErrorRateIndicatorSchema = t.TypeOf<
+  typeof apmTransactionErrorRateIndicatorSchema
+>;
+type APMTransactionDurationIndicatorSchema = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
+
 export {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -188,4 +199,8 @@ export type {
   UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
+  MetricCustomIndicatorSchema,
+  KQLCustomIndicatorSchema,
+  APMTransactionDurationIndicatorSchema,
+  APMTransactionErrorRateIndicatorSchema,
 };

@@ -212,7 +212,6 @@ enabled:
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/rule_execution_logic/config.ts
   - x-pack/test/encrypted_saved_objects_api_integration/config.ts
-  - x-pack/test/endpoint_api_integration_no_ingest/config.ts
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
   - x-pack/test/fleet_api_integration/config.agent_policy.ts
@@ -226,7 +225,7 @@ enabled:
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group2/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group3/config.ts
   - x-pack/test/functional_basic/apps/transform/creation/index_pattern/config.ts
-  - x-pack/test/functional_basic/apps/transform/start_reset_delete/config.ts
+  - x-pack/test/functional_basic/apps/transform/actions/config.ts
   - x-pack/test/functional_basic/apps/transform/edit_clone/config.ts
   - x-pack/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
   - x-pack/test/functional_basic/apps/transform/permissions/config.ts
@@ -292,7 +291,7 @@ enabled:
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
-  - x-pack/test/functional/apps/transform/start_reset_delete/config.ts
+  - x-pack/test/functional/apps/transform/actions/config.ts
   - x-pack/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/test/functional/apps/transform/permissions/config.ts
   - x-pack/test/functional/apps/transform/feature_controls/config.ts

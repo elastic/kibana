@@ -191,8 +191,11 @@ describe('Response console', () => {
     });
   });
 
-  describe('File operations: get-file and execute', () => {
+  describe('File operations: get-file and  execute', () => {
     const homeFilePath = `/home/ubuntu`;
+
+    const fileContent = 'This is a test file for the get-file command.';
+    const filePath = `/home/ubuntu/test_file.txt`;
 
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
@@ -231,9 +234,32 @@ describe('Response console', () => {
     it('"get-file --path" - should retrieve a file', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
       openResponseConsoleFromEndpointList();
-      inputConsoleCommand('get-file --path "/opt/Elastic/Endpoint/state/log/endpoint-000000.log"');
+      inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
-      waitForCommandToBeExecuted('get-file');
+      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
+        cy.contains('File retrieved from the host.');
+        cy.contains('(ZIP file passcode: elastic)');
+        cy.contains(
+          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+        cy.contains('Click here to download').click();
+        const downloadsFolder = Cypress.config('downloadsFolder');
+        cy.readFile(`${downloadsFolder}/upload.zip`);
+
+        cy.task('uploadFileToEndpoint', {
+          hostname: endpointHostname,
+          srcPath: `${downloadsFolder}/upload.zip`,
+          destPath: '/home/ubuntu/upload.zip',
+        });
+
+        cy.task('readZippedFileContentOnEndpoint', {
+          hostname: endpointHostname,
+          path: '/home/ubuntu/upload.zip',
+          password: 'elastic',
+        }).then((unzippedFileContent) => {
+          expect(unzippedFileContent).to.equal(fileContent);
+        });
+      });
     });
 
     it('"execute --command" - should execute a command', async () => {
