@@ -152,12 +152,12 @@ export const getAlertDetailsUrl = (
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
 export const getAlertUrl = async (
-  alertUuid: string,
+  alertUuid: string | null,
   spaceId: string,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>,
   publicBaseUrl?: string
 ) => {
-  if (!publicBaseUrl || !alertsLocator) return '';
+  if (!publicBaseUrl || !alertsLocator || !alertUuid) return '';
 
   return (
     await alertsLocator.getLocation({

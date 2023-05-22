@@ -13,9 +13,10 @@ import {
   waitForAlertInIndex,
   waitForRuleStatus,
 } from './helpers/alerting_wait_for_helpers';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../common/ftr_provider_context';
 import { createIndexConnector, createMetricThresholdRule } from './helpers/alerting_api_helper';
 
+// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -114,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: METRICS_ALERTS_INDEX,
           ruleId,
         });
-        alertId = resp.hits.hits[0]._source['kibana.alert.uuid'];
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
           'Metric threshold'
@@ -165,14 +166,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action parameter: ruleType', async () => {
-        const resp = await waitForDocumentInIndex<{ ruleType: string }>({
+        const resp = await waitForDocumentInIndex<{ ruleType: string; alertDetailsUrl: string }>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('metrics.alert.threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `http://localhost:5620/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:now-15m%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:now-15m%2CrangeTo:now%2Cstatus:all)`
         );
       });
     });

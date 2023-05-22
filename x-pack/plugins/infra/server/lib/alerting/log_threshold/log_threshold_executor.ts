@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
@@ -23,6 +24,7 @@ import {
   RuleExecutorServices,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 
@@ -128,7 +130,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       getAlertUuid,
       getAlertByAlertUuid,
     } = services;
-    const { basePath } = libs;
+    const { basePath, alertsLocator } = libs;
 
     const alertFactory: LogThresholdAlertFactory = (
       id,
@@ -240,6 +242,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         startedAt,
         validatedParams,
         getAlertByAlertUuid,
+        alertsLocator,
       });
     } catch (e) {
       throw new Error(e);
@@ -1003,6 +1006,7 @@ const processRecoveredAlerts = async ({
   startedAt,
   validatedParams,
   getAlertByAlertUuid,
+  alertsLocator,
 }: {
   basePath: IBasePath;
   getAlertStartedDate: (alertId: string) => string | null;
@@ -1014,6 +1018,7 @@ const processRecoveredAlerts = async ({
   getAlertByAlertUuid: (
     alertUuid: string
   ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -1030,12 +1035,7 @@ const processRecoveredAlerts = async ({
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
-      alertDetailsUrl: await getAlertUrl(
-        alertUuid,
-        spaceId,
-        libs.alertsLocator,
-        libs.basePath.publicBaseUrl
-      ),
+      alertDetailsUrl: await getAlertUrl(spaceId, alertUuid, alertsLocator, basePath.publicBaseUrl),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),
