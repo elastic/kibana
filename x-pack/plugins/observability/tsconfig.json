@@ -68,7 +68,8 @@
     "@kbn/core-theme-browser",
     "@kbn/core-elasticsearch-server",
     "@kbn/observability-shared-plugin",
-    "@kbn/exploratory-view-plugin"
+    "@kbn/exploratory-view-plugin",
+    "@kbn/rison"
   ],
   "exclude": ["target/**/*"]
 }
