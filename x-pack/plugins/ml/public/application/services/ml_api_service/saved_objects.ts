@@ -30,6 +30,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
     return httpService.http<JobsSpacesResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/jobs_spaces`,
       method: 'GET',
+      version: '1',
     });
   },
   updateJobsSpaces(
