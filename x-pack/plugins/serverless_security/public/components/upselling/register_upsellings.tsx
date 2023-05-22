@@ -12,13 +12,13 @@ import type {
   SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
-import type { ServerlessSecuritySkus } from '../../../common/config';
+import type { ServerlessSecurityPLIs } from '../../../common/config';
 import { CasesUpselling } from './pages/cases_upselling';
 import {
   PrebuiltRulesTooltipUpselling,
   RulesResponseActionsUpselling,
 } from './pages/rules_upselling';
-import { getProjectSkusFeatures } from '../../../common/sku/sku_features';
+import { getProjectPLIsFeatures } from '../../../common/pli/pli_features';
 
 interface UpsellingsConfig {
   feature: AppFeatureKey;
@@ -30,9 +30,9 @@ type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 
 export const registerUpsellings = (
   upselling: UpsellingService,
-  projectSkus: ServerlessSecuritySkus
+  projectSkus: ServerlessSecurityPLIs
 ) => {
-  const skusFeatures = getProjectSkusFeatures(projectSkus);
+  const skusFeatures = getProjectPLIsFeatures(projectSkus);
 
   const upsellingPages = getUpsellingPages(projectSkus).reduce<PageUpsellings>(
     (pageUpsellings, { pageName, feature, component }) => {
@@ -61,7 +61,7 @@ export const registerUpsellings = (
 // Upselling configuration for pages and sections components
 
 // TODO: lazy load these components
-const getUpsellingPages = (projectSkus: ServerlessSecuritySkus): UpsellingPages => [
+const getUpsellingPages = (projectSkus: ServerlessSecurityPLIs): UpsellingPages => [
   {
     pageName: SecurityPageName.case,
     feature: 'cases_base',
@@ -69,7 +69,7 @@ const getUpsellingPages = (projectSkus: ServerlessSecuritySkus): UpsellingPages 
   },
 ];
 
-const getUpsellingSections = (projectSkus: ServerlessSecuritySkus): UpsellingSections => [
+const getUpsellingSections = (projectSkus: ServerlessSecurityPLIs): UpsellingSections => [
   {
     id: 'rules_load_prepackaged_tooltip',
     feature: 'rules_load_prepackaged',
@@ -78,6 +78,6 @@ const getUpsellingSections = (projectSkus: ServerlessSecuritySkus): UpsellingSec
   {
     id: 'rules_response_actions',
     feature: 'rules_response_actions',
-    component: () => <RulesResponseActionsUpselling projectSkus={projectSkus} />,
+    component: () => <RulesResponseActionsUpselling projectPLIs={projectSkus} />,
   },
 ];

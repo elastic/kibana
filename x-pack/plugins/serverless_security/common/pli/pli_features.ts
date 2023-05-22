@@ -6,21 +6,21 @@
  */
 
 import type { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
-import { ServerlessSecuritySku } from '../config';
-import { SKU_APP_FEATURES } from './sku_config';
+import { ServerlessSecurityPLI } from '../config';
+import { PLI_APP_FEATURES } from './pli_config';
 
 /**
  * Returns the U (union) of all enabled skus features in a single object.
  */
-export const getProjectSkusFeatures = (projectSkus: ServerlessSecuritySku[]): AppFeatureKeys =>
-  projectSkus.reduce<AppFeatureKeys>((skusFeatures, projectSku) => {
-    const skuFeatures = SKU_APP_FEATURES[projectSku];
+export const getProjectPLIsFeatures = (projectPLIs: ServerlessSecurityPLI[]): AppFeatureKeys =>
+  projectPLIs.reduce<AppFeatureKeys>((plisFeatures, projectPLI) => {
+    const PLIFeatures = PLI_APP_FEATURES[projectPLI];
 
-    Object.entries(skuFeatures).forEach(([featureName, enabled]) => {
+    Object.entries(PLIFeatures).forEach(([featureName, enabled]) => {
       if (enabled) {
-        skusFeatures[featureName as AppFeatureKey] = true;
+        plisFeatures[featureName as AppFeatureKey] = true;
       }
     });
 
-    return skuFeatures;
+    return PLIFeatures;
   }, {} as AppFeatureKeys);

@@ -7,7 +7,7 @@
 
 import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import { ServerlessSecurityConfig } from './config';
-import { getProjectSkusFeatures } from '../common/sku/sku_features';
+import { getProjectPLIsFeatures } from '../common/pli/pli_features';
 
 import {
   ServerlessSecurityPluginSetup,
@@ -32,7 +32,7 @@ export class ServerlessSecurityPlugin
   }
 
   public setup(_coreSetup: CoreSetup, pluginsSetup: ServerlessSecurityPluginSetupDependencies) {
-    pluginsSetup.securitySolution.setAppFeatures(getProjectSkusFeatures(this.config.projectSkus));
+    pluginsSetup.securitySolution.setAppFeatures(getProjectPLIsFeatures(this.config.projectPLIs));
 
     return {};
   }

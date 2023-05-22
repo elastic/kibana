@@ -6,9 +6,9 @@
  */
 
 import type { AppFeatureKeys } from '@kbn/security-solution-plugin/common';
-import type { ServerlessSecuritySku } from '../config';
+import type { ServerlessSecurityPLI } from '../config';
 
-export const SKU_APP_FEATURES: Record<ServerlessSecuritySku, AppFeatureKeys> = {
+export const PLI_APP_FEATURES: Record<ServerlessSecurityPLI, AppFeatureKeys> = {
   endpointEssentials: {
     cases_base: false,
     rules_load_prepackaged: false,
