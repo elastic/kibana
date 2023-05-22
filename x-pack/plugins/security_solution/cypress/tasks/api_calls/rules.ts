@@ -6,10 +6,15 @@
  */
 
 import { rootRequest } from '../common';
+import moment from 'moment';
+import { Rule } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
 import type { RuleCreateProps } from '../../../common/detection_engine/rule_schema';
+import { internalAlertingSnoozeRule } from '../../urls/navigation';
 
-export const createRule = <T = unknown>(rule: RuleCreateProps) => {
+export const createRule = <T = unknown>(
+  rule: RuleCreateProps
+): Cypress.Chainable<Cypress.Response<T>> => {
   return rootRequest<T>({
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
@@ -18,6 +23,26 @@ export const createRule = <T = unknown>(rule: RuleCreateProps) => {
     failOnStatusCode: false,
   });
 };
+
+/**
+ * Snoozes a rule via API
+ *
+ * @param id Rule's SO id
+ * @param duration Snooze duration in milliseconds, -1 for indefinite
+ */
+export const snoozeRule = (id: string, duration: number): Cypress.Chainable =>
+  cy.request({
+    method: 'POST',
+    url: internalAlertingSnoozeRule(id),
+    body: {
+      snooze_schedule: {
+        duration,
+        rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment().format('zz') },
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
 
 export const deleteCustomRule = (ruleId = '1') => {
   rootRequest({

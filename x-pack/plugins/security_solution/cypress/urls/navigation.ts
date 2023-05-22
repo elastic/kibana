@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { INTERNAL_ALERTING_SNOOZE_RULE } from '@kbn/alerting-plugin/common';
+
 export const KIBANA_HOME = '/app/home#/';
 export const KIBANA_SAVED_OBJECTS = '/app/management/kibana/objects';
 
@@ -69,3 +71,6 @@ export const hostDetailsUrl = (hostName: string) =>
 export const userDetailsUrl = (userName: string) => `/app/security/users/${userName}/allUsers`;
 
 export const exceptionsListDetailsUrl = (listId: string) => `${EXCEPTIONS_LIST_URL}/${listId}`;
+
+export const internalAlertingSnoozeRule = (ruleId: string) =>
+  INTERNAL_ALERTING_SNOOZE_RULE.replace('{id}', ruleId);
