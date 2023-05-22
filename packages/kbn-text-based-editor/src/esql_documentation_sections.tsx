@@ -12,7 +12,7 @@ import { Markdown } from '@kbn/kibana-react-plugin/public';
 export const initialSection = (
   <Markdown
     markdown={i18n.translate(
-      'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.markdown',
+      'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.markdown',
       {
         defaultMessage: `## ESQL
 
@@ -34,21 +34,24 @@ The result of a query is the table produced by the final processing command.
 );
 
 export const sourceCommands = {
-  label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.sourceCommands', {
+  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.sourceCommands', {
     defaultMessage: 'Source commands',
   }),
-  description: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.commandsDescription', {
-    defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ESQL supports the following source commands.`,
-  }),
+  description: i18n.translate(
+    'textBasedEditor.query.textBasedLanguagesEditor.commandsDescription',
+    {
+      defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ESQL supports the following source commands.`,
+    }
+  ),
   items: [
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.from', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.from', {
         defaultMessage: 'FROM',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.from.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.from.markdown',
             {
               defaultMessage: `### FROM
 The \`FROM\` source command returns a table with up to 10,000 documents from a data stream, index, or alias. Each row in the resulting table represents a document. Each column corresponds to a field, and can be accessed by the name of that field.
@@ -65,13 +68,13 @@ FROM index
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.row', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.row', {
         defaultMessage: 'ROW',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.row.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.row.markdown',
             {
               defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
@@ -100,13 +103,13 @@ ROW a = ROUND(1.23, 0)
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.show', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.show', {
         defaultMessage: 'SHOW',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.show.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.show.markdown',
             {
               defaultMessage: `### SHOW
 The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
@@ -125,24 +128,27 @@ The \`SHOW <item>\` source command returns information about the deployment and 
 };
 
 export const processingCommands = {
-  label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.processingCommands', {
+  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.processingCommands', {
     defaultMessage: 'Processing commands',
   }),
   description: i18n.translate(
-    'unifiedSearch.query.textBasedLanguagesEditor.processingCommandsDescription',
+    'textBasedEditor.query.textBasedLanguagesEditor.processingCommandsDescription',
     {
       defaultMessage: `Processing commands change an input table by adding, removing, or changing rows and columns. ESQL supports the following processing commands.`,
     }
   ),
   items: [
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.dissect', {
-        defaultMessage: 'DISSECT',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.dissect',
+        {
+          defaultMessage: 'DISSECT',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.dissect.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.dissect.markdown',
             {
               defaultMessage: `### DISSECT
 \`DISSECT\` enables you to extract structured data out of a string. \`DISSECT\` matches the string against a delimiter-based pattern, and extracts the specified keys as columns.
@@ -162,13 +168,13 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.drop', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.drop', {
         defaultMessage: 'DROP',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.drop.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.drop.markdown',
             {
               defaultMessage: `### DROP
 Use \`DROP\` to remove columns from a table:
@@ -193,13 +199,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.eval', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.eval', {
         defaultMessage: 'EVAL',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.eval.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.eval.markdown',
             {
               defaultMessage: `### EVAL
 \`EVAL\` enables you to add new columns to the end of a table:
@@ -229,13 +235,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.grok', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.grok', {
         defaultMessage: 'GROK',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.grok.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.grok.markdown',
             {
               defaultMessage: `### GROK
 \`GROK\` enables you to extract structured data out of a string. \`GROK\` matches the string against patterns, based on regular expressions, and extracts the specified patterns as columns.
@@ -255,13 +261,13 @@ ROW a = "12 15.5 15.6 true"
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.limit', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.limit', {
         defaultMessage: 'LIMIT',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.limit.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.limit.markdown',
             {
               defaultMessage: `### LIMIT
 The \`LIMIT\` processing command enables you to limit the number of rows:
@@ -279,13 +285,16 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.project', {
-        defaultMessage: 'PROJECT',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.project',
+        {
+          defaultMessage: 'PROJECT',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.project.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.project.markdown',
             {
               defaultMessage: `### PROJECT
 The \`PROJECT\` command enables you to specify what columns are returned and the order in which they are returned.
@@ -319,13 +328,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.rename', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.rename', {
         defaultMessage: 'RENAME',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.rename.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.rename.markdown',
             {
               defaultMessage: `### RENAME
 Use \`RENAME\` to rename a column. If a column with the new name already exists, it will be replaced by the new column.
@@ -352,13 +361,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.sort', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.sort', {
         defaultMessage: 'SORT',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.sort.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.sort.markdown',
             {
               defaultMessage: `### SORT
 Use the \`SORT\` command to sort rows on one or more fields:
@@ -402,13 +411,16 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.statsby', {
-        defaultMessage: 'STATS ... BY',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.statsby',
+        {
+          defaultMessage: 'STATS ... BY',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.statsby.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.statsby.markdown',
             {
               defaultMessage: `### STATS ... BY
 Use \`STATS ... BY\` to group rows according to a common value and calculate one or more aggregated values over the grouped rows.
@@ -461,13 +473,13 @@ The following aggregation functions are supported:
       ),
     },
     {
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.where', {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.where', {
         defaultMessage: 'WHERE',
       }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.where.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.where.markdown',
             {
               defaultMessage: `### WHERE
 Use \`WHERE\` to produce a table that contains all the rows from the input table for which the provided condition evaluates to \`true\`:
@@ -535,11 +547,11 @@ FROM employees
 };
 
 export const functions = {
-  label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.functions', {
+  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.functions', {
     defaultMessage: 'Functions',
   }),
   description: i18n.translate(
-    'unifiedSearch.query.textBasedLanguagesEditor.functionsDocumentationESQLDescription',
+    'textBasedEditor.query.textBasedLanguagesEditor.functionsDocumentationESQLDescription',
     {
       defaultMessage: `Functions are supported by ROW, EVAL and WHERE.`,
     }
@@ -547,7 +559,7 @@ export const functions = {
   items: [
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
         {
           defaultMessage: 'ABS',
         }
@@ -555,7 +567,7 @@ export const functions = {
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.absFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction.markdown',
             {
               defaultMessage: `### ABS
 Returns the absolute value.
@@ -575,7 +587,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.caseFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.caseFunction',
         {
           defaultMessage: 'CASE',
         }
@@ -583,7 +595,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.caseFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.caseFunction.markdown',
             {
               defaultMessage: `### CASE
 Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to \`true\`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.
@@ -606,7 +618,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction',
         {
           defaultMessage: 'CIDR_MATCH',
         }
@@ -614,7 +626,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction.markdown',
             {
               defaultMessage: `### CIDR_MATCH
 Returns \`true\` if the provided IP is contained in one of the provided CIDR blocks. 
@@ -635,7 +647,7 @@ FROM hosts
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.concatFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concatFunction',
         {
           defaultMessage: 'CONCAT',
         }
@@ -643,7 +655,7 @@ FROM hosts
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.concatFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concatFunction.markdown',
             {
               defaultMessage: `### CONCAT
 Concatenates two or more strings.
@@ -663,7 +675,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.dateFormatFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateFormatFunction',
         {
           defaultMessage: 'DATE_FORMAT',
         }
@@ -671,7 +683,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.dateFormatFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateFormatFunction.markdown',
             {
               defaultMessage: `### DATE_FORMAT
 Returns a string representation of a date in the provided format. If no format is specified, the \`yyyy-MM-dd'T'HH:mm:ss.SSSZ\` format is used.
@@ -691,7 +703,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.dateTruncFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateTruncFunction',
         {
           defaultMessage: 'DATE_TRUNC',
         }
@@ -699,7 +711,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.dateTruncFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateTruncFunction.markdown',
             {
               defaultMessage: `### DATE_TRUNC
 Rounds down a date to the closest interval.
@@ -737,7 +749,7 @@ Timespan literals are not whitespace sensitive. These expressions are all valid:
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction',
         {
           defaultMessage: 'IS_FINITE',
         }
@@ -745,7 +757,7 @@ Timespan literals are not whitespace sensitive. These expressions are all valid:
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction.markdown',
             {
               defaultMessage: `### IS_FINITE
 Returns a boolean that indicates whether its input is a finite number.
@@ -764,7 +776,7 @@ ROW d = 1.0
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.isInfiniteFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isInfiniteFunction',
         {
           defaultMessage: 'IS_INFINITE',
         }
@@ -772,7 +784,7 @@ ROW d = 1.0
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.isInfiniteFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isInfiniteFunction.markdown',
             {
               defaultMessage: `### IS_INFINITE
 Returns a boolean that indicates whether its input is infinite.
@@ -791,7 +803,7 @@ ROW d = 1.0
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.isNanFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.isNanFunction',
         {
           defaultMessage: 'IS_NAN',
         }
@@ -799,7 +811,7 @@ ROW d = 1.0
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.isNanFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.isNanFunction.markdown',
             {
               defaultMessage: `### IS_NAN
 Returns a boolean that indicates whether its input is not a number.
@@ -818,7 +830,7 @@ ROW d = 1.0
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.isNullFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.isNullFunction',
         {
           defaultMessage: 'IS_NULL',
         }
@@ -826,7 +838,7 @@ ROW d = 1.0
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.isNullFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.isNullFunction.markdown',
             {
               defaultMessage: `### IS_NULL
 Returns a boolean than indicates whether its input is \`null\`.
@@ -852,7 +864,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.lengthFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.lengthFunction',
         {
           defaultMessage: 'LENGTH',
         }
@@ -860,7 +872,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.lengthFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.lengthFunction.markdown',
             {
               defaultMessage: `### LENGTH
 Returns the character length of a string.
@@ -880,7 +892,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvAvgFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvAvgFunction',
         {
           defaultMessage: 'MV_AVG',
         }
@@ -888,7 +900,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvAvgFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvAvgFunction.markdown',
             {
               defaultMessage: `### MV_AVG
 Converts a multivalued field into a single valued field containing the average of all of the values. For example:
@@ -915,7 +927,7 @@ NOTE: The output type is always a double and the input type can be any number.
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvMaxFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
         }
@@ -923,7 +935,7 @@ NOTE: The output type is always a double and the input type can be any number.
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvMaxFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMaxFunction.markdown',
             {
               defaultMessage: `### MV_MAX
 Converts a multivalued field into a single valued field containing the maximum value. For example:
@@ -961,7 +973,7 @@ Returning:
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvMinFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMinFunction',
         {
           defaultMessage: 'MV_MIN',
         }
@@ -969,7 +981,7 @@ Returning:
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvMinFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMinFunction.markdown',
             {
               defaultMessage: `### MV_MIN
 Converts a multivalued field into a single valued field containing the minimum value. For example:
@@ -1007,7 +1019,7 @@ Returning:
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvSumFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvSumFunction',
         {
           defaultMessage: 'MV_SUM',
         }
@@ -1015,7 +1027,7 @@ Returning:
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.mvSumFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvSumFunction.markdown',
             {
               defaultMessage: `### MV_SUM
 Converts a multivalued field into a single valued field containing the sum of all of the values. For example:
@@ -1041,7 +1053,7 @@ NOTE: The input type can be any number and the output type is the same as the in
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.powFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.powFunction',
         {
           defaultMessage: 'POW',
         }
@@ -1049,7 +1061,7 @@ NOTE: The input type can be any number and the output type is the same as the in
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.powFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.powFunction.markdown',
             {
               defaultMessage: `### POW
 Returns the the value of a base (first argument) raised to a power (second argument).
@@ -1068,7 +1080,7 @@ ROW base = 2.0, exponent = 2.0
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.roundFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.roundFunction',
         {
           defaultMessage: 'ROUND',
         }
@@ -1076,7 +1088,7 @@ ROW base = 2.0, exponent = 2.0
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.roundFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.roundFunction.markdown',
             {
               defaultMessage: `### ROUND
 Rounds a number to the closest number with the specified number of digits. Defaults to 0 digits if no number of digits is provided. If the specified number of digits is negative, rounds to the number of digits left of the decimal point.
@@ -1096,7 +1108,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.splitFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.splitFunction',
         {
           defaultMessage: 'SPLIT',
         }
@@ -1104,7 +1116,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.splitFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.splitFunction.markdown',
             {
               defaultMessage: `### SPLIT
 Splits a single valued string into multiple strings. For example:
@@ -1131,7 +1143,7 @@ NOTE: Only single byte delimiters are currently supported.
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.startsWithFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.startsWithFunction',
         {
           defaultMessage: 'STARTS_WITH',
         }
@@ -1139,7 +1151,7 @@ NOTE: Only single byte delimiters are currently supported.
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.startsWithFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.startsWithFunction.markdown',
             {
               defaultMessage: `### STARTS_WITH
 Returns a boolean that indicates whether a keyword string starts with another string:
@@ -1159,7 +1171,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.substringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.substringFunction',
         {
           defaultMessage: 'SUBSTRING',
         }
@@ -1167,7 +1179,7 @@ FROM employees
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.substringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.substringFunction.markdown',
             {
               defaultMessage: `### SUBSTRING
 Returns a substring of a string, specified by a start position and an optional length. This example returns the first three characters of every last name:
