@@ -165,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('Lens with adhoc data view');
       await PageObjects.lens.waitForVisualization('mtrVis');
       const metricData = await PageObjects.lens.getMetricVisualizationData();
-      expect(metricData[0].value).to.eql('5.73K');
+      expect(metricData[0].value).to.eql('5.73k');
       expect(metricData[0].title).to.eql('Average of bytes');
     });
 
