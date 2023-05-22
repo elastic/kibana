@@ -49,13 +49,10 @@ export function buildActiveMigrations({
     });
 
     if (!typeTransforms.transforms.length && !Object.keys(typeTransforms.versionSchemas).length) {
-      return migrations;
+      migrations[type.name] = typeTransforms;
     }
 
-    return {
-      ...migrations,
-      [type.name]: typeTransforms,
-    };
+    return migrations;
   }, {} as ActiveMigrations);
 }
 
