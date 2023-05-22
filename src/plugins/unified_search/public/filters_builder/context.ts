@@ -10,8 +10,10 @@ import React, { Dispatch } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { FiltersBuilderActions } from './reducer';
+import type { Operator } from '../filter_bar/filter_editor/lib';
 
 interface FiltersBuilderContextType {
+  operators: Operator[];
   dataView: DataView;
   dispatch: Dispatch<FiltersBuilderActions>;
   globalParams: {

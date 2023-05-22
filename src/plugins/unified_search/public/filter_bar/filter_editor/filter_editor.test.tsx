@@ -11,6 +11,7 @@ import { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
+import { FILTER_OPERATORS } from './lib';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -46,6 +47,7 @@ describe('<FilterEditor />', () => {
           } as any,
         },
         indexPatterns: [],
+        operators: FILTER_OPERATORS,
         onCancel: jest.fn(),
         onSubmit: jest.fn(),
       };

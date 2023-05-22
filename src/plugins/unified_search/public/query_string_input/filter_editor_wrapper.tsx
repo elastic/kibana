@@ -14,7 +14,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
-import { FilterEditor } from '../filter_bar/filter_editor';
+import { FilterEditor, FILTER_OPERATORS } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
 interface QueryDslFilter {
@@ -105,6 +105,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
       {newFilter && (
         <FilterEditor
           mode="add"
+          operators={FILTER_OPERATORS}
           filter={newFilter}
           indexPatterns={dataViews}
           key={JSON.stringify(newFilter)}

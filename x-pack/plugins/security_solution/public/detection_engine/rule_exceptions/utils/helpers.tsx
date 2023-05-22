@@ -870,3 +870,48 @@ export const enrichSharedExceptions = (
     });
   });
 };
+
+const fieldsToLookFor = [
+  'host.name',
+  'agent.id',
+  'user.name',
+  'rule.name',
+  'event.category',
+  'cloud.provider',
+  'cloud.region',
+  'cloud.provider',
+  'cloud.region',
+  'orchestrator.cluster.id',
+  'orchestrator.cluster.name',
+  'container.image.name',
+  'container.image.tag',
+  'orchestrator.namespace',
+  'orchestrator.resource.parent.type',
+  'orchestrator.resource.type',
+  'process.executable',
+  'file.path',
+];
+
+export const prepopulateAlertData = (
+  name = 'foo',
+  alertData: AlertData
+): ExceptionsBuilderExceptionItem[] => {
+  const item = getNewExceptionItem({
+    listId: undefined,
+    namespaceType: undefined,
+    name,
+  });
+  const entries = fieldsToLookFor.reduce((acc, field) => {
+    console.log('ALERTS', alertData[field]);
+    if (alertData[field]) {
+      if (!Array.isArray(alertData[field])) {
+        return [...acc, { field, operator: 'included', type: 'match', value: alertData[field] }];
+      }
+      return [...acc, { field, operator: 'included', type: 'match_any', value: alertData[field] }];
+    } else {
+      return acc;
+    }
+  }, []);
+  item.entries = entries;
+  return [item];
+};

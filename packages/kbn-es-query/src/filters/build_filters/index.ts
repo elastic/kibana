@@ -18,5 +18,6 @@ export * from './combined_filter';
 export * from './phrase_filter';
 export * from './phrases_filter';
 export * from './query_string_filter';
+export * from './query_wildcard_filter';
 export * from './range_filter';
 export * from './types';

@@ -14,12 +14,9 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiText,
-  EuiToolTip,
   EuiBadge,
   withEuiTheme,
   EuiTextColor,
@@ -43,7 +40,6 @@ import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { cx } from '@emotion/css';
 import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import { GenericComboBox } from './generic_combo_box';
 import {
@@ -51,14 +47,9 @@ import {
   getOperatorFromFilter,
   isFilterValid,
 } from './lib/filter_editor_utils';
-import { FiltersBuilder } from '../../filters_builder';
-import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
-import {
-  filterBadgeStyle,
-  filterPreviewLabelStyle,
-  filtersBuilderMaxHeightCss,
-} from './filter_editor.styles';
+import { Operator } from './lib';
+import { FiltersBuilderEditor } from './filters_builder_editor';
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -121,6 +112,7 @@ interface QueryDslFilter {
 export interface FilterEditorComponentProps {
   filter: Filter;
   indexPatterns: DataView[];
+  operators: Operator[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
@@ -307,70 +299,15 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
 
   private renderFiltersBuilderEditor() {
     const { selectedDataView, localFilter } = this.state;
-    const flattenedFilters = flattenFilters([localFilter]);
-
-    const shouldShowPreview =
-      selectedDataView &&
-      ((flattenedFilters.length > 1 && !this.hasCombinedFilterCustomType(flattenedFilters)) ||
-        (flattenedFilters.length === 1 &&
-          isFilterValid(
-            selectedDataView,
-            getFieldFromFilter(flattenedFilters[0], selectedDataView),
-            getOperatorFromFilter(flattenedFilters[0]),
-            getFilterParams(flattenedFilters[0])
-          )));
-
     return (
-      <>
-        <div
-          role="region"
-          aria-label=""
-          className={cx(filtersBuilderMaxHeightCss(this.props.theme.euiTheme), 'eui-yScroll')}
-        >
-          <EuiToolTip
-            position="top"
-            content={selectedDataView ? '' : strings.getSelectDataViewToolTip()}
-            display="block"
-          >
-            <FiltersBuilder
-              filters={[localFilter]}
-              timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
-              filtersForSuggestions={this.props.filtersForSuggestions}
-              dataView={selectedDataView!}
-              onChange={this.onLocalFilterChange}
-              disabled={!selectedDataView}
-            />
-          </EuiToolTip>
-        </div>
-
-        {shouldShowPreview ? (
-          <EuiFormRow
-            fullWidth
-            hasEmptyLabelSpace={true}
-            className={cx(filterBadgeStyle, filterPreviewLabelStyle)}
-            label={
-              <strong>
-                <FormattedMessage
-                  id="unifiedSearch.filter.filterBar.preview"
-                  defaultMessage="{icon} Preview"
-                  values={{
-                    icon: <EuiIcon type="inspect" size="s" />,
-                  }}
-                />
-              </strong>
-            }
-          >
-            <EuiText size="xs" data-test-subj="filter-preview">
-              <FilterBadgeGroup
-                filters={[localFilter]}
-                dataViews={this.props.indexPatterns}
-                booleanRelation={BooleanRelation.AND}
-                shouldShowBrackets={false}
-              />
-            </EuiText>
-          </EuiFormRow>
-        ) : null}
-      </>
+      <FiltersBuilderEditor
+        filter={localFilter}
+        dataView={selectedDataView}
+        onFilterChange={this.onLocalFilterChange}
+        operators={this.props.operators}
+        timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+        filtersForSuggestions={this.props.filtersForSuggestions}
+      />
     );
   }
 
@@ -446,7 +383,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       isFilterValid(
         selectedDataView,
         getFieldFromFilter(f, selectedDataView),
-        getOperatorFromFilter(f),
+        getOperatorFromFilter(f, this.props.operators),
         getFilterParams(f)
       )
     );

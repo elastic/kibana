@@ -20,7 +20,17 @@ export type {
 export { SearchBar } from './search_bar';
 export type { FilterItemsProps } from './filter_bar';
 export { FilterItem, FilterItems } from './filter_bar';
+export { FiltersBuilderEditor } from './filter_bar/filter_editor/filters_builder_editor';
+
 export { FilterBadgeGroup } from './filter_badge';
+export {
+  isOneOfOperator,
+  isNotOneOfOperator,
+  existsOperator,
+  doesNotExistOperator,
+  isOperator,
+  isNotOperator,
+} from './filter_bar/filter_editor';
 
 export { DataViewPicker, DataViewSelector, DataViewsList } from './dataview_picker';
 export type { DataViewPickerProps } from './dataview_picker';

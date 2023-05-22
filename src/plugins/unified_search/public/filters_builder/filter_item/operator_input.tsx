@@ -33,8 +33,8 @@ export function OperatorInput<TParams = unknown>({
   params,
   onHandleOperator,
 }: OperatorInputProps<TParams>) {
-  const { disabled } = useContext(FiltersBuilderContextType);
-  const operators = field ? getOperatorOptions(field) : [];
+  const { disabled, operators: operatorsToUse } = useContext(FiltersBuilderContextType);
+  const operators = field ? getOperatorOptions(field, operatorsToUse) : [];
 
   const onOperatorChange = useCallback(
     ([selectedOperator]: Operator[]) => {

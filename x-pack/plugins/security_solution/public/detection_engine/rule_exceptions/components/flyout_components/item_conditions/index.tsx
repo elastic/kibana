@@ -8,11 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+
 import type {
-  CreateRuleExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
   ExceptionListType,
   OsType,
   OsTypeArray,
@@ -26,7 +23,21 @@ import type {
 import type { DataViewBase } from '@kbn/es-query';
 import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../../common/detection_engine/utils';
+import {
+  FiltersBuilderEditor,
+  isOneOfOperator,
+  isNotOneOfOperator,
+  existsOperator,
+  doesNotExistOperator,
+  isOperator,
+  isNotOperator,
+} from '@kbn/unified-search-plugin/public';
+import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import {
+  hasEqlSequenceQuery,
+  isEqlRule,
+  transformExceptionsToFilter,
+} from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -107,6 +118,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onFilterIndexPatterns,
 }): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
+
   const isEndpointException = useMemo(
     (): boolean => exceptionListType === ExceptionListTypeEnum.ENDPOINT,
     [exceptionListType]
@@ -143,21 +155,22 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
     return isEdit ? exceptionListItems[0].namespace_type : defaultValue;
   }, [exceptionListItems, isEdit, isEndpointException]);
 
-  const handleBuilderOnChange = useCallback(
-    ({
-      exceptionItems,
-      errorExists,
-    }: {
-      exceptionItems: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
-      >;
-      errorExists: boolean;
-    }) => {
-      onExceptionItemAdd(exceptionItems);
-      onSetErrorExists(errorExists);
-    },
-    [onSetErrorExists, onExceptionItemAdd]
-  );
+  const handleBuilderOnChange = useCallback((fil) => {
+    // let field: DataViewField | undefined;
+    // let operator: Operator | undefined;
+    // let params: Filter['meta']['params'];
+    // field = getFieldFromFilter(fil, indexPatterns!);
+    // if (field) {
+    //   operator = getOperatorFromFilter(fil, [
+    //     doesNotExistOperator,
+    //     existsOperator,
+    //     isNotOneOfOperator,
+    //     isNotOperator,
+    //   ]);
+    //   params = getFilterParams(fil);
+    // }
+    console.log({ FILTER: fil });
+  }, []);
 
   const handleOSSelectionChange = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>): void => {
@@ -206,6 +219,13 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
     return (isEdit ? exceptionListItems[0].os_types : selectedOs) ?? [];
   }, [exceptionListItems, isEdit, selectedOs]);
 
+  const filter = useMemo(() => {
+    console.log('CONDITIONS', { exceptionListItems });
+    return transformExceptionsToFilter(exceptionListItems, indexPatterns);
+  }, [exceptionListItems, indexPatterns]);
+  const ip = getIndexPatternFromFilter(filter, [indexPatterns]);
+
+  console.log('ITEM CONDITIONS', { filter, ip, indexPatterns });
   return (
     <>
       <SectionHeader size="xs">
@@ -247,27 +267,19 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
           <EuiSpacer />
         </>
       )}
-      {getExceptionBuilderComponentLazy({
-        allowLargeValueLists,
-        httpService: http,
-        autocompleteService: unifiedSearch.autocomplete,
-        exceptionListItems,
-        listType: exceptionListType,
-        osTypes,
-        listId: listIdToUse,
-        listNamespaceType,
-        listTypeSpecificIndexPatternFilter: onFilterIndexPatterns,
-        exceptionItemName,
-        indexPatterns,
-        isOrDisabled: isExceptionBuilderFormDisabled,
-        isAndDisabled: isExceptionBuilderFormDisabled,
-        isNestedDisabled: isExceptionBuilderFormDisabled,
-        dataTestSubj: 'alertExceptionBuilder',
-        idAria: 'alertExceptionBuilder',
-        onChange: handleBuilderOnChange,
-        isDisabled: isExceptionBuilderFormDisabled,
-        allowCustomFieldOptions: !isEndpointException,
-      })}
+      <FiltersBuilderEditor
+        filter={filter}
+        dataView={ip}
+        onFilterChange={handleBuilderOnChange}
+        operators={[
+          doesNotExistOperator,
+          existsOperator,
+          isOneOfOperator,
+          isNotOneOfOperator,
+          isOperator,
+          isNotOperator,
+        ]}
+      />
     </>
   );
 };

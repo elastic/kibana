@@ -92,6 +92,7 @@ export function FilterItem({
 }: FilterItemProps) {
   const {
     dispatch,
+    operators: operatorsToUse,
     dataView,
     dropTarget,
     globalParams: { hideOr },
@@ -108,7 +109,7 @@ export function FilterItem({
   if (!conditionalOperationType) {
     field = getFieldFromFilter(filter, dataView!);
     if (field) {
-      operator = getOperatorFromFilter(filter);
+      operator = getOperatorFromFilter(filter, operatorsToUse);
       params = getFilterParams(filter);
     }
   }
