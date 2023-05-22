@@ -6,12 +6,15 @@
  */
 
 import {
+  EuiButton,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -191,6 +194,187 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section alignment="top" className="serverlessSearchFooterCardsSection">
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1>
+                <EuiTextColor color="ghost">
+                  {i18n.translate('xpack.serverlessSearch.footer.title', {
+                    defaultMessage: "What's next?",
+                  })}
+                </EuiTextColor>
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem>
+            <EuiCard
+              paddingSize="xl"
+              textAlign="left"
+              title={i18n.translate('xpack.serverlessSearch.footer.discoverCard.title', {
+                defaultMessage: 'Explore and visualize your data in Discover',
+              })}
+              description={i18n.translate(
+                'xpack.serverlessSearch.footer.discoverCard.description',
+                {
+                  defaultMessage:
+                    'With Discover, you can quickly search and filter your data, get information about the structure of the fields, and display your findings in a visualization.',
+                }
+              )}
+              footer={
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiButton color="primary" href={http.basePath.prepend('/app/discover')}>
+                      {i18n.translate('xpack.serverlessSearch.footer.discoverCard.buttonText', {
+                        defaultMessage: 'Explore data in Discover',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              image={
+                <FooterCardImage
+                  iconSrc={`${assetBasePath}discover_icon.png`}
+                  backgroundSrc={`${assetBasePath}discover_bg.png`}
+                />
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              paddingSize="xl"
+              textAlign="left"
+              title={i18n.translate('xpack.serverlessSearch.footer.pipelinesCard.title', {
+                defaultMessage: 'Transform your data using pipelines',
+              })}
+              description={i18n.translate(
+                'xpack.serverlessSearch.footer.pipelinesCard.description',
+                {
+                  defaultMessage:
+                    'Preprocess data before indexing into Elasticsearch. Remove fields, extract values from text, or enrich your data with machine learning models like ELSER.',
+                }
+              )}
+              footer={
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiButton
+                      color="primary"
+                      href={http.basePath.prepend('/app/management/ingest/ingest_pipelines')}
+                    >
+                      {i18n.translate('xpack.serverlessSearch.footer.pipelinesCard.buttonText', {
+                        defaultMessage: 'Configure your ingest pipelines',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              image={
+                <FooterCardImage
+                  iconSrc={`${assetBasePath}transform_icon.png`}
+                  backgroundSrc={`${assetBasePath}transform_bg.png`}
+                />
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              paddingSize="xl"
+              textAlign="left"
+              title={i18n.translate('xpack.serverlessSearch.footer.searchUI.title', {
+                defaultMessage: 'Build a user interface with Search UI',
+              })}
+              description={i18n.translate('xpack.serverlessSearch.footer.searchUI.description', {
+                defaultMessage:
+                  'Search UI is a free and open source JavaScript library maintained by Elastic for the fast development of modern, engaging search experiences.',
+              })}
+              footer={
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiButton color="primary">
+                      {i18n.translate('xpack.serverlessSearch.footer.searchUI.buttonText', {
+                        defaultMessage: 'Build with Search UI',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              image={
+                <FooterCardImage
+                  iconSrc={`${assetBasePath}searchui_icon.png`}
+                  backgroundSrc={`${assetBasePath}searchui_bg.png`}
+                />
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section alignment="top" className="serverlessSearchFooter">
+        <EuiFlexGroup gutterSize="l">
+          <EuiFlexItem>
+            <FooterIcon
+              src={`${assetBasePath}invite_users_icon.png`}
+              title={i18n.translate('xpack.serverlessSearch.footer.inviteUsers.title', {
+                defaultMessage: 'Invite more users',
+              })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FooterIcon
+              src={`${assetBasePath}billing_icon.png`}
+              title={i18n.translate('xpack.serverlessSearch.footer.community.title', {
+                defaultMessage: 'Billing and usage',
+              })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FooterIcon
+              src={`${assetBasePath}community_icon.png`}
+              title={i18n.translate('xpack.serverlessSearch.footer.community.title', {
+                defaultMessage: 'Join the community',
+              })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FooterIcon
+              src={`${assetBasePath}feedback_icon.png`}
+              title={i18n.translate('xpack.serverlessSearch.footer.feedback.title', {
+                defaultMessage: 'Give feedback',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
 };
+
+const FooterCardImage = ({
+  iconSrc,
+  backgroundSrc,
+}: {
+  iconSrc: string;
+  backgroundSrc: string;
+}) => (
+  <div className="serverlessSearchFooterCard--wrapper">
+    <img src={backgroundSrc} alt="" className="serverlessSearchFooterCard--Background" />
+    <EuiImage
+      size={250}
+      src={iconSrc}
+      alt=""
+      wrapperProps={{ className: 'serverlessSearchFooterCard--iconWrapper' }}
+      style={{ width: 'auto', height: '100%', inlineSize: 'auto' }}
+    />
+  </div>
+);
+
+const FooterIcon = ({ src, title }: { src: string; title: string }) => (
+  <>
+    <EuiImage size={120} src={src} alt="" />
+    <EuiText color="ghost" textAlign="center">
+      <h5>{title}</h5>
+    </EuiText>
+  </>
+);
