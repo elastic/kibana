@@ -7,48 +7,48 @@
 
 import * as rt from 'io-ts';
 
-const ActionTypeRT = rt.union([
+const ActionTypeRt = rt.union([
   rt.literal('append'),
   rt.literal('nothing'),
   rt.literal('overwrite'),
 ]);
-const CaseFieldRT = rt.union([
+const CaseFieldRt = rt.union([
   rt.literal('title'),
   rt.literal('description'),
   rt.literal('comments'),
   rt.literal('tags'),
 ]);
 
-const ThirdPartyFieldRT = rt.union([rt.string, rt.literal('not_mapped')]);
-export type ActionType = rt.TypeOf<typeof ActionTypeRT>;
-export type CaseField = rt.TypeOf<typeof CaseFieldRT>;
-export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRT>;
+const ThirdPartyFieldRt = rt.union([rt.string, rt.literal('not_mapped')]);
+export type ActionType = rt.TypeOf<typeof ActionTypeRt>;
+export type CaseField = rt.TypeOf<typeof CaseFieldRt>;
+export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRt>;
 
-export const ConnectorMappingsAttributesRT = rt.type({
-  action_type: ActionTypeRT,
-  source: CaseFieldRT,
-  target: ThirdPartyFieldRT,
+const ConnectorMappingsAttributesRt = rt.type({
+  action_type: ActionTypeRt,
+  source: CaseFieldRt,
+  target: ThirdPartyFieldRt,
 });
 
 export const ConnectorMappingsRt = rt.type({
-  mappings: rt.array(ConnectorMappingsAttributesRT),
+  mappings: rt.array(ConnectorMappingsAttributesRt),
   owner: rt.string,
 });
 
-export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRT>;
+export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
 export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
 
-const FieldTypeRT = rt.union([rt.literal('text'), rt.literal('textarea')]);
+const FieldTypeRt = rt.union([rt.literal('text'), rt.literal('textarea')]);
 
 const ConnectorFieldRt = rt.type({
   id: rt.string,
   name: rt.string,
   required: rt.boolean,
-  type: FieldTypeRT,
+  type: FieldTypeRt,
 });
 
 export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
 
-const GetDefaultMappingsResponseRt = rt.array(ConnectorMappingsAttributesRT);
+const GetDefaultMappingsResponseRt = rt.array(ConnectorMappingsAttributesRt);
 
 export type GetDefaultMappingsResponse = rt.TypeOf<typeof GetDefaultMappingsResponseRt>;
