@@ -504,7 +504,7 @@ describe('Response actions history page', () => {
         }
       });
 
-      // verify 4 rows are expanded and are the ones from before
+      // verify 2 rows are expanded and are the ones from before
       expect(history.location.search).toEqual(`?withOutputs=${actionIdsWithDetails}`);
     });
   });
