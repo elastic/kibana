@@ -59,7 +59,7 @@ Review the following information about the {kib} 8.8.0 release.
 [%collapsible]
 ====
 *Details* +
-If Monitor Management was enabled prior to 8.6.0, the API key generated internally will not contain the required permissions. The Synthetics app will attempt to fix this automatically in {kibana-pull}155203[#155203] when a user with sufficient privileges visits this page for the first time after upgrading to 8.8.0.
+If Monitor Management was enabled prior to 8.6.0, the API key generated internally will not contain the required permissions. The Synthetics app will attempt to fix this automatically in {kibana-pull}155203[#155203] when a user with https://www.elastic.co/guide/en/observability/8.8/synthetics-role-setup.html[sufficient privileges] visits this page for the first time after upgrading to 8.8.0.
 
 *Impact* +
 All monitors configured to run on Elastic’s global managed testing infrastructure will stop running until a user with permissions has loaded the Synthetics app.
