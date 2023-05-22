@@ -39,8 +39,6 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory = () => ({
   validate: {},
   handler: async ({ savedObjectsClient, request, response, server }): Promise<any> => {
     try {
-      await server.spaces?.spacesService.getActiveSpace(request);
-
       const data = await savedObjectsClient.find({
         type: syntheticsMonitorType,
         perPage: 0,
