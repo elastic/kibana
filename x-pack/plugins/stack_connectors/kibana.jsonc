@@ -15,8 +15,8 @@
       "esUiShared",
       "triggersActionsUi"
     ],
-         "extraPublicDirs": [
-           "public/common"
-         ]
+    "extraPublicDirs": [
+      "public/common"
+    ]
   }
 }
