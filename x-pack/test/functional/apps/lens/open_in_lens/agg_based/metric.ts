@@ -108,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Overall Max of Count',
           subtitle: undefined,
           extraText: '',
-          value: '1.44K',
+          value: '1.44k',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
