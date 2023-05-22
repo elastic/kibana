@@ -678,6 +678,8 @@
       "@kbn/eslint-plugin-telemetry/*": ["packages/kbn-eslint-plugin-telemetry/*"],
       "@kbn/eso-plugin": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin"],
       "@kbn/eso-plugin/*": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/*"],
+      "@kbn/ess-security": ["x-pack/plugins/ess_security"],
+      "@kbn/ess-security/*": ["x-pack/plugins/ess_security/*"],
       "@kbn/event-annotation-plugin": ["src/plugins/event_annotation"],
       "@kbn/event-annotation-plugin/*": ["src/plugins/event_annotation/*"],
       "@kbn/event-log-fixture-plugin": ["x-pack/test/plugin_api_integration/plugins/event_log"],

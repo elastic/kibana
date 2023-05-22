@@ -68,6 +68,7 @@ import type { NavigationLink } from './common/links';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
+import type { UpsellingService } from './common/lib/upsellings';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -132,11 +133,13 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     isSidebarEnabled$: BehaviorSubject<boolean>;
+    upselling: UpsellingService;
     telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
+  upselling: UpsellingService;
 }
 
 export interface PluginStart {
