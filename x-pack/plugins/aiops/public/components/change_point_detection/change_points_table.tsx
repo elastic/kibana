@@ -319,7 +319,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
   });
 
   return (
-    <div>
+    <div data-test-subj={'aiopChangePointPreviewChart'}>
       <EmbeddableComponent
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}

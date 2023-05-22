@@ -44,6 +44,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(result.length).to.eql(1);
       expect(parseInt(result[0].pValue, 10)).to.eql(0);
       expect(result[0].type).to.eql('distribution_change');
+
+      await elasticChart.waitForRenderComplete('aiopChangePointPreviewChart > xyVisChart');
+      const chartState = await elasticChart.getChartDebugData(
+        'aiopChangePointPreviewChart > xyVisChart',
+        0,
+        5000
+      );
+      if (!chartState) {
+        throw new Error('Preview chart debug state is not available');
+      }
+      expect(chartState.annotations![0].data.details).to.eql('distribution_change');
+      expect(chartState.annotations![0].domainType).to.eql('xDomain');
+      expect(chartState.lines![0].points.length).to.be.above(30);
     });
 
     it('shows multiple results when split field is selected', async () => {
