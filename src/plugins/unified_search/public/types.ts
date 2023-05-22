@@ -83,6 +83,7 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   };
   appName: string;
   uiSettings: CoreStart['uiSettings'];
+  theme: CoreStart['theme'];
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
