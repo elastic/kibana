@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import { merge } from '@kbn/std';
-
-const expandDottedField = (dottedFieldName: string, val: unknown): object => {
-  const parts = dottedFieldName.split('.');
-  if (parts.length === 1) {
-    return { [parts[0]]: val };
-  } else {
-    return { [parts[0]]: expandDottedField(parts.slice(1).join('.'), val) };
-  }
-};
+import { setWith } from 'lodash';
 
 /*
  * Expands an object with "dotted" fields to a nested object with unflattened fields.
@@ -48,8 +39,9 @@ export const expandDottedObject = (dottedObj: object) => {
   if (Array.isArray(dottedObj)) {
     return dottedObj;
   }
-  return Object.entries(dottedObj).reduce(
-    (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
-    {}
-  );
+  const returnObj = {};
+  Object.entries(dottedObj).forEach(([key, value]) => {
+    setWith(returnObj, key, value, Object);
+  });
+  return returnObj;
 };

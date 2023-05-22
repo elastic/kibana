@@ -112,6 +112,7 @@ describe('searchAfterAndBulkCreate', () => {
       indicesToQuery: inputIndexPattern,
       alertTimestampOverride: undefined,
       ruleExecutionLogger,
+      publicBaseUrl: 'http://testkibanabaseurl.com',
     });
   });
 

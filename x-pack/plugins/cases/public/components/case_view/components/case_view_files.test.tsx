@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import type { AppMockRenderer } from '../../../common/mock';
 
 import { createAppMockRenderer } from '../../../common/mock';
@@ -21,7 +21,7 @@ jest.mock('../../../containers/use_get_case_files');
 
 const useGetCaseFilesMock = useGetCaseFiles as jest.Mock;
 
-const caseData: Case = {
+const caseData: CaseUI = {
   ...basicCase,
   comments: [...basicCase.comments, alertCommentWithIndices],
 };

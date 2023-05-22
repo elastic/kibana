@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
-import { ESCaseSeverity, ESCaseStatus } from '@kbn/cases-plugin/server/services/cases/types';
+import {
+  CasePersistedSeverity,
+  CasePersistedStatus,
+} from '@kbn/cases-plugin/server/common/types/case';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
@@ -499,11 +502,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('severity', () => {
         it('severity keyword values are converted to matching short', async () => {
-          const expectedSeverityValues: Record<string, ESCaseSeverity> = {
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': ESCaseSeverity.LOW,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': ESCaseSeverity.MEDIUM,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': ESCaseSeverity.HIGH,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': ESCaseSeverity.CRITICAL,
+          const expectedSeverityValues: Record<string, CasePersistedSeverity> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': CasePersistedSeverity.LOW,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': CasePersistedSeverity.MEDIUM,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': CasePersistedSeverity.HIGH,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': CasePersistedSeverity.CRITICAL,
           };
 
           const casesFromES = await getCaseSavedObjectsFromES({ es });
@@ -518,11 +521,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('status', () => {
         it('status keyword values are converted to matching short', async () => {
-          const expectedStatusValues: Record<string, ESCaseStatus> = {
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': ESCaseStatus.OPEN,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': ESCaseStatus.OPEN,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': ESCaseStatus.IN_PROGRESS,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': ESCaseStatus.CLOSED,
+          const expectedStatusValues: Record<string, CasePersistedStatus> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': CasePersistedStatus.OPEN,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': CasePersistedStatus.OPEN,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': CasePersistedStatus.IN_PROGRESS,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': CasePersistedStatus.CLOSED,
           };
 
           const casesFromES = await getCaseSavedObjectsFromES({ es });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
 import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
@@ -140,17 +141,30 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
+  // create a unique, but stable (across re-renders) value
+  const uniqueValue = useMemo(() => `SuperUniqueValue-${uuidv4()}`, []);
+
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
+      uniqueValue,
       from,
       runtimeMappings,
       to,
       pageSize,
       pageIndex,
     });
-  }, [additionalFilters, from, pageIndex, pageSize, runtimeMappings, selectedGroup, to]);
+  }, [
+    additionalFilters,
+    from,
+    pageIndex,
+    pageSize,
+    runtimeMappings,
+    selectedGroup,
+    to,
+    uniqueValue,
+  ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
 
@@ -177,8 +191,24 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
+  const queriedGroup = useRef<string | null>(null);
+
+  const aggs = useMemo(
+    // queriedGroup because `selectedGroup` updates before the query response
+    () =>
+      parseGroupingQuery(
+        // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
+        queriedGroup.current === null ? selectedGroup : queriedGroup.current,
+        uniqueValue,
+        alertsGroupsData?.aggregations
+      ),
+    [alertsGroupsData?.aggregations, selectedGroup, uniqueValue]
+  );
+
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
+      queriedGroup.current =
+        queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup ?? '';
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
@@ -225,30 +255,30 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     () =>
       getGrouping({
         activePage: pageIndex,
-        data: alertsGroupsData?.aggregations,
+        data: aggs,
         groupingLevel,
         inspectButton: inspect,
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
         onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
         onChangeGroupsPage: (index) => setPageIndex(index),
-        renderChildComponent,
         onGroupClose,
+        renderChildComponent,
         selectedGroup,
         takeActionItems: getTakeActionItems,
       }),
     [
-      alertsGroupsData?.aggregations,
+      aggs,
       getGrouping,
       getTakeActionItems,
       groupingLevel,
       inspect,
       isLoadingGroups,
       loading,
+      onGroupClose,
       pageIndex,
       pageSize,
       renderChildComponent,
-      onGroupClose,
       selectedGroup,
       setPageIndex,
       setPageSize,

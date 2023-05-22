@@ -7,7 +7,7 @@
 import {
   ConfigKey,
   HTTPFields,
-  SyntheticsParam,
+  SyntheticsParamSO,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { omit } from 'lodash';
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.12.0')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(apiResponse.status).eql(200);
 
-      apiResponse.body.data.forEach(({ attributes }: SavedObject<SyntheticsParam>) => {
+      apiResponse.body.data.forEach(({ attributes }: SavedObject<SyntheticsParamSO>) => {
         params[attributes.key] = attributes.value;
       });
     });

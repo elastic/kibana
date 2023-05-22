@@ -17,7 +17,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 
 import { Filter, Query } from '@kbn/es-query';
@@ -43,6 +43,7 @@ import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
+import { SamplingMenu } from './sampling_menu';
 
 const BAR_TARGET = 20;
 
@@ -52,7 +53,7 @@ export const LogCategorizationPage: FC = () => {
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
+  const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
     getDefaultAiOpsListState()
@@ -60,13 +61,15 @@ export const LogCategorizationPage: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [categories, setCategories] = useState<Category[] | null>(null);
   const [selectedSavedSearch, setSelectedDataView] = useState(savedSearch);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
-  const [sparkLines, setSparkLines] = useState<SparkLinesPerCategory>({});
+  const [data, setData] = useState<{
+    categories: Category[];
+    sparkLines: SparkLinesPerCategory;
+  } | null>(null);
 
   useEffect(() => {
     if (savedSearch) {
@@ -118,9 +121,9 @@ export const LogCategorizationPage: FC = () => {
     intervalMs,
   } = useData(
     { selectedDataView: dataView, selectedSavedSearch },
+    'log_categorization',
     aiopsListState,
     setGlobalState,
-    'log_categorization',
     undefined,
     undefined,
     BAR_TARGET
@@ -160,20 +163,29 @@ export const LogCategorizationPage: FC = () => {
 
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
+      randomSampler.setDocCount(documentStats.totalCount);
       setEventRate(
         Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
           key: +key,
           docCount,
         }))
       );
-      setCategories(null);
+      setData(null);
       setTotalCount(documentStats.totalCount);
     }
-  }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery]);
+  }, [
+    documentStats,
+    earliest,
+    latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
+    randomSampler,
+  ]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
-    setCategories(null);
+    setData(null);
     const { title: index, timeFieldName: timeField } = dataView;
 
     if (selectedField === undefined || timeField === undefined) {
@@ -193,8 +205,7 @@ export const LogCategorizationPage: FC = () => {
         intervalMs
       );
 
-      setCategories(resp.categories);
-      setSparkLines(resp.sparkLinesPerCategory);
+      setData({ categories: resp.categories, sparkLines: resp.sparkLinesPerCategory });
     } catch (error) {
       toasts.addError(error, {
         title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
@@ -217,7 +228,7 @@ export const LogCategorizationPage: FC = () => {
   ]);
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
-    setCategories(null);
+    setData(null);
     setSelectedField(value && value.length ? value[0].label : undefined);
   };
 
@@ -263,15 +274,17 @@ export const LogCategorizationPage: FC = () => {
             >
               <FormattedMessage
                 id="xpack.aiops.logCategorization.runButton"
-                defaultMessage="Run categorization"
+                defaultMessage="Run pattern analysis"
               />
             </EuiButton>
           ) : (
             <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }} />
         <EuiFlexItem />
+        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
+          <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       {eventRate.length ? (
@@ -281,7 +294,7 @@ export const LogCategorizationPage: FC = () => {
             eventRate={eventRate}
             pinnedCategory={pinnedCategory}
             selectedCategory={selectedCategory}
-            sparkLines={sparkLines}
+            sparkLines={data?.sparkLines ?? {}}
             totalCount={totalCount}
             documentCountStats={documentStats.documentCountStats}
           />
@@ -289,25 +302,25 @@ export const LogCategorizationPage: FC = () => {
         </>
       ) : null}
 
-      {loading === true ? <EuiLoadingContent lines={10} /> : null}
+      {loading === true ? <EuiSkeletonText lines={10} /> : null}
 
       <InformationText
         loading={loading}
-        categoriesLength={categories?.length ?? null}
+        categoriesLength={data?.categories?.length ?? null}
         eventRateLength={eventRate.length}
         fieldSelected={selectedField !== null}
       />
 
       {selectedField !== undefined &&
-      categories !== null &&
-      categories.length > 0 &&
+      data !== null &&
+      data.categories.length > 0 &&
       isFullAiOpsListState(aiopsListState) ? (
         <CategoryTable
-          categories={categories}
+          categories={data.categories}
           aiopsListState={aiopsListState}
           dataViewId={dataView.id!}
           eventRate={eventRate}
-          sparkLines={sparkLines}
+          sparkLines={data.sparkLines}
           selectedField={selectedField}
           pinnedCategory={pinnedCategory}
           setPinnedCategory={setPinnedCategory}

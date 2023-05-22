@@ -155,86 +155,85 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // The group switch should be disabled by default
       await aiops.explainLogRateSpikesPage.assertSpikeAnalysisGroupSwitchExists(false);
 
-      // Enabled grouping
-      await aiops.explainLogRateSpikesPage.clickSpikeAnalysisGroupSwitch(false);
-
-      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
-
       if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
+        // Enabled grouping
+        await aiops.explainLogRateSpikesPage.clickSpikeAnalysisGroupSwitch(false);
+
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
+
         const analysisGroupsTable =
           await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
         expect(orderBy(analysisGroupsTable, 'group')).to.be.eql(
           orderBy(testData.expected.analysisGroupsTable, 'group')
         );
-      }
 
-      await ml.testExecution.logTestStep('expand table row');
-      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertExpandRowButtonExists();
-      await aiops.explainLogRateSpikesAnalysisGroupsTable.expandRow();
-
-      if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-        const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
-        expect(orderBy(analysisTable, ['fieldName', 'fieldValue'])).to.be.eql(
-          orderBy(testData.expected.analysisTable, ['fieldName', 'fieldValue'])
-        );
-      }
-
-      await ml.testExecution.logTestStep('open the field filter');
-      await aiops.explainLogRateSpikesPage.assertFieldFilterPopoverButtonExists(false);
-      await aiops.explainLogRateSpikesPage.clickFieldFilterPopoverButton(true);
-      await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList(
-        testData.expected.fieldSelectorPopover
-      );
-
-      await ml.testExecution.logTestStep('filter fields');
-      await aiops.explainLogRateSpikesPage.setFieldSelectorSearch(testData.fieldSelectorSearch);
-      await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList([
-        testData.fieldSelectorSearch,
-      ]);
-      await aiops.explainLogRateSpikesPage.clickFieldSelectorDisableAllSelectedButton();
-      await aiops.explainLogRateSpikesPage.assertFieldFilterApplyButtonExists(
-        !testData.fieldSelectorApplyAvailable
-      );
-
-      if (testData.fieldSelectorApplyAvailable) {
-        await ml.testExecution.logTestStep('regroup results');
-        await aiops.explainLogRateSpikesPage.clickFieldFilterApplyButton();
+        await ml.testExecution.logTestStep('expand table row');
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.assertExpandRowButtonExists();
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.expandRow();
 
         if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-          const filteredAnalysisGroupsTable =
-            await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
-          expect(orderBy(filteredAnalysisGroupsTable, 'group')).to.be.eql(
-            orderBy(testData.expected.filteredAnalysisGroupsTable, 'group')
+          const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
+          expect(orderBy(analysisTable, ['fieldName', 'fieldValue'])).to.be.eql(
+            orderBy(testData.expected.analysisTable, ['fieldName', 'fieldValue'])
           );
         }
-      }
 
-      if (testData.action !== undefined) {
-        await ml.testExecution.logTestStep('check all table row actions are present');
-        await aiops.explainLogRateSpikesAnalysisGroupsTable.assertRowActions(
-          testData.action.tableRowId
-        );
-
-        await ml.testExecution.logTestStep('click log pattern analysis action');
-        await aiops.explainLogRateSpikesAnalysisGroupsTable.clickRowAction(
-          testData.action.tableRowId,
-          testData.action.type
+        await ml.testExecution.logTestStep('open the field filter');
+        await aiops.explainLogRateSpikesPage.assertFieldFilterPopoverButtonExists(false);
+        await aiops.explainLogRateSpikesPage.clickFieldFilterPopoverButton(true);
+        await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList(
+          testData.expected.fieldSelectorPopover
         );
 
-        await ml.testExecution.logTestStep('check log pattern analysis page loaded correctly');
-        await aiops.logPatternAnalysisPageProvider.assertLogCategorizationPageExists();
-        await aiops.logPatternAnalysisPageProvider.assertTotalDocumentCount(
-          testData.action.expected.totalDocCount
+        await ml.testExecution.logTestStep('filter fields');
+        await aiops.explainLogRateSpikesPage.setFieldSelectorSearch(testData.fieldSelectorSearch);
+        await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList([
+          testData.fieldSelectorSearch,
+        ]);
+        await aiops.explainLogRateSpikesPage.clickFieldSelectorDisableAllSelectedButton();
+        await aiops.explainLogRateSpikesPage.assertFieldFilterApplyButtonExists(
+          !testData.fieldSelectorApplyAvailable
         );
-        await aiops.logPatternAnalysisPageProvider.assertQueryInput(
-          testData.action.expected.queryBar
-        );
+
+        if (testData.fieldSelectorApplyAvailable) {
+          await ml.testExecution.logTestStep('regroup results');
+          await aiops.explainLogRateSpikesPage.clickFieldFilterApplyButton();
+
+          if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
+            const filteredAnalysisGroupsTable =
+              await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
+            expect(orderBy(filteredAnalysisGroupsTable, 'group')).to.be.eql(
+              orderBy(testData.expected.filteredAnalysisGroupsTable, 'group')
+            );
+          }
+        }
+
+        if (testData.action !== undefined) {
+          await ml.testExecution.logTestStep('check all table row actions are present');
+          await aiops.explainLogRateSpikesAnalysisGroupsTable.assertRowActions(
+            testData.action.tableRowId
+          );
+
+          await ml.testExecution.logTestStep('click log pattern analysis action');
+          await aiops.explainLogRateSpikesAnalysisGroupsTable.clickRowAction(
+            testData.action.tableRowId,
+            testData.action.type
+          );
+
+          await ml.testExecution.logTestStep('check log pattern analysis page loaded correctly');
+          await aiops.logPatternAnalysisPageProvider.assertLogCategorizationPageExists();
+          await aiops.logPatternAnalysisPageProvider.assertTotalDocumentCount(
+            testData.action.expected.totalDocCount
+          );
+          await aiops.logPatternAnalysisPageProvider.assertQueryInput(
+            testData.action.expected.queryBar
+          );
+        }
       }
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/155222
-  describe.skip('explain log rate spikes', async function () {
+  describe('explain log rate spikes', async function () {
     for (const testData of explainLogRateSpikesTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {

@@ -18,7 +18,7 @@ import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
-import { PluginContext } from '../context/plugin_context';
+import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
 import { Subset } from '../typings';
@@ -55,7 +55,17 @@ const queryClient = new QueryClient({
 export const render = (component: React.ReactNode, config: Subset<ConfigSchema> = {}) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
-      <KibanaContextProvider services={{ ...core, data }}>
+      <KibanaContextProvider
+        services={{
+          ...core,
+          data,
+          exploratoryView: {
+            createExploratoryViewUrl: jest.fn(),
+            getAppDataView: jest.fn(),
+            ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
+          },
+        }}
+      >
         <PluginContext.Provider
           value={{
             appMountParameters,

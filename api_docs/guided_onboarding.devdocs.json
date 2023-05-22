@@ -960,6 +960,17 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1206,7 +1217,7 @@
         "label": "API_BASE_PATH",
         "description": [],
         "signature": [
-          "\"/api/guided_onboarding\""
+          "\"/internal/guided_onboarding\""
         ],
         "path": "src/plugins/guided_onboarding/common/constants.ts",
         "deprecated": false,

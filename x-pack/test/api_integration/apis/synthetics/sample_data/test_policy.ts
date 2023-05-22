@@ -21,7 +21,7 @@ export const getTestSyntheticsPolicy = (
   version: 'WzE2MjYsMV0=',
   name: 'test-monitor-name-Test private location 0-default',
   namespace: namespace || 'testnamespace',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.4' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.12.0' },
   enabled: true,
   policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
   inputs: [
@@ -55,11 +55,13 @@ export const getTestSyntheticsPolicy = (
             timeout: { value: '3ms', type: 'text' },
             max_redirects: { value: '3', type: 'integer' },
             proxy_url: { value: proxyUrl ?? 'http://proxy.com', type: 'text' },
+            proxy_headers: { value: null, type: 'yaml' },
             tags: { value: '["tag1","tag2"]', type: 'yaml' },
             username: { value: 'test-username', type: 'text' },
             password: { value: 'test', type: 'password' },
             'response.include_headers': { value: true, type: 'bool' },
             'response.include_body': { value: 'never', type: 'text' },
+            'response.include_body_max_bytes': { value: '1024', type: 'text' },
             'check.request.method': { value: '', type: 'text' },
             'check.request.headers': {
               value: '{"sampleHeader":"sampleHeaderValue"}',
@@ -70,6 +72,7 @@ export const getTestSyntheticsPolicy = (
             'check.response.headers': { value: null, type: 'yaml' },
             'check.response.body.positive': { value: null, type: 'yaml' },
             'check.response.body.negative': { value: null, type: 'yaml' },
+            'check.response.json': { value: null, type: 'yaml' },
             'ssl.certificate_authorities': {
               value: isTLSEnabled ? '"t.string"' : null,
               type: 'yaml',
@@ -89,6 +92,9 @@ export const getTestSyntheticsPolicy = (
             origin: { value: 'ui', type: 'text' },
             'monitor.project.id': { type: 'text', value: null },
             'monitor.project.name': { type: 'text', value: null },
+            ipv4: { type: 'bool', value: true },
+            ipv6: { type: 'bool', value: true },
+            mode: { type: 'text', value: 'any' },
           },
           id: 'synthetics/http-http-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
@@ -116,6 +122,9 @@ export const getTestSyntheticsPolicy = (
             'check.request.headers': { sampleHeader: 'sampleHeaderValue' },
             'check.request.body': 'testValue',
             'check.response.status': ['200', '201'],
+            ipv4: true,
+            ipv6: true,
+            mode: 'any',
             ...(isTLSEnabled
               ? {
                   'ssl.certificate': 't.string',
@@ -179,6 +188,9 @@ export const getTestSyntheticsPolicy = (
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            ipv4: { type: 'bool', value: true },
+            ipv6: { type: 'bool', value: true },
+            mode: { type: 'text' },
           },
           id: 'synthetics/tcp-tcp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         },
@@ -213,6 +225,9 @@ export const getTestSyntheticsPolicy = (
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            ipv4: { type: 'bool', value: true },
+            ipv6: { type: 'bool', value: true },
+            mode: { type: 'text' },
           },
           id: 'synthetics/icmp-icmp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         },
@@ -299,10 +314,7 @@ export const getTestSyntheticsPolicy = (
           },
           id: 'synthetics/browser-browser.network-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
         {
@@ -318,10 +330,7 @@ export const getTestSyntheticsPolicy = (
           },
           id: 'synthetics/browser-browser.screenshot-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
       ],

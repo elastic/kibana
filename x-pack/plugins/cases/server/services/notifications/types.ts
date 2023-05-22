@@ -6,11 +6,11 @@
  */
 
 import type { CaseAssignees } from '../../../common/api';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 export interface NotifyArgs {
   assignees: CaseAssignees;
-  theCase: CaseSavedObject;
+  theCase: CaseSavedObjectTransformed;
 }
 
 export interface NotificationService {

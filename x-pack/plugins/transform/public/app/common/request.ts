@@ -172,6 +172,7 @@ export const getRequestPayload = (
         date_histogram: {
           field: g.field,
           calendar_interval: g.calendar_interval,
+          time_zone: g.time_zone,
           ...getMissingBucketConfig(g),
         },
       };

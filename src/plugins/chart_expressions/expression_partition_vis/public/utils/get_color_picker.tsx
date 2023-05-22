@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, createContext, useContext } from 'react';
-import Color from 'color';
+import chroma from 'chroma-js';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin/public';
@@ -109,7 +109,7 @@ export const LegendColorPickerWrapper: LegendColorPicker = ({
     const enablePicker = isOnInnerLayer(bucketColumns[0], data, seriesName) || !bucketColumns[0].id;
     if (!enablePicker) return null;
   }
-  const hexColor = new Color(color).hex();
+  const hexColor = chroma(color).hex();
   return (
     <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
       <EuiWrappingPopover

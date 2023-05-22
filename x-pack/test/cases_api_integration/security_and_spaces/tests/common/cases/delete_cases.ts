@@ -36,6 +36,7 @@ import {
   listFiles,
   findAttachments,
   bulkCreateAttachments,
+  getAllComments,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -244,7 +245,7 @@ export default ({ getService }: FtrProviderContext): void => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
           await createSignalsIndex(supertest, log);
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 2);
           alerts = [signals.hits.hits[0], signals.hits.hits[1]];
         });
 
@@ -516,18 +517,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               auth: { user: superUser, space: 'space1' },
             }),
-            findAttachments({
+            getAllComments({
               supertest: supertestWithoutAuth,
               caseId: postedCase.id,
-              query: {
-                perPage: MAX_DOCS_PER_PAGE,
-              },
               auth: { user: secAllUser, space: 'space1' },
             }),
           ]);
 
           expect(filesAfterDelete.total).to.be(1);
-          expect(attachmentsAfterDelete.comments.length).to.be(1);
+          expect(attachmentsAfterDelete.length).to.be(1);
         });
       });
 

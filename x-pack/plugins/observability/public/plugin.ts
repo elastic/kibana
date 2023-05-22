@@ -24,7 +24,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { ExploratoryViewPublicPluginsStart } from '@kbn/exploratory-view-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type {
@@ -49,14 +48,16 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
-import { registerDataHandler } from './data_handler';
+import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
-import { createCallObservabilityApi } from './services/call_observability_api';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
@@ -94,7 +95,7 @@ export interface ObservabilityPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
-  exploratoryView: ExploratoryViewPublicPluginsStart;
+  exploratoryView: ExploratoryViewPublicStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -185,12 +186,19 @@ export class Plugin
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
-    createCallObservabilityApi(coreSetup.http);
-
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
-    pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
+
+    const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+
+    const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
+      new RuleDetailsLocatorDefinition()
+    );
+
+    const sloDetailsLocator = pluginsSetup.share.url.locators.create(
+      new SloDetailsLocatorDefinition()
+    );
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -310,6 +318,9 @@ export class Plugin
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      rulesLocator,
+      ruleDetailsLocator,
+      sloDetailsLocator,
     };
   }
 

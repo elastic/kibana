@@ -29,14 +29,14 @@ describe('getShouldRefresh', () => {
   );
 
   describe('filter changes', () => {
-    test('should return false when filters do not change', async () => {
+    test('should return false when filters do not change', () => {
       const lastInput = {
         filters: [existsFilter],
       } as unknown as DashboardContainerInput;
-      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, lastInput)).toBe(false);
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, lastInput)).toBe(false);
     });
 
-    test('should return true when pinned filters change', async () => {
+    test('should return true when pinned filters change', () => {
       const pinnedFilter = pinFilter(existsFilter);
       const lastInput = {
         filters: [pinnedFilter],
@@ -44,10 +44,10 @@ describe('getShouldRefresh', () => {
       const input = {
         filters: [toggleFilterNegated(pinnedFilter)],
       } as unknown as DashboardContainerInput;
-      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
     });
 
-    test('should return false when disabled filters change', async () => {
+    test('should return false when disabled filters change', () => {
       const disabledFilter = disableFilter(existsFilter);
       const lastInput = {
         filters: [disabledFilter],
@@ -55,29 +55,29 @@ describe('getShouldRefresh', () => {
       const input = {
         filters: [toggleFilterNegated(disabledFilter)],
       } as unknown as DashboardContainerInput;
-      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(false);
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(false);
     });
 
-    test('should return false when pinned filter changes to unpinned', async () => {
+    test('should return false when pinned filter changes to unpinned', () => {
       const lastInput = {
         filters: [existsFilter],
       } as unknown as DashboardContainerInput;
       const input = {
         filters: [pinFilter(existsFilter)],
       } as unknown as DashboardContainerInput;
-      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(false);
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(false);
     });
   });
 
   describe('timeRange changes', () => {
-    test('should return false when timeRange does not change', async () => {
+    test('should return false when timeRange does not change', () => {
       const lastInput = {
         timeRange: { from: 'now-15m', to: 'now' },
       } as unknown as DashboardContainerInput;
-      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, lastInput)).toBe(false);
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, lastInput)).toBe(false);
     });
 
-    test('should return true when timeRange changes (timeRestore is true)', async () => {
+    test('should return true when timeRange changes (timeRestore is true)', () => {
       const lastInput = {
         timeRange: { from: 'now-15m', to: 'now' },
         timeRestore: true,
@@ -86,10 +86,10 @@ describe('getShouldRefresh', () => {
         timeRange: { from: 'now-30m', to: 'now' },
         timeRestore: true,
       } as unknown as DashboardContainerInput;
-      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
     });
 
-    test('should return true when timeRange changes (timeRestore is false)', async () => {
+    test('should return true when timeRange changes (timeRestore is false)', () => {
       const lastInput = {
         timeRange: { from: 'now-15m', to: 'now' },
         timeRestore: false,
@@ -98,7 +98,26 @@ describe('getShouldRefresh', () => {
         timeRange: { from: 'now-30m', to: 'now' },
         timeRestore: false,
       } as unknown as DashboardContainerInput;
-      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
+    });
+  });
+
+  describe('key without custom diffing function (syncColors)', () => {
+    test('should return false when syncColors do not change', () => {
+      const lastInput = {
+        syncColors: false,
+      } as unknown as DashboardContainerInput;
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, lastInput)).toBe(false);
+    });
+
+    test('should return true when syncColors change', () => {
+      const lastInput = {
+        syncColors: false,
+      } as unknown as DashboardContainerInput;
+      const input = {
+        syncColors: true,
+      } as unknown as DashboardContainerInput;
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
     });
   });
 });

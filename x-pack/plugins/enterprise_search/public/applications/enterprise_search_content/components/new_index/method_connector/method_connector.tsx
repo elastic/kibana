@@ -9,14 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiCallOut,
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -24,14 +17,14 @@ import { Status } from '../../../../../../common/types/api';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
-import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
-
-import { FetchCloudHealthApiLogic } from '../../../api/stats/fetch_cloud_health_api_logic';
-import { NATIVE_CONNECTORS } from '../../search_index/connector/constants';
 import {
   LicensingCallout,
   LICENSING_FEATURE,
-} from '../../shared/licensing_callout/licensing_callout';
+} from '../../../../shared/licensing_callout/licensing_callout';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
+
+import { FetchCloudHealthApiLogic } from '../../../api/stats/fetch_cloud_health_api_logic';
+import { BETA_CONNECTORS, NATIVE_CONNECTORS } from '../../search_index/connector/constants';
 import { NewSearchIndexLogic } from '../new_search_index_logic';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
@@ -49,17 +42,17 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType })
   const { isModalVisible } = useValues(AddConnectorLogic);
   const { setIsModalVisible } = useActions(AddConnectorLogic);
   const { fullIndexName, language } = useValues(NewSearchIndexLogic);
-  const { isCloud, cloud } = useValues(KibanaLogic);
+  const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const { data: cloudHealthData } = useValues(FetchCloudHealthApiLogic);
 
   const isNative =
     Boolean(NATIVE_CONNECTORS.find((connector) => connector.serviceType === serviceType)) &&
-    isCloud;
+    (isCloud || hasPlatinumLicense);
+  const isBeta = Boolean(
+    BETA_CONNECTORS.find((connector) => connector.serviceType === serviceType)
+  );
 
   const isGated = isNative && !isCloud && !hasPlatinumLicense;
-  const hasLowMemory =
-    isNative && isCloud && cloudHealthData && !cloudHealthData.has_min_connector_memory;
 
   const { makeRequest: fetchCloudHealth } = useActions(FetchCloudHealthApiLogic);
 
@@ -76,41 +69,10 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType })
           <LicensingCallout feature={LICENSING_FEATURE.NATIVE_CONNECTOR} />
         </EuiFlexItem>
       )}
-      {hasLowMemory && (
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.enterpriseSearch.content.nativeConnector.memoryCallout.title',
-              {
-                defaultMessage: 'Your Enterprise Search deployment does not have enough memory',
-              }
-            )}
-            color="warning"
-            iconType="warning"
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.nativeConnector.memoryCallout.content',
-              {
-                defaultMessage:
-                  'Enterprise Search needs at least 4GB of memory to use a native connector. To proceed, please edit your deployment settings.',
-              }
-            )}
-            <EuiSpacer />
-            <EuiLink href={cloud.baseUrl} external>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.nativeConnector.memoryCallout.link.title',
-                {
-                  defaultMessage: 'Manage deployment',
-                }
-              )}
-            </EuiLink>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem>
         <NewSearchIndexTemplate
           docsUrl={docLinks.connectors}
-          disabled={isGated || hasLowMemory}
+          disabled={isGated}
           error={errorToText(error)}
           type="connector"
           onNameChange={() => {
@@ -120,6 +82,7 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType })
             makeRequest({ indexName: name, isNative, language: lang, serviceType })
           }
           buttonLoading={status === Status.LOADING}
+          isBeta={isBeta}
         />
 
         {isModalVisible && (

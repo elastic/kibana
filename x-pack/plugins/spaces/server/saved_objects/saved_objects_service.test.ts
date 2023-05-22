@@ -13,7 +13,7 @@ import { SpacesSavedObjectsService } from './saved_objects_service';
 
 describe('SpacesSavedObjectsService', () => {
   describe('#setup', () => {
-    it('registers the "space" saved object type with appropriate mappings and migrations', () => {
+    it('registers the "space" saved object type with appropriate mappings, migrations, and schemas', () => {
       const core = coreMock.createSetup();
       const spacesService = spacesServiceMock.createStartContract();
 
@@ -23,7 +23,11 @@ describe('SpacesSavedObjectsService', () => {
       expect(core.savedObjects.registerType).toHaveBeenCalledTimes(2);
       expect(core.savedObjects.registerType).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining({ name: 'space' })
+        expect.objectContaining({
+          name: 'space',
+          mappings: expect.any(Object),
+          schemas: { '8.8.0': expect.any(Object) },
+        })
       );
       expect(core.savedObjects.registerType).toHaveBeenNthCalledWith(
         2,

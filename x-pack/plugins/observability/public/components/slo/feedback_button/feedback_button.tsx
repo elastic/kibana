@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
 
-export function FeedbackButton() {
+interface Props {
+  disabled?: boolean;
+}
+
+export function FeedbackButton({ disabled }: Props) {
   return (
     <EuiButton
       data-test-subj="sloFeedbackButton"
+      isDisabled={disabled}
       href={SLO_FEEDBACK_LINK}
       target="_blank"
       color="warning"

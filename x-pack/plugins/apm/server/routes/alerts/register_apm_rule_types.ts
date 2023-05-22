@@ -17,6 +17,7 @@ import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import {
   AGENT_NAME,
+  ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
@@ -47,6 +48,10 @@ export const apmRuleTypeAlertFieldMap = {
     required: false,
   },
   [TRANSACTION_NAME]: {
+    type: 'keyword',
+    required: false,
+  },
+  [ERROR_GROUP_ID]: {
     type: 'keyword',
     required: false,
   },

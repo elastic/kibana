@@ -9,12 +9,7 @@
 import './discover_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageSidebar } from '@elastic/eui';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
@@ -101,7 +96,6 @@ export function DiscoverSidebarComponent({
   isProcessing,
   alwaysShowActionButtons = false,
   columns,
-  documents$,
   allFields,
   onAddField,
   onAddFilter,
@@ -125,7 +119,6 @@ export function DiscoverSidebarComponent({
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
 
-  const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
     INITIAL_SELECTED_FIELDS_RESULT
   );
@@ -233,12 +226,10 @@ export function DiscoverSidebarComponent({
           onAddField={onAddField}
           onRemoveField={onRemoveField}
           onAddFilter={onAddFilter}
-          documents$={documents$}
           trackUiMetric={trackUiMetric}
           multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
           onEditField={editField}
           onDeleteField={deleteField}
-          showFieldStats={showFieldStats}
           contextualFields={columns}
           groupIndex={groupIndex}
           itemIndex={itemIndex}
@@ -256,12 +247,10 @@ export function DiscoverSidebarComponent({
       onAddField,
       onRemoveField,
       onAddFilter,
-      documents$,
       trackUiMetric,
       multiFieldsMap,
       editField,
       deleteField,
-      showFieldStats,
       columns,
       selectedFieldsState.selectedFieldsMap,
     ]
@@ -272,7 +261,7 @@ export function DiscoverSidebarComponent({
   }
 
   return (
-    <EuiPageSideBar
+    <EuiPageSidebar
       className="dscSidebar"
       aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
         defaultMessage: 'Index and fields',
@@ -333,7 +322,7 @@ export function DiscoverSidebarComponent({
           </FieldList>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageSideBar>
+    </EuiPageSidebar>
   );
 }
 

@@ -278,7 +278,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     // Reset retention policy settings when the user disables the whole option
     useEffect(() => {
       if (!isRetentionPolicyEnabled) {
-        setRetentionPolicyDateField(isRetentionPolicyAvailable ? dateFieldNames[0] : '');
+        setRetentionPolicyDateField(
+          isRetentionPolicyAvailable ? dataViewAvailableTimeFields[0] : ''
+        );
         setRetentionPolicyMaxAge('');
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -625,7 +627,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text }))}
+                  options={dateFieldNames.map((text: string) => ({ text, value: text }))}
                   value={continuousModeDateField}
                   onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
@@ -713,7 +715,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text }))}
+                  options={dataViewAvailableTimeFields.map((text: string) => ({ text }))}
                   value={retentionPolicyDateField}
                   onChange={(e) => setRetentionPolicyDateField(e.target.value)}
                   data-test-subj="transformRetentionPolicyDateFieldSelect"

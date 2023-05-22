@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { DatePickerContextProvider } from '../context/date_picker_context';
+import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
 import { AlertDetails } from '../pages/alert_details/alert_details';
@@ -17,6 +17,7 @@ import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
 import { SlosPage } from '../pages/slos/slos';
+import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { casesPath } from '../../common';
@@ -36,15 +37,13 @@ export interface Params {
 // so I've recreated this simple version for this purpose.
 function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: string }) {
   const {
-    http: { basePath },
+    application: { navigateToApp },
   } = useKibana().services;
   const history = useHistory();
   const { search, hash } = useLocation();
 
   if (redirectToApp) {
-    window.location.replace(
-      `${window.location.origin}${basePath.prepend(`/app/${redirectToApp}${to}${search}${hash}`)}`
-    );
+    navigateToApp(redirectToApp, { path: `/${search}${hash}`, replace: true });
   } else if (to) {
     history.replace(to);
   }
@@ -131,6 +130,13 @@ export const routes = {
   '/slos/create': {
     handler: () => {
       return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/welcome': {
+    handler: () => {
+      return <SlosWelcomePage />;
     },
     params: {},
     exact: true,

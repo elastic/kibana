@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import type { Pagination, EuiBasicTableProps } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { EuiBasicTable, EuiLoadingContent, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable, EuiSkeletonText, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { useFilesTableColumns } from './use_files_table_columns';
@@ -46,12 +46,19 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
     showPreview();
   };
 
+  const filesTableRowProps = useCallback(
+    (file: FileJSON) => ({
+      'data-test-subj': `cases-files-table-row-${file.id}`,
+    }),
+    []
+  );
+
   const columns = useFilesTableColumns({ caseId, showPreview: displayPreview });
 
   return isLoading ? (
     <>
       <EuiSpacer size="l" />
-      <EuiLoadingContent data-test-subj="cases-files-table-loading" lines={10} />
+      <EuiSkeletonText data-test-subj="cases-files-table-loading" lines={10} />
     </>
   ) : (
     <>
@@ -72,6 +79,7 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
         onChange={onChange}
         data-test-subj="cases-files-table"
         noItemsMessage={<EmptyFilesTable caseId={caseId} />}
+        rowProps={filesTableRowProps}
       />
       {isPreviewVisible && selectedFile !== undefined && (
         <FilePreview closePreview={closePreview} selectedFile={selectedFile} />

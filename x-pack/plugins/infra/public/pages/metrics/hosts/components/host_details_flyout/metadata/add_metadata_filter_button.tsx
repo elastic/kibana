@@ -37,12 +37,13 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
         query: { filterManager: filterManagerService },
       },
       notifications: { toasts: toastsService },
+      telemetry,
     },
   } = useKibanaContextForPlugin();
 
   const existingFilter = useMemo(
-    () => searchCriteria.filters.find((filter) => filter.meta.key === item.name),
-    [item.name, searchCriteria.filters]
+    () => searchCriteria?.filters.find((filter) => filter.meta.key === item.name),
+    [item.name, searchCriteria?.filters]
   );
 
   const handleAddFilter = () => {
@@ -53,6 +54,9 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
       negate: false,
     });
     if (newFilter) {
+      telemetry.reportHostFlyoutFilterAdded({
+        field_name: item.name,
+      });
       filterManagerService.addFilters(newFilter);
       toastsService.addSuccess({
         title: filterAddedToastTitle,
@@ -84,7 +88,12 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
                 defaultMessage: 'Filter',
               }
             )}
-            onClick={() => filterManagerService.removeFilter(existingFilter)}
+            onClick={() => {
+              telemetry.reportHostFlyoutFilterRemoved({
+                field_name: existingFilter.meta.key!,
+              });
+              filterManagerService.removeFilter(existingFilter);
+            }}
           />
         </EuiToolTip>
       </span>

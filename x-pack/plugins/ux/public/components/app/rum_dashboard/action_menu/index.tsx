@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import {
   RECORDS_FIELD,
   createExploratoryViewUrl,

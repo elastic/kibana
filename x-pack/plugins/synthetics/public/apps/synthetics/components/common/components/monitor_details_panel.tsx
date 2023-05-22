@@ -11,7 +11,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -62,8 +62,10 @@ export const MonitorDetailsPanel = ({
   const dispatch = useDispatch();
 
   if (!monitor) {
-    return <EuiLoadingContent lines={8} />;
+    return <EuiSkeletonText lines={8} />;
   }
+
+  const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
 
   return (
     <PanelWithTitle
@@ -95,13 +97,15 @@ export const MonitorDetailsPanel = ({
           )}
           <TitleLabel>{URL_LABEL}</TitleLabel>
           <DescriptionLabel style={{ wordBreak: 'break-all' }}>
-            <EuiLink
-              data-test-subj="syntheticsMonitorDetailsPanelLink"
-              href={latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
-              external
-            >
-              {latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
-            </EuiLink>
+            {url ? (
+              <EuiLink data-test-subj="syntheticsMonitorDetailsPanelLink" href={url} external>
+                {url}
+              </EuiLink>
+            ) : (
+              <EuiText color="subdued" size="s">
+                {UN_AVAILABLE_LABEL}
+              </EuiText>
+            )}
           </DescriptionLabel>
           <TitleLabel>{LAST_RUN_LABEL}</TitleLabel>
           <DescriptionLabel>
@@ -231,7 +235,7 @@ const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags'
 });
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {
-  defaultMessage: 'Enabled',
+  defaultMessage: 'Enabled (all locations)',
 });
 
 const MONITOR_TYPE_LABEL = i18n.translate(
@@ -259,4 +263,8 @@ const PROJECT_ID_LABEL = i18n.translate('xpack.synthetics.monitorList.projectIdH
 
 const MONITOR_ID_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.monitorIdItemText', {
   defaultMessage: 'Monitor ID',
+});
+
+const UN_AVAILABLE_LABEL = i18n.translate('xpack.synthetics.monitorList.unAvailable', {
+  defaultMessage: '(unavailable)',
 });

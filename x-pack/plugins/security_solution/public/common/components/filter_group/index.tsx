@@ -6,7 +6,12 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { ControlPanelState, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
+import type {
+  ControlInputTransform,
+  ControlPanelState,
+  OptionsListEmbeddableInput,
+} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import type {
   ControlGroupInput,
   ControlGroupInputBuilder,
@@ -22,6 +27,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
+import type {
+  ControlGroupCreationOptions,
+  FieldFilterPredicate,
+} from '@kbn/controls-plugin/public/control_group/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterGroupProps, FilterItemObj } from './types';
@@ -38,6 +47,9 @@ import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
+import { TEST_IDS } from './constants';
+import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
+import { convertToBuildEsQuery } from '../../lib/kuery';
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -58,7 +70,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     timeRange,
     filters,
     query,
-    chainingSystem = 'HIERARCHICAL',
+    chainingSystem,
     initialControls,
     spaceId,
     onInit,
@@ -110,6 +122,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       return;
     }
     try {
+      if (!Array.isArray(param)) {
+        throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
+      }
       const storedControlGroupInput = getStoredControlInput();
       if (storedControlGroupInput) {
         const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
@@ -138,18 +153,47 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     return cleanup;
   }, []);
 
-  useEffect(() => {
-    controlGroup?.updateInput({
-      timeRange,
+  const { filters: validatedFilters, query: validatedQuery } = useMemo(() => {
+    const [_, kqlError] = convertToBuildEsQuery({
+      config: {},
+      queries: query ? [query] : [],
+      filters: filters ?? [],
+      indexPattern: { fields: [], title: '' },
+    });
+
+    // we only need to handle kqlError because control group can handle Lucene error
+    if (kqlError) {
+      /*
+       * Based on the behaviour from other components,
+       * ignore all filters and queries if there is some error
+       * in the input filters and queries
+       *
+       * */
+      return {
+        filters: [],
+        query: undefined,
+      };
+    }
+    return {
       filters,
       query,
+    };
+  }, [filters, query]);
+
+  useEffect(() => {
+    controlGroup?.updateInput({
+      filters: validatedFilters,
+      query: validatedQuery,
+      timeRange,
       chainingSystem,
     });
-  }, [timeRange, filters, query, chainingSystem, controlGroup]);
+  }, [timeRange, chainingSystem, controlGroup, validatedQuery, validatedFilters]);
 
   const handleInputUpdates = useCallback(
     (newInput: ControlGroupInput) => {
-      if (isEqual(getStoredControlInput(), newInput)) return;
+      if (isEqual(getStoredControlInput(), newInput)) {
+        return;
+      }
       if (!isEqual(newInput.panels, getStoredControlInput()?.panels) && !isViewMode) {
         setHasPendingChanges(true);
       }
@@ -158,7 +202,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     [setControlGroupInputUpdates, getStoredControlInput, isViewMode, setHasPendingChanges]
   );
 
-  const handleFilterUpdates = useCallback(
+  const handleOutputFilterUpdates = useCallback(
     ({ filters: newFilters }: ControlGroupOutput) => {
       if (isEqual(currentFiltersRef.current, newFilters)) return;
       if (onFilterChange) onFilterChange(newFilters ?? []);
@@ -168,8 +212,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const debouncedFilterUpdates = useMemo(
-    () => debounce(handleFilterUpdates, 500),
-    [handleFilterUpdates]
+    () => debounce(handleOutputFilterUpdates, 500),
+    [handleOutputFilterUpdates]
   );
 
   useEffect(() => {
@@ -249,13 +293,15 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           title: item.title,
           selectedOptions: item.selectedOptions ?? [],
           existsSelected: item.existsSelected ?? false,
-          exclude: item.existsSelected,
+          exclude: item.exclude,
         })),
       ];
     }
 
     return resultControls;
   }, [initialUrlParam, initialControls, getStoredControlInput]);
+
+  const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
 
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
@@ -301,9 +347,18 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             hideAdditionalSettings: true,
           },
         },
-      };
+        fieldFilterPredicate,
+      } as ControlGroupCreationOptions;
     },
-    [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
+    [
+      dataViewId,
+      timeRange,
+      filters,
+      chainingSystem,
+      query,
+      selectControlsWithPriority,
+      fieldFilterPredicate,
+    ]
   );
 
   useFilterUpdatesToUrlSync({
@@ -320,7 +375,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
 
-  const upsertPersistableControls = useCallback(() => {
+  const upsertPersistableControls = useCallback(async () => {
     const persistableControls = initialControls.filter((control) => control.persist === true);
     if (persistableControls.length > 0) {
       const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
@@ -328,7 +383,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       >;
       const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
       let filterControlsDeleted = false;
-      persistableControls.forEach((control) => {
+      for (const control of persistableControls) {
         const controlExists = currentPanels.some(
           (currControl) => control.fieldName === currControl.explicitInput.fieldName
         );
@@ -340,7 +395,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           }
 
           // add persitable controls
-          controlGroup?.addOptionsListControl({
+          await controlGroup?.addOptionsListControl({
             title: control.title,
             hideExclude: true,
             hideSort: true,
@@ -353,28 +408,42 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             ...control,
           });
         }
-      });
+      }
 
-      orderedPanels.forEach((panel) => {
+      for (const panel of orderedPanels) {
         if (panel.explicitInput.fieldName)
-          controlGroup?.addOptionsListControl({
+          await controlGroup?.addOptionsListControl({
             selectedOptions: [],
             fieldName: panel.explicitInput.fieldName,
             dataViewId: dataViewId ?? '',
             ...panel.explicitInput,
           });
-      });
+      }
     }
   }, [controlGroup, dataViewId, initialControls]);
 
-  const saveChangesHandler = useCallback(() => {
-    upsertPersistableControls();
+  const saveChangesHandler = useCallback(async () => {
+    await upsertPersistableControls();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [switchToViewMode, upsertPersistableControls]);
 
+  const newControlInputTranform: ControlInputTransform = (newInput, controlType) => {
+    // for any new controls, we want to avoid
+    // default placeholder
+    if (controlType === OPTIONS_LIST_CONTROL) {
+      return {
+        ...newInput,
+        placeholder: '',
+      };
+    }
+    return newInput;
+  };
+
   const addControlsHandler = useCallback(() => {
-    controlGroup?.openAddDataControlFlyout();
+    controlGroup?.openAddDataControlFlyout({
+      controlInputTransform: newControlInputTranform,
+    });
   }, [controlGroup]);
 
   return (
@@ -400,7 +469,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       <FilterWrapper className="filter-group__wrapper">
         <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
           {Array.isArray(initialUrlParam) ? (
-            <EuiFlexItem grow={true} data-test-subj="filter_group__items">
+            <EuiFlexItem grow={true} data-test-subj={TEST_IDS.FILTER_CONTROLS}>
               <ControlGroupRenderer
                 ref={onControlGroupLoadHandler}
                 getCreationOptions={getCreationOptions}
@@ -414,6 +483,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
                 <AddControl
                   onClick={addControlsHandler}
                   isDisabled={
+                    controlGroupInputUpdates &&
                     Object.values(controlGroupInputUpdates.panels).length >= NUM_OF_CONTROLS.MAX
                   }
                 />

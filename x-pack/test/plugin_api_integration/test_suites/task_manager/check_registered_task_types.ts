@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.servicenow-itom',
         'actions:.servicenow-sir',
         'actions:.slack',
+        'actions:.slack_api',
         'actions:.swimlane',
         'actions:.teams',
         'actions:.tines',

@@ -103,6 +103,7 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.name': 'k8s-pod-200xrg1-aws',
     'asset.ean': 'k8s.pod:pod-200xrg1',
     'asset.parents': ['k8s.node:node-101'],
+    'asset.references': ['k8s.cluster:cluster-001'],
   },
   {
     'asset.type': 'k8s.pod',
@@ -162,8 +163,39 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
   },
 ];
 
+const sampleCircularReferences: AssetWithoutTimestamp[] = [
+  {
+    'asset.type': 'k8s.node',
+    'asset.id': 'node-203',
+    'asset.name': 'k8s-node-203-aws',
+    'asset.ean': 'k8s.node:node-203',
+    'orchestrator.type': 'kubernetes',
+    'orchestrator.cluster.name': 'Cluster 001 (AWS EKS)',
+    'orchestrator.cluster.id': 'cluster-001',
+    'cloud.provider': 'aws',
+    'cloud.region': 'us-east-1',
+    'cloud.service.name': 'eks',
+    'asset.references': ['k8s.pod:pod-203ugg9', 'k8s.pod:pod-203ugg5'],
+  },
+  {
+    'asset.type': 'k8s.pod',
+    'asset.id': 'pod-203ugg5',
+    'asset.name': 'k8s-pod-203ugg5-aws',
+    'asset.ean': 'k8s.pod:pod-203ugg5',
+    'asset.references': ['k8s.node:node-203'],
+  },
+  {
+    'asset.type': 'k8s.pod',
+    'asset.id': 'pod-203ugg9',
+    'asset.name': 'k8s-pod-203ugg9-aws',
+    'asset.ean': 'k8s.pod:pod-203ugg9',
+    'asset.references': ['k8s.node:node-203'],
+  },
+];
+
 export const sampleAssets: AssetWithoutTimestamp[] = [
   ...sampleK8sClusters,
   ...sampleK8sNodes,
   ...sampleK8sPods,
+  ...sampleCircularReferences,
 ];

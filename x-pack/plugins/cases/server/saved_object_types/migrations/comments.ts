@@ -17,7 +17,6 @@ import type {
 } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import type { CommentAttributes } from '../../../common/api';
 import { CommentType } from '../../../common/api';
 import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
@@ -32,6 +31,7 @@ import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { getAllPersistableAttachmentMigrations } from './get_all_persistable_attachment_migrations';
 import type { PersistableStateAttachmentState } from '../../attachment_framework/types';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface UnsanitizedComment {
   comment: string;
@@ -71,7 +71,7 @@ export const createCommentsMigrations = (
 
   const persistableStateAttachmentMigrations = mapValues<
     MigrateFunctionsObject,
-    SavedObjectMigrationFn<CommentAttributes>
+    SavedObjectMigrationFn<AttachmentPersistedAttributes>
   >(
     getAllPersistableAttachmentMigrations(migrationDeps.persistableStateAttachmentTypeRegistry),
     migratePersistableStateAttachments
@@ -134,8 +134,10 @@ export const createCommentsMigrations = (
 };
 
 export const migratePersistableStateAttachments =
-  (migrate: MigrateFunction): SavedObjectMigrationFn<CommentAttributes, CommentAttributes> =>
-  (doc: SavedObjectUnsanitizedDoc<CommentAttributes>) => {
+  (
+    migrate: MigrateFunction
+  ): SavedObjectMigrationFn<AttachmentPersistedAttributes, AttachmentPersistedAttributes> =>
+  (doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>) => {
     if (doc.attributes.type !== CommentType.persistableState) {
       return doc;
     }

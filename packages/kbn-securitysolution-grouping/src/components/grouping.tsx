@@ -17,19 +17,19 @@ import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
-import { createGroupFilter } from './accordion_panel/helpers';
+import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
-import { GROUPS_UNIT } from './translations';
-import type { GroupingAggregation, GroupPanelRenderer } from './types';
-import { GroupStatsRenderer, OnGroupToggle } from './types';
+import { GROUPS_UNIT, NULL_GROUP } from './translations';
+import type { ParsedGroupingAggregation, GroupPanelRenderer } from './types';
+import { GroupingBucket, GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
   activePage: number;
-  data?: GroupingAggregation<T>;
+  data?: ParsedGroupingAggregation<T>;
   groupPanelRenderer?: GroupPanelRenderer<T>;
   groupSelector?: JSX.Element;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
@@ -79,12 +79,12 @@ const GroupingComponent = <T,>({
     {}
   );
 
-  const unitCount = data?.unitsCount?.value ?? 0;
+  const unitCount = useMemo(() => data?.unitsCount?.value ?? 0, [data?.unitsCount?.value]);
   const unitCountText = useMemo(() => {
     return `${unitCount.toLocaleString()} ${unit && unit(unitCount)}`;
   }, [unitCount, unit]);
 
-  const groupCount = data?.groupsCount?.value ?? 0;
+  const groupCount = useMemo(() => data?.groupsCount?.value ?? 0, [data?.groupsCount?.value]);
   const groupCountText = useMemo(
     () => `${groupCount.toLocaleString()} ${GROUPS_UNIT(groupCount)}`,
     [groupCount]
@@ -92,18 +92,31 @@ const GroupingComponent = <T,>({
 
   const groupPanels = useMemo(
     () =>
-      data?.groupByFields?.buckets?.map((groupBucket, groupNumber) => {
+      data?.groupByFields?.buckets?.map((groupBucket: GroupingBucket<T>, groupNumber) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group-${groupNumber}-${group}`;
+        const isNullGroup = groupBucket.isNullGroup ?? false;
+        const nullGroupMessage = isNullGroup
+          ? NULL_GROUP(selectedGroup, unit(groupBucket.doc_count))
+          : undefined;
 
         return (
-          <span key={groupKey}>
+          <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
             <GroupPanel
+              isNullGroup={isNullGroup}
+              nullGroupMessage={nullGroupMessage}
               onGroupClose={onGroupClose}
               extraAction={
                 <GroupStats
                   bucketKey={groupKey}
-                  groupFilter={createGroupFilter(selectedGroup, group)}
+                  groupFilter={
+                    isNullGroup
+                      ? getNullGroupFilter(selectedGroup)
+                      : createGroupFilter(
+                          selectedGroup,
+                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key]
+                        )
+                  }
                   groupNumber={groupNumber}
                   statRenderers={
                     groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)
@@ -114,7 +127,8 @@ const GroupingComponent = <T,>({
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
               groupBucket={groupBucket}
               groupPanelRenderer={
-                groupPanelRenderer && groupPanelRenderer(selectedGroup, groupBucket)
+                groupPanelRenderer &&
+                groupPanelRenderer(selectedGroup, groupBucket, nullGroupMessage)
               }
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {
@@ -157,8 +171,10 @@ const GroupingComponent = <T,>({
       takeActionItems,
       tracker,
       trigger,
+      unit,
     ]
   );
+
   const pageCount = useMemo(
     () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
     [groupCount, itemsPerPage]
@@ -205,7 +221,7 @@ const GroupingComponent = <T,>({
           <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
         )}
         {groupCount > 0 ? (
-          <>
+          <span data-test-subj={`grouping-level-${groupingLevel}`}>
             {groupPanels}
             {groupCount > 0 && (
               <>
@@ -230,7 +246,7 @@ const GroupingComponent = <T,>({
                 />
               </>
             )}
-          </>
+          </span>
         ) : (
           <EmptyGroupingComponent />
         )}

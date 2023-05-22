@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { getTopNavLinks } from './get_top_nav_links';
 import { dataViewMock } from '../../../../__mocks__/data_view';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 
@@ -31,16 +29,10 @@ test('getTopNavLinks result', () => {
     dataView: dataViewMock,
     navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
-    savedSearch: savedSearchMock,
     services,
     state,
-    searchSource: {} as ISearchSource,
-    onOpenSavedSearch: () => {},
     isPlainRecord: false,
-    persistDataView: jest.fn(),
-    updateDataViewList: jest.fn(),
     adHocDataViews: [],
-    updateAdHocDataViewId: jest.fn(),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
@@ -97,16 +89,10 @@ test('getTopNavLinks result for sql mode', () => {
     dataView: dataViewMock,
     navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
-    savedSearch: savedSearchMock,
     services,
     state,
-    searchSource: {} as ISearchSource,
-    onOpenSavedSearch: () => {},
     isPlainRecord: true,
-    persistDataView: jest.fn(),
-    updateDataViewList: jest.fn(),
     adHocDataViews: [],
-    updateAdHocDataViewId: jest.fn(),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
@@ -130,6 +116,13 @@ test('getTopNavLinks result for sql mode', () => {
         "label": "Open",
         "run": [Function],
         "testId": "discoverOpenButton",
+      },
+      Object {
+        "description": "Share Search",
+        "id": "share",
+        "label": "Share",
+        "run": [Function],
+        "testId": "shareTopNavButton",
       },
       Object {
         "description": "Open Inspector for search",
