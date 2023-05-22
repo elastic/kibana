@@ -32,7 +32,8 @@ components:
       properties:
         after_keys:
           description: Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
-          $ref: '#/components/schemas/AfterKeys'
+          allOf:
+            - $ref: '#/components/schemas/AfterKeys'
         data_view_id:
           description: The identifier of the Kibana data view to be used when generating risk scores. If unspecified, the Security Alerts data view for the current space will be used.
           example: security-solution-default
@@ -47,7 +48,8 @@ components:
             $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
         identifier_type:
           description: Used to restrict the type of risk scores being returned. If unspecified, both `host` and `user` scores will be returned.
-          $ref: '#/components/schemas/IdentifierType'
+          allOf:
+            - $ref: '#/components/schemas/IdentifierType'
         range:
           description: Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
           type: object
@@ -79,7 +81,8 @@ components:
       properties:
         after_keys:
           description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request.
-          $ref: '#/components/schemas/AfterKeys'
+          allOf:
+            - $ref: '#/components/schemas/AfterKeys'
         debug:
           description: Object containing debug information, particularly the internal request and response from elasticsearch
           type: object
