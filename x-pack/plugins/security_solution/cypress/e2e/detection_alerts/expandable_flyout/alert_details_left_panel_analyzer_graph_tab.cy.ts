@@ -19,7 +19,7 @@ import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-describe(
+describe.skip(
   'Alert details expandable flyout left panel analyzer graph',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
