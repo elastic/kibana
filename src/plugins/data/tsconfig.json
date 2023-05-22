@@ -48,6 +48,7 @@
     "@kbn/config-schema",
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": [
     "target/**/*",

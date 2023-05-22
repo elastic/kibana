@@ -29,6 +29,7 @@ export const performResolve = async <T>(
     helpers,
     allowedTypes,
     client,
+    migrator,
     serializer,
     extensions = {},
   } = apiExecutionContext;
@@ -39,6 +40,7 @@ export const performResolve = async <T>(
     registry,
     allowedTypes,
     client,
+    migrator,
     serializer,
     getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
     incrementCounterInternal: (t, i, counterFields, opts = {}) =>
