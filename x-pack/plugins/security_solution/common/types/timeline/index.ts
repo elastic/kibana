@@ -444,6 +444,7 @@ export enum TimelineTabs {
   pinned = 'pinned',
   eql = 'eql',
   session = 'session',
+  discover = 'discover',
 }
 
 /**
