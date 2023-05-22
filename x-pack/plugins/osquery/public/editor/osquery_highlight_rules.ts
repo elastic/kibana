@@ -158,15 +158,10 @@ export const initializeOsqueryEditor = () => {
             ],
             ['[a-zA-Z_$][a-zA-Z0-9_$]*\\b', 'identifier'],
             ['--.*$', 'comment'],
-            // {
-            //   token: 'comment',
-            //   start: '/\\*',
-            //   end: '\\*/',
-            // }
+            ['/\\*.*\\*/', 'comment'],
             ['".*?"', 'string'],
             ["'.*?'", 'string'],
             ['[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b', 'constant.numeric'],
-
             ['\\+|\\-|\\/|\\/\\/|%|<@>|@>|<@|&|\\^|~|<|>|<=|=>|==|!=|<>|=', 'keyword.operator'],
             ['[\\(]', 'paren.lparen'],
             ['[\\)]', 'paren.rparen'],
