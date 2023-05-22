@@ -24,8 +24,14 @@ import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import * as Rx from 'rxjs';
-import { JobParamsCsvFromSavedObject } from '../../../common/types';
+import type { CancellationToken } from '@kbn/reporting-common';
+import type { Writable } from 'stream';
+import { CsvGenerator } from '@kbn/generate-csv';
+import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import { ReportingConfigType } from '../../config';
+import { ReportTaskParams } from '../../lib/tasks';
+import { decryptJobHeaders } from '../common';
+import { getFieldFormats } from '../../services';
 
 interface CsvExportSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
@@ -154,5 +160,59 @@ export class CsvExportType {
 
   // this is going to replace the runtask factory
   // x-pack/plugins/reporting/server/export_types/csv_v2/execute_job.ts
-  runTask() {}
+  runTask(
+    jobId: string,
+    job: TaskPayloadCsvFromSavedObject,
+    payload: ReportTaskParams<TaskPayloadCsvFromSavedObject>['payload'],
+    cancellationToken: CancellationToken,
+    stream: Writable,
+    _logger: Logger
+  ) {
+    const config = this.getConfig();
+    const { encryptionKey, csvConfig } = config;
+
+    return async () => {
+      const logger = _logger.get(`execute:${jobId}`);
+
+      const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
+      const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
+      const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
+      const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
+      const { data: dataPluginStart, discover: discoverPluginStart } =
+        await this.getPluginStartDeps();
+
+      const data = dataPluginStart.search.asScoped(fakeRequest);
+
+      const { locatorParams } = job;
+      const { params } = locatorParams[0];
+
+      // use Discover contract to convert the job params into inputs for CsvGenerator
+      const locatorClient = await discoverPluginStart.locator.asScopedClient(fakeRequest);
+      const columns = await locatorClient.columnsFromLocator(params);
+      const searchSource = await locatorClient.searchSourceFromLocator(params);
+
+      const [es, searchSourceStart] = await Promise.all([
+        (await this.getEsClient()).asScoped(fakeRequest),
+        await dataPluginStart.search.searchSource.asScoped(fakeRequest),
+      ]);
+
+      const clients = { uiSettings, data, es };
+      const dependencies = { searchSourceStart, fieldFormatsRegistry };
+
+      const csv = new CsvGenerator(
+        {
+          columns,
+          searchSource: searchSource.getSerializedFields(true),
+          ...job,
+        },
+        csvConfig,
+        clients,
+        dependencies,
+        cancellationToken,
+        logger,
+        stream
+      );
+      return await csv.generateData();
+    };
+  }
 }
