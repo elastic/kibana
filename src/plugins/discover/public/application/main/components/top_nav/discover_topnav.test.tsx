@@ -40,7 +40,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     onOpenInspector: jest.fn(),
     onFieldEdited: jest.fn(),
     isPlainRecord: false,
-    persistDataView: jest.fn(),
   };
 }
 
