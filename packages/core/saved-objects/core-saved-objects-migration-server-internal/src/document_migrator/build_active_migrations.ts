@@ -36,7 +36,6 @@ export function buildActiveMigrations({
   convertVersion?: string;
   log: Logger;
 }): ActiveMigrations {
-  const coreTransforms = getCoreTransforms();
   const referenceTransforms = getReferenceTransforms(typeRegistry);
 
   return typeRegistry.getAllTypes().reduce((migrations, type) => {
@@ -46,7 +45,6 @@ export function buildActiveMigrations({
       type,
       log,
       kibanaVersion,
-      coreTransforms,
       referenceTransforms,
     });
 
@@ -64,13 +62,11 @@ export function buildActiveMigrations({
 const buildTypeTransforms = ({
   type,
   log,
-  coreTransforms,
   referenceTransforms,
 }: {
   type: SavedObjectsType;
   kibanaVersion: string;
   log: Logger;
-  coreTransforms: Transform[];
   referenceTransforms: Transform[];
 }): TypeTransforms => {
   const migrationsMap =
@@ -79,11 +75,13 @@ const buildTypeTransforms = ({
   const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
     ([version, transform]) => ({
       version,
+      deferred: !_.isFunction(transform) && !!transform.deferred,
       transform: convertMigrationFunction(version, type, transform, log),
       transformType: TransformType.Migrate,
     })
   );
 
+  const coreTransforms = getCoreTransforms({ log, type });
   const modelVersionTransforms = getModelVersionTransforms({ log, typeDefinition: type });
 
   const conversionTransforms = getConversionTransforms(type);
@@ -96,6 +94,16 @@ const buildTypeTransforms = ({
   ].sort(transformComparator);
 
   return {
+    immediateVersion: _.chain(transforms)
+      .groupBy('transformType')
+      .mapValues((items) =>
+        _.chain(items)
+          .filter(({ deferred }) => !deferred)
+          .last()
+          .get('version')
+          .value()
+      )
+      .value() as Record<TransformType, string>,
     latestVersion: _.chain(transforms)
       .groupBy('transformType')
       .mapValues((items) => _.last(items)?.version)
