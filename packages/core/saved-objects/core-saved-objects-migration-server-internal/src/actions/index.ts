@@ -12,7 +12,6 @@ import type { RetryableEsClientError } from './catch_retryable_es_client_errors'
 import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
 export {
-  BATCH_SIZE,
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
   INDEX_NUMBER_OF_SHARDS,

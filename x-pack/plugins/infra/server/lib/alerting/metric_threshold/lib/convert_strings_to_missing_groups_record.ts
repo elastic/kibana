@@ -17,8 +17,9 @@ export const convertStringsToMissingGroupsRecord = (
       return {
         key: subject,
         bucketKey: parts.reduce((acc, part, index) => {
-          return { ...acc, [`groupBy${index}`]: part };
-        }, {}),
+          acc[`groupBy${index}`] = part;
+          return acc;
+        }, {} as Record<string, string>),
       };
     }
     return subject;
