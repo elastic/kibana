@@ -13,7 +13,6 @@ import type {
 import type { ConfigType } from '../../../../config';
 import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
-import type { SignalSource } from '../types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 
