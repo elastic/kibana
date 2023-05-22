@@ -199,9 +199,9 @@ export interface VisTypeDefinition<TVisParams> {
   readonly updateVisTypeOnParamsChange?: (params: VisParams) => string | undefined;
 
   readonly setup?: (vis: Vis<TVisParams>) => Promise<Vis<TVisParams>>;
-  
+
   disableCreate?: boolean;
-  
+
   disableEdit?: boolean;
 
   readonly options?: Partial<VisTypeOptions>;
