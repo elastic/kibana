@@ -11,7 +11,7 @@
         "label": "CustomAssetsAccordion",
         "description": [],
         "signature": [
-          "({ views, initialIsOpen, }: React.PropsWithChildren<",
+          "({ views, initialIsOpen, title, }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -30,7 +30,7 @@
             "id": "def-public.CustomAssetsAccordion.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  views,\n  initialIsOpen = false,\n}",
+            "label": "{\n  views,\n  initialIsOpen = false,\n  title,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -475,6 +475,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CustomAssetsAccordionProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx",
             "deprecated": false,
@@ -16198,6 +16212,20 @@
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.uninstallTokenService",
+          "type": "Object",
+          "tags": [],
+          "label": "uninstallTokenService",
+          "description": [],
+          "signature": [
+            "UninstallTokenServiceInterface"
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -16643,6 +16671,17 @@
             "signature": [
               "number | undefined"
             ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AgentPolicy.is_protected",
+            "type": "boolean",
+            "tags": [],
+            "label": "is_protected",
+            "description": [],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -18154,6 +18193,21 @@
             "description": [],
             "signature": [
               "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FullAgentPolicy.secret_references",
+            "type": "Array",
+            "tags": [],
+            "label": "secret_references",
+            "description": [],
+            "signature": [
+              "PolicySecretReference",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -19764,6 +19818,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.is_protected",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_protected",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -19934,6 +20002,20 @@
             "signature": [
               "ShipperOutput",
               " | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewOutput.allow_edit",
+            "type": "Array",
+            "tags": [],
+            "label": "allow_edit",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false,
@@ -20480,6 +20562,21 @@
             "tags": [],
             "label": "revision",
             "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackagePolicy.secret_references",
+            "type": "Array",
+            "tags": [],
+            "label": "secret_references",
+            "description": [],
+            "signature": [
+              "PolicySecretReference",
+              "[] | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -21986,7 +22083,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"password\" | \"bool\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -21998,6 +22095,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "[RegistryVarsEntryKeys.required]",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.secret",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[RegistryVarsEntryKeys.secret]",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -22818,6 +22929,51 @@
         "description": [],
         "signature": [
           "\"apm\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_DEFEND_PACKAGE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_DEFEND_PACKAGE",
+        "description": [],
+        "signature": [
+          "\"cloud_defend\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"vuln_mgmt\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"cspm\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,
@@ -23925,6 +24081,21 @@
           "10000"
         ],
         "path": "x-pack/plugins/fleet/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.UNINSTALL_TOKENS_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "UNINSTALL_TOKENS_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-uninstall-tokens\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/uninstall_tokens.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

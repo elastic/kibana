@@ -66,6 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
           },
@@ -87,6 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
             pagination: {
@@ -142,6 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
@@ -163,6 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
           },
@@ -185,6 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM],
             runtimeMappings: {
@@ -223,6 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.APM],
           },
@@ -247,6 +253,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [],
           },
