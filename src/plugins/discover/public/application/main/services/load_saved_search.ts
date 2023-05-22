@@ -26,7 +26,7 @@ import { DiscoverServices } from '../../../build_services';
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
   dataStateContainer: DiscoverDataStateContainer;
-  internalStateContainer: DiscoverSharedStateContainer;
+  sharedStateContainer: DiscoverSharedStateContainer;
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
   setDataView: DiscoverStateContainer['actions']['setDataView'];
@@ -43,14 +43,14 @@ export const loadSavedSearch = async (
 ): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');
   const { savedSearchId, useAppState } = params ?? {};
-  const { appStateContainer, internalStateContainer, savedSearchContainer, services } = deps;
+  const { appStateContainer, sharedStateContainer, savedSearchContainer, services } = deps;
   const appState = useAppState ? appStateContainer.getState() : undefined;
 
   // Loading the saved search or creating a new one
   let nextSavedSearch = savedSearchId
     ? await savedSearchContainer.load(savedSearchId)
     : await savedSearchContainer.new(
-        await getStateDataView(params, { services, appState, internalStateContainer })
+        await getStateDataView(params, { services, appState, sharedStateContainer })
       );
 
   // Cleaning up the previous state
@@ -68,7 +68,7 @@ export const loadSavedSearch = async (
       const stateDataView = await getStateDataView(params, {
         services,
         appState,
-        internalStateContainer,
+        sharedStateContainer,
         savedSearch: nextSavedSearch,
       });
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
@@ -99,12 +99,12 @@ export const loadSavedSearch = async (
  * @param deps
  */
 function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
-  const { dataStateContainer, internalStateContainer, services, setDataView } = deps;
+  const { dataStateContainer, sharedStateContainer, services, setDataView } = deps;
   const savedSearchDataView = savedSearch.searchSource.getField('index')!;
 
   setDataView(savedSearchDataView);
   if (!savedSearchDataView.isPersisted()) {
-    internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
+    sharedStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
   }
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
@@ -139,12 +139,12 @@ const getStateDataView = async (
     savedSearch,
     appState,
     services,
-    internalStateContainer,
+    sharedStateContainer,
   }: {
     savedSearch?: SavedSearch;
     appState?: DiscoverAppState;
     services: DiscoverServices;
-    internalStateContainer: DiscoverSharedStateContainer;
+    sharedStateContainer: DiscoverSharedStateContainer;
   }
 ) => {
   const { dataView, dataViewSpec } = params ?? {};
@@ -159,7 +159,7 @@ const getStateDataView = async (
       savedSearch,
       isTextBasedQuery: isTextBasedQuery(appState?.query),
     },
-    { services, internalStateContainer }
+    { services, sharedStateContainer }
   );
   return result.dataView;
 };

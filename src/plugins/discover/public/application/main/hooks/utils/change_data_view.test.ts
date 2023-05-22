@@ -23,7 +23,7 @@ const setupTestParams = (dataView: DataView | undefined) => {
   discoverState.sharedState.transitions.setDataView(savedSearch.searchSource.getField('index')!);
   services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));
   discoverState.appState.update = jest.fn();
-  return { services, appState: discoverState.appState, internalState: discoverState.sharedState };
+  return { services, appState: discoverState.appState, sharedState: discoverState.sharedState };
 };
 
 describe('changeDataView', () => {

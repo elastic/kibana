@@ -178,11 +178,11 @@ export const loadAndResolveDataView = async (
     isTextBasedQuery?: boolean;
   },
   {
-    internalStateContainer,
+    sharedStateContainer,
     services,
-  }: { internalStateContainer: DiscoverSharedStateContainer; services: DiscoverServices }
+  }: { sharedStateContainer: DiscoverSharedStateContainer; services: DiscoverServices }
 ) => {
-  const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
+  const { adHocDataViews, savedDataViews } = sharedStateContainer.getState();
   const adHocDataView = adHocDataViews.find((dataView) => dataView.id === id);
   if (adHocDataView) return { fallback: false, dataView: adHocDataView };
 

@@ -512,7 +512,7 @@ describe('actions', () => {
     );
   });
 
-  test('loadSavedSearch with ad-hoc data view being added to internal state adHocDataViews', async () => {
+  test('loadSavedSearch with ad-hoc data view being added to shared state adHocDataViews', async () => {
     const savedSearchAdHocCopy = copySavedSearch(savedSearchAdHoc);
     const adHocDataViewId = savedSearchAdHoc.searchSource.getField('index')!.id;
     const { state } = await getState('/', savedSearchAdHocCopy);

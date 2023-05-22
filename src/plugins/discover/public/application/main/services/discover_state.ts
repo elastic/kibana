@@ -121,7 +121,7 @@ export interface DiscoverStateContainer {
      */
     initializeAndSync: () => () => void;
     /**
-     * Load current list of data views, add them to internal state
+     * Load current list of data views, add them to shared state
      */
     loadDataViewList: () => Promise<void>;
     /**
@@ -223,9 +223,9 @@ export function getDiscoverStateContainer({
     services,
   });
   /**
-   * Internal State Container, state that's not persisted and not part of the URL
+   * Shared State Container, state that's not persisted and not part of the URL
    */
-  const internalStateContainer = getSharedStateContainer();
+  const sharedStateContainer = getSharedStateContainer();
 
   const dataStateContainer = getDataStateContainer({
     services,
@@ -248,14 +248,14 @@ export function getDiscoverStateContainer({
   };
 
   const setDataView = (dataView: DataView) => {
-    internalStateContainer.transitions.setDataView(dataView);
+    sharedStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
 
   const loadDataViewList = async () => {
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
-    internalStateContainer.transitions.setSavedDataViews(dataViewList);
+    sharedStateContainer.transitions.setSavedDataViews(dataViewList);
   };
 
   /**
@@ -263,14 +263,14 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const prevDataView = internalStateContainer.getState().dataView;
+    const prevDataView = sharedStateContainer.getState().dataView;
     if (!prevDataView || prevDataView.isPersisted()) return;
     const newDataView = await services.dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
     services.dataViews.clearInstanceCache(prevDataView.id);
 
     updateFiltersReferences(prevDataView, newDataView);
 
-    internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
+    sharedStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
     await appStateContainer.replaceUrlState({ index: newDataView.id });
     const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearchContainer.getId());
     getUrlTracker().setTrackingEnabled(trackingEnabled);
@@ -292,7 +292,7 @@ export function getDiscoverStateContainer({
 
   const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
-      internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
+      sharedStateContainer.transitions.appendAdHocDataViews(nextDataView);
     } else {
       await loadDataViewList();
     }
@@ -318,7 +318,7 @@ export function getDiscoverStateContainer({
     return loadSavedSearchFn(params ?? {}, {
       appStateContainer,
       dataStateContainer,
-      internalStateContainer,
+      sharedStateContainer,
       savedSearchContainer,
       services,
       setDataView,
@@ -339,7 +339,7 @@ export function getDiscoverStateContainer({
         appState: appStateContainer,
         savedSearchState: savedSearchContainer,
         dataState: dataStateContainer,
-        internalState: internalStateContainer,
+        sharedState: sharedStateContainer,
         services,
         setDataView,
       })
@@ -353,7 +353,7 @@ export function getDiscoverStateContainer({
       services.filterManager.getFetches$()
     ).subscribe(async () => {
       await savedSearchContainer.update({
-        nextDataView: internalStateContainer.getState().dataView,
+        nextDataView: sharedStateContainer.getState().dataView,
         nextState: appStateContainer.getState(),
         useFilterAndQueryServices: true,
       });
@@ -375,7 +375,7 @@ export function getDiscoverStateContainer({
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }
-    internalStateContainer.transitions.appendAdHocDataViews(newDataView);
+    sharedStateContainer.transitions.appendAdHocDataViews(newDataView);
 
     await onChangeDataView(newDataView);
   };
@@ -399,7 +399,7 @@ export function getDiscoverStateContainer({
   const onChangeDataView = async (id: string | DataView) => {
     await changeDataView(id, {
       services,
-      internalState: internalStateContainer,
+      sharedState: sharedStateContainer,
       appState: appStateContainer,
     });
   };
@@ -427,7 +427,7 @@ export function getDiscoverStateContainer({
 
   return {
     appState: appStateContainer,
-    sharedState: internalStateContainer,
+    sharedState: sharedStateContainer,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
     searchSessionManager,

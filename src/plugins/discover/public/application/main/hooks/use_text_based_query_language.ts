@@ -80,8 +80,8 @@ export function useTextBasedQueryLanguage({
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const internalState = stateContainer.sharedState.getState();
-        const dataViewList = [...internalState.savedDataViews, ...internalState.adHocDataViews];
+        const sharedState = stateContainer.sharedState.getState();
+        const dataViewList = [...sharedState.savedDataViews, ...sharedState.adHocDataViews];
         let dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
         // no dataview found but the index pattern is valid

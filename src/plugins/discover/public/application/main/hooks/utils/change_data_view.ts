@@ -22,17 +22,17 @@ export async function changeDataView(
   id: string | DataView,
   {
     services,
-    internalState,
+    sharedState,
     appState,
   }: {
     services: DiscoverServices;
-    internalState: DiscoverSharedStateContainer;
+    sharedState: DiscoverSharedStateContainer;
     appState: DiscoverAppStateContainer;
   }
 ) {
   addLog('[ui] changeDataView', { id });
   const { dataViews, uiSettings } = services;
-  const dataView = internalState.getState().dataView;
+  const dataView = sharedState.getState().dataView;
   const state = appState.getState();
   let nextDataView: DataView | null = null;
 
@@ -54,8 +54,8 @@ export async function changeDataView(
     );
 
     appState.update(nextAppState);
-    if (internalState.getState().expandedDoc) {
-      internalState.transitions.setExpandedDoc(undefined);
+    if (sharedState.getState().expandedDoc) {
+      sharedState.transitions.setExpandedDoc(undefined);
     }
   }
 }

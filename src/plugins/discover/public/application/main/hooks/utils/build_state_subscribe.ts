@@ -29,14 +29,14 @@ export const buildStateSubscribe =
   ({
     appState,
     dataState,
-    internalState,
+    sharedState,
     savedSearchState,
     services,
     setDataView,
   }: {
     appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
-    internalState: DiscoverSharedStateContainer;
+    sharedState: DiscoverSharedStateContainer;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
     setDataView: DiscoverStateContainer['actions']['setDataView'];
@@ -62,7 +62,7 @@ export const buildStateSubscribe =
     if (nextState.index && dataViewChanged) {
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
         { id: nextState.index, savedSearch },
-        { internalStateContainer: internalState, services }
+        { sharedStateContainer: sharedState, services }
       );
 
       // If the requested data view is not found, don't try to load it,
