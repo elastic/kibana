@@ -7,8 +7,7 @@
  */
 
 import React from 'react';
-import type { CoreTheme } from '@kbn/core-theme-browser';
-import { of } from 'rxjs';
+import { from } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { render, act as renderAct } from '@testing-library/react';
@@ -19,12 +18,8 @@ import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist
 import { ThemeService } from './theme';
 import { coreMock } from '@kbn/core/public/mocks';
 
-const createThemeMock = (mode: boolean): CoreTheme => {
-  return { darkMode: mode };
-};
-
 const createTheme$Mock = (mode: boolean) => {
-  return of(createThemeMock(mode));
+  return from([{ darkMode: mode }]);
 };
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
