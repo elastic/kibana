@@ -7,6 +7,7 @@
 
 import { catchError, from, map, of } from 'rxjs';
 import { assign, createMachine } from 'xstate';
+import { FindDataStreamsResponse } from '../../../../common';
 import { IDataStreamsClient } from '../../../services/data_streams';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -19,7 +20,7 @@ import {
 export const createPureDataStreamsStateMachine = (
   initialContext: DefaultDataStreamsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrAHQCuAdgJbXpWoA2VAXpAMQAyA8gILID6yHgBUe-LMIBKAUR4BZLAG0ADAF1EoAA4B7WFTraKGkAA9EAdgDMAVhLWAjNYBsAJkvnlADgCcAFm-2ADQgAJ6InvYk-t5+5gHKvvbezgC+KcFomDj4RKQM2qgQNFCcvMgAkgByAOLiAKoAwg3S0sitKupIIDp6BkZdZghWtg7Obh4+-kGhiE72lnYeLp4u886uTmkZGNh4BMQk+YXFpXxVtQBiPOUc7WrGPfpUhsaD5uZOJOYRLk5O1r4nPEnMEwggXMplF9-J5rMpLJ4EvYXG4tiBMrscgcjhB2FhZJIGgAJQQiMQSGTyJT3LqPPqvRAuXwuEjeVaeIHWczLSzzSygxDWCFfOGQ6zWSxOSzuexojHZfakXEAI20lAAxsUsARcOqABZsfE8QkkoSicRSWQKDoPXRPF4DRC+HwkdnmQFOXxebzKFwChC+Zmu6KS97SlGeOU7BW5EgqtUUTUUKDa1C6g0mWCYdBgEioABmOdwAApRQBKNjyvax+MarU6-U22l2+mOoY2OyOVzub1Tf1CllMmIIiU+qW+KNZavYgpFZMXVBUBjsGTcPik80Uq3UzpaFvPfqgQZMlls+wc5Lczy86X+yyrKIxbxSvyQ7yeTwT9Lo6PTvKz4oFyXPECWJDdyUtKkmz3XoDwZcEgzPC8uR5Pl-V8DxXVFax3yBD82S-b8KG0XF4C6KssTImD7UPUxEAAWhBGYEEYkhIXYjiON8SxJ0xRVyGoWh6CYVgIFtWCHSPQVMMmCVYRwtx4X9CJWSfDD4kSZJNm-Cj+JxYpxJo+CYlsZQPHDf4XAlZ1-ScZRvEfd8fWfJIuV4mMZ0KSBDNbKSEHmXwoicTxzHFCEXGfa9zFs6xPCiew-klQEkjcL9tinSi4zAVU62TVN0x8uC2wcFlfWGd0fVHdDvHMEVITcBLu0sNKfwyvSAPnRdlzE5sJNowZmX9ZZTyfIVLHfSUeLSFIgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrAHQCuAdgJbXpWoA2VAXpAMQAyA8gILID6yHgBUe-LMIBKAUR4BZLAG0ADAF1EoAA4B7WFTraKGkAA9EAdgAsAVhLWAjNYBs11-fPXzADnsAaEACeiD52AL6h-miYOPhEpAzaqBA0UJy8yACSAHIA4uIAqgDChdLSyGUq6kggOnoGRtVmCFa2Ds6uDh7efoGITvYAzHbmygOWA8runj7hkRjYeATEJAlJKWl82XkAYjwZHBVqxrX6VIbGTd5OJN0ATF7KndM9QQi3yso31rMgUQuxy1WEHYWFkkkKAAlBCIxBIZPIlEdqid6hdELdrLcSABOW72LwefyvTGfDw-P4xJakYEAI20lAAxiksARcAyABZsUE8cFQoSicRSWQKSrHXSnc6NRCWbHYkh4gkPJ7dInSyxYjHk+aUuIkWn0ihMihQFmoNmckywTDoMAkVAAMxtuAAFNYPgBKNgUxa6-WM5msjmi5Hi1FS5o2OyOFxuLo+VUITEa74RX7an2AxLJY3bVBUBjsGTcPjQgVw4WIqpaUNnBqgJoYrG4-GE3oIAZ4sKp70A+JZlK5-MgsGQ0uwoUI4PVuq1tFvTE4hWt16WEbylOpijaYHwao9qlimeS+uIAC0TgT5610QzpEoNFOjBYkEPErrpkQ1geJC82Js-XMJw4xeYJbmvf4qRWftjVfMMTwQbEvFsZQRjGCYphVNtbkQuwPlGR4MJmbt017KCkhfEMj3fJpBksEhLCcAlrATFwvHo+wnE4rjuKccCdWWP1DQDM0OVg2dwyTEhlFucwBisW4gOeBMZXML4+NvMjsygQcCwgMTjw-BB1QTAYkJIJxNXCUIgA */
   createMachine<DataStreamsContext, DataStreamsEvent, IntegrationTypestate>(
     {
       context: initialContext,
@@ -128,11 +129,12 @@ export const createDataStreamsStateMachine = ({
   createPureDataStreamsStateMachine(initialContext).withConfig({
     services: {
       loadDataStreams: (context, event) => {
-        const searchParams = 'search' in event ? event.search : {};
+        const searchParams =
+          'search' in event ? { ...context.search, ...event.search } : context.search;
 
         return from(
           context.cache.has(searchParams)
-            ? Promise.resolve(context.cache.get(searchParams))
+            ? Promise.resolve(context.cache.get(searchParams) as FindDataStreamsResponse)
             : dataStreamsClient.findDataStreams(searchParams)
         ).pipe(
           map(

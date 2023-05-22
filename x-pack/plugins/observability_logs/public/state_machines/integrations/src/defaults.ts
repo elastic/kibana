@@ -10,6 +10,7 @@ import { DefaultIntegrationsContext } from './types';
 
 export const DEFAULT_CONTEXT: DefaultIntegrationsContext = {
   cache: new ImmutableCache(),
+  integrationsSource: null,
   integrations: null,
   error: null,
   search: {

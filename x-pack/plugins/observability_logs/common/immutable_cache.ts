@@ -11,10 +11,12 @@ export interface IImmutableCache<KeyType, ValueType> {
   clear(): ImmutableCache<KeyType, ValueType>;
 }
 
-export class ImmutableCache<KeyType, ValueType> implements IImmutableCache<KeyType, ValueType> {
-  private cache: Record<string, ValueType>;
+type Cache<ValueType> = Record<string, ValueType>;
 
-  constructor(cache?: Record<string, ValueType>) {
+export class ImmutableCache<KeyType, ValueType> implements IImmutableCache<KeyType, ValueType> {
+  private cache: Cache<ValueType>;
+
+  constructor(cache?: Cache<ValueType>) {
     this.cache = cache ?? {};
   }
 
@@ -31,7 +33,7 @@ export class ImmutableCache<KeyType, ValueType> implements IImmutableCache<KeyTy
 
   public has(key: KeyType): boolean {
     const serializedKey = this.serialize(key);
-    return Boolean(this.cache[serializedKey]);
+    return serializedKey in this.cache;
   }
 
   public clear(): ImmutableCache<KeyType, ValueType> {

@@ -25,6 +25,7 @@ import {
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import { getIntegrationId, IntegrationId, SortOrder } from '../../../common';
 import { dynamic } from '../../../common/dynamic';
 import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -42,58 +43,69 @@ import { getPopoverButtonStyles } from './data_stream_selector.utils';
 
 import { useBoolean } from '../../hooks/use_boolean';
 
-import type { DataStream, Integration } from '../../../common/data_streams';
-import {
-  LoadMoreIntegrations,
-  SearchIntegrations,
-  SearchIntegrationsParams,
-} from '../../hooks/use_integrations';
+import { DataStream, Integration, SearchStrategy } from '../../../common/data_streams';
+import { LoadMoreIntegrations } from '../../hooks/use_integrations';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import type { DataStreamSelectionHandler } from '../../customizations/custom_data_stream_selector';
+import { DataStreamSkeleton } from './data_stream_skeleton';
 
 /**
  * Lazy load hidden components
  */
-const DataStreamsList = dynamic(() => import('./data_streams_list'));
-
-export interface DataStreamSelectorProps {
-  title: string;
-  search: SearchIntegrationsParams;
-  integrations: Integration[] | null;
-  uncategorizedStreams: DataStream[] | null;
-  dataStreamsError: Error | null;
-  isLoadingIntegrations: boolean;
-  isLoadingStreams: boolean;
-  /* Triggered when a search or sorting is performed on integrations */
-  onSearchIntegrations: SearchIntegrations;
-  /* Triggered when we reach the bottom of the integration list and want to load more */
-  onLoadMoreIntegrations: LoadMoreIntegrations;
-  /* Triggered when the uncategorized streams entry is selected */
-  onStreamsEntryClick: () => void;
-  /* Triggered when retrying to load the data streams */
-  onStreamsReload: () => void;
-  /* Triggered when a data stream entry is selected */
-  onStreamSelected: DataStreamSelectionHandler;
-}
+const DataStreamsList = dynamic(() => import('./data_streams_list'), {
+  fallback: <DataStreamSkeleton />,
+});
 
 type CurrentPanelId =
   | typeof INTEGRATION_PANEL_ID
   | typeof UNCATEGORIZED_STREAMS_PANEL_ID
-  | `integration-${string}`;
+  | IntegrationId;
+
+export interface SearchParams {
+  name?: string;
+  sortOrder?: SortOrder;
+  strategy: SearchStrategy;
+  integrationId?: CurrentPanelId;
+}
+
+export type SearchHandler = (params: SearchParams) => void;
+
+export interface DataStreamSelectorProps {
+  title: string;
+  search: Pick<SearchParams, 'name' | 'sortOrder'>;
+  integrations: Integration[] | null;
+  dataStreams: DataStream[] | null;
+  dataStreamsError?: Error | null;
+  isLoadingIntegrations: boolean;
+  isLoadingStreams: boolean;
+  /* Triggered when a search or sorting is performed on integrations */
+  onIntegrationsSearch: SearchHandler;
+  /* Triggered when we reach the bottom of the integration list and want to load more */
+  onIntegrationsLoadMore: LoadMoreIntegrations;
+  /* Triggered when the uncategorized streams entry is selected */
+  onStreamsEntryClick: () => void;
+  /* Triggered when retrying to load the data streams */
+  onStreamsReload: () => void;
+  /* Triggered when a search or sorting is performed on data streams */
+  onStreamsSearch: SearchHandler;
+  /* Triggered when a data stream entry is selected */
+  onStreamSelected: DataStreamSelectionHandler;
+}
 
 export function DataStreamSelector({
   title,
   integrations,
-  uncategorizedStreams,
-  dataStreamsError,
   isLoadingIntegrations,
-  isLoadingStreams,
-  onSearchIntegrations,
-  onLoadMoreIntegrations,
+  onIntegrationsSearch,
+  onIntegrationsLoadMore,
   onStreamSelected,
+  search,
+  dataStreamsError,
+  isLoadingStreams,
   onStreamsEntryClick,
   onStreamsReload,
-  search,
+  onStreamsSearch,
+  dataStreams,
 }: DataStreamSelectorProps) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
@@ -102,9 +114,9 @@ export function DataStreamSelector({
 
   useEffect(() => {
     if (loadMoreIntersection?.isIntersecting) {
-      onLoadMoreIntegrations();
+      onIntegrationsLoadMore();
     }
-  }, [loadMoreIntersection, onLoadMoreIntegrations]);
+  }, [loadMoreIntersection, onIntegrationsLoadMore]);
 
   const [currentPanel, setCurrentPanel] = useState<CurrentPanelId>(INTEGRATION_PANEL_ID);
 
@@ -121,7 +133,7 @@ export function DataStreamSelector({
   );
 
   const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
-    const uncategorizedStreamsItem = {
+    const dataStreamsItem = {
       name: uncategorizedLabel,
       onClick: onStreamsEntryClick,
       panel: UNCATEGORIZED_STREAMS_PANEL_ID,
@@ -129,7 +141,7 @@ export function DataStreamSelector({
 
     if (!integrations) {
       return {
-        items: [uncategorizedStreamsItem],
+        items: [dataStreamsItem],
         panels: [],
       };
     }
@@ -141,26 +153,10 @@ export function DataStreamSelector({
     });
 
     return {
-      items: [uncategorizedStreamsItem, ...items],
+      items: [dataStreamsItem, ...items],
       panels,
     };
-  }, [integrations, handleStreamSelection, onStreamsEntryClick, setRef]);
-
-  const [localSearch, setLocalSearch] = useState<SearchIntegrationsParams>({
-    sortOrder: 'asc',
-    name: '',
-  });
-
-  const filteredIntegrationPanels = integrationPanels.map((panel) => {
-    if (panel.id !== currentPanel) {
-      return panel;
-    }
-
-    return {
-      ...panel,
-      items: applyStreamSearch(panel.items, localSearch),
-    };
-  });
+  }, [integrations, handleStreamSelection, setRef]);
 
   const panels = [
     {
@@ -175,15 +171,15 @@ export function DataStreamSelector({
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
       content: (
         <DataStreamsList
-          dataStreams={uncategorizedStreams}
+          onStreamClick={handleStreamSelection}
+          dataStreams={dataStreams}
           error={dataStreamsError}
           isLoading={isLoadingStreams}
           onRetry={onStreamsReload}
-          onStreamClick={handleStreamSelection}
         />
       ),
     },
-    ...filteredIntegrationPanels,
+    ...integrationPanels,
   ];
 
   const button = (
@@ -192,12 +188,21 @@ export function DataStreamSelector({
     </DataStreamButton>
   );
 
-  const handleIntegrationStreamsSearch = setLocalSearch;
+  // const handleIntegrationStreamsSearch = setLocalSearch;
 
   // TODO: Handle search strategy by current panel id
-  const handleSearch =
-    currentPanel === INTEGRATION_PANEL_ID ? onSearchIntegrations : handleIntegrationStreamsSearch;
-  const searchValue = currentPanel === INTEGRATION_PANEL_ID ? search : localSearch;
+  const handleSearch = (params: SearchParams) => {
+    const strategy = getSearchStrategy(currentPanel);
+    return onIntegrationsSearch({
+      ...params,
+      strategy,
+      ...(strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS && { integrationId: currentPanel }),
+    });
+  };
+  const searchValue = search;
+  // const handleSearch =
+  //   currentPanel === INTEGRATION_PANEL_ID ? onIntegrationsSearch : handleIntegrationStreamsSearch;
+  // const searchValue = currentPanel === INTEGRATION_PANEL_ID ? search : localSearch;
 
   return (
     <EuiPopover
@@ -240,8 +245,8 @@ const DataStreamButton = (props: DataStreamButtonProps) => {
 
 interface SearchControlsProps {
   isLoading: boolean;
-  search: SearchIntegrationsParams;
-  onSearch: SearchIntegrations;
+  search: SearchParams;
+  onSearch: SearchHandler;
 }
 
 const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) => {
@@ -251,7 +256,7 @@ const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) =>
   };
 
   const handleSortChange = (id: string) => {
-    onSearch({ ...search, sortOrder: id as SearchIntegrationsParams['sortOrder'] });
+    onSearch({ ...search, sortOrder: id as SearchParams['sortOrder'] });
   };
 
   return (
@@ -271,7 +276,7 @@ const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) =>
             buttonSize="compressed"
             options={sortOptions}
             legend={sortOrdersLabel}
-            idSelected={search.sortOrder}
+            idSelected={search.sortOrder as SortOrder}
             onChange={handleSortChange}
           />
         </EuiFlexItem>
@@ -291,38 +296,27 @@ interface IntegrationsTreeParams {
   spyRef: RefCallback<HTMLButtonElement>;
 }
 
-const applyStreamSearch = (streams: DataStream[], search: SearchIntegrationsParams) => {
-  const { name, sortOrder } = search;
-
-  const filteredStreams = streams.filter((stream) => stream.name.includes(name ?? ''));
-
-  const sortedStreams = filteredStreams.sort((curr, next) => curr.name.localeCompare(next.name));
-
-  const searchResult = sortOrder === 'asc' ? sortedStreams : sortedStreams.reverse();
-
-  return searchResult;
-};
-
 const buildIntegrationsTree = ({ list, onStreamSelected, spyRef }: IntegrationsTreeParams) => {
   return list.reduce(
-    (res: IntegrationsTree, entry, pos) => {
-      const entryId: CurrentPanelId = `integration-${entry.name}`;
+    (res: IntegrationsTree, integration, pos) => {
+      const entryId: CurrentPanelId = getIntegrationId(integration);
+      const { name, version, dataStreams } = integration;
 
       res.items.push({
-        name: entry.name,
-        icon: <PackageIcon packageName={entry.name} version={entry.version} size="m" tryApi />,
+        name,
+        icon: <PackageIcon packageName={name} version={version} size="m" tryApi />,
         panel: entryId,
         buttonRef: pos === list.length - 1 ? spyRef : undefined,
       });
 
       res.panels.push({
         id: entryId,
-        title: entry.name,
+        title: name,
         width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-        items: entry.dataStreams.map((stream) => ({
+        items: dataStreams.map((stream) => ({
           name: stream.name,
           onClick: () =>
-            onStreamSelected({ title: stream.title, name: `[${entry.name}] ${stream.name}` }),
+            onStreamSelected({ title: stream.title, name: `[${name}] ${stream.name}` }),
         })),
       });
 
@@ -330,4 +324,10 @@ const buildIntegrationsTree = ({ list, onStreamSelected, spyRef }: IntegrationsT
     },
     { items: [], panels: [] }
   );
+};
+
+const getSearchStrategy = (panelId: CurrentPanelId) => {
+  if (panelId === UNCATEGORIZED_STREAMS_PANEL_ID) return SearchStrategy.DATA_STREAMS;
+  if (panelId === INTEGRATION_PANEL_ID) return SearchStrategy.INTEGRATIONS;
+  return SearchStrategy.INTEGRATIONS_DATA_STREAMS;
 };

@@ -52,8 +52,8 @@ export const errorLabel = i18n.translate('xpack.observabilityLogs.dataStreamSele
   defaultMessage: 'error',
 });
 
-export const noDataStreamsRetryLabel = i18n.translate(
-  'xpack.observabilityLogs.dataStreamSelector.noDataStreamsRetry',
+export const noDataRetryLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.noDataRetry',
   {
     defaultMessage: 'Retry',
   }

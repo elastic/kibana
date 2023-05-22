@@ -8,9 +8,10 @@
 import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { useCallback } from 'react';
+import { SearchStrategy } from '../../common/data_streams';
 import { createIntegrationStateMachine } from '../state_machines/integrations';
 import { IDataStreamsClient } from '../services/data_streams';
-import { FindIntegrationsRequestQuery } from '../../common';
+import { FindIntegrationsRequestQuery, SortOrder } from '../../common';
 
 interface IntegrationsContextDeps {
   dataStreamsClient: IDataStreamsClient;
@@ -18,7 +19,8 @@ interface IntegrationsContextDeps {
 
 export interface SearchIntegrationsParams {
   name?: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder?: SortOrder;
+  strategy: SearchStrategy;
 }
 
 export type SearchIntegrations = (params: SearchIntegrationsParams) => void;
@@ -58,8 +60,8 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
       integrationsStateService.send({
         type: 'SEARCH_INTEGRATIONS',
         search: {
+          ...searchParams,
           nameQuery: searchParams.name,
-          sortOrder: searchParams.sortOrder,
         },
       }),
     [integrationsStateService]
@@ -97,7 +99,9 @@ export const [IntegrationsProvider, useIntegrationsContext] = createContainer(us
 /**
  * Utils
  */
-const filterSearchParams = (search: FindIntegrationsRequestQuery): SearchIntegrationsParams => ({
+const filterSearchParams = (
+  search: FindIntegrationsRequestQuery
+): Pick<SearchIntegrationsParams, 'name' | 'sortOrder'> => ({
   name: search.nameQuery,
   sortOrder: search.sortOrder,
 });

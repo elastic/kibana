@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { catchError, from, map, of } from 'rxjs';
+import { catchError, from, map, of, throwError } from 'rxjs';
 import { assign, createMachine } from 'xstate';
+import { EntityList } from '../../../../common/entity_list';
+import { DataStream, Integration, SearchStrategy } from '../../../../common/data_streams';
+import { FindIntegrationsResponse, getIntegrationId } from '../../../../common';
 import { IDataStreamsClient } from '../../../services/data_streams';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   DefaultIntegrationsContext,
   IntegrationsContext,
   IntegrationsEvent,
+  IntegrationsSearchParams,
   IntegrationTypestate,
 } from './types';
 
 export const createPureIntegrationsStateMachine = (
   initialContext: DefaultIntegrationsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogBMARgDsnMgFZpAZjWc1ADgCcANm0AWbQBoQAT0TbpKzvenSjy-WqP79RgL5fzaTDj4xKRk9ES4EDRQrAAyAPIAggAiyAByAOIA+gDKAKoAwvkAokVJpVy8SCCCwqKo4lIIcooq6po6BsZmloj68rpk0pzGw-JjsspGsj5+GFh4deRhEVGxiSkZmQBiCcgx5TziNSLBDTJysmTyepyyRpz9ym7mVk32g0a6X7pu+rra+jkMxA-nmQRIS3CkVQUAAskRsGA1sk0lk8oUSmUkhUjkITmIqo1ZJpLronnc5GoFNIXr1tGpBsp7PI3LpZB5-sDQYFFqEoVF4YjkRssjs9gdKgI8XUzghtDYyEZnGppLonK4NPJaQh5J8yJwDEY1E96U5+ly5jzgpCImx4slMrC4gAlIqZNIAFSK6WdCQ9yDiqWyOKqxxlhMQxNuZDJVKMlOp2qVl3kTNugKe0nkHnkFoCC2tfNtEFY2SKCWd+QAEu7Ul6fX6A0GQ1LaqcIwh2T8yHdjJoyfp08ptcoAWQdNpRopZACXHmwbyAMYACzAi4A1gKEWBuQWIQkAG64Aj0XAAIxPIgsHEOoel7dAjWM+hU2mUP2U2cHo-02sUDINTx5GkU01HkO55ytCEyBXNdNxhQUd0tPdSEPY9TwvRh0GvdhZElap7wJR9rHcV932NL9OB-EdPCuNM1TkQEqX0SCUPICAwDPIgqEXKJsjAXBsBXUty0rGtPW9X1-UDYNb1bfF6g7WQfkuekf11aRPBVEcHjIeVJ20cC9EBGdWPBEIOK4ni+IEoTl1YCRYHQfAwDIXAADNMGwAAKNMAEpWF3cz2M47jUF4mF+MElcWwItsiMkGQFCUVQNC0YyuhHQy9PlB49BVTS3zM3llmhKAtnQthXXtJJa3rKSm1k-CwwfRKmiVOixjZT5dCoplfx6BBeoZN9dBMZMqPy4rC1KqIKpPO11kdF03QkhtpObOS4oU2UnCMTr+juL4+s4AbXhcJR7HsJVDLNDRpug2aYXm+g2DLCtqzqyTGxk2KWoSxo9oO7rjuUfrtRVS4rs4LMDH0GcsxY4FUCIDj4CqILFlxeLFOIhAAFozsQfHlBjb53xzPQWU-ZQHpCKgaBOBhmEgbGdo7IYDSuU7TQ8e5wO1bRLjTW5ZCo-41TUJHZnzYKizKtnwzxpwQJUQcs1kM12S1Qa31J8X7njcCjGzNQ6ZtMrEMV1qiQeJQWSNTwxfZdwiZ1MWe36XU7bcVNpl8EFkLl0rWbvHHZQmYwyD+J4ph0Th43pP8nH1SYxgT3R+mMaRzZg1cNy3RFMetNCT3PS9sOtgHEGUBRFW+XrdTGVxh0Gi67HsN8hmcbNc8ssKIqgKK7Kr3G2uUpk9LUTPhhuH4qJohkJ1OsDXEnMbc6e8rKogUfZXjEcwP1K74c0-Ra6+HwfCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAZgBsAVjLTOATlly18gCwAOHbL0AaEAE9EshSoBMigL73TaTDnzFSZekVwQaUVgAZAHkAQQARZAA5AHEAfQBlAFUAYRSAUXTwrK5eJBBBYVFUcSkEOQB2NRVdTk5pHV0DI1MLBAq9eTJ5NUVNO0dnDCw8YvJvX38gsMjYuIAxUORAnJ5xQpEPUpkdGy75PQrDPW19Y9bEGwayWQqHJxAXEfcScZ8-VCgAWSJsMGmItF4sk0plsuFcushJsxPkyjY9HoyFdDooLggDF1pIpsfIBg8nm4xl53v4fn8AbN4otlqs8gJocVtggEUiUXd0VVlEpcfihq5Rh43r42CEInEvsEAErpOLRAAq6RiUtC8uQwSiCUh+Q2TLhiCOSJ6fWkdnRqk4shud0Gj2GRKFJJFEFYCXSoSlKQAEnKoorlar1ZrtQyilt9e19N1ev00eYDdiyKjbYTBa8yABjAAWYAzAGsyb8wKmXqRQgA3XAEei4ABG1ZEZg4ax1jPDoDKek4XVR5u71Xq6lu935z2J2dzBc+5OL9rTZcr1brDfQTfY0npBTbsI7iE6SOkvfjCF6FWtI7tAtL5AgYFrRCoGf8CTAuGw2dd7s9PoVSpVao1LUW1DGESgjVRFCNGxZEtaR5Dgq5pHRWQNG6PlLzHR1b3vR9n1fd8s1YCRYHQfAwDIXAADNMGwAAKRQ6gASlYEtiWwh9UCfT4XzfbMQy3MMd0kA0o2NWN0T0ZRkwJOdrzIdjcO4-CP2I0jMAo6iwDohjOGY1isLvDiuKgHiCPXTddXbYTygUZRVA0LQmnOY8dAqK08QvfT01gZSs2fdA-lwABbWBPw9b1ElSDIsjpKFBLA3cWT0K1ZEUDQOWPHobCTNRmhtGSr2JHzeL87iAtfEKwu-BYlhWCFgIE0DmVZZFDwytpoM4c8U1k4kJg+KB5irehRRmCVpVlX8AwA4MGssoSykNaMTTNTKlG6grMPTfr-CG6s2BlMVwl9f1-yDICLO3BLrKWsTTTjNp4J0JN8tHB1ttJT49pGl03XCn8-T-QNAP4+brsW0SY3u9FGi6zh8oeVAiFveB8i80g4qaiMAFp5HRXGesKx0qBoTYGGYSBMb1RLpGkVD5FkBFoePGw1GqHQVs83rHR2z4qassoEOetQKiUepGjOFoXJ0ap7sJrbPF574i35hbEF2TlemRUXFA8+X3sV95KdbeLmUg9m6ZsCpOGSqwrB0TlWbINR0PR8gJ3zQs-jdithuXRhV1V8GZE4HRpDIThoMMdrEF6JFXK5on0wUzi8JKoPmVUCozzxHpbk6PFaZhmXbEThXyGKgj-MCkKM4jEv5CqA4Y4xcOy4N4UBu+42QOp6zFCtshs9kaOHsuTg7PxRwgA */
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
       context: initialContext,
@@ -40,7 +44,7 @@ export const createPureIntegrationsStateMachine = (
           on: {
             LOADING_SUCCEEDED: {
               target: 'loaded',
-              actions: ['storeInCache', 'storeIntegrations', 'storeSearch'],
+              actions: ['storeInCache', 'storeIntegrationsResponse', 'storeSearch'],
             },
             LOADING_FAILED: {
               target: 'loadingFailed',
@@ -88,8 +92,28 @@ export const createPureIntegrationsStateMachine = (
             },
           },
           after: {
-            500: {
-              target: 'loading',
+            500: [
+              {
+                cond: 'isStreamSearch',
+                target: 'searchingStreams',
+              },
+              {
+                target: 'loading',
+              },
+            ],
+          },
+        },
+        searchingStreams: {
+          invoke: {
+            src: 'searchStreams',
+          },
+          on: {
+            SEARCH_SUCCEEDED: {
+              target: 'loaded',
+              actions: ['storeIntegrations'],
+            },
+            SEARCH_FAILED: {
+              target: 'loadingFailed',
             },
           },
         },
@@ -117,13 +141,17 @@ export const createPureIntegrationsStateMachine = (
             },
           }),
         })),
-        storeIntegrations: assign((context, event) =>
+        storeIntegrationsResponse: assign((context, event) =>
           'data' in event
             ? {
+                integrationsSource: event.data.items,
                 integrations: event.data.items,
                 total: event.data.total,
               }
             : {}
+        ),
+        storeIntegrations: assign((_context, event) =>
+          'integrations' in event ? { integrations: event.integrations } : {}
         ),
         storeInCache: assign((context, event) => {
           if (event.type !== 'LOADING_SUCCEEDED') return {};
@@ -142,6 +170,7 @@ export const createPureIntegrationsStateMachine = (
         appendIntegrations: assign((context, event) =>
           'data' in event
             ? {
+                integrationsSource: context.integrations?.concat(event.data.items) ?? [],
                 integrations: context.integrations?.concat(event.data.items) ?? [],
                 total: event.data.total,
               }
@@ -158,6 +187,8 @@ export const createPureIntegrationsStateMachine = (
       },
       guards: {
         hasMoreIntegrations: (context) => Boolean(context.search.searchAfter),
+        isStreamSearch: (context) =>
+          context.search.strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS,
       },
     }
   );
@@ -173,13 +204,12 @@ export const createIntegrationStateMachine = ({
 }: IntegrationsStateMachineDependencies) =>
   createPureIntegrationsStateMachine(initialContext).withConfig({
     services: {
-      loadIntegrations: (context, event) => {
-        const searchParams =
-          'search' in event ? { ...context.search, ...event.search } : context.search;
+      loadIntegrations: (context) => {
+        const searchParams = context.search;
 
         return from(
           context.cache.has(searchParams)
-            ? Promise.resolve(context.cache.get(searchParams))
+            ? Promise.resolve(context.cache.get(searchParams) as FindIntegrationsResponse)
             : dataStreamsClient.findIntegrations(searchParams)
         ).pipe(
           map(
@@ -196,5 +226,56 @@ export const createIntegrationStateMachine = ({
           )
         );
       },
+      searchStreams: (context) => {
+        const searchParams = context.search;
+
+        return from(
+          context.integrationsSource !== null
+            ? Promise.resolve(searchIntegrationStreams(context.integrationsSource, searchParams))
+            : throwError(
+                () =>
+                  new Error(
+                    'Failed to filter integration streams: No integrations found in context.'
+                  )
+              )
+        ).pipe(
+          map(
+            (integrations): IntegrationsEvent => ({
+              type: 'SEARCH_SUCCEEDED',
+              integrations,
+            })
+          ),
+          catchError((error) =>
+            of<IntegrationsEvent>({
+              type: 'SEARCH_FAILED',
+              error,
+            })
+          )
+        );
+      },
     },
   });
+
+const searchIntegrationStreams = (
+  integrations: Integration[],
+  search: IntegrationsSearchParams
+) => {
+  const { nameQuery, sortOrder, integrationId } = search;
+
+  return integrations.map((integration) => {
+    const id = getIntegrationId(integration)
+
+    if (id !== integrationId) {
+      return integration;
+    }
+
+    return {
+      ...integration,
+      // Filter and sort the dataStreams by the search criteria
+      dataStreams: new EntityList<DataStream>(integration.dataStreams)
+        .filterBy((stream) => stream.name.includes(nameQuery ?? ''))
+        .sortBy('name', sortOrder)
+        .build(),
+    };
+  }
+};
