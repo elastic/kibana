@@ -141,6 +141,29 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
         await this.assertTableSorting(columnName, columnIndex, direction);
       });
     }
+
+    public async invokeAction(rowIndex: number, actionSubject: string) {
+      const rows = await testSubjects.findAll(
+        `${this.parentSubj ? `${this.parentSubj} > ` : ''}~${this.tableTestSubj} > ~${
+          this.tableRowSubj
+        }`
+      );
+
+      const requestedRow = rows[rowIndex];
+      const actionButton = await requestedRow.findByTestSubject(actionSubject);
+
+      await retry.tryForTime(5000, async () => {
+        await actionButton.click();
+        await this.waitForTableToStartLoading();
+        await this.waitForTableToLoad();
+      });
+    }
+
+    public async selectAllRows() {
+      await testSubjects.click(
+        `${this.parentSubj ? `${this.parentSubj} > ` : ''} > checkboxSelectAll`
+      );
+    }
   };
 
   return {

@@ -230,7 +230,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                   );
                 },
                 isPrimary: true,
-                'data-test-subj': 'aiopsChangePointFilterForValue',
+                'data-test-subj': 'aiopsChangePointFilterOutValue',
               },
             ] as Array<DefaultItemAction<ChangePointAnnotation>>,
           },

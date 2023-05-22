@@ -88,6 +88,15 @@ export function ChangePointDetectionPageProvider(
       });
     },
 
+    async viewSelected() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
+          'aiopsChangePointDetectionViewSelected'
+        );
+        await testSubjects.existOrFail('aiopsChangePointDetectionSelectedCharts');
+      });
+    },
+
     getTable(index: number) {
       return tableService.getServiceInstance(
         'ChangePointResultsTable',
