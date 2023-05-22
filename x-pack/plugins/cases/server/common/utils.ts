@@ -24,7 +24,7 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo, FileAttachmentRequest } from './types';
+import type { AlertInfo, FileAttachmentRequest, SOWithErrors } from './types';
 
 import type {
   CasePostRequest,
@@ -457,3 +457,5 @@ export const getCaseViewPath = (params: {
 
   return `${basePath}${normalizePath(CASE_VIEW_PATH.replace(':detailName', caseId))}`;
 };
+
+export const isSOError = <T>(so: { error?: unknown }): so is SOWithErrors<T> => so.error != null;

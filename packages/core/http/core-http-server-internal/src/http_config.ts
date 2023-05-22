@@ -16,6 +16,7 @@ import { hostname } from 'os';
 import url from 'url';
 
 import type { Duration } from 'moment';
+import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { CspConfigType, CspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
 import {
@@ -137,6 +138,21 @@ const configSchema = schema.object(
         { defaultValue: [] }
       ),
     }),
+    eluMonitor: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      logging: schema.object({
+        enabled: schema.conditional(
+          schema.contextRef('dist'),
+          false,
+          schema.boolean({ defaultValue: true }),
+          schema.boolean({ defaultValue: false })
+        ),
+        threshold: schema.object({
+          elu: schema.number({ defaultValue: 0.15, min: 0, max: 1 }),
+          ela: schema.number({ defaultValue: 250, min: 0 }),
+        }),
+      }),
+    }),
     requestId: schema.object(
       {
         allowFromAnyIp: schema.boolean({ defaultValue: false }),
@@ -226,6 +242,8 @@ export class HttpConfig implements IHttpConfig {
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
 
+  public eluMonitor: IHttpEluMonitorConfig;
+
   /**
    * @internal
    */
@@ -265,7 +283,9 @@ export class HttpConfig implements IHttpConfig {
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
+
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
+    this.eluMonitor = rawHttpConfig.eluMonitor;
   }
 }
 
