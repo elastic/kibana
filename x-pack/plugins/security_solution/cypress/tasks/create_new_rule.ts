@@ -675,28 +675,34 @@ export const selectNewTermsRuleType = () => {
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
-  recurse(
+  cy.waitUntil(
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
-
-      cy.get(EMPTY_ALERT_TABLE).should('not.exist');
-      return cy.get(ALERTS_TABLE_COUNT).invoke('text').then(parseInt);
+      return cy.root().then(($el) => {
+        const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
+        if (emptyTableState.length > 0) {
+          cy.log('Table is empty', emptyTableState.length);
+          return false;
+        }
+        const countEl = $el.find(ALERTS_TABLE_COUNT);
+        const alertCount = parseInt(countEl.text(), 10) || 0;
+        return alertCount >= alertCountThreshold;
+      });
     },
-    (alertsTableCount) => alertsTableCount >= alertCountThreshold
+    { interval: 500, timeout: 12000 }
   );
   waitForAlerts();
 };
 
 export const waitForTheRuleToBeExecuted = () => {
-  recurse(
-    () => {
-      cy.get(REFRESH_BUTTON).click({ force: true });
-      return cy.get(RULE_STATUS).invoke('text');
-    },
-    // @ts-expect-error
-    (ruleStatus) => ruleStatus === 'succeeded'
-  );
+  cy.waitUntil(() => {
+    cy.get(REFRESH_BUTTON).click({ force: true });
+    return cy
+      .get(RULE_STATUS)
+      .invoke('text')
+      .then((ruleStatus) => ruleStatus === 'succeeded');
+  });
 };
 
 export const selectAndLoadSavedQuery = (queryName: string, queryValue: string) => {

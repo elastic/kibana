@@ -428,11 +428,7 @@ export const cli = () => {
 
         const hasFailedTests = _.some(results, (result) => result.failures > 0);
 
-        if (hasFailedTests) {
-          throw new Error('1');
-        }
-
-        return 0;
+        return process.exit(hasFailedTests ? 1 : 0);
       });
     },
     {
