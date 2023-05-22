@@ -271,7 +271,7 @@ export interface CategorySummaryItem {
   parent_title?: string;
 }
 
-// export type RequirementsByServiceName = PackageSpecManifest['conditions'];
+export type RequirementsByServiceName = PackageSpecManifest['conditions'];
 export interface AssetParts {
   pkgkey: string;
   dataset?: string;
@@ -409,23 +409,23 @@ export interface EpmPackageAdditions {
   keepPoliciesUpToDate?: boolean;
 }
 
-// type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
-//   SecondType;
+type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
+  SecondType;
 
-// TODO: these depends on installable
+// TODO: depend on SavedObject
 // Managers public HTTP response types
-// export type PackageList = PackageListItem[];
-// export type PackageListItem = Installable<RegistrySearchResult> & {
-//   integration?: string;
-//   id: string;
-// };
-
+export type PackageList = PackageListItem[];
+export type PackageListItem = Installable<RegistrySearchResult> & {
+  integration?: string;
+  id: string;
+};
+export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
+export type PackageInfo =
+  | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
+  | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
+// TODO: end of dependency on SavedObject
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
-// export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
-// export type PackageInfo =
-//   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
-//   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 // TODO - Expand this with other experimental indexing types
 export type ExperimentalIndexingFeature =
@@ -466,35 +466,37 @@ export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-// TODO: refactor dependencies
-// export type Installable<T> =
-//   | InstallStatusExcluded<T>
-//   | InstalledRegistry<T>
-//   | Installing<T>
-//   | NotInstalled<T>
-//   | InstallFailed<T>;
+// TODO: the following depend on SavedObject type
+export type Installable<T> =
+  | InstallStatusExcluded<T>
+  | InstalledRegistry<T>
+  | Installing<T>
+  | NotInstalled<T>
+  | InstallFailed<T>;
 
-// export type InstallStatusExcluded<T = {}> = T & {
-//   status: undefined;
-// };
+export type InstallStatusExcluded<T = {}> = T & {
+  status: undefined;
+};
 
-// export type InstalledRegistry<T = {}> = T & {
-//   status: InstallationStatus['Installed'];
-//   savedObject: SavedObject<Installation>;
-// };
+export type InstalledRegistry<T = {}> = T & {
+  status: InstallationStatus['Installed'];
+  savedObject: SavedObject<Installation>;
+};
 
-// export type Installing<T = {}> = T & {
-//   status: InstallationStatus['Installing'];
-//   savedObject: SavedObject<Installation>;
-// };
+export type Installing<T = {}> = T & {
+  status: InstallationStatus['Installing'];
+  savedObject: SavedObject<Installation>;
+};
 
-// export type NotInstalled<T = {}> = T & {
-//   status: InstallationStatus['NotInstalled'];
-// };
+export type NotInstalled<T = {}> = T & {
+  status: InstallationStatus['NotInstalled'];
+};
 
-// export type InstallFailed<T = {}> = T & {
-//   status: InstallationStatus['InstallFailed'];
-// };
+export type InstallFailed<T = {}> = T & {
+  status: InstallationStatus['InstallFailed'];
+};
+
+// end of dependendcies on SavedObject type
 
 // TODO: the following `reference` types should live under /server but they' re used in public/epm/assets
 export type AssetReference = KibanaAssetReference | EsAssetReference;
