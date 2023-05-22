@@ -209,7 +209,7 @@ function renderDarkModeTestCases(
     });
 
     describe('Dark Mode', () => {
-      it('UserSettings value should override the space setting', async () => {
+      it('UserSettings darkMode === true should override the space setting', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(true)
         );
@@ -229,6 +229,32 @@ function renderDarkModeTestCases(
 
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
+      });
+
+      it('UserSettings darkMode === false should override the space setting', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(false)
+        );
+
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return true;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: false } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+
+        const [render] = await getRender();
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: false,
           themeVersion: 'v8',
           basePath: '/mock-server-basepath',
           buildNum: expect.any(Number),

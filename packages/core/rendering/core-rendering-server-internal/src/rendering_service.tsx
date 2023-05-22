@@ -167,7 +167,7 @@ export class RenderingService {
 
     let darkMode: boolean;
 
-    if (userSettingDarkMode) {
+    if (userSettingDarkMode !== undefined) {
       darkMode = userSettingDarkMode;
     } else {
       darkMode = getSettingValue('theme:darkMode', settings, Boolean);
