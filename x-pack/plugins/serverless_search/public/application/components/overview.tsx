@@ -33,6 +33,7 @@ export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
   const { http, userProfile } = useKibanaServices();
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -73,11 +74,7 @@ export const ElasticsearchOverview = () => {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiImage
-                alt=""
-                src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/serverless_header.png`)}
-                size="554px"
-              />
+              <EuiImage alt="" src={`${assetBasePath}serverless_header.png`} size="554px" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiText>
