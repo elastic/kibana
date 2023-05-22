@@ -103,6 +103,7 @@ export interface StackFrame {
   FunctionName: string;
   FunctionOffset: number;
   LineNumber: number;
+  Inline: boolean;
 }
 
 export const emptyStackFrame: StackFrame = {
@@ -110,6 +111,7 @@ export const emptyStackFrame: StackFrame = {
   FunctionName: '',
   FunctionOffset: 0,
   LineNumber: 0,
+  Inline: false,
 };
 
 export interface Executable {
