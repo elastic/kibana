@@ -20,7 +20,7 @@ export const FieldBadge: FC<Props> = ({ type, value }) => {
       css={{
         marginRight: '2px',
         marginTop: '-4px',
-        border: '1px solid #a89752',
+        border: '1px solid #b78f15',
         fontSize: '12px',
         padding: '0px 6px',
         fontWeight: 'normal',
@@ -32,7 +32,7 @@ export const FieldBadge: FC<Props> = ({ type, value }) => {
         <EuiFlexItem grow={false}>
           <FieldIcon
             type={type}
-            style={{ marginRight: '2px', marginTop: '1px', border: '1px solid #a89752' }}
+            css={{ marginRight: '2px', marginTop: '1px', border: '1px solid #b78f15' }}
           />
         </EuiFlexItem>
         <EuiFlexItem>{value}</EuiFlexItem>

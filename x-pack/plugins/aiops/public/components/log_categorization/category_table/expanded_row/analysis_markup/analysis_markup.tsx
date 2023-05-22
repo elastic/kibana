@@ -25,7 +25,15 @@ import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 // } from '@elastic/eui';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 // import { FieldIcon } from '@kbn/react-field';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import { grokTypeToFieldType } from './get_field_names';
 import {
   splitGrok2,
@@ -123,6 +131,7 @@ export const AnalysisMarkup: FC<Props> = ({
   // const [editFieldCache, setEditFieldCache] = useState<any>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState<number | null>(null);
   const [results2, setResults2] = useState(resultsIn);
+  const [tempGrokPattern, setTempGrokPattern] = useState(results2.grok_pattern!);
 
   const originalGrokPattern = useMemo(() => resultsIn?.grok_pattern ?? '', [resultsIn]);
 
@@ -165,6 +174,10 @@ export const AnalysisMarkup: FC<Props> = ({
     },
     [results2]
   );
+
+  useEffect(() => {
+    setTempGrokPattern(results2.grok_pattern!.replace(/^%{POSINT:timestamp} /g, '^'));
+  }, [results2]);
 
   const togglePopover = useCallback((index: number | null) => {
     setIsPopoverOpen(index);
@@ -314,13 +327,25 @@ export const AnalysisMarkup: FC<Props> = ({
 
       <EuiSpacer size="m" />
 
+      <EuiTitle size="xxxs">
+        <h6>Grok pattern</h6>
+      </EuiTitle>
+      <EuiCodeBlock language="regex" isCopyable>
+        {tempGrokPattern}
+      </EuiCodeBlock>
+
+      <EuiTitle size="xxxs">
+        <h6>Pipeline</h6>
+      </EuiTitle>
+      <EuiCodeBlock language="text" isCopyable>
+        {JSON.stringify(processPipeline(results2.ingest_pipeline, results2.grok_pattern!), null, 2)}
+      </EuiCodeBlock>
+
+      <EuiSpacer size="m" />
+
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={() =>
-              createRuntimeField(results2.grok_pattern!.replace(/^%{POSINT:timestamp} /g, ''))
-            }
-          >
+          <EuiButton onClick={() => createRuntimeField(tempGrokPattern)}>
             Create runtime fields
           </EuiButton>
         </EuiFlexItem>
@@ -596,6 +621,24 @@ function processLine(
 
   // setMarkedUpLines(lineSplit);
   return lineSplit;
+}
+
+// function unescapeGrok(grokPattern: string) {
+//   return grokPattern.replace(/\\/g, '');
+// }
+
+function processPipeline(
+  pipeline: FindFileStructureResponse['ingest_pipeline'],
+  grokPattern: string
+) {
+  const gg = cloneDeep(pipeline);
+  if (gg.processors[0].grok?.patterns) {
+    const gr = grokPattern.replace(/^%{POSINT:timestamp} /g, '^');
+    gg.processors[0].grok.patterns = [gr];
+  }
+  gg.processors.splice(1, 1);
+  gg.processors.splice(gg.processors.length - 1, 1);
+  return gg;
 }
 
 // function getEntityTypeFromNameProvider(results: FindFileStructureResponse) {

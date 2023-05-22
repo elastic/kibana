@@ -56,6 +56,7 @@ export interface FindFileStructureResponse {
       };
     };
   };
+  ingest_pipeline: estypes.IngestPipelineConfig;
   quote: string;
   delimiter: string;
   need_client_timezone: boolean;

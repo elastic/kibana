@@ -129,7 +129,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({
 
       const defaultOverrides: Record<string, string> = {
         format: 'semi_structured_text',
-        lines_to_sample: '1001',
+        lines_to_sample: `${DOC_COUNT}`,
       };
 
       const tempOverrides = {
