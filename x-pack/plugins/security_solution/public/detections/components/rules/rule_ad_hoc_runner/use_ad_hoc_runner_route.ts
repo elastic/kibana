@@ -8,7 +8,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import { useAdHocRunner } from './use_ad_hoc_runner';
-import type { RulePreviewLogs } from '../../../../../common/detection_engine/rule_schema';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 
 interface AdHocRunnerRouteParams {
@@ -24,12 +23,10 @@ export const useAdHocRunnerRoute = ({ rule, timeframeOptions }: AdHocRunnerRoute
     timeframeOptions,
     isRequestTriggered,
   });
-  const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
   const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
 
   useEffect(() => {
-    setLogs(response.logs ?? []);
     setIsAborted(!!response.isAborted);
   }, [response]);
 
@@ -38,7 +35,6 @@ export const useAdHocRunnerRoute = ({ rule, timeframeOptions }: AdHocRunnerRoute
   }, [setHasNoiseWarning]);
 
   const clearAdHocRun = useCallback(() => {
-    setLogs([]);
     setIsAborted(false);
     setIsRequestTriggered(false);
     setHasNoiseWarning(false);
@@ -56,7 +52,6 @@ export const useAdHocRunnerRoute = ({ rule, timeframeOptions }: AdHocRunnerRoute
     isAdHocRunRequestInProgress: isLoading,
     adHocRunId: response.adHocRunId ?? '',
     executionId: response.executionId ?? '',
-    logs,
     isAborted,
   };
 };

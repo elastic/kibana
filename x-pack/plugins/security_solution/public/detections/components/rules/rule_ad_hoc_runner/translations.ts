@@ -7,22 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LAST_HOUR = i18n.translate('xpack.securitySolution.stepDefineRule.lastHour', {
-  defaultMessage: 'Last hour',
-});
-
-export const LAST_DAY = i18n.translate('xpack.securitySolution.stepDefineRule.lastDay', {
-  defaultMessage: 'Last day',
-});
-
-export const LAST_WEEK = i18n.translate('xpack.securitySolution.stepDefineRule.lastWeek', {
-  defaultMessage: 'Last week',
-});
-
-export const LAST_MONTH = i18n.translate('xpack.securitySolution.stepDefineRule.lastMonth', {
-  defaultMessage: 'Last month',
-});
-
 export const RULE_AD_HOC_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryAdHocRun.rulePreviewError',
   {
@@ -62,14 +46,6 @@ export const QUERY_GRAPH_HITS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryAdHocRun.queryAdHocRunTitle',
   {
     defaultMessage: 'Alerts',
-  }
-);
-
-export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryAdHocRun.queryGraphPreviewNoiseWarning',
-  {
-    defaultMessage:
-      'Noise warning: This rule may cause a lot of noise. Consider narrowing your query. This is based on a linear progression of 1 alert per hour.',
   }
 );
 

@@ -7,7 +7,6 @@
 
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
-import { isEmpty } from 'lodash/fp';
 
 export const getInvocationCountFromTimeRange = ({
   timeframeStart,
@@ -32,20 +31,21 @@ export const getInvocationCountFromTimeRange = ({
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
-    unit: 'ms',
+    unit: 's',
     value: 0,
   };
-  const filterTimeVal = time.match(/\d+/g);
-  const filterTimeType = time.match(/[a-zA-Z]+/g);
-  if (!isEmpty(filterTimeVal) && filterTimeVal != null && !isNaN(Number(filterTimeVal[0]))) {
-    timeObj.value = Number(filterTimeVal[0]);
+  // Match any number of digits plus a time unit of s, m, h, or d
+  const match = time.match(/(\d+)(s|m|h|d)(?!.\b)/g);
+
+  if (match != null) {
+    const [value, unit] = match;
+    if (value && !isNaN(Number(value))) {
+      timeObj.value = Number(value);
+    }
+    if (unit && ['s', 'm', 'd', 'h'].includes(unit)) {
+      timeObj.unit = unit as Unit;
+    }
   }
-  if (
-    !isEmpty(filterTimeType) &&
-    filterTimeType != null &&
-    ['s', 'm', 'h'].includes(filterTimeType[0])
-  ) {
-    timeObj.unit = filterTimeType[0] as Unit;
-  }
+
   return timeObj;
 };

@@ -110,7 +110,6 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
     createAdHocRun,
     isAdHocRunRequestInProgress,
     executionId,
-    logs,
     hasNoiseWarning,
     isAborted,
   } = useAdHocRunnerRoute({
@@ -231,7 +230,11 @@ const RuleAdHocRunnerComponent: React.FC<RuleAdHocRunnerProps> = ({ rule }) => {
           timeframeOptions={adHocRunOptions}
         />
       )}
-      <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
+      {/*
+       * Ad hoc rule execution does not provide logs to display
+       * but we still want to show noise or aborted warnings
+       */}
+      <PreviewLogsComponent logs={[]} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
     </>
   );
 };

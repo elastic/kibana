@@ -16,11 +16,10 @@ import type { TimeframePreviewOptions } from '../../../pages/detection_engine/ru
 import { usePreviewInvocationCount } from '../rule_preview/use_preview_invocation_count';
 import { RULE_AD_HOC_ERROR } from './translations';
 
-const emptyPreviewRule: AdHocRunResponse = {
+const emptyAdHocRuleExecution: AdHocRunResponse = {
   adHocRunId: undefined,
   executionId: undefined,
   initialInvocationCount: 0,
-  logs: [],
   isAborted: false,
 };
 
@@ -33,7 +32,7 @@ export const useAdHocRunner = ({
   timeframeOptions: TimeframePreviewOptions;
   isRequestTriggered: boolean;
 }) => {
-  const [response, setResponse] = useState<AdHocRunResponse>(emptyPreviewRule);
+  const [response, setResponse] = useState<AdHocRunResponse>(emptyAdHocRuleExecution);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
   const { invocationCount, interval, from } = usePreviewInvocationCount({ timeframeOptions });
@@ -49,7 +48,7 @@ export const useAdHocRunner = ({
 
   useEffect(() => {
     if (!rule) {
-      setResponse(emptyPreviewRule);
+      setResponse(emptyAdHocRuleExecution);
       setIsLoading(false);
     }
   }, [rule]);
@@ -57,7 +56,7 @@ export const useAdHocRunner = ({
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    setResponse(emptyPreviewRule);
+    setResponse(emptyAdHocRuleExecution);
     const createAdHocRunId = async () => {
       if (rule && isRequestTriggered) {
         try {

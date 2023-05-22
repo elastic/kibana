@@ -569,7 +569,6 @@ export interface AdHocRunResponse {
   adHocRunId: string | undefined;
   executionId: string | undefined;
   initialInvocationCount: number | undefined;
-  logs: RulePreviewLogs[] | undefined;
   isAborted: boolean | undefined;
 }
 
