@@ -16,7 +16,7 @@ import { initializeOsqueryEditor } from './osquery_highlight_rules';
 interface OsqueryEditorProps {
   defaultValue: string;
   onChange: (newValue: string) => void;
-  commands: Array<{
+  commands?: Array<{
     name: string;
     exec: () => void;
   }>;
