@@ -48,16 +48,16 @@ export const EditorFooter = memo(function EditorFooter({
     <EuiFlexGroup
       gutterSize="s"
       justifyContent="spaceBetween"
-      data-test-subj="unifiedTextLangEditor-footer"
+      data-test-subj="TextBasedLangEditor-footer"
       css={containerCSS}
       responsive={false}
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
-            <EuiText size="xs" color="subdued" data-test-subj="unifiedTextLangEditor-footer-lines">
+            <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-footer-lines">
               <p>
-                {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
+                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineCount', {
                   defaultMessage: '{count} {count, plural, one {line} other {lines}}',
                   values: { count: lines },
                 })}
@@ -89,7 +89,7 @@ export const EditorFooter = memo(function EditorFooter({
                       >
                         <p>
                           {i18n.translate(
-                            'unifiedSearch.query.textBasedLanguagesEditor.errorCount',
+                            'textBasedEditor.query.textBasedLanguagesEditor.errorCount',
                             {
                               defaultMessage: '{count} {count, plural, one {error} other {errors}}',
                               values: { count: errors.length },
@@ -105,7 +105,7 @@ export const EditorFooter = memo(function EditorFooter({
                     <div style={{ width: 500 }}>
                       <EuiPopoverTitle paddingSize="s">
                         {i18n.translate(
-                          'unifiedSearch.query.textBasedLanguagesEditor.errorsTitle',
+                          'textBasedEditor.query.textBasedLanguagesEditor.errorsTitle',
                           {
                             defaultMessage: 'Errors',
                           }
@@ -131,7 +131,7 @@ export const EditorFooter = memo(function EditorFooter({
                                     </EuiFlexItem>
                                     <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
                                       {i18n.translate(
-                                        'unifiedSearch.query.textBasedLanguagesEditor.lineNumber',
+                                        'textBasedEditor.query.textBasedLanguagesEditor.lineNumber',
                                         {
                                           defaultMessage: 'Line {lineNumber}',
                                           values: { lineNumber: error.startLineNumber },
@@ -142,7 +142,7 @@ export const EditorFooter = memo(function EditorFooter({
                                 </EuiFlexItem>
                                 <EuiFlexItem
                                   grow={false}
-                                  className="unifiedTextLangEditor_errorMessage"
+                                  className="TextBasedLangEditor_errorMessage"
                                 >
                                   {error.message}
                                 </EuiFlexItem>
@@ -164,7 +164,7 @@ export const EditorFooter = memo(function EditorFooter({
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
               <p>
-                {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.runQuery', {
+                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
                   defaultMessage: 'Run query',
                 })}
               </p>

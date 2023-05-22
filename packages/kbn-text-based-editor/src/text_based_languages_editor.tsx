@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
 import classNames from 'classnames';
 import { SQLLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -15,7 +15,6 @@ import {
   type LanguageDocumentationSections,
   LanguageDocumentationPopover,
 } from '@kbn/language-documentation-popover';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -49,7 +48,6 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
-import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -59,6 +57,8 @@ export interface TextBasedLanguagesEditorProps {
   isCodeEditorExpanded: boolean;
   errors?: Error[];
   isDisabled?: boolean;
+  isDarkMode?: boolean;
+  dataTestSubj?: string;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -81,7 +81,6 @@ const languageId = (language: string) => {
 let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
-
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
   onTextLangQueryChange,
@@ -90,6 +89,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isCodeEditorExpanded,
   errors,
   isDisabled,
+  isDarkMode,
+  dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -107,8 +108,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { uiSettings } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -118,15 +117,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(errors?.length),
     isCodeEditorExpandedFocused
   );
-  const isDark = uiSettings.get('theme:darkMode');
+  const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
-  const editorClassName = classNames('unifiedTextLangEditor', {
-    'unifiedTextLangEditor--expanded': isCodeEditorExpanded,
-    'unifiedTextLangEditor--compact': isCompactFocused,
-    'unifiedTextLangEditor--initial': !isCompactFocused,
+  const editorClassName = classNames('TextBasedLangEditor', {
+    'TextBasedLangEditor--expanded': isCodeEditorExpanded,
+    'TextBasedLangEditor--compact': isCompactFocused,
+    'TextBasedLangEditor--initial': !isCompactFocused,
   });
 
   // When the editor is on full size mode, the user can resize the height of the editor.
@@ -323,9 +322,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const sections = await getDocumentationSections(language);
       setDocumentationSections(sections);
     }
-
-    getDocumentation();
-  }, [language]);
+    if (!documentationSections) {
+      getDocumentation();
+    }
+  }, [language, documentationSections]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
@@ -377,13 +377,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               content={
                 isWordWrapped
                   ? i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                      'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                       {
                         defaultMessage: 'Disable word wrap',
                       }
                     )
                   : i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                      'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                       {
                         defaultMessage: 'Enable word wrap',
                       }
@@ -393,17 +393,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               <EuiButtonIcon
                 iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
                 color="text"
-                data-test-subj="unifiedTextLangEditor-toggleWordWrap"
+                data-test-subj="TextBasedLangEditor-toggleWordWrap"
                 aria-label={
                   isWordWrapped
                     ? i18n.translate(
-                        'unifiedSearch.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                        'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                         {
                           defaultMessage: 'Disable word wrap',
                         }
                       )
                     : i18n.translate(
-                        'unifiedSearch.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                        'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                         {
                           defaultMessage: 'Enable word wrap',
                         }
@@ -425,7 +425,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(
-                    'unifiedSearch.query.textBasedLanguagesEditor.minimizeTooltip',
+                    'textBasedEditor.query.textBasedLanguagesEditor.minimizeTooltip',
                     {
                       defaultMessage: 'Compact query editor',
                     }
@@ -435,12 +435,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     iconType="minimize"
                     color="text"
                     aria-label={i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.MinimizeEditor',
+                      'textBasedEditor.query.textBasedLanguagesEditor.MinimizeEditor',
                       {
                         defaultMessage: 'Minimize editor',
                       }
                     )}
-                    data-test-subj="unifiedTextLangEditor-minimize"
+                    data-test-subj="TextBasedLangEditor-minimize"
                     onClick={() => {
                       expandCodeEditor(false);
                       updateLinesFromModel = false;
@@ -454,9 +454,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   sections={documentationSections}
                   buttonProps={{
                     color: 'text',
-                    'data-test-subj': 'unifiedTextLangEditor-documentation',
+                    'data-test-subj': 'TextBasedLangEditor-documentation',
                     'aria-label': i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                      'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
                       {
                         defaultMessage: 'Documentation',
                       }
@@ -482,18 +482,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               }}
             >
               <div ref={resizeRef} css={styles.resizableContainer}>
-                <EuiFlexItem data-test-subj="unifiedTextLangEditor" className={editorClassName}>
+                <EuiFlexItem
+                  data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
+                  className={editorClassName}
+                >
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge
                         color={euiTheme.colors.lightShade}
                         css={styles.linesBadge}
-                        data-test-subj="unifiedTextLangEditor-inline-lines-badge"
+                        data-test-subj="TextBasedLangEditor-inline-lines-badge"
                       >
-                        {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
-                          defaultMessage: '{count} {count, plural, one {line} other {lines}}',
-                          values: { count: lines },
-                        })}
+                        {i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.lineCount',
+                          {
+                            defaultMessage: '{count} {count, plural, one {line} other {lines}}',
+                            values: { count: lines },
+                          }
+                        )}
                       </EuiBadge>
                     )}
                     {!isCompactFocused && errors && errors.length > 0 && (
@@ -502,7 +508,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         css={styles.errorsBadge}
                         iconType="error"
                         iconSide="left"
-                        data-test-subj="unifiedTextLangEditor-inline-errors-badge"
+                        data-test-subj="TextBasedLangEditor-inline-errors-badge"
                       >
                         {errors.length}
                       </EuiBadge>
@@ -546,7 +552,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(
-                    'unifiedSearch.query.textBasedLanguagesEditor.expandTooltip',
+                    'textBasedEditor.query.textBasedLanguagesEditor.expandTooltip',
                     {
                       defaultMessage: 'Expand query editor',
                     }
@@ -558,7 +564,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     size="m"
                     aria-label="Expand"
                     onClick={() => expandCodeEditor(true)}
-                    data-test-subj="unifiedTextLangEditor-expand"
+                    data-test-subj="TextBasedLangEditor-expand"
                     css={{
                       borderRadius: 0,
                       backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
@@ -573,9 +579,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   sections={documentationSections}
                   buttonProps={{
                     display: 'empty',
-                    'data-test-subj': 'unifiedTextLangEditor-inline-documentation',
+                    'data-test-subj': 'TextBasedLangEditor-inline-documentation',
                     'aria-label': i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                      'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
                       {
                         defaultMessage: 'Documentation',
                       }

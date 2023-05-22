@@ -1,4 +1,4 @@
-.unifiedTextLangEditor--resizableButtonContainer {
+.TextBasedLangEditor--resizableButtonContainer {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -7,7 +7,7 @@
   flex-direction: column;
 }
 
-.unifiedTextLangEditor--resizableButton {
+.TextBasedLangEditor--resizableButton {
   position: relative;
   flex-shrink: 0;
   z-index: 1;

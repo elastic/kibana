@@ -1,4 +1,13 @@
-# Unified search text based languages editor
+# @kbn/text-based-editor
+
+Contains the editor for text based languages. Specifically for:
+ - ESQL, with autocomplete and syntax highlighting
+ - SQL, with syntax highlighting
+
+---
+
+Contains the ESQL editor with the autocomplete and the autosuggest functionality (based on atlr). 
+The antlr code can be found in packages/kbn-monaco/src/esql
 
 A **monaco** based editor that is part of the unified search experience. It is rendered for all the applications that support text-based languages.
 In order to enable text based languages on your unified search bar add `textBasedLanguages: ['SQL', 'ESQL', '...']` to the dataViewPicker properties. 
@@ -6,6 +15,7 @@ In order to enable text based languages on your unified search bar add `textBase
 
 ## Languages supported
 - SQL: based on the Elasticsearch sql api
+- ESQL: based on the Elastisearch esql api
 
 
 ## Features
@@ -17,30 +27,3 @@ In order to enable text based languages on your unified search bar add `textBase
 - The editor is responsive regardless of the mode selected.
 - The editor has a built in documentation that dynamically changes based on the language of the query.
 - The user can quickly submit the query by pressing CMD/CTRL + Enter.
-
-## Preview
-Run `node scripts/storybook unified_search` for a preview of the unified search bar with the editor.
-
-## Component properties
-The editor is imported to the query_bar_top_row.tsx file. Accepts the following properties:
-- query: This is the **AggregateQuery** query. i.e. (`{sql: SELECT * FROM 'DATAVIEW1'}`)
-- onTextLangQueryChange: callback that is called every time the query is updated
-- expandCodeEditor: flag that opens the editor on the expanded mode
-- errors: array of `Error`.
-- onTextLangQuerySubmit: callback that is called when the user submits the query
-
-```
- <TextBasedLanguagesEditor
-  query={props.query}
-  onTextLangQueryChange={props.onTextLangQueryChange}
-  expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
-  isCodeEditorExpanded={codeEditorIsExpanded}
-  errors={props.textBasedLanguageModeErrors}
-  onTextLangQuerySubmit={() =>
-    onSubmit({
-      query: queryRef.current,
-      dateRange: dateRangeRef.current,
-    })
- }
- />
-```
