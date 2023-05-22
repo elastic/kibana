@@ -68,11 +68,13 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     });
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-    saveObservabilityOnboardingState({
+
+    await saveObservabilityOnboardingState({
       savedObjectsClient,
       apiKeyId,
       observabilityOnboardingState: { state } as ObservabilityOnboardingState,
     });
+
     return {
       apiKeyId, // key the status off this
       apiKeyEncoded,

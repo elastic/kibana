@@ -14,7 +14,8 @@ export interface ObservabilityOnboardingState {
   state: {
     datasetName: string;
     customConfigurations: string;
-    logFilePaths: string;
+    logFilePaths: string[];
+    namespace: string;
     progress: Record<string, string>;
   };
 }

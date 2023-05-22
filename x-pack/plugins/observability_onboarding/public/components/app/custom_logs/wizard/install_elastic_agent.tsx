@@ -15,6 +15,7 @@ import {
   EuiButtonGroup,
   EuiCodeBlock,
   EuiSteps,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import {
   StepPanel,
@@ -22,9 +23,7 @@ import {
   StepPanelFooter,
 } from '../../../shared/step_panel';
 import { useWizard } from '.';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-// import { useKibana } from '@kbn/kibana-react-plugin/public';
-// import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
@@ -41,48 +40,47 @@ export function InstallElasticAgent() {
     goBack();
   }
 
-  const { data: installShipperSetup } = useFetcher((callApi) => {
-    if (CurrentStep !== InstallElasticAgent) {
-      return;
-    }
-    return callApi(
-      'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
-      {
-        params: {
-          body: {
-            name: wizardState.datasetName,
-            state: {
-              datasetName: wizardState.datasetName,
-              customConfigurations: wizardState.customConfigurations,
-              logFilePaths: wizardState.logFilePaths,
+  const { data: installShipperSetup, status: installShipperSetupStatus } =
+    useFetcher((callApi) => {
+      if (CurrentStep !== InstallElasticAgent) {
+        return;
+      }
+
+      return callApi(
+        'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
+        {
+          params: {
+            body: {
+              name: wizardState.datasetName,
+              state: {
+                datasetName: wizardState.datasetName,
+                namespace: wizardState.namespace,
+                customConfigurations: wizardState.customConfigurations,
+                logFilePaths: wizardState.logFilePaths,
+              },
             },
           },
-        },
+        }
+      );
+    }, []);
+
+  const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
+    (callApi) => {
+      if (installShipperSetup?.apiKeyId) {
+        return callApi(
+          'GET /api/observability_onboarding/elastic_agent/config',
+          {
+            headers: {
+              authorization: `ApiKey ${installShipperSetup?.apiKeyEncoded}`,
+            },
+          }
+        );
       }
-    );
-  }, []);
+    },
+    [installShipperSetup?.apiKeyId, installShipperSetup?.apiKeyEncoded]
+  );
 
   const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
-  const esHost = installShipperSetup?.esHost;
-
-  const elasticAgentYaml = getElasticAgentYaml({
-    esHost,
-    apiKeyEncoded,
-    logfileId: 'custom-logs-abcdefgh',
-    logfileNamespace: 'default',
-    logfileStreams: [
-      ...wizardState.logFilePaths.map((path) => ({
-        id: `logs-onboarding-${wizardState.datasetName}`,
-        dataset: wizardState.datasetName,
-        path,
-      })),
-      // {
-      //   id: 'logs-onboarding-demo-app',
-      //   dataset: 'demo1',
-      //   path: '/home/oliver/github/logs-onboarding-demo-app/combined.log',
-      // },
-    ],
-  });
 
   return (
     <StepPanel title="Install shipper to collect data">
@@ -101,7 +99,10 @@ export function InstallElasticAgent() {
           steps={[
             {
               title: 'Install the Elastic Agent',
-              status: 'current',
+              status:
+                installShipperSetupStatus === FETCH_STATUS.LOADING
+                  ? 'loading'
+                  : 'current',
               children: (
                 <>
                   <EuiText color="subdued">
@@ -128,20 +129,34 @@ export function InstallElasticAgent() {
                     }
                   />
                   <EuiSpacer size="m" />
-                  <EuiCodeBlock language="bash" isCopyable>
-                    {getInstallShipperCommand({
-                      elasticAgentPlatform,
-                      apiKeyEncoded,
-                      apiEndpoint: installShipperSetup?.apiEndpoint,
-                      scriptDownloadUrl: installShipperSetup?.scriptDownloadUrl,
-                    })}
-                  </EuiCodeBlock>
+                  <EuiSkeletonRectangle
+                    isLoading={
+                      installShipperSetupStatus === FETCH_STATUS.LOADING
+                    }
+                    contentAriaLabel="Command to install elastic agent"
+                    width="100%"
+                    height={80}
+                    borderRadius="s"
+                  >
+                    <EuiCodeBlock language="bash" isCopyable>
+                      {getInstallShipperCommand({
+                        elasticAgentPlatform,
+                        apiKeyEncoded,
+                        apiEndpoint: installShipperSetup?.apiEndpoint,
+                        scriptDownloadUrl:
+                          installShipperSetup?.scriptDownloadUrl,
+                      })}
+                    </EuiCodeBlock>
+                  </EuiSkeletonRectangle>
                 </>
               ),
             },
             {
               title: 'Configure the agent',
-              status: 'incomplete',
+              status:
+                yamlConfigStatus === FETCH_STATUS.LOADING
+                  ? 'loading'
+                  : 'incomplete',
               children: (
                 <>
                   <EuiText color="subdued">
@@ -151,15 +166,23 @@ export function InstallElasticAgent() {
                     </p>
                   </EuiText>
                   <EuiSpacer size="m" />
-                  <EuiCodeBlock language="yaml" isCopyable>
-                    {elasticAgentYaml}
-                  </EuiCodeBlock>
+                  <EuiSkeletonRectangle
+                    isLoading={yamlConfigStatus === FETCH_STATUS.LOADING}
+                    contentAriaLabel="Elastic agent yaml configuration"
+                    width="100%"
+                    height={300}
+                    borderRadius="s"
+                  >
+                    <EuiCodeBlock language="yaml" isCopyable>
+                      {yamlConfig}
+                    </EuiCodeBlock>
+                  </EuiSkeletonRectangle>
                   <EuiSpacer size="m" />
                   <EuiButton
                     iconType="download"
                     color="primary"
                     href={`data:application/yaml;base64,${Buffer.from(
-                      elasticAgentYaml,
+                      yamlConfig,
                       'utf8'
                     ).toString('base64')}`}
                     download="elastic-agent.yml"
@@ -219,43 +242,4 @@ function getInstallShipperCommand({
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {
   const str = flatten(zip(parts, args)).join('');
   return str.replace(/\s+/g, ' ').trim();
-}
-
-function getElasticAgentYaml({
-  esHost = '$ES_HOST',
-  apiKeyEncoded = '$API_KEY',
-  logfileId,
-  logfileNamespace,
-  logfileStreams,
-}: {
-  esHost: string | undefined;
-  apiKeyEncoded: string | undefined;
-  logfileId: string;
-  logfileNamespace: string;
-  logfileStreams: Array<{ id: string; dataset: string; path: string }>;
-}) {
-  const apiKeyBeats = Buffer.from(apiKeyEncoded, 'base64').toString('utf8');
-  return `
-outputs:
-  default:
-    type: elasticsearch
-    hosts:
-      - '${esHost}'
-    api_key: ${apiKeyBeats}
-
-inputs:
-  - id: ${logfileId}
-    type: logfile
-    data_stream:
-      namespace: ${logfileNamespace}
-    streams:
-${logfileStreams
-  .map(
-    ({ id, dataset, path }) => `      - id: ${id}
-        data_stream:
-          dataset: ${dataset}
-        paths:
-          - ${path}`
-  )
-  .join('\n')}`.trim();
 }
