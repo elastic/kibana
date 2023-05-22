@@ -57,23 +57,28 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
     };
   }, []);
 
-  const editorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    const minHeight = 100;
-    const maxHeight = 1000;
+  const editorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      const minHeight = 100;
+      const maxHeight = 1000;
 
-    commands?.map((command) => {
-      if (command.name === 'submitOnCmdEnter') {
-        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, command.exec);
-      }
-    });
+      commands?.map((command) => {
+        if (command.name === 'submitOnCmdEnter') {
+          // on CMD/CTRL + Enter submit the query
+          // eslint-disable-next-line no-bitwise
+          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, command.exec);
+        }
+      });
 
-    const updateHeight = () => {
-      const contentHeight = Math.min(maxHeight, Math.max(minHeight, editor.getContentHeight()));
-      setHeight(contentHeight);
-    };
+      const updateHeight = () => {
+        const contentHeight = Math.min(maxHeight, Math.max(minHeight, editor.getContentHeight()));
+        setHeight(contentHeight);
+      };
 
-    editor.onDidContentSizeChange(updateHeight);
-  }, []);
+      editor.onDidContentSizeChange(updateHeight);
+    },
+    [commands]
+  );
 
   //
   return (
