@@ -105,7 +105,7 @@ export const openTakeActionButton = () => {
 export const selectTakeActionItem = (option: string) => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN)
     .should('be.visible')
-    .within(() => cy.get(option).click());
+    .within(() => cy.get(option).should('be.visible').click());
 };
 
 /**

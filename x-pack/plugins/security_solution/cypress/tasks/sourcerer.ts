@@ -29,11 +29,12 @@ export const selectDataView = (dataView: string, sourcererScope?: string) => {
 
 const openTimelineSourcerer = () => {
   cy.get(SOURCERER.triggerTimeline).should('be.enabled');
+  cy.get(SOURCERER.triggerTimeline).('be.visible');
   cy.get(SOURCERER.triggerTimeline).first().click();
   cy.get(SOURCERER.wrapperTimeline).should('be.visible');
 };
 export const openAdvancedSettings = () => {
-  cy.get(SOURCERER.advancedSettings).click();
+  cy.get(SOURCERER.advancedSettings).should('be.visible').click();
 };
 
 const clickOutOfSelector = () => {

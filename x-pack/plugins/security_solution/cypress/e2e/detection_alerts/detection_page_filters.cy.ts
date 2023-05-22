@@ -137,7 +137,7 @@ describe('Detections : Page Filters', () => {
       discardFilterGroupControls();
     });
 
-    it.only('should be able to add new Controls', () => {
+    it('should be able to add new Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
       editFilterGroupControls();
@@ -257,12 +257,14 @@ describe('Detections : Page Filters', () => {
     });
 
     openPageFilterPopover(1);
+    cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click();
     closePageFilterPopover(1);
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
     cy.get(OPTION_LIST_VALUES(1)).click();
+    cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click();
 
     // high should be scuccessfully selected.

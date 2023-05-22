@@ -292,11 +292,11 @@ export const createNewTimeline = () => {
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
 };
 
 export const closeCreateTimelineOptionsPopover = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').type('{esc}');
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').type('{esc}');
 };
 
 export const createNewTimelineTemplate = () => {
@@ -310,7 +310,7 @@ export const executeTimelineKQL = (query: string) => {
 };
 
 export const executeTimelineSearch = (query: string) => {
-  cy.get(TIMELINE_QUERY).type(`${query}{enter}`);
+  cy.get(TIMELINE_QUERY).type(`${query} {enter}`);
 };
 
 export const expandFirstTimelineEventDetails = () => {
@@ -324,7 +324,7 @@ export const deleteTimeline = () => {
 };
 
 export const markAsFavorite = () => {
-  cy.get(STAR_ICON).click();
+  cy.get(STAR_ICON).should('be.visible').click();
   cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
 };
@@ -340,6 +340,7 @@ export const openTimelineInspectButton = () => {
 
 export const openTimelineFromSettings = () => {
   openCreateTimelineOptionsPopover();
+  cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).click();
 };
 
