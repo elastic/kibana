@@ -13,7 +13,7 @@ import { UserRt } from '../user';
 
 const ClosureTypeRt = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
-const ConfigurationBasicWithoutOwnerRt = rt.type({
+export const ConfigurationBasicWithoutOwnerRt = rt.type({
   /**
    * The external connector
    */
@@ -40,22 +40,12 @@ export const ConfigurationPatchRequestRt = rt.intersection([
   rt.type({ version: rt.string }),
 ]);
 
-const ConfigurationActivityFieldsRt = rt.type({
+export const ConfigurationActivityFieldsRt = rt.type({
   created_at: rt.string,
   created_by: UserRt,
   updated_at: rt.union([rt.string, rt.null]),
   updated_by: rt.union([UserRt, rt.null]),
 });
-
-export const ConfigurationPartialAttributesRt = rt.intersection([
-  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.props)),
-  rt.exact(rt.partial(ConfigurationActivityFieldsRt.props)),
-  rt.exact(
-    rt.partial({
-      owner: rt.string,
-    })
-  ),
-]);
 
 export const ConfigurationAttributesRt = rt.intersection([
   CasesConfigureBasicRt,

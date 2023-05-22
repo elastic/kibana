@@ -15,11 +15,7 @@ import type {
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import type { ConfigurationAttributes } from '../../../common/api';
-import {
-  ConfigurationPartialAttributesRt,
-  decodeOrThrow,
-  ConfigurationAttributesRt,
-} from '../../../common/api';
+import { decodeOrThrow } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
@@ -37,7 +33,11 @@ import type {
 import type {
   ConfigurationSavedObjectTransformed,
   ConfigurationTransformedAttributes,
-  ConfigurePersistedAttributes,
+  ConfigurationPersistedAttributes,
+} from '../../common/types/configure';
+import {
+  ConfigurationPartialAttributesRt,
+  ConfigurationTransformedAttributesRt,
 } from '../../common/types/configure';
 
 export class CaseConfigureService {
@@ -65,7 +65,7 @@ export class CaseConfigureService {
   }: GetCaseConfigureArgs): Promise<ConfigurationSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to GET case configuration ${configurationId}`);
-      const configuration = await unsecuredSavedObjectsClient.get<ConfigurePersistedAttributes>(
+      const configuration = await unsecuredSavedObjectsClient.get<ConfigurationPersistedAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         configurationId
       );
@@ -84,7 +84,7 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to find all case configuration`);
 
-      const findResp = await unsecuredSavedObjectsClient.find<ConfigurePersistedAttributes>({
+      const findResp = await unsecuredSavedObjectsClient.find<ConfigurationPersistedAttributes>({
         ...options,
         // Get the latest configuration
         sortField: 'created_at',
@@ -96,7 +96,9 @@ export class CaseConfigureService {
 
       const validatedConfigs: ConfigurationSavedObjectTransformed[] = [];
       for (const config of transformedConfigs.saved_objects) {
-        const validatedAttributes = decodeOrThrow(ConfigurationAttributesRt)(config.attributes);
+        const validatedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(
+          config.attributes
+        );
 
         validatedConfigs.push(Object.assign(config, { attributes: validatedAttributes }));
       }
@@ -117,11 +119,12 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
       const esConfigInfo = transformAttributesToESModel(attributes);
-      const createdConfig = await unsecuredSavedObjectsClient.create<ConfigurePersistedAttributes>(
-        CASE_CONFIGURE_SAVED_OBJECT,
-        esConfigInfo.attributes,
-        { id, references: esConfigInfo.referenceHandler.build(), refresh }
-      );
+      const createdConfig =
+        await unsecuredSavedObjectsClient.create<ConfigurationPersistedAttributes>(
+          CASE_CONFIGURE_SAVED_OBJECT,
+          esConfigInfo.attributes,
+          { id, references: esConfigInfo.referenceHandler.build(), refresh }
+        );
 
       return transformToExternalAndValidate(createdConfig);
     } catch (error) {
@@ -144,7 +147,7 @@ export class CaseConfigureService {
       const esUpdateInfo = transformAttributesToESModel(updatedAttributes);
 
       const updatedConfiguration =
-        await unsecuredSavedObjectsClient.update<ConfigurePersistedAttributes>(
+        await unsecuredSavedObjectsClient.update<ConfigurationPersistedAttributes>(
           CASE_CONFIGURE_SAVED_OBJECT,
           configurationId,
           {
@@ -171,10 +174,10 @@ export class CaseConfigureService {
 }
 
 const transformToExternalAndValidate = (
-  configuration: SavedObject<ConfigurePersistedAttributes>
+  configuration: SavedObject<ConfigurationPersistedAttributes>
 ) => {
   const transformedConfig = transformToExternalModel(configuration);
-  const validatedAttributes = decodeOrThrow(ConfigurationAttributesRt)(
+  const validatedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(
     transformedConfig.attributes
   );
 
@@ -182,7 +185,7 @@ const transformToExternalAndValidate = (
 };
 
 function transformUpdateResponseToExternalModel(
-  updatedConfiguration: SavedObjectsUpdateResponse<ConfigurePersistedAttributes>
+  updatedConfiguration: SavedObjectsUpdateResponse<ConfigurationPersistedAttributes>
 ): SavedObjectsUpdateResponse<ConfigurationTransformedAttributes> {
   const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
 
@@ -206,7 +209,7 @@ function transformUpdateResponseToExternalModel(
 }
 
 function transformToExternalModel(
-  configuration: SavedObject<ConfigurePersistedAttributes>
+  configuration: SavedObject<ConfigurationPersistedAttributes>
 ): ConfigurationSavedObjectTransformed {
   const connector = transformESConnectorOrUseDefault({
     connector: configuration.attributes.connector,
@@ -214,7 +217,7 @@ function transformToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  const castedAttributes = configuration.attributes as ConfigurationAttributes;
+  const castedAttributes = configuration.attributes as ConfigurationTransformedAttributes;
 
   return {
     ...configuration,
@@ -226,7 +229,7 @@ function transformToExternalModel(
 }
 
 function transformFindResponseToExternalModel(
-  configurations: SavedObjectsFindResponse<ConfigurePersistedAttributes>
+  configurations: SavedObjectsFindResponse<ConfigurationPersistedAttributes>
 ): SavedObjectsFindResponse<ConfigurationTransformedAttributes> {
   return {
     ...configurations,
@@ -238,15 +241,15 @@ function transformFindResponseToExternalModel(
 }
 
 function transformAttributesToESModel(configuration: ConfigurationAttributes): {
-  attributes: ConfigurePersistedAttributes;
+  attributes: ConfigurationPersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
 function transformAttributesToESModel(configuration: Partial<ConfigurationAttributes>): {
-  attributes: Partial<ConfigurePersistedAttributes>;
+  attributes: Partial<ConfigurationPersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
 function transformAttributesToESModel(configuration: Partial<ConfigurationAttributes>): {
-  attributes: Partial<ConfigurePersistedAttributes>;
+  attributes: Partial<ConfigurationPersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
   const { connector, ...restWithoutConnector } = configuration;
