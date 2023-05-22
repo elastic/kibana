@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin } from '@kbn/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import { ServerlessSecurityConfig } from './config';
+import { getProjectSkusFeatures } from '../common/sku/sku_features';
 
 import {
   ServerlessSecurityPluginSetup,
@@ -23,9 +25,15 @@ export class ServerlessSecurityPlugin
       ServerlessSecurityPluginStartDependencies
     >
 {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private config: ServerlessSecurityConfig;
 
-  public setup() {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
+  }
+
+  public setup(_coreSetup: CoreSetup, pluginsSetup: ServerlessSecurityPluginSetupDependencies) {
+    pluginsSetup.securitySolution.setAppFeatures(getProjectSkusFeatures(this.config.projectSkus));
+
     return {};
   }
 
