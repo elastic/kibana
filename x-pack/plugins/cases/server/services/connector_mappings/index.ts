@@ -24,10 +24,10 @@ import type {
   ConnectorMappingsTransformed,
 } from '../../common/types/connector_mappings';
 import {
-  ConnectorMappingsRt,
-  decodeOrThrow,
+  ConnectorMappingsTransformedRt,
   ConnectorMappingsPartialRt,
-} from '../../../common/api';
+} from '../../common/types/connector_mappings';
+import { decodeOrThrow } from '../../../common/api';
 
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}
@@ -47,7 +47,7 @@ export class ConnectorMappingsService {
       const validatedMappings: Array<SavedObjectsFindResult<ConnectorMappingsTransformed>> = [];
 
       for (const mapping of connectorMappings.saved_objects) {
-        const validatedMapping = decodeOrThrow(ConnectorMappingsRt)(mapping.attributes);
+        const validatedMapping = decodeOrThrow(ConnectorMappingsTransformedRt)(mapping.attributes);
 
         validatedMappings.push(Object.assign(mapping, { attributes: validatedMapping }));
       }
@@ -77,7 +77,9 @@ export class ConnectorMappingsService {
           }
         );
 
-      const validatedAttributes = decodeOrThrow(ConnectorMappingsRt)(connectorMappings.attributes);
+      const validatedAttributes = decodeOrThrow(ConnectorMappingsTransformedRt)(
+        connectorMappings.attributes
+      );
 
       return Object.assign(connectorMappings, { attributes: validatedAttributes });
     } catch (error) {

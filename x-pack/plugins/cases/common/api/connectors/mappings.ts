@@ -35,8 +35,6 @@ export const ConnectorMappingsRt = rt.type({
   owner: rt.string,
 });
 
-export const ConnectorMappingsPartialRt = rt.exact(rt.partial(ConnectorMappingsRt.props));
-
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
 export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
 
