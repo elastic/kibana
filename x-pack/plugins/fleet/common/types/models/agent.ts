@@ -79,6 +79,8 @@ export interface AgentAction extends NewAgentAction {
 export interface AgentMetadata {
   [x: string]: any;
 }
+
+// SO definition for this type is declared in server/types/interfaces
 interface AgentBase {
   type: AgentType;
   active: boolean;
@@ -122,10 +124,6 @@ export interface Agent extends AgentBase {
   packages: string[];
   sort?: Array<number | string | null>;
   metrics?: AgentMetrics;
-}
-
-export interface AgentSOAttributes extends AgentBase {
-  packages?: string[];
 }
 
 export interface CurrentUpgrade {

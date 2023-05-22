@@ -6,11 +6,7 @@
  */
 
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../../screens/security_main';
-import {
-  CREATE_NEW_TIMELINE,
-  TIMELINE_FLYOUT_HEADER,
-  TIMELINE_SETTINGS_ICON,
-} from '../../screens/timeline';
+import { CREATE_NEW_TIMELINE, TIMELINE_FLYOUT_HEADER } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
@@ -20,6 +16,10 @@ import {
   closeTimelineUsingToggle,
   openTimelineUsingToggle,
 } from '../../tasks/security_main';
+import {
+  closeCreateTimelineOptionsPopover,
+  openCreateTimelineOptionsPopover,
+} from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
@@ -61,14 +61,14 @@ describe('timeline flyout button', () => {
     cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/153771
-  it.skip('the `(+)` button popover menu owns focus', () => {
-    cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  it('the `(+)` button popover menu owns focus when open', () => {
+    openCreateTimelineOptionsPopover();
     cy.get(`${CREATE_NEW_TIMELINE}`)
+      .should('be.visible')
       .pipe(($el) => $el.trigger('focus'))
       .should('have.focus');
-    cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').type('{esc}');
-    cy.get(CREATE_NEW_TIMELINE).should('not.be.visible');
+    closeCreateTimelineOptionsPopover();
+    cy.get(CREATE_NEW_TIMELINE).should('not.exist');
   });
 
   it('should render the global search dropdown when the input is focused', () => {

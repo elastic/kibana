@@ -23,6 +23,8 @@ const COPY_TO_CLIPBOARD_SUCCESS = i18n.translate(
   }
 );
 
+const escapeValue = (value: string) => value.replace(/"/g, '\\"');
+
 export const createCopyToClipboardActionFactory = createCellActionFactory(
   ({ notifications }: { notifications: NotificationsStart }) => ({
     type: COPY_CELL_ACTION_TYPE,
@@ -34,8 +36,8 @@ export const createCopyToClipboardActionFactory = createCellActionFactory(
       let textValue: undefined | string;
       if (field.value != null) {
         textValue = Array.isArray(field.value)
-          ? field.value.map((value) => `"${value}"`).join(', ')
-          : `"${field.value}"`;
+          ? field.value.map((value) => `"${escapeValue(value)}"`).join(' AND ')
+          : `"${escapeValue(field.value)}"`;
       }
       const text = textValue ? `${field.name}: ${textValue}` : field.name;
       const isSuccess = copy(text, { debug: true });
