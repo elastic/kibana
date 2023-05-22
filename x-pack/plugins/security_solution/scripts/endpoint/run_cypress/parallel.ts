@@ -11,17 +11,16 @@ import _ from 'lodash';
 import * as fs from 'fs';
 import globby from 'globby';
 import pMap from 'p-map';
-// import { resolve } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 
 import {
+  EsVersion,
   FunctionalTestRunner,
   readConfigFile,
   runElasticsearch,
   runKibanaServer,
-  EsVersion,
 } from '@kbn/test';
 
 import {
@@ -36,7 +35,7 @@ import type {
   ObjectExpression,
   ObjectProperty,
 } from '@babel/types';
-// import pRetry from 'p-retry';
+
 import { createFailError } from '@kbn/dev-cli-errors';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../common/localhost_services';
@@ -53,26 +52,21 @@ const retrieveIntegrations = (
   const integrationsPaths = globby.sync(specPattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
-  console.error('integrationsPaths', integrationsPaths, chunksTotal, chunkSize, chunkIndex);
-
   return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
 };
 
 export const cli = () => {
   run(
-    async (extraoptions) => {
-      console.error('extraoptions', extraoptions);
+    async () => {
       const { argv } = yargs(process.argv.slice(2));
 
-      console.error('process.argv', argv);
-
       const cypressConfigFile = await import(require.resolve(`../../../${argv.configFile}`));
-
+      const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(
-        argv?.spec
-          ? argv?.spec.includes(',')
-            ? argv?.spec.split(',')
-            : [argv?.spec]
+        spec
+          ? spec.includes(',')
+            ? spec.split(',')
+            : [spec]
           : cypressConfigFile?.e2e?.specPattern
           ? cypressConfigFile?.e2e?.specPattern
           : [
@@ -89,14 +83,11 @@ export const cli = () => {
         throw new Error('No files found');
       }
 
-      console.error('files', files);
-
       const esPorts: number[] = [9200, 9220];
       const kibanaPorts: number[] = [5601, 5620];
       const fleetServerPorts: number[] = [8220];
 
-      const getEsPort = () => {
-        console.error('getEsPort', esPorts);
+      const getEsPort = <T>(): T | number => {
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
         if (esPorts.includes(esPort)) {
           return getEsPort();
@@ -105,8 +96,7 @@ export const cli = () => {
         return esPort;
       };
 
-      const getKibanaPort = () => {
-        console.error('getKibanaPort', kibanaPorts);
+      const getKibanaPort = <T>(): T | number => {
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
         if (kibanaPorts.includes(kibanaPort)) {
           return getKibanaPort();
@@ -115,8 +105,7 @@ export const cli = () => {
         return kibanaPort;
       };
 
-      const getFleetServerPort = () => {
-        console.error('getFleetServerPort', fleetServerPorts);
+      const getFleetServerPort = <T>(): T | number => {
         const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
         if (fleetServerPorts.includes(fleetServerPort)) {
           return getFleetServerPort();
@@ -125,7 +114,15 @@ export const cli = () => {
         return fleetServerPort;
       };
 
-      const cleanupServerPorts = ({ esPort, kibanaPort, fleetServerPort }) => {
+      const cleanupServerPorts = ({
+        esPort,
+        kibanaPort,
+        fleetServerPort,
+      }: {
+        esPort: number;
+        kibanaPort: number;
+        fleetServerPort: number;
+      }) => {
         _.pull(esPorts, esPort);
         _.pull(kibanaPorts, kibanaPort);
         _.pull(fleetServerPorts, fleetServerPort);
@@ -167,7 +164,7 @@ export const cli = () => {
             return {};
           }
 
-          const configValues = _.reduce(
+          return _.reduce(
             ftrConfig.value.properties,
             (acc: Record<string, string | number | Record<string, string>>, property) => {
               const key = (property.key as Identifier).name;
@@ -187,7 +184,6 @@ export const cli = () => {
             },
             {}
           );
-          return configValues;
         }
         return undefined;
       };
@@ -197,16 +193,19 @@ export const cli = () => {
         writeTo: process.stdout,
       });
 
-      const hostRealIp = await getLocalhostRealIp();
+      const hostRealIp = getLocalhostRealIp();
 
       const isOpen = argv._[0] === 'open';
 
       await pMap(
         files,
         // files.slice(0, 2),
-        // [files[0]],
-        async (filePath, index) => {
-          let result;
+        // [files[20]],
+        async (filePath) => {
+          let result:
+            | CypressCommandLine.CypressRunResult
+            | CypressCommandLine.CypressFailedRunResult
+            | undefined;
           await withProcRunner(log, async (procs) => {
             const abortCtrl = new AbortController();
 
@@ -215,9 +214,9 @@ export const cli = () => {
               abortCtrl.abort();
             };
 
-            const esPort = getEsPort();
-            const kibanaPort = getKibanaPort();
-            const fleetServerPort = getFleetServerPort();
+            const esPort: number = getEsPort();
+            const kibanaPort: number = getKibanaPort();
+            const fleetServerPort: number = getFleetServerPort();
             const configFromTestFile = parseTestFileConfig(filePath);
 
             const config = await readConfigFile(
@@ -289,13 +288,6 @@ export const cli = () => {
               }
             );
 
-            console.error(
-              'xxxxx2',
-              config,
-              config.get('servers'),
-              config.get('kbnTestServer.serverArgs')
-            );
-
             const lifecycle = new Lifecycle(log);
 
             const providers = new ProviderCollection(log, [
@@ -310,8 +302,6 @@ export const cli = () => {
             const options = {
               installDir: process.env.KIBANA_INSTALL_DIR,
             };
-
-            console.error('options', options, kibanaPort);
 
             const shutdownEs = await runElasticsearch({
               config,
@@ -341,8 +331,6 @@ export const cli = () => {
 
             const customEnv = await functionalTestRunner.run(abortCtrl.signal);
 
-            console.error('customEnv', customEnv);
-
             if (isOpen) {
               await cypress.open({
                 configFile: require.resolve(`../../../${argv.configFile}`),
@@ -358,10 +346,9 @@ export const cli = () => {
               try {
                 result = await cypress.run({
                   browser: 'chrome',
-                  headed: true,
                   spec: filePath,
-                  configFile: argv.configFile,
-                  reporter: argv.reporter,
+                  configFile: argv.configFile as string,
+                  reporter: argv.reporter as string,
                   reporterOptions: argv.reporterOptions,
                   config: {
                     e2e: {
@@ -427,10 +414,12 @@ export const cli = () => {
         { concurrency: !isOpen ? 3 : 1 }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
-
-        const hasFailedTests = _.some(results, (result) => result.failures > 0);
+        const hasFailedTests = _.some(
+          results,
+          (result) => result?.status === 'finished' && result.totalFailed > 0
+        );
         if (hasFailedTests) {
-          throw createFailError('Test fail error');
+          throw createFailError('Not all tests passed');
         }
       });
     },
