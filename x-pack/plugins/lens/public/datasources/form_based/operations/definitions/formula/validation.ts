@@ -37,7 +37,7 @@ import type {
   GenericOperationDefinition,
 } from '..';
 import type { FormBasedLayer } from '../../../types';
-import { IndexPattern } from '../../../../../types';
+import type { IndexPattern } from '../../../../../types';
 import type { TinymathNodeTypes } from './types';
 
 interface ValidationErrors {

@@ -51,18 +51,6 @@ export function getEventAnnotationService(
       throw savedObject.error;
     }
 
-    // const annotations = (
-    //   await client.find<EventAnnotationConfig>({
-    //     type: EVENT_ANNOTATION_TYPE,
-    //     hasReference: {
-    //       type: EVENT_ANNOTATION_GROUP_TYPE,
-    //       id: savedObjectId,
-    //     },
-    //   })
-    // ).savedObjects
-    //   .filter(({ error }) => !error)
-    //   .map((annotation) => annotation.attributes);
-
     const adHocDataViewSpec = savedObject.attributes.dataViewSpec
       ? DataViewPersistableStateService.inject(
           savedObject.attributes.dataViewSpec,
@@ -82,22 +70,6 @@ export function getEventAnnotationService(
       dataViewSpec: adHocDataViewSpec,
     };
   };
-
-  // const deleteAnnotationGroup = async (savedObjectId: string): Promise<void> => {
-  //   const annotationsSOs = (
-  //     await client.find({
-  //       type: EVENT_ANNOTATION_TYPE,
-  //       hasReference: {
-  //         type: EVENT_ANNOTATION_GROUP_TYPE,
-  //         id: savedObjectId,
-  //       },
-  //     })
-  //   ).savedObjects.map((annotation) => ({ id: annotation.id, type: EVENT_ANNOTATION_TYPE }));
-  //   await client.bulkDelete([
-  //     { type: EVENT_ANNOTATION_GROUP_TYPE, id: savedObjectId },
-  //     ...annotationsSOs,
-  //   ]);
-  // };
 
   const extractDataViewInformation = (group: EventAnnotationGroupConfig) => {
     let { dataViewSpec = null } = group;
@@ -163,40 +135,10 @@ export function getEventAnnotationService(
     );
   };
 
-  // const updateAnnotations = async (
-  //   savedObjectId: string,
-  //   modifications: { delete?: string[]; upsert?: EventAnnotationConfig[] }
-  // ): Promise<void> => {
-  //   if (modifications.delete && modifications.delete.length > 0) {
-  //     await client.bulkDelete(
-  //       modifications.delete.map((id) => ({ type: EVENT_ANNOTATION_TYPE, id }))
-  //     );
-  //   }
-
-  //   if (modifications.upsert && modifications.upsert.length > 0) {
-  //     const annotationsToUpdate = modifications.upsert.map((a) => ({
-  //       type: EVENT_ANNOTATION_TYPE,
-  //       attributes: a,
-  //       id: a.id,
-  //       overwrite: true,
-  //       references: [
-  //         {
-  //           type: EVENT_ANNOTATION_GROUP_TYPE,
-  //           id: savedObjectId,
-  //           name: `event-annotation-group-ref-${a.id}`,
-  //         },
-  //       ],
-  //     }));
-  //     await client.bulkCreate(annotationsToUpdate);
-  //   }
-  // };
-
   return {
     loadAnnotationGroup,
-    // updateAnnotations,
     updateAnnotationGroup,
     createAnnotationGroup,
-    // deleteAnnotationGroup,
     renderEventAnnotationGroupSavedObjectFinder: (props) => {
       return (
         <EventAnnotationGroupSavedObjectFinder

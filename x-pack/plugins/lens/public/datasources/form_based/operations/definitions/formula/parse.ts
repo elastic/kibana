@@ -10,7 +10,7 @@ import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
 import { nonNullable } from '../../../../../utils';
 import type { DateRange } from '../../../../../../common/types';
-import { IndexPattern } from '../../../../../types';
+import type { IndexPattern } from '../../../../../types';
 import {
   OperationDefinition,
   GenericOperationDefinition,

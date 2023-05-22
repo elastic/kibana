@@ -25,7 +25,7 @@ import { parseTimeShift } from '@kbn/data-plugin/common';
 import moment from 'moment';
 import { nonNullable } from '../../../../../../utils';
 import { DateRange } from '../../../../../../../common/types';
-import { IndexPattern } from '../../../../../../types';
+import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
