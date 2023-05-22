@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiFormRow, EuiPopover, EuiRange, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiPopover, EuiRange, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
@@ -50,13 +50,19 @@ export function DiscoverGridSettingsPopover({
     [setActiveSampleSize, debouncedOnChangeSampleSize]
   );
 
-  const buttonLabel = i18n.translate('discover.grid.settingsPopover.buttonLabel', {
-    defaultMessage: 'Settings',
+  const buttonLabel = i18n.translate('discover.grid.sampleSizeSettingsPopover.buttonLabel', {
+    defaultMessage: '{sampleSize} rows max',
+    values: {
+      sampleSize,
+    },
   });
 
-  const sampleSizeLabel = i18n.translate('discover.grid.settingsPopover.sampleSizeLabel', {
-    defaultMessage: 'Sample size',
-  });
+  const sampleSizeLabel = i18n.translate(
+    'discover.grid.sampleSizeSettingsPopover.sampleSizeLabel',
+    {
+      defaultMessage: 'Sample size',
+    }
+  );
 
   useEffect(() => {
     setActiveSampleSize(sampleSize); // reset local state
@@ -67,19 +73,20 @@ export function DiscoverGridSettingsPopover({
       data-test-subj="dscGridSettingsPopover"
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      anchorPosition="downRight"
+      anchorPosition="downCenter"
       panelPaddingSize="s"
       panelClassName="euiDataGrid__displayPopoverPanel"
       button={
         <EuiToolTip content={buttonLabel} delay="long">
-          <EuiButtonIcon
+          <EuiButtonEmpty
             size="xs"
-            iconType="gear"
+            iconType="visTable"
             color="text"
             data-test-subj="dscGridSettingsPopoverButton"
             onClick={isPopoverOpen ? closePopover : openPopover}
-            aria-label={buttonLabel}
-          />
+          >
+            {buttonLabel}
+          </EuiButtonEmpty>
         </EuiToolTip>
       }
     >

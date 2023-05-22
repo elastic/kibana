@@ -490,22 +490,26 @@ export const DiscoverGrid = ({
   const additionalControls = useMemo(
     () => ({
       left: {
-        append: usedSelectedDocs.length ? (
-          <DiscoverGridDocumentToolbarBtn
-            isFilterActive={isFilterActive}
-            rows={rows!}
-            selectedDocs={usedSelectedDocs}
-            setSelectedDocs={setSelectedDocs}
-            setIsFilterActive={setIsFilterActive}
-          />
-        ) : null,
+        append: (
+          <>
+            {onUpdateSampleSize ? (
+              <DiscoverGridSettingsPopover
+                sampleSize={sampleSizeState}
+                onChangeSampleSize={onUpdateSampleSize}
+              />
+            ) : null}
+            {usedSelectedDocs.length ? (
+              <DiscoverGridDocumentToolbarBtn
+                isFilterActive={isFilterActive}
+                rows={rows!}
+                selectedDocs={usedSelectedDocs}
+                setSelectedDocs={setSelectedDocs}
+                setIsFilterActive={setIsFilterActive}
+              />
+            ) : null}
+          </>
+        ),
       },
-      right: onUpdateSampleSize ? (
-        <DiscoverGridSettingsPopover
-          sampleSize={sampleSizeState}
-          onChangeSampleSize={onUpdateSampleSize}
-        />
-      ) : null,
     }),
     [usedSelectedDocs, isFilterActive, rows, sampleSizeState, setIsFilterActive, onUpdateSampleSize]
   );
