@@ -19,6 +19,7 @@ import React, {
 
 import { useNavigation as useNavigationServices } from '../../../services';
 import { InternalNavigationNode, RegisterFunction } from '../types';
+import { CloudLink } from './cloud_link';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
 import { NavigationUI } from './navigation_ui';
@@ -117,3 +118,4 @@ export function useNavigation() {
 
 Navigation.Group = NavigationGroup;
 Navigation.Item = NavigationItem;
+Navigation.CloudLink = CloudLink;

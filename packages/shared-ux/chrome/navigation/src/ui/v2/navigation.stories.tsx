@@ -241,6 +241,7 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
     <NavigationWrapper>
       <NavigationProvider {...services}>
         <Navigation homeRef="/">
+          <Navigation.CloudLink preset="deployments" />
         </Navigation>
       </NavigationProvider>
     </NavigationWrapper>

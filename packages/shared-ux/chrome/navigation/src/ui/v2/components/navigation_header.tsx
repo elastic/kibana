@@ -9,7 +9,7 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLogo, EuiLoadingSpinner } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { useNavigation as useAppServices } from '../../../services';
+import { useNavigation as useServices } from '../../../services';
 import { ElasticMark } from '../../elastic_mark';
 import { getI18nStrings } from '../../i18n_strings';
 
@@ -21,7 +21,7 @@ interface Props {
 
 export const NavHeader: FC<Props> = ({ homeHref }) => {
   const strings = getI18nStrings();
-  const { basePath, navigateToUrl, loadingCount$ } = useAppServices();
+  const { basePath, navigateToUrl, loadingCount$ } = useServices();
   const loadingCount = useObservable(loadingCount$, 0);
   const homeUrl = basePath.prepend(homeHref);
 
