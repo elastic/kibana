@@ -46,10 +46,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * Adhoc data views functionality
    */
-  const { persistDataView } = useAdHocDataViews({
-    stateContainer,
-    services,
-  });
+  useAdHocDataViews({ stateContainer, services });
 
   /**
    * State changes (data view, columns), when a text base query result is returned
@@ -91,11 +88,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <RootDragDropProvider>
-      <DiscoverLayoutMemoized
-        navigateTo={navigateTo}
-        stateContainer={stateContainer}
-        persistDataView={persistDataView}
-      />
+      <DiscoverLayoutMemoized navigateTo={navigateTo} stateContainer={stateContainer} />
     </RootDragDropProvider>
   );
 }
