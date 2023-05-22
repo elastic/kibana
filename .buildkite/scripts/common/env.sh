@@ -56,6 +56,9 @@ export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es
 # Not really a secret, if APM supported public auth we would use it and APM requires that we use this name
 export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
 
+ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.9.0/archives/20230521-141830_f42b7652/manifest.json"
+
+
 if is_pr; then
   if is_pr_with_label "ci:collect-apm"; then
     export ELASTIC_APM_ACTIVE=true
