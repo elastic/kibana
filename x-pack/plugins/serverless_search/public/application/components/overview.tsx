@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { CodeBox } from './code_box';
@@ -26,50 +27,83 @@ import { InstallClientPanel } from './overview_panels/install_client';
 import { OverviewPanel } from './overview_panels/overview_panel';
 import './overview.scss';
 import { IngestData } from './overview_panels/ingest_data';
+import { ApiKeyPanel } from './api_key/api_key';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
-  const { http } = useKibanaServices();
+  const { http, userProfile } = useKibanaServices();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth>
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" direction="column" gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <EuiTitle className="serverlessSearchHeaderTitle" size="l">
-                  <h1>
-                    {i18n.translate('xpack.serverlessSearch.header.title', {
-                      defaultMessage: 'Get started with Elasticsearch',
-                    })}
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  {i18n.translate('xpack.serverlessSearch.header.description', {
-                    defaultMessage:
-                      "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
-                  })}
-                </EuiText>
-                <EuiSpacer size="xxl" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+        <EuiText color="ghost">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {/* Reversing column direction here so screenreaders keep h1 as the first element */}
+              <EuiFlexGroup justifyContent="flexStart" direction="columnReverse" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle className="serverlessSearchHeaderTitle" size="s">
+                    <h1>
+                      {i18n.translate('xpack.serverlessSearch.header.title', {
+                        defaultMessage: 'Get started with Elasticsearch',
+                      })}
+                    </h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxxs">
+                    <h2>
+                      {i18n.translate('xpack.serverlessSearch.header.greeting.title', {
+                        defaultMessage: 'Hi {name}!',
+                        values: { name: userProfile.user.full_name || userProfile.user.username },
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer />
+              <EuiText>
+                {i18n.translate('xpack.serverlessSearch.header.description', {
+                  defaultMessage:
+                    "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
+                })}
+              </EuiText>
+              <EuiSpacer size="xxl" />
+            </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiImage
-              alt=""
-              src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/serverless_header.png`)}
-              size="554px"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiImage
+                alt=""
+                src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/serverless_header.png`)}
+                size="554px"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <InstallClientPanel language={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+        <OverviewPanel
+          description={i18n.translate('xpack.serverlessSearch.apiKey.description', {
+            defaultMessage:
+              "You'll need these unique identifiers to securely connect to your Elasticsearch project.",
+          })}
+          leftPanelContent={<ApiKeyPanel />}
+          links={[
+            {
+              href: docLinks.securityApis,
+              label: i18n.translate('xpack.serverlessSearch.configureClient.basicConfigLabel', {
+                defaultMessage: 'Basic configuration',
+              }),
+            },
+          ]}
+          title={i18n.translate('xpack.serverlessSearch.apiKey.title', {
+            defaultMessage: 'Store your API key and Cloud ID',
+          })}
+        />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <OverviewPanel

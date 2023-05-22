@@ -70,15 +70,41 @@ describe('validateTypeMigrations', () => {
       );
     });
 
-    it('validates the migration function', () => {
+    it('throws on the invalid migration type', () => {
       const type = createType({
         name: 'foo',
-        convertToMultiNamespaceTypeVersion: '3.1.1',
-        namespaceType: 'multiple',
         migrations: { '1.2.3': 23 as any },
       });
 
-      expect(() => validate({ type })).toThrow(/expected a function, but got 23/i);
+      expect(() => validate({ type })).toThrow(/expected a function or an object/i);
+    });
+
+    it('throws on the invalid migration object', () => {
+      const type = createType({
+        name: 'foo',
+        migrations: {
+          '1.2.3': {
+            deferred: false,
+            transform: 23 as any,
+          },
+        },
+      });
+
+      expect(() => validate({ type })).toThrow(/expected a function or an object/i);
+    });
+
+    it('validates the migration object', () => {
+      const type = createType({
+        name: 'foo',
+        migrations: {
+          '1.2.3': {
+            deferred: false,
+            transform: jest.fn(),
+          },
+        },
+      });
+
+      expect(() => validate({ type })).not.toThrow();
     });
 
     describe('when switchToModelVersionAt is specified', () => {
