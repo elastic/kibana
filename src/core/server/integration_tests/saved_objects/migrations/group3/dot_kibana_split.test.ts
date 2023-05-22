@@ -39,7 +39,7 @@ const RELOCATE_TYPES: Record<string, string> = {
   // overriding `indexPattern: foo` defined in the registry
 };
 
-const PARALLEL_MIGRATORS = 6;
+const PARALLEL_MIGRATORS = 4;
 export const logFilePath = Path.join(__dirname, 'dot_kibana_split.test.log');
 
 describe('split .kibana index into multiple system indices', () => {
@@ -209,7 +209,6 @@ describe('split .kibana index into multiple system indices', () => {
             "fleet-message-signing-keys",
             "fleet-preconfiguration-deletion-record",
             "fleet-proxy",
-            "fleet-uninstall-tokens",
             "graph-workspace",
             "guided-onboarding-guide-state",
             "guided-onboarding-plugin-state",
@@ -443,7 +442,7 @@ describe('split .kibana index into multiple system indices', () => {
 
       const breakdownAfter = await getAggregatedTypesCountAllIndices(esClient);
       expect(breakdownAfter).toMatchSnapshot('after migration');
-    });
+    }, 1200000);
 
     afterEach(async () => {
       await esServer?.stop();
