@@ -56,6 +56,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
     },
     actionConnectorFields: lazy(() => import('./slack_connectors')),
     actionParamsFields: lazy(() => import('./slack_params')),
+    actionResultsFields: lazy(() => import('./slack_results')),
     convertParamsBetweenGroups: (
       params: PostMessageParams | SlackActionParams
     ): PostMessageParams | SlackActionParams | {} => {

@@ -24,7 +24,10 @@ interface ResponseActionsResultsProps {
 export const ResponseActionsResults = React.memo(
   ({ actions, ruleName, ecsData }: ResponseActionsResultsProps) => {
     const {
-      services: { osquery },
+      services: {
+        osquery,
+        triggersActionsUi: { actionTypeRegistry },
+      },
     } = useKibana();
     const { OsqueryResult } = osquery;
 
@@ -56,6 +59,21 @@ export const ResponseActionsResults = React.memo(
             );
           }
           return null;
+          if (action.event?.kind === 'action') {
+            const actionTypeId = action.kibana.saved_objects.find(
+              (so) => so.type === 'action'
+            ).type_id;
+
+            const res = actionTypeRegistry.get(actionTypeId);
+
+            const ResolvedCOmponent = res.actionResultsFields;
+            console.log({ actionTypeId });
+            return (
+              <Suspense fallback={<span>Loading...</span>}>
+                <ResolvedCOmponent action={action} />
+              </Suspense>
+            );
+          }
         })}
       </>
     );

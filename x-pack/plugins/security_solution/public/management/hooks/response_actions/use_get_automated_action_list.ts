@@ -34,7 +34,7 @@ export const useGetAutomatedActionList = (
 ) => {
   const { data } = useKibana().services;
 
-  const { alertIds } = query;
+  const { alertIds, executionIds } = query;
   return useQuery({
     queryKey: ['get-automated-action-list', { alertIds }],
     queryFn: async () => {
@@ -42,6 +42,7 @@ export const useGetAutomatedActionList = (
         data.search.search<ActionRequestOptions, ActionRequestStrategyResponse>(
           {
             alertIds,
+            executionIds,
             sort: {
               direction: Direction.desc,
               field: '@timestamp',

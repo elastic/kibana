@@ -16,6 +16,7 @@ import type {
 
 export interface ActionRequestOptions extends RequestBasicOptions {
   alertIds: string[];
+  executionIds?: string[];
   agentId?: string;
   sort: {
     direction: Direction;
