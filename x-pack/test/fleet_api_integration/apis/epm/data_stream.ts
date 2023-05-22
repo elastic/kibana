@@ -109,10 +109,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('Data Streams endpoint', () => {
         it('Allows the fetching of data streams', async () => {
           const res = await supertest
-            .get(`/api/fleet/epm/data_streams?uncategorisedOnly=false`)
+            .get(`/api/fleet/epm/data_streams?uncategorisedOnly=false&datasetQuery=datastreams`)
             .expect(200);
           const dataStreams = res.body.items;
-          expect(dataStreams.length).to.be(7);
+          expect(dataStreams.length).to.be(6);
         });
       });
 
