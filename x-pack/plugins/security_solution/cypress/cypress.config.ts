@@ -20,4 +20,8 @@ export default defineCypressConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
   },
+  reporter: 'junit',
+  reporterOptions: {
+    mochaFile: 'target/junit/security-solution-cypress-[hash].xml'
+  }
 });
