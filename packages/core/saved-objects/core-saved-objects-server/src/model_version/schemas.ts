@@ -20,10 +20,10 @@ export interface SavedObjectsModelVersionSchemaDefinitions {
    *
    * When retrieving a savedObject document from an index, if the version of the document
    * is higher than the latest version known of the Kibana instance, the document will go
-   * through the `higherVersionConversion` schema of the associated model version.
+   * through the `backwardConversion` schema of the associated model version.
    *
    * E.g a Kibana instance with model version `2` for type `foo` types fetches a `foo` document
-   * at model version `3`. The document will then go through the `higherVersionConversion`
+   * at model version `3`. The document will then go through the `backwardConversion`
    * of the model version 2 (if present).
    *
    * See {@link SavedObjectModelVersionBackwardConversionSchema} for more info.
