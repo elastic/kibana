@@ -81,8 +81,8 @@ export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes })
         return;
       }
 
-      const legacyJoinFields = new Map<string, JoinDescriptor>();
-      vectorLayerDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+      const legacyJoinFields = new Map<string, Partial<JoinDescriptor>>();
+      vectorLayerDescriptor.joins.forEach((joinDescriptor: Partial<JoinDescriptor>) => {
         _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
           const legacyAggKey = getLegacyAggKey({
             aggType: aggDescriptor.type,
@@ -104,13 +104,13 @@ export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes })
         const style: any = vectorLayerDescriptor.style!.properties[key as VECTOR_STYLES];
         if (_.get(style, 'options.field.origin') === FIELD_ORIGIN.JOIN) {
           const joinDescriptor = legacyJoinFields.get(style.options.field.name);
-          if (joinDescriptor) {
+          if (joinDescriptor?.right?.id) {
             const { aggType, aggFieldName } = parseLegacyAggKey(style.options.field.name);
             // Update legacy join agg key to new join agg key
             style.options.field.name = getJoinAggKey({
               aggType,
               aggFieldName,
-              rightSourceId: joinDescriptor.right.id!,
+              rightSourceId: joinDescriptor.right.id,
             });
           }
         }
