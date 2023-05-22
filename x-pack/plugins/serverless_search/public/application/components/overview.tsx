@@ -330,7 +330,7 @@ export const ElasticsearchOverview = () => {
           <EuiFlexItem>
             <FooterIcon
               src={`${assetBasePath}billing_icon.png`}
-              title={i18n.translate('xpack.serverlessSearch.footer.community.title', {
+              title={i18n.translate('xpack.serverlessSearch.footer.billing.title', {
                 defaultMessage: 'Billing and usage',
               })}
             />
