@@ -22,7 +22,6 @@ export async function saveObservabilityOnboardingState({
   observabilityOnboardingState,
   apiKeyId,
 }: Options): Promise<SavedObservabilityOnboardingState> {
-  savedObjectsClient;
   const {
     id,
     attributes,

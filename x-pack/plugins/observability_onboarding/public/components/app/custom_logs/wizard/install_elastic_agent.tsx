@@ -221,7 +221,7 @@ function getInstallShipperCommand({
   apiEndpoint: string | undefined;
   scriptDownloadUrl: string | undefined;
 }) {
-  const setupScriptFilename = 'standalone-agent-setup.sh';
+  const setupScriptFilename = 'standalone_agent_setup.sh';
   const PLATFORM_COMMAND: Record<ElasticAgentPlatform, string> = {
     'linux-tar': oneLine`
       curl ${scriptDownloadUrl} -o ${setupScriptFilename} &&
