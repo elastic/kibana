@@ -27,6 +27,8 @@
     "@kbn/fleet-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/observability-shared-plugin",
+    "@kbn/core-http-server",
+    "@kbn/security-plugin",
   ],
   "exclude": [
     "target/**/*",
