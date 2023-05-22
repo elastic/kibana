@@ -202,7 +202,7 @@ export function SloEditForm({ slo }: Props) {
                 title: i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
                   defaultMessage: 'Define SLI',
                 }),
-                children: <SloEditFormIndicatorSection />,
+                children: <SloEditFormIndicatorSection isEditMode={isEditMode} />,
                 status: isIndicatorSectionValid ? 'complete' : 'incomplete',
               },
               {
