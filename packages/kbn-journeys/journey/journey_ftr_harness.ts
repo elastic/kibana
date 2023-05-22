@@ -59,7 +59,7 @@ export class JourneyFtrHarness {
     this.log.info(`Updating telemetry & APM labels: ${JSON.stringify(labels)}`);
 
     await this.kibanaServer.request({
-      path: '/_settings',
+      path: '/internal/core/_settings',
       method: 'PUT',
       body: { telemetry: { labels } },
     });

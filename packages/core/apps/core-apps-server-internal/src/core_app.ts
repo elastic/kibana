@@ -149,7 +149,7 @@ export class CoreAppsService {
 
     router.versioned
       .put({
-        path: '/_settings',
+        path: '/internal/core/_settings',
         access: 'internal',
       })
       .addVersion(

@@ -35,9 +35,6 @@ export function makeFtrConfigProvider(
       ? Number.parseInt(process.env.GITHUB_PR_NUMBER, 10)
       : undefined;
 
-    // eslint-disable-next-line no-console
-    console.log(`testBuildId=${testBuildId}`);
-
     if (Number.isNaN(prId)) {
       throw new Error('invalid GITHUB_PR_NUMBER environment variable');
     }
