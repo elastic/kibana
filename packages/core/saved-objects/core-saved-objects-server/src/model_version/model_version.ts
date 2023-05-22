@@ -25,7 +25,7 @@ export interface SavedObjectsModelVersion {
   /**
    * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
    *
-   * Schemas are used to validate / convert the shape and/or content of the documents are various stages of their usages.
+   * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
    */
   schemas?: SavedObjectsModelVersionSchemaDefinitions;
 }
