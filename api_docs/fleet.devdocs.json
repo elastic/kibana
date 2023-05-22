@@ -20006,6 +20006,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewOutput.allow_edit",
+            "type": "Array",
+            "tags": [],
+            "label": "allow_edit",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -22915,6 +22929,51 @@
         "description": [],
         "signature": [
           "\"apm\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_DEFEND_PACKAGE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_DEFEND_PACKAGE",
+        "description": [],
+        "signature": [
+          "\"cloud_defend\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"vuln_mgmt\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"cspm\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,

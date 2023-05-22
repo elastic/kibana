@@ -32,7 +32,6 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async getManageViewsEntries() {
-      await this.clickSavedViewsButton();
       await this.clickManageViewsButton();
       return testSubjects.findAll('infraRenderNameButton');
     },
@@ -52,13 +51,11 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async createView(name: string) {
-      await this.clickSavedViewsButton();
       await this.clickSaveNewViewButton();
       await this.createNewSavedView(name);
     },
 
     async updateView(name: string) {
-      await this.clickSavedViewsButton();
       await this.clickUpdateViewButton();
       await this.createNewSavedView(name);
     },

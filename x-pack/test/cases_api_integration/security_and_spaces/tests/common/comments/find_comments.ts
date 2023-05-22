@@ -8,13 +8,16 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CommentsFindResponse } from '@kbn/cases-plugin/common/api';
+import { CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
+  persistableStateAttachment,
   postCaseReq,
+  postCommentActionsReq,
   postCommentAlertReq,
   postCommentUserReq,
+  postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
 import {
   createComment,
@@ -25,8 +28,8 @@ import {
   ensureSavedObjectIsAuthorized,
   getSpaceUrlPrefix,
   createCase,
-  superUserSpace1Auth,
   findAttachments,
+  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 
 import {
@@ -53,81 +56,85 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should find all case comment', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq, 200);
 
       // post 2 comments
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        expectedHttpCode: 200,
+      });
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        expectedHttpCode: 200,
+      });
 
-      const { body: caseComments } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const caseComments = await findAttachments({
+        supertest,
+        caseId: postedCase.id,
+        expectedHttpCode: 200,
+      });
 
       expect(caseComments.comments).to.eql(patchedCase.comments);
     });
 
-    it('should filter case comments', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+    it('should find only case comments of the correct type', async () => {
+      const postedCase = await createCase(supertest, postCaseReq, 200);
 
-      // post 2 comments
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      // post 5 comments of all possible types
+      await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
+          postCommentUserReq,
+          postCommentAlertReq,
+          postCommentActionsReq,
+          postExternalReferenceESReq,
+          persistableStateAttachment,
+        ],
+        expectedHttpCode: 200,
+      });
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({ ...postCommentUserReq, comment: 'unique' })
-        .expect(200);
+      const caseComments = await findAttachments({
+        supertest,
+        caseId: postedCase.id,
+        expectedHttpCode: 200,
+      });
 
-      const { body: caseComments } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find?search=unique`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(caseComments.comments).to.eql([patchedCase.comments[1]]);
+      expect(caseComments.comments.length).to.eql(1);
+      expect(caseComments.comments[0].type).to.eql(CommentType.user);
     });
 
-    it('unhappy path - 400s when query is bad', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+    describe('unhappy paths', () => {
+      for (const errorScenario of [
+        { name: 'field is wrong type', queryParams: { perPage: true } },
+        { name: 'field is unknown', queryParams: { foo: 'bar' } },
+        { name: 'page > 10k', queryParams: { page: 10001 } },
+        { name: 'perPage > 10k', queryParams: { perPage: 10001 } },
+        { name: 'page * perPage > 10k', queryParams: { page: 2, perPage: 9001 } },
+      ]) {
+        it(`400s when ${errorScenario.name}`, async () => {
+          const postedCase = await createCase(supertest, postCaseReq, 200);
 
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: postCommentUserReq,
+            expectedHttpCode: 200,
+          });
 
-      await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find?perPage=true`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
+          await findAttachments({
+            supertest,
+            caseId: postedCase.id,
+            query: errorScenario.queryParams,
+            expectedHttpCode: 400,
+          });
+        });
+      }
     });
 
     describe('rbac', () => {
@@ -167,7 +174,7 @@ export default ({ getService }: FtrProviderContext): void => {
           createComment({
             supertest: supertestWithoutAuth,
             caseId: obsCase.id,
-            params: { ...postCommentAlertReq, owner: 'observabilityFixture' },
+            params: { ...postCommentUserReq, owner: 'observabilityFixture' },
             auth: { user: obsOnly, space: space1 },
           }),
         ]);
@@ -266,60 +273,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should not return any comments when trying to exploit RBAC through the search query parameter', async () => {
-        const obsCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'observabilityFixture' }),
-          200,
-          superUserSpace1Auth
-        );
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          auth: superUserSpace1Auth,
-          params: { ...postCommentUserReq, owner: 'observabilityFixture' },
-          caseId: obsCase.id,
-        });
-
-        const { body: res }: { body: CommentsFindResponse } = await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix('space1')}${CASES_URL}/${
-              obsCase.id
-            }/comments/_find?search=securitySolutionFixture+observabilityFixture`
-          )
-          .auth(secOnly.username, secOnly.password)
-          .expect(200);
-
-        // shouldn't find any comments since they were created under the observability ownership
-        ensureSavedObjectIsAuthorized(res.comments, 0, ['securitySolutionFixture']);
-      });
-
-      it('should not allow retrieving unauthorized comments using the filter field', async () => {
-        const obsCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'observabilityFixture' }),
-          200,
-          superUserSpace1Auth
-        );
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          auth: superUserSpace1Auth,
-          params: { ...postCommentUserReq, owner: 'observabilityFixture' },
-          caseId: obsCase.id,
-        });
-
-        const { body: res } = await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix('space1')}${CASES_URL}/${
-              obsCase.id
-            }/comments/_find?filter=cases-comments.attributes.owner:"observabilityFixture"`
-          )
-          .auth(secOnly.username, secOnly.password)
-          .expect(200);
-        expect(res.comments.length).to.be(0);
-      });
-
       // This test ensures that the user is not allowed to define the namespaces query param
       // so she cannot search across spaces
       it('should NOT allow to pass a namespaces query parameter', async () => {
@@ -340,11 +293,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         await supertest.get(`${CASES_URL}/${obsCase.id}/comments/_find?namespaces=*`).expect(400);
-      });
-
-      it('should NOT allow to pass a non supported query parameter', async () => {
-        await supertest.get(`${CASES_URL}/id/comments/_find?notExists=papa`).expect(400);
-        await supertest.get(`${CASES_URL}/id/comments/_find?owner=papa`).expect(400);
       });
     });
   });
