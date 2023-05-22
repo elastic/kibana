@@ -151,8 +151,8 @@ describe('Custom query rules', () => {
     it('Creates and edits a new rule with a data view', function () {
       visit(RULE_CREATION);
       fillDefineCustomRuleAndContinue(rule);
-      cy.get(RULE_NAME_INPUT).clear().type(rule.name, );
-      cy.get(RULE_DESCRIPTION_INPUT).clear().type(rule.description, );
+      cy.get(RULE_NAME_INPUT).clear().type(rule.name);
+      cy.get(RULE_DESCRIPTION_INPUT).clear().type(rule.description);
 
       cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
 

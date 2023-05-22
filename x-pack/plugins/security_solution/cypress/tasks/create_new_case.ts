@@ -60,7 +60,6 @@ export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
 export const attachTimeline = (newCase: TestCase) => {
   cy.get(INSERT_TIMELINE_BTN).click();
   cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
-
 };
 
 export const createCase = () => {
