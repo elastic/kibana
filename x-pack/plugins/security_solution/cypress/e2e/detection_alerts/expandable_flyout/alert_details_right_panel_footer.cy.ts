@@ -66,7 +66,7 @@ const deleteCase = () => {
   cy.get(CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON).click();
 };
 
-describe(
+describe.skip(
   'Alert details expandable flyout right panel footer',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {

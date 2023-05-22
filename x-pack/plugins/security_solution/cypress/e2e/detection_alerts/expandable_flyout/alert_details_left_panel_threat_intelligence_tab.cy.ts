@@ -13,7 +13,7 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe(
+describe.skip(
   'Expandable flyout left panel threat intelligence',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {

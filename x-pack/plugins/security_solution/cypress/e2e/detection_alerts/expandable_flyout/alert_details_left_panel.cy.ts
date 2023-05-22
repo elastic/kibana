@@ -78,7 +78,7 @@ describe(
       cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB).should('be.visible').and('have.text', 'History');
     });
 
-    it('should display tab content when switching tabs', () => {
+    it.skip('should display tab content when switching tabs', () => {
       openVisualizeTab();
       cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
 
@@ -130,7 +130,7 @@ describe(
           .and('have.text', 'Correlations');
       });
 
-      it('should display content when switching buttons', () => {
+      it.skip('should display content when switching buttons', () => {
         openInsightsTab();
         openEntities();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT)

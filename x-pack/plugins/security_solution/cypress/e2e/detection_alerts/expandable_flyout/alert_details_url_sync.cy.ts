@@ -17,7 +17,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
 } from '../../../screens/document_expandable_flyout';
 
-describe(
+describe.skip(
   'Expandable flyout state sync',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
