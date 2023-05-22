@@ -720,6 +720,7 @@ describe('DocumentMigratorPipeline', () => {
       const transforms: TypeTransforms = {
         transforms: [],
         latestVersion: latestVersions(),
+        immediateVersion: latestVersions(),
         versionSchemas: {
           '8.7.0': schema_8_7_0,
           '8.8.0': schema_8_8_0,
@@ -756,6 +757,7 @@ describe('DocumentMigratorPipeline', () => {
       const transforms: TypeTransforms = {
         transforms: [],
         latestVersion: latestVersions(),
+        immediateVersion: latestVersions(),
         versionSchemas: {
           '8.8.0': schema_8_8_0,
           '8.9.0': schema_8_9_0,
