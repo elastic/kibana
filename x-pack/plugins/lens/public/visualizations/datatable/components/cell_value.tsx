@@ -23,7 +23,6 @@ export const createGridCell = (
   theme: CoreSetup['theme'],
   fitRowToContent?: boolean
 ) => {
-  // Changing theme requires a full reload of the page, so we can cache here
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, minMaxByColumnId, getColorForValue, handleFilterClick } =
       useContext(DataContext);
