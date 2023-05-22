@@ -56,4 +56,4 @@ export const generateFilterAggs = (
         },
       },
     }))
-    .reduce((parent: Record<string, any>, agg: any) => ({ ...parent, ...agg }), {});
+    .reduce((parent: Record<string, any>, agg: any) => Object.assign(parent, agg), {});
