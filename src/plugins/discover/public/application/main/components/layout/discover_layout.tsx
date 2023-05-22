@@ -175,11 +175,6 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
 
-  const savedSearchTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    savedSearchTitle.current?.focus();
-  }, []);
-
   const textBasedLanguageModeErrors = useMemo(() => {
     if (isPlainRecord) {
       return dataState.error;
@@ -255,8 +250,6 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
         id="savedSearchTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSavedSearchTitle"
-        tabIndex={-1}
-        ref={savedSearchTitle}
       >
         {savedSearch.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {

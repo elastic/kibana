@@ -41,8 +41,10 @@ export type {
   SavedObjectsMappingProperties,
 } from './src/mapping_definition';
 export type {
+  SavedObjectMigration,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
+  SavedObjectMigrationParams,
   SavedObjectsMigrationLogger,
   SavedObjectMigrationFn,
 } from './src/migration';
