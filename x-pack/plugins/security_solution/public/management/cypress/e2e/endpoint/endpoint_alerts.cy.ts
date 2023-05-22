@@ -9,7 +9,8 @@ import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_dat
 import { getAlertsTableRows, navigateToAlertsList } from '../../screens/alerts';
 import { waitForEndpointAlerts } from '../../tasks/alerts';
 import { request } from '../../tasks/common';
-import { getEndpointIntegrationVersion } from '../../tasks/fleet';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import type { PolicyData, ResponseActionApiResponse } from '../../../../../common/endpoint/types';
@@ -25,29 +26,15 @@ describe('Endpoint generated alerts', () => {
 
   before(() => {
     getEndpointIntegrationVersion().then((version) => {
-      const policyName = `alerts test ${Math.random().toString(36).substring(2, 7)}`;
-
-      cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-        policyName,
-        endpointPackageVersion: version,
-        agentPolicyName: policyName,
-      }).then((data) => {
+      createAgentPolicyTask(version, 'alerts test').then((data) => {
         indexedPolicy = data;
         policy = indexedPolicy.integrationPolicies[0];
 
         return enableAllPolicyProtections(policy.id).then(() => {
           // Create and enroll a new Endpoint host
-          return cy
-            .task(
-              'createEndpointHost',
-              {
-                agentPolicyId: policy.policy_id,
-              },
-              { timeout: 180000 }
-            )
-            .then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
-            });
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
         });
       });
     });
