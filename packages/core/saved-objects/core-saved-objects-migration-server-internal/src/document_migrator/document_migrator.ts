@@ -99,7 +99,7 @@ export class DocumentMigrator implements VersionedTransformer {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
 
-    return Object.entries(this.migrations).reduce(
+    return Object.entries(this.migrations).reduce<SavedObjectsMigrationVersion>(
       (acc, [type, { latestVersion, immediateVersion }]) => {
         const version = includeDeferred ? latestVersion : immediateVersion;
         const latestMigrationVersion =
