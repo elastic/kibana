@@ -48,11 +48,11 @@ export const filterStatusOpen = () => {
 };
 
 export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
-  cy.get(TITLE_INPUT).type(newCase.name, );
+  cy.get(TITLE_INPUT).type(newCase.name);
   newCase.tags.forEach((tag) => {
-    cy.get(TAGS_INPUT).type(`${tag}{enter}`, );
+    cy.get(TAGS_INPUT).type(`${tag}{enter}`);
   });
-  cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `, );
+  cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `);
 };
 
 export const attachTimeline = (newCase: TestCase) => {
@@ -97,7 +97,7 @@ export const fillIbmResilientConnectorOptions = (
   cy.get(SELECT_INCIDENT_TYPE).should('exist');
   cy.get(SELECT_SEVERITY).should('exist');
   ibmResilientConnector.incidentTypes.forEach((incidentType) => {
-    cy.get(SELECT_INCIDENT_TYPE).type(`${incidentType}{enter}`, );
+    cy.get(SELECT_INCIDENT_TYPE).type(`${incidentType}{enter}`);
   });
   cy.get(CONNECTOR_RESILIENT).click();
   cy.get(SELECT_SEVERITY).select(ibmResilientConnector.severity);
