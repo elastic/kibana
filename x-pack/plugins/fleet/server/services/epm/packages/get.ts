@@ -207,15 +207,15 @@ export async function getInstalledPackages(options: {
     const dataStreams = Object.entries(esIndexPatterns)
       .map(([key, value]) => {
         return {
-          name: key,
-          title: value,
+          name: value,
+          title: key,
         };
       })
       .filter((stream) => {
         if (!dataStreamType) {
           return true;
         } else {
-          return stream.title.startsWith(`${dataStreamType}-`);
+          return stream.name.startsWith(`${dataStreamType}-`);
         }
       });
 

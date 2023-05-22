@@ -494,7 +494,7 @@ owner: elastic`,
       expect(results).toEqual({
         items: [
           {
-            dataStreams: [{ name: 'apm_server_logs', title: 'logs-elastic_agent.apm_server-*' }],
+            dataStreams: [{ name: 'logs-elastic_agent.apm_server-*', title: 'apm_server_logs' }],
             name: 'elastic_agent',
             status: 'installed',
             version: '1.7.0',
