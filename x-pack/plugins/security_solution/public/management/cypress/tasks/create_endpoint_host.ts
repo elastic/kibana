@@ -7,6 +7,7 @@
 
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
+// only used in "real" endpoint tests not in mocked ones
 export const createEndpointHost = (
   agentPolicyId: string,
   timeout?: number
