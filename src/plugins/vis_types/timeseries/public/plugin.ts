@@ -92,7 +92,8 @@ export class MetricsPlugin implements Plugin<void, void> {
     setUISettings(core.uiSettings);
     visualizations.createBaseVisualization({
       ...metricsVisDefinition,
-      hidden: readOnly,
+      disableCreate: readOnly,
+      disableEdit: readOnly,
     });
   }
 

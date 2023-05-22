@@ -170,7 +170,7 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
 
     if (this.attributeService) {
-      const readOnly = Boolean(vis.type.hidden);
+      const readOnly = Boolean(vis.type.disableEdit);
       const isByValue = !this.inputIsRefType(initialInput);
       const editable = readOnly
         ? false

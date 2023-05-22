@@ -29,7 +29,7 @@ export function createInputControlVisTypeDefinition(
       defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),
     stage: 'experimental',
-    hidden: true,
+    disableCreate: true,
     isDeprecated: true,
     visConfig: {
       defaults: {

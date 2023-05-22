@@ -83,7 +83,7 @@ export const useSavedVisInstance = (
           savedVisInstance = await getVisualizationInstance(services, visualizationIdFromUrl);
         }
 
-        if (savedVisInstance.vis.type.hidden) {
+        if (savedVisInstance.vis.type.disableEdit) {
           throw new Error(
             i18n.translate('visualizations.editVisualization.readOnlyErrorMessage', {
               defaultMessage:

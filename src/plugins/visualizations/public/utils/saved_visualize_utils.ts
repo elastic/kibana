@@ -109,7 +109,7 @@ export function mapHitSource(
   newAttributes.image = newAttributes.type?.image;
   newAttributes.typeTitle = newAttributes.type?.title;
   newAttributes.editUrl = `/edit/${id}`;
-  newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.hidden);
+  newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.disableEdit);
 
   return newAttributes;
 }
