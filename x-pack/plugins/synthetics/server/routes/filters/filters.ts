@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -38,53 +37,43 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.FILTERS,
   validate: {},
   handler: async ({ savedObjectsClient, request, response, server }): Promise<any> => {
-    try {
-      const data = await savedObjectsClient.find({
-        type: syntheticsMonitorType,
-        perPage: 0,
-        aggs,
-      });
+    const data = await savedObjectsClient.find({
+      type: syntheticsMonitorType,
+      perPage: 0,
+      aggs,
+    });
 
-      const { monitorTypes, tags, locations, projects, schedules } =
-        (data?.aggregations as AggsResponse) ?? {};
-      const result = {
-        monitorTypes:
-          monitorTypes?.buckets?.map(({ key, doc_count: count }) => ({
+    const { monitorTypes, tags, locations, projects, schedules } =
+      (data?.aggregations as AggsResponse) ?? {};
+    return {
+      monitorTypes:
+        monitorTypes?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          count,
+        })) ?? [],
+      tags:
+        tags?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          count,
+        })) ?? [],
+      locations:
+        locations?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          count,
+        })) ?? [],
+      projects:
+        projects?.buckets
+          ?.filter(({ key }) => key)
+          .map(({ key, doc_count: count }) => ({
             label: key,
             count,
           })) ?? [],
-        tags:
-          tags?.buckets?.map(({ key, doc_count: count }) => ({
-            label: key,
-            count,
-          })) ?? [],
-        locations:
-          locations?.buckets?.map(({ key, doc_count: count }) => ({
-            label: key,
-            count,
-          })) ?? [],
-        projects:
-          projects?.buckets
-            ?.filter(({ key }) => key)
-            .map(({ key, doc_count: count }) => ({
-              label: key,
-              count,
-            })) ?? [],
-        schedules:
-          schedules?.buckets?.map(({ key, doc_count: count }) => ({
-            label: String(key),
-            count,
-          })) ?? [],
-      };
-      return result;
-    } catch (error) {
-      if (error.output?.statusCode === 404) {
-        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
-      }
-
-      throw error;
-    }
+      schedules:
+        schedules?.buckets?.map(({ key, doc_count: count }) => ({
+          label: String(key),
+          count,
+        })) ?? [],
+    };
   },
 });
 
