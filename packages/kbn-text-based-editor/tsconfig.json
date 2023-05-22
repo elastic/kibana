@@ -20,7 +20,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/language-documentation-popover",
     "@kbn/test-jest-helpers",
-    "@kbn/data-plugin"
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/data-views-plugin"
   ],
   "exclude": [
     "target/**/*",
