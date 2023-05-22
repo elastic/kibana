@@ -131,19 +131,20 @@ export const AssetDetails = ({
   if (!showInFlyout) {
     return (
       <>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>{node.name}</h2>
+            <EuiTitle size="l">
+              <h1>{node.name}</h1>
             </EuiTitle>
           </EuiFlexItem>
           {links && headerLinks}
         </EuiFlexGroup>
+        <EuiSpacer size="l" />
         <EuiTabs
           css={css`
             margin-bottom: 25px;
           `}
-          size="s"
+          size="l"
         >
           {tabEntries}
         </EuiTabs>

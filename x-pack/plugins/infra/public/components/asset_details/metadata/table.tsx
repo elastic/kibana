@@ -12,6 +12,7 @@ import {
   EuiLink,
   EuiInMemoryTable,
   EuiSearchBarProps,
+  type HorizontalAlignment,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -140,6 +141,7 @@ export const Table = (props: Props) => {
               name: 'Actions',
               sortable: false,
               showOnHover: true,
+              align: 'center' as HorizontalAlignment,
               render: (_name: string, item: Row) => {
                 return <AddMetadataFilterButton item={item} />;
               },
