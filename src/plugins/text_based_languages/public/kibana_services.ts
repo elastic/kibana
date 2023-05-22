@@ -12,10 +12,12 @@ import { CoreStart } from '@kbn/core/public';
 
 export let core: CoreStart;
 
-const servicesReady$ = new BehaviorSubject<{ core: CoreStart } | undefined>(undefined);
+const servicesReady$ = new BehaviorSubject<{ core: CoreStart; darkMode: boolean } | undefined>(
+  undefined
+);
 export const untilPluginStartServicesReady = () => {
   if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
-  return new Promise<{ core: CoreStart }>((resolve) => {
+  return new Promise<{ core: CoreStart; darkMode: boolean }>((resolve) => {
     const subscription = servicesReady$.subscribe((deps) => {
       if (deps) {
         subscription.unsubscribe();
@@ -27,5 +29,7 @@ export const untilPluginStartServicesReady = () => {
 
 export const setKibanaServices = (kibanaCore: CoreStart) => {
   core = kibanaCore;
-  servicesReady$.next({ core });
+  core.theme.theme$.subscribe(({ darkMode }) => {
+    servicesReady$.next({ core, darkMode });
+  });
 };
