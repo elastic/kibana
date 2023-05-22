@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
 import {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
@@ -19,9 +20,11 @@ export interface ServerlessSecurityPluginStart {}
 export interface ServerlessSecurityPluginSetupDependencies {
   security: SecurityPluginSetup;
   securitySolution: SecuritySolutionPluginSetup;
+  features: PluginSetupContract;
 }
 
 export interface ServerlessSecurityPluginStartDependencies {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
+  features: PluginStartContract;
 }
