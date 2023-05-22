@@ -19,9 +19,10 @@ const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
     defaultMessage: 'Cloud Security Posture',
   }),
-  VULNERABILITY_DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
-    defaultMessage: 'Vulnerability Dashboard',
-  }),
+  VULNERABILITY_DASHBOARD: i18n.translate(
+    'xpack.csp.navigation.vulnerabilityDashboardNavItemLabel',
+    { defaultMessage: 'Cloud Native Vulnerability Management' }
+  ),
   FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
     defaultMessage: 'Findings',
   }),

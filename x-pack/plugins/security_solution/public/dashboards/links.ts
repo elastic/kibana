@@ -9,7 +9,10 @@ import { DASHBOARDS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/c
 import { DASHBOARDS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import { links as kubernetesLinks } from '../kubernetes/links';
-import { dashboardLinks as cloudSecurityPostureLinks } from '../cloud_security_posture/links';
+import {
+  dashboardLinks as cloudSecurityPostureLinks,
+  vulnerabilityDashboardLink,
+} from '../cloud_security_posture/links';
 import {
   ecsDataQualityDashboardLinks,
   detectionResponseLinks,
@@ -33,6 +36,7 @@ export const dashboardsLandingLinks: LinkItem = {
     detectionResponseLinks,
     kubernetesLinks,
     cloudSecurityPostureLinks,
+    vulnerabilityDashboardLink,
     entityAnalyticsLinks,
     ecsDataQualityDashboardLinks,
   ],
