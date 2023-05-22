@@ -34,9 +34,7 @@ const isAccessible = (
     throw new Error('Trying to map an object from a type without management metadata');
   }
   const inAppUrl = getInAppUrl(object);
-  return inAppUrl
-    ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath) ?? false)
-    : false;
+  return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath) ?? false) : false;
 };
 
 export const mapToResult = (
