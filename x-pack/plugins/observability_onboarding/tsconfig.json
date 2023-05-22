@@ -26,6 +26,7 @@
     "@kbn/cloud-plugin",
     "@kbn/fleet-plugin",
     "@kbn/usage-collection-plugin",
+    "@kbn/observability-shared-plugin",
   ],
   "exclude": [
     "target/**/*",
