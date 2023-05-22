@@ -5,20 +5,27 @@
  * 2.0.
  */
 import type { IImmutableCache } from '../../../../common/immutable_cache';
-import { FindIntegrationsResponse, FindIntegrationsRequestQuery } from '../../../../common/latest';
-import { Integration } from '../../../../common/data_streams';
+import {
+  FindIntegrationsResponse,
+  FindIntegrationsRequestQuery,
+  SortOrder,
+} from '../../../../common/latest';
+import { Integration, SearchStrategy } from '../../../../common/data_streams';
 
 export interface DefaultIntegrationsContext {
   cache: IImmutableCache<FindIntegrationsRequestQuery, FindIntegrationsResponse>;
+  integrationsSource: Integration[] | null;
   integrations: Integration[] | null;
   error: Error | null;
-  search: FindIntegrationsRequestQuery;
+  search: FindIntegrationsRequestQuery & { strategy?: SearchStrategy };
   total?: number;
 }
 
 export interface IntegrationsSearchParams {
   nameQuery?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: SortOrder;
+  strategy?: SearchStrategy;
+  integrationId?: string;
 }
 
 export type IntegrationTypestate =
@@ -47,6 +54,10 @@ export type IntegrationTypestate =
       context: DefaultIntegrationsContext;
     }
   | {
+      value: 'searchingStreams';
+      context: DefaultIntegrationsContext;
+    }
+  | {
       value: 'checkingMoreIntegrationsAvailability';
       context: DefaultIntegrationsContext;
     };
@@ -60,6 +71,14 @@ export type IntegrationsEvent =
     }
   | {
       type: 'LOADING_FAILED';
+      error: Error;
+    }
+  | {
+      type: 'SEARCH_SUCCEEDED';
+      integrations: Integration[];
+    }
+  | {
+      type: 'SEARCH_FAILED';
       error: Error;
     }
   | {

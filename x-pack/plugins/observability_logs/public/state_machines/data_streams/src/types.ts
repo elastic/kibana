@@ -5,7 +5,11 @@
  * 2.0.
  */
 import type { IImmutableCache } from '../../../../common/immutable_cache';
-import { FindDataStreamsRequestQuery, FindDataStreamsResponse } from '../../../../common/latest';
+import {
+  FindDataStreamsRequestQuery,
+  FindDataStreamsResponse,
+  SortOrder,
+} from '../../../../common/latest';
 import { DataStream } from '../../../../common/data_streams';
 
 export interface DefaultDataStreamsContext {
@@ -17,7 +21,7 @@ export interface DefaultDataStreamsContext {
 
 export interface DataStreamsSearchParams {
   datasetQuery?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: SortOrder;
 }
 
 export type IntegrationTypestate =

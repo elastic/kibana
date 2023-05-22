@@ -10,7 +10,7 @@ import createContainer from 'constate';
 import { useCallback } from 'react';
 import { createDataStreamsStateMachine } from '../state_machines/data_streams';
 import { IDataStreamsClient } from '../services/data_streams';
-import { FindDataStreamsRequestQuery } from '../../common';
+import { FindDataStreamsRequestQuery, SortOrder } from '../../common';
 
 interface DataStreamsContextDeps {
   dataStreamsClient: IDataStreamsClient;
@@ -18,7 +18,7 @@ interface DataStreamsContextDeps {
 
 export interface SearchDataStreamsParams {
   name?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: SortOrder;
 }
 
 export type SearchDataStreams = (params: SearchDataStreamsParams) => void;

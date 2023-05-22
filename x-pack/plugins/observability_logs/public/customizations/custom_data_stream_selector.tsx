@@ -50,18 +50,19 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
 
   return (
     <DataStreamSelector
+      dataStreams={dataStreams}
       dataStreamsError={dataStreamsError}
       integrations={integrations}
       isLoadingIntegrations={isLoadingIntegrations}
       isLoadingStreams={isLoadingStreams}
-      onSearchIntegrations={searchIntegrations}
-      onLoadMoreIntegrations={loadMore}
+      onIntegrationsLoadMore={loadMore}
+      onIntegrationsSearch={searchIntegrations}
       onStreamSelected={handleStreamSelection}
       onStreamsEntryClick={loadDataStreams}
       onStreamsReload={reloadDataStreams}
+      onStreamsSearch={searchDataStreams}
       search={search}
       title={dataView.getName()}
-      uncategorizedStreams={dataStreams}
     />
   );
 });

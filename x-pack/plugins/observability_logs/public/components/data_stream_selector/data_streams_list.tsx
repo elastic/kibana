@@ -6,31 +6,23 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiContextMenuItem,
-  EuiEmptyPrompt,
-  EuiPanel,
-  EuiSkeletonText,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiContextMenuItem, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   errorLabel,
   noDataStreamsDescriptionLabel,
   noDataStreamsLabel,
-  noDataStreamsRetryLabel,
-  uncategorizedLabel,
+  noDataRetryLabel,
 } from './constants';
-import type { DataStreamSelectionHandler } from '../../customizations/custom_data_stream_selector';
 import { DataStream } from '../../../common/data_streams';
+import { DataStreamSkeleton } from './data_stream_skeleton';
+import { SearchHandler } from './data_stream_selector';
 
 interface DataStreamListProps {
   dataStreams: DataStream[] | null;
-  error: Error | null;
+  error?: Error | null;
   isLoading: boolean;
-  onStreamClick: DataStreamSelectionHandler;
+  onStreamClick: SearchHandler;
   onRetry: () => void;
 }
 
@@ -45,11 +37,7 @@ export const DataStreamsList = ({
   const hasError = error !== null;
 
   if (isLoading) {
-    return (
-      <EuiPanel>
-        <EuiSkeletonText lines={7} isLoading contentAriaLabel={uncategorizedLabel} />
-      </EuiPanel>
-    );
+    return <DataStreamSkeleton />;
   }
 
   if (isEmpty) {
@@ -85,7 +73,7 @@ export const DataStreamsList = ({
             }}
           />
         }
-        actions={[<EuiButton onClick={onRetry}>{noDataStreamsRetryLabel}</EuiButton>]}
+        actions={[<EuiButton onClick={onRetry}>{noDataRetryLabel}</EuiButton>]}
       />
     );
   }
