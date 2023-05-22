@@ -21,6 +21,7 @@ import { useNavigation as useNavigationServices } from '../../../services';
 import { InternalNavigationNode, RegisterFunction } from '../types';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
+import { NavigationUI } from './navigation_ui';
 
 interface Context {
   register: RegisterFunction;
@@ -35,10 +36,11 @@ const NavigationContext = createContext<Context>({
 
 interface Props {
   children: ReactNode;
+  homeRef: string;
   onRootItemRemove?: (id: string) => void;
 }
 
-export function Navigation({ children, onRootItemRemove }: Props) {
+export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
   const { onProjectNavigationChange } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
@@ -100,7 +102,7 @@ export function Navigation({ children, onRootItemRemove }: Props) {
 
   return (
     <NavigationContext.Provider value={contextValue}>
-      <ul>{children}</ul>
+      <NavigationUI homeRef={homeRef}>{children}</NavigationUI>
     </NavigationContext.Provider>
   );
 }

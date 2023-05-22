@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { of } from 'rxjs';
 import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
+import { EuiButtonIcon, EuiCollapsibleNav, EuiThemeProvider } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { NavigationStorybookMock } from '../../../mocks';
 import mdx from '../../../README.mdx';
 import { NavigationProvider } from '../../services';
@@ -20,6 +22,57 @@ import type { ChromeNavigationViewModel, NavigationServices } from '../../../typ
 import { Navigation } from './components';
 
 const storybookMock = new NavigationStorybookMock();
+
+const SIZE_OPEN = 248;
+const SIZE_CLOSED = 40;
+
+const NavigationWrapper: FC = ({ children }) => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  const collabsibleNavCSS = css`
+    border-inline-end-width: 1,
+    display: flex,
+    flex-direction: row,
+  `;
+
+  const CollapseButton = () => {
+    const buttonCSS = css`
+      margin-left: -32px;
+      position: fixed;
+      z-index: 1000;
+    `;
+    return (
+      <span css={buttonCSS}>
+        <EuiButtonIcon
+          iconType={isOpen ? 'menuLeft' : 'menuRight'}
+          color={isOpen ? 'ghost' : 'text'}
+          onClick={toggleOpen}
+        />
+      </span>
+    );
+  };
+
+  const toggleOpen = useCallback(() => {
+    setIsOpen(!isOpen);
+  }, [isOpen, setIsOpen]);
+
+  return (
+    <EuiThemeProvider>
+      <EuiCollapsibleNav
+        css={collabsibleNavCSS}
+        isOpen={true}
+        showButtonIfDocked={true}
+        onClose={toggleOpen}
+        isDocked={true}
+        size={isOpen ? SIZE_OPEN : SIZE_CLOSED}
+        hideCloseButton={false}
+        button={<CollapseButton />}
+      >
+        {isOpen && children}
+      </EuiCollapsibleNav>
+    </EuiThemeProvider>
+  );
+};
 
 const navTree: ChromeProjectNavigationNode[] = [
   {
@@ -145,7 +198,7 @@ export const FromObjectConfig = (args: ChromeNavigationViewModel & NavigationSer
 
   return (
     <NavigationProvider {...services}>
-      <DefaultNavigation navTree={navTree} />
+      <DefaultNavigation homeRef="/" navTree={navTree} />
     </NavigationProvider>
   );
 };
@@ -161,7 +214,7 @@ export const FromReactNodes = (args: ChromeNavigationViewModel & NavigationServi
 
   return (
     <NavigationProvider {...services}>
-      <Navigation>
+      <Navigation homeRef="/">
         <Navigation.Item link="item1" />
         <Navigation.Item link="unknown" title="This should not appear" />
         <Navigation.Group id="group1" title="My group">
@@ -172,6 +225,25 @@ export const FromReactNodes = (args: ChromeNavigationViewModel & NavigationServi
         <Navigation.Item id="itemLast">Title from react node</Navigation.Item>
       </Navigation>
     </NavigationProvider>
+  );
+};
+
+export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    navLinks$: of(deepLinks),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+  });
+
+  return (
+    <NavigationWrapper>
+      <NavigationProvider {...services}>
+        <Navigation homeRef="/">
+        </Navigation>
+      </NavigationProvider>
+    </NavigationWrapper>
   );
 };
 

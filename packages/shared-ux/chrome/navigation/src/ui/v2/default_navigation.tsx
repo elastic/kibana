@@ -12,10 +12,11 @@ import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { Navigation } from './components';
 
 interface Props {
+  homeRef: string;
   navTree: ChromeProjectNavigationNode[];
 }
 
-export const DefaultNavigation: FC<Props> = ({ navTree }) => {
+export const DefaultNavigation: FC<Props> = ({ homeRef, navTree }) => {
   // Temp logic to demo removing items from the tree
   const [removedItems, setRemovedItems] = useState<Set<string>>(new Set());
 
@@ -77,6 +78,7 @@ export const DefaultNavigation: FC<Props> = ({ navTree }) => {
 
   return (
     <Navigation
+      homeRef={homeRef}
       onRootItemRemove={(id) => {
         onRemove([id]);
       }}
