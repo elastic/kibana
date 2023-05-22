@@ -145,12 +145,9 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       apiKeyId,
       observabilityOnboardingState: {
         ...observabilityOnboardingState,
-        state: {
-          ...observabilityOnboardingState.state,
-          progress: {
-            ...observabilityOnboardingState.state.progress,
-            [name]: status,
-          },
+        progress: {
+          ...observabilityOnboardingState.progress,
+          [name]: status,
         },
       },
     });

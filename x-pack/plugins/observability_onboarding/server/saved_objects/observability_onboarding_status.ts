@@ -16,8 +16,8 @@ export interface ObservabilityOnboardingState {
     customConfigurations: string;
     logFilePaths: string[];
     namespace: string;
-    progress: Record<string, string>;
   };
+  progress: Record<string, string>;
 }
 
 export interface SavedObservabilityOnboardingState
@@ -32,8 +32,8 @@ export const observabilityOnboardingState: SavedObjectsType = {
   namespaceType: 'multiple',
   mappings: {
     properties: {
-      apiKeyId: { type: 'keyword' },
       state: { type: 'object', dynamic: false },
+      progress: { type: 'object', dynamic: false },
     },
   },
 };
