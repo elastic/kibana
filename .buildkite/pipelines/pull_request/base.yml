@@ -4,7 +4,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
@@ -14,7 +14,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
@@ -25,7 +25,7 @@ steps:
     label: Build Kibana Distribution and Plugins
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-16
       minCpuPlatform: 'Intel Cascade Lake'
@@ -42,7 +42,7 @@ steps:
     label: 'Build API Docs'
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-4
       minCpuPlatform: 'Intel Cascade Lake'
@@ -57,7 +57,7 @@ steps:
     label: Mark CI Stats as ready
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
@@ -74,7 +74,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
@@ -93,7 +93,7 @@ steps:
   #   depends_on: build
   #   agents:
   #     provider: gcp
-  #     image: family/brian-ubuntu-2004
+  #     image: family/kibana-ubuntu-2004
   #     imageProject: elastic-images-qa
   #     machineType: n2-standard-4
   #     minCpuPlatform: 'Intel Cascade Lake'
@@ -108,7 +108,7 @@ steps:
     label: 'Linting'
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-8
       minCpuPlatform: 'Intel Cascade Lake'
@@ -123,7 +123,7 @@ steps:
     label: 'Linting (with types)'
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-16
       minCpuPlatform: 'Intel Cascade Lake'
@@ -139,7 +139,7 @@ steps:
     label: 'Checks'
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
@@ -154,7 +154,7 @@ steps:
     label: 'Check Types'
     agents:
       provider: gcp
-      image: family/brian-ubuntu-2004
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-16
       minCpuPlatform: 'Intel Cascade Lake'

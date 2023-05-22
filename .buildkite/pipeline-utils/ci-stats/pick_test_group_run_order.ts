@@ -405,7 +405,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               provider: 'gcp',
-              image: 'family/brian-ubuntu-2004',
+              image: 'family/kibana-ubuntu-2004',
               imageProject: 'elastic-images-qa',
               machineType: 'n2-standard-4',
               minCpuPlatform: 'Intel Cascade Lake',
@@ -429,7 +429,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest-integration',
             agents: {
               provider: 'gcp',
-              image: 'family/brian-ubuntu-2004',
+              image: 'family/kibana-ubuntu-2004',
               imageProject: 'elastic-images-qa',
               machineType: 'n2-standard-4',
               minCpuPlatform: 'Intel Cascade Lake',
@@ -470,7 +470,7 @@ export async function pickTestGroupRunOrder() {
                   timeout_in_minutes: 90,
                   agents: {
                     provider: 'gcp',
-                    image: 'family/brian-ubuntu-2004',
+                    image: 'family/kibana-ubuntu-2004',
                     imageProject: 'elastic-images-qa',
                     machineType: 'n2-standard-4',
                     minCpuPlatform: 'Intel Cascade Lake',
