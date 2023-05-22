@@ -77,23 +77,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # - command: .buildkite/scripts/steps/test/ftr_configs.sh
-  #   label: 'FTR Configs'
-  #   timeout_in_minutes: 90
-  #   depends_on: build
-  #   agents:
-  #     provider: gcp
-  #     image: family/kibana-ubuntu-2004
-  #     imageProject: elastic-images-qa
-  #     machineType: n2-standard-4
-  #     minCpuPlatform: 'Intel Cascade Lake'
-  #   env:
-  #     FTR_CONFIG_GROUP_KEY: ftr_configs_0
-  #   retry:
-  #     automatic:
-  #       - exit_status: '*'
-  #         limit: 1
-
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
