@@ -552,7 +552,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const isCloudUser = user.elastic_cloud_user;
 
-  const { isThemeOverridden, isOverriddenThemeDarkMode } = determineIfDarkModeOverride(
+  const { isThemeOverridden, isOverriddenThemeDarkMode } = determineIfThemeOverridden(
     services.settings.client
   );
 
@@ -922,7 +922,7 @@ function renderHelpText(isOverridden: boolean) {
   }
 }
 
-function determineIfDarkModeOverride(settingsClient: IUiSettingsClient): {
+function determineIfThemeOverridden(settingsClient: IUiSettingsClient): {
   isThemeOverridden: boolean;
   isOverriddenThemeDarkMode: boolean;
 } {
