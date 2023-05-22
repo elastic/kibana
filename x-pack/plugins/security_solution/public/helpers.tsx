@@ -33,7 +33,7 @@ import type {
 import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
 import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SecurityPageName } from './app/types';
-import type { InspectResponse, StartedSubPlugins } from './types';
+import type { InspectResponse, StartedSubPlugins, StartServices } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store/timeline';
 import { TimelineId } from '../common/types';
@@ -194,7 +194,8 @@ export const isThreatIntelligencePath = (pathname: string): boolean => {
 
 export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
-  capabilities: Capabilities
+  capabilities: Capabilities,
+  services: StartServices
 ): RouteProps[] => {
   return [
     ...Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
@@ -207,7 +208,13 @@ export const getSubPluginRoutesByCapabilities = (
         ...acc,
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
-          component: () => <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />,
+          component: () => {
+            const Upsell = services.upselling.getPageUpselling(key as SecurityPageName);
+            if (Upsell) {
+              return <Upsell />;
+            }
+            return <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />;
+          },
         })),
       ];
     }, []),
