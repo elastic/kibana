@@ -139,7 +139,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     ) => {
       const alertContext =
         actions != null
-          ? actions.reduce((next, action) => ({ ...next, ...action.context }), {})
+          ? actions.reduce((next, action) => Object.assign(next, action.context), {})
           : {};
 
       const alert = alertWithLifecycle({
