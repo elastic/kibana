@@ -45,5 +45,6 @@ export const clickOnShowTopN = () => {
 };
 
 export const clickOnCopyValue = () => {
-  cy.get(COPY).first().invoke('focus').click({ force: true });
+  cy.get(COPY).first().focus();
+  cy.get(COPY).first().click();
 };

@@ -349,8 +349,8 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  cy.get(propertySelector).eq(rowIndex).realHover();
-  cy.get(actionSelector).first().click();
+  cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
+  cy.get(actionSelector).first().click({ force: true });
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
@@ -366,7 +366,7 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 };
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickExpandActions(propertySelector, rowIndex);
-  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
+  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click();
 };
 export const closeTopNAlertProperty = () => {
   cy.get(TOP_N_CONTAINER).then(() => {
@@ -391,7 +391,8 @@ export const waitForAlerts = () => {
 };
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
-  cy.get(columnSelector).eq(1).focus().find(CELL_EXPAND_VALUE).click({ force: true });
+  cy.get(columnSelector).eq(1).focus();
+  cy.find(CELL_EXPAND_VALUE).click();
 };
 
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
