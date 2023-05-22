@@ -21,7 +21,8 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       public readonly tableTestSubj: string,
       public readonly tableRowSubj: string,
       public readonly columns: Array<{ id: string; testSubj: string }>,
-      public readonly searchInputSubj: string
+      public readonly searchInputSubj: string,
+      public readonly parentSubj?: string
     ) {}
 
     public async assertTableLoaded() {
@@ -33,7 +34,9 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
     }
 
     public async parseTable() {
-      const table = await testSubjects.find(`~${this.tableTestSubj}`);
+      const table = await testSubjects.find(
+        `${this.parentSubj ? `${this.parentSubj} > ` : ''}~${this.tableTestSubj}`
+      );
       const $ = await table.parseDomContent();
       const rows = [];
 
@@ -146,10 +149,11 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       tableTestSubj: string,
       tableRowSubj: string,
       columns: Array<{ id: string; testSubj: string }>,
-      searchInputSubj: string
+      searchInputSubj: string,
+      parentSubj?: string
     ) {
       Object.defineProperty(TableService, 'name', { value: name });
-      return new TableService(tableTestSubj, tableRowSubj, columns, searchInputSubj);
+      return new TableService(tableTestSubj, tableRowSubj, columns, searchInputSubj, parentSubj);
     },
   };
 }

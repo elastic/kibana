@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -37,5 +38,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForChangePointDetection('ft_ecommerce');
       await aiops.changePointDetectionPage.assertChangePointDetectionPageExists();
     });
+
+    it('detects a change point when no split field is selected', async () => {
+      await aiops.changePointDetectionPage.clickUseFullDataButton();
+      await aiops.changePointDetectionPage.selectMetricField(0, 'products.discount_amount');
+      const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
+      expect(result.length).to.eql(1);
+      expect(parseInt(result[0].pValue, 10)).to.eql(0);
+      expect(result[0].type).to.eql('distribution_change');
+    });
+
+    it('shows multiple results when split field is selected', async () => {});
+
+    it('supports a quick filter action', async () => {});
+
+    it('allows change point selection for detailed view', async () => {});
+
+    it('supports multiple configurations for change point detection', async () => {});
   });
 }

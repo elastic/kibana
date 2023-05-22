@@ -7,13 +7,15 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlTableService } from '../ml/common_table_service';
 
-export function ChangePointDetectionPageProvider({
-  getService,
-  getPageObject,
-}: FtrProviderContext) {
+export function ChangePointDetectionPageProvider(
+  { getService, getPageObject }: FtrProviderContext,
+  tableService: MlTableService
+) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
 
   return {
     async navigateToIndexPatternSelection() {
@@ -33,6 +35,56 @@ export function ChangePointDetectionPageProvider({
       expect(actualQueryString).to.eql(
         expectedQueryString,
         `Expected query bar text to be '${expectedQueryString}' (got '${actualQueryString}')`
+      );
+    },
+
+    async assertPanelLoaded() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.waitForHidden('aiopsChangePointResultsTable loading');
+      });
+    },
+
+    async assertMetricFieldSelection(panelIndex: number = 0, expectedIdentifier: string[]) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        `aiopsChangePointPanel_${panelIndex} > aiopsChangePointMetricField > comboBoxInput`
+      );
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected the metric field to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
+    },
+
+    async selectMetricField(panelIndex: number = 0, value: string) {
+      await comboBox.set(
+        `aiopsChangePointPanel_${panelIndex} > aiopsChangePointMetricField > comboBoxInput`,
+        value
+      );
+      await this.assertMetricFieldSelection(panelIndex, [value]);
+    },
+
+    async clickUseFullDataButton() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
+        await testSubjects.existOrFail('aiopsChangePointResultsTable loaded');
+      });
+    },
+
+    getTable(index: number) {
+      return tableService.getServiceInstance(
+        'ChangePointResultsTable',
+        `aiopsChangePointResultsTable`,
+        'aiopsChangePointResultsTableRow',
+        [
+          { id: 'timestamp', testSubj: 'aiopsChangePointTimestamp' },
+          { id: 'preview', testSubj: 'aiopsChangePointPreview' },
+          { id: 'type', testSubj: 'aiopsChangePointType' },
+          { id: 'pValue', testSubj: 'aiopsChangePointPValue' },
+          { id: 'groupName', testSubj: 'aiopsChangePointGroupName' },
+          { id: 'groupValue', testSubj: 'aiopsChangePointGroupValue' },
+        ],
+        '',
+        `aiopsChangePointPanel_${index}`
       );
     },
   };
