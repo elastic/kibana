@@ -6,44 +6,47 @@
  */
 
 import React, { memo, Suspense } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
+import type { ConnectorTypeFields } from '../../../common/api';
 import type { CaseActionConnector } from '../types';
 import { getCaseConnectors } from '.';
 
 interface Props {
   connector: CaseActionConnector | null;
+  fields: ConnectorTypeFields['fields'];
 }
 
-const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector }) => {
+const ConnectorFieldsFormPreviewComponent: React.FC<Props> = ({ connector, fields }) => {
   const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
     return null;
   }
 
-  const { fieldsComponent: FieldsComponent } = caseConnectorsRegistry.get(connector.actionTypeId);
+  const { previewComponent: PreviewComponent } = caseConnectorsRegistry.get(connector.actionTypeId);
 
   return (
     <>
-      {FieldsComponent != null ? (
+      {PreviewComponent != null ? (
         <Suspense
           fallback={
             <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem>
-                <EuiSkeletonText lines={5} size="m" />
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
               </EuiFlexItem>
             </EuiFlexGroup>
           }
         >
-          <div data-test-subj={'connector-fields'}>
-            <FieldsComponent connector={connector} key={connector.id} />
+          <div data-test-subj={'connector-fields-preview'}>
+            <PreviewComponent connector={connector} fields={fields} key={connector.id} />
           </div>
         </Suspense>
       ) : null}
     </>
   );
 };
-ConnectorFieldsFormComponent.displayName = 'ConnectorFieldsForm';
 
-export const ConnectorFieldsForm = memo(ConnectorFieldsFormComponent);
+ConnectorFieldsFormPreviewComponent.displayName = 'ConnectorFieldsFormPreview';
+
+export const ConnectorFieldsPreviewForm = memo(ConnectorFieldsFormPreviewComponent);
