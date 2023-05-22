@@ -2048,14 +2048,6 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
-          },
-          {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
           },

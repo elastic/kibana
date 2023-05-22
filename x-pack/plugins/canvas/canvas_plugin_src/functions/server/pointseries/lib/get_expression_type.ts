@@ -27,9 +27,8 @@ export function getExpressionType(columns: DatatableColumn[], mathExpression: st
       const fieldTypes = fieldNames.reduce((types, name) => {
         const type = getFieldType(columns, name);
         if (type !== 'null' && types.indexOf(type) === -1) {
-          return types.concat(type);
+          types.push(type);
         }
-
         return types;
       }, [] as string[]);
 
