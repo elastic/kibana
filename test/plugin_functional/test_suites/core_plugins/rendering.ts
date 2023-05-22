@@ -160,7 +160,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.sendUsageTo (any)',
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
-        'vis_type_timeseries.readOnly (boolean)',
         'vis_type_vega.enableExternalUrls (boolean)',
         'xpack.actions.email.domain_allowlist (array)',
         'xpack.apm.serviceMapEnabled (boolean)',

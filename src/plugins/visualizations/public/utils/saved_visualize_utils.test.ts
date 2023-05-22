@@ -499,8 +499,6 @@ describe('saved_visualize_utils', () => {
           },
           {
             id: 'wat',
-            image: undefined,
-            readOnly: false,
             references: undefined,
             icon: undefined,
             savedObjectType: 'visualization',
@@ -508,7 +506,6 @@ describe('saved_visualize_utils', () => {
             type: 'test',
             typeName: 'test',
             typeTitle: undefined,
-            updatedAt: undefined,
             title: 'WATEVER',
             url: '#/edit/wat',
           },
