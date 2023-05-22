@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiToolTip, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-import { ServerlessSecuritySkus } from '../../../../common/config';
+import { ServerlessSecurityPLIs } from '../../../../common/config';
 
 export const PrebuiltRulesTooltipUpselling: React.FC = React.memo(({ children }) => {
   return (
@@ -27,9 +27,9 @@ export const PrebuiltRulesTooltipUpselling: React.FC = React.memo(({ children })
   );
 });
 
-export const RulesResponseActionsUpselling: React.FC<{ projectSkus: ServerlessSecuritySkus }> =
-  React.memo(({ projectSkus }) => {
-    const upsellingSku = projectSkus.includes('cloudEssentials')
+export const RulesResponseActionsUpselling: React.FC<{ projectPLIs: ServerlessSecurityPLIs }> =
+  React.memo(({ projectPLIs: projectPLIs }) => {
+    const upsellingPLI = projectPLIs.includes('cloudEssentials')
       ? 'Cloud Complete'
       : 'Endpoint Complete';
 
@@ -39,7 +39,7 @@ export const RulesResponseActionsUpselling: React.FC<{ projectSkus: ServerlessSe
         title={<>This is a testing component for a Serverless upselling prompt.</>}
         body={
           <>
-            Get <EuiLink href="#">{upsellingSku}</EuiLink> to attach Response Actions to rules
+            Get <EuiLink href="#">{upsellingPLI}</EuiLink> to attach Response Actions to rules
             <br />
             <br />
             <iframe
