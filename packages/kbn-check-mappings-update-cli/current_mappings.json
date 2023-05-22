@@ -2097,6 +2097,17 @@
       }
     }
   },
+  "observability-onboarding-state": {
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "state": {
+        "type": "object",
+        "dynamic": false
+      }
+    }
+  },
   "ml-job": {
     "properties": {
       "job_id": {
