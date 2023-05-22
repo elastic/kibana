@@ -111,6 +111,7 @@ Any modifications made to this file will be overwritten.
     "warning" : "warning",
     "outcome" : "succeeded"
   },
+  "api_key_created_by_user" : false,
   "params" : {
     "key" : ""
   },
@@ -118,6 +119,7 @@ Any modifications made to this file will be overwritten.
   "enabled" : true,
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 5,
   "tags" : [ "tags", "tags" ],
   "running" : true,
   "api_key_owner" : "elastic",
@@ -142,6 +144,7 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -154,6 +157,7 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -407,6 +411,7 @@ Any modifications made to this file will be overwritten.
       "warning" : "warning",
       "outcome" : "succeeded"
     },
+    "api_key_created_by_user" : false,
     "params" : {
       "key" : ""
     },
@@ -414,6 +419,7 @@ Any modifications made to this file will be overwritten.
     "enabled" : true,
     "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
     "rule_type_id" : "monitoring_alert_cluster_health",
+    "revision" : 5,
     "tags" : [ "tags", "tags" ],
     "running" : true,
     "api_key_owner" : "elastic",
@@ -438,6 +444,7 @@ Any modifications made to this file will be overwritten.
       "params" : {
         "key" : ""
       },
+      "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
       "connector_type_id" : ".server-log",
       "frequency" : {
         "summary" : true,
@@ -450,6 +457,7 @@ Any modifications made to this file will be overwritten.
       "params" : {
         "key" : ""
       },
+      "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
       "connector_type_id" : ".server-log",
       "frequency" : {
         "summary" : true,
@@ -473,6 +481,7 @@ Any modifications made to this file will be overwritten.
       "warning" : "warning",
       "outcome" : "succeeded"
     },
+    "api_key_created_by_user" : false,
     "params" : {
       "key" : ""
     },
@@ -480,6 +489,7 @@ Any modifications made to this file will be overwritten.
     "enabled" : true,
     "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
     "rule_type_id" : "monitoring_alert_cluster_health",
+    "revision" : 5,
     "tags" : [ "tags", "tags" ],
     "running" : true,
     "api_key_owner" : "elastic",
@@ -504,6 +514,7 @@ Any modifications made to this file will be overwritten.
       "params" : {
         "key" : ""
       },
+      "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
       "connector_type_id" : ".server-log",
       "frequency" : {
         "summary" : true,
@@ -516,6 +527,7 @@ Any modifications made to this file will be overwritten.
       "params" : {
         "key" : ""
       },
+      "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
       "connector_type_id" : ".server-log",
       "frequency" : {
         "summary" : true,
@@ -654,6 +666,7 @@ Any modifications made to this file will be overwritten.
     "warning" : "warning",
     "outcome" : "succeeded"
   },
+  "api_key_created_by_user" : false,
   "params" : {
     "key" : ""
   },
@@ -661,6 +674,7 @@ Any modifications made to this file will be overwritten.
   "enabled" : true,
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 5,
   "tags" : [ "tags", "tags" ],
   "running" : true,
   "api_key_owner" : "elastic",
@@ -685,6 +699,7 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -697,6 +712,7 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -2012,6 +2028,7 @@ Any modifications made to this file will be overwritten.
     "warning" : "warning",
     "outcome" : "succeeded"
   },
+  "api_key_created_by_user" : false,
   "params" : {
     "key" : ""
   },
@@ -2019,6 +2036,7 @@ Any modifications made to this file will be overwritten.
   "enabled" : true,
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 5,
   "tags" : [ "tags", "tags" ],
   "running" : true,
   "api_key_owner" : "elastic",
@@ -2043,6 +2061,7 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -2055,6 +2074,7 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -2231,6 +2251,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
 <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
 <div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+<div class="param">uuid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A universally unique identifier (UUID) for the action. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2566,7 +2587,8 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">actions </div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
-<div class="param">api_key_owner </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">api_key_created_by_user (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the API key that is associated with the rule was created by the user. </div>
+<div class="param">api_key_owner </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The owner of the API key that is associated with the rule and used to run background tasks. </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The application or feature that owns the rule. For example, <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
 <div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> The date and time that the rule was created. format: date-time</div>
 <div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that created the rule. </div>
@@ -2580,6 +2602,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">next_run (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
 <div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
+<div class="param">revision (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The rule revision number. </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the type of rule. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
 <div class="param">running (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule is running. </div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
