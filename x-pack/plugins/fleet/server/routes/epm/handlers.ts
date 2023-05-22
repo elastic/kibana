@@ -148,6 +148,7 @@ export const getDataStreamsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const coreContext = await context.core;
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const res = await getDataStreams({
       esClient,
