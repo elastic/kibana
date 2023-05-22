@@ -65,6 +65,8 @@ export function FieldSelector({
       : []
   ).concat(createOptions(suggestions));
 
+  const isDisabled = name !== 'indicator.params.service' && !serviceName;
+
   return (
     <EuiFlexItem>
       <EuiFormRow
@@ -77,7 +79,7 @@ export function FieldSelector({
             label
           )
         }
-        isInvalid={getFieldState(name).invalid}
+        isInvalid={getFieldState(name).invalid && !isDisabled}
       >
         <Controller
           shouldUnregister
@@ -92,8 +94,8 @@ export function FieldSelector({
               async
               data-test-subj={dataTestSubj}
               isClearable
-              isDisabled={name !== 'indicator.params.service' && !serviceName}
-              isInvalid={fieldState.invalid}
+              isDisabled={isDisabled}
+              isInvalid={fieldState.invalid && !isDisabled}
               isLoading={isLoading}
               onChange={(selected: EuiComboBoxOptionOption[]) => {
                 if (selected.length) {
