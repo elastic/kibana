@@ -92,9 +92,10 @@ export const deleteExceptionListWithRuleReferenceByListId = (listId: string) => 
 
 export const searchForExceptionList = (searchText: string) => {
   if (Cypress.browser.name === 'firefox') {
-    cy.get(EXCEPTIONS_TABLE_SEARCH).type(`${searchText}{enter}`, { force: true });
+    cy.get(EXCEPTIONS_TABLE_SEARCH).type(`${searchText}{enter}`);
   } else {
-    cy.get(EXCEPTIONS_TABLE_SEARCH).type(searchText, { force: true }).trigger('search');
+    cy.get(EXCEPTIONS_TABLE_SEARCH).type(searchText);
+    cy.get(EXCEPTIONS_TABLE_SEARCH).realPress('Enter');
   }
 };
 
@@ -174,7 +175,7 @@ export const editExceptionLisDetails = ({
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', name.original);
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT)
       .should('have.value', name.original)
-      .clear({ force: true })
+      .clear()
       .type(`${name.updated}`);
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT).should('have.value', name.updated);
   }
@@ -182,7 +183,7 @@ export const editExceptionLisDetails = ({
   if (description != null) {
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT)
       .should('have.value', description.original)
-      .clear({ force: true })
+      .clear()
       .should('not.have.value');
     if (description.updated != null) {
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT).type(

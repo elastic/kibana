@@ -17,7 +17,6 @@ export const openSourcerer = (sourcererScope?: string) => {
     return openTimelineSourcerer();
   }
   cy.get(SOURCERER.trigger).should('be.enabled');
-  cy.get(SOURCERER.trigger).should('be.visible');
   cy.get(SOURCERER.trigger).click();
   cy.get(SOURCERER.wrapper).should('be.visible');
 };
@@ -30,12 +29,10 @@ export const selectDataView = (dataView: string, sourcererScope?: string) => {
 
 const openTimelineSourcerer = () => {
   cy.get(SOURCERER.triggerTimeline).should('be.enabled');
-  cy.get(SOURCERER.triggerTimeline).should('be.visible');
   cy.get(SOURCERER.triggerTimeline).first().click();
   cy.get(SOURCERER.wrapperTimeline).should('be.visible');
 };
 export const openAdvancedSettings = () => {
-  cy.get(SOURCERER.advancedSettings).should('be.visible');
   cy.get(SOURCERER.advancedSettings).click();
 };
 
@@ -87,14 +84,14 @@ export const deselectSourcererOptions = (patternNames: string[]) => {
 
 export const saveSourcerer = () => {
   clickOutOfSelector();
-  return cy.get(SOURCERER.saveButton).click({ force: true });
+  return cy.get(SOURCERER.saveButton).click();
 };
 
 export const resetSourcerer = () => {
   return cy.get(SOURCERER.resetButton).click();
 };
 
-export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check({ force: true });
+export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check();
 
 export const addIndexToDefault = (index: string) => {
   visit(`/app/management/kibana/settings?query=category:(securitySolution)`);

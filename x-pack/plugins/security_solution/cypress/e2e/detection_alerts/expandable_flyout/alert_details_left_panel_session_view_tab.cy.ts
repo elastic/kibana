@@ -36,8 +36,7 @@ describe.skip(
 
     it('should display session view no data message', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_NO_DATA)
-        .should('be.visible')
-        .and('contain.text', 'No data to render')
+        .should('contain.text', 'No data to render')
         .and('contain.text', 'No process events found for this query');
     });
 

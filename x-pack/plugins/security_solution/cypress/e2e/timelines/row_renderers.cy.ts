@@ -35,7 +35,7 @@ describe('Row renderers', () => {
     openTimelineUsingToggle();
     populateTimeline();
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
-    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
   });
 
   it('Row renderers should be enabled by default', () => {

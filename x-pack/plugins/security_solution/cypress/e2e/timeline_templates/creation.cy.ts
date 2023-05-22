@@ -59,7 +59,7 @@ describe.skip('Timeline Templates', () => {
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
-  it('Creates a timeline template', async () => {
+  it('Creates a timeline template', () => {
     visitWithoutDateRange(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();

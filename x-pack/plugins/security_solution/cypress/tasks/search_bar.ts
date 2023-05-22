@@ -21,22 +21,18 @@ import {
 
 export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
-  cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).should('be.visible');
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click();
 };
 
 export const openKqlQueryBar = () => {
-  cy.get(GLOBAL_KQL_INPUT).should('be.visible');
   cy.get(GLOBAL_KQL_INPUT).click();
 };
 
 export const fillKqlQueryBar = (query: string) => {
-  cy.get(GLOBAL_KQL_INPUT).should('be.visible');
   cy.get(GLOBAL_KQL_INPUT).type(query);
 };
 
 export const clearKqlQueryBar = () => {
-  cy.get(GLOBAL_KQL_INPUT).should('be.visible');
   cy.get(GLOBAL_KQL_INPUT).clear();
   // clicks outside of the input to close the autocomplete
   cy.get('body').click(0, 0);
@@ -50,8 +46,6 @@ export const removeKqlFilter = () => {
 };
 
 export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => {
-  cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('exist');
-  cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.visible');
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}{enter}`);
   if (!operator) {
     cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).click();

@@ -13,14 +13,14 @@ import {
 import { waitForPageToBeLoaded } from './common';
 
 export const goToCreateNewCase = () => {
-  cy.get(ALL_CASES_CREATE_NEW_CASE_BTN, { timeout: 60000 }).click({ force: true });
+  cy.get(ALL_CASES_CREATE_NEW_CASE_BTN, { timeout: 60000 }).click();
 };
 
 export const goToCaseDetails = () => {
   waitForPageToBeLoaded();
-  cy.get(ALL_CASES_NAME).click({ force: true });
+  cy.get(ALL_CASES_NAME).click();
 };
 
 export const goToEditExternalConnection = () => {
-  cy.get(EDIT_EXTERNAL_CONNECTION).click({ force: true });
+  cy.get(EDIT_EXTERNAL_CONNECTION).click();
 };

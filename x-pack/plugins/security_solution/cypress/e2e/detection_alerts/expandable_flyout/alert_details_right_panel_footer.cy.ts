@@ -55,8 +55,11 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 const createNewCaseFromCases = () => {
   navigateToCasesPage();
   cy.get(CREATE_CASE_BUTTON).click();
-  cy.get(NEW_CASE_NAME_INPUT).should('be.visible').click().type('case');
-  cy.get(NEW_CASE_DESCRIPTION_INPUT).should('be.visible').click().type('case description');
+  cy.get(NEW_CASE_NAME_INPUT).click();
+  cy.get(NEW_CASE_NAME_INPUT).type('case');
+  cy.get(NEW_CASE_DESCRIPTION_INPUT).click()
+  cy.get(NEW_CASE_DESCRIPTION_INPUT).type('case description');
+
   cy.get(NEW_CASE_CREATE_BUTTON).click();
 };
 
@@ -84,15 +87,21 @@ describe.skip(
 
     it('should display footer take action button on all tabs', () => {
       openOverviewTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView().should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView()
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+
       cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
       openTableTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView().should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+
       cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
       openJsonTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView().should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+
       cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
       // reset state for next test

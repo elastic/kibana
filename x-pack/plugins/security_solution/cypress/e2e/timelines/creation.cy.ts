@@ -191,7 +191,9 @@ describe('Timelines', (): void => {
           cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
           cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
           waitForTimelineChanges();
-          cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}').clear();
+          cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
+          cy.get(TIMELINE_CORRELATION_INPUT).clear();
+
           // TODO: It may need a further refactor to handle the frequency with which react calls this api
           // Since it's based on real time text changes...and real time query validation
           // there's almost no guarantee on the number of calls, so a cypress.wait may actually be more appropriate

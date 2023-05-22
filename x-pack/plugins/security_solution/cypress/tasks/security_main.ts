@@ -25,9 +25,9 @@ export const closeTimelineUsingCloseButton = () => {
 };
 
 export const enterFullScreenMode = () => {
-  cy.get(TIMELINE_FULL_SCREEN_BUTTON).first().click({ force: true });
+  cy.get(TIMELINE_FULL_SCREEN_BUTTON).first().click();
 };
 
 export const exitFullScreenMode = () => {
-  cy.get(TIMELINE_EXIT_FULL_SCREEN_BUTTON).first().click({ force: true });
+  cy.get(TIMELINE_EXIT_FULL_SCREEN_BUTTON).first().click();
 };

@@ -66,16 +66,10 @@ describe(
     });
 
     it('should display 4 tabs in the header', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
-        .should('be.visible')
-        .and('have.text', 'Visualize');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
-        .should('be.visible')
-        .and('have.text', 'Insights');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB)
-        .should('be.visible')
-        .and('have.text', 'Investigation');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB).should('be.visible').and('have.text', 'History');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB).should('have.text', 'Visualize');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).should('have.text', 'Insights');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB).should('have.text', 'Investigation');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB).should('have.text', 'History');
     });
 
     it.skip('should display tab content when switching tabs', () => {
@@ -95,12 +89,14 @@ describe(
     describe.skip('visualize tab', () => {
       it('should display a button group with 2 button in the visualize tab', () => {
         openVisualizeTab();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)
-          .should('be.visible')
-          .and('have.text', 'Session View');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
-          .should('be.visible')
-          .and('have.text', 'Analyzer Graph');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON).should(
+          'have.text',
+          'Session View'
+        );
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON).should(
+          'have.text',
+          'Analyzer Graph'
+        );
       });
 
       it('should display content when switching buttons', () => {
@@ -116,41 +112,49 @@ describe(
     describe.skip('insights tab', () => {
       it('should display a button group with 4 button in the insights tab', () => {
         openInsightsTab();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON)
-          .should('be.visible')
-          .and('have.text', 'Entities');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
-          .should('be.visible')
-          .and('have.text', 'Threat Intelligence');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON)
-          .should('be.visible')
-          .and('have.text', 'Prevalence');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
-          .should('be.visible')
-          .and('have.text', 'Correlations');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON).should(
+          'have.text',
+          'Entities'
+        );
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON).should(
+          'have.text',
+          'Threat Intelligence'
+        );
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON).should(
+          'have.text',
+          'Prevalence'
+        );
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON).should(
+          'have.text',
+          'Correlations'
+        );
       });
 
       it.skip('should display content when switching buttons', () => {
         openInsightsTab();
         openEntities();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT)
-          .should('be.visible')
-          .and('have.text', 'Entities');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should(
+          'have.text',
+          'Entities'
+        );
 
         openThreatIntelligence();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_CONTENT)
-          .should('be.visible')
-          .and('have.text', 'Threat Intelligence');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_CONTENT).should(
+          'have.text',
+          'Threat Intelligence'
+        );
 
         openPrevalence();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_CONTENT)
-          .should('be.visible')
-          .and('have.text', 'Prevalence');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_CONTENT).should(
+          'have.text',
+          'Prevalence'
+        );
 
         openCorrelations();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_CONTENT)
-          .should('be.visible')
-          .and('have.text', 'Correlations');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_CONTENT).should(
+          'have.text',
+          'Correlations'
+        );
       });
     });
   }

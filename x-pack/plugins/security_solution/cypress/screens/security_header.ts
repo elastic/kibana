@@ -106,5 +106,5 @@ export const openNavigationPanelFor = (page: string) => {
 
 // opens the navigation panel of a main link
 export const openNavigationPanel = (page: string) => {
-  cy.get(`${page} button.solutionSideNavItemButton`).click({ force: true });
+  cy.get(`${page} button.solutionSideNavItemButton`).click();
 };

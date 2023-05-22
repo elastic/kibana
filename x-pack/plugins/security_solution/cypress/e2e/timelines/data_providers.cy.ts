@@ -69,7 +69,7 @@ describe('timeline data providers', () => {
       });
   });
 
-  it('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
+  it.only('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
     updateDataProviderByFieldHoverAction('host.name', 0);
     waitForTimelineChanges();

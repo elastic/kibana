@@ -27,7 +27,7 @@ import {
 import { waitForPageFilters } from '../alerts';
 
 export const openFilterGroupContextMenu = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
+  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click();
 };
 
 export const waitForFilterGroups = () => {
@@ -41,7 +41,7 @@ export const waitForFilterGroups = () => {
 
 export const resetFilterGroup = () => {
   openFilterGroupContextMenu();
-  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click();
 };
 
 export const editFilterGroupControls = () => {
@@ -51,7 +51,7 @@ export const editFilterGroupControls = () => {
 
 export const cancelFieldEditing = () => {
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('be.visible');
-  cy.get(FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS.CANCEL).should('be.visible').trigger('click');
+  cy.get(FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS.CANCEL).trigger('click');
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('not.exist');
 };
 

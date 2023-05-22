@@ -36,12 +36,7 @@ export const importTimeline = (timeline: string) => {
 };
 
 export const openTimeline = (id?: string) => {
-  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
-  if (id) {
-    cy.get(TIMELINE(id)).should('be.visible').pipe(click);
-  } else {
-    cy.get(TIMELINE_NAME).should('be.visible').pipe(click);
-  }
+  cy.get(id ? TIMELINE(id): TIMELINE_NAME).click();
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {

@@ -83,7 +83,7 @@ export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConne
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
   cy.get(COMBO_BOX_INPUT).type(connector.index);
 
-  cy.get(COMBO_BOX_SELECTION).click({ force: true });
+  cy.get(COMBO_BOX_SELECTION).click();
 
   cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
   cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');

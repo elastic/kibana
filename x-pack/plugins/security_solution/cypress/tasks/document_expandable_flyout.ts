@@ -93,11 +93,10 @@ export const openTakeActionButtonAndSelectItem = (option: string) => {
  * Scroll down to the flyout footer's take action button and open its dropdown
  */
 export const openTakeActionButton = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER)
-    .scrollIntoView()
-    .within(() => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).click();
-    });
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).within(() => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).click();
+  });
 };
 
 /**
@@ -106,14 +105,16 @@ export const openTakeActionButton = () => {
 export const selectTakeActionItem = (option: string) => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN)
     .should('be.visible')
-    .within(() => cy.get(option).should('be.visible').click());
+    .within(() => cy.get(option).click());
 };
 
 /**
  * Open the Overview tab in the document details expandable flyout right section
  */
-export const openOverviewTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).scrollIntoView().click();
+export const openOverviewTab = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).click();
+};
 
 /**
  * Toggle the Overview tab investigation section in the document details expandable flyout right section
@@ -138,12 +139,10 @@ export const toggleOverviewTabDescriptionSection = () =>
 /**
  * Toggle the Overview tab insights section in the document details expandable flyout right section
  */
-export const toggleOverviewTabInsightsSection = () =>
-  cy
-    .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER)
-    .scrollIntoView()
-    .should('be.visible')
-    .click();
+export const toggleOverviewTabInsightsSection = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER).click();
+};
 
 /**
  * Toggle the Overview tab visualizations section in the document details expandable flyout right section

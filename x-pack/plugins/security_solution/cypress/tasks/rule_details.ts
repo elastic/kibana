@@ -43,7 +43,6 @@ import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_br
 export const enablesRule = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
-  cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
@@ -63,7 +62,8 @@ export const openExceptionFlyoutFromEmptyViewerPrompt = () => {
 };
 
 export const searchForExceptionItem = (query: string) => {
-  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).clear().type(`${query}{enter}`);
+  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).clear();
+  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(`${query}{enter}`);
 };
 
 export const addExceptionFlyoutFromViewerHeader = () => {
@@ -103,8 +103,8 @@ export const goToEndpointExceptionsTab = () => {
 };
 
 export const openEditException = (index = 0) => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click({ force: true });
-  cy.get(EDIT_EXCEPTION_BTN).eq(index).click({ force: true });
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click();
+  cy.get(EDIT_EXCEPTION_BTN).eq(index).click();
 };
 
 export const removeException = () => {
@@ -116,7 +116,7 @@ export const removeException = () => {
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
     cy.log('Wating for the rule to be executed');
-    cy.get(REFRESH_BUTTON).click({ force: true });
+    cy.get(REFRESH_BUTTON).click();
     return cy
       .get(RULE_STATUS)
       .invoke('text')

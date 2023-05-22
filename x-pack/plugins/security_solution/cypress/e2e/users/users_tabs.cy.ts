@@ -58,19 +58,19 @@ describe('Users stats and tables', () => {
     });
 
     it(`renders anomalies tab`, () => {
-      cy.get(ANOMALIES_TAB).click({ force: true });
+      cy.get(ANOMALIES_TAB).click();
 
       cy.get(ANOMALIES_TAB_CONTENT).should('exist');
     });
 
     it(`renders events tab`, () => {
-      cy.get(EVENTS_TAB).click({ force: true });
+      cy.get(EVENTS_TAB).click();
 
       cy.get(EVENTS_TAB_CONTENT).should('exist');
     });
 
     it(`renders users risk tab`, () => {
-      cy.get(RISK_SCORE_TAB).click({ force: true });
+      cy.get(RISK_SCORE_TAB).click();
 
       cy.get(RISK_SCORE_TAB_CONTENT).should('exist');
     });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ROLES } from '../../../common/test';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 
 import {
@@ -36,7 +35,7 @@ const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
 describe('URL compatibility', () => {
   before(() => {
-    login(ROLES.platform_engineer);
+    login();
     visit(SECURITY_DETECTIONS_URL);
   });
 

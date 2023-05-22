@@ -44,6 +44,8 @@ describe('Detections > Callouts', () => {
     // Otherwise the app will be disabled and show a "welcome"-like page.
     login();
     visitWithoutDateRange(ALERTS_URL);
+    waitForPageTitleToBeShown();
+    cy.get('[data-test-subj="no_index"]').should('not.exist');
   });
 
   context('indicating read-only access to resources', () => {

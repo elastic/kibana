@@ -91,7 +91,7 @@ export const openAddEndpointExceptionFromFirstAlert = () => {
 };
 
 export const openAddExceptionFromAlertDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
+  cy.get(EXPAND_ALERT_BTN).first().click();
 
   cy.get(TAKE_ACTION_BTN).click();
   cy.get(TAKE_ACTION_MENU).should('be.visible');
@@ -173,7 +173,7 @@ export const refreshAlertPageFilter = () => {
 };
 
 export const togglePageFilterPopover = (filterIndex: number) => {
-  cy.get(OPTION_LIST_VALUES(filterIndex)).click({ force: true });
+  cy.get(OPTION_LIST_VALUES(filterIndex)).click();
 };
 
 export const openPageFilterPopover = (filterIndex: number) => {
@@ -191,7 +191,7 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = () => {
-  cy.get(OPTION_LISTS_EXISTS).click({ force: true });
+  cy.get(OPTION_LISTS_EXISTS).click();
 
   cy.get(OPTION_LISTS_EXISTS).then(($el) => {
     if ($el.attr('aria-checked', 'false')) {
@@ -208,7 +208,7 @@ export const selectPageFilterValue = (filterIndex: number, ...values: string[]) 
   openPageFilterPopover(filterIndex);
   clearAllSelections();
   values.forEach((value) => {
-    cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
+    cy.get(OPTION_SELECTABLE(filterIndex, value)).click();
   });
   closePageFilterPopover(filterIndex);
   waitForAlerts();
@@ -249,7 +249,7 @@ export const goToOpenedAlertsOnRuleDetailsPage = () => {
 };
 
 export const goToOpenedAlerts = () => {
-  // cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  // cy.get(OPENED_ALERTS_FILTER_BTN).click();
   /*
    * below line commented because alertPageFiltersEnabled feature flag
    * is disabled by default
@@ -266,20 +266,20 @@ export const goToOpenedAlerts = () => {
 export const openFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(OPEN_ALERT_BTN).should('be.visible');
-  cy.get(OPEN_ALERT_BTN).click({ force: true });
+  cy.get(OPEN_ALERT_BTN).click();
 };
 
 export const openAlerts = () => {
-  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(TAKE_ACTION_POPOVER_BTN).click();
   cy.get(OPEN_ALERT_BTN).click();
 };
 
 export const selectCountTable = () => {
-  cy.get(SELECT_AGGREGATION_CHART).click({ force: true });
+  cy.get(SELECT_AGGREGATION_CHART).click();
 };
 
 export const selectAlertsHistogram = () => {
-  cy.get(SELECT_HISTOGRAM).click({ force: true });
+  cy.get(SELECT_HISTOGRAM).click();
 };
 
 export const clearGroupByTopInput = () => {
@@ -315,17 +315,17 @@ export const openAlertsFieldBrowser = () => {
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     waitForAlerts();
-    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
+    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click();
     cy.get('@checkbox').should('have.attr', 'checked');
   }
 };
 
 export const investigateFirstAlertInTimeline = () => {
-  cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
+  cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click();
 };
 
 export const openAnalyzerForFirstAlertInTimeline = () => {
-  cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
+  cy.get(OPEN_ANALYZER_BTN).first().click();
 };
 
 export const closeAnalyzer = () => {
@@ -349,8 +349,8 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
-  cy.get(actionSelector).first().click({ force: true });
+  cy.get(propertySelector).eq(rowIndex).parents('[data-test-subj="dataGridRowCell"]').realHover();
+  cy.get(actionSelector).first().click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
@@ -426,8 +426,8 @@ export const waitForPageFilters = () => {
 };
 
 export const resetFilters = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
-  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
+  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click();
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click();
   waitForPageFilters();
 };
 
@@ -452,7 +452,8 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 };
 
 export const selectFirstPageAlerts = () => {
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView().click({ force: true });
+  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView();
+  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().click();
 };
 
 export const selectAllAlerts = () => {

@@ -387,7 +387,7 @@ describe('Exceptions flyout', () => {
         });
 
         // try to save and see version conflict error
-        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click({ force: true });
+        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
 
         cy.get(EXCEPTION_FLYOUT_VERSION_CONFLICT).should('be.visible');
 
@@ -403,7 +403,7 @@ describe('Exceptions flyout', () => {
         deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
 
         // try to save and see error
-        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click({ force: true });
+        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
 
         cy.get(EXCEPTION_FLYOUT_LIST_DELETED_ERROR).should('be.visible');
       });
