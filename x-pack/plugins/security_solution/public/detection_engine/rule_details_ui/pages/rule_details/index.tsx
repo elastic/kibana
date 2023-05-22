@@ -40,6 +40,7 @@ import {
   FILTER_OPEN,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -142,7 +143,6 @@ import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
-import { useIsExperimentalFeatureEnabled } from '@kbn/security-solution-plugin/public/common/hooks/use_experimental_features';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
