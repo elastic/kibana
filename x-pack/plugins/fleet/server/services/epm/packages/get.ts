@@ -16,11 +16,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
-import type {
-  PackageUsageStats,
-  PackagePolicySOAttributes,
-  Installable,
-} from '../../../../common/types';
+import type { PackageUsageStats, Installable } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
@@ -28,7 +24,7 @@ import type {
   EpmPackageAdditions,
   GetCategoriesRequest,
 } from '../../../../common/types';
-import type { Installation, PackageInfo } from '../../../types';
+import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
   FleetError,
   PackageFailedVerificationError,

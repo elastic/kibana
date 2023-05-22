@@ -267,6 +267,21 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.fieldFilterPredicate",
+            "type": "Function",
+            "tags": [],
+            "label": "fieldFilterPredicate",
+            "description": [],
+            "signature": [
+              "FieldFilterPredicate",
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupContainer.Unnamed",
             "type": "Function",
             "tags": [],
@@ -368,6 +383,22 @@
                 "description": [],
                 "signature": [
                   "ControlGroupSettings",
+                  " | undefined"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.Unnamed.$5",
+                "type": "Function",
+                "tags": [],
+                "label": "fieldFilterPredicate",
+                "description": [],
+                "signature": [
+                  "FieldFilterPredicate",
                   " | undefined"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
@@ -1546,6 +1577,8 @@
               },
               "> | undefined, settings?: ",
               "ControlGroupSettings",
+              " | undefined, fieldFilterPredicate?: ",
+              "FieldFilterPredicate",
               " | undefined) => Promise<",
               {
                 "pluginId": "controls",
@@ -1628,6 +1661,22 @@
                 "description": [],
                 "signature": [
                   "ControlGroupSettings",
+                  " | undefined"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainerFactory.create.$4",
+                "type": "Function",
+                "tags": [],
+                "label": "fieldFilterPredicate",
+                "description": [],
+                "signature": [
+                  "FieldFilterPredicate",
                   " | undefined"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
