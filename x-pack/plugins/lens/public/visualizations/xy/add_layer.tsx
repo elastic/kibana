@@ -185,7 +185,7 @@ export function AddLayerButton({
                   name: i18n.translate('xpack.lens.configPanel.newAnnotation', {
                     defaultMessage: 'New annotation',
                   }),
-                  icon: 'plusInCircleFilled',
+                  icon: 'plusInCircle',
                   onClick: () => {
                     addLayer(LayerTypes.ANNOTATIONS);
                     toggleLayersChoice(false);
