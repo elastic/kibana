@@ -9,7 +9,7 @@ steps:
       machineType: n2-standard-2
       minCpuPlatform: 'Intel Cascade Lake'
 
-  - command: git clone https://github.com/elastic/security-docs.git; ls -alh .
+  - command: git clone https://github.com/elastic/kibana-buildkite.git; ls -alh .
     label: Test Git Clone
     agents:
       provider: gcp
