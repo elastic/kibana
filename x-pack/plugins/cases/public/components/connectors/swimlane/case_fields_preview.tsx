@@ -9,14 +9,25 @@ import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 
-import type { ConnectorFieldsProps } from '../types';
+import type { SwimlaneFieldsType } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/api';
+import type { ConnectorFieldsPreviewProps } from '../types';
+import { ConnectorCard } from '../card';
 import { connectorValidator } from './validator';
 
-const SwimlaneFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
+const SwimlaneFieldsPreviewComponent: React.FunctionComponent<
+  ConnectorFieldsPreviewProps<SwimlaneFieldsType>
+> = ({ connector }) => {
   const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   return (
     <>
+      <ConnectorCard
+        connectorType={ConnectorTypes.swimlane}
+        isLoading={false}
+        listItems={[]}
+        title={connector.name}
+      />
       {showMappingWarning && (
         <EuiCallOut
           title={i18n.EMPTY_MAPPING_WARNING_TITLE}
@@ -30,8 +41,7 @@ const SwimlaneFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = (
     </>
   );
 };
-
-SwimlaneFieldsComponent.displayName = 'SwimlaneFields';
+SwimlaneFieldsPreviewComponent.displayName = 'SwimlaneFieldsPreview';
 
 // eslint-disable-next-line import/no-default-export
-export { SwimlaneFieldsComponent as default };
+export { SwimlaneFieldsPreviewComponent as default };
