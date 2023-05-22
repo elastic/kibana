@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import styled from 'styled-components';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { EuiResizeObserver } from '@elastic/eui';
 
+import type { monaco } from '@kbn/monaco';
 import type { EuiCodeEditorProps } from '../shared_imports';
 
-import './osquery_mode';
-import 'brace/theme/tomorrow';
 import { initializeOsqueryEditor } from './osquery_highlight_rules';
 
 interface OsqueryEditorProps {
@@ -22,12 +19,6 @@ interface OsqueryEditorProps {
   onChange: (newValue: string) => void;
   commands?: EuiCodeEditorProps['commands'];
 }
-
-const ResizeWrapper = styled.div`
-  overflow: auto;
-  resize: vertical;
-  min-height: 100px;
-`;
 
 const MIN_HEIGHT = 100;
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
@@ -37,20 +28,10 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
-  const editorRef = useRef<{ renderer: { layerConfig: { maxHeight: number; minHeight: number } } }>(
-    {
-      renderer: { layerConfig: { maxHeight: 100, minHeight: 100 } },
-    }
-  );
 
   useDebounce(
     () => {
       onChange(editorValue);
-      const config = editorRef.current?.renderer.layerConfig;
-
-      // if (config.maxHeight > config.minHeight) {
-      setHeight(config.maxHeight);
-      // }
     },
     500,
     [editorValue]
@@ -58,26 +39,13 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
-  // const resizeEditor = useCallback((editorInstance) => {
-  //   editorRef.current.renderer = editorInstance.renderer;
-  //
-  //   setTimeout(() => {
-  //     const { maxHeight } = editorInstance.renderer.layerConfig;
-  //     if (maxHeight > MIN_HEIGHT) {
-  //       setHeight(maxHeight);
-  //     }
-  //   }, 0);
-  // }, []);
-
   const editorOptions = useMemo(
     () => ({
       theme: 'osquery',
+      automaticLayout: true,
     }),
     []
   );
-  const onResize = useCallback((dimensions) => {
-    setHeight(dimensions.height);
-  }, []);
 
   useEffect(() => {
     const disposable = initializeOsqueryEditor();
@@ -87,26 +55,31 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
     };
   }, []);
 
+  const editorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    const minHeight = 100;
+    const maxHeight = 1000;
+
+    const updateHeight = () => {
+      const contentHeight = Math.min(maxHeight, Math.max(minHeight, editor.getContentHeight()));
+      setHeight(contentHeight);
+    };
+
+    editor.onDidContentSizeChange(updateHeight);
+  }, []);
+
   //
   return (
-    <EuiResizeObserver onResize={onResize}>
-      {(resizeRef) => (
-        <ResizeWrapper ref={resizeRef}>
-          <CodeEditor
-            languageId={'sql'}
-            value={editorValue}
-            onChange={setEditorValue}
-            options={editorOptions}
-            // TODO handle height
-            // onLoad={resizeEditor}
-            height={height + 'px'}
-            width="100%"
-            // TODO AFAIK Monaco doesnt support commands, will try to figure it out next
-            // commands={commands}
-          />
-        </ResizeWrapper>
-      )}
-    </EuiResizeObserver>
+    <CodeEditor
+      languageId={'sql'}
+      value={editorValue}
+      onChange={setEditorValue}
+      options={editorOptions}
+      height={height + 'px'}
+      width="100%"
+      // TODO AFAIK Monaco doesnt support commands, will try to figure it out next
+      // commands={commands}
+      editorDidMount={editorDidMount}
+    />
   );
 };
 
