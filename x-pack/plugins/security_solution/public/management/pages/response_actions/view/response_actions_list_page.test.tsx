@@ -479,5 +479,33 @@ describe('Response actions history page', () => {
 
       expect(history.location.search).toEqual('?endDate=now&startDate=now-15m');
     });
+
+    it('should set actionIds using `withOutputs` to URL params ', async () => {
+      const allActionIds = mockUseGetEndpointActionList.data?.data.map((action) => action.id) ?? [];
+      const actionIdsWithDetails = allActionIds
+        .reduce<string[]>((acc, e, i) => {
+          if ([0, 1].includes(i)) {
+            acc.push(e);
+          }
+          return acc;
+        }, [])
+        .join()
+        .split(',')
+        .join('%2C');
+
+      render();
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      // expand some rows
+      expandButtons.forEach((button, i) => {
+        if ([0, 1].includes(i)) {
+          userEvent.click(button);
+        }
+      });
+
+      // verify 4 rows are expanded and are the ones from before
+      expect(history.location.search).toEqual(`?withOutputs=${actionIdsWithDetails}`);
+    });
   });
 });
