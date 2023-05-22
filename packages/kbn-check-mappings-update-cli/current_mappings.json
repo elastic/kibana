@@ -2099,10 +2099,11 @@
   },
   "observability-onboarding-state": {
     "properties": {
-      "apiKeyId": {
-        "type": "keyword"
-      },
       "state": {
+        "type": "object",
+        "dynamic": false
+      },
+      "progress": {
         "type": "object",
         "dynamic": false
       }
