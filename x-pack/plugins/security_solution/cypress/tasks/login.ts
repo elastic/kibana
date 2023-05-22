@@ -396,4 +396,3 @@ export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
 export const logout = () => {
   cy.visit(LOGOUT_URL);
 };
-
