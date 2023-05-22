@@ -284,6 +284,102 @@ function renderDarkModeTestCases(
           buildNum: expect.any(Number),
         });
       });
+
+      it('config `theme:darkMode: true` setting should override User Settings theme `darkMode === false', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(false)
+        );
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return true;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: true, isOverridden: true } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+        const [render] = await getRender();
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: true,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
+      });
+
+      it('config `theme:darkMode: false` setting should override User Settings theme `darkMode === true', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(true)
+        );
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return false;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: false, isOverridden: true } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+        const [render] = await getRender();
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: false,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
+      });
+
+      it('config `theme:darkMode: false` setting should override User Settings theme `darkMode === undefined', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(undefined)
+        );
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return false;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: false, isOverridden: true } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+        const [render] = await getRender();
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: false,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
+      });
+
+      it('config `theme:darkMode: true` setting should override User Settings theme `darkMode === undefined', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(undefined)
+        );
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return true;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: true, isOverridden: true } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+        const [render] = await getRender();
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: true,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
+      });
     });
   });
 }
