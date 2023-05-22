@@ -164,9 +164,11 @@ export const getKibanaMigratorTestKit = async ({
     }
     hasRun = true;
     migrator.prepareMigrations();
-    const migrationResults = await migrator.runMigrations();
-    await loggingSystem.stop();
-    return migrationResults;
+    try {
+      return await migrator.runMigrations();
+    } finally {
+      await loggingSystem.stop();
+    }
   };
 
   const savedObjectsRepository = SavedObjectsRepository.createRepository(
