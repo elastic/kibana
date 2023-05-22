@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { DataStream, SyntheticsMonitor } from '../../../../../../common/runtime_types';
