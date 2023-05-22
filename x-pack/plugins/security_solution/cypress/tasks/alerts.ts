@@ -321,7 +321,7 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
 };
 
 export const investigateFirstAlertInTimeline = () => {
-  cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click();
+  cy.get(SEND_ALERT_TO_TIMELINE_BTN).filter(':visible').first().click();
 };
 
 export const openAnalyzerForFirstAlertInTimeline = () => {
@@ -391,7 +391,7 @@ export const waitForAlerts = () => {
 };
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
-  cy.get(columnSelector).eq(1).focus();
+  cy.get(columnSelector).eq(1).realHover();
   cy.find(CELL_EXPAND_VALUE).click();
 };
 

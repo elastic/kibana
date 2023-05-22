@@ -60,7 +60,6 @@ describe('timeline data providers', () => {
   it('persists timeline when data provider is updated by dragging a field from data grid', () => {
     updateDataProviderbyDraggingField('host.name', 0);
     waitForTimelineChanges();
-    cy.wait(1000);
     cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()
@@ -69,11 +68,11 @@ describe('timeline data providers', () => {
       });
   });
 
-  it.only('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
+  it('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
+    waitForTimelineChanges();
     updateDataProviderByFieldHoverAction('host.name', 0);
     waitForTimelineChanges();
-    cy.wait(1000);
     cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()
