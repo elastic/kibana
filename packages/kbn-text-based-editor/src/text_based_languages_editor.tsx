@@ -523,7 +523,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         color: 'text',
                         'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
-                          'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
                           {
                             defaultMessage: 'Documentation',
                           }
@@ -667,7 +667,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         display: 'empty',
                         'data-test-subj': 'TextBasedLangEditor-inline-documentation',
                         'aria-label': i18n.translate(
-                          'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
                           {
                             defaultMessage: 'Documentation',
                           }
