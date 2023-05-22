@@ -48,7 +48,7 @@ export function buildActiveMigrations({
       referenceTransforms,
     });
 
-    if (!typeTransforms.transforms.length && !Object.keys(typeTransforms.versionSchemas).length) {
+    if (typeTransforms.transforms.length || Object.keys(typeTransforms.versionSchemas).length) {
       migrations[type.name] = typeTransforms;
     }
 
