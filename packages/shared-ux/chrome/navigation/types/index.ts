@@ -40,14 +40,14 @@ export interface NavigationKibanaDependencies {
       navLinks: {
         getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
       };
-      project: {
-        setNavigation: (projectNavigation: ChromeProjectNavigation) => void;
-      };
     };
     http: {
       basePath: BasePathService;
       getLoadingCount$(): Observable<number>;
     };
+  };
+  serverless: {
+    setNavigation: (projectNavigation: ChromeProjectNavigation) => void;
   };
 }
 
