@@ -6,7 +6,7 @@
  */
 
 export * from './api/get_rule_execution_events/response_schema.mock';
-export * from './api/get_rule_execution_results/response_schema.mock';
+export * from '../../generated_schema/get_rule_execution_results/get_rule_execution_results_response_schema.mock';
 
 export * from './model/execution_event.mock';
 export * from './model/execution_result.mock';

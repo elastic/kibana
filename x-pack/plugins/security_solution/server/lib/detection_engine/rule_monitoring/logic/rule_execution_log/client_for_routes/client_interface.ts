@@ -8,12 +8,12 @@
 import type { SortOrder } from '../../../../../../../common/detection_engine/schemas/common';
 import type {
   GetRuleExecutionEventsResponse,
-  GetRuleExecutionResultsResponse,
   LogLevel,
   RuleExecutionEventType,
-  RuleExecutionStatus,
   SortFieldOfRuleExecutionResult,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../../common/generated_schema/common_schema.gen';
+import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/generated_schema/get_rule_execution_results/get_rule_execution_results_response_schema.gen';
 
 /**
  * Used from route handlers to fetch and manage various information about the rule execution:

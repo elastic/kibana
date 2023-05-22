@@ -9,10 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { ExtMeta } from '../utils/console_logging';
 
-import type {
-  GetRuleExecutionEventsResponse,
-  GetRuleExecutionResultsResponse,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleExecutionEventsResponse } from '../../../../../../../common/detection_engine/rule_monitoring';
 
 import type { IEventLogReader } from '../event_log/event_log_reader';
 import type {
@@ -20,6 +17,7 @@ import type {
   GetExecutionResultsArgs,
   IRuleExecutionLogForRoutes,
 } from './client_interface';
+import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/generated_schema/get_rule_execution_results/get_rule_execution_results_response_schema.gen';
 
 export const createClientForRoutes = (
   eventLog: IEventLogReader,

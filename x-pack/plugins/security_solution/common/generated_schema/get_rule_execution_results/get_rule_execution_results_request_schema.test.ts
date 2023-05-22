@@ -9,25 +9,25 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { RULE_EXECUTION_STATUSES } from '../../model/execution_status';
-import { DefaultSortField, DefaultRuleExecutionStatusCsvArray } from './request_schema';
+import { GetRuleExecutionResultsRequestQuery } from './get_rule_execution_results_request_schema.gen';
+import { RuleExecutionStatus } from '../common_schema.gen';
+
+const StatusFilter = GetRuleExecutionResultsRequestQuery.shape.status_filters;
 
 describe('Request schema of Get rule execution results', () => {
   describe('DefaultRuleExecutionStatusCsvArray', () => {
     describe('Validation succeeds', () => {
       describe('when input is a single rule execution status', () => {
-        const cases = RULE_EXECUTION_STATUSES.map((supportedStatus) => {
+        const cases = RuleExecutionStatus.options.map((supportedStatus) => {
           return { input: supportedStatus };
         });
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
-            const expectedOutput = [input]; // note that it's an array after decode
+            const parsed = StatusFilter.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual(expectedOutput);
+            expect(parsed.success).toEqual(true);
+            expect(parsed.data).toEqual([input]);
           });
         });
       });
@@ -40,12 +40,10 @@ describe('Request schema of Get rule execution results', () => {
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
-            const expectedOutput = input;
+            const parsed = StatusFilter.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual(expectedOutput);
+            expect(parsed.success).toEqual(true);
+            expect(parsed.data).toEqual(input);
           });
         });
       });
@@ -64,11 +62,10 @@ describe('Request schema of Get rule execution results', () => {
 
         cases.forEach(({ input, expectedOutput }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
+            const parsed = StatusFilter.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual(expectedOutput);
+            expect(parsed.success).toEqual(true);
+            expect(parsed.data).toEqual(expectedOutput);
           });
         });
       });

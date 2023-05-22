@@ -7,13 +7,10 @@
 
 export * from './api/get_rule_execution_events/request_schema';
 export * from './api/get_rule_execution_events/response_schema';
-export * from './api/get_rule_execution_results/request_schema';
-export * from './api/get_rule_execution_results/response_schema';
 export * from './api/urls';
 
 export * from './model/execution_event';
 export * from './model/execution_metrics';
-export * from './model/execution_result';
 export * from './model/execution_settings';
 export * from './model/execution_status';
 export * from './model/execution_summary';

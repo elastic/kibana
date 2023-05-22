@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from "zod";
+import * as CommonSchema from '../common_schema.gen';
+
+{{> disclaimer}}
+
+{{#if requestQuery.description}}
+/**
+* {{{requestQuery.description}}}
+*/
+{{/if}}
+export const {{operationId}}RequestQuery = {{#if requestQuery}}{{> schema_item requestQuery prefix='CommonSchema.'}}{{else}}z.undefined(){{/if}};
+export type {{operationId}}RequestQuery = z.infer<typeof {{operationId}}RequestQuery>;
+export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}RequestQuery>;
+
+{{#if requestParams.description}}
+/**
+* {{{requestParams.description}}}
+*/
+{{/if}}
+export const {{operationId}}RequestParams = {{#if requestParams}}{{> schema_item requestParams prefix='CommonSchema.'}}{{else}}z.undefined(){{/if}};
+export type {{operationId}}RequestParams = z.infer<typeof {{operationId}}RequestParams>;
+export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}RequestParams>;
+
+{{#if requestBody.description}}
+/**
+* {{{requestBody.description}}}
+*/
+{{/if}}
+export const {{operationId}}RequestBody = {{#if requestBody}}{{> schema_item requestBody prefix='CommonSchema.'}}{{else}}z.undefined(){{/if}};
+export type {{operationId}}RequestBody = z.infer<typeof {{operationId}}RequestBody>;
+export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}RequestBody>;

@@ -6,8 +6,8 @@
  */
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { getRuleExecutionResultsRoute } from '../../generated_routes/get_rule_execution_results/get_rule_execution_results_route.gen';
 import { getRuleExecutionEventsRoute } from './get_rule_execution_events/route';
-import { getRuleExecutionResultsRoute } from './get_rule_execution_results/route';
 
 export const registerRuleMonitoringRoutes = (router: SecuritySolutionPluginRouter) => {
   getRuleExecutionEventsRoute(router);

@@ -1,0 +1,1385 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Elastic Security SIEM Signals API (https://www.elastic.co/guide/en/security/current/security-apis.html)",
+    "version": "8.9.0"
+  },
+  "servers": [
+    {
+      "url": "http://{kibana_host}:{port}",
+      "variables": { "kibana_host": { "default": "localhost" }, "port": { "default": "5601" } }
+    }
+  ],
+  "paths": {
+    "/api/detection_engine/index": {
+      "summary": "Signal index operations (used to store detection alerts)",
+      "post": {
+        "operationId": "CreateIndex",
+        "x-codegen-enabled": false,
+        "summary": "Create index",
+        "description": "Creates a signal index with the naming convention `.siem-signals-<space name>`.",
+        "tags": ["Index API"],
+        "responses": { "200": { "description": "Indicates a successful call." } }
+      },
+      "get": {
+        "operationId": "GetIndex",
+        "x-codegen-enabled": false,
+        "summary": "Get index",
+        "description": "Gets the signal index name if it exists.",
+        "tags": ["Index API"],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "name": { "type": "string" } } }
+              }
+            }
+          },
+          "404": {
+            "description": "Indicates no index exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": { "type": "integer" },
+                    "error": { "type": "string" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteIndex",
+        "x-codegen-enabled": false,
+        "summary": "Delete index",
+        "description": "Deletes the signal index.",
+        "tags": ["Index API"],
+        "responses": { "200": { "description": "Indicates a successful call." } }
+      }
+    },
+    "/api/detection_engine/privileges": {
+      "summary": "Returns the user's Kibana space and signal index permissions, and whether the user is authenticated",
+      "get": {
+        "operationId": "GetPrivileges",
+        "x-codegen-enabled": false,
+        "summary": "Get privileges",
+        "description": "Returns user privileges for the {kib} space.",
+        "tags": ["Privileges API"],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "username": { "type": "string" },
+                    "has_all_requested": { "type": "boolean" },
+                    "cluster": { "type": "object", "additionalProperties": { "type": "boolean" } },
+                    "index": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": { "type": "boolean" }
+                      }
+                    },
+                    "application": { "type": "object" },
+                    "is_authenticated": { "type": "boolean" },
+                    "has_encryption_key": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules": {
+      "summary": "Detection rules CRUD functions",
+      "get": {
+        "operationId": "GetRule",
+        "x-codegen-enabled": false,
+        "summary": "Get rule",
+        "description": "Retrieves a single rule using the `rule_id` or `id` field.",
+        "tags": ["Rules API"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "description": "Retrieves the rule with a specific `id`.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "rule_id",
+            "in": "query",
+            "required": false,
+            "description": "Retrieves the rule with a specific `rule_id`.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteRule",
+        "x-codegen-enabled": false,
+        "summary": "Delete rule",
+        "description": "Deletes a single rule using the `rule_id` or `id` field.",
+        "tags": ["Rules API"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "description": "The rule's `id` value.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "rule_id",
+            "in": "query",
+            "required": false,
+            "description": "The rule's `rule_id` value.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "Indicates a successful call." } }
+      },
+      "put": {
+        "operationId": "UpdateRule",
+        "x-codegen-enabled": false,
+        "summary": "Update Rule",
+        "tags": ["Rules API"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Rule" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Rule updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Rule updated successfully" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g. missing required fields, invalid data)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "message": { "type": "string", "example": "Error: Invalid request data" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "message": { "type": "string", "example": "Error: Internal server error" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/_export": {
+      "summary": "Exports rules to an `.ndjson` file",
+      "post": {
+        "operationId": "ExportRules",
+        "x-codegen-enabled": false,
+        "summary": "Export rules",
+        "description": "Exports rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file - Actions, Exception lists. Prebuilt rules cannot be exported.",
+        "tags": ["Import/Export API"],
+        "parameters": [
+          {
+            "name": "exclude_export_details",
+            "in": "query",
+            "required": false,
+            "description": "Determines whether a summary of the exported rules is returned.",
+            "schema": { "type": "boolean", "default": false }
+          },
+          {
+            "name": "file_name",
+            "in": "query",
+            "required": false,
+            "description": "File name for saving the exported rules.",
+            "schema": { "type": "string", "default": "export.ndjson" }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "objects": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": { "rule_id": { "type": "string" } }
+                    },
+                    "description": "Array of `rule_id` fields. Exports all rules when unspecified."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary",
+                  "description": "An `.ndjson` file containing the returned rules."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/_find": {
+      "get": {
+        "operationId": "FindRules",
+        "x-codegen-enabled": false,
+        "summary": "Find rules",
+        "description": "Retrieves a paginated subset of detection rules. By default, the first page is returned with 20 results per page.",
+        "tags": ["Rules API"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "The page number to return.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "The number of rules to return per page.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "sort_field",
+            "in": "query",
+            "required": false,
+            "description": "Determines which field is used to sort the results.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "description": "Determines the sort order, which can be `desc` or `asc`.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "description": "Filters the returned results according to the value of the specified field, using the `alert.attributes.<field name>:<field value>` syntax.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "page": { "type": "integer" },
+                    "perPage": { "type": "integer" },
+                    "total": { "type": "integer" },
+                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/Rule" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/_import": {
+      "summary": "Imports rules from an `.ndjson` file",
+      "post": {
+        "operationId": "ImportRules",
+        "x-codegen-enabled": false,
+        "summary": "Import rules",
+        "description": "Imports rules from an `.ndjson` file, including actions and exception lists.",
+        "tags": ["Import/Export API"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The `.ndjson` file containing the rules."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "overwrite",
+            "in": "query",
+            "required": false,
+            "description": "Determines whether existing rules with the same `rule_id` are overwritten.",
+            "schema": { "type": "boolean", "default": false }
+          },
+          {
+            "name": "overwrite_exceptions",
+            "in": "query",
+            "required": false,
+            "description": "Determines whether existing exception lists with the same `list_id` are overwritten.",
+            "schema": { "type": "boolean", "default": false }
+          },
+          {
+            "name": "overwrite_action_connectors",
+            "in": "query",
+            "required": false,
+            "description": "Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.",
+            "schema": { "type": "boolean", "default": false }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/tags": {
+      "summary": "Aggregates and returns rule tags",
+      "get": {
+        "operationId": "GetTags",
+        "x-codegen-enabled": false,
+        "summary": "Aggregates and returns all unique tags from all rules",
+        "tags": ["Tags API"],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call",
+            "content": {
+              "application/json": { "schema": { "type": "array", "items": { "type": "string" } } }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/signals": {
+      "summary": "Aggregates, queries, and returns alerts, and updates their statuses"
+    },
+    "/api/detection_engine/signals/search": {
+      "post": {
+        "operationId": "SearchSignals",
+        "x-codegen-enabled": false,
+        "summary": "Aggregates and returns alerts",
+        "tags": ["Signals API"],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/signals/status": {
+      "post": {
+        "operationId": "UpdateSignalStatus",
+        "x-codegen-enabled": false,
+        "summary": "Sets the status of one or more alerts",
+        "tags": ["Signals API"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signal_ids": { "type": "array", "items": { "type": "string" } },
+                  "query": { "type": "object" },
+                  "status": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/prepackaged": {
+      "summary": "Loads and retrieves the status of Elastic prebuilt rules",
+      "put": {
+        "operationId": "InstallPrepackagedRules",
+        "x-codegen-enabled": false,
+        "summary": "Loads and updates Elastic prebuilt rules",
+        "tags": ["Prepackaged Rules API"],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "rules_installed": {
+                      "type": "integer",
+                      "description": "The number of rules installed"
+                    },
+                    "rules_updated": {
+                      "type": "integer",
+                      "description": "The number of rules updated"
+                    },
+                    "timelines_installed": {
+                      "type": "integer",
+                      "description": "The number of timelines installed"
+                    },
+                    "timelines_updated": {
+                      "type": "integer",
+                      "description": "The number of timelines updated"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/prepackaged/_status": {
+      "get": {
+        "operationId": "GetPrepackagedRulesStatus",
+        "x-codegen-enabled": false,
+        "summary": "Get the status of Elastic prebuilt rules",
+        "tags": ["Prepackaged Rules API"],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "The status of Elastic prebuilt rules",
+                  "type": "object",
+                  "properties": {
+                    "rules_custom_installed": {
+                      "type": "integer",
+                      "description": "The total number of custom rules"
+                    },
+                    "rules_installed": {
+                      "type": "integer",
+                      "description": "The total number of installed prebuilt rules"
+                    },
+                    "rules_not_installed": {
+                      "type": "integer",
+                      "description": "The total number of available prebuilt rules that are not installed"
+                    },
+                    "rules_not_updated": {
+                      "type": "integer",
+                      "description": "The total number of outdated prebuilt rules"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/_bulk_create": {
+      "post": {
+        "operationId": "CreateRulesBulk",
+        "x-codegen-enabled": false,
+        "deprecated": true,
+        "summary": "Bulk create rules",
+        "description": "Creates new rules.",
+        "tags": ["Bulk API"],
+        "requestBody": {
+          "description": "A JSON array of rules, where each rule contains the required fields.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Rule" } }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Rule" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/_bulk_delete": {
+      "delete": {
+        "operationId": "DeleteRulesBulk",
+        "x-codegen-enabled": false,
+        "deprecated": true,
+        "summary": "Bulk delete rules",
+        "description": "Deletes multiple rules.",
+        "tags": ["Bulk API"],
+        "requestBody": {
+          "description": "A JSON array of `id` or `rule_id` fields of the rules you want to delete.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": { "id": { "type": "string" }, "rule_id": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Rule" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/_bulk_update": {
+      "put": {
+        "operationId": "UpdateRulesBulk",
+        "x-codegen-enabled": false,
+        "deprecated": true,
+        "summary": "Bulk update rules (PUT)",
+        "description": "Updates multiple rules using the `PUT` method.",
+        "tags": ["Bulk API"],
+        "requestBody": {
+          "description": "A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to modify.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Rule" } }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Rule" } }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "PatchRulesBulk",
+        "x-codegen-enabled": false,
+        "deprecated": true,
+        "summary": "Bulk update rules (PATCH)",
+        "description": "Updates multiple rules using the `PATCH` method.",
+        "tags": ["Bulk API"],
+        "requestBody": {
+          "description": "A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to modify.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Rule" } }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Rule" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/detection_engine/rules/_bulk_action": {
+      "post": {
+        "operationId": "PerformBulkAction",
+        "x-codegen-enabled": false,
+        "summary": "Applies a bulk action to multiple rules",
+        "description": "The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.",
+        "tags": ["Bulk API"],
+        "parameters": [
+          {
+            "name": "dry_run",
+            "in": "query",
+            "description": "Enables dry run mode for the request call.",
+            "required": false,
+            "schema": { "type": "boolean" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PerformBulkActionRequest" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/internal/detection_engine/rules/{ruleId}/execution/results": {
+      "get": {
+        "operationId": "GetRuleExecutionResults",
+        "description": "Returns execution results of a given rule (aggregated by execution UUID) from Event Log.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ruleId",
+            "schema": { "type": "string" },
+            "required": true,
+            "description": "Rule's saved object ID (`rule.id`)"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "schema": { "type": "string", "format": "date-time" },
+            "required": true,
+            "description": "The start date in ISO format for the execution results."
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "schema": { "type": "string", "format": "date-time" },
+            "required": true,
+            "description": "The end date in ISO format for the execution results."
+          },
+          {
+            "in": "query",
+            "name": "query_text",
+            "schema": { "type": "string", "default": "" },
+            "required": false,
+            "description": "The query text to filter the execution results."
+          },
+          {
+            "in": "query",
+            "name": "status_filters",
+            "schema": {
+              "type": "array",
+              "x-preprocess": "CsvToArray",
+              "items": { "$ref": "#/components/schemas/RuleExecutionStatus" },
+              "default": []
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_field",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "timestamp",
+                "duration_ms",
+                "gap_duration_s",
+                "indexing_duration_ms",
+                "search_duration_ms",
+                "schedule_delay_ms"
+              ],
+              "default": "timestamp"
+            },
+            "required": false,
+            "description": "The field to sort the execution results."
+          },
+          {
+            "in": "query",
+            "name": "sort_order",
+            "schema": { "$ref": "#/components/schemas/SortOrder", "default": "desc" },
+            "required": false,
+            "description": "The order to sort the execution results."
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": { "type": "integer", "default": 20 },
+            "required": false,
+            "description": "The number of execution results per page."
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "type": "integer", "default": 1 },
+            "required": false,
+            "description": "The page number for the execution results."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "description": "The total number of execution results."
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/RuleExecutionResult" }
+                    }
+                  },
+                  "required": ["total", "events"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": { "basicAuth": { "type": "http", "scheme": "basic" } },
+    "schemas": {
+      "SortOrder": { "type": "string", "enum": ["asc", "desc"] },
+      "RuleExecutionStatus": {
+        "type": "string",
+        "description": "Custom execution status of Security rules that is different from the status used in the Alerting Framework. We merge our custom status with the Framework's status to determine the resulting status of a rule.\n- going to run - @deprecated Replaced by the 'running' status but left for backwards compatibility with rule execution events already written to Event Log in the prior versions of Kibana. Don't use when writing rule status changes.\n- running - Rule execution started but not reached any intermediate or final status.\n- partial failure - Rule can partially fail for various reasons either in the middle of an execution (in this case we update its status right away) or in the end of it. So currently this status can be both intermediate and final at the same time. A typical reason for a partial failure: not all the indices that the rule searches over actually exist.\n- failed - Rule failed to execute due to unhandled exception or a reason defined in the business logic of its executor function.\n- succeeded - Rule executed successfully without any issues. Note: this status is just an indication of a rule's \"health\". The rule might or might not generate any alerts despite of it.",
+        "enum": ["going to run", "running", "partial failure", "failed", "succeeded"]
+      },
+      "RuleExecutionResult": {
+        "type": "object",
+        "description": "Rule execution result is an aggregate that groups plain rule execution events by execution UUID.\nIt contains such information as execution UUID, date, status and metrics.",
+        "properties": {
+          "execution_uuid": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "duration_ms": { "type": "integer" },
+          "status": { "type": "string" },
+          "message": { "type": "string" },
+          "num_active_alerts": { "type": "integer" },
+          "num_new_alerts": { "type": "integer" },
+          "num_recovered_alerts": { "type": "integer" },
+          "num_triggered_actions": { "type": "integer" },
+          "num_succeeded_actions": { "type": "integer" },
+          "num_errored_actions": { "type": "integer" },
+          "total_search_duration_ms": { "type": "integer" },
+          "es_search_duration_ms": { "type": "integer" },
+          "schedule_delay_ms": { "type": "integer" },
+          "timed_out": { "type": "boolean" },
+          "indexing_duration_ms": { "type": "integer" },
+          "search_duration_ms": { "type": "integer" },
+          "gap_duration_s": { "type": "integer" },
+          "security_status": { "type": "string" },
+          "security_message": { "type": "string" }
+        },
+        "required": [
+          "execution_uuid",
+          "timestamp",
+          "duration_ms",
+          "status",
+          "message",
+          "num_active_alerts",
+          "num_new_alerts",
+          "num_recovered_alerts",
+          "num_triggered_actions",
+          "num_succeeded_actions",
+          "num_errored_actions",
+          "total_search_duration_ms",
+          "es_search_duration_ms",
+          "schedule_delay_ms",
+          "timed_out",
+          "indexing_duration_ms",
+          "search_duration_ms",
+          "gap_duration_s",
+          "security_status",
+          "security_message"
+        ]
+      },
+      "Actions": {
+        "type": "object",
+        "properties": {
+          "action_type_id": {
+            "type": "string",
+            "description": "The action type used for sending notifications."
+          },
+          "group": {
+            "type": "string",
+            "description": "Optionally groups actions by use cases. Use `default` for alert notifications."
+          },
+          "id": { "type": "string", "description": "The connector ID." },
+          "params": {
+            "type": "object",
+            "description": "Object containing the allowed connector fields, which varies according to the connector type."
+          }
+        }
+      },
+      "BaseRule": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Rule ID" },
+          "name": { "type": "string", "description": "Rule name" },
+          "description": { "type": "string", "description": "Rule description" },
+          "timeline_id": { "type": "string", "description": "Timeline template ID" },
+          "timeline_title": { "type": "string", "description": "Timeline template title" },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action_type_id": {
+                  "type": "string",
+                  "description": "The action type used for sending notifications"
+                },
+                "group": {
+                  "type": "string",
+                  "description": "Optionally groups actions by use cases"
+                },
+                "id": { "type": "string", "description": "The connector ID" },
+                "params": {
+                  "type": "object",
+                  "description": "Object containing the allowed connector fields"
+                }
+              }
+            }
+          },
+          "threats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "framework": { "type": "string", "description": "Relevant attack framework" },
+                "tactic": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "reference": { "type": "string" }
+                  }
+                },
+                "technique": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "reference": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "exceptions_list": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "description": "ID of the exception container" },
+                "list_id": {
+                  "type": "string",
+                  "description": "List ID of the exception container"
+                },
+                "namespace_type": {
+                  "type": "string",
+                  "description": "Determines the exceptions validity in rule's Kibana space"
+                },
+                "type": { "type": "string", "description": "The exception type" }
+              }
+            }
+          },
+          "language": {
+            "type": "string",
+            "enum": ["kuery", "lucene"],
+            "description": "Determines the query language (optional)"
+          },
+          "filters": {
+            "type": "array",
+            "items": { "type": "object" },
+            "description": "The query and filter context array used to define the conditions for when alerts are created from events (optional)"
+          },
+          "risk_score": {
+            "type": "integer",
+            "description": "Risk score (0 to 100)",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Severity of the rule"
+          },
+          "index": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Indices on which the rule functions (optional)"
+          },
+          "risk_score_mapping": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string" },
+                "operator": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            },
+            "description": "Overrides generated alerts' risk_score with a value from the source event"
+          },
+          "rule_name_override": {
+            "type": "string",
+            "description": "Sets the source field for the alert's signal.rule.name value"
+          },
+          "severity_mapping": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string" },
+                "operator": { "type": "string" },
+                "severity": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            },
+            "description": "Overrides generated alerts' severity with values from the source event"
+          },
+          "timestamp_override": {
+            "type": "string",
+            "description": "Sets the time field used to query indices (optional)"
+          },
+          "event_category_field": {
+            "type": "string",
+            "description": "Contains the event classification (optional, only for EQL rules)"
+          },
+          "tiebreaker_field": {
+            "type": "string",
+            "description": "Sets a secondary field for sorting events (optional, only for EQL rules)"
+          },
+          "timestamp_field": {
+            "type": "string",
+            "description": "Contains the event timestamp used for sorting a sequence of events (optional, only for EQL rules)"
+          }
+        },
+        "required": ["id", "name"]
+      },
+      "QueryRule": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseRule" },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["query"], "description": "Rule type" },
+              "query": { "type": "string", "description": "Query to execute" }
+            },
+            "required": ["type", "query"]
+          }
+        ]
+      },
+      "SavedQueryRule": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseRule" },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["saved_query"], "description": "Rule type" },
+              "saved_id": { "type": "string", "description": "Saved query ID" }
+            },
+            "required": ["type", "saved_id"]
+          }
+        ]
+      },
+      "ThresholdRule": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseRule" },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["threshold"], "description": "Rule type" },
+              "threshold": {
+                "type": "object",
+                "properties": {
+                  "field": { "type": "string", "description": "Field to aggregate on" },
+                  "value": { "type": "integer", "description": "Threshold value" }
+                }
+              }
+            },
+            "required": ["type", "threshold"]
+          }
+        ]
+      },
+      "ThreatMatchRule": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseRule" },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["threat_match"], "description": "Rule type" },
+              "threat_filters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "Query and filter context array used to filter documents from the Elasticsearch index containing the threat values"
+                }
+              },
+              "threat_indicator_path": {
+                "type": "string",
+                "description": "Defines the path to the threat indicator in the indicator documents (optional)"
+              },
+              "threat_index": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Indices on which the rule functions (optional)"
+              },
+              "threat_query": { "type": "string", "description": "Query to execute (optional)" },
+              "threat_mapping": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": { "type": "string" },
+                          "type": { "type": "string" },
+                          "value": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "description": "Overrides generated alerts' fields with values from the source event"
+                }
+              }
+            },
+            "required": ["type", "threat_filters"]
+          }
+        ]
+      },
+      "MlRule": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseRule" },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["machine_learning"],
+                "description": "Rule type"
+              },
+              "anomaly_threshold": { "type": "integer", "description": "Anomaly threshold" },
+              "machine_learning_job_id": {
+                "type": "string",
+                "description": "Machine learning job ID"
+              }
+            },
+            "required": ["type", "machine_learning_job_id", "anomaly_threshold"]
+          }
+        ]
+      },
+      "EqlRule": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseRule" },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["eql"], "description": "Rule type" },
+              "eql_query": { "type": "string", "description": "EQL query to execute" }
+            },
+            "required": ["type", "eql_query"]
+          }
+        ]
+      },
+      "Rule": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/QueryRule" },
+          { "$ref": "#/components/schemas/SavedQueryRule" },
+          { "$ref": "#/components/schemas/MlRule" },
+          { "$ref": "#/components/schemas/EqlRule" }
+        ]
+      },
+      "Throttle": {
+        "type": "string",
+        "description": "Defines the maximum interval in which a rule's actions are executed.",
+        "enum": ["rule", "1h", "1d", "7d"]
+      },
+      "Subtechnique": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Subtechnique ID" },
+          "name": { "type": "string", "description": "Subtechnique name" },
+          "reference": { "type": "string", "description": "Subtechnique reference" }
+        },
+        "required": ["id", "name", "reference"]
+      },
+      "Technique": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Technique ID" },
+          "name": { "type": "string", "description": "Technique name" },
+          "reference": { "type": "string", "description": "Technique reference" },
+          "subtechnique": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Subtechnique" },
+            "description": "Array containing more specific information on the attack technique"
+          }
+        },
+        "required": ["id", "name", "reference"]
+      },
+      "Threat": {
+        "type": "object",
+        "properties": {
+          "framework": { "type": "string", "description": "Relevant attack framework" },
+          "tactic": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Tactic ID" },
+              "name": { "type": "string", "description": "Tactic name" },
+              "reference": { "type": "string", "description": "Tactic reference" }
+            },
+            "required": ["id", "name", "reference"]
+          },
+          "technique": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Technique" },
+            "description": "Array containing information on the attack techniques (optional)"
+          }
+        },
+        "required": ["framework", "tactic"]
+      },
+      "BulkActionBase": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": { "query": { "type": "string", "description": "Query to filter rules" } },
+            "required": ["query"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "array",
+                "description": "Array of rule IDs",
+                "minItems": 1,
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "BulkDeleteRules": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BulkActionBase" },
+          {
+            "type": "object",
+            "properties": { "action": { "type": "string", "enum": ["delete"] } },
+            "required": ["action"]
+          }
+        ]
+      },
+      "BulkDisableRules": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BulkActionBase" },
+          {
+            "type": "object",
+            "properties": { "action": { "type": "string", "enum": ["disable"] } },
+            "required": ["action"]
+          }
+        ]
+      },
+      "BulkEnableRules": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BulkActionBase" },
+          {
+            "type": "object",
+            "properties": { "action": { "type": "string", "enum": ["enable"] } },
+            "required": ["action"]
+          }
+        ]
+      },
+      "BulkExportRules": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BulkActionBase" },
+          {
+            "type": "object",
+            "properties": { "action": { "type": "string", "enum": ["export"] } },
+            "required": ["action"]
+          }
+        ]
+      },
+      "BulkDuplicateRules": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BulkActionBase" },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "type": "string", "enum": ["duplicate"] },
+              "duplicate": {
+                "type": "object",
+                "properties": {
+                  "include_exceptions": {
+                    "type": "boolean",
+                    "description": "Whether to copy exceptions from the original rule"
+                  },
+                  "include_expired_exceptions": {
+                    "type": "boolean",
+                    "description": "Whether to copy expired exceptions from the original rule"
+                  }
+                }
+              }
+            },
+            "required": ["action"]
+          }
+        ]
+      },
+      "RuleActionSummary": {
+        "type": "boolean",
+        "description": "Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert"
+      },
+      "RuleActionNotifyWhen": {
+        "type": "string",
+        "description": "The condition for throttling the notification: 'onActionGroupChange', 'onActiveAlert',  or 'onThrottleInterval'",
+        "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"]
+      },
+      "RuleActionThrottle": {
+        "type": "string",
+        "description": "The condition for throttling the notification: 'rule', 'no_actions', or time duration"
+      },
+      "RuleActionFrequency": {
+        "type": "object",
+        "properties": {
+          "summary": { "$ref": "#/components/schemas/RuleActionSummary" },
+          "notifyWhen": { "$ref": "#/components/schemas/RuleActionNotifyWhen" },
+          "throttle": { "$ref": "#/components/schemas/RuleActionThrottle", "nullable": true }
+        }
+      },
+      "BulkActionEditPayloadRuleActions": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["add_rule_actions", "set_rule_actions"] },
+          "value": {
+            "type": "object",
+            "properties": {
+              "throttle": { "$ref": "#/components/schemas/RuleActionThrottle" },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "group": { "type": "string", "description": "Action group" },
+                    "id": { "type": "string", "description": "Action ID" },
+                    "params": { "type": "object", "description": "Action parameters" },
+                    "frequency": {
+                      "$ref": "#/components/schemas/RuleActionFrequency",
+                      "description": "Action frequency"
+                    }
+                  },
+                  "required": ["group", "id", "params"]
+                }
+              }
+            },
+            "required": ["actions"]
+          }
+        },
+        "required": ["type", "value"]
+      },
+      "BulkActionEditPayloadSchedule": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["set_schedule"] },
+          "value": {
+            "type": "object",
+            "properties": {
+              "interval": {
+                "type": "string",
+                "description": "Interval in which the rule is executed"
+              },
+              "lookback": { "type": "string", "description": "Lookback time for the rule" }
+            },
+            "required": ["interval", "lookback"]
+          }
+        }
+      },
+      "BulkActionEditPayload": {
+        "anyOf": [
+          { "$ref": "#/components/schemas/BulkActionEditPayloadRuleActions" },
+          { "$ref": "#/components/schemas/BulkActionEditPayloadSchedule" }
+        ]
+      },
+      "BulkEditRules": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BulkActionBase" },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "type": "string", "x-type": "literal", "enum": ["edit"] },
+              "edit": {
+                "type": "array",
+                "description": "Array of objects containing the edit operations",
+                "items": { "$ref": "#/components/schemas/BulkActionEditPayload" }
+              }
+            },
+            "required": ["action", "rule"]
+          }
+        ]
+      },
+      "PerformBulkActionRequest": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/BulkDeleteRules" },
+          { "$ref": "#/components/schemas/BulkDisableRules" },
+          { "$ref": "#/components/schemas/BulkEnableRules" },
+          { "$ref": "#/components/schemas/BulkExportRules" },
+          { "$ref": "#/components/schemas/BulkDuplicateRules" },
+          { "$ref": "#/components/schemas/BulkEditRules" }
+        ]
+      }
+    }
+  },
+  "security": [{ "basicAuth": [] }]
+}

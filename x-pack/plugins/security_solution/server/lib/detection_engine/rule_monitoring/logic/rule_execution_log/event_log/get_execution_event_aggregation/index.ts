@@ -12,16 +12,14 @@ import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 
 import type {
-  RuleExecutionResult,
-  GetRuleExecutionResultsResponse,
-} from '../../../../../../../../common/detection_engine/rule_monitoring';
-import { RuleExecutionStatus } from '../../../../../../../../common/detection_engine/rule_monitoring';
-import type {
   ExecutionEventAggregationOptions,
   ExecutionUuidAggResult,
   ExecutionUuidAggBucket,
 } from './types';
 import { EXECUTION_UUID_FIELD } from './types';
+import { RuleExecutionStatus } from '../../../../../../../../common/generated_schema/common_schema.gen';
+import type { RuleExecutionResult } from '../../../../../../../../common/generated_schema/common_schema.gen';
+import type { GetRuleExecutionResultsResponse } from '../../../../../../../../common/generated_schema/get_rule_execution_results/get_rule_execution_results_response_schema.gen';
 
 // Base ECS fields
 const ACTION_FIELD = 'event.action';
@@ -376,9 +374,9 @@ export const mapRuleExecutionStatusToPlatformStatus = (
 ): string[] => {
   return flatMap(ruleStatuses, (rs) => {
     switch (rs) {
-      case RuleExecutionStatus.failed:
+      case RuleExecutionStatus.enum.failed:
         return 'failure';
-      case RuleExecutionStatus.succeeded:
+      case RuleExecutionStatus.enum.succeeded:
         return 'success';
       default:
         return [];
@@ -395,9 +393,9 @@ export const mapPlatformStatusToRuleExecutionStatus = (
 ): RuleExecutionStatus | undefined => {
   switch (platformStatus) {
     case 'failure':
-      return RuleExecutionStatus.failed;
+      return RuleExecutionStatus.enum.failed;
     case 'success':
-      return RuleExecutionStatus.succeeded;
+      return RuleExecutionStatus.enum.succeeded;
     default:
       return undefined;
   }

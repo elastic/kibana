@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { transformError } from '@kbn/securitysolution-es-utils';
+import moment from 'moment';
+import type { {{operationId}}Response } from '../../../../../common/generated_schema/{{snakeCase operationId}}/{{snakeCase operationId}}_response_schema.gen';
+import {  {{operationId}}RequestParams, {{operationId}}RequestQuery, {{operationId}}RequestBody } from '../../../../../common/generated_schema/{{snakeCase operationId}}/{{snakeCase operationId}}_request_schema.gen';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { buildSiemResponse } from '../../routes/utils';
+import { {{camelCase operationId}}Implementation } from './{{snakeCase operationId}}_implementation';
+import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
+
+{{> disclaimer}}
+
+/**
+{{#if description}}
+* {{{description}}}
+{{/if}}
+{{#if deprecated}}
+* @deprecated
+{{/if}}
+{{#if tags}}
+* tags: {{{tags}}}
+{{/if}}
+*/
+export const {{camelCase operationId}}Route = (router: SecuritySolutionPluginRouter) => {
+  router.{{method}}(
+    {
+      path: "{{path}}",
+      validate: {
+        params: buildRouteValidationWithZod({{operationId}}RequestParams),
+        query: buildRouteValidationWithZod({{operationId}}RequestQuery),
+        body: buildRouteValidationWithZod({{operationId}}RequestBody),
+      },
+      options: {
+        tags: ['access:securitySolution'],
+        timeout: {
+          // FUNFACT: If we do not add a very long timeout what will happen
+          // is that Chrome which receive a 408 error and then do a retry.
+          // This retry can cause lots of connections to happen. Using a very
+          // long timeout will ensure that Chrome does not do retries and saturate the connections.
+          idleSocket: moment.duration('1', 'hour').asMilliseconds(),
+        },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const body: {{operationId}}Response  = await {{camelCase operationId}}Implementation(context, request, response);
+
+        return response.ok({ body });
+      } catch (err) {
+        const siemResponse = buildSiemResponse(response);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
+      }
+    }
+  );
+};
