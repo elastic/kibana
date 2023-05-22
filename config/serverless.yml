@@ -19,6 +19,11 @@ xpack.license_management.enabled: false
 xpack.reporting.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 
+# Disabled plugin UIs
+xpack.security.ui.usersEnabled: false
+xpack.security.ui.rolesEnabled: false
+xpack.security.ui.roleMappingsEnabled: false
+
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 # server.restrictInternalApis: true
 # Telemetry enabled by default and not disableable via UI

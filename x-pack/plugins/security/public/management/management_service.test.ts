@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type {
+  ClientConfigType,
   DefinedSections,
   ManagementApp,
   ManagementSetup,
@@ -43,6 +44,12 @@ describe('ManagementService', () => {
         locator: {} as any,
       };
 
+      const uiConfig: ClientConfigType = {
+        usersEnabled: true,
+        rolesEnabled: true,
+        roleMappingsEnabled: true,
+      };
+
       const service = new ManagementService();
       service.setup({
         getStartServices: getStartServices as any,
@@ -50,6 +57,7 @@ describe('ManagementService', () => {
         fatalErrors,
         authc,
         management: managementSetup,
+        uiConfig,
       });
 
       expect(mockSection.registerApp).toHaveBeenCalledTimes(4);
@@ -105,12 +113,19 @@ describe('ManagementService', () => {
         locator: {} as any,
       };
 
+      const uiConfig: ClientConfigType = {
+        usersEnabled: true,
+        rolesEnabled: true,
+        roleMappingsEnabled: true,
+      };
+
       service.setup({
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
         authc: securityMock.createSetup().authc,
         management: managementSetup,
+        uiConfig,
       });
 
       const getMockedApp = (id: string) => {
@@ -150,6 +165,7 @@ describe('ManagementService', () => {
           navLinks: {},
           catalogue: {},
         },
+        uiConfig,
       });
 
       return {

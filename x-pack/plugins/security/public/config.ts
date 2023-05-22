@@ -10,4 +10,9 @@ export interface ConfigType {
   showInsecureClusterWarning: boolean;
   sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
   showNavLinks: boolean;
+  ui: {
+    usersEnabled: boolean;
+    rolesEnabled: boolean;
+    roleMappingsEnabled: boolean;
+  };
 }

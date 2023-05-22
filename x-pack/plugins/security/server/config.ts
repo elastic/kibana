@@ -297,6 +297,11 @@ export const ConfigSchema = schema.object({
     ),
   }),
   enabled: schema.boolean({ defaultValue: true }),
+  ui: schema.object({
+    usersEnabled: schema.boolean({ defaultValue: true }),
+    rolesEnabled: schema.boolean({ defaultValue: true }),
+    roleMappingsEnabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export function createConfig(
