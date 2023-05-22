@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
+import type { ConnectorMappings } from '../../../common/api';
+
 export interface ConnectorMappingsPersistedAttributes {
   mappings: Array<{
     action_type: string;
@@ -13,3 +16,6 @@ export interface ConnectorMappingsPersistedAttributes {
   }>;
   owner: string;
 }
+
+export type ConnectorMappingsTransformed = ConnectorMappings;
+export type ConnectorMappingsSavedObjectTransformed = SavedObject<ConnectorMappingsTransformed>;
