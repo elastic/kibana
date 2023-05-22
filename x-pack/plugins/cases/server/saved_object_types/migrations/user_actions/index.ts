@@ -38,14 +38,6 @@ export interface UserActionsMigrationsDeps {
 export const createUserActionsMigrations = (
   deps: UserActionsMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const persistableStateAttachmentMigrations = mapValues<
-    MigrateFunctionsObject,
-    SavedObjectMigrationFn<CaseUserActionAttributesWithoutConnectorId>
-  >(
-    getAllPersistableAttachmentMigrations(deps.persistableStateAttachmentTypeRegistry),
-    migratePersistableStateAttachments
-  ) as MigrateFunctionsObject;
-
   const userActionsMigrations = {
     '7.10.0': (
       doc: SavedObjectUnsanitizedDoc<UserActions>
@@ -99,44 +91,6 @@ export const createUserActionsMigrations = (
     '8.5.0': addAssigneesToCreateUserAction,
   };
 
-  return mergeSavedObjectMigrationMaps(persistableStateAttachmentMigrations, userActionsMigrations);
+  return  userActionsMigrations;
 };
 
-export const migratePersistableStateAttachments =
-  (
-    migrate: MigrateFunction
-  ): SavedObjectMigrationFn<
-    CaseUserActionAttributesWithoutConnectorId,
-    CaseUserActionAttributesWithoutConnectorId
-  > =>
-  (doc: SavedObjectUnsanitizedDoc<CaseUserActionAttributesWithoutConnectorId>) => {
-    if (
-      doc.attributes.type !== ActionTypes.comment ||
-      doc.attributes.payload.comment.type !== CommentType.persistableState
-    ) {
-      return doc;
-    }
-
-    const { persistableStateAttachmentState, persistableStateAttachmentTypeId } =
-      doc.attributes.payload.comment;
-
-    const migratedState = migrate({
-      persistableStateAttachmentState,
-      persistableStateAttachmentTypeId,
-    }) as PersistableStateAttachmentState;
-
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        payload: {
-          ...doc.attributes.payload,
-          comment: {
-            ...doc.attributes.payload.comment,
-            persistableStateAttachmentState: migratedState.persistableStateAttachmentState,
-          },
-        },
-      },
-      references: doc.references ?? [],
-    };
-  };

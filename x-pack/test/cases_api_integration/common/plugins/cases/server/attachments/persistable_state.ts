@@ -27,10 +27,4 @@ export const getPersistableStateAttachment = (): PersistableStateAttachmentTypeS
     },
     references: [{ id: 'testRef', name: 'myTestReference', type: 'test-so' }],
   }),
-  migrations: () => ({
-    '8.4.0': (state: PersistableStateAttachmentState): PersistableStateAttachmentState => ({
-      persistableStateAttachmentTypeId: '.test',
-      persistableStateAttachmentState: { migrated: true },
-    }),
-  }),
 });

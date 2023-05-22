@@ -69,14 +69,6 @@ export const createCommentsMigrations = (
     SavedObjectMigrationFn<{ comment?: string }>
   >(lensMigrationObject, migrateByValueLensVisualizations) as MigrateFunctionsObject;
 
-  const persistableStateAttachmentMigrations = mapValues<
-    MigrateFunctionsObject,
-    SavedObjectMigrationFn<AttachmentPersistedAttributes>
-  >(
-    getAllPersistableAttachmentMigrations(migrationDeps.persistableStateAttachmentTypeRegistry),
-    migratePersistableStateAttachments
-  ) as MigrateFunctionsObject;
-
   const commentsMigrations = {
     '7.11.0': (
       doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
@@ -127,37 +119,10 @@ export const createCommentsMigrations = (
     '8.1.0': removeAssociationType,
   };
 
-  return mergeSavedObjectMigrationMaps(
-    persistableStateAttachmentMigrations,
+  return (
     mergeSavedObjectMigrationMaps(commentsMigrations, embeddableMigrations)
   );
 };
-
-export const migratePersistableStateAttachments =
-  (
-    migrate: MigrateFunction
-  ): SavedObjectMigrationFn<AttachmentPersistedAttributes, AttachmentPersistedAttributes> =>
-  (doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>) => {
-    if (doc.attributes.type !== CommentType.persistableState) {
-      return doc;
-    }
-
-    const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = doc.attributes;
-
-    const migratedState = migrate({
-      persistableStateAttachmentState,
-      persistableStateAttachmentTypeId,
-    }) as PersistableStateAttachmentState;
-
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        persistableStateAttachmentState: migratedState.persistableStateAttachmentState,
-      },
-      references: doc.references ?? [],
-    };
-  };
 
 export const migrateByValueLensVisualizations =
   (migrate: MigrateFunction): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
