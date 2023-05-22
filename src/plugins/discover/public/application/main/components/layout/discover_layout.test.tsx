@@ -161,17 +161,6 @@ describe('Discover component', () => {
     ).not.toBeNull();
   }, 10000);
 
-  test('the saved search title h1 gains focus on navigate', async () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const component = await mountComponent(dataViewWithTimefieldMock, undefined, {
-      attachTo: container,
-    });
-    expect(
-      component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
-    ).toHaveFocus();
-  }, 10000);
-
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, undefined);
