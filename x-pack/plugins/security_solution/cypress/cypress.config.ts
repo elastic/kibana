@@ -22,6 +22,6 @@ export default defineCypressConfig({
   },
   reporter: 'junit',
   reporterOptions: {
-    mochaFile: 'target/junit/security-solution-cypress-[hash].xml'
-  }
+    mochaFile: 'target/junit/security-solution-cypress-[hash].xml',
+  },
 });
