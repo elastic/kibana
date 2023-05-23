@@ -34,7 +34,7 @@ const startSync = (appState: DiscoverAppStateContainer) => {
   return stop;
 };
 
-async function getState(url: string, savedSearch?: SavedSearch) {
+async function getState(url: string = '/', savedSearch?: SavedSearch) {
   const nextHistory = createBrowserHistory();
   nextHistory.push(url);
   const nextState = getDiscoverStateContainer({
@@ -171,7 +171,7 @@ describe('Test discover state with legacy migration', () => {
   });
 });
 
-describe('createSearchSessionRestorationDataProvider', () => {
+describe('Test createSearchSessionRestorationDataProvider', () => {
   let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
   const history = createBrowserHistory();
   const mockDataPlugin = dataPluginMock.createStartContract();
@@ -237,7 +237,17 @@ describe('createSearchSessionRestorationDataProvider', () => {
   });
 });
 
-describe('actions', () => {
+describe('Test discover searchSessionManager', () => {
+  test('getting the next session id', async () => {
+    const { state } = await getState();
+    const nextId = 'id';
+    discoverServiceMock.data.search.session.start = jest.fn(() => nextId);
+    state.actions.initializeAndSync();
+    expect(state.searchSessionManager.getNextSearchSessionId()).toBe(nextId);
+  });
+});
+
+describe('Test discover state actions', () => {
   beforeEach(async () => {
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
       return { from: 'now-15d', to: 'now' };
@@ -545,7 +555,6 @@ describe('actions', () => {
     );
     // check if the changed data view is reflected in the URL
     expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
-
     unsubscribe();
   });
   test('onDataViewCreated - persisted data view', async () => {
