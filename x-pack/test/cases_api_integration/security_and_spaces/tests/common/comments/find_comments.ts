@@ -309,17 +309,11 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: obsCase.id,
         });
 
-        const commentsResp = await supertest
+        await supertest
           .get(`${CASES_URL}/${obsCase.id}/comments/_find?namespaces[0]=*`)
-          .expect(200);
+          .expect(400);
 
-        expect(commentsResp.body.comments.length).to.eql(1);
-
-        const nextCommentsResp = await supertest
-          .get(`${CASES_URL}/${obsCase.id}/comments/_find?namespaces=*`)
-          .expect(200);
-
-        expect(nextCommentsResp.body.comments.length).to.eql(1);
+        await supertest.get(`${CASES_URL}/${obsCase.id}/comments/_find?namespaces=*`).expect(400);
       });
     });
   });
