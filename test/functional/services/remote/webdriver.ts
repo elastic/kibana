@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
+import { map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
@@ -28,7 +28,6 @@ import { installDriver } from 'ms-chromium-edge-driver';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { pollForLogEntry$ } from './poll_for_log_entry';
-import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
@@ -260,40 +259,57 @@ async function attemptToCreateCommand(
           };
         }
 
-        const { input, chunk$, cleanup } = await createStdoutSocket();
-        lifecycle.cleanup.add(cleanup);
+        if (process.platform === 'linux') {
+          const session = await new Builder()
+            .forBrowser(browserType)
+            .setFirefoxOptions(firefoxOptions)
+            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).setHostname('::1'))
+            .build();
+          return {
+            session,
+            consoleLog$: Rx.EMPTY,
+          };
+        }
 
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(
-            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
-          )
-          .build();
+        log.error(`not starting driver`);
 
-        const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
+        // const { input, chunk$, cleanup } = await createStdoutSocket();
+        // lifecycle.cleanup.add(cleanup);
 
-        return {
-          session,
-          consoleLog$: chunk$.pipe(
-            map((chunk) => chunk.toString('utf8')),
-            mergeMap((msg) => {
-              const match = msg.match(CONSOLE_LINE_RE);
-              if (!match) {
-                log.debug('Firefox stdout: ' + msg);
-                return [];
-              }
+        // const ffService = new firefox.ServiceBuilder(geckoDriver.path);
 
-              const [, level, message] = match;
-              return [
-                {
-                  level,
-                  message: message.trim(),
-                },
-              ];
-            })
-          ),
-        };
+        // const session = await new Builder()
+        //   .forBrowser(browserType)
+        //   .setFirefoxOptions(firefoxOptions)
+        //   .setFirefoxService(
+        //     new firefox.ServiceBuilder(geckoDriver.path).setHostname('127.0.0.1')
+        //     // .setStdio(['ignore', input, 'ignore'])
+        //   )
+        //   .build();
+
+        // const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
+
+        // return {
+        //   session,
+        //   consoleLog$: chunk$.pipe(
+        //     map((chunk) => chunk.toString('utf8')),
+        //     mergeMap((msg) => {
+        //       const match = msg.match(CONSOLE_LINE_RE);
+        //       if (!match) {
+        //         log.debug('Firefox stdout: ' + msg);
+        //         return [];
+        //       }
+
+        //       const [, level, message] = match;
+        //       return [
+        //         {
+        //           level,
+        //           message: message.trim(),
+        //         },
+        //       ];
+        //     })
+        //   ),
+        // };
       }
 
       default:
