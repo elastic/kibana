@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import {
   createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 import {
   DataPublicPluginStart,
+  noSearchSessionStorageCapabilityMessage,
   QueryState,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
@@ -100,10 +100,6 @@ export interface DiscoverStateContainer {
    */
   internalState: DiscoverInternalStateContainer;
   /**
-   * kbnUrlStateStorage - it keeps the state in sync with the URL
-   */
-  kbnUrlStateStorage: IKbnUrlStateStorage;
-  /**
    * State of saved search, the saved object of Discover
    */
   savedSearchState: DiscoverSavedSearchContainer;
@@ -169,11 +165,6 @@ export interface DiscoverStateContainer {
      * @param id - id of the data view
      */
     onChangeDataView: (id: string) => Promise<void>;
-    /**
-     * Triggered when an ad-hoc data view is persisted to allow sharing links and CSV
-     * @param dataView
-     */
-    persistAdHocDataView: (dataView: DataView) => Promise<DataView>;
     /**
      * Set the currently selected data view
      * @param dataView
@@ -324,18 +315,6 @@ export function getDiscoverStateContainer({
     fetchData();
   };
 
-  const persistAdHocDataView = async (adHocDataView: DataView) => {
-    const persistedDataView = await services.dataViews.createAndSave({
-      ...adHocDataView.toSpec(),
-      id: uuidv4(),
-    });
-    services.dataViews.clearInstanceCache(adHocDataView.id);
-    updateFiltersReferences(adHocDataView, persistedDataView);
-    internalStateContainer.transitions.removeAdHocDataViewById(adHocDataView.id!);
-    await appStateContainer.update({ index: persistedDataView.id }, true);
-    return persistedDataView;
-  };
-
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
     return loadSavedSearchFn(params ?? {}, {
       appStateContainer,
@@ -381,6 +360,23 @@ export function getDiscoverStateContainer({
       });
       fetchData();
     });
+
+    services.data.search.session.enableStorage(
+      createSearchSessionRestorationDataProvider({
+        appStateContainer,
+        data: services.data,
+        getSavedSearch: () => savedSearchContainer.getState(),
+      }),
+      {
+        isDisabled: () =>
+          services.capabilities.discover.storeSearchSession
+            ? { disabled: false }
+            : {
+                disabled: true,
+                reasonText: noSearchSessionStorageCapabilityMessage,
+              },
+      }
+    );
 
     return () => {
       unsubscribeData();
@@ -448,7 +444,6 @@ export function getDiscoverStateContainer({
   };
 
   return {
-    kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
     internalState: internalStateContainer,
     dataState: dataStateContainer,
@@ -465,7 +460,6 @@ export function getDiscoverStateContainer({
       onDataViewEdited,
       onOpenSavedSearch,
       onUpdateQuery,
-      persistAdHocDataView,
       setDataView,
       undoSavedSearchChanges,
       updateAdHocDataViewId,
