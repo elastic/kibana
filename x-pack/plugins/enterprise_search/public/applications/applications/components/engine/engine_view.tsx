@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { useParams, Redirect, Switch } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
@@ -48,9 +48,16 @@ export const EngineView: React.FC = () => {
   }>();
   const { renderHeaderActions } = useValues(KibanaLogic);
 
+  useLayoutEffect(() => {
+    renderHeaderActions(EngineHeaderDocsAction);
+
+    return () => {
+      renderHeaderActions();
+    };
+  }, []);
+
   useEffect(() => {
     fetchEngine({ engineName });
-    renderHeaderActions(EngineHeaderDocsAction);
   }, [engineName]);
 
   if (fetchEngineApiStatus === Status.ERROR) {
