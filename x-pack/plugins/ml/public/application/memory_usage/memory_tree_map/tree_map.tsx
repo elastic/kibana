@@ -19,11 +19,12 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useCurrentKibanaTheme } from '../../components/color_range_legend/use_color_range';
 import { MemoryUsageInfo } from '../../../../common/types/trained_models';
 import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
-import { useFieldFormatter, useUiSettings } from '../../contexts/kibana';
+import { useFieldFormatter } from '../../contexts/kibana';
 
 import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
@@ -65,7 +66,7 @@ const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
 );
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
-  const isDarkTheme = useUiSettings().get('theme:darkMode');
+  const isDarkTheme = useCurrentKibanaTheme();
   const { theme, baseTheme } = useMemo(
     () =>
       isDarkTheme
