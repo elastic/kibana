@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import execa from 'execa';
 import Path from 'path';
 import Fs from 'fs';
-
 import { REPO_ROOT } from '@kbn/repo-info';
 import JsYaml from 'js-yaml';
 
@@ -26,36 +24,30 @@ interface FtrConfigsManifest {
   disabled: string[];
   enabled: Array<string | FtrConfigWithOptions>;
 }
+let ftrConfigsManifest: FtrConfigsManifest;
 
-// eslint-disable-next-line no-console
-console.log(`REPO_ROOT: ${REPO_ROOT}`);
-// eslint-disable-next-line no-console
-console.log(`cwd: ${process.cwd()}`);
+const loadNormal = (): FtrConfigsManifest => {
+  const x = Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL);
+  return JsYaml.safeLoad(Fs.readFileSync(x, 'utf8'));
+};
 
-ls('.');
-ls(REPO_ROOT);
-ls(`${REPO_ROOT}/.buildkite`);
-ls(
-  '/var/lib/buildkite-agent/builds/kb-n2-4-spot-8d94c28da2235528/elastic/kibana-pull-request/kibana-build-xpack/'
-);
-ls(
-  '/var/lib/buildkite-agent/builds/kb-n2-4-spot-8d94c28da2235528/elastic/kibana-pull-request/kibana-build-xpack/.buildkite/'
-);
-
-async function ls(dir: string) {
+const loadAbnormal = (): FtrConfigsManifest => {
+  const fromRepoRootIntoKbn = Path.resolve(REPO_ROOT, '../kibana', FTR_CONFIGS_MANIFEST_REL);
+  return JsYaml.safeLoad(Fs.readFileSync(fromRepoRootIntoKbn, 'utf8'));
+};
+try {
+  ftrConfigsManifest = loadNormal();
+} catch (_) {
+  // eslint-disable-next-line no-console
+  console.error(`\n### Could not load ${FTR_CONFIGS_MANIFEST_REL} normally, Error: \n  ${_}`);
   try {
-    const { stdout } = await execa('ls', ['-la', dir]);
-    // eslint-disable-next-line no-console
-    console.log(`ls ${dir}:\n${stdout}\nls (end)`);
+    ftrConfigsManifest = loadAbnormal();
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(`ls ${dir}: ERROR: ${e}`);
+    throw new Error(
+      `\n### Could not load ${FTR_CONFIGS_MANIFEST_REL} abnormally either, Error: \n  ${e}`
+    );
   }
 }
-
-const ftrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
-  Fs.readFileSync(Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL), 'utf8')
-);
 
 export const FTR_CONFIGS_MANIFEST_PATHS = [
   Object.values(ftrConfigsManifest.enabled),
