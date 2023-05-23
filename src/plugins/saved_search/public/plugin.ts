@@ -10,13 +10,14 @@ import { CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
 import {
   getSavedSearch,
   saveSavedSearch,
   SaveSavedSearchOptions,
   getNewSavedSearch,
 } from './services/saved_searches';
-import { SavedSearch } from '../common/types';
+import { SavedSearch, SavedSearchAttributes } from '../common/types';
 
 /**
  * Data plugin public Setup contract
@@ -30,6 +31,7 @@ export interface SavedSearchPublicPluginSetup {}
 export interface SavedSearchPublicPluginStart {
   get: (savedSearchId: string) => ReturnType<typeof getSavedSearch>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
+  getAll: () => Promise<Array<SimpleSavedObject<SavedSearchAttributes>>>;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
@@ -76,6 +78,21 @@ export class SavedSearchPublicPlugin
           spaces,
           savedObjectsTagging: savedObjectsTagging?.getTaggingApi(),
         });
+      },
+      getAll: async () => {
+        // todo this is loading a list
+        const result = await core.savedObjects.client.find<SavedSearchAttributes>({
+          type: 'search',
+          perPage: 10000,
+        });
+        return result.savedObjects;
+        // todo
+        /*
+          .then((response) => {
+            savedSearchesCache = response.savedObjects;
+            return savedSearchesCache;
+          });
+          */
       },
       getNew: () => getNewSavedSearch({ search: data.search }),
       save: (savedSearch, options = {}) => {

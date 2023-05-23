@@ -23,16 +23,6 @@ describe('getSavedSearch', () => {
     search = dataPluginMock.createStartContract().search;
   });
 
-  test('should return empty saved search in case of no id', async () => {
-    const savedSearch = await getSavedSearch(undefined, {
-      savedObjectsClient,
-      search,
-    });
-
-    expect(search.searchSource.createEmpty).toHaveBeenCalled();
-    expect(savedSearch).toHaveProperty('searchSource');
-  });
-
   test('should throw an error if so not found', async () => {
     let errorMessage = 'No error thrown.';
     savedObjectsClient.resolve = jest.fn().mockReturnValue({

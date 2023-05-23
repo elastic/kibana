@@ -36,17 +36,10 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     sort: false,
   });
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      redirect: () =>
-        resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to, layer),
-    }
-  );
+  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+    redirect: () =>
+      resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to, layer),
+  });
   return (
     <PageLoader context={context}>
       {<Redirect to={createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB)} />}

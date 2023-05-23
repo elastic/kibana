@@ -8,17 +8,9 @@
 
 import { discoverServiceMock } from '../__mocks__/services';
 import { SearchEmbeddableFactory, type StartServices } from './search_embeddable_factory';
-import { getSavedSearch } from '@kbn/saved-search-plugin/public';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '../__mocks__/data_view';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-
-jest.mock('@kbn/saved-search-plugin/public', () => {
-  return {
-    ...jest.requireActual('@kbn/saved-search-plugin/public'),
-    getSavedSearch: jest.fn(),
-  };
-});
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   return {
@@ -35,7 +27,6 @@ const input = {
   rowsPerPage: 50,
 };
 
-const getSavedSearchMock = getSavedSearch as unknown as jest.Mock;
 const ErrorEmbeddableMock = ErrorEmbeddable as unknown as jest.Mock;
 
 describe('SearchEmbeddableFactory', () => {

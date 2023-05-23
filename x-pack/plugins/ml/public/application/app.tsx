@@ -97,10 +97,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
-    getSavedSearchDeps: {
-      search: deps.data.search,
-      savedObjectsClient: coreStart.savedObjects.client,
-    },
   };
 
   const services = {
@@ -123,6 +119,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     licensing: deps.licensing,
     lens: deps.lens,
     savedObjectsManagement: deps.savedObjectsManagement,
+    savedSearch: deps.savedSearch,
     ...coreStart,
   };
 
@@ -177,6 +174,7 @@ export const renderApp = (
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,
+    savedSearch: deps.savedSearch,
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,

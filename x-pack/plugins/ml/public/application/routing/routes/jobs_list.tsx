@@ -50,7 +50,6 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     undefined,
     deps.config,
     deps.dataViewsContract,
-    deps.getSavedSearchDeps,
     basicResolvers(deps)
   );
   const timefilter = useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });

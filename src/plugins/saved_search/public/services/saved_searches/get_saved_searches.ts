@@ -65,6 +65,7 @@ export const getSavedSearch = async (
     savedSearchId,
     savedSearch.attributes,
     tags,
+    so.saved_object.references,
     await search.searchSource.create(searchSourceValues),
     {
       outcome: so.outcome,

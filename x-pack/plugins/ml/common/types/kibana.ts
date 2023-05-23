@@ -18,6 +18,7 @@ export interface Route {
 }
 
 // TODO define saved object type
+// todo remove
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 
 export function isSavedSearchSavedObject(

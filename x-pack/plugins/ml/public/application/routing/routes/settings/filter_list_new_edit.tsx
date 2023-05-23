@@ -85,19 +85,11 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
   }
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      checkFullLicense,
-      checkGetJobsCapabilities: () =>
-        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-      getMlNodeCount,
-    }
-  );
+  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+    checkFullLicense,
+    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+    getMlNodeCount,
+  });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 

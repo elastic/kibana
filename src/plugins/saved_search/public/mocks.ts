@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+
 const savedSearchStartMock = () => ({
-  get: jest.fn(),
-  getNew: jest.fn(),
+  get: jest.fn().mockImplementation(() => ({
+    id: 'savedSearch',
+    title: 'savedSearchTitle',
+    searchSource: searchSourceInstanceMock,
+  })),
+  getNew: jest.fn().mockImplementation(() => ({
+    searchSource: searchSourceInstanceMock,
+  })),
   save: jest.fn(),
 });
 
