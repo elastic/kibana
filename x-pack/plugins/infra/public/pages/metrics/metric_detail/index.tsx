@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { withMetricPageProviders } from './page_providers';
-import { useMetadata } from './hooks/use_metadata';
+import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
