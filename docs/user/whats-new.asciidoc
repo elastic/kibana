@@ -214,6 +214,17 @@ You can now attach files to cases for better investigation processes.
 With the new capability you can upload indicators of compromise (IOCs) and other files to support alert and case triage. For more information, check <<add-case-files>>.
 
 [discrete]
+==== Case details in alert tables
+
+In *{observability} > Alerts* and *Security > Alerts* there is a new *Cases* column.
+When you attach an alert to a case, a link appears in the new column.
+You can attach up to 10 cases to each alert.
+
+[role="screenshot"]
+image::images/highlights-alerts-table.png[The cases column in {observability}>Alerts]
+
+
+[discrete]
 === Per-user dark mode
 
 Continuing our user-first effort for personalization and collaboration,
@@ -241,4 +252,4 @@ https://www.elastic.co/subscriptions[subscription feature] and
 and applies to all spaces.
 
 [role="screenshot"]
-image::images/highlights-branding-settings.png[Settings in for customizing logo, organaization name, page title, and browser icon]
+image::images/highlights-branding-settings.png[Settings in for customizing logo, organization name, page title, and browser icon]
