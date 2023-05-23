@@ -147,23 +147,24 @@ export const goToQueryTab = () => {
 };
 
 export const addNotesToTimeline = (notes: string) => {
-  goToNotesTab().then(() => {
-    cy.get(NOTES_TAB_BUTTON)
-      .find('.euiBadge__text')
-      .invoke('text')
-      .then(parseInt)
-      .then((notesCount) => {
-        cy.get(NOTES_TEXT_AREA).type(notes, {
-          parseSpecialCharSequences: false,
-          force: true,
-        });
+  goToNotesTab();
 
-        cy.get(ADD_NOTE_BUTTON).click();
-        cy.get(ADD_NOTE_BUTTON).should('have.attr', 'disabled');
-
-        cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
+  cy.get(NOTES_TAB_BUTTON)
+    .find('.euiBadge__text')
+    .invoke('text')
+    .then(parseInt)
+    .then((notesCount) => {
+      cy.get(NOTES_TEXT_AREA).type(notes, {
+        parseSpecialCharSequences: false,
+        force: true,
       });
-  });
+
+      cy.get(ADD_NOTE_BUTTON).click();
+      cy.get(ADD_NOTE_BUTTON).should('have.attr', 'disabled');
+
+      cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
+    });
+
   goToQueryTab();
   goToNotesTab();
 };

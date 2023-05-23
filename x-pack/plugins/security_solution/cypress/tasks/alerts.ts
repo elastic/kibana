@@ -116,7 +116,8 @@ export const closeAlerts = () => {
 export const expandFirstAlertActions = () => {
   waitForAlerts();
 
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible').click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().filter(':visible').click();
+  // cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible').click();
   cy.get(TIMELINE_CONTEXT_MENU_BTN)
     .first()
     .should('be.visible')
@@ -373,7 +374,7 @@ export const waitForAlerts = () => {
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
   cy.get(columnSelector).eq(1).realHover();
-  cy.find(CELL_EXPAND_VALUE).click({ force: true });
+  cy.get(columnSelector).eq(1).find(CELL_EXPAND_VALUE).click();
 };
 
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {

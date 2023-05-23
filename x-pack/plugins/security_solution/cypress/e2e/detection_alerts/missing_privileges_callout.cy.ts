@@ -44,6 +44,7 @@ describe('Detections > Callouts', () => {
     // Otherwise the app will be disabled and show a "welcome"-like page.
     login();
     visitWithoutDateRange(ALERTS_URL);
+    waitForPageTitleToBeShown();
   });
 
   context('indicating read-only access to resources', () => {
