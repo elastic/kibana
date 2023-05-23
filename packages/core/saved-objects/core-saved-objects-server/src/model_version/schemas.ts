@@ -7,6 +7,7 @@
  */
 
 import type { ObjectType } from '@kbn/config-schema';
+import { SavedObjectsValidationSpec } from '../validation';
 
 /**
  * The schemas associated with this model version.
@@ -29,6 +30,11 @@ export interface SavedObjectsModelVersionSchemaDefinitions {
    * See {@link SavedObjectModelVersionForwardCompatibilitySchema} for more info.
    */
   forwardCompatibility?: SavedObjectModelVersionForwardCompatibilitySchema;
+  /**
+   * The schema applied when creating a document of the current version
+   * Allows for validating properties using @kbn/config-schema validations
+   */
+  create?: SavedObjectsValidationSpec;
 }
 
 /**

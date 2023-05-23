@@ -9,7 +9,10 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { SavedObjectsTypeValidator } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  SavedObjectsTypeValidator,
+  modelVersionToVirtualVersion,
+} from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsErrorHelpers,
   type SavedObjectSanitizedDoc,
@@ -100,10 +103,29 @@ export class ValidationHelper {
   private getTypeValidator(type: string): SavedObjectsTypeValidator {
     if (!this.typeValidatorMap[type]) {
       const savedObjectType = this.registry.getType(type);
+
+      const combinedSchemas =
+        typeof savedObjectType!.schemas === 'function'
+          ? savedObjectType!.schemas()
+          : savedObjectType!.schemas ?? {};
+
+      const modelVersionsMap =
+        typeof savedObjectType!.modelVersions === 'function'
+          ? savedObjectType!.modelVersions()
+          : savedObjectType!.modelVersions ?? {};
+
+      Object.entries(modelVersionsMap).reduce((map, [key, modelVersion]) => {
+        const virtualVersion = modelVersionToVirtualVersion(key);
+        if (modelVersion.schemas?.create) {
+          combinedSchemas[virtualVersion] = modelVersion.schemas!.create!;
+        }
+        return map;
+      }, {});
+
       this.typeValidatorMap[type] = new SavedObjectsTypeValidator({
         logger: this.logger.get('type-validator'),
         type,
-        validationMap: savedObjectType!.schemas ?? {},
+        validationMap: combinedSchemas,
         defaultVersion: this.kibanaVersion,
       });
     }
@@ -122,3 +144,16 @@ export class ValidationHelper {
     }
   }
 }
+
+/**
+ ```typescript
+ * const modelVersionMap: SavedObjectsModelVersionMap = {
+ *   '1': modelVersion1,
+ *   '2': modelVersion2,
+ *   '3': modelVersion3,
+ * }
+ * where
+ *  modelVersion = {
+  changes; []
+ }
+ */
