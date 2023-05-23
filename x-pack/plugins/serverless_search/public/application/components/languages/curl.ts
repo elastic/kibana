@@ -13,12 +13,12 @@ export const curlDefinition: LanguageDefinition = {
   buildSearchQuery: `TBD`,
   configureClient: `TBD`,
   docLink: docLinks.apiIntro,
-  iconType: 'curl.svg',
+  iconType: 'cURL.svg',
   id: Languages.CURL,
   ingestData: `TBD`,
   installClient: `TBD`,
-  name: i18n.translate('xpack.serverlessSearch.languages.curl', {
-    defaultMessage: 'curl',
+  name: i18n.translate('xpack.serverlessSearch.languages.cURL', {
+    defaultMessage: 'cURL',
   }),
   languageStyling: 'shell',
   testConnection: `TBD`,
