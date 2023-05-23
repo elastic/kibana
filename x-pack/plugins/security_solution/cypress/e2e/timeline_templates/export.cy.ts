@@ -20,10 +20,7 @@ import { searchByTitle } from '../../tasks/table_pagination';
 describe('Export timelines', () => {
   before(() => {
     cleanKibana();
-    cy.intercept({
-      method: 'POST',
-      path: '/api/timeline/_export?file_name=timelines_export.ndjson',
-    }).as('export');
+
     createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
@@ -32,6 +29,10 @@ describe('Export timelines', () => {
   });
 
   it('Exports a custom timeline template', function () {
+    cy.intercept({
+      method: 'POST',
+      path: '/api/timeline/_export?file_name=timelines_export.ndjson',
+    }).as('export');
     login();
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
     searchByTitle(this.templateTitle);
