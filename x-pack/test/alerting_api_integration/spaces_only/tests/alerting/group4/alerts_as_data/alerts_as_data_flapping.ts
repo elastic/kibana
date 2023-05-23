@@ -324,7 +324,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           getTestRuleData({
             rule_type_id: 'test.patternFiringAad',
             // set the schedule long so we can use "runSoon" to specify rule runs
-            schedule: { interval: '1s' },
+            schedule: { interval: '1d' },
             throttle: null,
             params: ruleParameters,
             actions: [],
