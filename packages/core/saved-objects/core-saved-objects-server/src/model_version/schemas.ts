@@ -20,22 +20,22 @@ export interface SavedObjectsModelVersionSchemaDefinitions {
    *
    * When retrieving a savedObject document from an index, if the version of the document
    * is higher than the latest version known of the Kibana instance, the document will go
-   * through the `backwardConversion` schema of the associated model version.
+   * through the `forwardCompatibility` schema of the associated model version.
    *
    * E.g a Kibana instance with model version `2` for type `foo` types fetches a `foo` document
-   * at model version `3`. The document will then go through the `backwardConversion`
+   * at model version `3`. The document will then go through the `forwardCompatibility`
    * of the model version 2 (if present).
    *
-   * See {@link SavedObjectModelVersionBackwardConversionSchema} for more info.
+   * See {@link SavedObjectModelVersionForwardCompatibilitySchema} for more info.
    */
-  backwardConversion?: SavedObjectModelVersionBackwardConversionSchema;
+  forwardCompatibility?: SavedObjectModelVersionForwardCompatibilitySchema;
 }
 
 /**
- * Plain javascript function alternative for {@link SavedObjectModelVersionBackwardConversionSchema}
+ * Plain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}
  * @public
  */
-export type SavedObjectModelVersionBackwardConversionFn<InAttrs = unknown, OutAttrs = unknown> = (
+export type SavedObjectModelVersionForwardCompatibilityFn<InAttrs = unknown, OutAttrs = unknown> = (
   attributes: InAttrs
 ) => OutAttrs;
 
@@ -46,7 +46,7 @@ export type SavedObjectModelVersionBackwardConversionFn<InAttrs = unknown, OutAt
  * - A `@kbn/config-schema`'s Object schema, that will receive the document's attributes
  * - An arbitrary function that will receive the document's attributes as parameter and should return the converted attributes
  *
- * Note that These conversion mechanism shouldn't assert the data itself, only strip unknown fields to convert
+ * @remark These conversion mechanism shouldn't assert the data itself, only strip unknown fields to convert
  * the document to the *shape* of the document at the given version.
  *
  * @example using a function:
@@ -70,7 +70,7 @@ export type SavedObjectModelVersionBackwardConversionFn<InAttrs = unknown, OutAt
  *
  * @public
  */
-export type SavedObjectModelVersionBackwardConversionSchema<
+export type SavedObjectModelVersionForwardCompatibilitySchema<
   InAttrs = unknown,
   OutAttrs = unknown
-> = ObjectType | SavedObjectModelVersionBackwardConversionFn<InAttrs, OutAttrs>;
+> = ObjectType | SavedObjectModelVersionForwardCompatibilityFn<InAttrs, OutAttrs>;

@@ -230,7 +230,7 @@ describe('getModelVersionSchemas', () => {
         1: {
           changes: [],
           schemas: {
-            backwardConversion: schema1,
+            forwardCompatibility: schema1,
           },
         },
         2: {
@@ -240,7 +240,7 @@ describe('getModelVersionSchemas', () => {
         3: {
           changes: [],
           schemas: {
-            backwardConversion: schema3,
+            forwardCompatibility: schema3,
           },
         },
       },
@@ -263,7 +263,7 @@ describe('getModelVersionSchemas', () => {
         1: {
           changes: [],
           schemas: {
-            backwardConversion: schema1,
+            forwardCompatibility: schema1,
           },
         },
         2: {
@@ -273,7 +273,7 @@ describe('getModelVersionSchemas', () => {
         3: {
           changes: [],
           schemas: {
-            backwardConversion: schema3,
+            forwardCompatibility: schema3,
           },
         },
       },

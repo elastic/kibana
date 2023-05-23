@@ -9,11 +9,11 @@
 import { isConfigSchema, type ObjectType } from '@kbn/config-schema';
 import type {
   SavedObjectUnsanitizedDoc,
-  SavedObjectModelVersionBackwardConversionSchema,
+  SavedObjectModelVersionForwardCompatibilitySchema,
 } from '@kbn/core-saved-objects-server';
 
 function isObjectType(
-  schema: SavedObjectModelVersionBackwardConversionSchema
+  schema: SavedObjectModelVersionForwardCompatibilitySchema
 ): schema is ObjectType {
   return isConfigSchema(schema);
 }
@@ -21,7 +21,7 @@ function isObjectType(
 export type ConvertedSchema = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
 export const convertModelVersionBackwardConversionSchema = (
-  schema: SavedObjectModelVersionBackwardConversionSchema
+  schema: SavedObjectModelVersionForwardCompatibilitySchema
 ): ConvertedSchema => {
   if (isObjectType(schema)) {
     return (doc) => {

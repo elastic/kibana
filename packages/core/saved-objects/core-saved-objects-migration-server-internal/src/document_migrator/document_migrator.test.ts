@@ -1389,7 +1389,7 @@ describe('DocumentMigrator', () => {
           1: {
             changes: [],
             schemas: {
-              backwardConversion: (attrs: any) => {
+              forwardCompatibility: (attrs: any) => {
                 return {
                   foo: attrs.foo,
                 };
@@ -1432,7 +1432,7 @@ describe('DocumentMigrator', () => {
           1: {
             changes: [],
             schemas: {
-              backwardConversion: (attrs: any) => {
+              forwardCompatibility: (attrs: any) => {
                 return {
                   foo: attrs.foo,
                 };

@@ -30,6 +30,6 @@ export type {
 
 export type {
   SavedObjectsModelVersionSchemaDefinitions,
-  SavedObjectModelVersionBackwardConversionSchema,
-  SavedObjectModelVersionBackwardConversionFn,
+  SavedObjectModelVersionForwardCompatibilitySchema,
+  SavedObjectModelVersionForwardCompatibilityFn,
 } from './schemas';

@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { convertModelVersionBackwardConversionSchema } from './backward_conversion_schema';
 import type {
   SavedObjectUnsanitizedDoc,
-  SavedObjectModelVersionBackwardConversionFn,
+  SavedObjectModelVersionForwardCompatibilityFn,
 } from '@kbn/core-saved-objects-server';
 
 describe('convertModelVersionBackwardConversionSchema', () => {
@@ -25,7 +25,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
 
   describe('using functions', () => {
     it('converts the schema', () => {
-      const conversionSchema: jest.MockedFunction<SavedObjectModelVersionBackwardConversionFn> =
+      const conversionSchema: jest.MockedFunction<SavedObjectModelVersionForwardCompatibilityFn> =
         jest.fn();
       conversionSchema.mockImplementation((attrs) => attrs);
 
@@ -41,7 +41,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
 
     it('returns the document with the updated properties', () => {
       const conversionSchema: jest.MockedFunction<
-        SavedObjectModelVersionBackwardConversionFn<any, any>
+        SavedObjectModelVersionForwardCompatibilityFn<any, any>
       > = jest.fn();
       conversionSchema.mockImplementation((attrs) => ({ foo: attrs.foo }));
 
@@ -58,7 +58,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
 
     it('throws if the function throws', () => {
       const conversionSchema: jest.MockedFunction<
-        SavedObjectModelVersionBackwardConversionFn<any, any>
+        SavedObjectModelVersionForwardCompatibilityFn<any, any>
       > = jest.fn();
       conversionSchema.mockImplementation(() => {
         throw new Error('dang');

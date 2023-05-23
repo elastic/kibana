@@ -33,7 +33,7 @@ export const getModelVersionSchemas = ({
       : typeDefinition.modelVersions ?? {};
 
   return Object.entries(modelVersionMap).reduce((map, [rawModelVersion, versionDefinition]) => {
-    const schema = versionDefinition.schemas?.backwardConversion;
+    const schema = versionDefinition.schemas?.forwardCompatibility;
     if (schema) {
       const modelVersion = assertValidModelVersion(rawModelVersion);
       const virtualVersion = modelVersionToVirtualVersion(modelVersion);
