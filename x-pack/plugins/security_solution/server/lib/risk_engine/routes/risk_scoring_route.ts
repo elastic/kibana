@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  DEFAULT_MAX_RISK_SCORE_IDENTIFIER_BUCKETS,
+  DEFAULT_RISK_SCORE_IDENTIFIER_PAGE_SIZE,
   RISK_SCORES_URL,
 } from '../../../../common/constants';
 import { riskScoresRequestSchema } from '../../../../common/risk_engine/risk_scoring/risk_scores_request_schema';
@@ -59,17 +59,17 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
 
         const afterKeys = userAfterKeys ?? {};
         const range = userRange ?? { start: 'now-15d', end: 'now' };
-        const maxIdentifierBuckets = DEFAULT_MAX_RISK_SCORE_IDENTIFIER_BUCKETS;
+        const identifierPageSize = DEFAULT_RISK_SCORE_IDENTIFIER_PAGE_SIZE;
 
         const result = await riskScore.getScores({
           afterKeys,
           debug,
+          identifierPageSize,
+          identifierType,
           index,
           filter,
-          maxIdentifierBuckets,
           range,
           weights,
-          identifierType,
         });
 
         return response.ok({ body: result });
