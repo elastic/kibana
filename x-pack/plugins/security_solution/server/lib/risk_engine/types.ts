@@ -9,7 +9,6 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export type IdentifierType = 'user' | 'host';
-export type RiskCategoryType = 'signals'; // TODO this should be 'alerts' instead of 'signals' but we don't have the category field in ECS
 
 export interface RiskScoreWeight {
   type: string;
