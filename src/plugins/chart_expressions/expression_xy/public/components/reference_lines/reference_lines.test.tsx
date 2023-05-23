@@ -47,7 +47,8 @@ const data: Datatable = {
 };
 
 function createLayers(
-  decorations: ReferenceLineLayerArgs['decorations']
+  decorations: ReferenceLineLayerArgs['decorations'],
+  table?: Datatable
 ): ReferenceLineLayerConfig[] {
   return [
     {
@@ -56,7 +57,7 @@ function createLayers(
       decorations,
       type: 'referenceLineLayer',
       layerType: LayerTypes.REFERENCELINE,
-      table: data,
+      table: table || data,
     },
   ];
 }
@@ -174,22 +175,36 @@ describe('ReferenceLines', () => {
             yAccessorLeftFirstId: { convert: convertLeft } as unknown as FieldFormat,
             yAccessorRightFirstId: { convert: convertRight } as unknown as FieldFormat,
           }}
-          layers={createLayers([
+          layers={createLayers(
+            [
+              {
+                forAccessor: `yAccessorLeftFirstId`,
+                position: getAxisFromId('yAccessorLeft'),
+                lineStyle: 'solid',
+                fill: undefined,
+                type: 'referenceLineDecorationConfig',
+              },
+              {
+                forAccessor: `yAccessorRightFirstId`,
+                position: getAxisFromId('yAccessorRight'),
+                lineStyle: 'solid',
+                fill: 'above',
+                type: 'referenceLineDecorationConfig',
+              },
+            ],
             {
-              forAccessor: `yAccessorLeftFirstId`,
-              position: getAxisFromId('yAccessorLeft'),
-              lineStyle: 'solid',
-              fill: undefined,
-              type: 'referenceLineDecorationConfig',
-            },
-            {
-              forAccessor: `yAccessorRightFirstId`,
-              position: getAxisFromId('yAccessorRight'),
-              lineStyle: 'solid',
-              fill: 'above',
-              type: 'referenceLineDecorationConfig',
-            },
-          ])}
+              type: 'datatable',
+              rows: [row],
+              columns: Object.keys(row).map((id) => ({
+                id,
+                name: `Static value: ${row[id]}`,
+                meta: {
+                  type: 'number',
+                  params: { id: 'number', params: { formatOverride: true, pattern: '0.0' } },
+                },
+              })),
+            }
+          )}
         />
       );
       const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();

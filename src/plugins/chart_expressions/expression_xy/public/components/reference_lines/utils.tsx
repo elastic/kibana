@@ -254,15 +254,15 @@ export function getReferenceLinesFormattersMap(
   for (const layer of referenceLinesLayers) {
     if (isReferenceLine(layer)) {
       for (const { valueMeta, forAccessor } of layer.decorations) {
-        if (valueMeta) {
-          formattersMap[forAccessor] = formatFactory(valueMeta);
+        if (valueMeta?.params?.params?.formatOverride) {
+          formattersMap[forAccessor] = formatFactory(valueMeta.params.params);
         }
       }
     } else {
       for (const { forAccessor } of layer.decorations || []) {
         const columnFormat = layer.table.columns.find(({ id }) => id === forAccessor)?.meta.params;
-        if (columnFormat) {
-          formattersMap[forAccessor] = formatFactory(columnFormat);
+        if (columnFormat?.params?.formatOverride) {
+          formattersMap[forAccessor] = formatFactory(columnFormat.params);
         }
       }
     }
