@@ -12,7 +12,7 @@ import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/comm
 interface PolicyProps {
   name?: string;
   id: string;
-  configId: string;
+  configId?: string;
   projectId?: string;
   location: { name?: string; id?: string };
   namespace?: string;
