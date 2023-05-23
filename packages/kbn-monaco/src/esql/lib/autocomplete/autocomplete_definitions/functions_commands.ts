@@ -133,6 +133,21 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'to_string',
+    insertText: 'to_string',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toStringDoc', {
+      defaultMessage: 'Converts to string.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL string = to_string(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'date_format',
     insertText: 'date_format',
     kind: 1,

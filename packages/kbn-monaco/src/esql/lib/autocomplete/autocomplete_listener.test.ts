@@ -141,6 +141,7 @@ describe('autocomplete_listener', () => {
       'substring',
       'starts_with',
       'split',
+      'to_string',
       'date_format',
       'date_trunc',
       'is_finite',
