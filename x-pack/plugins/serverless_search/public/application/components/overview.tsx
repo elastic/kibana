@@ -28,8 +28,8 @@ import { OverviewPanel } from './overview_panels/overview_panel';
 import './overview.scss';
 import { IngestData } from './overview_panels/ingest_data';
 import { SelectClientPanel } from './overview_panels/select_client';
-import { LanguageClientPanels } from './overview_panels/language_client_panels';
 import { ApiKeyPanel } from './api_key/api_key';
+import { LanguageClientPanel } from './overview_panels/language_client_panel';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
@@ -86,11 +86,15 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <SelectClientPanel>
-          <LanguageClientPanels
-            setSelectedLanguage={setSelectedLanguage}
-            languages={languageDefinitions}
-            selectedLanguage={selectedLanguage}
-          />
+          {languageDefinitions.map((language, index) => (
+            <EuiFlexItem key={`panelItem.${index}`}>
+              <LanguageClientPanel
+                language={language}
+                setSelectedLanguage={setSelectedLanguage}
+                isSelectedLanguage={selectedLanguage === language}
+              />
+            </EuiFlexItem>
+          ))}
         </SelectClientPanel>
       </EuiPageTemplate.Section>
 

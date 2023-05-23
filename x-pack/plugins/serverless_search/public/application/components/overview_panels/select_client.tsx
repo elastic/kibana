@@ -49,7 +49,9 @@ export const SelectClientPanel: React.FC = ({ children }) => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          {children}
+          <EuiFlexGroup gutterSize="xs" direction="row">
+            {children}
+          </EuiFlexGroup>
           <EuiSpacer size="l" />
           <EuiCallOut
             title={i18n.translate('xpack.serverlessSearch.selectClient.callout.title', {
