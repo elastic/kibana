@@ -143,8 +143,9 @@ export const cli = () => {
           | undefined;
 
         const callExpression = expressionStatement?.expression;
-
+        // @ts-expect-error
         if (expressionStatement?.expression?.arguments?.length === 3) {
+          // @ts-expect-error
           const callExpressionArguments = _.find(callExpression?.arguments, [
             'type',
             'ObjectExpression',
@@ -154,7 +155,7 @@ export const cli = () => {
             'key.name',
             'env',
           ]) as ObjectProperty[] | undefined;
-
+          // @ts-expect-error
           const ftrConfig = _.find(callExpressionProperties?.value?.properties, [
             'key.name',
             'ftrConfig',
@@ -178,6 +179,7 @@ export const cli = () => {
                 });
               }
               if (key && value) {
+                // @ts-expect-error
                 acc[key] = value;
               }
               return acc;
@@ -199,8 +201,6 @@ export const cli = () => {
 
       await pMap(
         files,
-        // files.slice(0, 2),
-        // [files[20]],
         async (filePath) => {
           let result:
             | CypressCommandLine.CypressRunResult
@@ -261,6 +261,7 @@ export const cli = () => {
                 );
 
                 if (
+                  // @ts-expect-error
                   configFromTestFile?.enableExperimental?.length &&
                   _.some(vars.kbnTestServer.serverArgs, (value) =>
                     value.includes('--xpack.securitySolution.enableExperimental')

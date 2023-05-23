@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-// require('./child_process');
+require('./child_process');
 require('./lodash_template');

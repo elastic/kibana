@@ -36,6 +36,7 @@ export const drag = (subject: JQuery<HTMLElement>) => {
   const subjectLocation = subject[0].getBoundingClientRect();
 
   // Use cypress-real-events
+  // eslint-disable-next-line cypress/no-unnecessary-waiting,cypress/unsafe-to-chain-command
   cy.wrap(subject)
     .trigger('mousedown', {
       button: primaryButton,
@@ -56,6 +57,7 @@ export const drag = (subject: JQuery<HTMLElement>) => {
 /** "Drops" the subject being dragged on the specified drop target  */
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
   const targetLocation = dropTarget[0].getBoundingClientRect();
+  // eslint-disable-next-line cypress/no-unnecessary-waiting,cypress/unsafe-to-chain-command
   cy.wrap(dropTarget)
     .trigger('mousemove', {
       button: primaryButton,
