@@ -7,7 +7,11 @@
 
 import { getTimeline } from '../../../objects/timeline';
 
-import { TIMELINE_DESCRIPTION, TIMELINE_TITLE, OPEN_TIMELINE_MODAL } from '../../../screens/timeline';
+import {
+  TIMELINE_DESCRIPTION,
+  TIMELINE_TITLE,
+  OPEN_TIMELINE_MODAL,
+} from '../../../screens/timeline';
 import {
   TIMELINES_DESCRIPTION,
   TIMELINES_PINNED_EVENT_COUNT,

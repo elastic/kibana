@@ -20,6 +20,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...securitySolutionCypressConfig.getAll(),
 
     testRunner: (context: FtrProviderContext) =>
-    SecuritySolutionCypressCliIvestigationsTestRunner(context, cliCount, cliNumber),
+      SecuritySolutionCypressCliIvestigationsTestRunner(context, cliCount, cliNumber),
   };
 }

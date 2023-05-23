@@ -94,7 +94,9 @@ export async function SecuritySolutionCypressVisualTestRunner(context: FtrProvid
   return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:open');
 }
 
-export async function SecuritySolutionCypressCliIvestigationsTestRunner(context: FtrProviderContext) {
+export async function SecuritySolutionCypressCliIvestigationsTestRunner(
+  context: FtrProviderContext
+) {
   return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:investigations:run');
 }
 

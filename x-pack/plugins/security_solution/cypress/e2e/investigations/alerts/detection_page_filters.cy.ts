@@ -76,7 +76,7 @@ const customFilters = [
     fieldName: 'kibana.alert.rule.name',
     title: 'Rule Name',
   },
-  ];
+];
 const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_PAGE_FILTERS) => {
   cy.get(CONTROL_FRAMES).should((sub) => {
     expect(sub.length).eq(filterObject.length);
@@ -95,7 +95,7 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
           filter.selectedOptions && filter.selectedOptions.length > 0
             ? filter.selectedOptions.join('')
             : ''
-            );
+        );
       });
     });
   });
@@ -176,7 +176,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
         }
         return filter;
       }
-      );
+    );
 
     cy.url().then((url) => {
       const currURL = new URL(url);
@@ -195,7 +195,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
         fieldName: 'process.name',
         selectedOptions: ['testing123'],
       },
-      ];
+    ];
 
     const pageFilterUrlString = formatPageFilterSearchParam(CUSTOM_URL_FILTER);
 

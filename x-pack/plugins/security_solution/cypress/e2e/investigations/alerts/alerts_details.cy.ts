@@ -16,7 +16,12 @@ import {
   TABLE_ROWS,
 } from '../../../screens/alerts_details';
 import { closeAlertFlyout, expandFirstAlert } from '../../../tasks/alerts';
-import { changeAlertStatusTo, filterBy, openJsonView, openTable } from '../../../tasks/alerts_details';
+import {
+  changeAlertStatusTo,
+  filterBy,
+  openJsonView,
+  openTable,
+} from '../../../tasks/alerts_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
