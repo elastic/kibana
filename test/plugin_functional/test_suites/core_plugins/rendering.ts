@@ -160,6 +160,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.sendUsageTo (any)',
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
+        'vis_type_timeseries.readOnly (any)',
         'vis_type_vega.enableExternalUrls (boolean)',
         'xpack.actions.email.domain_allowlist (array)',
         'xpack.apm.serviceMapEnabled (boolean)',
@@ -244,7 +245,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       // abundantly clear when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
       const extra = _.difference(actualExposedConfigKeys, expectedExposedConfigKeys).sort();
       const missing = _.difference(expectedExposedConfigKeys, actualExposedConfigKeys).sort();
-      expect({ extra, missing }).to.eql({ extra: [ 'vis_type_timeseries.readOnly (any)', ], missing: [] }, EXPOSED_CONFIG_SETTINGS_ERROR);
+      expect({ extra, missing }).to.eql({ extra: [], missing: [] }, EXPOSED_CONFIG_SETTINGS_ERROR);
     });
 
     it('exposes plugin config settings to unauthenticated users', async () => {
