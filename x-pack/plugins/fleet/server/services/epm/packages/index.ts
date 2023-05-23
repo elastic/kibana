@@ -22,6 +22,7 @@ export {
   getInstallations,
   getPackageInfo,
   getPackages,
+  getInstalledPackages,
   getLimitedPackages,
 } from './get';
 

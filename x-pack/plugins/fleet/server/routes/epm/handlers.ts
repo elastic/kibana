@@ -30,10 +30,14 @@ import type {
   GetStatsResponse,
   UpdatePackageResponse,
   GetVerificationKeyIdResponse,
+  GetInstalledPackagesResponse,
+  GetEpmDataStreamsResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
+  GetDataStreamsRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageFromRegistryRequestSchema,
@@ -49,6 +53,7 @@ import {
   bulkInstallPackages,
   getCategories,
   getPackages,
+  getInstalledPackages,
   getFile,
   getPackageInfo,
   isBulkInstallError,
@@ -66,6 +71,7 @@ import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type { ReauthorizeTransformRequestSchema } from '../../types';
+import { getDataStreams } from '../../services/epm/data_streams';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -109,6 +115,52 @@ export const getListHandler: FleetRequestHandler<
       // Only cache responses where the installation status is excluded, otherwise the request
       // needs up-to-date information on whether the package is installed so we can't cache it
       headers: request.query.excludeInstallStatus ? { ...CACHE_CONTROL_10_MINUTES_HEADER } : {},
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getInstalledListHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const res = await getInstalledPackages({
+      savedObjectsClient,
+      ...request.query,
+    });
+
+    const body: GetInstalledPackagesResponse = { ...res };
+
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getDataStreamsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetDataStreamsRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const coreContext = await context.core;
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const res = await getDataStreams({
+      esClient,
+      ...request.query,
+    });
+
+    const body: GetEpmDataStreamsResponse = {
+      ...res,
+    };
+
+    return response.ok({
+      body,
     });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
