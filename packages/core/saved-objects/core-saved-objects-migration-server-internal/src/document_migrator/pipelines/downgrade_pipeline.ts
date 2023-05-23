@@ -18,7 +18,6 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
   private kibanaVersion: string;
   private originalDoc: SavedObjectUnsanitizedDoc;
   private typeTransforms: TypeTransforms;
-  private ignoreMissingTransforms: boolean;
   private targetTypeVersion: string;
   private targetCoreVersion?: string;
 
@@ -28,13 +27,11 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
     typeTransforms,
     targetTypeVersion,
     targetCoreVersion,
-    ignoreMissingTransforms,
   }: {
     document: SavedObjectUnsanitizedDoc;
     typeTransforms: TypeTransforms;
     kibanaVersion: string;
     targetTypeVersion: string;
-    ignoreMissingTransforms: boolean;
     targetCoreVersion?: string;
   }) {
     this.originalDoc = document;
@@ -43,7 +40,6 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
     this.typeTransforms = typeTransforms;
     this.targetTypeVersion = targetTypeVersion;
     this.targetCoreVersion = targetCoreVersion;
-    this.ignoreMissingTransforms = ignoreMissingTransforms;
   }
 
   run(): MigrationPipelineResult {
@@ -52,12 +48,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
 
     for (const transform of this.getPendingTransforms()) {
       if (!transform.transformDown) {
-        if (this.ignoreMissingTransforms) {
-          continue;
-        }
-        throw new Error(
-          `Could not apply transformation ${transform.transformType}:${transform.version}: no down conversion registered`
-        );
+        continue;
       }
       const { transformedDoc } = transform.transformDown(this.document);
       if (this.document.type !== this.originalDoc.type) {

@@ -20,18 +20,6 @@ import { DocumentUpgradePipeline, DocumentDowngradePipeline } from './pipelines'
 import { downgradeRequired } from './utils';
 import { TransformType } from './types';
 
-interface TransformOptions {
-  convertNamespaceTypes?: boolean;
-  allowDowngrade?: boolean;
-}
-
-interface DocumentMigratorOptions {
-  kibanaVersion: string;
-  typeRegistry: ISavedObjectTypeRegistry;
-  convertVersion?: string;
-  log: Logger;
-}
-
 /**
  * Options for {@link VersionedTransformer.migrate}
  */
@@ -43,6 +31,18 @@ export interface DocumentMigrateOptions {
    * Defaults to `false`.
    */
   allowDowngrade?: boolean;
+}
+
+interface TransformOptions {
+  convertNamespaceTypes?: boolean;
+  allowDowngrade?: boolean;
+}
+
+interface DocumentMigratorOptions {
+  kibanaVersion: string;
+  typeRegistry: ISavedObjectTypeRegistry;
+  convertVersion?: string;
+  log: Logger;
 }
 
 interface MigrationVersionParams {
@@ -187,13 +187,13 @@ export class DocumentMigrator implements VersionedTransformer {
       }
       return this.transformDown(doc, { targetTypeVersion: latestVersion! });
     } else {
-      return this.transformUp(doc, { convertNamespaceTypes, allowDowngrade });
+      return this.transformUp(doc, { convertNamespaceTypes });
     }
   }
 
   private transformUp(
     doc: SavedObjectUnsanitizedDoc,
-    { convertNamespaceTypes = false }: TransformOptions = {}
+    { convertNamespaceTypes }: { convertNamespaceTypes: boolean }
   ) {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
@@ -212,7 +212,7 @@ export class DocumentMigrator implements VersionedTransformer {
 
   private transformDown = (
     doc: SavedObjectUnsanitizedDoc,
-    options: { targetTypeVersion: string }
+    { targetTypeVersion }: { targetTypeVersion: string }
   ) => {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
@@ -220,10 +220,9 @@ export class DocumentMigrator implements VersionedTransformer {
 
     const pipeline = new DocumentDowngradePipeline({
       document: doc,
+      targetTypeVersion,
       typeTransforms: this.migrations[doc.type],
       kibanaVersion: this.options.kibanaVersion,
-      targetTypeVersion: options.targetTypeVersion,
-      ignoreMissingTransforms: true,
     });
     const { document } = pipeline.run();
     const additionalDocs: SavedObjectUnsanitizedDoc[] = [];

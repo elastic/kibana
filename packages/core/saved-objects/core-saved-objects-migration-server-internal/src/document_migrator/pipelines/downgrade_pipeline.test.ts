@@ -99,7 +99,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.5.0',
     });
@@ -167,7 +166,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.7.0',
     });
@@ -187,7 +185,7 @@ describe('DocumentMigratorPipeline', () => {
     expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
   });
 
-  it('skips transforms without down fn if `ignoreMissingTransforms` is `true`', () => {
+  it('skips transforms without down fn', () => {
     const document = createDoc({
       id: 'foo-1',
       type: 'foo',
@@ -223,7 +221,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.5.0',
     });
@@ -232,52 +229,6 @@ describe('DocumentMigratorPipeline', () => {
 
     expect(migrate8_6_0_down).toHaveBeenCalledTimes(1);
     expect(migrate8_8_0_down).toHaveBeenCalledTimes(1);
-  });
-
-  it('throws trying to apply a transform without down fn if `ignoreMissingTransforms` is `false`', () => {
-    const document = createDoc({
-      id: 'foo-1',
-      type: 'foo',
-      typeMigrationVersion: '8.8.0',
-    });
-
-    const migrate8_6_0_up = createTransformFn();
-    const migrate8_6_0_down = createTransformFn();
-    const migrate8_7_0_up = createTransformFn();
-    const migrate8_8_0_up = createTransformFn();
-    const migrate8_8_0_down = createTransformFn();
-
-    const fooTransforms = getTypeTransforms([
-      {
-        transformType: TransformType.Migrate,
-        version: '8.6.0',
-        transform: migrate8_6_0_up,
-        transformDown: migrate8_6_0_down,
-      },
-      {
-        transformType: TransformType.Migrate,
-        version: '8.7.0',
-        transform: migrate8_7_0_up,
-      },
-      {
-        transformType: TransformType.Migrate,
-        version: '8.8.0',
-        transform: migrate8_8_0_up,
-        transformDown: migrate8_8_0_down,
-      },
-    ]);
-
-    const pipeline = new DocumentDowngradePipeline({
-      document,
-      kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: false,
-      typeTransforms: fooTransforms,
-      targetTypeVersion: '8.5.0',
-    });
-
-    expect(() => pipeline.run()).toThrowErrorMatchingInlineSnapshot(
-      `"Could not apply transformation migrate:8.7.0: no down conversion registered"`
-    );
   });
 
   it('throws trying to downgrade to a higher version', () => {
@@ -316,7 +267,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.8.0',
     });
@@ -364,7 +314,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.7.0',
     });
@@ -416,7 +365,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.5.0',
     });
@@ -475,7 +423,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.6.0',
     });
@@ -517,7 +464,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.6.0',
     });
@@ -559,7 +505,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.6.0',
     });
@@ -602,7 +547,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.6.0',
       targetCoreVersion: '8.6.0',
@@ -653,7 +597,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.9.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.7.0',
       targetCoreVersion: '8.7.0',
@@ -690,7 +633,6 @@ describe('DocumentMigratorPipeline', () => {
     const pipeline = new DocumentDowngradePipeline({
       document,
       kibanaVersion: '8.8.0',
-      ignoreMissingTransforms: true,
       typeTransforms: fooTransforms,
       targetTypeVersion: '8.7.0',
     });
@@ -731,7 +673,6 @@ describe('DocumentMigratorPipeline', () => {
       const pipeline = new DocumentDowngradePipeline({
         document,
         kibanaVersion: '8.8.0',
-        ignoreMissingTransforms: true,
         typeTransforms: transforms,
         targetTypeVersion: '8.7.0',
       });
@@ -767,7 +708,6 @@ describe('DocumentMigratorPipeline', () => {
       const pipeline = new DocumentDowngradePipeline({
         document,
         kibanaVersion: '8.8.0',
-        ignoreMissingTransforms: true,
         typeTransforms: transforms,
         targetTypeVersion: '8.7.0',
       });
