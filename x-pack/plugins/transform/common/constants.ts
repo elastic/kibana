@@ -27,7 +27,7 @@ export const PLUGIN = {
 };
 
 const INTERNAL_API_BASE_PATH = '/internal/transform/';
-const EXTERNAL_API_BASE_PATH = '/internal/transform/';
+const EXTERNAL_API_BASE_PATH = '/api/transform/';
 
 export const addInternalBasePath = (uri: string): string => `${INTERNAL_API_BASE_PATH}${uri}`;
 export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE_PATH}${uri}`;
