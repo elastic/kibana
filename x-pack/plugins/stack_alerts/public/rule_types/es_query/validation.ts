@@ -14,7 +14,7 @@ import {
   builtInGroupByTypes,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryRuleParams, SearchType } from './types';
-import { isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,
   ONLY_ES_QUERY_EXPRESSION_ERRORS,
@@ -221,6 +221,56 @@ const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>
   return errors;
 };
 
+const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQuery>) => {
+  const errors: typeof ONLY_ES_QUERY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    ONLY_ES_QUERY_EXPRESSION_ERRORS
+  );
+
+  if (!ruleParams.index) {
+    errors.index.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
+        defaultMessage: 'Index is required.',
+      })
+    );
+  }
+
+  if (!ruleParams.timeField) {
+    errors.timeField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
+        defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+
+  if (!ruleParams.esQuery) {
+    errors.esQuery.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
+        defaultMessage: 'Elasticsearch query is required.',
+      })
+    );
+  }
+  // } else {
+  //   try {
+  //     const parsedQuery = JSON.parse(ruleParams.esQuery);
+  //     if (!parsedQuery.query) {
+  //       errors.esQuery.push(
+  //         i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
+  //           defaultMessage: `Query field is required.`,
+  //         })
+  //       );
+  //     }
+  //   } catch (err) {
+  //     errors.esQuery.push(
+  //       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.jsonQueryText', {
+  //         defaultMessage: 'Query must be valid JSON.',
+  //       })
+  //     );
+  //   }
+  // }
+  return errors;
+};
+
 export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
   const validationResult = { errors: {} };
 
@@ -239,6 +289,15 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
     validationResult.errors = {
       ...validationResult.errors,
       ...validateSearchSourceParams(ruleParams),
+    };
+    return validationResult;
+  }
+
+  const isEsqlQuery = isEsqlQueryRule(ruleParams);
+  if (isEsqlQuery) {
+    validationResult.errors = {
+      ...validationResult.errors,
+      ...validateEsqlQueryParams(ruleParams),
     };
     return validationResult;
   }

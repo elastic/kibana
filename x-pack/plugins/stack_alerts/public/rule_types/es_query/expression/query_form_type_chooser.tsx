@@ -51,6 +51,18 @@ const FORM_TYPE_ITEMS: Array<{ formType: SearchType; label: string; description:
       }
     ),
   },
+  {
+    formType: SearchType.esqlQuery,
+    label: i18n.translate('xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeLabel', {
+      defaultMessage: 'ESQL',
+    }),
+    description: i18n.translate(
+      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeDescription',
+      {
+        defaultMessage: 'Use ESQL to define a text-based query.',
+      }
+    ),
+  },
 ];
 
 export interface QueryFormTypeProps {

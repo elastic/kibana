@@ -41,6 +41,8 @@ export type {
 
 export { QuerySuggestionTypes } from './autocomplete/providers/query_suggestion_provider';
 
+export { TextBasedLanguagesEditor } from './query_string_input/text_based_languages_editor';
+
 import { UnifiedSearchPublicPlugin } from './plugin';
 
 // This exports static code and TypeScript types,

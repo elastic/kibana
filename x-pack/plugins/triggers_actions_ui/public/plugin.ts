@@ -85,6 +85,7 @@ import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -153,6 +154,7 @@ interface PluginsStart {
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
+  expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
@@ -276,6 +278,7 @@ export class Plugin
           ruleTypeRegistry,
           alertsTableConfigurationRegistry,
           kibanaFeatures,
+          expressions: pluginsStart.expressions,
         });
       },
     });

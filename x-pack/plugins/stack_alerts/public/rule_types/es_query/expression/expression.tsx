@@ -17,6 +17,7 @@ import { EsQueryExpression } from './es_query_expression';
 import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isSearchSourceRule } from '../util';
 import { ALL_EXPRESSION_ERROR_KEYS } from '../constants';
+import { EsqlQueryExpression } from './esql_query_expression';
 
 function areSearchSourceExpressionPropsEqual(
   prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,
@@ -95,9 +96,15 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
         <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
       )}
 
-      {ruleParams.searchType && !isSearchSource && (
+      {ruleParams.searchType && !isSearchSource && ruleParams.searchType === SearchType.esQuery && (
         <EsQueryExpression {...props} ruleParams={ruleParams} />
       )}
+
+      {ruleParams.searchType &&
+        !isSearchSource &&
+        ruleParams.searchType === SearchType.esqlQuery && (
+          <EsqlQueryExpression {...props} ruleParams={ruleParams} />
+        )}
 
       <EuiHorizontalRule />
     </>

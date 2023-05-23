@@ -40,6 +40,7 @@ import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { CONNECTORS_PLUGIN_ID } from '../common/constants';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -66,6 +67,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   element: HTMLElement;
   theme$: Observable<CoreTheme>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  expressions: ExpressionsStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
