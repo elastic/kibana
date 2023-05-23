@@ -17,13 +17,13 @@ export const createNodeAgentInstructions = (
 ): EuiStepProps[] => {
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.nodeClient.install.title', {
+      title: i18n.translate('xpack.apm.tutorial.node.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.nodeClient.install.textPre', {
+            {i18n.translate('xpack.apm.tutorial.node.install.textPre', {
               defaultMessage:
                 'Install the APM agent for Node.js as a dependency to your application.',
             })}
@@ -36,13 +36,13 @@ export const createNodeAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.nodeClient.configure.title', {
+      title: i18n.translate('xpack.apm.tutorial.node.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.nodeClient.configure.textPre', {
+            {i18n.translate('xpack.apm.tutorial.node.configure.textPre', {
               defaultMessage:
                 'Agents are libraries that run inside of your application process. \
  APM services are created programmatically based on the `serviceName`. \
@@ -58,18 +58,15 @@ export const createNodeAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.nodeClient.configure.textPost',
-              {
-                defaultMessage:
-                  'See [the documentation]({documentationLink}) for advanced usage, including how to use with \
+            {i18n.translate('xpack.apm.tutorial.node.configure.textPost', {
+              defaultMessage:
+                'See [the documentation]({documentationLink}) for advanced usage, including how to use with \
 [Babel/ES Modules]({babelEsModulesLink}).',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/nodejs/current/index.html`,
-                  babelEsModulesLink: `${baseUrl}guide/en/apm/agent/nodejs/current/advanced-setup.html#es-modules`,
-                },
-              }
-            )}
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/nodejs/current/index.html`,
+                babelEsModulesLink: `${baseUrl}guide/en/apm/agent/nodejs/current/advanced-setup.html#es-modules`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),

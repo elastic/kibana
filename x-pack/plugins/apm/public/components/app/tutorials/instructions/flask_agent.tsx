@@ -17,13 +17,13 @@ export const createFlaskAgentInstructions = (
 ): EuiStepProps[] => {
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.flaskClient.install.title', {
+      title: i18n.translate('xpack.apm.tutorial.flask.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.flaskClient.install.textPre', {
+            {i18n.translate('xpack.apm.tutorial.flask.install.textPre', {
               defaultMessage:
                 'Install the APM agent for Python as a dependency.',
             })}
@@ -36,20 +36,17 @@ export const createFlaskAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.flaskClient.configure.title', {
+      title: i18n.translate('xpack.apm.tutorial.flask.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.flaskClient.configure.textPre',
-              {
-                defaultMessage:
-                  'Agents are libraries that run inside of your application process. \
+            {i18n.translate('xpack.apm.tutorial.flask.configure.textPre', {
+              defaultMessage:
+                'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `SERVICE_NAME`.',
-              }
-            )}
+            })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <AgentConfigInstructions
@@ -60,16 +57,13 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.flaskClient.configure.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for advanced usage.',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/python/current/flask-support.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.flask.configure.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for advanced usage.',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/python/current/flask-support.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),

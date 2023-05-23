@@ -26,44 +26,41 @@ export const createDotNetAgentInstructions = (
 }`;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.dotNetClient.download.title', {
+      title: i18n.translate('xpack.apm.tutorial.dotNet.download.title', {
         defaultMessage: 'Download the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.dotNetClient.download.textPre',
-              {
-                defaultMessage:
-                  'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
+            {i18n.translate('xpack.apm.tutorial.dotNet.download.textPre', {
+              defaultMessage:
+                'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
       NuGet packages available for different use cases. \n\nFor an ASP.NET Core application with Entity Framework \
       Core download the [Elastic.Apm.NetCoreAll]({netCoreAllApmPackageLink}) package. This package will automatically add every \
       agent component to your application. \n\n In case you would like to minimize the dependencies, you can use the \
       [Elastic.Apm.AspNetCore]({aspNetCorePackageLink}) package for just \
       ASP.NET Core monitoring or the [Elastic.Apm.EfCore]({efCorePackageLink}) package for just Entity Framework Core monitoring. \n\n In \
       case you only want to use the public Agent API for manual instrumentation use the [Elastic.Apm]({elasticApmPackageLink}) package.',
-                values: {
-                  allNuGetPackagesLink:
-                    'https://www.nuget.org/packages?q=Elastic.apm',
-                  netCoreAllApmPackageLink:
-                    'https://www.nuget.org/packages/Elastic.Apm.NetCoreAll',
-                  aspNetCorePackageLink:
-                    'https://www.nuget.org/packages/Elastic.Apm.AspNetCore',
-                  efCorePackageLink:
-                    'https://www.nuget.org/packages/Elastic.Apm.EntityFrameworkCore',
-                  elasticApmPackageLink:
-                    'https://www.nuget.org/packages/Elastic.Apm',
-                },
-              }
-            )}
+              values: {
+                allNuGetPackagesLink:
+                  'https://www.nuget.org/packages?q=Elastic.apm',
+                netCoreAllApmPackageLink:
+                  'https://www.nuget.org/packages/Elastic.Apm.NetCoreAll',
+                aspNetCorePackageLink:
+                  'https://www.nuget.org/packages/Elastic.Apm.AspNetCore',
+                efCorePackageLink:
+                  'https://www.nuget.org/packages/Elastic.Apm.EntityFrameworkCore',
+                elasticApmPackageLink:
+                  'https://www.nuget.org/packages/Elastic.Apm',
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),
     },
     {
       title: i18n.translate(
-        'xpack.apm.tutorial.dotNetClient.configureApplication.title',
+        'xpack.apm.tutorial.dotNet.configureApplication.title',
         {
           defaultMessage: 'Add the agent to the application',
         }
@@ -72,7 +69,7 @@ export const createDotNetAgentInstructions = (
         <>
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.dotNetClient.configureApplication.textPre',
+              'xpack.apm.tutorial.dotNet.configureApplication.textPre',
               {
                 defaultMessage:
                   'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
@@ -87,7 +84,7 @@ export const createDotNetAgentInstructions = (
           <EuiSpacer />
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.dotNetClient.configureApplication.textPost',
+              'xpack.apm.tutorial.dotNet.configureApplication.textPost',
               {
                 defaultMessage:
                   'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
@@ -99,12 +96,9 @@ export const createDotNetAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate(
-        'xpack.apm.tutorial.dotNetClient.configureAgent.title',
-        {
-          defaultMessage: 'Sample appsettings.json file:',
-        }
-      ),
+      title: i18n.translate('xpack.apm.tutorial.dotNet.configureAgent.title', {
+        defaultMessage: 'Sample appsettings.json file:',
+      }),
       children: (
         <>
           <AgentConfigInstructions
@@ -116,7 +110,7 @@ export const createDotNetAgentInstructions = (
           <EuiSpacer />
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.dotNetClient.configureAgent.textPost',
+              'xpack.apm.tutorial.dotNet.configureAgent.textPost',
               {
                 defaultMessage:
                   'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \

@@ -45,4 +45,4 @@ export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
 -${javaVariables.apmServerUrl}={{{apmServerUrl}}} \\
 -${javaVariables.apmEnvironment}={{{apmEnvironment}}} \\
 -Delastic.apm.application_packages=org.example \\
--jar {{{apmServiceName}}}.jar;`;
+-jar {{{apmServiceName}}}.jar`;

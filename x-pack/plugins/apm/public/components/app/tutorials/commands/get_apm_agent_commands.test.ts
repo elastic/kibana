@@ -12,7 +12,7 @@ describe('getCommands', () => {
     apmServiceName: 'my-service-name',
     apmEnvironment: 'my-environment',
   };
-  describe('unknown agent', () => {
+  describe('Unknown agent', () => {
     it('renders empty command', () => {
       const commands = getApmAgentCommands({
         variantId: 'foo',
@@ -23,7 +23,7 @@ describe('getCommands', () => {
       expect(commands).toBe('');
     });
   });
-  describe('java agent', () => {
+  describe('Java agent', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'java',
@@ -57,49 +57,27 @@ describe('getCommands', () => {
         -jar my-service-name.jar"
       `);
     });
-  });
-  describe('RUM(js) agent', () => {
-    it('renders empty commands', () => {
+    it('renders with api key even though secret token is present', () => {
       const commands = getApmAgentCommands({
-        variantId: 'js',
-        defaultValues,
-      });
-      expect(commands).not.toBe('');
-      expect(commands).toMatchInlineSnapshot(`
-        "import { init as initApm } from '@elastic/apm-rum'
-        var apm = initApm({
-          serviceName: 'my-service-name',
-
-          serverUrl: '',
-
-          serviceVersion: '',
-
-          environment: 'my-environment'
-        })"
-      `);
-    });
-    it('renders with secret token and url', () => {
-      const commands = getApmAgentCommands({
-        variantId: 'js',
+        variantId: 'java',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
+        apiKey: 'myApiKey',
         defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
-        "import { init as initApm } from '@elastic/apm-rum'
-        var apm = initApm({
-          serviceName: 'my-service-name',
-
-          serverUrl: 'localhost:8220',
-
-          serviceVersion: '',
-
-          environment: 'my-environment'
-        })"
+        "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
+        -Delastic.apm.service_name=my-service-name \\\\
+        -Delastic.apm.api_key=myApiKey \\\\
+        -Delastic.apm.server_url=localhost:8220 \\\\
+        -Delastic.apm.environment=my-environment \\\\
+        -Delastic.apm.application_packages=org.example \\\\
+        -jar my-service-name.jar"
       `);
     });
   });
+
   describe('Node.js agent', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
@@ -134,6 +112,28 @@ describe('getCommands', () => {
           serviceName: 'my-service-name',
 
           secretToken: 'foobar',
+
+          serverUrl: 'localhost:8220',
+
+          environment: 'my-environment'
+        })"
+      `);
+    });
+    it('renders with api key even though secret token is present', () => {
+      const commands = getApmAgentCommands({
+        variantId: 'node',
+        apmServerUrl: 'localhost:8220',
+        secretToken: 'foobar',
+        apiKey: 'myApiKey',
+        defaultValues,
+      });
+      expect(commands).not.toBe('');
+      expect(commands).toMatchInlineSnapshot(`
+        "// Add this to the very top of the first file loaded in your app
+        var apm = require('elastic-apm-node').start({
+          serviceName: 'my-service-name',
+
+          apiKey: 'myApiKey',
 
           serverUrl: 'localhost:8220',
 
@@ -189,6 +189,37 @@ describe('getCommands', () => {
           'SERVICE_NAME': 'my-service-name',
 
           'SECRET_TOKEN': 'foobar',
+
+          'SERVER_URL': 'localhost:8220',
+
+          'ENVIRONMENT': 'my-environment',
+        }
+
+        MIDDLEWARE = (
+          'elasticapm.contrib.django.middleware.TracingMiddleware',
+          #...
+        )"
+      `);
+    });
+    it('renders with api key even though secret token is present', () => {
+      const commands = getApmAgentCommands({
+        variantId: 'django',
+        apmServerUrl: 'localhost:8220',
+        secretToken: 'foobar',
+        apiKey: 'myApiKey',
+        defaultValues,
+      });
+      expect(commands).not.toBe('');
+      expect(commands).toMatchInlineSnapshot(`
+        "INSTALLED_APPS = (
+          'elasticapm.contrib.django',
+          # ...
+        )
+
+        ELASTIC_APM = {
+          'SERVICE_NAME': 'my-service-name',
+
+          'API_KEY': 'myApiKey',
 
           'SERVER_URL': 'localhost:8220',
 
@@ -259,6 +290,36 @@ describe('getCommands', () => {
         apm = ElasticAPM(app)"
       `);
     });
+    it('renders with api key even though secret token is present', () => {
+      const commands = getApmAgentCommands({
+        variantId: 'flask',
+        apmServerUrl: 'localhost:8220',
+        secretToken: 'foobar',
+        apiKey: 'myApiKey',
+        defaultValues,
+      });
+      expect(commands).not.toBe('');
+      expect(commands).toMatchInlineSnapshot(`
+        "# Initialize using environment variables
+        from elasticapm.contrib.flask import ElasticAPM
+        app = Flask(__name__)
+        apm = ElasticAPM(app)
+
+        # Or use ELASTIC_APM in your application's settings
+        from elasticapm.contrib.flask import ElasticAPM
+        app.config['ELASTIC_APM'] = {
+          'SERVICE_NAME': 'my-service-name',
+
+          'API_KEY': 'myApiKey',
+
+          'SERVER_URL': 'localhost:8220',
+
+          'ENVIRONMENT': 'my-environment',
+        }
+
+        apm = ElasticAPM(app)"
+      `);
+    });
   });
   describe('Ruby on Rails agent', () => {
     it('renders empty commands', () => {
@@ -299,6 +360,27 @@ describe('getCommands', () => {
         environment: 'my-environment'"
       `);
     });
+    it('renders with api key even though secret token is present', () => {
+      const commands = getApmAgentCommands({
+        variantId: 'rails',
+        apmServerUrl: 'localhost:8220',
+        secretToken: 'foobar',
+        apiKey: 'myApiKey',
+        defaultValues,
+      });
+      expect(commands).not.toBe('');
+      expect(commands).toMatchInlineSnapshot(`
+        "# config/elastic_apm.yml:
+
+        service_name: 'my-service-name'
+
+        api_key: 'myApiKey'
+
+        server_url: 'localhost:8220'
+
+        environment: 'my-environment'"
+      `);
+    });
   });
   describe('Rack agent', () => {
     it('renders empty commands', () => {
@@ -314,7 +396,7 @@ describe('getCommands', () => {
 
         secret_token: ''
 
-        server_url: '',
+        server_url: ''
 
         environment: 'my-environment'"
       `);
@@ -334,7 +416,28 @@ describe('getCommands', () => {
 
         secret_token: 'foobar'
 
-        server_url: 'localhost:8220',
+        server_url: 'localhost:8220'
+
+        environment: 'my-environment'"
+      `);
+    });
+    it('renders with api key even though secret token is present', () => {
+      const commands = getApmAgentCommands({
+        variantId: 'rack',
+        apmServerUrl: 'localhost:8220',
+        secretToken: 'foobar',
+        apiKey: 'myApiKey',
+        defaultValues,
+      });
+      expect(commands).not.toBe('');
+      expect(commands).toMatchInlineSnapshot(`
+        "# config/elastic_apm.yml:
+
+        service_name: 'my-service-name'
+
+        api_key: 'myApiKey'
+
+        server_url: 'localhost:8220'
 
         environment: 'my-environment'"
       `);
@@ -379,8 +482,29 @@ describe('getCommands', () => {
         "
       `);
     });
+    it('renders with api key even though secret token is present', () => {
+      const commands = getApmAgentCommands({
+        variantId: 'go',
+        apmServerUrl: 'localhost:8220',
+        secretToken: 'foobar',
+        apiKey: 'myApiKey',
+        defaultValues,
+      });
+      expect(commands).not.toBe('');
+      expect(commands).toMatchInlineSnapshot(`
+        "# Initialize using environment variables:
+        export ELASTIC_APM_SERVICE_NAME=my-service-name
+
+        export ELASTIC_APM_API_KEY=myApiKey
+
+        export ELASTIC_APM_SERVER_URL=localhost:8220
+
+        export ELASTIC_APM_ENVIRONMENT=my-environment
+        "
+      `);
+    });
   });
-  describe('dotNet agent', () => {
+  describe('DotNet agent', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'dotnet',
@@ -417,6 +541,26 @@ describe('getCommands', () => {
         }"
       `);
     });
+    it('renders with api key even though secret token is present', () => {
+      const commands = getApmAgentCommands({
+        variantId: 'dotnet',
+        apmServerUrl: 'localhost:8220',
+        secretToken: 'foobar',
+        apiKey: 'myApiKey',
+        defaultValues,
+      });
+      expect(commands).not.toBe('');
+      expect(commands).toMatchInlineSnapshot(`
+        "{
+          \\"ElasticApm\\": {
+            \\"ServiceName\\": \\"my-service-name\\",
+            \\"ApiKey\\": \\"myApiKey\\",
+            \\"ServerUrl\\": \\"localhost:8220\\",
+            \\"Environment\\": \\"my-environment\\",
+          }
+        }"
+      `);
+    });
   });
   describe('PHP agent', () => {
     it('renders empty commands', () => {
@@ -447,6 +591,25 @@ describe('getCommands', () => {
         "elastic_apm.service_name=\\"my-service-name\\"
 
         elastic_apm.secret_token=\\"foobar\\"
+
+        elastic_apm.server_url=\\"localhost:8220\\"
+
+        elastic_apm.environment=\\"my-environment\\""
+      `);
+    });
+    it('renders with api key even though secret token is present', () => {
+      const commands = getApmAgentCommands({
+        variantId: 'php',
+        apmServerUrl: 'localhost:8220',
+        secretToken: 'foobar',
+        apiKey: 'myApiKey',
+        defaultValues,
+      });
+      expect(commands).not.toBe('');
+      expect(commands).toMatchInlineSnapshot(`
+        "elastic_apm.service_name=\\"my-service-name\\"
+
+        elastic_apm.api_key=\\"myApiKey\\"
 
         elastic_apm.server_url=\\"localhost:8220\\"
 

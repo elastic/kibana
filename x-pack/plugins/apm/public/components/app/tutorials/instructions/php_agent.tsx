@@ -15,12 +15,12 @@ import { INSTRUCTION_VARIANT } from '../instruction_variants';
 export const createPhpAgentInstructions = (baseUrl: string): EuiStepProps[] => {
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.phpClient.download.title', {
+      title: i18n.translate('xpack.apm.tutorial.php.download.title', {
         defaultMessage: 'Download the APM agent',
       }),
       children: (
         <EuiMarkdownFormat>
-          {i18n.translate('xpack.apm.tutorial.phpClient.download.textPre', {
+          {i18n.translate('xpack.apm.tutorial.php.download.textPre', {
             defaultMessage:
               'Download the package corresponding to your platform from [GitHub releases]({githubReleasesLink}).',
             values: {
@@ -32,22 +32,15 @@ export const createPhpAgentInstructions = (baseUrl: string): EuiStepProps[] => {
       ),
     },
     {
-      title: i18n.translate(
-        'xpack.apm.tutorial.phpClient.installPackage.title',
-        {
-          defaultMessage: 'Install the downloaded package',
-        }
-      ),
+      title: i18n.translate('xpack.apm.tutorial.php.installPackage.title', {
+        defaultMessage: 'Install the downloaded package',
+      }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.phpClient.installPackage.textPre',
-              {
-                defaultMessage:
-                  'For example on Alpine Linux using APK package:',
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.php.installPackage.textPre', {
+              defaultMessage: 'For example on Alpine Linux using APK package:',
+            })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
@@ -55,32 +48,26 @@ export const createPhpAgentInstructions = (baseUrl: string): EuiStepProps[] => {
           </EuiCodeBlock>
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.phpClient.installPackage.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for installation commands on other supported platforms and advanced installation.',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/php/current/setup.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.php.installPackage.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for installation commands on other supported platforms and advanced installation.',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/php/current/setup.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),
     },
     {
-      title: i18n.translate(
-        'xpack.apm.tutorial.phpClient.configureAgent.title',
-        {
-          defaultMessage: 'Configure the agent',
-        }
-      ),
+      title: i18n.translate('xpack.apm.tutorial.php.configureAgent.title', {
+        defaultMessage: 'Configure the agent',
+      }),
       children: (
         <>
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.phpClient.Configure the agent.textPre',
+              'xpack.apm.tutorial.php.Configure the agent.textPre',
               {
                 defaultMessage:
                   'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
@@ -95,16 +82,13 @@ export const createPhpAgentInstructions = (baseUrl: string): EuiStepProps[] => {
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.phpClient.configureAgent.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/php/current/configuration.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.php.configureAgent.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/php/current/configuration.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),

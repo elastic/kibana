@@ -47,12 +47,12 @@ export const rack = `# config/elastic_apm.yml:
 ${rackVariables.apmServiceName}: '{{{apmServiceName}}}'
 
 {{#apiKey}}
-${rackVariables.apiKey}: '{{{apiKey}}}',
+${rackVariables.apiKey}: '{{{apiKey}}}'
 {{/apiKey}}
 {{^apiKey}}
 ${rackVariables.secretToken}: '{{{secretToken}}}'
 {{/apiKey}}
 
-${rackVariables.apmServerUrl}: '{{{apmServerUrl}}}',
+${rackVariables.apmServerUrl}: '{{{apmServerUrl}}}'
 
 ${rackVariables.apmEnvironment}: '{{{apmEnvironment}}}'`;

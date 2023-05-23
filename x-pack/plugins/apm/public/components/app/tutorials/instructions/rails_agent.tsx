@@ -17,13 +17,13 @@ export const createRailsAgentInstructions = (
 ): EuiStepProps[] => {
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.railsClient.install.title', {
+      title: i18n.translate('xpack.apm.tutorial.rails.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.railsClient.install.textPre', {
+            {i18n.translate('xpack.apm.tutorial.rails.install.textPre', {
               defaultMessage: 'Add the agent to your Gemfile.',
             })}
           </EuiMarkdownFormat>
@@ -35,20 +35,17 @@ export const createRailsAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.railsClient.configure.title', {
+      title: i18n.translate('xpack.apm.tutorial.rails.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.railsClient.configure.textPre',
-              {
-                defaultMessage:
-                  'APM is automatically started when your app boots. Configure the agent, by creating the config file {configFile}',
-                values: { configFile: '`config/elastic_apm.yml`' },
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.rails.configure.textPre', {
+              defaultMessage:
+                'APM is automatically started when your app boots. Configure the agent, by creating the config file {configFile}',
+              values: { configFile: '`config/elastic_apm.yml`' },
+            })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <AgentConfigInstructions
@@ -59,16 +56,13 @@ export const createRailsAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.railsClient.configure.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/ruby/current/index.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.rails.configure.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/ruby/current/index.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),

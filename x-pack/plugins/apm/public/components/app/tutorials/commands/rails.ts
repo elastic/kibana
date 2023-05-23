@@ -47,7 +47,7 @@ export const rails = `# config/elastic_apm.yml:
 ${railsVariables.apmServiceName}: '{{{apmServiceName}}}'
 
 {{#apiKey}}
-${railsVariables.apiKey}: '{{{apiKey}}}',
+${railsVariables.apiKey}: '{{{apiKey}}}'
 {{/apiKey}}
 {{^apiKey}}
 ${railsVariables.secretToken}: '{{{secretToken}}}'

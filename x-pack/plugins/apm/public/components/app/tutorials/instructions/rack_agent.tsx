@@ -26,13 +26,13 @@ export const createRackAgentInstructions = (
 
   ElasticAPM.start(
     app: MySinatraApp, # ${i18n.translate(
-      'xpack.apm.tutorial.rackClient.configure.commands.requiredComment',
+      'xpack.apm.tutorial.rack.configure.commands.requiredComment',
       {
         defaultMessage: 'required',
       }
     )}
     config_file: '' # ${i18n.translate(
-      'xpack.apm.tutorial.rackClient.configure.commands.optionalComment',
+      'xpack.apm.tutorial.rack.configure.commands.optionalComment',
       {
         defaultMessage: 'optional, defaults to config/elastic_apm.yml',
       }
@@ -44,13 +44,13 @@ export const createRackAgentInstructions = (
   at_exit { ElasticAPM.stop }`;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.rackClient.install.title', {
+      title: i18n.translate('xpack.apm.tutorial.rack.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rackClient.install.textPre', {
+            {i18n.translate('xpack.apm.tutorial.rack.install.textPre', {
               defaultMessage: 'Add the agent to your Gemfile.',
             })}
           </EuiMarkdownFormat>
@@ -62,13 +62,13 @@ export const createRackAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.rackClient.configure.title', {
+      title: i18n.translate('xpack.apm.tutorial.rack.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.rackClient.configure.textPre', {
+            {i18n.translate('xpack.apm.tutorial.rack.configure.textPre', {
               defaultMessage:
                 'For Rack or a compatible framework (e.g. Sinatra), include the middleware in your app and start the agent.',
             })}
@@ -81,22 +81,16 @@ export const createRackAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate(
-        'xpack.apm.tutorial.rackClient.createConfig.title',
-        {
-          defaultMessage: 'Create config file',
-        }
-      ),
+      title: i18n.translate('xpack.apm.tutorial.rack.createConfig.title', {
+        defaultMessage: 'Create config file',
+      }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.rackClient.createConfig.textPre',
-              {
-                defaultMessage: 'Create a config file {configFile}:',
-                values: { configFile: '`config/elastic_apm.yml`' },
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.rack.createConfig.textPre', {
+              defaultMessage: 'Create a config file {configFile}:',
+              values: { configFile: '`config/elastic_apm.yml`' },
+            })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <AgentConfigInstructions
@@ -107,16 +101,13 @@ export const createRackAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.rackClient.configure.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/ruby/current/index.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.rack.configure.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/ruby/current/index.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),

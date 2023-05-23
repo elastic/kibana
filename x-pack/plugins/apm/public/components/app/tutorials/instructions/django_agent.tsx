@@ -17,13 +17,13 @@ export const createDjangoAgentInstructions = (
 ): EuiStepProps[] => {
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.djangoClient.install.title', {
+      title: i18n.translate('xpack.apm.tutorial.django.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.djangoClient.install.textPre', {
+            {i18n.translate('xpack.apm.tutorial.django.install.textPre', {
               defaultMessage:
                 'Install the APM agent for Python as a dependency.',
             })}
@@ -36,20 +36,17 @@ export const createDjangoAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.djangoClient.configure.title', {
+      title: i18n.translate('xpack.apm.tutorial.django.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.djangoClient.configure.textPre',
-              {
-                defaultMessage:
-                  'Agents are libraries that run inside of your application process. \
+            {i18n.translate('xpack.apm.tutorial.django.configure.textPre', {
+              defaultMessage:
+                'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `SERVICE_NAME`.',
-              }
-            )}
+            })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           <AgentConfigInstructions
@@ -60,16 +57,13 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.tutorial.djangoClient.configure.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for advanced usage.',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/python/current/django-support.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.tutorial.django.configure.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for advanced usage.',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/python/current/django-support.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),

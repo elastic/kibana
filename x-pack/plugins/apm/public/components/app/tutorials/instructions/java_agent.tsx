@@ -17,12 +17,12 @@ export const createJavaAgentInstructions = (
 ): EuiStepProps[] => {
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.javaClient.download.title', {
+      title: i18n.translate('xpack.apm.tutorial.java.download.title', {
         defaultMessage: 'Download the APM agent',
       }),
       children: (
         <EuiMarkdownFormat>
-          {i18n.translate('xpack.apm.tutorial.javaClient.download.textPre', {
+          {i18n.translate('xpack.apm.tutorial.java.download.textPre', {
             defaultMessage:
               'Download the agent jar from [Maven Central]({mavenCentralLink}). \
       Do **not** add the agent as a dependency to your application.',
@@ -35,17 +35,14 @@ export const createJavaAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate(
-        'xpack.apm.tutorial.javaClient.startApplication.title',
-        {
-          defaultMessage: 'Start your application with the javaagent flag',
-        }
-      ),
+      title: i18n.translate('xpack.apm.tutorial.java.startApplication.title', {
+        defaultMessage: 'Start your application with the javaagent flag',
+      }),
       children: (
         <>
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.javaClient.startApplication.textPre',
+              'xpack.apm.tutorial.java.startApplication.textPre',
               {
                 defaultMessage:
                   'Add the `-javaagent` flag and configure the agent with system properties.\n\n \
@@ -68,7 +65,7 @@ export const createJavaAgentInstructions = (
           <EuiSpacer />
           <EuiMarkdownFormat>
             {i18n.translate(
-              'xpack.apm.tutorial.javaClient.startApplication.textPost',
+              'xpack.apm.tutorial.java.startApplication.textPost',
               {
                 defaultMessage:
                   'See the [documentation]({documentationLink}) for configuration options and advanced \

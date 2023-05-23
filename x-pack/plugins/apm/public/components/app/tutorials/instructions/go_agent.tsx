@@ -28,13 +28,13 @@ func main() {
 `;
   return [
     {
-      title: i18n.translate('xpack.apm.tutorial.goClient.install.title', {
+      title: i18n.translate('xpack.apm.tutorial.go.install.title', {
         defaultMessage: 'Install the APM agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.goClient.install.textPre', {
+            {i18n.translate('xpack.apm.tutorial.go.install.textPre', {
               defaultMessage: 'Install the APM agent packages for Go.',
             })}
           </EuiMarkdownFormat>
@@ -46,13 +46,13 @@ func main() {
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.goClient.configure.title', {
+      title: i18n.translate('xpack.apm.tutorial.go.configure.title', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.goClient.configure.textPre', {
+            {i18n.translate('xpack.apm.tutorial.go.configure.textPre', {
               defaultMessage:
                 'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the executable \
@@ -68,7 +68,7 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.goClient.configure.textPost', {
+            {i18n.translate('xpack.apm.tutorial.go.configure.textPost', {
               defaultMessage:
                 'See the [documentation]({documentationLink}) for advanced configuration.',
               values: {
@@ -80,13 +80,13 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
       ),
     },
     {
-      title: i18n.translate('xpack.apm.tutorial.goClient.goClient.title', {
+      title: i18n.translate('xpack.apm.tutorial.go.goClient.title', {
         defaultMessage: 'Instrument your application',
       }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.goClient.instrument.textPre', {
+            {i18n.translate('xpack.apm.tutorial.go.instrument.textPre', {
               defaultMessage:
                 'Instrument your Go application by using one of the provided instrumentation modules or \
 by using the tracer API directly.',
@@ -97,7 +97,7 @@ by using the tracer API directly.',
             {codeBlock}
           </EuiCodeBlock>
           <EuiMarkdownFormat>
-            {i18n.translate('xpack.apm.tutorial.goClient.instrument.textPost', {
+            {i18n.translate('xpack.apm.tutorial.go.instrument.textPost', {
               defaultMessage:
                 'See the [documentation]({documentationLink}) for a detailed \
 guide to instrumenting Go source code.',
