@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
-import { MonitorInspect } from '../../common/components/monitor_inspect';
+import { MonitorInspectWrapper } from '../../common/components/monitor_inspect';
 import { InspectMonitorPortalNode } from '../portals';
 
 export const InspectMonitorPortal = () => {
   return (
     <InPortal node={InspectMonitorPortalNode}>
-      <MonitorInspect />
+      <MonitorInspectWrapper />
     </InPortal>
   );
 };

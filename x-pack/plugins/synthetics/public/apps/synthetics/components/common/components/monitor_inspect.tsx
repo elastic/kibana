@@ -6,6 +6,11 @@
  */
 
 import React, { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiButton,
@@ -18,14 +23,26 @@ import {
   EuiFlyoutBody,
   EuiToolTip,
 } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { i18n } from '@kbn/i18n';
+
+import { ClientPluginsStart } from '../../../../../plugin';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { DataStream, SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { inspectMonitorAPI, MonitorInspectResponse } from '../../../state/monitor_management/api';
 
-export const MonitorInspect = () => {
+export const MonitorInspectWrapper = () => {
+  const {
+    services: { uiSettings },
+  } = useKibana<ClientPluginsStart>();
+
+  const { isDev } = useSyntheticsSettingsContext();
+
+  const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
+
+  return isDev || isInspectorEnabled ? <MonitorInspect /> : null;
+};
+
+const MonitorInspect = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const closeFlyout = () => {
@@ -56,35 +73,25 @@ export const MonitorInspect = () => {
       <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="flyoutTitle">{FORMATTED_CONFIG_LABEL}</h2>
+            <h2 id="flyoutTitle">{CONFIG_LABEL}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <div style={{ blockSize: '100%', overflow: 'scroll' }}>
-            {!loading && data ? (
-              <>
-                <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
-                  {formatContent(data.result)}
-                </EuiCodeBlock>
-                {data.decodedCode && (
-                  <>
-                    <EuiHorizontalRule />
-                    <EuiTitle size="s">
-                      <h2 id="flyoutTitle">{SOURCE_CODE_LABEL}</h2>
-                    </EuiTitle>
-                    <EuiSpacer size="s" />
-                    <EuiCodeBlock language="javascript" fontSize="m" paddingSize="m" lineNumbers>
-                      {data.decodedCode}
-                    </EuiCodeBlock>
-                  </>
-                )}
-              </>
-            ) : loading && !error ? (
-              <LoadingState />
-            ) : (
-              <p>{error?.message}</p>
-            )}
-          </div>
+          {!loading && data ? (
+            <>
+              <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
+                {formatContent(data.result)}
+              </EuiCodeBlock>
+              {/*
+                Uncomment when a solution to show original source code is found
+                {data.decodedCode && <MonitorCode code={data.decodedCode} />}
+                */}
+            </>
+          ) : loading && !error ? (
+            <LoadingState />
+          ) : (
+            <p>{error?.message}</p>
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiButton
@@ -99,7 +106,7 @@ export const MonitorInspect = () => {
     );
   }
   return (
-    <div>
+    <>
       <EuiToolTip content={formState.isValid ? FORMATTED_CONFIG_DESCRIPTION : VALID_CONFIG_LABEL}>
         <EuiButton
           disabled={!formState.isValid}
@@ -113,9 +120,24 @@ export const MonitorInspect = () => {
       </EuiToolTip>
 
       {flyout}
-    </div>
+    </>
   );
 };
+
+// @ts-ignore: Unused variable
+// tslint:disable-next-line: no-unused-variable
+const MonitorCode = ({ code }: { code: string }) => (
+  <>
+    <EuiHorizontalRule />
+    <EuiTitle size="s">
+      <h2 id="flyoutTitle">{SOURCE_CODE_LABEL}</h2>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiCodeBlock language="javascript" fontSize="m" paddingSize="m" lineNumbers>
+      {code}
+    </EuiCodeBlock>
+  </>
+);
 
 const formatContent = (result: MonitorInspectResponse) => {
   const firstResult = result.publicConfigs?.[0].monitors?.[0];
@@ -132,12 +154,9 @@ const formatContent = (result: MonitorInspectResponse) => {
   );
 };
 
-const FORMATTED_CONFIG_LABEL = i18n.translate(
-  'xpack.synthetics.monitorInspect.formattedConfigLabel',
-  {
-    defaultMessage: 'Formatted configuration',
-  }
-);
+const CONFIG_LABEL = i18n.translate('xpack.synthetics.monitorInspect.configLabel', {
+  defaultMessage: 'Configuration',
+});
 
 const VALID_CONFIG_LABEL = i18n.translate(
   'xpack.synthetics.monitorInspect.formattedConfigLabel.valid',
