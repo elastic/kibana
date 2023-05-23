@@ -13,6 +13,8 @@ import type {
   PackageUsageStats,
   InstallType,
   InstallSource,
+  SimpleSOAssetType,
+  AssetSOObject,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -173,4 +175,15 @@ export interface DeletePackageResponse {
 }
 export interface GetVerificationKeyIdResponse {
   id: string | null;
+}
+
+export interface GetBulkAssetsRequest {
+  body: {
+    objects: AssetSOObject[];
+    options?: { spaceId?: string };
+  };
+}
+
+export interface GetBulkAssetsResponse {
+  items: SimpleSOAssetType[];
 }

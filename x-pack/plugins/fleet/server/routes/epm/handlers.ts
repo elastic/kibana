@@ -10,10 +10,12 @@ import path from 'path';
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
 
@@ -30,6 +32,8 @@ import type {
   GetStatsResponse,
   UpdatePackageResponse,
   GetVerificationKeyIdResponse,
+  GetBulkAssetsResponse,
+  SimpleSOAssetType,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -44,6 +48,7 @@ import type {
   FleetRequestHandler,
   UpdatePackageRequestSchema,
   GetLimitedPackagesRequestSchema,
+  GetBulkAssetsRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -65,7 +70,9 @@ import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
-import type { ReauthorizeTransformRequestSchema } from '../../types';
+import type { ReauthorizeTransformRequestSchema, SimpleSOAssetAttributes } from '../../types';
+import { ElasticsearchAssetType, KibanaAssetType } from '../../../common/types/models';
+import type { AllowedAssetTypes, KibanaSavedObjectType } from '../../../common/types/models';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -237,6 +244,55 @@ export const getInfoHandler: FleetRequestHandler<
     });
     const body: GetInfoResponse = {
       item: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getBulkAssetsHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetBulkAssetsRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const allowedAssetTypes: AllowedAssetTypes = [
+      KibanaAssetType.dashboard,
+      KibanaAssetType.search,
+      KibanaAssetType.visualization,
+      ElasticsearchAssetType.transform,
+    ];
+    const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
+
+    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const { objects, options } = request.body;
+    const { spaceId } = options;
+    const namespace = SavedObjectsUtils.namespaceStringToId(spaceId || DEFAULT_SPACE_ID);
+
+    const { resolved_objects: resolvedObjects } =
+      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(objects, {
+        namespace,
+      });
+    const res: SimpleSOAssetType[] = resolvedObjects
+      .map(({ saved_object: savedObject }) => savedObject)
+      .filter(
+        (savedObject) =>
+          savedObject?.error?.statusCode !== 404 && allowedAssetTypesLookup.has(savedObject.type)
+      )
+      .map((obj) => {
+        return {
+          id: obj.id,
+          type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
+          updatedAt: obj.updated_at,
+          attributes: {
+            title: obj.attributes.title,
+            description: obj.attributes.description,
+          },
+        };
+      });
+    const body: GetBulkAssetsResponse = {
+      items: res,
     };
     return response.ok({ body });
   } catch (error) {

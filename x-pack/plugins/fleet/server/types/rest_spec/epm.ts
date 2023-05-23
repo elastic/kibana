@@ -50,6 +50,15 @@ export const GetInfoRequestSchema = {
   }),
 };
 
+export const GetBulkAssetsRequestSchema = {
+  body: schema.object({
+    objects: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() })),
+    options: schema.object({
+      spaceId: schema.maybe(schema.string()),
+    }),
+  }),
+};
+
 export const GetInfoRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),

@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-// import type { SavedObject } from '@kbn/core/public'; // DEPRECATION
+import type { SavedObject } from '@kbn/core/public'; // DEPRECATION
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -100,6 +100,28 @@ export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
   ElasticsearchAssetType.index
 >;
+
+export type AllowedAssetTypes = [
+  KibanaAssetType.dashboard,
+  KibanaAssetType.search,
+  KibanaAssetType.visualization,
+  ElasticsearchAssetType.transform
+];
+
+export interface SimpleSOAssetType {
+  id: string;
+  type: ElasticsearchAssetType | KibanaSavedObjectType;
+  updatedAt?: string;
+  attributes: {
+    title?: string;
+    description?: string;
+  };
+}
+
+export interface AssetSOObject {
+  id: string;
+  type: ElasticsearchAssetType | KibanaSavedObjectType;
+}
 
 export type DataType = typeof dataTypes;
 export type MonitoringType = typeof monitoringTypes;

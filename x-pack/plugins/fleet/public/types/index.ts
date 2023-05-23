@@ -132,6 +132,8 @@ export type {
   PostHealthCheckResponse,
   PostRetrieveAgentsByActionsRequest,
   PostRetrieveAgentsByActionsResponse,
+  GetBulkAssetsRequest,
+  GetBulkAssetsResponse,
 } from '../../common/types';
 export {
   entries,

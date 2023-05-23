@@ -23,15 +23,17 @@ import {
 
 import { AssetTitleMap } from '../../../constants';
 
+import type { SimpleSOAssetType } from '../../../../../../../../common';
+
 import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
 
 import { ElasticsearchAssetType, KibanaAssetType } from '../../../../../types';
 
-import type { AllowedAssetType, AssetSavedObject } from './types';
+import type { AllowedAssetType } from './types'; // FIX
 
 interface Props {
   type: AllowedAssetType;
-  savedObjects: AssetSavedObject[];
+  savedObjects: SimpleSOAssetType[];
 }
 
 export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }) => {

@@ -141,3 +141,8 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   prerelease_integrations_enabled: boolean;
 }
+
+export interface SimpleSOAssetAttributes {
+  title?: string;
+  description?: string;
+}
