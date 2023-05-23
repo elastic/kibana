@@ -14,8 +14,8 @@ import { SHARE } from './translations';
 
 interface ShareButtonProps {
   /**
-  * Url retrieved from the kibana.alert.url field of the document
-  */
+   * Url retrieved from the kibana.alert.url field of the document
+   */
   alertUrl: string;
 }
 
