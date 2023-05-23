@@ -46,6 +46,8 @@ export const fieldToName = (field: string) => {
 const snapshotTypeKeys = Object.keys(SnapshotMetricTypeKeys) as SnapshotMetricType[];
 export const SNAPSHOT_METRIC_TRANSLATIONS = snapshotTypeKeys.reduce((result, metric) => {
   const text = toMetricOpt(metric)?.text;
-  if (text) return { ...result, [metric]: text };
+  if (text) {
+    result[metric] = text;
+  }
   return result;
-}, {}) as Record<SnapshotMetricType, string>;
+}, {} as Record<SnapshotMetricType, string>);
