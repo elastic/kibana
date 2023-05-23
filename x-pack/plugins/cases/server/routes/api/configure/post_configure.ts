@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { CasesConfigureRequestRt, throwErrors } from '../../../../common/api';
+import { ConfigurationRequestRt, throwErrors } from '../../../../common/api';
 import { CASE_CONFIGURE_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -21,7 +21,7 @@ export const postCaseConfigureRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const query = pipe(
-        CasesConfigureRequestRt.decode(request.body),
+        ConfigurationRequestRt.decode(request.body),
         fold(throwErrors(Boom.badRequest), identity)
       );
 
