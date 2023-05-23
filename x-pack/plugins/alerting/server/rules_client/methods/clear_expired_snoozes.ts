@@ -13,7 +13,10 @@ import { updateMeta } from '../lib';
 
 export async function clearExpiredSnoozes(
   context: RulesClientContext,
-  { rule }: { rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'> }
+  {
+    rule,
+    version,
+  }: { rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'>; version?: string }
 ): Promise<void> {
   const snoozeSchedule = rule.snoozeSchedule
     ? rule.snoozeSchedule.filter((s) => {
@@ -33,7 +36,8 @@ export async function clearExpiredSnoozes(
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
-  const updateOptions = { refresh: false };
+
+  const updateOptions = { version, refresh: false };
 
   await partiallyUpdateAlert(
     context.unsecuredSavedObjectsClient,
