@@ -37,7 +37,6 @@ import {
   ES_GEO_FIELD_TYPE,
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
-  GIS_INTERNAL_PATH,
   MVT_GETTILE_API_PATH,
   SCALING_TYPES,
   SOURCE_TYPES,
@@ -892,7 +891,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     );
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_INTERNAL_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
+      `${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
     const tileUrlParams = getTileUrlParams({

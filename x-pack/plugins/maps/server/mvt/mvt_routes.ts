@@ -17,7 +17,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   APP_ID,
   MVT_GETTILE_API_PATH,
-  API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
@@ -34,24 +33,30 @@ export function initMVTRoutes({
   logger: Logger;
   core: CoreStart;
 }) {
-  router.get(
-    {
-      path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+  router.versioned
+    .get({
+      path: `${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+      access: 'internal',
+    })
+    .addVersion({
+      version: '1',
       validate: {
-        params: schema.object({
-          x: schema.number(),
-          y: schema.number(),
-          z: schema.number(),
-        }),
-        query: schema.object({
-          buffer: schema.maybe(schema.number()),
-          geometryFieldName: schema.string(),
-          hasLabels: schema.boolean(),
-          requestBody: schema.string(),
-          index: schema.string(),
-          token: schema.maybe(schema.string()),
-          executionContextId: schema.maybe(schema.string()),
-        }),
+        request: {
+          params: schema.object({
+            x: schema.number(),
+            y: schema.number(),
+            z: schema.number(),
+          }),
+          query: schema.object({
+            buffer: schema.maybe(schema.number()),
+            geometryFieldName: schema.string(),
+            hasLabels: schema.boolean(),
+            requestBody: schema.string(),
+            index: schema.string(),
+            token: schema.maybe(schema.string()),
+            executionContextId: schema.maybe(schema.string()),
+          }),
+        },
       },
     },
     async (
@@ -92,7 +97,7 @@ export function initMVTRoutes({
           type: 'server',
           name: APP_ID,
           description: 'mvt:get_hits_tile',
-          url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+          url: `${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
           id: query.executionContextId,
         }),
         logger,
@@ -103,26 +108,32 @@ export function initMVTRoutes({
     }
   );
 
-  router.get(
-    {
-      path: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+  router.versioned
+    .get({
+      path: `${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+      access: 'internal',
+    })
+    .addVersion({
+      version: '1',
       validate: {
-        params: schema.object({
-          x: schema.number(),
-          y: schema.number(),
-          z: schema.number(),
-        }),
-        query: schema.object({
-          buffer: schema.maybe(schema.number()),
-          geometryFieldName: schema.string(),
-          hasLabels: schema.boolean(),
-          requestBody: schema.string(),
-          index: schema.string(),
-          renderAs: schema.string(),
-          token: schema.maybe(schema.string()),
-          gridPrecision: schema.number(),
-          executionContextId: schema.maybe(schema.string()),
-        }),
+        request: {
+          params: schema.object({
+            x: schema.number(),
+            y: schema.number(),
+            z: schema.number(),
+          }),
+          query: schema.object({
+            buffer: schema.maybe(schema.number()),
+            geometryFieldName: schema.string(),
+            hasLabels: schema.boolean(),
+            requestBody: schema.string(),
+            index: schema.string(),
+            renderAs: schema.string(),
+            token: schema.maybe(schema.string()),
+            gridPrecision: schema.number(),
+            executionContextId: schema.maybe(schema.string()),
+          }),
+        },
       },
     },
     async (
@@ -165,7 +176,7 @@ export function initMVTRoutes({
           type: 'server',
           name: APP_ID,
           description: 'mvt:get_aggs_tile',
-          url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+          url: `${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
           id: query.executionContextId,
         }),
         logger,

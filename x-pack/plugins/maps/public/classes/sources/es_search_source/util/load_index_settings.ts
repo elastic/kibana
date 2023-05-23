@@ -38,6 +38,7 @@ async function fetchIndexSettings(indexPatternTitle: string): Promise<INDEX_SETT
     return await http.fetch(`/${INDEX_SETTINGS_API_PATH}`, {
       method: 'GET',
       credentials: 'same-origin',
+      version: '1',
       query: {
         indexPatternTitle,
       },

@@ -21,14 +21,20 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
   const [coreStart, { data: dataPlugin }]: [CoreStart, StartDeps] =
     (await coreSetup.getStartServices()) as unknown as [CoreStart, StartDeps];
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `/${FONTS_API_PATH}/{fontstack}/{range}`,
+      access: 'internal',
+    })
+    .addVersion({
+      version: '1',
       validate: {
-        params: schema.object({
-          fontstack: schema.string(),
-          range: schema.string(),
-        }),
+        request: {
+          params: schema.object({
+            fontstack: schema.string(),
+            range: schema.string(),
+          }),
+        },
       },
     },
     (context, request, response) => {
@@ -53,13 +59,19 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
     }
   );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `/${INDEX_SETTINGS_API_PATH}`,
+      access: 'internal',
+    })
+    .addVersion({
+      version: '1',
       validate: {
-        query: schema.object({
-          indexPatternTitle: schema.string(),
-        }),
+        request: {
+          query: schema.object({
+            indexPatternTitle: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, response) => {

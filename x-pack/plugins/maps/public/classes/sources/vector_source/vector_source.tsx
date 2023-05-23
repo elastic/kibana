@@ -238,10 +238,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return null;
   }
 
-  async addFeature(
-    geometry: Geometry | Position[],
-    defaultFields: Record<string, Record<string, string>>
-  ) {
+  async addFeature(geometry: Geometry | Position[]) {
     throw new Error('Should implement VectorSource#addFeature');
   }
 
