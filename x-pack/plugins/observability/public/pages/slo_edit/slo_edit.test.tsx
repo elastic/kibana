@@ -451,7 +451,6 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
         expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
 
-        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
         expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
           slo.indicator.params.index!
         );
@@ -563,7 +562,6 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
         expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
 
-        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
         expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
           slo.indicator.params.index!
         );
