@@ -22,12 +22,12 @@ export class PrivateLocationTestService {
   async installSyntheticsPackage() {
     await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
     const response = await this.supertest
-      .get('/api/fleet/epm/packages/synthetics/0.12.0')
+      .get('/api/fleet/epm/packages/synthetics/1.0.1')
       .set('kbn-xsrf', 'true')
       .expect(200);
     if (response.body.item.status !== 'installed') {
       await this.supertest
-        .post('/api/fleet/epm/packages/synthetics/0.12.0')
+        .post('/api/fleet/epm/packages/synthetics/1.0.1')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -46,6 +46,7 @@ export class PrivateLocationTestService {
       })
       .expect(200);
   }
+
   async setTestLocations(testFleetPolicyIds: string[]) {
     const server = this.getService('kibanaServer');
 

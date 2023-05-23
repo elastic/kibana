@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await testPrivateLocations.installSyntheticsPackage();
+
       await kServer.savedObjects.clean({ types: [syntheticsParamType] });
     });
 

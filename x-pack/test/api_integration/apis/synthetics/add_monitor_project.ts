@@ -1437,6 +1437,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1505,6 +1506,7 @@ export default function ({ getService }: FtrProviderContext) {
             configId,
             projectId: project,
             locationName: 'Test private location 0',
+            locationId: testPolicyId,
           })
         );
       } finally {
@@ -1627,6 +1629,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1708,6 +1711,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1745,6 +1749,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: id2,
             configId: configId2,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );

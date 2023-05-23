@@ -19,7 +19,6 @@ import { SavedObject } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import { getTestBrowserSyntheticsPolicy } from './sample_data/test_browser_policy';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -132,7 +131,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       comparePolicies(
         packagePolicy,
-        getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId })
+        getTestSyntheticsPolicy({
+          name: browserMonitorJson.name,
+          id: newMonitorId,
+          isBrowser: true,
+          location: { id: testFleetPolicyID },
+        })
       );
     });
 
@@ -140,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ key: 'test', value: 'test' });
+        .send({ key: 'test', value: 'http://proxy.com' });
 
       expect(apiResponse.status).eql(200);
     });
@@ -149,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI
         .get(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ key: 'test', value: 'test' });
+        .send({ key: 'test', value: 'http://proxy.com' });
 
       expect(apiResponse.status).eql(200);
 
@@ -181,7 +185,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       comparePolicies(
         packagePolicy,
-        getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId, params })
+        getTestSyntheticsPolicy({
+          name: browserMonitorJson.name,
+          id: newMonitorId,
+          params,
+          isBrowser: true,
+          location: { id: testFleetPolicyID },
+        })
       );
     });
 
@@ -226,14 +236,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      const pPolicy = getTestSyntheticsPolicy(
-        httpMonitorJson.name,
-        newHttpMonitorId,
-        undefined,
-        undefined,
-        false,
-        'test'
-      );
+      const pPolicy = getTestSyntheticsPolicy({
+        name: httpMonitorJson.name,
+        id: newHttpMonitorId,
+        isTLSEnabled: false,
+        namespace: 'testnamespace',
+        location: { id: testFleetPolicyID },
+      });
 
       comparePolicies(packagePolicy, pPolicy);
     });
@@ -284,7 +293,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       comparePolicies(
         packagePolicy,
-        getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId })
+        getTestSyntheticsPolicy({
+          name: browserMonitorJson.name,
+          id: newMonitorId,
+          isBrowser: true,
+          location: { id: testFleetPolicyID },
+        })
       );
     });
   });
