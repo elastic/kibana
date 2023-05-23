@@ -189,14 +189,14 @@ const serviceGroupCountsRoute = createApmServerRoute({
         spaceId: activeSpace?.id,
       }),
     ]);
-    const serviceGroupCounts: ServiceGroupCounts = serviceGroups.reduce(
-      (acc, { id }): ServiceGroupCounts => ({
-        ...acc,
-        [id]: {
+    const serviceGroupCounts = serviceGroups.reduce<ServiceGroupCounts>(
+      (acc, { id }): ServiceGroupCounts => {
+        acc[id] = {
           services: servicesCounts[id],
           alerts: serviceGroupAlertsCount[id],
-        },
-      }),
+        };
+        return acc;
+      },
       {}
     );
     return serviceGroupCounts;
