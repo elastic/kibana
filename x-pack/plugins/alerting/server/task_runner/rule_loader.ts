@@ -7,7 +7,7 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest, FakeRawRequest, Headers, SavedObject } from '@kbn/core/server';
+import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -36,7 +36,7 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   let enabled: boolean;
   let apiKey: string | null;
   let rule: SanitizedRule<Params>;
-  let rawRule: SavedObject<RawRule>;
+  let rawRule: RawRule;
   let fakeRequest: CoreKibanaRequest;
   let rulesClient: RulesClientApi;
 
@@ -100,7 +100,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   enabled: boolean;
   consumer: string;
   rule: SanitizedRule<Params>;
-  rawRule: SavedObject<RawRule>;
+  rawRule: RawRule;
   fakeRequest: CoreKibanaRequest;
   rulesClient: RulesClientApi;
 }> {
@@ -125,7 +125,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
 
   return {
     rule,
-    rawRule,
+    rawRule: rawRule.attributes,
     apiKey: rawRule.attributes.apiKey,
     enabled: rawRule.attributes.enabled,
     consumer: rawRule.attributes.consumer,

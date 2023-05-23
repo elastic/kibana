@@ -285,7 +285,6 @@ export class RuleTypeRegistry {
           spaceId: schema.string(),
           consumer: schema.string(),
         }),
-        ...(ruleType.schema && { indirectParamsSchema: ruleType.schema }),
       },
     });
     if (this.alertsService && ruleType.alerts) {

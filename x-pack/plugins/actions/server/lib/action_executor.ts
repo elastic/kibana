@@ -12,6 +12,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { rawActionSchema } from '../raw_action_schema';
 import {
   validateParams,
   validateConfig,
@@ -132,7 +133,8 @@ export class ActionExecutor {
           namespace.namespace
         );
 
-        const { actionTypeId, name, config, secrets } = actionInfo;
+        const { actionTypeId, name, config, secrets, rawAction, isPreconfigured } = actionInfo;
+
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         let { logger } = this.actionExecutorContext!;
         logger = logger.get(loggerId);
@@ -211,6 +213,8 @@ export class ActionExecutor {
               params,
               config,
               secrets,
+              rawAction,
+              isPreconfigured,
             },
             { configurationUtilities }
           );
@@ -364,6 +368,7 @@ interface ActionInfo {
   secrets: unknown;
   actionId: string;
   isPreconfigured?: boolean;
+  rawAction: RawAction;
 }
 
 async function getActionInfoInternal(
@@ -385,6 +390,7 @@ async function getActionInfoInternal(
       secrets: pcAction.secrets,
       actionId,
       isPreconfigured: true,
+      rawAction: { ...pcAction, isMissingSecrets: false } as RawAction,
     };
   }
 
@@ -394,11 +400,17 @@ async function getActionInfoInternal(
     );
   }
 
+  const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+    'action',
+    actionId,
+    {
+      namespace: namespace === 'default' ? undefined : namespace,
+    }
+  );
+
   const {
     attributes: { secrets, actionTypeId, config, name },
-  } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
-    namespace: namespace === 'default' ? undefined : namespace,
-  });
+  } = rawAction;
 
   return {
     actionTypeId,
@@ -406,6 +418,7 @@ async function getActionInfoInternal(
     config,
     secrets,
     actionId,
+    rawAction: rawAction.attributes,
   };
 }
 
@@ -431,10 +444,20 @@ interface ValidateActionOpts {
   params: Record<string, unknown>;
   config: unknown;
   secrets: unknown;
+  rawAction: RawAction;
+  isPreconfigured?: boolean;
 }
 
 function validateAction(
-  { actionId, actionType, params, config, secrets }: ValidateActionOpts,
+  {
+    actionId,
+    actionType,
+    params,
+    config,
+    secrets,
+    rawAction,
+    isPreconfigured = false,
+  }: ValidateActionOpts,
   validatorServices: ValidatorServices
 ) {
   let validatedParams: Record<string, unknown>;
@@ -451,7 +474,9 @@ function validateAction(
         secrets,
       });
     }
-
+    if (!isPreconfigured) {
+      rawActionSchema.validate(rawAction);
+    }
     return { validatedParams, validatedConfig, validatedSecrets };
   } catch (err) {
     throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {

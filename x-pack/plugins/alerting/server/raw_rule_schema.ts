@@ -29,7 +29,7 @@ const outcome = schema.oneOf([
   schema.literal('failed'),
 ]);
 
-export const ruleTypeSchema = schema.object({
+export const rawRuleSchema = schema.object({
   name: schema.string(),
   enabled: schema.boolean(),
   consumer: schema.string(),
@@ -213,4 +213,5 @@ export const ruleTypeSchema = schema.object({
       severity: schema.maybe(schema.string()),
     })
   ),
+  params: schema.recordOf(schema.string(), schema.any()),
 });

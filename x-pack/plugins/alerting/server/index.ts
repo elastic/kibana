@@ -71,7 +71,7 @@ export {
   installWithTimeout,
 } from './alerts_service';
 
-export { ruleTypeSchema } from './rule_type_schema';
+export { rawRuleSchema } from './raw_rule_schema';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

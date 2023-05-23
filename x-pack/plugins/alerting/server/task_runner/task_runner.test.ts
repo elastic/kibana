@@ -49,7 +49,6 @@ import {
   mockRunNowResponse,
   ruleType,
   RULE_NAME,
-  SAVED_OBJECT,
   generateRunnerResult,
   RULE_ACTIONS,
   generateEnqueueFunctionInput,
@@ -64,6 +63,7 @@ import {
   DATE_9999,
   getSummarizedAlertsMock,
   mockAAD,
+  mockedRawRuleSO,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
@@ -252,7 +252,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
 
@@ -341,7 +341,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
 
@@ -382,7 +382,7 @@ describe('Task Runner', () => {
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
       rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
@@ -468,7 +468,7 @@ describe('Task Runner', () => {
       ...(mockedRuleTypeSavedObject as Rule),
       muteAll: true,
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
@@ -595,7 +595,7 @@ describe('Task Runner', () => {
         muteAll,
         snoozeSchedule: snoozeSchedule != null ? JSON.parse(snoozeSchedule) : [],
       });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
 
       const expectedExecutions = shouldBeSnoozed ? 0 : 1;
@@ -647,7 +647,7 @@ describe('Task Runner', () => {
       } as MaintenanceWindow,
     ]);
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
@@ -719,7 +719,7 @@ describe('Task Runner', () => {
         ...(mockedRuleTypeSavedObject as Rule),
         mutedInstanceIds: ['2'],
       });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
@@ -804,7 +804,7 @@ describe('Task Runner', () => {
         notifyWhen: 'onThrottleInterval',
         throttle: '1d',
       });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
       // expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
@@ -850,7 +850,7 @@ describe('Task Runner', () => {
         mutedInstanceIds: ['2'],
         notifyWhen: 'onActionGroupChange',
       });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenCalledTimes(7);
@@ -907,7 +907,7 @@ describe('Task Runner', () => {
       ...(mockedRuleTypeSavedObject as Rule),
       notifyWhen: 'onActionGroupChange',
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
@@ -976,7 +976,7 @@ describe('Task Runner', () => {
         ...(mockedRuleTypeSavedObject as Rule),
         notifyWhen: 'onActionGroupChange',
       });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
       await taskRunner.run();
 
@@ -1036,7 +1036,7 @@ describe('Task Runner', () => {
       expect(AlertingEventLogger).toHaveBeenCalled();
 
       rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
       expect(
         customTaskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest
@@ -1151,7 +1151,7 @@ describe('Task Runner', () => {
       expect(AlertingEventLogger).toHaveBeenCalled();
 
       rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       const runnerResult = await taskRunner.run();
       expect(runnerResult.state.alertInstances).toEqual(
         generateAlertInstance({
@@ -1281,7 +1281,7 @@ describe('Task Runner', () => {
       expect(AlertingEventLogger).toHaveBeenCalled();
 
       rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       const runnerResult = await taskRunner.run();
       expect(runnerResult.state.alertInstances).toEqual(
         generateAlertInstance({
@@ -1409,7 +1409,7 @@ describe('Task Runner', () => {
           },
         ],
       });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       const runnerResult = await taskRunner.run();
       expect(runnerResult.state.alertInstances).toEqual(
         generateAlertInstance({
@@ -1506,7 +1506,7 @@ describe('Task Runner', () => {
           },
         ],
       });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
 
       expect(ruleType.getSummarizedAlerts).toHaveBeenCalledWith({
@@ -1583,7 +1583,7 @@ describe('Task Runner', () => {
           },
         ],
       });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       const result = await taskRunner.run();
 
       expect(ruleType.getSummarizedAlerts).toHaveBeenCalledWith({
@@ -1651,7 +1651,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult.state.alertInstances).toEqual(
       generateAlertInstance({
@@ -1709,7 +1709,7 @@ describe('Task Runner', () => {
       ...(mockedRuleTypeSavedObject as Rule),
       schedule: { interval: '30s' },
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(
@@ -1742,7 +1742,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 
@@ -1781,7 +1781,7 @@ describe('Task Runner', () => {
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 
@@ -1814,7 +1814,7 @@ describe('Task Runner', () => {
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 
@@ -1853,7 +1853,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 
@@ -1882,7 +1882,7 @@ describe('Task Runner', () => {
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
@@ -1919,7 +1919,7 @@ describe('Task Runner', () => {
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
     expect(runnerResult.schedule!.interval).toEqual(mockedTaskInstance.schedule!.interval);
@@ -1943,7 +1943,7 @@ describe('Task Runner', () => {
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 
@@ -1969,7 +1969,7 @@ describe('Task Runner', () => {
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
@@ -2030,7 +2030,7 @@ describe('Task Runner', () => {
       actions: [],
     });
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
 
     testAlertingEventLogCalls({
@@ -2138,7 +2138,7 @@ describe('Task Runner', () => {
       actions: [],
     });
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
 
     testAlertingEventLogCalls({
@@ -2213,7 +2213,7 @@ describe('Task Runner', () => {
       notifyWhen: 'onActionGroupChange',
       actions: [],
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
 
     testAlertingEventLogCalls({
@@ -2284,7 +2284,7 @@ describe('Task Runner', () => {
       notifyWhen: 'onActionGroupChange',
       actions: [],
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
 
     testAlertingEventLogCalls({
@@ -2360,7 +2360,7 @@ describe('Task Runner', () => {
       notifyWhen: 'onActionGroupChange',
       actions: [],
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
 
     testAlertingEventLogCalls({
@@ -2408,7 +2408,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
     expect(ruleType.executor).toHaveBeenCalledTimes(1);
@@ -2473,7 +2473,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
   });
@@ -2488,7 +2488,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -2516,7 +2516,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     await taskRunner.run();
     await taskRunner.run();
@@ -2553,7 +2553,7 @@ describe('Task Runner', () => {
       ...(mockedRuleTypeSavedObject as Rule),
       schedule: { interval: '50s' },
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
     expect(
@@ -2575,7 +2575,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     ruleType.executor.mockImplementation(
       async ({
@@ -2623,7 +2623,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     for (let i = 0; i < 300; i++) {
       await taskRunner.run();
@@ -2696,7 +2696,7 @@ describe('Task Runner', () => {
     });
 
     ruleTypeRegistry.get.mockReturnValue(ruleType);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const taskRunner = new TaskRunner(
       ruleType,
@@ -2863,8 +2863,8 @@ describe('Task Runner', () => {
     });
 
     ruleTypeRegistry.get.mockReturnValue(ruleType);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
 
     const taskRunner = new TaskRunner(
       ruleType,
@@ -2967,15 +2967,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        apiKey: Buffer.from('123:abc').toString('base64'),
-        enabled: true,
-      },
-      references: [],
-    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
     await taskRunner.run();
@@ -3055,7 +3047,7 @@ describe('Task Runner', () => {
     expect(AlertingEventLogger).toHaveBeenCalled();
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult.state.alertInstances).toEqual({});
     expect(runnerResult.state.alertRecoveredInstances).toEqual({});

@@ -68,7 +68,6 @@ export interface TaskRegisterDefinition {
   maxConcurrency?: number;
 
   paramsSchema?: ObjectType;
-  indirectParamsSchema?: ObjectType;
 }
 
 /**

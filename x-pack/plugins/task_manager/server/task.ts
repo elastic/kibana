@@ -86,9 +86,7 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed;
 }
 
-export type RunFunction = (
-  indirectParamsSchema?: ObjectType
-) => Promise<RunResult | undefined | void>;
+export type RunFunction = () => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
 export interface CancellableTask {
   run: RunFunction;
@@ -142,7 +140,6 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
-    indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
     validate({ timeout }) {
@@ -157,17 +154,13 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = Omit<
-  TypeOf<typeof taskDefinitionSchema>,
-  'paramsSchema' | 'indirectParamsSchema'
-> & {
+export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
   paramsSchema?: ObjectType;
-  indirectParamsSchema?: ObjectType;
 };
 
 export enum TaskStatus {

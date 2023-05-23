@@ -25,7 +25,6 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
-import { ObjectType } from '@kbn/config-schema';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -281,7 +280,6 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
-  schema?: ObjectType;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
