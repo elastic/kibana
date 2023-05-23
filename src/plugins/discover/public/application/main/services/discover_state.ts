@@ -170,11 +170,6 @@ export interface DiscoverStateContainer {
      */
     onChangeDataView: (id: string) => Promise<void>;
     /**
-     * Triggered when an ad-hoc data view is persisted to allow sharing links and CSV
-     * @param dataView
-     */
-    persistAdHocDataView: (dataView: DataView) => Promise<DataView>;
-    /**
      * Set the currently selected data view
      * @param dataView
      */
@@ -324,18 +319,6 @@ export function getDiscoverStateContainer({
     fetchData();
   };
 
-  const persistAdHocDataView = async (adHocDataView: DataView) => {
-    const persistedDataView = await services.dataViews.createAndSave({
-      ...adHocDataView.toSpec(),
-      id: uuidv4(),
-    });
-    services.dataViews.clearInstanceCache(adHocDataView.id);
-    updateFiltersReferences(adHocDataView, persistedDataView);
-    internalStateContainer.transitions.removeAdHocDataViewById(adHocDataView.id!);
-    await appStateContainer.update({ index: persistedDataView.id }, true);
-    return persistedDataView;
-  };
-
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
     return loadSavedSearchFn(params ?? {}, {
       appStateContainer,
@@ -465,7 +448,6 @@ export function getDiscoverStateContainer({
       onDataViewEdited,
       onOpenSavedSearch,
       onUpdateQuery,
-      persistAdHocDataView,
       setDataView,
       undoSavedSearchChanges,
       updateAdHocDataViewId,
