@@ -35,8 +35,8 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
     <>
       <EuiSpacer size="xxl" />
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={3}>{leftPanelContent}</EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={6}>{leftPanelContent}</EuiFlexItem>
+        <EuiFlexItem grow={4}>
           <EuiPanel color="subdued">
             <EuiTitle>
               <h2>{title}</h2>

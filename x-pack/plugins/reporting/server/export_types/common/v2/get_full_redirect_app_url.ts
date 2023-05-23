@@ -6,19 +6,20 @@
  */
 
 import { format } from 'url';
-import { ReportingCore } from '../../..';
+import { ReportingServerInfo } from '../../../core';
+import { ReportingConfigType } from '../../../config';
 import { buildKibanaPath } from '../../../../common/build_kibana_path';
 import { getRedirectAppPath } from '../../../../common/constants';
 
 export function getFullRedirectAppUrl(
-  reporting: ReportingCore,
+  config: ReportingConfigType,
+  serverInfo: ReportingServerInfo,
   spaceId?: string,
   forceNow?: string
 ) {
   const {
     kibanaServer: { protocol, hostname, port },
-  } = reporting.getConfig();
-  const serverInfo = reporting.getServerInfo();
+  } = config;
   const path = buildKibanaPath({
     basePath: serverInfo.basePath,
     spaceId,
