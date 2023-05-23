@@ -14,7 +14,7 @@ import React, {
   useRef,
 } from 'react';
 
-interface WizardContext<T, StepKey extends string> {
+export interface WizardContext<T, StepKey extends string> {
   CurrentStep: ComponentType;
   goToStep: (step: StepKey) => void;
   goBack: () => void;
