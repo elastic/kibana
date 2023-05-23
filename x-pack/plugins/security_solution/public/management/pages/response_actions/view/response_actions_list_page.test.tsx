@@ -375,7 +375,6 @@ describe('Response actions history page', () => {
       }, []);
 
       // verify 5 rows are expanded
-      expect(traysOnPage1).toBeTruthy();
       expect(traysOnPage1.length).toEqual(5);
       // verify 5 rows that are expanded are the ones from before
       expect(expandedButtons).toEqual([0, 2, 3, 4, 5]);
