@@ -1417,8 +1417,7 @@ describe('merge_missing_fields_with_source', () => {
               'x-test': 'from fields',
             },
           },
-          // there is leftover of the empty flattened object left out, since we can't create wildcard
-          // map of string based paths to array paths in buildFieldsKeyAsArrayMap
+          // preserves conflicting keys if values contain empty objects
           'email.headers': {},
         });
       });

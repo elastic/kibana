@@ -9,20 +9,20 @@ import { buildFieldsKeyAsArrayMap } from './build_fields_key_as_array_map';
 
 describe('buildFieldsKeyAsArrayMap()', () => {
   it('returns primitive type if it passed as source', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(buildFieldsKeyAsArrayMap(1 as any)).toEqual({});
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(buildFieldsKeyAsArrayMap(Infinity as any)).toEqual({});
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(buildFieldsKeyAsArrayMap(NaN as any)).toEqual({});
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(buildFieldsKeyAsArrayMap(false as any)).toEqual({});
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(buildFieldsKeyAsArrayMap(null as any)).toEqual({});
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(buildFieldsKeyAsArrayMap(undefined as any)).toEqual({});
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(buildFieldsKeyAsArrayMap([] as any)).toEqual({});
+    // @ts-expect-error
+    expect(buildFieldsKeyAsArrayMap(1)).toEqual({});
+    // @ts-expect-error
+    expect(buildFieldsKeyAsArrayMap(Infinity)).toEqual({});
+    // @ts-expect-error
+    expect(buildFieldsKeyAsArrayMap(NaN)).toEqual({});
+    // @ts-expect-error
+    expect(buildFieldsKeyAsArrayMap(false)).toEqual({});
+    // @ts-expect-error
+    expect(buildFieldsKeyAsArrayMap(null)).toEqual({});
+    // @ts-expect-error
+    expect(buildFieldsKeyAsArrayMap(undefined)).toEqual({});
+    // @ts-expect-error
+    expect(buildFieldsKeyAsArrayMap([])).toEqual({});
   });
   it('builds map for nested source', () => {
     expect(buildFieldsKeyAsArrayMap({ a: 'b' })).toEqual({ a: ['a'] });
