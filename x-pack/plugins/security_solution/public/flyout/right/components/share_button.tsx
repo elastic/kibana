@@ -13,6 +13,9 @@ import { FLYOUT_HEADER_SHARE_BUTTON_TEST_ID } from './test_ids';
 import { SHARE } from './translations';
 
 interface ShareButtonProps {
+  /**
+  * Url retrieved from the kibana.alert.url field of the document
+  */
   alertUrl: string;
 }
 
