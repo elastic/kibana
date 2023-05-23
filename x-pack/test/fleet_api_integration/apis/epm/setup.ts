@@ -19,7 +19,10 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
 
   const uninstallPackage = async (name: string, version: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
+    await supertest
+      .delete(`/api/fleet/epm/packages/${name}/${version}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: 'true' });
   };
 
   describe('setup api', async () => {
