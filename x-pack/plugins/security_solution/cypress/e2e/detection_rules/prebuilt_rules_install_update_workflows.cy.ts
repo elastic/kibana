@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AssetReference, BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   ELASTIC_RULES_BTN,
@@ -19,24 +20,12 @@ import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules'
 import {
   createNewRuleAsset,
   installAvailableRules,
-  preventPrebuiltRulesInstallation,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-
-interface Asset {
-  id: string;
-  type: string;
-}
-interface PackageItem {
-  name: string;
-  result: {
-    installSource: string;
-    assets: Asset[];
-  };
-}
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   before(() => {
@@ -64,7 +53,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       cy.wait('@installPackage').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
 
-        const packages = response?.body.items.map(({ name, result }: PackageItem) => ({
+        const packages = response?.body.items.map(({ name, result }: BulkInstallPackageInfo) => ({
           name,
           installSource: result.installSource,
         }));
@@ -76,23 +65,23 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
     });
 
-    it('should install rules from the Fleet package when user clicks on CTA', () => {
+    it.only('should install rules from the Fleet package when user clicks on CTA', () => {
       cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
 
       /* Retrieve how many rules were installed from the Fleet package */
       cy.wait('@installPackage').then(({ response }) => {
         const packageAssets = response?.body.items.find(
-          ({ name }: PackageItem) => name === 'security_detection_engine'
+          ({ name }: BulkInstallPackageInfo) => name === 'security_detection_engine'
         ).result.assets;
 
         const rulesWithHistoricalVersions = packageAssets.filter(
-          ({ type }: Asset) => type === 'security-rule'
+          ({ type }: AssetReference) => type === 'security-rule'
         );
 
         // Get unique rules to install by removing version appendix
         // from rule id and then removing duplicates
         const numberOfRulesToInstall = [
-          ...new Set(rulesWithHistoricalVersions.map(({ id }: Asset) => id.split('_')[0])),
+          ...new Set(rulesWithHistoricalVersions.map(({ id }: AssetReference) => id.split('_')[0])),
         ].length;
 
         cy.get(LOAD_PREBUILT_RULES_BTN).click();
@@ -115,7 +104,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       rule_id: 'rule_2',
     });
     beforeEach(() => {
-      preventPrebuiltRulesInstallation();
+      preventPrebuiltRulesPackageInstallation();
 
       /* Create two mock rules */
       createNewRuleAsset({ rule: RULE_1 });
@@ -169,7 +158,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       version: 2,
     });
     beforeEach(() => {
-      preventPrebuiltRulesInstallation();
+      preventPrebuiltRulesPackageInstallation();
       /* Create a new rule and install it */
       createNewRuleAsset({ rule: OUTDATED_RULE });
       installAvailableRules();

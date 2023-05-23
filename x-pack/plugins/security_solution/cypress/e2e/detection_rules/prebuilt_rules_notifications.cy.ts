@@ -15,7 +15,7 @@ import { deleteFirstRule, waitForRulesTableToBeLoaded } from '../../tasks/alerts
 import {
   installAvailableRules,
   createNewRuleAsset,
-  preventPrebuiltRulesInstallation,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
@@ -33,7 +33,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     deleteAlertsAndRules();
     esArchiverResetKibana();
 
-    preventPrebuiltRulesInstallation();
+    preventPrebuiltRulesPackageInstallation();
     createNewRuleAsset({
       rule: createRuleAssetSavedObject({
         name: 'Test rule 1',
@@ -48,7 +48,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       waitForRulesTableToBeLoaded();
     });
 
-    it('should notify user about prebuilt rules package available for installation', () => {
+    it('should notify user about prebuilt rules available for installation', () => {
       cy.get(LOAD_PREBUILT_RULES_BTN).should('be.visible');
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
     });

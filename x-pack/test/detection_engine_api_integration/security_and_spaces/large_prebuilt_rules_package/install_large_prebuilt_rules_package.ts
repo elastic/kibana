@@ -28,10 +28,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es);
     });
 
-    /**
-     * Unlike other tests that use mocks, this test uses actual rules from the
-     * package storage and checks that they are installed.
-     */
     it('should install a package containing 15000 prebuilt rules without crashing', async () => {
       // Verify that status is empty before package installation
       const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);

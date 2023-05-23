@@ -82,12 +82,7 @@ export const createNewRuleAsset = ({
           failOnStatusCode: false,
           body: rule,
         })
-        .then((response) => {
-          if (response.status !== 200) {
-            return false;
-          }
-          return true;
-        });
+        .then((response) => response.status === 200);
     },
     { interval: 500, timeout: 12000 }
   );
@@ -103,12 +98,7 @@ export const installAvailableRules = () => {
           headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
           failOnStatusCode: false,
         })
-        .then((response) => {
-          if (response.status !== 200) {
-            return false;
-          }
-          return true;
-        });
+        .then((response) => response.status === 200);
     },
     { interval: 500, timeout: 12000 }
   );
@@ -118,6 +108,6 @@ export const installAvailableRules = () => {
 /* by intercepting the request and returning a mockempty object as response
 /* Used primarily to prevent the unwanted installation of "real" prebuilt rules
 /* during e2e tests, and allow for manual installation of mock rules instead. */
-export const preventPrebuiltRulesInstallation = () => {
+export const preventPrebuiltRulesPackageInstallation = () => {
   cy.intercept('POST', '/api/fleet/epm/packages/_bulk*', {}).as('getPrebuiltRules');
 };

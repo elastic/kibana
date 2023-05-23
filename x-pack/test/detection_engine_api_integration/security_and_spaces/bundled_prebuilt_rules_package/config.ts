@@ -26,6 +26,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
+        /*  Tests in this directory simulate an air-gapped environment in which the instance doesn't have access to EPR.
+         *  To do that, we point the Fleet url to an invalid URL, and instruct Fleet to fetch bundled packages at the
+         *  location defined in BUNDLED_PACKAGE_DIR.
+         */
         `--xpack.fleet.registryUrl=http://invalidURL:8080`,
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
       ],
