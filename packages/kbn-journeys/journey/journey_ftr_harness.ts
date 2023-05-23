@@ -74,7 +74,6 @@ export class JourneyFtrHarness {
 
     // update labels before FTR service
     await this.updateTelemetryAndAPMLabels(journeyLabels);
-    await setTimeout(20000);
 
     this.apm = apmNode.start({
       serviceName: 'functional test runner',

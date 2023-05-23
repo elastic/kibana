@@ -151,6 +151,9 @@ export class CoreAppsService {
       .put({
         path: '/internal/core/_settings',
         access: 'internal',
+        options: {
+          tags: ['access:updateDynamicConfig'],
+        },
       })
       .addVersion(
         {
