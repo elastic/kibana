@@ -77,9 +77,7 @@ export default {
 } as Meta;
 
 const Template: Story<AssetDetailsProps> = (args) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const closeFlyout = () => setIsOpen(false);
-  return <AssetDetails {...args} closeFlyout={closeFlyout} />;
+  return <AssetDetails {...args} />;
 };
 
 const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
@@ -101,10 +99,18 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
 export const DefaultAssetDetailsWithMetadataTabSelected = Template.bind({});
 DefaultAssetDetailsWithMetadataTabSelected.args = {
   showActionsColumn: true,
-  persistMetadataSearchToUrlState: {
-    metadataSearchUrlState: 'test',
-    setMetadataSearchUrlState: () => {},
+};
+
+export const AssetDetailsWithMetadataTabSelectedWithPersistedSearch = Template.bind({});
+AssetDetailsWithMetadataTabSelectedWithPersistedSearch.args = {
+  showActionsColumn: true,
+  hostFlyoutOpen: {
+    clickedItemId: 'host1-macos',
+    selectedTabId: 'metadata',
+    searchFilter: '',
+    metadataSearch: 'ip',
   },
+  setHostFlyoutOpen: () => {},
 };
 
 export const AssetDetailsWithMetadataWithoutActions = Template.bind({});
