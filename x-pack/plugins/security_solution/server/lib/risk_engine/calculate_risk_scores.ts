@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregationContainer,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
@@ -135,37 +138,36 @@ const buildIdentifierTypeAggregation = ({
   identifierType: IdentifierType;
   identifierPageSize: number;
   weights?: RiskScoreWeight[];
-}): SearchRequest['aggs'] => {
+}): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
   const identifierField = getFieldForIdentifierAgg(identifierType);
 
   return {
-    [identifierType]: {
-      composite: {
-        size: identifierPageSize,
-        sources: [
-          {
-            [identifierField]: {
-              terms: {
-                field: identifierField,
-              },
+    composite: {
+      size: identifierPageSize,
+      sources: [
+        {
+          [identifierField]: {
+            terms: {
+              field: identifierField,
             },
           },
-        ],
-        after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
-      },
-      aggs: {
-        riskiest_inputs: {
-          top_hits: {
-            size: 10,
-            sort: { [ALERT_RISK_SCORE]: 'desc' },
-            _source: false,
-          },
         },
-        risk_details: {
-          scripted_metric: {
-            init_script: 'state.inputs = []',
-            map_script: `
+      ],
+      after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
+    },
+    aggs: {
+      riskiest_inputs: {
+        top_hits: {
+          size: 10,
+          sort: { [ALERT_RISK_SCORE]: 'desc' },
+          _source: false,
+        },
+      },
+      risk_details: {
+        scripted_metric: {
+          init_script: 'state.inputs = []',
+          map_script: `
               Map fields = new HashMap();
               String category = doc['${EVENT_KIND}'].value;
               double score = doc['${ALERT_RISK_SCORE}'].value;
@@ -179,14 +181,13 @@ const buildIdentifierTypeAggregation = ({
 
               state.inputs.add(fields);
             `,
-            combine_script: 'return state;',
-            params: {
-              max_risk_inputs_per_identity: 999999,
-              p: 1.5,
-              risk_cap: 261.2,
-            },
-            reduce_script: buildReduceScript({ globalIdentifierTypeWeight }),
+          combine_script: 'return state;',
+          params: {
+            max_risk_inputs_per_identity: 999999,
+            p: 1.5,
+            risk_cap: 261.2,
           },
+          reduce_script: buildReduceScript({ globalIdentifierTypeWeight }),
         },
       },
     },
@@ -226,18 +227,15 @@ export const calculateRiskScores = async ({
           filter,
         },
       },
-      aggs: identifierTypes.reduce(
-        (aggs, _identifierType) => ({
-          ...aggs,
-          ...buildIdentifierTypeAggregation({
-            afterKeys: userAfterKeys,
-            identifierType: _identifierType,
-            identifierPageSize,
-            weights,
-          }),
-        }),
-        {}
-      ),
+      aggs: identifierTypes.reduce((aggs, _identifierType) => {
+        aggs[_identifierType] = buildIdentifierTypeAggregation({
+          afterKeys: userAfterKeys,
+          identifierType: _identifierType,
+          identifierPageSize,
+          weights,
+        });
+        return aggs;
+      }, {} as Record<string, AggregationsAggregationContainer>),
     };
 
     if (debug) {
