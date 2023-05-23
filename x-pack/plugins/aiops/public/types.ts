@@ -12,24 +12,31 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiopsPluginSetupDeps {}
+export interface AiopsPluginSetupDeps {
+  embeddable: EmbeddableSetup;
+  share: SharePluginSetup;
+  discover: DiscoverSetup;
+}
 
 export interface AiopsPluginStartDeps {
-  data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  uiActions: UiActionsStart;
+  data: DataPublicPluginStart;
+  discover: DiscoverStart;
+  embeddable: EmbeddableStart;
+  executionContext: ExecutionContextStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
-  share: SharePluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  storage: IStorageWrapper;
   licensing: LicensingPluginStart;
-  executionContext: ExecutionContextStart;
+  share: SharePluginStart;
+  storage: IStorageWrapper;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**

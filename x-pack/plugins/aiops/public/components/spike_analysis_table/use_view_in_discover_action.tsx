@@ -24,12 +24,12 @@ const viewInDiscoverMessage = i18n.translate(
   }
 );
 
-export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction => {
+export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction | undefined => {
   const { application, share, data } = useAiopsAppContext();
 
   const discoverLocator = useMemo(
-    () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
-    [share.url.locators]
+    () => share?.url?.locators.get('DISCOVER_APP_LOCATOR'),
+    [share?.url?.locators]
   );
 
   const discoverUrlError = useMemo(() => {

@@ -27,7 +27,11 @@ describe('Document view mode toggle component', () => {
 
     return mountWithIntl(
       <KibanaContextProvider services={serivces}>
-        <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+        <DocumentViewModeToggle
+          viewMode={viewMode}
+          setDiscoverViewMode={setDiscoverViewMode}
+          isTimeBasedDataView={true}
+        />
       </KibanaContextProvider>
     );
   };
