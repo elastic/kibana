@@ -67,10 +67,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await retry.try(async () => {
+          await retry.waitFor('true response', async () => {
             const response = await supertest.get(servicePath);
             expect(response.status).to.be(200);
-            expect(response.body.result).to.be(true);
+            return response.body.result === true;
           });
         });
       });
