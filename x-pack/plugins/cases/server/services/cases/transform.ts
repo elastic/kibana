@@ -10,8 +10,6 @@
 import type {
   SavedObject,
   SavedObjectReference,
-  SavedObjectsBulkResponse,
-  SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
@@ -35,18 +33,6 @@ import {
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
 import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
 import type { ExternalServicePersisted } from '../../common/types/external_service';
-
-export function transformUpdateResponsesToExternalModels(
-  response: SavedObjectsBulkUpdateResponse<CasePersistedAttributes>
-): SavedObjectsBulkUpdateResponse<CaseTransformedAttributes> {
-  return {
-    ...response,
-    saved_objects: response.saved_objects.map((so) => ({
-      ...so,
-      ...transformUpdateResponseToExternalModel(so),
-    })),
-  };
-}
 
 export function transformUpdateResponseToExternalModel(
   updatedCase: SavedObjectsUpdateResponse<CasePersistedAttributes>
@@ -147,29 +133,6 @@ function buildReferenceHandler(
     { id: connectorId, name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
     { id: pushConnectorId, name: PUSH_CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
   ]);
-}
-
-/**
- * Until Kibana uses typescript 4.3 or higher we'll have to keep these functions separate instead of using an overload
- * definition like this:
- *
- * export function transformArrayResponseToExternalModel(
- *  response: SavedObjectsBulkResponse<CasePersistedAttributes> | SavedObjectsFindResponse<CasePersistedAttributes>
- * ): SavedObjectsBulkResponse<CaseTransformedAttributes> | SavedObjectsFindResponse<CaseTransformedAttributes> {
- *
- * See this issue for more details: https://stackoverflow.com/questions/49510832/typescript-how-to-map-over-union-array-type
- */
-
-export function transformBulkResponseToExternalModel(
-  response: SavedObjectsBulkResponse<CasePersistedAttributes>
-): SavedObjectsBulkResponse<CaseTransformedAttributes> {
-  return {
-    ...response,
-    saved_objects: response.saved_objects.map((so) => ({
-      ...so,
-      ...transformSavedObjectToExternalModel(so),
-    })),
-  };
 }
 
 export function transformFindResponseToExternalModel(

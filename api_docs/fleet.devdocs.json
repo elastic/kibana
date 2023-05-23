@@ -11,7 +11,7 @@
         "label": "CustomAssetsAccordion",
         "description": [],
         "signature": [
-          "({ views, initialIsOpen, }: React.PropsWithChildren<",
+          "({ views, initialIsOpen, title, }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -30,7 +30,7 @@
             "id": "def-public.CustomAssetsAccordion.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  views,\n  initialIsOpen = false,\n}",
+            "label": "{\n  views,\n  initialIsOpen = false,\n  title,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -475,6 +475,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CustomAssetsAccordionProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx",
             "deprecated": false,
@@ -5527,6 +5541,468 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-server.FleetFile",
+        "type": "Interface",
+        "tags": [],
+        "label": "FleetFile",
+        "description": [],
+        "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.actionId",
+            "type": "string",
+            "tags": [],
+            "label": "actionId",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.agents",
+            "type": "Array",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.mimeType",
+            "type": "string",
+            "tags": [],
+            "label": "mimeType",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.sha256",
+            "type": "string",
+            "tags": [],
+            "label": "sha256",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFile.created",
+            "type": "string",
+            "tags": [],
+            "label": "created",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.FleetFileClientInterface",
+        "type": "Interface",
+        "tags": [],
+        "label": "FleetFileClientInterface",
+        "description": [],
+        "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFileClientInterface.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "Creates a new file. Only applicable when type of file is `to-host`."
+            ],
+            "signature": [
+              "(fileStream: ",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.HapiReadableStream",
+                "text": "HapiReadableStream"
+              },
+              ", agentIds: string[]) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.FleetFile",
+                "text": "FleetFile"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.FleetFileClientInterface.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fileStream",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "server",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-server.HapiReadableStream",
+                    "text": "HapiReadableStream"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.FleetFileClientInterface.create.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "agentIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFileClientInterface.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "Deletes a file. Only applicable when type of file is `to-host`."
+            ],
+            "signature": [
+              "(fileId: string) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.FleetFileClientInterface.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fileId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFileClientInterface.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "Updates metadata for the file. Only applicable when type of file is `to-host`."
+            ],
+            "signature": [
+              "(fileId: string, updates: Partial<",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.FleetFileUpdatableFields",
+                "text": "FleetFileUpdatableFields"
+              },
+              ">) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.FleetFile",
+                "text": "FleetFile"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.FleetFileClientInterface.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fileId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.FleetFileClientInterface.update.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "updates",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "server",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-server.FleetFileUpdatableFields",
+                    "text": "FleetFileUpdatableFields"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFileClientInterface.doesFileHaveData",
+            "type": "Function",
+            "tags": [],
+            "label": "doesFileHaveData",
+            "description": [
+              "Checks if a file has chunks"
+            ],
+            "signature": [
+              "(fileId: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.FleetFileClientInterface.doesFileHaveData.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fileId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFileClientInterface.download",
+            "type": "Function",
+            "tags": [],
+            "label": "download",
+            "description": [
+              "Returns a Stream for downloading the file"
+            ],
+            "signature": [
+              "(fileId: string) => Promise<{ stream: ",
+              "Readable",
+              "; fileName: string; mimeType?: string | undefined; }>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.FleetFileClientInterface.download.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fileId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFileClientInterface.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "Returns meta info about the file"
+            ],
+            "signature": [
+              "(fileId: string) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.FleetFile",
+                "text": "FleetFile"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.FleetFileClientInterface.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fileId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.FleetFileUpdatableFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "FleetFileUpdatableFields",
+        "description": [],
+        "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFileUpdatableFields.agents",
+            "type": "Array",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetFileUpdatableFields.actionId",
+            "type": "string",
+            "tags": [],
+            "label": "actionId",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-server.FleetSetupDeps",
         "type": "Interface",
         "tags": [],
@@ -5698,6 +6174,47 @@
               }
             ],
             "path": "x-pack/plugins/fleet/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.HapiReadableStream",
+        "type": "Interface",
+        "tags": [],
+        "label": "HapiReadableStream",
+        "description": [
+          "\nReadable returned by Hapi when `stream` is used to define a property and/or route payload"
+        ],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "server",
+            "docId": "kibFleetPluginApi",
+            "section": "def-server.HapiReadableStream",
+            "text": "HapiReadableStream"
+          },
+          " extends ",
+          "Readable"
+        ],
+        "path": "x-pack/plugins/fleet/server/services/files/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.HapiReadableStream.hapi",
+            "type": "Object",
+            "tags": [],
+            "label": "hapi",
+            "description": [],
+            "signature": [
+              "{ filename: string; headers: Record<string, string>; }"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/files/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9172,6 +9689,23 @@
           "any"
         ],
         "path": "x-pack/plugins/fleet/server/config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.FleetFileTransferDirection",
+        "type": "Type",
+        "tags": [],
+        "label": "FleetFileTransferDirection",
+        "description": [
+          "\nThe type of file.\nUse `from-host` when interacting with files that were sent to ES from the\nhost (via Fleet-Server)\nUse `to-host` when interacting with files that are being sent to the host\n(via fleet-server)"
+        ],
+        "signature": [
+          "\"from-host\" | \"to-host\""
+        ],
+        "path": "x-pack/plugins/fleet/server/services/files/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16181,6 +16715,91 @@
         },
         {
           "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.createFilesClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createFilesClient",
+          "description": [
+            "\nCreate a Fleet Files client instance"
+          ],
+          "signature": [
+            "(packageName: string, type: ",
+            {
+              "pluginId": "fleet",
+              "scope": "server",
+              "docId": "kibFleetPluginApi",
+              "section": "def-server.FleetFileTransferDirection",
+              "text": "FleetFileTransferDirection"
+            },
+            ", maxSizeBytes?: number | undefined) => ",
+            {
+              "pluginId": "fleet",
+              "scope": "server",
+              "docId": "kibFleetPluginApi",
+              "section": "def-server.FleetFileClientInterface",
+              "text": "FleetFileClientInterface"
+            }
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "fleet",
+              "id": "def-server.FleetStartContract.createFilesClient.$1",
+              "type": "string",
+              "tags": [],
+              "label": "packageName",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/fleet/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "fleet",
+              "id": "def-server.FleetStartContract.createFilesClient.$2",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "fleet",
+                  "scope": "server",
+                  "docId": "kibFleetPluginApi",
+                  "section": "def-server.FleetFileTransferDirection",
+                  "text": "FleetFileTransferDirection"
+                }
+              ],
+              "path": "x-pack/plugins/fleet/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "fleet",
+              "id": "def-server.FleetStartContract.createFilesClient.$3",
+              "type": "number",
+              "tags": [],
+              "label": "maxSizeBytes",
+              "description": [],
+              "signature": [
+                "number | undefined"
+              ],
+              "path": "x-pack/plugins/fleet/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "fleet",
           "id": "def-server.FleetStartContract.messageSigningService",
           "type": "Object",
           "tags": [],
@@ -19992,6 +20611,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewOutput.allow_edit",
+            "type": "Array",
+            "tags": [],
+            "label": "allow_edit",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -22901,6 +23534,51 @@
         "description": [],
         "signature": [
           "\"apm\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_DEFEND_PACKAGE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_DEFEND_PACKAGE",
+        "description": [],
+        "signature": [
+          "\"cloud_defend\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"vuln_mgmt\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"cspm\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,

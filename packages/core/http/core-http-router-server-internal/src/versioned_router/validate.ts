@@ -18,8 +18,8 @@ export function validate(
 ): { body: unknown; params: unknown; query: unknown } {
   const validator = RouteValidator.from(runtimeSchema);
   return {
-    body: validator.getBody(data.body, `get ${version} body`),
-    params: validator.getParams(data.params, `get ${version} params`),
-    query: validator.getQuery(data.query, `get ${version} query`),
+    params: validator.getParams(data.params, 'request params'),
+    query: validator.getQuery(data.query, 'request query'),
+    body: validator.getBody(data.body, 'request body'),
   };
 }
