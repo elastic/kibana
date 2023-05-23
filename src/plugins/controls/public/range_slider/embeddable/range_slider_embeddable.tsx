@@ -172,6 +172,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       dataFetchPipe.subscribe(async () =>
         this.runRangeSliderQuery().catch((e) => {
           this.dispatch.setErrorMessage(e.message);
+          this.renderComplete.dispatchError();
         })
       )
     );
@@ -210,6 +211,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         this.dispatch.setDataViewId(this.dataView.id);
       } catch (e) {
         this.dispatch.setErrorMessage(e.message);
+        this.renderComplete.dispatchError();
       }
     }
 
@@ -228,6 +230,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         this.dispatch.setField(this.field?.toSpec());
       } catch (e) {
         this.dispatch.setErrorMessage(e.message);
+        this.renderComplete.dispatchError();
       }
     }
 
@@ -236,6 +239,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
   private runRangeSliderQuery = async () => {
     this.dispatch.setLoading(true);
+    this.renderComplete.dispatchInProgress();
+
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
@@ -375,6 +380,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         this.dispatch.publishFilters([]);
         this.dispatch.setErrorMessage(undefined);
       });
+      this.renderComplete.dispatchComplete();
       return;
     }
 
@@ -431,6 +437,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
           this.dispatch.publishFilters([]);
           this.dispatch.setErrorMessage(undefined);
         });
+        this.renderComplete.dispatchComplete();
         return;
       }
     }
@@ -442,11 +449,13 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.dispatch.publishFilters([rangeFilter]);
       this.dispatch.setErrorMessage(undefined);
     });
+    this.renderComplete.dispatchComplete();
   };
 
   public reload = () => {
     this.runRangeSliderQuery().catch((e) => {
       this.dispatch.setErrorMessage(e.message);
+      this.renderComplete.dispatchError();
     });
   };
 
@@ -461,6 +470,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
+    super.render(node);
     const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>

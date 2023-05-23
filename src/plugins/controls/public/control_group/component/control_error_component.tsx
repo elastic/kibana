@@ -25,6 +25,7 @@ export const ControlError = ({ error }: ControlErrorProps) => {
       color="danger"
       iconSize="m"
       iconType="error"
+      data-test-subj="control-frame-error"
       onClick={() => setPopoverOpen((open) => !open)}
       className={'errorEmbeddableCompact__button'}
       textProps={{ className: 'errorEmbeddableCompact__text' }}

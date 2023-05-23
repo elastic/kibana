@@ -248,6 +248,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           );
       } catch (e) {
         this.dispatch.setErrorMessage(e.message);
+        this.renderComplete.dispatchError();
       }
 
       this.dispatch.setDataViewId(this.dataView?.id);
@@ -268,6 +269,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         this.field = originalField.toSpec();
       } catch (e) {
         this.dispatch.setErrorMessage(e.message);
+        this.renderComplete.dispatchError();
       }
       this.dispatch.setField(this.field);
     }
@@ -289,6 +291,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
     } = this.getState();
     this.dispatch.setLoading(true);
+    this.renderComplete.dispatchInProgress();
     if (searchString.valid) {
       // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
       const {
@@ -332,6 +335,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           return;
         }
         this.dispatch.setErrorMessage(response.error.message);
+        this.renderComplete.dispatchError();
         return;
       }
 
@@ -369,6 +373,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         this.dispatch.setLoading(false);
         this.dispatch.publishFilters(newFilters);
       });
+      this.renderComplete.dispatchComplete();
     } else {
       batch(() => {
         this.dispatch.setErrorMessage(undefined);
@@ -377,6 +382,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         });
         this.dispatch.setLoading(false);
       });
+      this.renderComplete.dispatchComplete();
     }
   };
 
@@ -427,6 +433,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
+
+    super.render(node);
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <OptionsListEmbeddableContext.Provider value={this}>
