@@ -1360,7 +1360,6 @@
     "cypress-axe": "^1.4.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.3",
-    "cypress-pipe": "^2.0.0",
     "cypress-react-selector": "^3.0.0",
     "cypress-real-events": "^1.8.1",
     "cypress-recurse": "^1.35.1",

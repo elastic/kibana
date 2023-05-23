@@ -55,7 +55,8 @@ export const closeFieldsBrowser = () => {
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT).clear().type(fieldName);
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).clear();
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName);
 
   cy.waitUntil(() =>
     cy
@@ -70,7 +71,8 @@ export const toggleCategoryFilter = () => {
 
 export const toggleCategory = (category: string) => {
   toggleCategoryFilter();
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear().type(category);
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear();
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear();
   cy.get(FIELDS_BROWSER_CATEGORY_FILTER_OPTION(category)).click({ force: true });
   toggleCategoryFilter();
 };

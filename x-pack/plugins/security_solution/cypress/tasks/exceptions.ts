@@ -118,13 +118,14 @@ export const addExceptionFlyoutItemName = (name: string) => {
   cy.get(EXCEPTION_ITEM_NAME_INPUT).scrollIntoView();
   cy.get(EXCEPTION_ITEM_NAME_INPUT).should('be.visible');
   cy.get(EXCEPTION_ITEM_NAME_INPUT).first().focus();
-  cy.get(EXCEPTION_ITEM_NAME_INPUT)
-    .type(`${name}{enter}`, { force: true })
-    .should('have.value', name);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`, { force: true });
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
 };
 
 export const editExceptionFlyoutItemName = (name: string) => {
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).clear().type(`${name}{enter}`).should('have.value', name);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).clear();
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
 };
 
 export const selectBulkCloseAlerts = () => {

@@ -42,14 +42,12 @@ export const openLensVisualizationsInspectModal = (
   cy.get(panelSelector)
     .get(`[data-test-embeddable-id="${embeddableId}"]`)
     .each(($el) => {
-      const container = cy.wrap($el);
-
       // wait for visualization to load
       if ($el.find(LOADER_ARIA).length > 0) {
         cy.get(LOADER_ARIA).should('not.exist');
       }
 
-      container.find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
+      cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
       cy.get(EMBEDDABLE_PANEL_INSPECT).click();
 
       onOpen();

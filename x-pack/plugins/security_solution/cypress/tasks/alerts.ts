@@ -116,30 +116,11 @@ export const closeAlerts = () => {
 export const expandFirstAlertActions = () => {
   waitForAlerts();
 
-  let count = 0;
-
-  const click = ($el: JQuery<HTMLElement>) => {
-    count++;
-    return $el.trigger('click');
-  };
-
-  /*
-   *
-   * Sometimes it takes some time for UI to attach event listener to
-   * TIMELINE_CONTEXT_MENU_BTN and cypress is too fast to click.
-   * Becuase of this popover does not open when click.
-   * pipe().should() makes sure that pipe function is repeated until should becomes true
-   *
-   * */
-
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible').click();
   cy.get(TIMELINE_CONTEXT_MENU_BTN)
     .first()
     .should('be.visible')
-    .pipe(click)
-    .should('have.attr', 'data-popover-open', 'true')
-    .then(() => {
-      cy.log(`Clicked ${count} times`);
-    });
+    .should('have.attr', 'data-popover-open', 'true');
 };
 
 export const expandFirstAlert = () => {

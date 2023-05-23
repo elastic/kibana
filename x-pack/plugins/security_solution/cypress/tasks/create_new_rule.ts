@@ -440,13 +440,6 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
   const thresholdField = 0;
   const threshold = 1;
 
-  const typeThresholdField = ($el: Cypress.ObjectLike) =>
-    cy
-      .wrap($el)
-      .type(isArray(rule.threshold.field) ? rule.threshold.field[0] : rule.threshold.field, {
-        delay: 35,
-      });
-
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .type(rule.query || '');
@@ -454,7 +447,12 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
     .find(INPUT)
     .then((inputs) => {
       cy.wrap(inputs[thresholdField]).click();
-      cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
+      cy.wrap(inputs[thresholdField]).type(
+        isArray(rule.threshold.field) ? rule.threshold.field[0] : rule.threshold.field,
+        {
+          delay: 35,
+        }
+      );
       cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
       cy.wrap(inputs[threshold]).clear();
       cy.wrap(inputs[threshold]).type(`${rule.threshold.value}`);
