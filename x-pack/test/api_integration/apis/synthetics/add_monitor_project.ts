@@ -78,12 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
-      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.12.0')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await testPrivateLocations.installSyntheticsPackage();
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -1446,6 +1441,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1514,6 +1510,7 @@ export default function ({ getService }: FtrProviderContext) {
             configId,
             projectId: project,
             locationName: 'Test private location 0',
+            locationId: testPolicyId,
           })
         );
       } finally {
@@ -1636,6 +1633,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1717,6 +1715,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1754,6 +1753,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: id2,
             configId: configId2,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
