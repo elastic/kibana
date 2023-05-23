@@ -68,7 +68,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
             iconType="lock"
           >
             <FormattedMessage
-              id="xpack.securitySolution.markdown.premiumPlugin"
+              id="xpack.securitySolution.markdown.premiumPluginLinkPrefix"
               defaultMessage="To use these interactive markdown features, you must {link}."
               values={{
                 link: (
@@ -78,7 +78,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
                     })}
                   >
                     <FormattedMessage
-                      id="xpack.securitySolution.markdown.premiumPlugin"
+                      id="xpack.securitySolution.markdown.premiumPluginLinkSuffix"
                       defaultMessage="start a trial or upgrade your subscription"
                     />
                   </EuiLink>
