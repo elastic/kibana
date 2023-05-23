@@ -7,7 +7,7 @@
  */
 
 import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 
 export interface InternalNavigationNode
   extends Omit<ChromeProjectNavigationNode, 'id' | 'link' | 'children'> {
@@ -16,6 +16,7 @@ export interface InternalNavigationNode
   path: string[];
   deepLink?: ChromeNavLink;
   children?: InternalNavigationNode[];
+  itemRender?: () => React.ReactElement;
 }
 
 export type UnRegisterFunction = (id: string) => void;

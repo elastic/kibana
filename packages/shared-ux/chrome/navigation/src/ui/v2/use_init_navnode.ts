@@ -53,7 +53,7 @@ function createInternalNavNode(
   return {
     ...navNode,
     id,
-    path: path ?? [],
+    path: path ?? [id],
     title: title ?? '',
     deepLink,
   };

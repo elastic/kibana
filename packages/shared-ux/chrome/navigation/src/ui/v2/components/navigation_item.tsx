@@ -6,20 +6,32 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { NodeProps } from '../types';
 import { useInitNavnode } from '../use_init_navnode';
 
-function NavigationItemComp(node: NodeProps) {
-  const { children } = node;
+interface Props extends NodeProps {
+  element?: string;
+  unstyled?: boolean;
+  itemRender?: () => React.ReactNode;
+}
+
+function NavigationItemComp(props: Props) {
+  const { element, unstyled = false, children, ...node } = props;
   const { navNode } = useInitNavnode(node);
 
-  if (!navNode || !children) {
+  if (!navNode || !unstyled) {
     return null;
   }
 
-  return <>{children}</>;
+  if (children) {
+    return <>{children}</>;
+  }
+
+  const Element = element || Fragment;
+
+  return <Element>{navNode.title}</Element>;
 }
 
 export const NavigationItem = React.memo(NavigationItemComp);

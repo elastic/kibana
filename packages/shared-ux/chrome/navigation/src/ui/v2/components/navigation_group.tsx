@@ -55,6 +55,7 @@ const navigationNodeToEuiItem = (
           }
         : undefined,
     href,
+    renderItem: item.itemRender,
     items: item.children?.map((_item) =>
       navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
     ),
@@ -95,11 +96,12 @@ const TopLevel: FC<TopLevelProps> = ({ navNode, items = [], defaultIsCollapsed =
 };
 
 interface Props extends NodeProps {
+  unstyled?: boolean;
   defaultIsCollapsed?: boolean;
 }
 
 function NavigationGroupComp(props: Props) {
-  const { children, defaultIsCollapsed, ...node } = props;
+  const { children, defaultIsCollapsed, unstyled = false, ...node } = props;
   const { navNode, registerChildNode, path, childrenNodes } = useInitNavnode(node);
 
   const renderContent = useCallback(() => {
@@ -110,7 +112,7 @@ function NavigationGroupComp(props: Props) {
 
     return (
       <>
-        {isTopLevel && (
+        {isTopLevel && !unstyled && (
           <TopLevel
             navNode={navNode}
             items={Object.values(childrenNodes)}
@@ -120,7 +122,7 @@ function NavigationGroupComp(props: Props) {
         {children}
       </>
     );
-  }, [navNode, path, childrenNodes, children, defaultIsCollapsed]);
+  }, [navNode, path, childrenNodes, children, defaultIsCollapsed, unstyled]);
 
   const contextValue = useMemo(() => {
     return {

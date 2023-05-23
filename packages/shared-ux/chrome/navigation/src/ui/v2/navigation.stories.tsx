@@ -12,7 +12,13 @@ import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import { EuiButtonIcon, EuiCollapsibleNav, EuiThemeProvider } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCollapsibleNav,
+  EuiLink,
+  EuiThemeProvider,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { NavigationStorybookMock } from '../../../mocks';
 import mdx from '../../../README.mdx';
@@ -249,6 +255,29 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
 
           <Navigation.RecentlyAccessed />
 
+          <Navigation.Group id="myCustomGroup" unstyled>
+            <div css={{ backgroundColor: 'yellow', padding: '16px' }}>
+              <EuiTitle size="m">
+                <h3>I am unstyled</h3>
+              </EuiTitle>
+              <ul>
+                <Navigation.Item id="item1" element="li" title="But this item" unstyled />
+                <Navigation.Item id="item2" element="li" title="...and this item" unstyled />
+                <Navigation.Item id="item3" title="...are all registered" unstyled>
+                  <li>
+                    <EuiLink>...are all registered</EuiLink>
+                  </li>
+                </Navigation.Item>
+                <Navigation.Item
+                  id="item4"
+                  element="li"
+                  title="...in the chrome service"
+                  unstyled
+                />
+              </ul>
+            </div>
+          </Navigation.Group>
+
           <Navigation.Group
             id="example_projet"
             title="Example project"
@@ -258,7 +287,13 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
             <Navigation.Group id="root">
               <Navigation.Item id="item1" title="Get started" />
               <Navigation.Item id="item2" title="Alerts" />
-              <Navigation.Item id="item3" title="Cases" />
+              <Navigation.Item
+                id="seb"
+                title="I am so cool"
+                itemRender={() => (
+                  <span style={{ color: 'blue', fontStyle: 'italic' }}>I am so cool </span>
+                )}
+              />
             </Navigation.Group>
 
             <Navigation.Group id="settigns" title="Settings">
@@ -268,7 +303,7 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
             </Navigation.Group>
           </Navigation.Group>
 
-          <Navigation.Bucket preset="analytics" />
+          <Navigation.Bucket preset="analytics" defaultIsCollapsed={false} />
           <Navigation.Bucket preset="ml" />
 
           <Navigation.Footer>

@@ -27,29 +27,40 @@ interface Props {
 }
 
 export const NavigationBucket: FC<Props> = ({ navNode: _navNode, defaultIsCollapsed, preset }) => {
-  const renderItems = useCallback((items: ChromeProjectNavigationNode[]) => {
-    return items.map((item) => {
-      const id = item.id ?? item.link;
+  const renderItems = useCallback(
+    (items: ChromeProjectNavigationNode[], isRoot = false) => {
+      return items.map((item) => {
+        const id = item.id ?? item.link;
 
-      if (!id) {
-        throw new Error(
-          `At least one of id or link must be defined for navigation item ${item.title}`
+        if (!id) {
+          throw new Error(
+            `At least one of id or link must be defined for navigation item ${item.title}`
+          );
+        }
+
+        return (
+          <React.Fragment key={id}>
+            {item.children ? (
+              <Navigation.Group
+                id={item.id}
+                link={item.link}
+                title={item.title}
+                icon={item.icon}
+                defaultIsCollapsed={
+                  isRoot && defaultIsCollapsed !== undefined ? defaultIsCollapsed : undefined
+                }
+              >
+                {renderItems(item.children)}
+              </Navigation.Group>
+            ) : (
+              <Navigation.Item id={item.id} link={item.link} title={item.title} />
+            )}
+          </React.Fragment>
         );
-      }
-
-      return (
-        <React.Fragment key={id}>
-          {item.children ? (
-            <Navigation.Group id={item.id} link={item.link} title={item.title} icon={item.icon}>
-              {renderItems(item.children)}
-            </Navigation.Group>
-          ) : (
-            <Navigation.Item id={item.id} link={item.link} title={item.title} />
-          )}
-        </React.Fragment>
-      );
-    });
-  }, []);
+      });
+    },
+    [defaultIsCollapsed]
+  );
 
   const navNode = preset ? navTreePresets[preset] : _navNode;
 
@@ -57,5 +68,5 @@ export const NavigationBucket: FC<Props> = ({ navNode: _navNode, defaultIsCollap
     throw new Error('Either preset or navNode must be defined');
   }
 
-  return <>{renderItems([navNode])}</>;
+  return <>{renderItems([navNode], true)}</>;
 };
