@@ -30,5 +30,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./explain_log_rate_spikes'));
+    loadTestFile(require.resolve('./change_point_detection'));
   });
 }
