@@ -724,9 +724,9 @@ export const getXyVisualization = ({
         {...props}
         eventAnnotationService={eventAnnotationService}
         onAddLayerFromAnnotationGroup={async (loadedGroupInfo) => {
-          if (loadedGroupInfo.dataViewSpec) {
-            await props.addIndexPatternFromDataViewSpec(loadedGroupInfo.dataViewSpec);
-          }
+          await props.ensureIndexPattern(
+            loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
+          );
           props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
         }}
       />

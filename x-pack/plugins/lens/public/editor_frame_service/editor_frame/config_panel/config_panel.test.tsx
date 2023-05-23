@@ -120,13 +120,15 @@ describe('ConfigPanel', () => {
         ...visualizationMap.testVis,
         getLayerIds: () => Object.keys(frame.datasourceLayers),
         getAddLayerButtonComponent: (props) => {
+          // TODO this is currently a copy of the XY add layer menu.
+          // this test should just use some generic component to exercise the flows
           return (
             <AddLayerButton
               {...props}
               eventAnnotationService={{} as EventAnnotationServiceType}
               onAddLayerFromAnnotationGroup={async (loadedGroupInfo) => {
                 if (loadedGroupInfo.dataViewSpec) {
-                  await props.addIndexPatternFromDataViewSpec(loadedGroupInfo.dataViewSpec);
+                  await props.ensureIndexPattern(loadedGroupInfo.dataViewSpec);
                 }
                 props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
               }}

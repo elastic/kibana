@@ -315,20 +315,25 @@ export function LayerPanels(
         );
       })}
       {!hideAddLayerButton &&
-        activeVisualization.getAddLayerButtonComponent &&
-        activeVisualization.getAddLayerButtonComponent({
+        activeVisualization?.getAddLayerButtonComponent?.({
           visualization: activeVisualization,
           visualizationState: visualization.state,
           layersMeta: props.framePublicAPI,
           addLayer,
-          addIndexPatternFromDataViewSpec: async (spec: DataViewSpec) => {
-            const dataView = await props.dataViews.create(spec);
+          ensureIndexPattern: async (specOrId: DataViewSpec | string) => {
+            let indexPatternId;
 
-            if (!dataView.id) {
-              return;
+            if (typeof specOrId === 'string') {
+              indexPatternId = specOrId;
+            } else {
+              const dataView = await props.dataViews.create(specOrId);
+
+              if (!dataView.id) {
+                return;
+              }
+
+              indexPatternId = dataView.id;
             }
-
-            const indexPatternId = dataView.id;
 
             const newIndexPatterns = await indexPatternService.ensureIndexPattern({
               id: indexPatternId,
