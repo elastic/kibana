@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   FONTS_API_PATH,
   MVT_GETTILE_API_PATH,
@@ -21,7 +22,7 @@ export function transformRequest(url: string, resourceType: string) {
     return {
       url,
       method: 'GET',
-      headers: { 'elastic-api-version': '1' },
+      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     }
   }
 
@@ -29,7 +30,7 @@ export function transformRequest(url: string, resourceType: string) {
     return {
       url,
       method: 'GET',
-      headers: { 'elastic-api-version': '1' },
+      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     }
   }
 
@@ -37,7 +38,7 @@ export function transformRequest(url: string, resourceType: string) {
     return {
       url,
       method: 'GET',
-      headers: { 'elastic-api-version': '1' },
+      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     }
   }
 }
