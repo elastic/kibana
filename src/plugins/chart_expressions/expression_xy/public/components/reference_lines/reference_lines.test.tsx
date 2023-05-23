@@ -96,6 +96,7 @@ describe('ReferenceLines', () => {
 
     beforeEach(() => {
       defaultProps = {
+        formatters: {},
         xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
@@ -161,6 +162,54 @@ describe('ReferenceLines', () => {
           </Chart>
         )
       ).not.toThrow();
+    });
+
+    it('should prefer column formatter over x axis default one', () => {
+      const convertLeft = jest.fn((x) => `left-${x}`);
+      const convertRight = jest.fn((x) => `right-${x}`);
+      const wrapper = shallow(
+        <ReferenceLines
+          {...defaultProps}
+          formatters={{
+            yAccessorLeftFirstId: { convert: convertLeft } as unknown as FieldFormat,
+            yAccessorRightFirstId: { convert: convertRight } as unknown as FieldFormat,
+          }}
+          layers={createLayers([
+            {
+              forAccessor: `yAccessorLeftFirstId`,
+              position: getAxisFromId('yAccessorLeft'),
+              lineStyle: 'solid',
+              fill: undefined,
+              type: 'referenceLineDecorationConfig',
+            },
+            {
+              forAccessor: `yAccessorRightFirstId`,
+              position: getAxisFromId('yAccessorRight'),
+              lineStyle: 'solid',
+              fill: 'above',
+              type: 'referenceLineDecorationConfig',
+            },
+          ])}
+        />
+      );
+      const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();
+      const annotations = referenceLineLayer.find(ReferenceLineAnnotations);
+      expect(annotations.first().dive().find(LineAnnotation).prop('dataValues')).toEqual(
+        expect.arrayContaining([{ dataValue: 5, details: `left-5`, header: undefined }])
+      );
+      expect(annotations.last().dive().find(RectAnnotation).prop('dataValues')).toEqual(
+        expect.arrayContaining([
+          {
+            coordinates: { x0: undefined, x1: undefined, y0: 5, y1: undefined },
+            details: `right-5`,
+            header: undefined,
+          },
+        ])
+      );
+
+      expect(convertLeft).toHaveBeenCalled();
+      expect(convertRight).toHaveBeenCalled();
+      expect(defaultProps.xAxisFormatter.convert).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -482,6 +531,7 @@ describe('ReferenceLines', () => {
 
     beforeEach(() => {
       defaultProps = {
+        formatters: {},
         xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
