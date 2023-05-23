@@ -7,12 +7,13 @@
  */
 
 import { ChromeNavLink } from '@kbn/core-chrome-browser';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { InternalNavigationNode, NodeProps, RegisterFunction, UnRegisterFunction } from './types';
 import { useRegisterTreeNode } from './use_register_tree_node';
+import { flattenObject } from './utils';
 
 function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {
   const id = _id ?? link;
@@ -24,40 +25,7 @@ function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {
   return id;
 }
 
-function createInternalNavNode(
-  id: string,
-  _navNode: NodeProps,
-  deepLinks: Readonly<ChromeNavLink[]>
-): InternalNavigationNode | null {
-  const { children, onRemove, link, ...navNode } = _navNode;
-  const deepLink = deepLinks.find((dl) => dl.id === link);
-  const isLinkActive = isNodeActive({ link, deepLink });
-
-  const titleFromDeepLinkOrChildren = typeof children === 'string' ? children : deepLink?.title;
-  let title = navNode.title ?? titleFromDeepLinkOrChildren;
-
-  if (!title || title.trim().length === 0) {
-    if (isLinkActive) {
-      throw new Error(`Title prop missing for navigation item [${id}]`);
-    } else {
-      // No title provided but the node is disabled, so we can safely set it to an empty string
-      title = '';
-    }
-  }
-
-  if (!isLinkActive) {
-    return null;
-  }
-
-  return {
-    ...navNode,
-    id,
-    title,
-    deepLink,
-  };
-}
-
-function isNodeActive({ link, deepLink }: { link?: string; deepLink?: ChromeNavLink }) {
+function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNavLink }) {
   if (link && !deepLink) {
     // If a link is provided, but no deepLink is found, don't render anything
     return false;
@@ -65,11 +33,36 @@ function isNodeActive({ link, deepLink }: { link?: string; deepLink?: ChromeNavL
   return true;
 }
 
+function createInternalNavNode(
+  id: string,
+  _navNode: NodeProps,
+  deepLinks: Readonly<ChromeNavLink[]>
+): InternalNavigationNode | null {
+  const { children, link, ...navNode } = _navNode;
+  const deepLink = deepLinks.find((dl) => dl.id === link);
+  const isVisible = isNodeVisible({ link, deepLink });
+
+  const titleFromDeepLinkOrChildren = typeof children === 'string' ? children : deepLink?.title;
+  const title = navNode.title ?? titleFromDeepLinkOrChildren;
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return {
+    ...navNode,
+    id,
+    title: title ?? '',
+    deepLink,
+  };
+}
+
 export const useInitNavnode = (node: NodeProps) => {
   /**
    * Map of children nodes
    */
-  const childrenNodes = useRef<Record<string, InternalNavigationNode>>({});
+  const [childrenNodes, setChildrenNodes] = useState<Record<string, InternalNavigationNode>>({});
+
   /**
    * Flag to indicate if the current node has been registered
    */
@@ -93,7 +86,21 @@ export const useInitNavnode = (node: NodeProps) => {
    * The current node path, including all of its parents. We'll use it to match it against
    * the list of active routes based on current URL location (passed by the Chrome service)
    */
-  const nodePath = useRef<string[]>([]);
+  const [nodePath, setNodePath] = useState<string[] | null>(null);
+
+  const nodePathToString = nodePath ? nodePath.join('.') : null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableNodePath = useMemo(() => nodePath, [nodePathToString]);
+
+  // We need a way to detect when children nodes have changed to re-register the group
+  // on the parent. We keep a unique string id of all the children ids in a ref
+  // so we can detect when this change happens.
+  // Without this mechanism, we would enter an infinite loop of re-registering the group.
+  const childrenNodeIds = useMemo(
+    () => Object.keys(flattenObject(childrenNodes)).sort().join('.'),
+    [childrenNodes]
+  );
+  const childrenIdsRef = useRef(childrenNodeIds);
 
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
@@ -107,8 +114,12 @@ export const useInitNavnode = (node: NodeProps) => {
   );
 
   const register = useCallback(() => {
-    if (internalNavNode) {
-      const children = Object.values(childrenNodes.current).sort((a, b) => {
+    const childrenChanged = childrenIdsRef.current !== childrenNodeIds;
+
+    if (internalNavNode && (!isRegistered.current || childrenChanged)) {
+      childrenIdsRef.current = childrenNodeIds;
+
+      const children = Object.values(childrenNodes).sort((a, b) => {
         const aOrder = orderChildrenRef.current[a.id];
         const bOrder = orderChildrenRef.current[b.id];
         return aOrder - bOrder;
@@ -119,63 +130,67 @@ export const useInitNavnode = (node: NodeProps) => {
         children: children.length ? children : undefined,
       });
 
-      nodePath.current = [...path, internalNavNode.id];
+      setNodePath([...path, internalNavNode.id]);
+
       unregisterRef.current = unregister;
       isRegistered.current = true;
     }
-  }, [internalNavNode, registerNodeOnParent]);
+  }, [internalNavNode, registerNodeOnParent, childrenNodes, childrenNodeIds]);
+
+  const unregisterChildNode: UnRegisterFunction = useCallback((childId: string) => {
+    setChildrenNodes((prev) => {
+      const updatedItems = { ...prev };
+      delete updatedItems[childId];
+      return updatedItems;
+    });
+  }, []);
 
   const registerChildNode = useCallback<RegisterFunction>(
     (childNode) => {
-      childrenNodes.current[childNode.id] = childNode;
+      setChildrenNodes((prev) => {
+        return {
+          ...prev,
+          [childNode.id]: childNode,
+        };
+      });
+
       orderChildrenRef.current[childNode.id] = idx.current++;
 
-      if (isRegistered.current) {
-        register();
-      }
-
-      const unregisterFn = () => {
-        // Remove the child from this children map
-        const updatedItems = { ...childrenNodes.current };
-        delete updatedItems[childNode.id];
-        childrenNodes.current = updatedItems;
-
-        if (isRegistered.current) {
-          // Update the parent tree
-          register();
-        }
-      };
-
       return {
-        unregister: unregisterFn,
-        path: [...nodePath.current],
+        unregister: unregisterChildNode,
+        path: stableNodePath ? [...stableNodePath] : [],
       };
     },
-    [register]
+    [stableNodePath, unregisterChildNode]
   );
 
   const unregister = useCallback(() => {
     isRegistered.current = false;
     if (unregisterRef.current) {
-      unregisterRef.current();
+      unregisterRef.current(id);
+      unregisterRef.current = undefined;
     }
-  }, []);
+  }, [id]);
 
+  /** Register when mounting and whenever the internal nav node changes */
   useEffect(() => {
     if (internalNavNode) {
       register();
     } else {
       unregister();
     }
-  }, [internalNavNode, unregister, register]);
+  }, [unregister, register, internalNavNode]);
 
+  /** Unregister when unmounting */
   useEffect(() => unregister, [unregister]);
 
   return useMemo(
     () => ({
       navNode: internalNavNode,
+      path: stableNodePath,
       registerChildNode,
+      childrenNodes,
     }),
-    [internalNavNode, registerChildNode]
+    [internalNavNode, registerChildNode, stableNodePath, childrenNodes]
   );
 };

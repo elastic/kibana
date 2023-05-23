@@ -6,11 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useCallback, useMemo, useContext } from 'react';
+import React, { createContext, useCallback, useMemo, useContext, FC } from 'react';
 
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiCollapsibleNavGroup,
+  EuiIcon,
+  EuiSideNav,
+  EuiSideNavItemType,
+  EuiText,
+} from '@elastic/eui';
+import type { BasePathService, NavigateToUrlFn } from '../../../../types/internal';
 import { useInitNavnode } from '../use_init_navnode';
-import { NodeProps, RegisterFunction } from '../types';
+import { navigationStyles as styles } from '../../../styles';
+import { useNavigation as useServices } from '../../../services';
+import { InternalNavigationNode, NodeProps, RegisterFunction } from '../types';
 
 export const NavigationGroupContext = createContext<Context | undefined>(undefined);
 
@@ -28,45 +37,93 @@ export function useNavigationGroup<T extends boolean = true>(
   return context as T extends true ? Context : Context | undefined;
 }
 
-function NavigationGroupComp(node: NodeProps) {
-  const { children, onRemove } = node;
-  const { navNode, registerChildNode } = useInitNavnode(node);
-  const { title, deepLink } = navNode ?? {};
+const navigationNodeToEuiItem = (
+  item: InternalNavigationNode,
+  { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
+): EuiSideNavItemType<unknown> => {
 
-  const wrapTextWithLink = useCallback(
-    (text?: string) =>
-      deepLink ? (
-        <a href={deepLink.href} target="_blank">
-          {text}
-        </a>
-      ) : (
-        text
-      ),
-    [deepLink]
-  );
+  const href = '/todo';
 
-  const renderTempUIToTestRemoveBehavior = useCallback(
-    () =>
-      onRemove ? (
-        <>
-          {' '}
-          <EuiButton size="s" onClick={() => onRemove()}>
-            Remove
-          </EuiButton>
-        </>
-      ) : null,
-    [onRemove]
+  return {
+    id: item.id,
+    name: item.title,
+    onClick:
+      href !== undefined
+        ? (event: React.MouseEvent) => {
+            event.preventDefault();
+            navigateToUrl(basePath.prepend(href!));
+          }
+        : undefined,
+    href,
+    items: item.children?.map((_item) =>
+      navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
+    ),
+    ...(item.icon && {
+      icon: <EuiIcon type={item.icon} size="s" />,
+    }),
+  };
+};
+
+interface TopLevelProps {
+  navNode: InternalNavigationNode;
+  items?: InternalNavigationNode[];
+  defaultIsCollapsed?: boolean;
+}
+
+const TopLevel: FC<TopLevelProps> = ({
+  children,
+  navNode,
+  items = [],
+  defaultIsCollapsed = true,
+}) => {
+  const { id, title, icon } = navNode;
+  const { navigateToUrl, basePath } = useServices();
+
+  return (
+    <EuiCollapsibleNavGroup
+      id={id}
+      title={title}
+      iconType={icon}
+      isCollapsible={true}
+      initialIsOpen={!defaultIsCollapsed}
+    >
+      <EuiText color="default">
+        <EuiSideNav
+          items={items?.map((item) => navigationNodeToEuiItem(item, { navigateToUrl, basePath }))}
+          css={styles.euiSideNavItems}
+        />
+      </EuiText>
+    </EuiCollapsibleNavGroup>
   );
+};
+
+interface Props extends NodeProps {
+  defaultIsCollapsed?: boolean;
+}
+
+function NavigationGroupComp(props: Props) {
+  const { children, defaultIsCollapsed, ...node } = props;
+  const { navNode, registerChildNode, path, childrenNodes } = useInitNavnode(node);
 
   const renderContent = useCallback(() => {
+    if (!path || !navNode) {
+      return null;
+    }
+    const isTopLevel = path && path.length === 1;
+
     return (
       <>
-        {wrapTextWithLink(title)}
-        {renderTempUIToTestRemoveBehavior()}
-        <ul>{children}</ul>
+        {isTopLevel && (
+          <TopLevel
+            navNode={navNode}
+            items={Object.values(childrenNodes)}
+            defaultIsCollapsed={defaultIsCollapsed}
+          />
+        )}
+        {children}
       </>
     );
-  }, [children, renderTempUIToTestRemoveBehavior, title, wrapTextWithLink]);
+  }, [navNode, path, childrenNodes, children, defaultIsCollapsed]);
 
   const contextValue = useMemo(() => {
     return {
@@ -80,8 +137,7 @@ function NavigationGroupComp(node: NodeProps) {
 
   return (
     <NavigationGroupContext.Provider value={contextValue}>
-      {/* Note: temporary UI. In future PR we'll have an EUI component here */}
-      <li style={{ paddingLeft: '20px', marginBottom: '15px' }}>{renderContent()}</li>
+      {renderContent()}
     </NavigationGroupContext.Provider>
   );
 }

@@ -18,11 +18,13 @@ import React, {
 } from 'react';
 
 import { useNavigation as useNavigationServices } from '../../../services';
-import { InternalNavigationNode, RegisterFunction } from '../types';
+import { InternalNavigationNode, RegisterFunction, UnRegisterFunction } from '../types';
 import { CloudLink } from './cloud_link';
+import { NavigationBucket } from './navigation_bucket';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
 import { NavigationUI } from './navigation_ui';
+import { RecentlyAccessed } from './recently_accessed';
 
 interface Context {
   register: RegisterFunction;
@@ -54,6 +56,21 @@ export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
     {}
   );
 
+  const unregister: UnRegisterFunction = useCallback(
+    (id: string) => {
+      if (onRootItemRemove) {
+        onRootItemRemove(id);
+      }
+
+      setNavigationItems((prevItems) => {
+        const updatedItems = { ...prevItems };
+        delete updatedItems[id];
+        return updatedItems;
+      });
+    },
+    [onRootItemRemove]
+  );
+
   const register = useCallback(
     (navNode: InternalNavigationNode) => {
       orderChildrenRef.current[navNode.id] = idx.current++;
@@ -66,21 +83,11 @@ export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
       });
 
       return {
-        unregister: () => {
-          if (onRootItemRemove) {
-            onRootItemRemove(navNode.id);
-          }
-
-          setNavigationItems((prevItems) => {
-            const updatedItems = { ...prevItems };
-            delete updatedItems[navNode.id];
-            return updatedItems;
-          });
-        },
+        unregister,
         path: [],
       };
     },
-    [onRootItemRemove]
+    [unregister]
   );
 
   const contextValue = useMemo<Context>(
@@ -119,3 +126,5 @@ export function useNavigation() {
 Navigation.Group = NavigationGroup;
 Navigation.Item = NavigationItem;
 Navigation.CloudLink = CloudLink;
+Navigation.RecentlyAccessed = RecentlyAccessed;
+Navigation.Bucket = NavigationBucket;

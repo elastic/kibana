@@ -10,7 +10,7 @@ import React, { FC, useCallback, useState } from 'react';
 import { of } from 'rxjs';
 import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { EuiButtonIcon, EuiCollapsibleNav, EuiThemeProvider } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -235,6 +235,10 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
   });
 
   return (
@@ -242,6 +246,28 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
       <NavigationProvider {...services}>
         <Navigation homeRef="/">
           <Navigation.CloudLink preset="deployments" />
+          <Navigation.RecentlyAccessed />
+
+          <Navigation.Group
+            id="example_projet"
+            title="Example project"
+            icon="logoObservability"
+            defaultIsCollapsed={false}
+          >
+            <Navigation.Group id="root">
+              <Navigation.Item id="item1" title="Get started" />
+              <Navigation.Item id="item2" title="Alerts" />
+              <Navigation.Item id="item3" title="Cases" />
+            </Navigation.Group>
+
+            <Navigation.Group id="settigns" title="Settings">
+              <Navigation.Item id="item1" title="Logs" />
+              <Navigation.Item id="item2" title="Signals" />
+              <Navigation.Item id="item3" title="Tracing" />
+            </Navigation.Group>
+          </Navigation.Group>
+
+          <Navigation.Bucket preset="analytics" />
         </Navigation>
       </NavigationProvider>
     </NavigationWrapper>
