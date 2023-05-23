@@ -11,10 +11,10 @@ import * as rt from 'io-ts';
 export const dataStreamRT = rt.exact(
   rt.intersection([
     rt.type({
-      name: rt.string,
+      name: indexPatternRt,
     }),
     rt.partial({
-      title: indexPatternRt,
+      title: rt.string,
     }),
   ])
 );

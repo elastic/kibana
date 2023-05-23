@@ -68,11 +68,13 @@ export interface SearchParams {
   integrationId?: CurrentPanelId;
 }
 
+type PartialSearchParams = Pick<SearchParams, 'name' | 'sortOrder'>;
+
 export type SearchHandler = (params: SearchParams) => void;
 
 export interface DataStreamSelectorProps {
   title: string;
-  search: Pick<SearchParams, 'name' | 'sortOrder'>;
+  search: PartialSearchParams;
   integrations: Integration[] | null;
   dataStreams: DataStream[] | null;
   dataStreamsError?: Error | null;
@@ -107,7 +109,7 @@ export function DataStreamSelector({
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
-  const [loadMoreIntersection, setRef] = useIntersectionRef();
+  const [loadMoreIntersection, setSpyRef] = useIntersectionRef();
 
   useEffect(() => {
     if (loadMoreIntersection?.isIntersecting) {
@@ -144,16 +146,17 @@ export function DataStreamSelector({
     }
 
     const { items, panels } = buildIntegrationsTree({
-      list: integrations,
+      integrations,
       onStreamSelected: handleStreamSelection,
-      spyRef: setRef,
     });
+
+    setIntegrationListSpy(items, setSpyRef);
 
     return {
       items: [dataStreamsItem, ...items],
       panels,
     };
-  }, [integrations, handleStreamSelection, onStreamsEntryClick, setRef]);
+  }, [integrations, handleStreamSelection, onStreamsEntryClick, setSpyRef]);
 
   const panels = [
     {
@@ -185,7 +188,7 @@ export function DataStreamSelector({
     </DataStreamButton>
   );
 
-  const handleSearch = (params: SearchParams) => {
+  const handleSearch = (params: PartialSearchParams) => {
     const strategy = getSearchStrategy(currentPanel);
     return onSearch({
       ...params,
@@ -194,9 +197,6 @@ export function DataStreamSelector({
     });
   };
   const searchValue = search;
-  // const handleSearch =
-  //   currentPanel === INTEGRATION_PANEL_ID ? onSearch : handleIntegrationStreamsSearch;
-  // const searchValue = currentPanel === INTEGRATION_PANEL_ID ? search : localSearch;
 
   return (
     <EuiPopover
@@ -205,8 +205,8 @@ export function DataStreamSelector({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      {...(isMobile && { display: 'block' })}
       buffer={8}
+      {...(isMobile && { display: 'block' })}
     >
       <EuiContextMenuPanel title={selectViewLabel}>
         <SearchControls
@@ -239,8 +239,8 @@ const DataStreamButton = (props: DataStreamButtonProps) => {
 
 interface SearchControlsProps {
   isLoading: boolean;
-  search: SearchParams;
-  onSearch: SearchHandler;
+  search: PartialSearchParams;
+  onSearch: (params: PartialSearchParams) => void;
 }
 
 const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) => {
@@ -285,14 +285,13 @@ interface IntegrationsTree {
 }
 
 interface IntegrationsTreeParams {
-  list: Integration[];
+  integrations: Integration[];
   onStreamSelected: DataStreamSelectionHandler;
-  spyRef: RefCallback<HTMLButtonElement>;
 }
 
-const buildIntegrationsTree = ({ list, onStreamSelected, spyRef }: IntegrationsTreeParams) => {
-  return list.reduce(
-    (res: IntegrationsTree, integration, pos) => {
+const buildIntegrationsTree = ({ integrations, onStreamSelected }: IntegrationsTreeParams) => {
+  return integrations.reduce(
+    (res: IntegrationsTree, integration) => {
       const entryId: CurrentPanelId = getIntegrationId(integration);
       const { name, version, dataStreams } = integration;
 
@@ -300,7 +299,6 @@ const buildIntegrationsTree = ({ list, onStreamSelected, spyRef }: IntegrationsT
         name,
         icon: <PackageIcon packageName={name} version={version} size="m" tryApi />,
         panel: entryId,
-        buttonRef: pos === list.length - 1 ? spyRef : undefined,
       });
 
       res.panels.push({
@@ -308,9 +306,9 @@ const buildIntegrationsTree = ({ list, onStreamSelected, spyRef }: IntegrationsT
         title: name,
         width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
         items: dataStreams.map((stream) => ({
-          name: stream.name,
+          name: stream.title,
           onClick: () =>
-            onStreamSelected({ title: stream.title, name: `[${name}] ${stream.name}` }),
+            onStreamSelected({ title: `[${name}] ${stream.title}`, name: stream.name }),
         })),
       });
 
@@ -318,6 +316,16 @@ const buildIntegrationsTree = ({ list, onStreamSelected, spyRef }: IntegrationsT
     },
     { items: [], panels: [] }
   );
+};
+
+const setIntegrationListSpy = (
+  items: EuiContextMenuPanelItemDescriptor[],
+  spyRef: RefCallback<HTMLButtonElement>
+) => {
+  const lastItem = items.at(-1);
+  if (lastItem) {
+    lastItem.buttonRef = spyRef;
+  }
 };
 
 const getSearchStrategy = (panelId: CurrentPanelId) => {

@@ -10,4 +10,13 @@ const defaultConfig = require('@kbn/storybook').defaultConfig;
 module.exports = {
   ...defaultConfig,
   stories: ['../**/*.stories.mdx', ...defaultConfig.stories],
+  webpackFinal: async (config) => {
+    const originalConfig = await defaultConfig.webpackFinal(config);
+
+    // Mock fleet plugin for PackageIcon component
+    originalConfig.resolve.alias['@kbn/fleet-plugin/public'] = require.resolve(
+      './__mocks__/package_icon'
+    );
+    return originalConfig;
+  },
 };
