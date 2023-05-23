@@ -1499,40 +1499,50 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Checked option.',
       }
     ),
-    'euiSelectableListItem.checkedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.checkedOptionInstructions',
-      {
-        defaultMessage: 'To uncheck this option, press enter.',
-      }
-    ),
-    'euiSelectableListItem.includedOption': i18n.translate(
-      'core.euiSelectableListItem.includedOption',
-      {
-        defaultMessage: 'Selected option.',
-      }
-    ),
-    'euiSelectableListItem.includedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.includedOptionInstructions',
-      {
-        defaultMessage: 'To exclude this option, press enter.',
-      }
-    ),
     'euiSelectableListItem.excludedOption': i18n.translate(
       'core.euiSelectableListItem.excludedOption',
       {
         defaultMessage: 'Excluded option.',
       }
     ),
-    'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.excludedOptionInstructions',
+    'euiSelectableListItem.checkOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.checkOptionInstructions',
       {
-        defaultMessage: 'To uncheck this option, press enter.',
+        defaultMessage: 'To check this option, press Enter.',
       }
     ),
-    'euiSelectableListItem.unckeckedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.unckeckedOptionInstructions',
+    'euiSelectableListItem.uncheckOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.uncheckOptionInstructions',
       {
-        defaultMessage: 'To select this option, press enter.',
+        defaultMessage: 'To uncheck this option, press Enter.',
+      }
+    ),
+    'euiSelectableListItem.excludeOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.excludeOptionInstructions',
+      {
+        defaultMessage: 'To exclude this option, press Enter.',
+      }
+    ),
+    'euiSelectableListItem.mixedOption': i18n.translate('core.euiSelectableListItem.mixedOption', {
+      defaultMessage: 'Mixed (indeterminate) option.',
+    }),
+
+    'euiSelectableListItem.mixedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionInstructions',
+      {
+        defaultMessage: 'To check this option for all, press Enter once.',
+      }
+    ),
+    'euiSelectableListItem.mixedOptionUncheckInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionUncheckInstructions',
+      {
+        defaultMessage: 'To uncheck this option for all, press Enter twice.',
+      }
+    ),
+    'euiSelectableListItem.mixedOptionExcludeInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionExcludeInstructions',
+      {
+        defaultMessage: 'To exclude this option for all, press Enter twice.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
