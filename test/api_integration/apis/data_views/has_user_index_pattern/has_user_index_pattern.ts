@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('has user index pattern API', () => {
     configArray.forEach((config) => {
@@ -66,9 +67,11 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          const response = await supertest.get(servicePath);
-          expect(response.status).to.be(200);
-          expect(response.body.result).to.be(true);
+          await retry.try(async () => {
+            const response = await supertest.get(servicePath);
+            expect(response.status).to.be(200);
+            expect(response.body.result).to.be(true);
+          });
         });
       });
     });
