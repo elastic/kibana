@@ -59,7 +59,7 @@ export const GetDataStreamsRequestSchema = {
     sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
     }),
-    uncategorisedOnly: schema.boolean({ defaultValue: true }),
+    uncategorisedOnly: schema.boolean({ defaultValue: false }),
   }),
 };
 
