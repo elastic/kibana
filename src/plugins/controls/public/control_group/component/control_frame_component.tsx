@@ -16,6 +16,7 @@ import {
   EuiLoadingChart,
   EuiToolTip,
 } from '@elastic/eui';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -25,8 +26,6 @@ import {
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { ControlError } from './control_error_component';
-import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { isErr } from '@kbn/task-manager-plugin/server/lib/result_type';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -42,7 +41,6 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [fatalError, setFatalError] = useState<Error | string>();
 
   const controlGroup = useControlGroupContainer();
 
@@ -67,23 +65,14 @@ export const ControlFrame = ({
     const inputSubscription = embeddable
       ?.getInput$()
       .subscribe((newInput) => setTitle(newInput.title));
-    const errorSubscription = embeddable?.getOutput$().subscribe(({ error }) => {
-      // if (isErrorEmbeddable(embeddable)) {
-      //   setFatalError(embeddable.error);
-      // } else {
-      setFatalError(error);
-      // }
-    });
     return () => {
       inputSubscription?.unsubscribe();
-      errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
     'controlFrame--oneLine': controlStyle === 'oneLine',
-    'controlFrame--fatalError': !!fatalError,
   });
 
   function renderEmbeddablePrepend() {
@@ -113,7 +102,7 @@ export const ControlFrame = ({
         </>
       }
     >
-      {embeddable && !fatalError && (
+      {embeddable && (
         <div
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
