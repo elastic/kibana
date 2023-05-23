@@ -13,10 +13,12 @@ import {
 import { EVENT_VIEWER_CHECKBOX } from '../../screens/hosts/events';
 
 export const selectFirstPageEvents = () => {
+  // eslint-disable-next-line cypress/unsafe-to-chain-command
   cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
 };
 
 export const selectAllEvents = () => {
+  // eslint-disable-next-line cypress/unsafe-to-chain-command
   cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
   cy.get(SELECT_ALL_EVENTS).click();
 };
