@@ -16,10 +16,12 @@ import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
 import { registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { ReportingStore } from './lib';
+import { PdfExportType } from './export_types/printable_pdf_v2/types';
+import { ReportingStore, getExportTypesRegistry } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
+  ExportTypeDefinition,
   ReportingRequestHandlerContext,
   ReportingSetup,
   ReportingSetupDeps,
@@ -36,6 +38,8 @@ export class ReportingPlugin
 {
   private logger: Logger;
   private reportingCore?: ReportingCore;
+  private pdfExport?: PdfExportType;
+  private exportTypeRegistry = getExportTypesRegistry();
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
     this.logger = initContext.logger.get();
@@ -46,6 +50,13 @@ export class ReportingPlugin
     const reportingCore = new ReportingCore(core, this.logger, this.initContext);
     this.reportingCore = reportingCore;
 
+    this.pdfExport = new PdfExportType(
+      core,
+      this.reportingCore.getConfig(),
+      this.logger,
+      this.initContext
+    );
+    this.exportTypeRegistry.register(this.pdfExport as unknown as ExportTypeDefinition);
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
     http.registerRouteHandlerContext(PLUGIN_ID, () => {
@@ -69,6 +80,8 @@ export class ReportingPlugin
       docLinks: core.docLinks,
       ...plugins,
     });
+
+    this.pdfExport.setup(core, { basePath: http.basePath, logger: this.logger, ...plugins });
 
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
@@ -112,6 +125,15 @@ export class ReportingPlugin
         store,
         ...plugins,
       });
+
+      if (this.pdfExport) {
+        this.pdfExport.start(core, {
+          savedObjects,
+          uiSettings,
+          screenshotting: plugins.screenshotting,
+          logger,
+        });
+      }
 
       // Note: this must be called after ReportingCore.pluginStart
       await store.start();

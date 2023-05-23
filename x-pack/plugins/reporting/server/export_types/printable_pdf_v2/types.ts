@@ -8,7 +8,6 @@ import apm from 'elastic-apm-node';
 import {
   CoreKibanaRequest,
   CoreSetup,
-  CoreStart,
   FakeRawRequest,
   KibanaRequest,
   Logger,
@@ -17,6 +16,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
+  CoreStart,
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
@@ -41,12 +41,14 @@ export type {
 interface PdfExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;
+  logger: Logger;
 }
 
 interface PdfExportTypeStartupDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   screenshotting: ScreenshottingStart;
+  logger: Logger;
 }
 
 export class PdfExportType {
@@ -63,14 +65,8 @@ export class PdfExportType {
     this.logger = logger.get('pdf-export');
   }
 
-  setup(coreSetup: CoreSetup, setupDeps: PdfExportTypeSetupDeps) {
-    this.coreSetup = coreSetup;
-    this.setupDeps = setupDeps;
-  }
-  start(coreStart: CoreStart, startDeps: PdfExportTypeStartupDeps) {
-    this.coreStart = coreStart;
-    this.startDeps = startDeps;
-  }
+  public setup(core: CoreSetup, setupDeps: PdfExportTypeSetupDeps) {}
+  public start(core: CoreStart, setupDeps: PdfExportTypeStartupDeps) {}
 
   /*
    * Gives synchronous access to the setupDeps
@@ -195,18 +191,14 @@ export class PdfExportType {
         mergeMap(async (headers) => {
           const fakeRequest = this.getFakeRequest(headers, job.spaceId, jobLogger);
           const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-          return getCustomLogo(uiSettingsClient, headers);
+          const result = getCustomLogo(uiSettingsClient, headers);
+          return result;
         }),
         mergeMap(({ logo, headers }) => {
           const { browserTimezone, layout, title, locatorParams } = job;
 
           const urls = locatorParams.map((locator) => [
-            getFullRedirectAppUrl(
-              this.getConfig(),
-              this.getServerInfo(),
-              job.spaceId,
-              job.forceNow
-            ),
+            getFullRedirectAppUrl(this.config, this.getServerInfo(), job.spaceId, job.forceNow),
             locator,
           ]) as UrlOrUrlLocatorTuple[];
 
