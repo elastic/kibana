@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useSelector } from 'react-redux';
-import type { useMonitorList } from '../../../hooks/use_monitor_list';
+import type { useMonitorList } from '../hooks/use_monitor_list';
 import { selectOverviewStatus } from '../../../state/overview_status';
 import { MonitorAsyncError } from './monitor_errors/monitor_async_error';
 import { ListFilters } from '../common/monitor_filters/list_filters';

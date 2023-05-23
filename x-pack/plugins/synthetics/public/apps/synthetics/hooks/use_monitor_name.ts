@@ -6,7 +6,7 @@
  */
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useMonitorList } from './use_monitor_list';
+import { useMonitorList } from '../components/monitors_page/hooks/use_monitor_list';
 
 export const useMonitorName = ({ search = '' }: { search?: string }) => {
   const { monitorId } = useParams<{ monitorId: string }>();

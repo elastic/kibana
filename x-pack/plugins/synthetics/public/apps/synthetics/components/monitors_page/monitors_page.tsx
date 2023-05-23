@@ -22,7 +22,7 @@ import { useEnablement } from '../../hooks/use_enablement';
 import { EnablementEmptyState } from './management/synthetics_enablement/synthetics_enablement';
 import { MonitorListContainer } from './management/monitor_list_container';
 import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
-import { useMonitorList } from '../../hooks/use_monitor_list';
+import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
 
 const MonitorManagementPage: React.FC = () => {

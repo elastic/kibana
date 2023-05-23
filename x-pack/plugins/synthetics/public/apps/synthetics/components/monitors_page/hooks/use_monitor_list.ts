@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
+import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 import {
   fetchMonitorListAction,
   quietFetchMonitorListAction,
@@ -15,9 +16,8 @@ import {
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   updateManagementPageStateAction,
-} from '../state';
-import { useSyntheticsRefreshContext } from '../contexts';
-import { useMonitorFiltersState } from './use_filters';
+} from '../../../state';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export function useMonitorList(query?: string) {
   const dispatch = useDispatch();
