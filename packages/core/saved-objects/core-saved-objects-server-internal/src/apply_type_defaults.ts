@@ -17,7 +17,7 @@ export const applyTypeDefaults = (type: SavedObjectsType): SavedObjectsType => {
   let switchToModelVersionAt = type.switchToModelVersionAt;
   if (
     !switchToModelVersionAt ||
-    Semver.valid(switchToModelVersionAt) ||
+    !Semver.valid(switchToModelVersionAt) ||
     Semver.gt(switchToModelVersionAt, globalSwitchToModelVersionAt)
   ) {
     switchToModelVersionAt = globalSwitchToModelVersionAt;
