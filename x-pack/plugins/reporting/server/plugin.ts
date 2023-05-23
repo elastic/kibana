@@ -41,9 +41,12 @@ export class ReportingPlugin
   private exportTypesRegistry = getExportTypesRegistry();
   private csvExport: CsvExportType;
 
-  constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
+  constructor(
+    private core: CoreSetup,
+    private initContext: PluginInitializerContext<ReportingConfigType>
+  ) {
     this.logger = initContext.logger.get();
-    this.csvExport = new CsvExportType(this.logger);
+    this.csvExport = new CsvExportType(core, this.logger, initContext);
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
