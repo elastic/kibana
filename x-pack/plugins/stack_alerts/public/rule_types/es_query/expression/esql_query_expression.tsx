@@ -7,14 +7,12 @@
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { lastValueFrom } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   FieldOption,
@@ -24,19 +22,18 @@ import {
   isCountAggregation,
   BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { AggregateQuery } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
-import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { convertFieldSpecToFieldOption, useTriggerUiActionServices } from '../util';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { AggregateQuery } from '@kbn/es-query';
+import { convertFieldSpecToFieldOption } from '../util';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
-import { DataView } from '@kbn/data-views-plugin/common';
 
 const { useXJsonMode } = XJson;
 

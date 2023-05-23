@@ -28,6 +28,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -40,7 +41,6 @@ import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { CONNECTORS_PLUGIN_ID } from '../common/constants';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
