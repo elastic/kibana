@@ -36,7 +36,8 @@ function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNav
 function createInternalNavNode(
   id: string,
   _navNode: NodeProps,
-  deepLinks: Readonly<ChromeNavLink[]>
+  deepLinks: Readonly<ChromeNavLink[]>,
+  path: string[] | null
 ): InternalNavigationNode | null {
   const { children, link, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
@@ -52,6 +53,7 @@ function createInternalNavNode(
   return {
     ...navNode,
     id,
+    path: path ?? [],
     title: title ?? '',
     deepLink,
   };
@@ -109,8 +111,8 @@ export const useInitNavnode = (node: NodeProps) => {
   const id = getIdFromNavigationNode(node);
 
   const internalNavNode = useMemo(
-    () => createInternalNavNode(id, node, deepLinks),
-    [node, id, deepLinks]
+    () => createInternalNavNode(id, node, deepLinks, stableNodePath),
+    [node, id, deepLinks, stableNodePath]
   );
 
   const register = useCallback(() => {
@@ -130,7 +132,9 @@ export const useInitNavnode = (node: NodeProps) => {
         children: children.length ? children : undefined,
       });
 
-      setNodePath([...path, internalNavNode.id]);
+      const updatedPath = [...path, internalNavNode.id];
+      setNodePath(updatedPath);
+      internalNavNode.path = updatedPath;
 
       unregisterRef.current = unregister;
       isRegistered.current = true;
@@ -147,10 +151,15 @@ export const useInitNavnode = (node: NodeProps) => {
 
   const registerChildNode = useCallback<RegisterFunction>(
     (childNode) => {
+      const childPath = stableNodePath ? [...stableNodePath, childNode.id] : [];
+
       setChildrenNodes((prev) => {
         return {
           ...prev,
-          [childNode.id]: childNode,
+          [childNode.id]: {
+            ...childNode,
+            path: childPath,
+          },
         };
       });
 
@@ -158,7 +167,7 @@ export const useInitNavnode = (node: NodeProps) => {
 
       return {
         unregister: unregisterChildNode,
-        path: stableNodePath ? [...stableNodePath] : [],
+        path: childPath,
       };
     },
     [stableNodePath, unregisterChildNode]

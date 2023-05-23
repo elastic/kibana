@@ -9,15 +9,15 @@
 import React, { FC, useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { Navigation } from './navigation';
-import { analytics } from '../nav_tree_presets';
+import { analytics, devtools, ml, management } from '../nav_tree_presets';
 
 type Preset = 'analytics' | 'devtools' | 'ml' | 'management';
 
 const navTreePresets: { [preset in Preset]: ChromeProjectNavigationNode } = {
   analytics,
-  ml: analytics,
-  devtools: analytics,
-  management: analytics,
+  ml,
+  devtools,
+  management,
 };
 
 interface Props {

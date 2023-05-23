@@ -246,6 +246,7 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
       <NavigationProvider {...services}>
         <Navigation homeRef="/">
           <Navigation.CloudLink preset="deployments" />
+
           <Navigation.RecentlyAccessed />
 
           <Navigation.Group
@@ -268,9 +269,11 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
           </Navigation.Group>
 
           <Navigation.Bucket preset="analytics" />
+          <Navigation.Bucket preset="ml" />
 
           <Navigation.Footer>
             <Navigation.Bucket preset="devtools" />
+            <Navigation.Bucket preset="management" />
           </Navigation.Footer>
         </Navigation>
       </NavigationProvider>

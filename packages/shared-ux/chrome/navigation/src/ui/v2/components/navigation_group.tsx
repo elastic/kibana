@@ -41,11 +41,11 @@ const navigationNodeToEuiItem = (
   item: InternalNavigationNode,
   { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
 ): EuiSideNavItemType<unknown> => {
-
-  const href = '/todo';
+  const href = item.deepLink?.href;
+  const id = item.path ? item.path.join('.') : item.id;
 
   return {
-    id: item.id,
+    id,
     name: item.title,
     onClick:
       href !== undefined
@@ -58,6 +58,7 @@ const navigationNodeToEuiItem = (
     items: item.children?.map((_item) =>
       navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
     ),
+    ['data-test-subj']: `nav-item-${id}`,
     ...(item.icon && {
       icon: <EuiIcon type={item.icon} size="s" />,
     }),
@@ -70,12 +71,7 @@ interface TopLevelProps {
   defaultIsCollapsed?: boolean;
 }
 
-const TopLevel: FC<TopLevelProps> = ({
-  children,
-  navNode,
-  items = [],
-  defaultIsCollapsed = true,
-}) => {
+const TopLevel: FC<TopLevelProps> = ({ navNode, items = [], defaultIsCollapsed = true }) => {
   const { id, title, icon } = navNode;
   const { navigateToUrl, basePath } = useServices();
 
@@ -86,6 +82,7 @@ const TopLevel: FC<TopLevelProps> = ({
       iconType={icon}
       isCollapsible={true}
       initialIsOpen={!defaultIsCollapsed}
+      data-test-subj={`nav-bucket-${id}`}
     >
       <EuiText color="default">
         <EuiSideNav

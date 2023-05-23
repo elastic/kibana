@@ -8,3 +8,5 @@
 
 export { analytics } from './analytics';
 export { devtools } from './devtools';
+export { ml } from './ml';
+export { management } from './management';

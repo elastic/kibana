@@ -13,6 +13,7 @@ export interface InternalNavigationNode
   extends Omit<ChromeProjectNavigationNode, 'id' | 'link' | 'children'> {
   id: string;
   title: string;
+  path: string[];
   deepLink?: ChromeNavLink;
   children?: InternalNavigationNode[];
 }
