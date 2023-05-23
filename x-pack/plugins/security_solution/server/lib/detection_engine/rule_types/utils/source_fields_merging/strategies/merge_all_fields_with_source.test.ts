@@ -1556,7 +1556,7 @@ describe('merge_all_fields_with_source', () => {
       });
     });
 
-    test('merges fields into source if it is "undefined"', () => {
+    test('drops a conflicting key if the value is undefined', () => {
       const _source: SignalSourceHit['_source'] = {
         'email.headers': { 'x-test': undefined },
       };
