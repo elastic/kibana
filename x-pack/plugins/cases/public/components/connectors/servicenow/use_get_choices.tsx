@@ -5,94 +5,53 @@
  * 2.0.
  */
 
-import { useState, useEffect, useRef } from 'react';
-import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { ServerError } from '../../../types';
 import type { ActionConnector } from '../../../../common/api';
+import { connectorsQueriesKeys } from '../constants';
 import { getChoices } from './api';
 import type { Choice } from './types';
 import * as i18n from './translations';
 
-export interface UseGetChoicesProps {
+export interface Props {
   http: HttpSetup;
-  toastNotifications: IToasts;
   connector?: ActionConnector;
   fields: string[];
-  onSuccess?: (choices: Choice[]) => void;
 }
 
-export interface UseGetChoices {
-  choices: Choice[];
-  isLoading: boolean;
-}
+export const useGetChoices = ({ http, connector, fields }: Props) => {
+  const { showErrorToast } = useCasesToast();
+  return useQuery<ActionTypeExecutorResult<Choice[]>, ServerError>(
+    connectorsQueriesKeys.servicenowGetChoices(connector?.id ?? '', fields),
+    () => {
+      const abortCtrlRef = new AbortController();
 
-export const useGetChoices = ({
-  http,
-  connector,
-  toastNotifications,
-  fields,
-  onSuccess,
-}: UseGetChoicesProps): UseGetChoices => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [choices, setChoices] = useState<Choice[]>([]);
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!connector) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        abortCtrl.current = new AbortController();
-        setIsLoading(true);
-
-        const res = await getChoices({
-          http,
-          signal: abortCtrl.current.signal,
-          connectorId: connector.id,
-          fields,
-        });
-
-        if (!didCancel.current) {
-          setIsLoading(false);
-          setChoices(res.data ?? []);
-          if (res.status && res.status === 'error') {
-            toastNotifications.addDanger({
-              title: i18n.CHOICES_API_ERROR,
-              text: `${res.serviceMessage ?? res.message}`,
-            });
-          } else if (onSuccess) {
-            onSuccess(res.data ?? []);
-          }
+      return getChoices({
+        http,
+        signal: abortCtrlRef.signal,
+        connectorId: connector?.id ?? '',
+        fields,
+      });
+    },
+    {
+      enabled: Boolean(connector),
+      staleTime: 60 * 1000, // one minute
+      onSuccess: (res) => {
+        if (res.status && res.status === 'error') {
+          showErrorToast(new Error(i18n.CHOICES_API_ERROR), {
+            title: i18n.CHOICES_API_ERROR,
+            toastMessage: `${res.serviceMessage ?? res.message}`,
+          });
         }
-      } catch (error) {
-        if (!didCancel.current) {
-          setIsLoading(false);
-          if (error.name !== 'AbortError') {
-            toastNotifications.addDanger({
-              title: i18n.CHOICES_API_ERROR,
-              text: error.message,
-            });
-          }
-        }
-      }
-    };
-
-    didCancel.current = false;
-    abortCtrl.current.abort();
-    fetchData();
-
-    return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [http, connector, toastNotifications, fields]);
-
-  return {
-    choices,
-    isLoading,
-  };
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.CHOICES_API_ERROR });
+      },
+    }
+  );
 };
+
+export type UseGetChoices = ReturnType<typeof useGetChoices>;

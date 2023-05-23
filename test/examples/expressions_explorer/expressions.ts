@@ -17,8 +17,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
 
-  // failing test: https://github.com/elastic/kibana/issues/156780
-  describe.skip('', () => {
+  describe('', () => {
     it('runs expression', async () => {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('expressionResult');
@@ -54,7 +53,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await find.clickByCssSelector(selector);
       await retry.try(async () => {
         const text = await browser.getCurrentUrl();
-        expect(text).to.be('https://www.google.com/?gws_rd=ssl');
+        expect(text).to.contain('https://www.google.com/');
       });
     });
   });

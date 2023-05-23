@@ -83,14 +83,15 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.DocumentMigrator.migrationVersion",
-            "type": "Object",
+            "id": "def-common.DocumentMigrator.getMigrationVersion",
+            "type": "Function",
             "tags": [],
-            "label": "migrationVersion",
+            "label": "getMigrationVersion",
             "description": [
-              "\nGets the latest version of each migrate-able property."
+              "\nGets the latest pending version of each type.\nSome migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)."
             ],
             "signature": [
+              "({ includeDeferred, migrationType, }?: MigrationVersionParams) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -101,7 +102,25 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-common.DocumentMigrator.getMigrationVersion.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    includeDeferred = true,\n    migrationType = 'type',\n  }",
+                "description": [],
+                "signature": [
+                  "MigrationVersionParams"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1370,7 +1389,7 @@
             "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          ", index: string) => ",
+          ", index: string, batchSize: number) => ",
           "TaskEither",
           "<",
           "RetryableEsClientError",
@@ -1418,6 +1437,21 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.pickupUpdatedMappings.$3",
+            "type": "number",
+            "tags": [],
+            "label": "batchSize",
+            "description": [],
+            "signature": [
+              "number"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
@@ -1520,7 +1554,7 @@
           "\nReindex documents from the `sourceIndex` into the `targetIndex`. Returns a\ntask ID which can be tracked for progress.\n"
         ],
         "signature": [
-          "({ client, sourceIndex, targetIndex, reindexScript, requireAlias, excludeOnUpgradeQuery, }: ",
+          "({ client, sourceIndex, targetIndex, reindexScript, requireAlias, excludeOnUpgradeQuery, batchSize, }: ",
           "ReindexParams",
           ") => ",
           "TaskEither",
@@ -1539,7 +1573,7 @@
             "id": "def-common.reindex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    sourceIndex,\n    targetIndex,\n    reindexScript,\n    requireAlias,\n    excludeOnUpgradeQuery,\n  }",
+            "label": "{\n    client,\n    sourceIndex,\n    targetIndex,\n    reindexScript,\n    requireAlias,\n    excludeOnUpgradeQuery,\n    batchSize,\n  }",
             "description": [],
             "signature": [
               "ReindexParams"
@@ -1586,78 +1620,6 @@
               "RemoveWriteBlockParams"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/remove_write_block.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-common.searchForOutdatedDocuments",
-        "type": "Function",
-        "tags": [],
-        "label": "searchForOutdatedDocuments",
-        "description": [
-          "\nSearch for outdated saved object documents with the provided query. Will\nreturn one batch of documents. Searching should be repeated until no more\noutdated documents can be found.\n\nUsed for testing only"
-        ],
-        "signature": [
-          "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "common",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-common.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
-          ", options: ",
-          "SearchForOutdatedDocumentsOptions",
-          ") => ",
-          "TaskEither",
-          "<",
-          "RetryableEsClientError",
-          ", ",
-          "SearchResponse",
-          ">"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.searchForOutdatedDocuments.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "client",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.searchForOutdatedDocuments.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "SearchForOutdatedDocumentsOptions"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1819,7 +1781,7 @@
           "\nUpdates an index's mappings and runs an pickupUpdatedMappings task so that the mapping\nchanges are \"picked up\". Returns a taskId to track progress."
         ],
         "signature": [
-          "({ client, index, mappings, }: ",
+          "({ client, index, mappings, batchSize, }: ",
           "UpdateAndPickupMappingsParams",
           ") => ",
           "TaskEither",
@@ -1838,7 +1800,7 @@
             "id": "def-common.updateAndPickupMappings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  index,\n  mappings,\n}",
+            "label": "{\n  client,\n  index,\n  mappings,\n  batchSize,\n}",
             "description": [],
             "signature": [
               "UpdateAndPickupMappingsParams"

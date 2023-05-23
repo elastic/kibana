@@ -11,12 +11,16 @@ class ESDocLinks {
   public apiIntro: string = '';
   public beats: string = '';
   public connectors: string = '';
+  public elasticsearchClients: string = '';
   public integrations: string = '';
   public jsApiReference: string = '';
   public jsAdvancedConfig: string = '';
   public jsBasicConfig: string = '';
   public jsClient: string = '';
+  public kibanaRunApiInConsole: string = '';
   public logStash: string = '';
+  public metadata: string = '';
+  public roleDescriptors: string = '';
   public rubyAdvancedConfig: string = '';
   public rubyBasicConfig: string = '';
   public rubyClient: string = '';
@@ -26,11 +30,15 @@ class ESDocLinks {
 
   setDocLinks(newDocLinks: DocLinks) {
     this.apiIntro = newDocLinks.apis.restApis;
+    this.elasticsearchClients = newDocLinks.clients.guide;
     this.integrations = newDocLinks.serverlessSearch.integrations;
     this.jsAdvancedConfig = newDocLinks.clients.jsAdvancedConfig;
     this.jsApiReference = newDocLinks.clients.jsApiReference;
     this.jsBasicConfig = newDocLinks.clients.jsBasicConfig;
     this.jsClient = newDocLinks.clients.jsIntro;
+    this.kibanaRunApiInConsole = newDocLinks.console.guide;
+    this.metadata = newDocLinks.security.mappingRoles;
+    this.roleDescriptors = newDocLinks.security.mappingRoles;
     this.rubyAdvancedConfig = newDocLinks.clients.rubyAdvancedConfig;
     this.rubyBasicConfig = newDocLinks.clients.rubyBasicConfig;
     this.rubyExamples = newDocLinks.clients.rubyExamples;

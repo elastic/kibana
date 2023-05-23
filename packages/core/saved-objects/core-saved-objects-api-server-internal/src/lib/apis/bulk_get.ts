@@ -21,6 +21,7 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
+import { includedFields } from '../utils';
 import {
   Either,
   errorContent,
@@ -32,16 +33,28 @@ import {
   rawDocExistsInNamespaces,
 } from './utils';
 import { ApiExecutionContext } from './types';
-import { includedFields } from '../included_fields';
 
 export interface PerformBulkGetParams<T = unknown> {
   objects: SavedObjectsBulkGetObject[];
   options: SavedObjectsGetOptions;
 }
 
+type ExpectedBulkGetResult = Either<
+  { type: string; id: string; error: Payload },
+  { type: string; id: string; fields?: string[]; namespaces?: string[]; esRequestIndex: number }
+>;
+
 export const performBulkGet = async <T>(
   { objects, options }: PerformBulkGetParams<T>,
-  { helpers, allowedTypes, client, serializer, registry, extensions = {} }: ApiExecutionContext
+  {
+    helpers,
+    allowedTypes,
+    client,
+    migrator,
+    serializer,
+    registry,
+    extensions = {},
+  }: ApiExecutionContext
 ): Promise<SavedObjectsBulkResponse<T>> => {
   const {
     common: commonHelper,
@@ -75,10 +88,6 @@ export const performBulkGet = async <T>(
   };
 
   let bulkGetRequestIndexCounter = 0;
-  type ExpectedBulkGetResult = Either<
-    { type: string; id: string; error: Payload },
-    { type: string; id: string; fields?: string[]; namespaces?: string[]; esRequestIndex: number }
-  >;
   const expectedBulkGetResults = await Promise.all(
     objects.map<Promise<ExpectedBulkGetResult>>(async (object) => {
       const { type, id, fields } = object;
@@ -191,9 +200,12 @@ export const performBulkGet = async <T>(
       }
 
       // @ts-expect-error MultiGetHit._source is optional
-      return getSavedObjectFromSource(registry, type, id, doc, {
+      const document = getSavedObjectFromSource(registry, type, id, doc, {
         migrationVersionCompatibility,
       });
+      const migrated = migrator.migrateDocument(document);
+
+      return migrated;
     }),
   };
 
