@@ -10,6 +10,7 @@ import {
   getCoreTransformsMock,
   getConversionTransformsMock,
   getModelVersionTransformsMock,
+  getModelVersionSchemasMock,
   getReferenceTransformsMock,
   resetAllMocks,
   validateTypeMigrationsMock,
@@ -192,6 +193,60 @@ describe('buildActiveMigrations', () => {
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
       expect(migrations.foo.transforms).toEqual([expectTransform(TransformType.Migrate, '7.12.0')]);
       expect(migrations.bar.transforms).toEqual([expectTransform(TransformType.Migrate, '8.3.0')]);
+    });
+  });
+
+  describe('model version schemas', () => {
+    it('calls getModelVersionSchemas with the correct parameters', () => {
+      const foo = createType({ name: 'foo' });
+      const bar = createType({ name: 'bar' });
+
+      addType(foo);
+      addType(bar);
+
+      buildMigrations();
+
+      expect(getModelVersionSchemasMock).toHaveBeenCalledTimes(2);
+      expect(getModelVersionSchemasMock).toHaveBeenNthCalledWith(1, {
+        typeDefinition: foo,
+      });
+      expect(getModelVersionSchemasMock).toHaveBeenNthCalledWith(2, {
+        typeDefinition: bar,
+      });
+    });
+
+    it('adds the schemas from getModelVersionSchemas to each type', () => {
+      const foo = createType({ name: 'foo' });
+      const bar = createType({ name: 'bar' });
+
+      addType(foo);
+      addType(bar);
+
+      getModelVersionSchemasMock.mockImplementation(
+        ({ typeDefinition }: { typeDefinition: SavedObjectsType }) => {
+          if (typeDefinition.name === 'foo') {
+            return {
+              '7.10.0': jest.fn(),
+            };
+          } else {
+            return {
+              '8.3.0': jest.fn(),
+              '8.4.0': jest.fn(),
+            };
+          }
+        }
+      );
+
+      const migrations = buildMigrations();
+
+      expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
+      expect(migrations.foo.versionSchemas).toEqual({
+        '7.10.0': expect.any(Function),
+      });
+      expect(migrations.bar.versionSchemas).toEqual({
+        '8.3.0': expect.any(Function),
+        '8.4.0': expect.any(Function),
+      });
     });
   });
 
