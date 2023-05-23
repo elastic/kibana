@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const API_PATH = '/api/unified_field_list/field_stats';
+  const API_PATH = '/internal/unified_field_list/field_stats';
 
   describe('field stats apis', () => {
     before(async () => {
