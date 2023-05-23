@@ -22,16 +22,24 @@ import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
 
+export interface ManagementAppConfigType {
+  userManagementEnabled: boolean;
+  roleManagementEnabled: boolean;
+  roleMappingManagementEnabled: boolean;
+}
+
 interface SetupParams {
   management: ManagementSetup;
   license: SecurityLicense;
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
+  uiConfig?: ManagementAppConfigType;
 }
 
 interface StartParams {
   capabilities: Capabilities;
+  uiConfig?: ManagementAppConfigType;
 }
 
 export class ManagementService {
@@ -39,31 +47,52 @@ export class ManagementService {
   private licenseFeaturesSubscription?: Subscription;
   private securitySection?: ManagementSection;
 
-  setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
+  setup({ getStartServices, management, authc, license, fatalErrors, uiConfig }: SetupParams) {
     this.license = license;
     this.securitySection = management.sections.section.security;
 
-    this.securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
-    this.securitySection.registerApp(
-      rolesManagementApp.create({ fatalErrors, license, getStartServices })
-    );
+    if (!uiConfig || uiConfig.userManagementEnabled) {
+      this.securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
+    }
+    if (!uiConfig || uiConfig.roleManagementEnabled) {
+      this.securitySection.registerApp(
+        rolesManagementApp.create({ fatalErrors, license, getStartServices })
+      );
+    }
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
-    this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
+    if (!uiConfig || uiConfig.roleMappingManagementEnabled) {
+      this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
+    }
   }
 
-  start({ capabilities }: StartParams) {
+  start({ capabilities, uiConfig }: StartParams) {
     this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
       const securitySection = this.securitySection!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
-        [securitySection.getApp(usersManagementApp.id)!, features.showLinks],
-        [securitySection.getApp(rolesManagementApp.id)!, features.showLinks],
         [securitySection.getApp(apiKeysManagementApp.id)!, features.showLinks],
-        [
+      ];
+
+      if (!uiConfig || uiConfig.userManagementEnabled) {
+        securityManagementAppsStatuses.push([
+          securitySection.getApp(usersManagementApp.id)!,
+          features.showLinks,
+        ]);
+      }
+
+      if (!uiConfig || uiConfig.roleManagementEnabled) {
+        securityManagementAppsStatuses.push([
+          securitySection.getApp(rolesManagementApp.id)!,
+          features.showLinks,
+        ]);
+      }
+
+      if (!uiConfig || uiConfig.roleMappingManagementEnabled) {
+        securityManagementAppsStatuses.push([
           securitySection.getApp(roleMappingsManagementApp.id)!,
           features.showLinks && features.showRoleMappingsManagement,
-        ],
-      ];
+        ]);
+      }
 
       // Iterate over all registered apps and update their enable status depending on the available
       // license features.
