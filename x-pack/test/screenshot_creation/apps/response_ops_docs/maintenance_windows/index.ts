@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const METRICS_INDICES = 'logs-elastic_agent.osquerybeat*';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('maintenance windows', function () {
+    loadTestFile(require.resolve('./create_window'));
+  });
+}

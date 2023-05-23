@@ -6295,6 +6295,13 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.4.1.tgz#ff22eb2e5d476fbc2450a196e40dd243cc20c28f"
   integrity sha512-O2yRJce1GOc6PAy3QxFM4NzFiWzvScDC1/5ihYBL6BUEVdq0XMWN01sppE+H6bBXbaFYipjwFLEWLg5PaSOThA==
 
+"@opentelemetry/core@1.13.0", "@opentelemetry/core@^1.11.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.13.0.tgz#7cdcb4176d260d279b0aa31456c4ce2ba7f410aa"
+  integrity sha512-2dBX3Sj99H96uwJKvc2w9NOiNgbvAO6mOFJFramNkKfS9O4Um+VWgpnlAazoYjT6kUJ1MP70KQ5ngD4ed+4NUw==
+  dependencies:
+    "@opentelemetry/semantic-conventions" "1.13.0"
+
 "@opentelemetry/core@1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.4.0.tgz#26839ab9e36583a174273a1e1c5b33336c163725"
@@ -6365,6 +6372,14 @@
     "@opentelemetry/sdk-metrics-base" "0.30.0"
     "@opentelemetry/sdk-trace-base" "1.4.0"
 
+"@opentelemetry/resources@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-1.13.0.tgz#436b33ea950004e66fce6575f2776a05faca7f8e"
+  integrity sha512-euqjOkiN6xhjE//0vQYGvbStxoD/WWQRhDiO0OTLlnLBO9Yw2Gd/VoSx2H+svsebjzYk5OxLuREBmcdw6rbUNg==
+  dependencies:
+    "@opentelemetry/core" "1.13.0"
+    "@opentelemetry/semantic-conventions" "1.13.0"
+
 "@opentelemetry/resources@1.4.0", "@opentelemetry/resources@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-1.4.0.tgz#5e23b0d7976158861059dec17e0ee36a35a5ab85"
@@ -6383,6 +6398,15 @@
     "@opentelemetry/resources" "1.4.0"
     lodash.merge "4.6.2"
 
+"@opentelemetry/sdk-metrics@^1.12.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-metrics/-/sdk-metrics-1.13.0.tgz#4e859107a7a4389bcda7b37d3952bc7dd34211d7"
+  integrity sha512-MOjZX6AnSOqLliCcZUrb+DQKjAWXBiGeICGbHAGe5w0BB18PJIeIo995lO5JSaFfHpmUMgJButTPfJJD27W3Vg==
+  dependencies:
+    "@opentelemetry/core" "1.13.0"
+    "@opentelemetry/resources" "1.13.0"
+    lodash.merge "4.6.2"
+
 "@opentelemetry/sdk-trace-base@1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-base/-/sdk-trace-base-1.4.0.tgz#e54d09c1258cd53d3fe726053ed1cbda9d74f023"
@@ -6391,6 +6415,11 @@
     "@opentelemetry/core" "1.4.0"
     "@opentelemetry/resources" "1.4.0"
     "@opentelemetry/semantic-conventions" "1.4.0"
+
+"@opentelemetry/semantic-conventions@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.13.0.tgz#0290398b3eaebc6029c348988a78c3b688fe9219"
+  integrity sha512-LMGqfSZkaMQXqewO0o1wvWr/2fQdCh4a3Sqlxka/UsJCe0cfLulh6x2aqnKLnsrSGiCq5rSCwvINd152i0nCqw==
 
 "@opentelemetry/semantic-conventions@1.4.0", "@opentelemetry/semantic-conventions@^1.4.0":
   version "1.4.0"
@@ -14330,10 +14359,10 @@ elastic-apm-http-client@11.2.0, elastic-apm-http-client@^11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-http-client@11.3.1:
-  version "11.3.1"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.3.1.tgz#cf2c73f973e0400812c443812a0d5a8a08e5a4b2"
-  integrity sha512-AicMDPJYmO4tGTRcZQZFS7nhyGAQ6f4hUTKQVxiM/6mHo6F895JsJoPVwOE2yCathKDnD9LVS9zWdT2wvG8gxA==
+elastic-apm-http-client@11.4.0:
+  version "11.4.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.4.0.tgz#781a69d958628e11c51f94249131a3d04875962f"
+  integrity sha512-DxPy8MFrcL04qxMG4sxmI5yIKrFCIhJc2xx0eupE3qjCIIPHeLJaUrjFbQbsAnnuhC9sljWsEebtFweHj+Vmug==
   dependencies:
     agentkeepalive "^4.2.1"
     breadth-filter "^2.0.0"
@@ -14385,20 +14414,22 @@ elastic-apm-node@^3.38.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.45.0:
-  version "3.45.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.45.0.tgz#d4d0a6481d3c9a099e06aa5399cf3e241422c36f"
-  integrity sha512-AfCMvfAHy5VhOzqM7GXXao3dEGhEok1+XNNvjlOEAGic1Y3biKY4ZQYI+QktYShC2E7b/TaLo8L/Twu16Ah2hA==
+elastic-apm-node@^3.46.0:
+  version "3.46.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.46.0.tgz#38a8cf8ee1da73d10d62eca59a770643171d16b2"
+  integrity sha512-MuM7Xe+5K7AkfFqrKWrvBJVFcS+hPcTKGj7yR/0/WHR5/r/ZjkBEX/t2bUMjgyHHG4lu5LH/RN86ScGdw1GG2w==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.4.1"
+    "@opentelemetry/core" "^1.11.0"
+    "@opentelemetry/sdk-metrics" "^1.12.0"
     after-all-results "^2.0.0"
     async-cache "^1.1.0"
     async-value-promise "^1.1.1"
     basic-auth "^2.0.1"
     cookie "^0.5.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "11.3.1"
+    elastic-apm-http-client "11.4.0"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
@@ -14417,7 +14448,6 @@ elastic-apm-node@^3.45.0:
     relative-microtime "^2.0.0"
     require-in-the-middle "^7.0.1"
     semver "^6.3.0"
-    set-cookie-serde "^1.0.0"
     shallow-clone-shim "^2.0.0"
     source-map "^0.8.0-beta.0"
     sql-summary "^1.0.1"
