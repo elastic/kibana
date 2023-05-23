@@ -28,16 +28,12 @@ let ftrConfigsManifest: FtrConfigsManifest;
 
 const loadNormal = (): FtrConfigsManifest => {
   const x = Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL);
-  // eslint-disable-next-line no-console
-  console.log(`\n### Trying to load: \n  ${x}`);
   return JsYaml.safeLoad(Fs.readFileSync(x, 'utf8'));
 };
 
 const loadAbnormal = (): FtrConfigsManifest => {
-  const x = Path.resolve(REPO_ROOT, '../kibana', FTR_CONFIGS_MANIFEST_REL);
-  // eslint-disable-next-line no-console
-  console.log(`\n### Trying to load (abnormally): \n  ${x}`);
-  return JsYaml.safeLoad(Fs.readFileSync(x, 'utf8'));
+  const fromRepoRootIntoKbn = Path.resolve(REPO_ROOT, '../kibana', FTR_CONFIGS_MANIFEST_REL);
+  return JsYaml.safeLoad(Fs.readFileSync(fromRepoRootIntoKbn, 'utf8'));
 };
 try {
   ftrConfigsManifest = loadNormal();
@@ -48,8 +44,6 @@ try {
     ftrConfigsManifest = loadAbnormal();
   } catch (e) {
     const msg = `\n### Could not load ${FTR_CONFIGS_MANIFEST_REL} abnormally either, Error: \n  ${e}`;
-    // eslint-disable-next-line no-console
-    console.error(msg);
     throw new Error(msg);
   }
 }
