@@ -7,14 +7,13 @@
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
   secretKeys,
   ConfigKey,
   LegacyConfigKey,
 } from '../../../../common/constants/monitor_management';
 import { monitorMigrations } from './migrations/monitors';
-
-export const syntheticsMonitorType = 'synthetics-monitor';
 
 const legacyConfigKeys = Object.values(LegacyConfigKey);
 

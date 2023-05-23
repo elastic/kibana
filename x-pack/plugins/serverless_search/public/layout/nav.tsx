@@ -99,6 +99,7 @@ const navItems: ChromeNavigationNodeViewModel[] = [
         title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
           defaultMessage: 'Indices',
         }),
+        // TODO: this will be updated to a new Indices page
         href: '/app/management/data/index_management/indices',
       },
       {
@@ -106,7 +107,16 @@ const navItems: ChromeNavigationNodeViewModel[] = [
         title: i18n.translate('xpack.serverlessSearch.nav.content.transforms', {
           defaultMessage: 'Transforms',
         }),
-        href: '/app/management/data/transform',
+        // TODO: this will be updated to a new Transforms page
+        href: '/app/management/ingest/ingest_pipelines',
+      },
+      {
+        id: 'content_indexing_api',
+        title: i18n.translate('xpack.serverlessSearch.nav.content.indexingApi', {
+          defaultMessage: 'Indexing API',
+        }),
+        // TODO: this page does not exist yet, linking to getting started for now
+        href: '/app/elasticsearch',
       },
     ],
   },
