@@ -25,6 +25,7 @@ import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingRulesConfig } from './config';
+import { AlertsService } from './alerts_service';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -37,8 +38,10 @@ export interface RulesClientFactoryOpts {
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  kibanaBaseUrl: string | undefined;
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
+  alertsService: AlertsService | null;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
 }
 
@@ -57,6 +60,8 @@ export class RulesClientFactory {
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
+  private alertsService: AlertsService | null = null;
+  private kibanaBaseUrl?: string;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
 
   public initialize(options: RulesClientFactoryOpts) {
@@ -75,8 +80,10 @@ export class RulesClientFactory {
     this.actions = options.actions;
     this.eventLog = options.eventLog;
     this.kibanaVersion = options.kibanaVersion;
+    this.kibanaBaseUrl = options.kibanaBaseUrl;
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
+    this.alertsService = options.alertsService;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
   }
 
@@ -91,6 +98,7 @@ export class RulesClientFactory {
     return new RulesClient({
       spaceId,
       kibanaVersion: this.kibanaVersion,
+      kibanaBaseUrl: this.kibanaBaseUrl,
       logger: this.logger,
       taskManager: this.taskManager,
       ruleTypeRegistry: this.ruleTypeRegistry,
@@ -137,6 +145,8 @@ export class RulesClientFactory {
         return eventLog.getClient(request);
       },
       eventLogger: this.eventLogger,
+      actionsPlugin: this.actions!,
+      alertsService: this.alertsService,
       isAuthenticationTypeAPIKey() {
         if (!securityPluginStart) {
           return false;

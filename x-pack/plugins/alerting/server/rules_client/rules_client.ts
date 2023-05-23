@@ -53,6 +53,7 @@ import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
 import { listAlertTypes } from './methods/list_alert_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
+import { PreviewOptions, preview } from './methods/preview';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -139,6 +140,7 @@ export class RulesClient {
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
   public bulkDisableRules = (options: BulkOptions) => bulkDisableRules(this.context, options);
 
+  public preview = (params: PreviewOptions) => preview(this.context, params);
   public updateApiKey = (options: { id: string }) => updateApiKey(this.context, options);
 
   public enable = (options: { id: string }) => enable(this.context, options);

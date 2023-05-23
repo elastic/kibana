@@ -26,7 +26,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { ruleDetailsRoute } from '@kbn/rule-data-utils';
+import { createRuleRoute, ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
@@ -45,6 +45,7 @@ const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
+const CreateRuleRoute = lazy(() => import('./sections/create_rule/components/create_rule'));
 const queryClient = new QueryClient();
 
 export interface TriggersAndActionsUiServices extends CoreStart {
@@ -116,6 +117,10 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         <Route
           path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
+        />
+        <Route
+          path={createRuleRoute}
+          component={suspendedComponentWithProps(CreateRuleRoute, 'xl')}
         />
         <Route
           exact

@@ -118,7 +118,7 @@ export interface RuleExecutorOptions<
   startedAt: Date;
   state: State;
   namespace?: string;
-  flappingSettings: RulesSettingsFlappingProperties;
+  flappingSettings?: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
 }
 

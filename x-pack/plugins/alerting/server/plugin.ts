@@ -17,6 +17,7 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
+  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -96,6 +97,7 @@ import {
 } from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { PreviewTaskRunnerFactory } from './preview/preview_task_runner_factory';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -184,6 +186,7 @@ export class AlertingPlugin {
   private readonly logger: Logger;
   private ruleTypeRegistry?: RuleTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
+  private readonly previewTaskRunnerFactory: PreviewTaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
   private isESOCanEncrypt?: boolean;
   private security?: SecurityPluginSetup;
@@ -205,6 +208,7 @@ export class AlertingPlugin {
     this.config = initializerContext.config.get();
     this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
+    this.previewTaskRunnerFactory = new PreviewTaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
     this.alertsService = null;
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
@@ -276,6 +280,14 @@ export class AlertingPlugin {
       inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
+
+    plugins.taskManager.registerTaskDefinitions({
+      [`alerting:preview`]: {
+        title: `Alert Preview`,
+        timeout: '1m',
+        createTaskRunner: (context: RunContext) => this.previewTaskRunnerFactory.create(context),
+      },
+    });
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
@@ -414,6 +426,7 @@ export class AlertingPlugin {
       isESOCanEncrypt,
       logger,
       taskRunnerFactory,
+      previewTaskRunnerFactory,
       ruleTypeRegistry,
       rulesClientFactory,
       alertingAuthorizationClientFactory,
@@ -462,8 +475,10 @@ export class AlertingPlugin {
       actions: plugins.actions,
       eventLog: plugins.eventLog,
       kibanaVersion: this.kibanaVersion,
+      kibanaBaseUrl: this.kibanaBaseUrl,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
+      alertsService: this.alertsService,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
     });
 
@@ -525,6 +540,34 @@ export class AlertingPlugin {
       maxAlerts: this.config.rules.run.alerts.max,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
+      getRulesSettingsClientWithRequest,
+      getMaintenanceWindowClientWithRequest,
+    });
+
+    previewTaskRunnerFactory.initialize({
+      logger,
+      data: plugins.data,
+      share: plugins.share,
+      dataViews: plugins.dataViews,
+      savedObjects: core.savedObjects,
+      uiSettings: core.uiSettings,
+      elasticsearch: core.elasticsearch,
+      getRulesClientWithRequest,
+      spaceIdToNamespace,
+      actionsPlugin: plugins.actions,
+      encryptedSavedObjectsClient,
+      basePathService: core.http.basePath,
+      eventLogger: this.eventLogger!,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      executionContext: core.executionContext,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      alertsService: this.alertsService,
+      kibanaBaseUrl: this.kibanaBaseUrl,
+      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
+      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      maxAlerts: this.config.rules.run.alerts.max,
+      actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       getRulesSettingsClientWithRequest,
       getMaintenanceWindowClientWithRequest,
     });
