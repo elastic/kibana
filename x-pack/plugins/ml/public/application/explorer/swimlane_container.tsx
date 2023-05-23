@@ -41,6 +41,7 @@ import {
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
+import { useCurrentKibanaTheme } from '../components/color_range_legend/use_color_range';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
@@ -51,7 +52,6 @@ import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
-import { useUiSettings } from '../contexts/kibana';
 import { Y_AXIS_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './swimlane_annotation_container';
 import { useCurrentEuiTheme } from '../components/color_range_legend';
 
@@ -191,7 +191,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const isDarkTheme = !!useUiSettings().get('theme:darkMode');
+  const isDarkTheme = useCurrentKibanaTheme();
   const { euiTheme } = useCurrentEuiTheme();
 
   // Holds the container height for previously fetched data
@@ -515,7 +515,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   {isLoading && (
                     <EuiText
                       textAlign={'center'}
-                      style={{
+                      css={{
                         position: 'absolute',
                         top: '50%',
                         left: '50%',
