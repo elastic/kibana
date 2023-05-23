@@ -10,7 +10,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
-import { createAddToExistingCaseLensAction } from './add_to_existing_case';
+import { createAddToNewCaseLensAction } from './add_to_new_case';
 import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { of, Subject } from 'rxjs';
@@ -37,7 +37,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   KibanaThemeProvider: jest.fn().mockImplementation(({ children }) => <>{children}</>),
 }));
 
-describe('createAddToExistingCaseLensAction', () => {
+describe('createAddToNewCaseLensAction', () => {
   class MockEmbeddable {
     public type;
     private input;
@@ -137,11 +137,11 @@ describe('createAddToExistingCaseLensAction', () => {
     (getCasePermissions as jest.Mock).mockReturnValue({ update: true, read: true });
 
     jest.clearAllMocks();
-    action = createAddToExistingCaseLensAction(caseUiActionProps);
+    action = createAddToNewCaseLensAction(caseUiActionProps);
   });
 
   test('it should return display name', () => {
-    expect(action.getDisplayName(context)).toEqual('Add to existing case');
+    expect(action.getDisplayName(context)).toEqual('Add to new case');
   });
 
   it('should return icon type', () => {

@@ -13,15 +13,18 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { CommentType } from '../../../../common';
-import { isLensEmbeddable } from './utils';
+import {
+  getCaseOwner,
+  getCasePermissions,
+  hasCasePermissions,
+  hasInput,
+  isLensEmbeddable,
+} from './utils';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 
-import { OWNER_INFO } from '../../../../common/constants';
-import type { CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import CasesProvider from '../../cases_context';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
@@ -73,7 +76,10 @@ export const createAddToNewCaseLensAction = ({
     currentAppId = appId;
   });
 
-  return createAction<{ embeddable: DashboardVisualizationEmbeddable; coreStart: CoreStart }>({
+  const owner = getCaseOwner(currentAppId);
+  const casePermissions = getCasePermissions(applicationService.capabilities, owner);
+
+  return createAction<ActionContext>({
     id: ACTION_ID,
     type: 'actionButton',
     getIconType: () => 'casesApp',
@@ -82,26 +88,11 @@ export const createAddToNewCaseLensAction = ({
         defaultMessage: 'Add to new case',
       }),
     isCompatible: async ({ embeddable }) =>
-      !isErrorEmbeddable(embeddable) && isLensEmbeddable(embeddable),
+      !isErrorEmbeddable(embeddable) &&
+      isLensEmbeddable(embeddable) &&
+      hasCasePermissions(casePermissions) &&
+      hasInput(embeddable),
     execute: async ({ embeddable }) => {
-      const { attributes, timeRange } = embeddable.getInput();
-      const owner = Object.values(OWNER_INFO)
-        .filter((info) => info.appId === currentAppId)
-        .map((i) => i.id);
-
-      const casePermissions = canUseCases(applicationService.capabilities)(
-        owner.length > 0 ? owner : undefined
-      );
-
-      if (
-        attributes == null ||
-        timeRange == null ||
-        !casePermissions.update ||
-        !casePermissions.read
-      ) {
-        return;
-      }
-
       const targetDomElement = document.createElement('div');
 
       const cleanupDom = () => {

@@ -90,16 +90,16 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           attachments,
         });
 
-        // if (props.onSuccess) {
-        //   props.onSuccess(theCase);
-        // }
+        if (props.onSuccess) {
+          props.onSuccess(theCase);
+        }
 
-        // casesToasts.showSuccessAttach({
-        //   theCase,
-        //   attachments,
-        //   title: props.successToaster?.title,
-        //   content: props.successToaster?.content,
-        // });
+        casesToasts.showSuccessAttach({
+          theCase,
+          attachments,
+          title: props.successToaster?.title,
+          content: props.successToaster?.content,
+        });
       } catch (error) {
         // error toast is handled
         // inside the createAttachments method
@@ -111,8 +111,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       closeModal,
       createAttachments,
       createNewCaseFlyout,
-      props.noAttachmentsToaster?.content,
-      props.noAttachmentsToaster?.title,
+      props,
       startTransaction,
     ]
   );
