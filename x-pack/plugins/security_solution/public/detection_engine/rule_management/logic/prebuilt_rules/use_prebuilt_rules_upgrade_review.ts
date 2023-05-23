@@ -16,16 +16,14 @@ import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../api/hooks/prebuil
  * A wrapper around useQuery provides default values to the underlying query,
  * like query key, abortion signal, and error handler.
  *
- * @param options - react-query options
  * @returns useQuery result
  */
-export const usePrebuiltRulesUpgradeReview = (
-  options?: UseQueryOptions<ReviewRuleUpgradeResponseBody, Error>
-) => {
+export const usePrebuiltRulesUpgradeReview = () => {
   const { addError } = useAppToasts();
 
-  return useFetchPrebuiltRulesUpgradeReviewQuery({
-    onError: (error: Error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
-    ...options,
-  });
+  return (
+    useFetchPrebuiltRulesUpgradeReviewQuery({
+      onError: (error: Error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
+    }).data?.attributes.rules ?? []
+  );
 };

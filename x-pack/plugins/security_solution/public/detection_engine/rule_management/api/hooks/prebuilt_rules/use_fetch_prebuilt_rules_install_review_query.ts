@@ -10,18 +10,23 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { reviewRuleInstall } from '../../api';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/detection_engine/prebuilt_rules/api/urls';
 import type { ReviewRuleInstallationResponseBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import { DEFAULT_QUERY_OPTIONS } from '../constants';
 
 export const REVIEW_RULE_INSTALLATION_QUERY_KEY = ['POST', REVIEW_RULE_INSTALLATION_URL];
 
 export const useFetchPrebuiltRulesInstallReviewQuery = (
-  options?: UseQueryOptions<ReviewRuleInstallationResponseBody, Error>
+  options?: UseQueryOptions<ReviewRuleInstallationResponseBody>
 ) => {
   return useQuery<ReviewRuleInstallationResponseBody>(
     REVIEW_RULE_INSTALLATION_QUERY_KEY,
     async ({ signal }) => {
       const response = await reviewRuleInstall({ signal });
       return response;
-    } // TODO: Pass along options
+    },
+    {
+      ...DEFAULT_QUERY_OPTIONS,
+      ...options,
+    }
   );
 };
 

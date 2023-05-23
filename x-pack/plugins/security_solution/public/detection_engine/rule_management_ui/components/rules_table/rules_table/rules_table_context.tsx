@@ -15,6 +15,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
+import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -38,8 +40,6 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
-import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
-import { useFetchPrebuiltRulesInstallReviewQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 
@@ -301,8 +301,12 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     }
   );
-  const rulesToUpgrade = useFetchPrebuiltRulesUpgradeReviewQuery().data?.attributes.rules || [];
-  const rulesToInstall = useFetchPrebuiltRulesInstallReviewQuery().data?.attributes.rules || [];
+  const rulesToUpgrade = usePrebuiltRulesUpgradeReview();
+  const rulesToInstall = usePrebuiltRulesInstallReview();
+
+  if (rulesToInstall.length > 0) {
+    debugger;
+  }
 
   // Fetch rules snooze settings
   const {
@@ -401,10 +405,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       actions,
     };
   }, [
+    rulesSnoozeSettings,
     rules,
     rulesToUpgrade,
     rulesToInstall,
-    rulesSnoozeSettings,
     isSnoozeSettingsLoading,
     isSnoozeSettingsFetching,
     isSnoozeSettingsFetchError,

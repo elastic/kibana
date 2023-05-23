@@ -21,7 +21,11 @@ export const useFetchPrebuiltRulesUpgradeReviewQuery = (
     async ({ signal }) => {
       const response = await reviewRuleUpgrade({ signal });
       return response;
-    } // TODO: Pass along options
+    },
+    {
+      ...DEFAULT_QUERY_OPTIONS,
+      ...options,
+    }
   );
 };
 
