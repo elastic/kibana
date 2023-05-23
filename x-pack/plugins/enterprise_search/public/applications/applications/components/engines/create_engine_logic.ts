@@ -18,8 +18,6 @@ import { ENGINES_PATH } from '../../routes';
 
 import { EnginesListLogic } from './engines_list_logic';
 
-const NAME_VALIDATION = new RegExp(/^[a-z0-9\-]+$/);
-
 export interface CreateEngineLogicActions {
   createEngine: () => void;
   createEngineRequest: CreateEngineApiLogicActions['makeRequest'];
@@ -37,7 +35,7 @@ export interface CreateEngineLogicValues {
   createEngineError?: typeof CreateEngineApiLogic.values.error;
   createEngineStatus: typeof CreateEngineApiLogic.values.status;
   engineName: string;
-  engineNameStatus: 'complete' | 'incomplete' | 'warning';
+  engineNameStatus: 'complete' | 'incomplete';
   formDisabled: boolean;
   indicesStatus: 'complete' | 'incomplete';
   selectedIndices: string[];
@@ -103,8 +101,7 @@ export const CreateEngineLogic = kea<
       () => [selectors.engineName],
       (engineName: string) => {
         if (engineName.length === 0) return 'incomplete';
-        if (NAME_VALIDATION.test(engineName)) return 'complete';
-        return 'warning';
+        return 'complete';
       },
     ],
     formDisabled: [
