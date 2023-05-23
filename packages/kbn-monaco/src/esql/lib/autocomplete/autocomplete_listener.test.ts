@@ -43,7 +43,17 @@ describe('autocomplete_listener', () => {
 
   describe('where', () => {
     testSuggestions('from a | where ', ['is_null', 'cidr_match', 'FieldIdentifier']);
-    testSuggestions('from a | where "field" ', ['==', '!=', '<', '>', '<=', '>=', 'like', 'rlike']);
+    testSuggestions('from a | where "field" ', [
+      '==',
+      '!=',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      'like',
+      'rlike',
+      'in',
+    ]);
     testSuggestions('from a | where "field" >= ', ['FieldIdentifier']);
     testSuggestions('from a | where "field" >= "field1" ', ['or', 'and', '|']);
     testSuggestions('from a | where "field" >= "field1" and ', ['FieldIdentifier']);
@@ -56,6 +66,7 @@ describe('autocomplete_listener', () => {
       '>=',
       'like',
       'rlike',
+      'in',
     ]);
     testSuggestions('from a | stats a=avg("field") | where a ', [
       '==',
@@ -66,6 +77,7 @@ describe('autocomplete_listener', () => {
       '>=',
       'like',
       'rlike',
+      'in',
     ]);
     testSuggestions('from a | stats a=avg("b") | where "c" ', [
       '==',
@@ -76,6 +88,7 @@ describe('autocomplete_listener', () => {
       '>=',
       'like',
       'rlike',
+      'in',
     ]);
     testSuggestions('from a | where "field" >= "field1" and  "field2 == ', ['FieldIdentifier']);
   });
@@ -128,8 +141,10 @@ describe('autocomplete_listener', () => {
       'substring',
       'starts_with',
       'split',
+      'to_string',
       'date_format',
       'date_trunc',
+      'auto_bucket',
       'is_finite',
       'is_infinite',
       'case',

@@ -98,8 +98,9 @@ LP : '(';
 OPENING_BRACKET : '[' -> pushMode(EXPRESSION), pushMode(EXPRESSION);
 CLOSING_BRACKET : ']' -> popMode, popMode;
 NOT : 'not';
-LIKE: 'like';
-RLIKE: 'rlike';
+LIKE: L I K E;
+RLIKE: R L I K E;
+IN: I N;
 NULL : 'null';
 OR : 'or';
 RP : ')';
@@ -146,6 +147,7 @@ MATH_FUNCTION
     | S T A R T S UNDERSCORE W I T H
     | D A T E UNDERSCORE F O R M A T
     | D A T E UNDERSCORE T R U N C
+    | A U T O UNDERSCORE B U C K E T
     | I S UNDERSCORE F I N I T E
     | I S UNDERSCORE I N F I N I T E
     | C A S E
@@ -155,6 +157,7 @@ MATH_FUNCTION
     | M V UNDERSCORE M A X
     | M V UNDERSCORE S U M
     | S P L I T
+    | T O UNDERSCORE S T R I N G
     ;
 
 UNARY_FUNCTION

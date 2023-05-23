@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { MonitorFields } from '../../../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../../../common/types/saved_objects';
 

@@ -42,11 +42,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  // non-sensitive
-  'visualize:enableLabs': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:heatmap:maxBuckets': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -448,10 +443,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:apmAWSLambdaRequestCostPerMillion': {
     type: 'integer',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:profilingElasticsearchPlugin': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {

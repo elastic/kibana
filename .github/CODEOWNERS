@@ -19,7 +19,6 @@ x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
-packages/kbn-alerts @elastic/security-solution
 packages/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
@@ -414,6 +413,7 @@ packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-management
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-app-services
+x-pack/packages/kbn-infra-forge @elastic/actionable-observability
 x-pack/plugins/infra @elastic/infra-monitoring-ui
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
 src/plugins/input_control_vis @elastic/kibana-presentation
@@ -458,6 +458,7 @@ packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
+x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
@@ -486,7 +487,7 @@ x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_onboarding @elastic/apm-ui
 x-pack/plugins/observability @elastic/actionable-observability
-x-pack/plugins/observability_shared @elastic/actionable-observability
+x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
 packages/kbn-optimizer @elastic/kibana-operations
@@ -578,7 +579,7 @@ packages/kbn-server-route-repository @elastic/apm-ui
 x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_observability @elastic/appex-sharedux
 packages/serverless/project_switcher @elastic/appex-sharedux
-x-pack/plugins/serverless_search @elastic/appex-sharedux
+x-pack/plugins/serverless_search @elastic/enterprise-search-frontend
 x-pack/plugins/serverless_security @elastic/security-solution
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
@@ -669,6 +670,8 @@ x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations
 packages/kbn-test-subj-selector @elastic/kibana-operations
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
+packages/kbn-text-based-editor @elastic/kibana-visualizations
+src/plugins/text_based_languages @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/plugins/threat_intelligence @elastic/protections-experience
@@ -791,16 +794,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/serverless_security/ @elastic/appex-sharedux
 
-### Observability Plugins
-
-# Observability Shared App
-x-pack/plugins/observability_shared @elastic/observability-ui
-
-# Observability App
-x-pack/plugins/observability @elastic/actionable-observability
-
-# Observability App > Overview page
-x-pack/plugins/observability/public/pages/overview @elastic/observability-ui
+### Observability packages
 
 # Observability App > Alert Details
 x-pack/packages/observability/alert_details @elastic/actionable-observability
@@ -845,13 +839,6 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/synthetics @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/field_value_suggestions @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/core_web_vitals @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/load_when_in_view @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/filter_value_label @elastic/uptime
-/x-pack/plugins/observability/public/utils/observability_data_views @elastic/uptime
-/x-pack/plugins/observability/e2e @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -859,7 +846,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
 # Observability onboarding tour
-/x-pack/plugins/observability/public/components/shared/tour @elastic/platform-onboarding
+/x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
 /x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
 
 ### END Observability Plugins
@@ -953,6 +940,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/.telemetryrc.json @elastic/kibana-core
 /src/plugins/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
 /x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
+x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @elastic/kibana-telemetry @shahinakmal
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization @elastic/kibana-core
@@ -1002,8 +990,6 @@ x-pack/test/observability_functional @elastic/actionable-observability
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
 # Security Solution
-/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
-/x-pack/test/security_solution_endpoint/ @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
@@ -1085,25 +1071,12 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
 
-## Security Solution sub teams - Detections and Response Alerts
-/x-pack/plugins/security_solution/common/detection_engine/schemas/alerts @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/common/field_maps @elastic/security-detections-response-alerts
-
-/x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/public/detections/pages/alerts @elastic/security-detections-response-alerts
-
-/x-pack/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detections-response-alerts
-
 ## Security Solution sub teams - Detection Rule Management
 /x-pack/plugins/security_solution/common/detection_engine/fleet_integrations @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_monitoring @elastic/security-detection-rule-management
-/x-pack/plugins/security_solution/common/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/common/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
@@ -1117,7 +1090,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detections/components/modals/ml_job_upgrade_modal @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detections/components/rules @elastic/security-detection-rule-management
-/x-pack/plugins/security_solution/public/detections/components/rules/rule_preview @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/public/detections/components/rules/rule_preview @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules @elastic/security-detection-rule-management
@@ -1127,49 +1100,61 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_management @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring @elastic/security-detection-rule-management
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/server/utils @elastic/security-detection-rule-management
 
-## Security Solution sub teams - Security Platform
+## Security Solution sub teams - Detection Engine
 
-/x-pack/plugins/security_solution/cypress/e2e/data_sources @elastic/security-solution-platform
-/x-pack/plugins/security_solution/cypress/e2e/exceptions @elastic/security-solution-platform
-/x-pack/plugins/security_solution/cypress/e2e/value_lists @elastic/security-solution-platform
+/x-pack/plugins/security_solution/common/detection_engine/schemas/alerts @elastic/security-detection-engine
+/x-pack/plugins/security_solution/common/field_maps @elastic/security-detection-engine
 
-/x-pack/plugins/security_solution/common/detection_engine/rule_exceptions @elastic/security-solution-platform
+/x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/detections/pages/alerts @elastic/security-detection-engine
 
-/x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-solution-platform
-/x-pack/plugins/security_solution/public/detection_engine/rule_exceptions_ui @elastic/security-solution-platform
-/x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
-/x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
-/x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-solution-platform
-/x-pack/plugins/security_solution/public/common/components/sourcerer @elastic/security-solution-platform
+/x-pack/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detection-engine
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detection-engine
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detection-engine
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detection-engine
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
 
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-solution-platform
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-solution-platform
-/x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-solution-platform
+/x-pack/plugins/security_solution/cypress/e2e/data_sources @elastic/security-detection-engine
+/x-pack/plugins/security_solution/cypress/e2e/exceptions @elastic/security-detection-engine
+/x-pack/plugins/security_solution/cypress/e2e/value_lists @elastic/security-detection-engine
+
+/x-pack/plugins/security_solution/common/detection_engine/rule_exceptions @elastic/security-detection-engine
+
+/x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/detection_engine/rule_exceptions_ui @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/exceptions @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/common/components/sourcerer @elastic/security-detection-engine
+
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-detection-engine
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-detection-engine
+/x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
-/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-solution-platform
+/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
 
 ## Security Solution cross teams ownership
 /x-pack/plugins/security_solution/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/cypress/helpers @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/plugins/security_solution/cypress/e2e/detection_rules @elastic/security-detection-rule-management @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/cypress/e2e/detection_rules @elastic/security-detection-rule-management @elastic/security-detection-engine
 /x-pack/plugins/security_solution/cypress/objects @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/cypress/plugins @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/cypress/screens/common @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/cypress/support @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/plugins/security_solution/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-solution-platform
+/x-pack/plugins/security_solution/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/common/ecs @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/common/test @elastic/security-detection-rule-management @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/common/test @elastic/security-detection-rule-management @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response
 /x-pack/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
 
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions @elastic/security-solution-platform @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions @elastic/security-detection-engine @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/server/routes @elastic/security-detections-response @elastic/security-threat-hunting
 
 ## Security Solution sub teams - security-defend-workflows
@@ -1183,7 +1168,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
@@ -1230,7 +1215,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/apm/**/*.scss @elastic/observability-design
 /x-pack/plugins/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
-/x-pack/plugins/observability/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design

@@ -40,12 +40,14 @@ describe('#checkAdditiveOnlyChange', () => {
     delete next.bar.properties.number;
 
     expect(() => checkAdditiveOnlyChange(log, current, next)).toThrowErrorMatchingInlineSnapshot(`
-      "Removing mapped properties is disallowed. Properties found in current mappings but not in next mappings:
+      "Removing mapped properties is disallowed >8.8. Found the following properties in current mappings but not in next mappings:
       [
         \\"foo.properties.text\\",
         \\"bar.properties.number\\",
         \\"foo.properties.object.properties.nestedText\\"
-      ]"
+      ]
+
+      Reach out to the Kibana core team if you have any questions."
     `);
   });
 
