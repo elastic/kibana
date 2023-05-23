@@ -11,8 +11,8 @@ export interface ConfigType {
   sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
   showNavLinks: boolean;
   ui: {
-    usersEnabled: boolean;
-    rolesEnabled: boolean;
-    roleMappingsEnabled: boolean;
+    userManagementEnabled: boolean;
+    roleManagementEnabled: boolean;
+    roleMappingManagementEnabled: boolean;
   };
 }

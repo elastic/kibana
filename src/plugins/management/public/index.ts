@@ -21,7 +21,6 @@ export type {
   ManagementSetup,
   ManagementStart,
   DefinedSections,
-  ClientConfigType,
 } from './types';
 
 export { MANAGEMENT_APP_ID } from '../common/contants';

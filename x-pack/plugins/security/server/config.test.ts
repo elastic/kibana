@@ -72,11 +72,6 @@ describe('config schema', () => {
         },
         "showInsecureClusterWarning": true,
         "showNavLinks": true,
-        "ui": Object {
-          "roleMappingsEnabled": true,
-          "rolesEnabled": true,
-          "usersEnabled": true,
-        },
       }
     `);
 
@@ -132,11 +127,6 @@ describe('config schema', () => {
         },
         "showInsecureClusterWarning": true,
         "showNavLinks": true,
-        "ui": Object {
-          "roleMappingsEnabled": true,
-          "rolesEnabled": true,
-          "usersEnabled": true,
-        },
       }
     `);
 
@@ -191,11 +181,6 @@ describe('config schema', () => {
         },
         "showInsecureClusterWarning": true,
         "showNavLinks": true,
-        "ui": Object {
-          "roleMappingsEnabled": true,
-          "rolesEnabled": true,
-          "usersEnabled": true,
-        },
       }
     `);
   });
