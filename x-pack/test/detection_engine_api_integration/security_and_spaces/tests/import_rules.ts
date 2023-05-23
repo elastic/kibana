@@ -20,7 +20,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteAllSignals,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
       it('should successfully import rules without actions when user has no actions privileges', async () => {
@@ -240,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

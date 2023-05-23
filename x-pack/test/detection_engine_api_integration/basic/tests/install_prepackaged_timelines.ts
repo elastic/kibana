@@ -13,7 +13,7 @@ import {
   createSignalsIndex,
   deleteAllRules,
   deleteAllTimelines,
-  deleteAllSignals,
+  deleteAllAlerts,
   waitFor,
 } from '../../utils';
 
@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await deleteAllTimelines(es);
       });

@@ -19,7 +19,7 @@ import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/d
 import {
   createRule,
   deleteAllRules,
-  deleteAllSignals,
+  deleteAllAlerts,
   getOpenSignals,
   getPreviewAlerts,
   previewRule,
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
-      await deleteAllSignals(supertest, log, es);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

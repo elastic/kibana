@@ -23,7 +23,7 @@ import {
   createSignalsIndex,
   deleteAllRules,
   createExceptionList,
-  deleteAllSignals,
+  deleteAllAlerts,
 } from '../../utils';
 import {
   deleteAllExceptions,
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await deleteAllExceptions(supertest, log);
-      await deleteAllSignals(supertest, log, es);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

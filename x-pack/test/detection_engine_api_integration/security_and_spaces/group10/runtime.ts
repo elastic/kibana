@@ -13,7 +13,7 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteAllSignals,
+  deleteAllAlerts,
   getRuleForSignalTesting,
   getSignalsById,
   waitForRuleSuccess,
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'

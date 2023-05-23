@@ -17,7 +17,7 @@ import {
   getRuleForSignalTesting,
   createRuleWithAuth,
   getThresholdRuleForSignalTesting,
-  deleteAllSignals,
+  deleteAllAlerts,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteAllSignals(supertest, log, es);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     beforeEach(async () => {

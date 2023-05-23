@@ -12,14 +12,16 @@ import { DETECTION_ENGINE_INDEX_URL } from '@kbn/security-solution-plugin/common
 import { countDownTest } from './count_down_test';
 
 /**
- * Deletes all alerts from a given index or indices, defaults to `.alerts-security.alerts-default`
+ * Deletes all alerts from a given index or indices, defaults to `.alerts-security.alerts-*`
  * For use inside of afterEach blocks of tests
  */
-export const deleteAllSignals = async (
+export const deleteAllAlerts = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   es: Client,
-  index: string[] = ['.alerts-security.alerts-default']
+  index: Array<'.alerts-security.alerts-*' | '.preview.alerts-security.alerts-*'> = [
+    '.alerts-security.alerts-*',
+  ]
 ): Promise<void> => {
   await countDownTest(
     async () => {
@@ -37,7 +39,7 @@ export const deleteAllSignals = async (
         passed: true,
       };
     },
-    'deleteAllSignals',
+    'deleteAllAlerts',
     log
   );
 };

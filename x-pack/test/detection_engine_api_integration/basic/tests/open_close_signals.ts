@@ -25,7 +25,7 @@ import {
   getSignalsByIds,
   waitForRuleSuccess,
   getRuleForSignalTesting,
-  deleteAllSignals,
+  deleteAllAlerts,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

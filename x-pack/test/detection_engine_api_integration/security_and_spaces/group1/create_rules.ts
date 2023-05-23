@@ -37,7 +37,7 @@ import {
   getThresholdRuleForSignalTesting,
   waitForRulePartialFailure,
   createRule,
-  deleteAllSignals,
+  deleteAllAlerts,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import {
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -516,7 +516,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
       afterEach(async () => {
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override'

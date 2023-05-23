@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllRules, deleteAllSignals, getStats } from '../../../../utils';
+import { createSignalsIndex, deleteAllRules, deleteAllAlerts, getStats } from '../../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteAllSignals(supertest, log, es);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

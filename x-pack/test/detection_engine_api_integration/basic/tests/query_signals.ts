@@ -12,7 +12,7 @@ import {
   ALERTS_AS_DATA_FIND_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getSignalStatus, createSignalsIndex, deleteAllSignals } from '../../utils';
+import { getSignalStatus, createSignalsIndex, deleteAllAlerts } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
 
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
       });
     });
 
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
       });
 
       it('should be able to filter old signals on host.os.name.caseless using runtime field', async () => {
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteAllSignals(supertest, log, es);
+        await deleteAllAlerts(supertest, log, es);
       });
 
       it('should be able to filter using a runtime field defined in the request', async () => {
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
 
-          await deleteAllSignals(supertest, log, es);
+          await deleteAllAlerts(supertest, log, es);
         });
 
         it('should not give errors when executing security solution histogram aggs', async () => {
@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await deleteAllSignals(supertest, log, es);
+          await deleteAllAlerts(supertest, log, es);
         });
       });
     });
