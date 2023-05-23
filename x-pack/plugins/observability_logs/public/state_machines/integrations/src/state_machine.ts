@@ -263,7 +263,7 @@ const searchIntegrationStreams = (
   const { nameQuery, sortOrder, integrationId } = search;
 
   return integrations.map((integration) => {
-    const id = getIntegrationId(integration)
+    const id = getIntegrationId(integration);
 
     if (id !== integrationId) {
       return integration;
@@ -277,5 +277,5 @@ const searchIntegrationStreams = (
         .sortBy('name', sortOrder)
         .build(),
     };
-  }
+  });
 };

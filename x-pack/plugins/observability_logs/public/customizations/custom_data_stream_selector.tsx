@@ -46,7 +46,12 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   } = useDataStreamsContext();
 
   const handleStreamSelection: DataStreamSelectionHandler = (dataStream) => {
-    return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream);
+    return stateContainer.actions.onCreateDefaultAdHocDataView({
+      // Invert the property because the API returns the index pattern as `name`
+      // and a readable name as `title`
+      name: dataStream.title,
+      title: dataStream.name,
+    });
   };
 
   const handleSearch: SearchHandler = (params) => {
@@ -61,6 +66,7 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
 
   return (
     <DataStreamSelector
+      key={dataView.id}
       dataStreams={dataStreams}
       dataStreamsError={dataStreamsError}
       integrations={integrations}

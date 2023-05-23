@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const parameters = {
-  docs: {
-    source: {
-      type: 'code', // without this, stories in mdx documents freeze the browser
-    },
-  },
-};
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+
+// Export mock package icon that doesn't trigger http requests
+export const PackageIcon = () => <EuiIcon type="package" style={{ marginRight: 8 }} />;
