@@ -58,6 +58,8 @@ describe('useUserProfileForm', () => {
     coreStart.http.post.mockReset().mockResolvedValue(undefined);
     coreStart.notifications.toasts.addDanger.mockReset();
     coreStart.notifications.toasts.addSuccess.mockReset();
+    coreStart.settings.client.get.mockReset();
+    coreStart.settings.client.isOverridden.mockReset();
   });
 
   it('should initialise form with values from user profile', () => {
@@ -254,8 +256,9 @@ describe('useUserProfileForm', () => {
           <UserProfile user={nonCloudUser} data={data} />
         </Providers>
       );
-
-      expect(testWrapper.exists('[data-test-subj="darkModeButton"]')).toBeTruthy();
+      const darkModeButton = testWrapper.find('EuiButtonGroup[data-test-subj="darkModeButton"]');
+      expect(darkModeButton).toBeTruthy();
+      expect(darkModeButton.getDOMNode()).not.toBeDisabled();
     });
 
     it('should not display if the User is a cloud user', () => {
@@ -278,7 +281,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists('[data-test-subj="darkModeButton"]')).toBeFalsy();
+      expect(testWrapper.exists('EuiButtonGroup[data-test-subj="darkModeButton"]')).toBeFalsy();
     });
 
     it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
@@ -305,6 +308,60 @@ describe('useUserProfileForm', () => {
         expect.objectContaining({ title: 'Profile updated' }),
         expect.objectContaining({ toastLifeTimeMs: 300000 })
       );
+    });
+
+    it('should be disabled if the theme has been set to `darkMode: true` in the config', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValueOnce(true);
+      coreStart.settings.client.isOverridden.mockReturnValueOnce(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const darkModeButton = testWrapper.find('EuiButtonGroup[data-test-subj="darkModeButton"]');
+      expect(darkModeButton).toBeTruthy();
+      expect(darkModeButton.getDOMNode()).toHaveProperty('disabled');
+    });
+
+    it('should be disabled if the theme has been set to `darkMode: false` in the config', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValueOnce(false);
+      coreStart.settings.client.isOverridden.mockReturnValueOnce(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const darkModeButton = testWrapper.find('EuiButtonGroup[data-test-subj="darkModeButton"]');
+      expect(darkModeButton).toBeTruthy();
+      expect(darkModeButton.getDOMNode()).toHaveProperty('disabled');
     });
   });
 });
