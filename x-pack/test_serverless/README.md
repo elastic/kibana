@@ -48,7 +48,7 @@ Test services and page objects from `x-pack/test/[api_integration|functional]`
 are available for reuse.
 
 Serverless specific services and page objects are implemented in
-`x-pack/test_serverless/[api_integration|functional]` only and may not be added
+`x-pack/test_serverless/[api_integration|functional|shared]` only and may not be added
 to or make modifications in `x-pack/test`.
 
 With this helper method reuse, we have to avoid name clashes and go with the

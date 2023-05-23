@@ -89,6 +89,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/observability-alert-details",
     "@kbn/custom-integrations-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/controls-plugin",
   ],
   "exclude": [
     "target/**/*",
