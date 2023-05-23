@@ -47,7 +47,6 @@ describe('UserActionsService: Finder', () => {
   };
 
   const mockPointInTimeFinder = (soFindRes: SavedObjectsFindResponse) => {
-    // console.log(soFindRes);
     unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
       close: jest.fn(),
       // @ts-expect-error

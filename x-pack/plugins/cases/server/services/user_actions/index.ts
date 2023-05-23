@@ -216,10 +216,9 @@ export class CaseUserActionService {
 
         const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
-        const fieldsDoc = {
-          ...res,
+        const fieldsDoc = Object.assign(res, {
           attributes: decodeRes,
-        };
+        });
 
         connectorFields.set(connectorId, fieldsDoc);
       }
