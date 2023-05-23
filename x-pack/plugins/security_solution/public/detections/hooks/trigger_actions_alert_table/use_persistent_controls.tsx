@@ -36,7 +36,9 @@ export const getPersistentControlsHook = (tableId: TableId) => {
     } = useKibana();
 
     const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-    const group = useDeepEqualSelector((state) => groupIdSelector()(state, tableId));
+    const { options } = useDeepEqualSelector((state) => groupIdSelector()(state, tableId)) ?? {
+      options: [],
+    };
 
     const trackGroupChange = useCallback(
       (groupSelection: string) => {
@@ -61,7 +63,7 @@ export const getPersistentControlsHook = (tableId: TableId) => {
       groupingId: tableId,
       onGroupChange,
       fields: indexPattern.fields,
-      defaultGroupingOptions: group.options,
+      defaultGroupingOptions: options,
       maxGroupingLevels: 3,
     });
 
