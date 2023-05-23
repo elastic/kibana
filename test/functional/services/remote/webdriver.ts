@@ -259,19 +259,20 @@ async function attemptToCreateCommand(
           };
         }
 
-        if (process.platform === 'linux') {
-          const session = await new Builder()
-            .forBrowser(browserType)
-            .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).setHostname('::1'))
-            .build();
-          return {
-            session,
-            consoleLog$: Rx.EMPTY,
-          };
-        }
+        // if (process.platform === 'linux') {
+        firefoxOptions.addArguments('--host').addArguments('::1');
+        const session = await new Builder()
+          .forBrowser(browserType)
+          .setFirefoxOptions(firefoxOptions)
+          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+          .build();
+        return {
+          session,
+          consoleLog$: Rx.EMPTY,
+        };
+        // }
 
-        log.error(`not starting driver`);
+        // log.error(`not starting driver`);
 
         // const { input, chunk$, cleanup } = await createStdoutSocket();
         // lifecycle.cleanup.add(cleanup);
