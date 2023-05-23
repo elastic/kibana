@@ -153,26 +153,26 @@ const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> | und
   normalizedAppLinksUpdater$.getValue()[id];
 
 const processAppLinks = (appLinks: AppLinkItems, linksPermissions: LinksPermissions): LinkItem[] =>
-  appLinks.reduce<LinkItem[]>((acc, appLink) => {
-    if (!isLinkAllowed(appLink, linksPermissions)) {
+  appLinks.reduce<LinkItem[]>((acc, { links, ...appLinkWithoutSublinks }) => {
+    if (!isLinkAllowed(appLinkWithoutSublinks, linksPermissions)) {
       return acc;
     }
-    if (!hasCapabilities(linksPermissions.capabilities, appLink.capabilities)) {
-      if (linksPermissions.upselling.isPageUpsellable(appLink.id)) {
-        acc.push({ ...appLink, unauthorized: true });
+    if (!hasCapabilities(linksPermissions.capabilities, appLinkWithoutSublinks.capabilities)) {
+      if (linksPermissions.upselling.isPageUpsellable(appLinkWithoutSublinks.id)) {
+        acc.push({ ...appLinkWithoutSublinks, unauthorized: true });
       }
       return acc; // not adding sub-links for links that are not authorized
     }
 
-    if (appLink.links) {
-      const childrenLinks = processAppLinks(appLink.links, linksPermissions);
+    const resultAppLink: LinkItem = appLinkWithoutSublinks;
+    if (links) {
+      const childrenLinks = processAppLinks(links, linksPermissions);
       if (childrenLinks.length > 0) {
-        appLink.links = childrenLinks;
-      } else {
-        delete appLink.links;
+        resultAppLink.links = childrenLinks;
       }
     }
-    acc.push(appLink);
+
+    acc.push(resultAppLink);
     return acc;
   }, []);
 
