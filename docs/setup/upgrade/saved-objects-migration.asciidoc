@@ -63,3 +63,11 @@ Starting on 8.6.0, index names aren't necessarily aligned with the deployed {kib
 * `.kibana_task_manager_8.7.0_001` index, with `.kibana_task_manager` and `.kibana_task_manager_8.8.0` aliases.
 
 Starting on 8.8.0, {kib} splits the main saved object index into multiple ones, as depicted on the table above. When upgrading from a previous version, the {kib} migration process will reindex some saved objects from the `.kibana` index into the new indices, depending on their types. Note that the `.kibana` index still exists, and it continues to store multiple saved object types.
+
+[float]
+[[upgrade-migrations-old-indices]]
+==== Old {kib} indices
+
+As a deployment is gradually upgraded, multiple {kib} indices are created in {es}: (`.kibana_1`, `.kibana_2`, `.kibana_7.12.0_001`, `.kibana_7.13.0_001`, `.kibana_8.0.0_001` etc).
+{kib} only uses those indices that the _default_ and _version_ aliases point to.
+The other, older {kib} saved object indices can be safely deleted, but are left around as a matter of historical record, and to facilitate rolling {kib} back to a previous version.
