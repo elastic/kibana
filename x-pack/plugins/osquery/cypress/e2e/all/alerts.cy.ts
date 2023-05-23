@@ -143,11 +143,10 @@ describe('Alert Event Details', () => {
         cy.contains('Run a set of queries in a pack').click();
       });
       cy.contains('Save changes').click();
-      cy.getBySel('response-actions-error')
-        .within(() => {
-          cy.contains(' Pack is a required field');
-        })
-        .should('exist');
+
+      cy.getBySel('response-actions-error').within(() => {
+        cy.contains('Pack is a required field');
+      });
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
         cy.contains('Pack is a required field');
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
@@ -161,7 +160,6 @@ describe('Alert Event Details', () => {
         cy.contains('Advanced').click();
         typeInECSFieldInput('message{downArrow}{enter}');
         cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
-        cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
       });
 
       cy.getBySel('ruleEditSubmitButton').click();
@@ -406,7 +404,7 @@ describe('Alert Event Details', () => {
       cy.getBySel('expand-event').first().click({ force: true });
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
-      cy.contains('Run a set of queries in a pack').wait(500).click();
+      cy.contains('Run a set of queries in a pack').click();
       cy.getBySel('select-live-pack').within(() => {
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
       });
@@ -683,7 +681,6 @@ describe('Alert Event Details', () => {
       inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
         parseSpecialCharSequences: false,
       });
-      cy.wait(1000);
       submitQuery();
       cy.getBySel('flyout-body-osquery').within(() => {
         // at least 2 agents should have responded, sometimes it takes a while for the agents to respond

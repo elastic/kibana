@@ -15,8 +15,7 @@ export const preparePack = (packName: string) => {
   cy.contains('Packs').click();
   cy.getBySel('tablePaginationPopoverButton').click();
   cy.getBySel('tablePagination-50-rows').click();
-  const createdPack = cy.contains(packName);
-  createdPack.click();
+  cy.contains(packName).click();
 };
 
 export const deactivatePack = (packName: string) => {

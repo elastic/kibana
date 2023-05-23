@@ -80,7 +80,6 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.waitForReact(1000);
     cy.contains('New live query').should('not.be.disabled');
     cy.contains(liveQueryQuery);
-    cy.wait(1000);
     cy.react('EuiTableBody').first().react('CustomItemAction').first().click();
     cy.contains(savedQueryName);
     submitQuery();

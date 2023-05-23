@@ -37,8 +37,9 @@ describe('ALL - Timelines', () => {
           .first()
           .within(() => {
             cy.get(`[data-is-loading="true"]`).should('not.exist');
-          })
-          .click();
+          });
+
+        cy.getBySel('expand-event').first().click();
       });
     takeOsqueryActionWithParams();
   });

@@ -119,7 +119,7 @@ describe('ALL - Add Integration', () => {
         cy.contains(policyName);
       });
       cy.getBySel('packagePolicyNameInput')
-        .wait(500)
+        // .wait(500)
         .type(`{selectall}{backspace}${integrationName}`);
       cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
       cy.getBySel('confirmModalCancelButton').click();
@@ -174,7 +174,8 @@ describe('ALL - Add Integration', () => {
         `${policyName} {downArrow}{enter}{esc}`
       );
       findAndClickButton('Add query');
-      cy.getBySel('savedQuerySelect').click().type('{downArrow}{enter}');
+      cy.getBySel('savedQuerySelect').click();
+      cy.getBySel('savedQuerySelect').type('{downArrow}{enter}');
       cy.contains(/^Save$/).click();
       cy.contains(/^Save pack$/).click();
       cy.contains(`Successfully created "${packName}" pack`).click();
