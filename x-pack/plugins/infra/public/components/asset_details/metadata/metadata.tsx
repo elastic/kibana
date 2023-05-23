@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import type { MetricsTimeInput } from '../../../pages/metrics/metric_detail/hooks/use_metrics_time';
-import { useMetadata } from '../../../pages/metrics/metric_detail/hooks/use_metadata';
+import { useMetadata } from '../hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
