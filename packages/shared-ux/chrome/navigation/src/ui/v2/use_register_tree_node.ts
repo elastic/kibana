@@ -17,8 +17,8 @@ import { useNavigationGroup } from './components/navigation_group';
  */
 export const useRegisterTreeNode = () => {
   const root = useNavigation();
-  const parent = useNavigationGroup(false);
-  const register = parent ? parent.register : root.register;
+  const group = useNavigationGroup(false);
+  const register = group ? group.register : root.register;
 
   return useMemo(
     () => ({

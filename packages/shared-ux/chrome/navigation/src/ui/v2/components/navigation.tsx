@@ -21,6 +21,7 @@ import { useNavigation as useNavigationServices } from '../../../services';
 import { InternalNavigationNode, RegisterFunction, UnRegisterFunction } from '../types';
 import { CloudLink } from './cloud_link';
 import { NavigationBucket } from './navigation_bucket';
+import { NavigationFooter } from './navigation_footer';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
 import { NavigationUI } from './navigation_ui';
@@ -28,6 +29,7 @@ import { RecentlyAccessed } from './recently_accessed';
 
 interface Context {
   register: RegisterFunction;
+  updateFooterChildren: (children: ReactNode) => void;
 }
 
 const NavigationContext = createContext<Context>({
@@ -35,6 +37,7 @@ const NavigationContext = createContext<Context>({
     unregister: () => {},
     path: [],
   }),
+  updateFooterChildren: () => {},
 });
 
 interface Props {
@@ -55,6 +58,7 @@ export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
   const [navigationItems, setNavigationItems] = useState<Record<string, InternalNavigationNode>>(
     {}
   );
+  const [footerChildren, setFooterChildren] = useState<ReactNode>(null);
 
   const unregister: UnRegisterFunction = useCallback(
     (id: string) => {
@@ -93,6 +97,7 @@ export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
   const contextValue = useMemo<Context>(
     () => ({
       register,
+      updateFooterChildren: setFooterChildren,
     }),
     [register]
   );
@@ -110,7 +115,9 @@ export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
 
   return (
     <NavigationContext.Provider value={contextValue}>
-      <NavigationUI homeRef={homeRef}>{children}</NavigationUI>
+      <NavigationUI homeRef={homeRef} footerChildren={footerChildren}>
+        {children}
+      </NavigationUI>
     </NavigationContext.Provider>
   );
 }
@@ -125,6 +132,7 @@ export function useNavigation() {
 
 Navigation.Group = NavigationGroup;
 Navigation.Item = NavigationItem;
+Navigation.Footer = NavigationFooter;
 Navigation.CloudLink = CloudLink;
 Navigation.RecentlyAccessed = RecentlyAccessed;
 Navigation.Bucket = NavigationBucket;

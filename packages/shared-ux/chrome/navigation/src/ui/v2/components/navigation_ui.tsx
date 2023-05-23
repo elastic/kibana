@@ -12,9 +12,10 @@ import { NavHeader } from './navigation_header';
 
 interface Props {
   homeRef: string;
+  footerChildren?: React.ReactNode;
 }
 
-export const NavigationUI: FC<Props> = ({ children, homeRef }) => {
+export const NavigationUI: FC<Props> = ({ children, footerChildren, homeRef }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -31,5 +32,8 @@ export const NavigationUI: FC<Props> = ({ children, homeRef }) => {
 
         {children}
       </EuiFlexItem>
+
+      {footerChildren && <EuiFlexItem grow={false}>{footerChildren}</EuiFlexItem>}
+    </EuiFlexGroup>
   );
 };
