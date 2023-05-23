@@ -74,6 +74,16 @@ export async function SecuritySolutionCypressCliTestRunnerCI(
   });
 }
 
+export async function SecuritySolutionCypressCliIvestigationsTestRunner(
+  context: FtrProviderContext,
+  totalCiJobs: number,
+  ciJobNumber: number
+  ) {
+  const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:investigations:run', {
+    SPEC_LIST: integrations.join(','),
+  });
+}
 export async function SecuritySolutionCypressCliResponseOpsTestRunner(context: FtrProviderContext) {
   return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:respops');
 }
@@ -93,13 +103,6 @@ export async function SecuritySolutionCypressCliFirefoxTestRunner(context: FtrPr
 export async function SecuritySolutionCypressVisualTestRunner(context: FtrProviderContext) {
   return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:open');
 }
-
-export async function SecuritySolutionCypressCliIvestigationsTestRunner(
-  context: FtrProviderContext
-) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:investigations:run');
-}
-
 export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
 
