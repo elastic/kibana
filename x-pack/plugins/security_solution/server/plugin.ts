@@ -56,7 +56,6 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
-// import { getCasesKibanaFeature, getSecuritySolutionKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import type {
   CreateRuleOptions,
