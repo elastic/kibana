@@ -249,13 +249,13 @@ export const addNewCase = () => {
 };
 
 export const attachTimelineToNewCase = () => {
-  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click({ force: true });
-  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
+  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click();
 };
 
 export const attachTimelineToExistingCase = () => {
-  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click({ force: true });
-  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
+  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click();
 };
 
 const clickIdHoverActionOverflowButton = () => {
