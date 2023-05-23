@@ -52,7 +52,10 @@ import {
 import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import {
+  CustomIntegrationsPluginSetup,
+  CustomIntegrationsPluginStart,
+} from '@kbn/custom-integrations-plugin/server';
 import { APMConfig } from '.';
 import { ApmIndicesConfig } from './routes/settings/apm_indices/get_apm_indices';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -112,4 +115,5 @@ export interface APMPluginStartDependencies {
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
+  customIntegrations?: CustomIntegrationsPluginStart;
 }
