@@ -105,15 +105,7 @@ export const DataDriftDetectionPage: FC = () => {
     [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
-  const {
-    documentStats,
-    timefilter,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-  } = useData(
+  const { documentStats, timefilter, searchQueryLanguage, searchString, searchQuery } = useData(
     { selectedDataView: dataView, selectedSavedSearch },
     'data_drift',
     aiopsListState,
@@ -121,7 +113,6 @@ export const DataDriftDetectionPage: FC = () => {
     currentSelectedSignificantTerm,
     currentSelectedGroup
   );
-  console.log(`--@@documentStats`, documentStats);
 
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
@@ -143,7 +134,6 @@ export const DataDriftDetectionPage: FC = () => {
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
-  console.log(`--@@windowParameters`, windowParameters);
   useEffect(() => {
     if (globalState?.time !== undefined) {
       timefilter.setTime({

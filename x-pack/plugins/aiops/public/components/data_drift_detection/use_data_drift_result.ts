@@ -21,6 +21,7 @@ import {
   DRIFT_P_VALUE_THRESHOLD,
   CRITICAL_VALUES_TABLE,
   SIGNIFICANCE_LEVELS,
+  DATA_DRIFT_TYPE,
 } from './constants';
 
 import {
@@ -36,15 +37,15 @@ import {
   TimeRange,
 } from './types';
 
-export const getDataDriftType = (kibanaType: string): 'numeric' | 'categoric' | 'unsupported' => {
+export const getDataDriftType = (kibanaType: string): DataDriftField['type'] => {
   switch (kibanaType) {
     case 'number':
-      return 'numeric';
+      return DATA_DRIFT_TYPE.NUMERIC;
     case 'boolean':
     case 'string':
-      return 'categoric';
+      return DATA_DRIFT_TYPE.CATEGORICAL;
     default:
-      return 'unsupported';
+      return DATA_DRIFT_TYPE.UNSUPPORTED;
   }
 };
 
@@ -79,25 +80,6 @@ export const computeChi2PValue = (
     ])
   ).sort();
 
-  // // Calculate the expected and observed frequencies for each key
-  // const frequencies: { [key: string]: { observed: number; expected: number } } = {};
-  // // let totalBaseline: number = 0;
-  // // let totalDrifted: number = 0;
-  // allKeys.forEach((key) => {
-  //   const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
-  //   const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
-
-  //   const observedBaseline: number = baselineTerm ? baselineTerm.doc_count : 0;
-  //   const observedDrifted: number = driftedTerm ? driftedTerm.doc_count : 0;
-  //   frequencies[key] = {
-  //     observed: observedDrifted,
-  //     expected: observedBaseline,
-  //   };
-
-  //   // totalBaseline += observedBaseline;
-  //   // totalDrifted += observedDrifted;
-  // });
-
   // Calculate the chi-squared statistic and degrees of freedom
   let chiSquared: number = 0;
   const degreesOfFreedom: number = allKeys.length - 1;
@@ -105,8 +87,8 @@ export const computeChi2PValue = (
     const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
     const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
 
-    const observed: number = driftedTerm ? driftedTerm.percentage : 0;
-    const expected: number = baselineTerm ? baselineTerm.percentage : 0;
+    const observed: number = driftedTerm?.percentage ?? 0;
+    const expected: number = baselineTerm?.percentage ?? 0;
     chiSquared += Math.pow(observed - expected, 2) / (expected > 0 ? expected : 1e-6); // Prevent divide by zero
   });
 
@@ -270,21 +252,13 @@ const processDataDriftResult = (
 };
 export const useFetchDataDriftResult = ({
   fields,
-  referenceDataView,
-  productionDataView,
+  currentDataView,
   timeRanges,
 }: {
   fields?: DataDriftField[];
-  referenceDataView?: DataView;
-  productionDataView?: DataView;
+  currentDataView?: DataView;
   timeRanges?: { reference: TimeRange; production: TimeRange };
 } = {}) => {
-  console.log(`--@@useFetchDataDriftResult`, {
-    fields,
-    referenceDataView,
-    productionDataView,
-    timeRanges,
-  });
   const dataSearch = useDataSearch();
   const [result, setResult] = useState<Result<Feature[]>>({
     data: undefined,
@@ -292,332 +266,310 @@ export const useFetchDataDriftResult = ({
     error: undefined,
   });
 
-  useEffect(() => {
-    let controller: AbortController = new AbortController();
+  useEffect(
+    () => {
+      let controller: AbortController = new AbortController();
 
-    const doFetchEsRequest = async function () {
-      console.log(`--@@doFetchEsRequest called`);
-      controller.abort();
+      const doFetchEsRequest = async function () {
+        controller.abort();
 
-      setResult({ data: undefined, status: FETCH_STATUS.NOT_INITIATED, error: undefined });
+        setResult({ data: undefined, status: FETCH_STATUS.NOT_INITIATED, error: undefined });
 
-      controller = new AbortController();
+        controller = new AbortController();
 
-      const signal = controller.signal;
+        const signal = controller.signal;
 
-      if (!fields || !referenceDataView || !productionDataView) return;
+        if (!fields || !currentDataView) return;
 
-      setResult({ data: undefined, status: FETCH_STATUS.LOADING, error: undefined });
+        setResult({ data: undefined, status: FETCH_STATUS.LOADING, error: undefined });
 
-      const referenceIndex = referenceDataView?.getIndexPattern();
-      const productionIndex = productionDataView?.getIndexPattern();
+        // Place holder for when there might be difference data views in the future
+        const referenceIndex = currentDataView?.getIndexPattern();
+        const productionIndex = referenceIndex;
 
-      const referenceDatetimeField = referenceDataView?.timeFieldName;
-      const productionDatetimeField = productionDataView?.timeFieldName;
+        const referenceDatetimeField = currentDataView?.timeFieldName;
+        const productionDatetimeField = referenceDatetimeField;
 
-      let refRangeFilter;
-      if (
-        referenceDatetimeField !== undefined &&
-        timeRanges?.reference &&
-        isPopulatedObject(timeRanges?.reference, ['start', 'end'])
-      ) {
-        refRangeFilter = {
-          range: {
-            [referenceDatetimeField]: {
-              gte: timeRanges.reference.start,
-              lte: timeRanges.reference.end,
-            },
-          },
-        };
-      }
-
-      try {
-        const baselineRequest = {
-          index: referenceIndex,
-          body: {
-            size: 0,
-            ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
-            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-          },
-        };
-
-        console.log(`--@@baselineRequest`, baselineRequest);
-
-        // for each field with type "numeric", add a percentiles agg to the request
-        for (const { field, type } of fields) {
-          // if the field is numeric, add a percentiles and stats aggregations to the request
-          if (type === 'numeric') {
-            baselineRequest.body.aggs[`${field}_percentiles`] = {
-              percentiles: {
-                field,
-                percents,
-              },
-            };
-            baselineRequest.body.aggs[`${field}_stats`] = {
-              stats: {
-                field,
-              },
-            };
-          }
-          // if the field is categorical, add a terms aggregation to the request
-          if (type === 'categoric') {
-            baselineRequest.body.aggs[`${field}_terms`] = {
-              terms: {
-                field,
-                size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
-              },
-            };
-          }
-        }
-
-        console.log(baselineRequest);
-
-        const baselineResponse = await dataSearch(baselineRequest, signal);
-
-        console.log(baselineResponse);
-
-        if (!baselineResponse.aggregations) {
-          setResult({
-            data: undefined,
-            status: FETCH_STATUS.FAILURE,
-            error: `Unable to fetch percentiles data from ${referenceIndex}`,
-          });
-          return;
-        }
-
-        let prodRangeFilter;
+        let refRangeFilter;
         if (
-          productionDatetimeField !== undefined &&
-          timeRanges?.production &&
-          isPopulatedObject(timeRanges?.production, ['start', 'end'])
+          referenceDatetimeField !== undefined &&
+          timeRanges?.reference &&
+          isPopulatedObject(timeRanges?.reference, ['start', 'end'])
         ) {
-          prodRangeFilter = {
+          refRangeFilter = {
             range: {
-              [productionDatetimeField]: {
-                gte: timeRanges?.production.start,
-                lte: timeRanges.production.end,
+              [referenceDatetimeField]: {
+                gte: timeRanges.reference.start,
+                lte: timeRanges.reference.end,
               },
             },
           };
         }
 
-        const driftedRequest = {
-          index: productionIndex,
-          body: {
-            size: 0,
-            ...(prodRangeFilter ? { query: { bool: { filter: [prodRangeFilter] } } } : {}),
-            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-          },
-        };
+        try {
+          const baselineRequest = {
+            index: referenceIndex,
+            body: {
+              size: 0,
+              ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
+              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+            },
+          };
 
-        console.log(`--@@driftedRequest`, driftedRequest);
+          // for each field with type "numeric", add a percentiles agg to the request
+          for (const { field, type } of fields) {
+            // if the field is numeric, add a percentiles and stats aggregations to the request
+            if (type === DATA_DRIFT_TYPE.NUMERIC) {
+              baselineRequest.body.aggs[`${field}_percentiles`] = {
+                percentiles: {
+                  field,
+                  percents,
+                },
+              };
+              baselineRequest.body.aggs[`${field}_stats`] = {
+                stats: {
+                  field,
+                },
+              };
+            }
+            // if the field is categorical, add a terms aggregation to the request
+            if (type === DATA_DRIFT_TYPE.CATEGORICAL) {
+              baselineRequest.body.aggs[`${field}_terms`] = {
+                terms: {
+                  field,
+                  size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
+                },
+              };
+            }
+          }
 
-        // retrieve p-values for each numeric field
-        for (const { field, type } of fields) {
-          if (type === 'numeric') {
-            // create ranges based on percentiles
-            const percentiles = Object.values<number>(
-              baselineResponse.aggregations.numeric_unchangeable_percentiles?.values
-            );
-            // Result is
-            const ranges: Array<{ from?: number; to?: number }> = [];
-            percentiles.forEach((val: number, idx) => {
-              if (idx === 0) {
-                ranges.push({ to: val });
-              } else if (idx === percentiles.length - 1) {
-                ranges.push({ from: val });
-              } else {
-                ranges.push({ from: percentiles[idx - 1], to: val });
-              }
+          const baselineResponse = await dataSearch(baselineRequest, signal);
+
+          if (!baselineResponse.aggregations) {
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: `Unable to fetch percentiles data from ${referenceIndex}`,
             });
-            // add range and bucket_count_ks_test to the request
-            driftedRequest.body.aggs[`${field}_ranges`] = {
+            return;
+          }
+
+          let prodRangeFilter;
+          if (
+            productionDatetimeField !== undefined &&
+            timeRanges?.production &&
+            isPopulatedObject(timeRanges?.production, ['start', 'end'])
+          ) {
+            prodRangeFilter = {
               range: {
-                field,
-                ranges,
-              },
-            };
-            driftedRequest.body.aggs[`${field}_ks_test`] = {
-              bucket_count_ks_test: {
-                buckets_path: `${field}_ranges>_count`,
-                alternative: ['two_sided'],
-              },
-            };
-            // add stats aggregation to the request
-            driftedRequest.body.aggs[`${field}_stats`] = {
-              stats: {
-                field,
-              },
-            };
-          }
-          // if feature is categoric perform terms aggregation
-          if (type === 'categoric') {
-            driftedRequest.body.aggs[`${field}_terms`] = {
-              terms: {
-                field,
-                size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
-              },
-            };
-          }
-        }
-
-        console.log('Drifted request', driftedRequest);
-
-        const driftedResp = await dataSearch(driftedRequest, signal);
-
-        console.log('Drifted response', driftedResp);
-
-        if (!driftedResp.aggregations) {
-          setResult({
-            data: undefined,
-            status: FETCH_STATUS.FAILURE,
-            error: `Unable to fetch drift data from ${productionIndex}`,
-          });
-          return;
-        }
-
-        const referenceHistogramRequest = {
-          index: referenceIndex,
-          body: {
-            size: 0,
-            ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
-            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-          },
-        };
-
-        const productionHistogramRequest = {
-          index: productionIndex,
-          body: {
-            size: 0,
-            ...(prodRangeFilter ? { query: { bool: { filter: [prodRangeFilter] } } } : {}),
-            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-          },
-        };
-
-        const fieldRange: { [field: string]: Range } = {};
-
-        for (const { field, type } of fields) {
-          // add histogram aggregation with min and max from baseline
-          if (type === 'numeric') {
-            const numBins = 10;
-            const min = Math.min(
-              baselineResponse.aggregations[`${field}_stats`].min,
-              driftedResp.aggregations[`${field}_stats`].min
-            );
-            const max = Math.max(
-              baselineResponse.aggregations[`${field}_stats`].max,
-              driftedResp.aggregations[`${field}_stats`].max
-            );
-            const interval = (max - min) / numBins;
-            const offset = min;
-            fieldRange[field] = { min, max, interval };
-            referenceHistogramRequest.body.aggs[`${field}_histogram`] = {
-              histogram: {
-                field,
-                interval,
-                offset,
-                extended_bounds: {
-                  min,
-                  max,
-                },
-              },
-            };
-            productionHistogramRequest.body.aggs[`${field}_histogram`] = {
-              histogram: {
-                field,
-                interval,
-                offset,
-                extended_bounds: {
-                  min,
-                  max,
+                [productionDatetimeField]: {
+                  gte: timeRanges?.production.start,
+                  lte: timeRanges.production.end,
                 },
               },
             };
           }
-        }
 
-        console.log('Reference histogram request', referenceHistogramRequest);
-        console.log('Production histogram request', productionHistogramRequest);
+          const driftedRequest = {
+            index: productionIndex,
+            body: {
+              size: 0,
+              ...(prodRangeFilter ? { query: { bool: { filter: [prodRangeFilter] } } } : {}),
+              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+            },
+          };
 
-        const productionHistogramResponse = await dataSearch(productionHistogramRequest, signal);
+          // retrieve p-values for each numeric field
+          for (const { field, type } of fields) {
+            if (type === DATA_DRIFT_TYPE.NUMERIC) {
+              // create ranges based on percentiles
+              const percentiles = Object.values<number>(
+                baselineResponse.aggregations.numeric_unchangeable_percentiles?.values
+              );
+              // Result is
+              const ranges: Array<{ from?: number; to?: number }> = [];
+              percentiles.forEach((val: number, idx) => {
+                if (idx === 0) {
+                  ranges.push({ to: val });
+                } else if (idx === percentiles.length - 1) {
+                  ranges.push({ from: val });
+                } else {
+                  ranges.push({ from: percentiles[idx - 1], to: val });
+                }
+              });
+              // add range and bucket_count_ks_test to the request
+              driftedRequest.body.aggs[`${field}_ranges`] = {
+                range: {
+                  field,
+                  ranges,
+                },
+              };
+              driftedRequest.body.aggs[`${field}_ks_test`] = {
+                bucket_count_ks_test: {
+                  buckets_path: `${field}_ranges>_count`,
+                  alternative: ['two_sided'],
+                },
+              };
+              // add stats aggregation to the request
+              driftedRequest.body.aggs[`${field}_stats`] = {
+                stats: {
+                  field,
+                },
+              };
+            }
+            // if feature is categoric perform terms aggregation
+            if (type === DATA_DRIFT_TYPE.CATEGORICAL) {
+              driftedRequest.body.aggs[`${field}_terms`] = {
+                terms: {
+                  field,
+                  size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
+                },
+              };
+            }
+          }
 
-        console.log('Production histogram response', productionHistogramResponse);
+          const driftedResp = await dataSearch(driftedRequest, signal);
 
-        if (!productionHistogramResponse.aggregations) {
+          if (!driftedResp.aggregations) {
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: `Unable to fetch drift data from ${productionIndex}`,
+            });
+            return;
+          }
+
+          const referenceHistogramRequest = {
+            index: referenceIndex,
+            body: {
+              size: 0,
+              ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
+              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+            },
+          };
+
+          const productionHistogramRequest = {
+            index: productionIndex,
+            body: {
+              size: 0,
+              ...(prodRangeFilter ? { query: { bool: { filter: [prodRangeFilter] } } } : {}),
+              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+            },
+          };
+
+          const fieldRange: { [field: string]: Range } = {};
+
+          for (const { field, type } of fields) {
+            // add histogram aggregation with min and max from baseline
+            if (type === DATA_DRIFT_TYPE.NUMERIC) {
+              const numBins = 10;
+              const min = Math.min(
+                baselineResponse.aggregations[`${field}_stats`].min,
+                driftedResp.aggregations[`${field}_stats`].min
+              );
+              const max = Math.max(
+                baselineResponse.aggregations[`${field}_stats`].max,
+                driftedResp.aggregations[`${field}_stats`].max
+              );
+              const interval = (max - min) / numBins;
+              const offset = min;
+              fieldRange[field] = { min, max, interval };
+              referenceHistogramRequest.body.aggs[`${field}_histogram`] = {
+                histogram: {
+                  field,
+                  interval,
+                  offset,
+                  extended_bounds: {
+                    min,
+                    max,
+                  },
+                },
+              };
+              productionHistogramRequest.body.aggs[`${field}_histogram`] = {
+                histogram: {
+                  field,
+                  interval,
+                  offset,
+                  extended_bounds: {
+                    min,
+                    max,
+                  },
+                },
+              };
+            }
+          }
+
+          const productionHistogramResponse = await dataSearch(productionHistogramRequest, signal);
+
+          if (!productionHistogramResponse.aggregations) {
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: `Unable to fetch histogram data from ${productionIndex}`,
+            });
+            return;
+          }
+
+          const referenceHistogramResponse = await dataSearch(referenceHistogramRequest, signal);
+
+          if (!referenceHistogramResponse.aggregations) {
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: `Unable to fetch histogram data from ${referenceIndex}`,
+            });
+            return;
+          }
+
+          // retrieve aggregation results from driftedResp for different fields and add to data
+
+          const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
+          for (const { field, type } of fields) {
+            if (type === DATA_DRIFT_TYPE.NUMERIC) {
+              data[field] = {
+                type: DATA_DRIFT_TYPE.NUMERIC,
+                pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
+                range: fieldRange[field],
+                referenceHistogram:
+                  referenceHistogramResponse.aggregations[`${field}_histogram`].buckets,
+                productionHistogram:
+                  productionHistogramResponse.aggregations[`${field}_histogram`].buckets,
+              };
+            }
+            if (type === DATA_DRIFT_TYPE.CATEGORICAL) {
+              data[field] = {
+                type: DATA_DRIFT_TYPE.CATEGORICAL,
+                driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
+                driftedSumOtherDocCount:
+                  driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
+                baselineTerms: baselineResponse.aggregations[`${field}_terms`].buckets,
+                baselineSumOtherDocCount:
+                  baselineResponse.aggregations[`${field}_terms`].sum_other_doc_count,
+              };
+            }
+          }
+
+          setResult({
+            data: processDataDriftResult(data),
+            status: FETCH_STATUS.SUCCESS,
+          });
+        } catch (e) {
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
-            error: `Unable to fetch histogram data from ${productionIndex}`,
+            error: extractErrorMessage(e),
           });
-          return;
         }
+      };
 
-        const referenceHistogramResponse = await dataSearch(referenceHistogramRequest, signal);
+      doFetchEsRequest();
 
-        console.log('Reference histogram response', referenceHistogramResponse);
-
-        if (!referenceHistogramResponse.aggregations) {
-          setResult({
-            data: undefined,
-            status: FETCH_STATUS.FAILURE,
-            error: `Unable to fetch histogram data from ${referenceIndex}`,
-          });
-          return;
-        }
-
-        // retrieve aggregation results from driftedResp for different fields and add to data
-        console.log('Populating data');
-        const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
-        for (const { field, type } of fields) {
-          if (type === 'numeric') {
-            data[field] = {
-              type: 'numeric',
-              pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
-              range: fieldRange[field],
-              referenceHistogram:
-                referenceHistogramResponse.aggregations[`${field}_histogram`].buckets,
-              productionHistogram:
-                productionHistogramResponse.aggregations[`${field}_histogram`].buckets,
-            };
-          }
-          if (type === 'categoric') {
-            data[field] = {
-              type: 'categoric',
-              driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
-              driftedSumOtherDocCount:
-                driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
-              baselineTerms: baselineResponse.aggregations[`${field}_terms`].buckets,
-              baselineSumOtherDocCount:
-                baselineResponse.aggregations[`${field}_terms`].sum_other_doc_count,
-            };
-          }
-        }
-
-        setResult({
-          data: processDataDriftResult(data),
-          status: FETCH_STATUS.SUCCESS,
-        });
-      } catch (e) {
-        setResult({
-          data: undefined,
-          status: FETCH_STATUS.FAILURE,
-          error: extractErrorMessage(e),
-        });
-      }
-    };
-
-    doFetchEsRequest();
-
-    return () => {
-      controller.abort();
-    };
+      return () => {
+        controller.abort();
+      };
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    dataSearch,
-    timeRanges,
-    JSON.stringify(fields),
-    referenceDataView?.id,
-    productionDataView?.id,
-  ]);
+    [dataSearch, JSON.stringify({ fields, timeRanges }), currentDataView?.id]
+  );
   return result;
 };

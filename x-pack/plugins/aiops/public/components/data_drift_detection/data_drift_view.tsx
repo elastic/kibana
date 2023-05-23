@@ -24,12 +24,12 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiTableFieldDataColumnType,
-  EuiFormRow,
   EuiScreenReaderOnly,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { WindowParameters } from '@kbn/aiops-utils';
+import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { getDataDriftType, useFetchDataDriftResult } from './use_data_drift_result';
 import { NUMERIC_TYPE_LABEL } from './constants';
 import { Histogram, ComparisionHistogram, Feature, DataDriftField, TimeRange } from './types';
@@ -44,29 +44,14 @@ const formatSignificanceLevel = (significanceLevel: number) => {
   }
 };
 
-const idPrefix = htmlIdGenerator()();
-
-export const DataViewSelector = ({
-  type,
-  onChangeDataView,
-  dataView,
-}: {
-  type: 'reference' | 'production';
-  onChangeDataView: (newDataViewId: string) => void;
-  dataView?: DataView;
-}) => {
-  return (
-    <EuiFormRow label={`Select ${type} data view`} id={idPrefix}>
-      {/* <DataViewPicker*/}
-      {/*  trigger={{ label: dataView ? dataView.getName() : 'Pick data view' }}*/}
-      {/*  onChangeDataView={onChangeDataView}*/}
-      {/* />*/}
-    </EuiFormRow>
-  );
-};
-
 // Reference data numeric distribution
-export const ReferenceDistribution = ({ data }: { data: Histogram[] }) => {
+export const ReferenceDistribution = ({
+  data,
+  color,
+}: {
+  data: Histogram[];
+  color?: SeriesColorAccessor;
+}) => {
   return (
     <Chart>
       <Settings />
@@ -78,13 +63,20 @@ export const ReferenceDistribution = ({ data }: { data: Histogram[] }) => {
         xAccessor="key"
         yAccessors={['percentage']}
         data={data}
+        color={color}
       />
     </Chart>
   );
 };
 
 // Production data numeric distribution
-export const ProductionDistribution = ({ data }: { data: Histogram[] }) => {
+export const ProductionDistribution = ({
+  data,
+  color,
+}: {
+  data: Histogram[];
+  color?: SeriesColorAccessor;
+}) => {
   return (
     <Chart>
       <Settings />
@@ -96,6 +88,7 @@ export const ProductionDistribution = ({ data }: { data: Histogram[] }) => {
         xAccessor="key"
         yAccessors={['percentage']}
         data={data}
+        color={color}
       />
     </Chart>
   );
@@ -105,10 +98,12 @@ const DataDriftChart = ({
   featureName,
   featureType,
   data,
+  colors,
 }: {
   featureName: string;
   featureType: string;
   data: ComparisionHistogram[];
+  colors: { referenceColor: string; productionColor: string };
 }) => {
   return (
     <Chart>
@@ -129,6 +124,10 @@ const DataDriftChart = ({
         yAccessors={['percentage']}
         splitSeriesAccessors={['g']}
         data={data}
+        color={(identifier) => {
+          const key = identifier.seriesKeys[0];
+          return key === 'Production' ? colors.productionColor : colors.referenceColor;
+        }}
       />
     </Chart>
   );
@@ -145,9 +144,8 @@ export const DataDriftView = ({
   const [fetchInfo, setFetchIno] = useState<
     | {
         fields: DataDriftField[];
-        referenceDataView: DataView;
-        productionDataView: DataView;
-        timeRanges: { reference: TimeRange; production: TimeRange };
+        currentDataView: DataView;
+        timeRanges?: { reference: TimeRange; production: TimeRange };
       }
     | undefined
   >();
@@ -174,16 +172,25 @@ export const DataDriftView = ({
     }
     setFetchIno({
       fields: mergedFields,
-      referenceDataView: dataView,
-      productionDataView: dataView,
-      timeRanges: {
-        reference: { start: windowParameters?.baselineMin, end: windowParameters?.baselineMax },
-        production: { start: windowParameters?.deviationMin, end: windowParameters?.deviationMax },
-      },
+      currentDataView: dataView,
+      ...(windowParameters
+        ? {
+            timeRanges: {
+              reference: {
+                start: windowParameters.baselineMin,
+                end: windowParameters.baselineMax,
+              },
+              production: {
+                start: windowParameters.deviationMin,
+                end: windowParameters.deviationMax,
+              },
+            },
+          }
+        : {}),
     });
   }, [dataView, windowParameters]);
   const result = useFetchDataDriftResult(fetchInfo);
-  console.log(`--@@result`, result);
+
   const dataFromResult = result.data;
 
   return (
@@ -192,61 +199,18 @@ export const DataDriftView = ({
         Analyze
       </EuiButton>
 
-      {/* <EuiFlexGroup>*/}
-      {/*  <EuiFlexItem>*/}
-      {/*    <DataViewSelector*/}
-      {/*      type="reference"*/}
-      {/*      onChangeDataView={(newDataViewId) => updateDataView('reference', newDataViewId)}*/}
-      {/*      dataView={referenceDataView}*/}
-      {/*    />*/}
-      {/*    <EuiSpacer size="m" />*/}
-
-      {/*    <EuiSuperDatePicker*/}
-      {/*      width="restricted"*/}
-      {/*      onTimeChange={(ts) => onTimeChange('reference', ts)}*/}
-      {/*      start={tempTimeRanges.reference.start}*/}
-      {/*      end={tempTimeRanges.reference.end}*/}
-      {/*      showUpdateButton={false}*/}
-      {/*    />*/}
-      {/*  </EuiFlexItem>*/}
-      {/*  <EuiFlexItem>*/}
-      {/*    <DataViewSelector*/}
-      {/*      type="production"*/}
-      {/*      onChangeDataView={(newDataViewId) => updateDataView('production', newDataViewId)}*/}
-      {/*      dataView={productionDataView}*/}
-      {/*    />*/}
-      {/*    <EuiSpacer size="m" />*/}
-      {/*    <EuiSuperDatePicker*/}
-      {/*      width="restricted"*/}
-      {/*      onTimeChange={(ts) => onTimeChange('production', ts)}*/}
-      {/*      start={tempTimeRanges.production.start}*/}
-      {/*      end={tempTimeRanges.production.end}*/}
-      {/*      showUpdateButton={false}*/}
-      {/*    />*/}
-      {/*  </EuiFlexItem>*/}
-      {/*  <EuiFlexItem grow={false}>*/}
-      {/*    <EuiFormRow hasEmptyLabelSpace>*/}
-      {/*      <EuiButton*/}
-      {/*        disabled={!referenceDataView || !productionDataView}*/}
-      {/*        onClick={updateFieldsAndTime}*/}
-      {/*      >*/}
-      {/*        Analyze*/}
-      {/*      </EuiButton>*/}
-      {/*    </EuiFormRow>*/}
-      {/*  </EuiFlexItem>*/}
-      {/* </EuiFlexGroup>*/}
-
-      {/* <EuiSpacer size="m" />*/}
-      {/* {result.status === FETCH_STATUS.NOT_INITIATED ? (*/}
-      {/*  <EuiCallOut>Pick a reference data view and production data view to detect drift</EuiCallOut>*/}
-      {/* ) : null}*/}
-      {/* {result.status === FETCH_STATUS.LOADING ? 'Loading' : null}*/}
       {dataFromResult ? <DataDriftOverviewTable data={dataFromResult} /> : null}
     </div>
   );
 };
 
-export const OverlapDistributionComparison = ({ data }: { data: ComparisionHistogram[] }) => {
+export const OverlapDistributionComparison = ({
+  data,
+  colors,
+}: {
+  data: ComparisionHistogram[];
+  colors: { referenceColor: string; productionColor: string };
+}) => {
   return (
     <Chart>
       <Settings showLegend={false} />
@@ -260,12 +224,21 @@ export const OverlapDistributionComparison = ({ data }: { data: ComparisionHisto
         splitSeriesAccessors={['g']}
         data={data}
         curve={CurveType.CURVE_STEP_AFTER}
+        color={(identifier) => {
+          const key = identifier.seriesKeys[0];
+          return key === 'Production' ? colors.productionColor : colors.referenceColor;
+        }}
       />
     </Chart>
   );
 };
 
 export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
+  const euiTheme = useEuiTheme();
+  const colors = {
+    referenceColor: euiTheme.euiColorVis2,
+    productionColor: euiTheme.euiColorVis1,
+  };
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -384,7 +357,7 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
       render: (referenceHistogram: Feature['referenceHistogram']) => {
         return (
           <div css={{ width: 100, height: 40 }}>
-            <ReferenceDistribution data={referenceHistogram} />
+            <ReferenceDistribution data={referenceHistogram} color={colors.referenceColor} />
           </div>
         );
       },
@@ -397,7 +370,7 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
       render: (productionDistribution: Feature['productionHistogram']) => {
         return (
           <div css={{ width: 100, height: 40 }}>
-            <ProductionDistribution data={productionDistribution} />
+            <ProductionDistribution data={productionDistribution} color={colors.productionColor} />
           </div>
         );
       },
@@ -410,7 +383,7 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
       render: (comparisonDistribution: Feature['comparisonDistribution']) => {
         return (
           <div css={{ width: 100, height: 40 }}>
-            <OverlapDistributionComparison data={comparisonDistribution} />
+            <OverlapDistributionComparison data={comparisonDistribution} colors={colors} />
           </div>
         );
       },
@@ -449,6 +422,7 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
             featureName={featureName}
             featureType={item.featureType}
             data={comparisonDistribution}
+            colors={colors}
           />
         </div>
       );

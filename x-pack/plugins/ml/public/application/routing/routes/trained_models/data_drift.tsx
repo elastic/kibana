@@ -23,7 +23,7 @@ export const dataDriftRouteFactory = (
 ): MlRoute => ({
   id: 'data_drift',
   path: createPath(ML_PAGES.DATA_DRIFT),
-  title: i18n.translate('xpack.ml.modelManagement.trainedModels.docTitle', {
+  title: i18n.translate('xpack.ml.modelManagement.dataDrift.docTitle', {
     defaultMessage: 'Data Drift',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
@@ -31,7 +31,7 @@ export const dataDriftRouteFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_DRIFT_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.trainedModelsLabel', {
+      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftLabel', {
         defaultMessage: 'Data Drift',
       }),
     },

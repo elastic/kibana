@@ -22,7 +22,6 @@ export const DataDriftWithDocCountPage: FC = () => {
   const dataView = context.currentDataView;
   const savedSearch = context.selectedSavedSearch;
 
-  console.log('services', services);
   return (
     <>
       <MlPageHeader>

@@ -7,28 +7,28 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NUMERIC_TYPE_LABEL = i18n.translate('xpack.ml.trainedModels.driftData.numericLabel', {
+export const DATA_DRIFT_TYPE = {
+  NUMERIC: 'numeric',
+  CATEGORICAL: 'categorical',
+  UNSUPPORTED: 'unsupported',
+} as const;
+
+export const NUMERIC_TYPE_LABEL = i18n.translate('xpack.aiops.driftData.numericLabel', {
   defaultMessage: 'Numeric',
 });
-export const CATEGORICAL_TYPE_LABEL = i18n.translate(
-  'xpack.ml.trainedModels.driftData.categoricalLabel',
-  {
-    defaultMessage: 'Categorical',
-  }
-);
+export const CATEGORICAL_TYPE_LABEL = i18n.translate('xpack.aiops.driftData.categoricalLabel', {
+  defaultMessage: 'Categorical',
+});
 
-export const UNKNOWN_PVALUE_LABEL = i18n.translate(
-  'xpack.ml.trainedModels.driftData.unknownPValueLabel',
-  {
-    defaultMessage: 'Unknown',
-  }
-);
+export const UNKNOWN_PVALUE_LABEL = i18n.translate('xpack.aiops.driftData.unknownPValueLabel', {
+  defaultMessage: 'Unknown',
+});
 
-export const REFERENCE_LABEL = i18n.translate('xpack.ml.trainedModels.driftData.referenceLabel', {
+export const REFERENCE_LABEL = i18n.translate('xpack.aiops.driftData.referenceLabel', {
   defaultMessage: 'Reference',
 });
 
-export const PRODUCTION_LABEL = i18n.translate('xpack.ml.trainedModels.driftData.productionLabel', {
+export const PRODUCTION_LABEL = i18n.translate('xpack.aiops.driftData.productionLabel', {
   defaultMessage: 'Production',
 });
 

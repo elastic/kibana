@@ -69,7 +69,8 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT
   | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT
   | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION
-  | typeof ML_PAGES.DATA_DRIFT,
+  | typeof ML_PAGES.DATA_DRIFT
+  | typeof ML_PAGES.DATA_DRIFT_INDEX_SELECT,
   MlGenericUrlPageState | undefined
 >;
 

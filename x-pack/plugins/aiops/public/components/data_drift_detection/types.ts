@@ -6,6 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { DATA_DRIFT_TYPE } from './constants';
 
 export interface Histogram {
   doc_count: 0;
@@ -30,7 +31,7 @@ export interface Feature {
 
 export interface DataDriftField {
   field: string;
-  type: 'numeric' | 'categoric' | 'unsupported';
+  type: DataDriftType;
   displayName: string;
 }
 export enum FETCH_STATUS {
@@ -47,8 +48,8 @@ export interface Result<T extends unknown> {
 }
 
 export interface TimeRange {
-  start: string;
-  end: string;
+  start: string | number;
+  end: string | number;
 }
 
 export interface Range {
@@ -65,7 +66,7 @@ export interface NumericDriftData {
   productionHistogram: Histogram[];
 }
 export interface CategoricalDriftData {
-  type: 'categoric';
+  type: 'categorical';
   driftedTerms: Histogram[];
   driftedSumOtherDocCount: number;
   baselineTerms: Histogram[];
@@ -73,9 +74,11 @@ export interface CategoricalDriftData {
 }
 
 export const isNumericDriftData = (arg: any): arg is NumericDriftData => {
-  return isPopulatedObject(arg, ['type']) && arg.type === 'numeric';
+  return isPopulatedObject(arg, ['type']) && arg.type === DATA_DRIFT_TYPE.NUMERIC;
 };
 
 export const isCategoricalDriftData = (arg: any): arg is CategoricalDriftData => {
-  return isPopulatedObject(arg, ['type']) && arg.type === 'categoric';
+  return isPopulatedObject(arg, ['type']) && arg.type === DATA_DRIFT_TYPE.CATEGORICAL;
 };
+
+export type DataDriftType = typeof DATA_DRIFT_TYPE[keyof typeof DATA_DRIFT_TYPE];
