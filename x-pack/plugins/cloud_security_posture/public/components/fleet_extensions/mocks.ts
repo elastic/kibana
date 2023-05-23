@@ -119,7 +119,7 @@ const getPolicyMock = (
         type: CLOUDBEAT_VULN_MGMT_AWS,
         policy_template: 'vuln_mgmt',
         enabled: type === CLOUDBEAT_VULN_MGMT_AWS,
-        streams: [{ enabled: false, data_stream: dataStream }],
+        streams: [{ enabled: type === CLOUDBEAT_VULN_MGMT_AWS, data_stream: dataStream }],
       },
     ],
   };
