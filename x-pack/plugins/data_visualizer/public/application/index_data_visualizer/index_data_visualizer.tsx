@@ -32,7 +32,7 @@ import {
   type Dictionary,
   type SetUrlState,
 } from '@kbn/ml-url-state';
-import { getSavedSearch, type SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -94,6 +94,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
     data: { dataViews, search },
     savedObjects: { client: savedObjectsClient },
     notifications: { toasts },
+    savedSearch: savedSearchService,
   } = services;
 
   const history = useHistory();
@@ -159,10 +160,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       if (typeof parsedQueryString?.savedSearchId === 'string') {
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
-          const savedSearch = await getSavedSearch(savedSearchId, {
-            search,
-            savedObjectsClient,
-          });
+          const savedSearch = await savedSearchService.get(savedSearchId);
           const dataView = savedSearch.searchSource.getField('index');
 
           if (!dataView) {
@@ -190,7 +188,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       }
     };
     getDataView();
-  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search]);
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search, savedSearchService]);
 
   const setUrlState: SetUrlState = useCallback(
     (
