@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import {
   createUICapabilities as createCasesUICapabilities,
@@ -33,8 +33,8 @@ export const casesSubFeatureDelete: SubFeatureConfig = {
           }),
           includeIn: 'all',
           savedObject: {
-            all: [],
-            read: [],
+            all: [...filesSavedObjectTypes],
+            read: [...filesSavedObjectTypes],
           },
           cases: {
             delete: [APP_ID],
