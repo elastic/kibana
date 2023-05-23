@@ -321,11 +321,29 @@ export function LayerPanels(
           visualizationState: visualization.state,
           layersMeta: props.framePublicAPI,
           addLayer,
-          addIndexPatternFromDataViewSpec: (spec: DataViewSpec) =>
-            props.indexPatternService.addIndexPatternFromDataViewSpec(
-              spec,
-              props.framePublicAPI.dataViews.indexPatterns
-            ),
+          addIndexPatternFromDataViewSpec: async (spec: DataViewSpec) => {
+            const dataView = await props.dataViews.create(spec);
+
+            if (!dataView.id) {
+              return;
+            }
+
+            const indexPatternId = dataView.id;
+
+            const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+              id: indexPatternId,
+              cache: props.framePublicAPI.dataViews.indexPatterns,
+            });
+
+            dispatchLens(
+              changeIndexPattern({
+                dataViews: { indexPatterns: newIndexPatterns },
+                datasourceIds: Object.keys(datasourceStates),
+                visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+                indexPatternId,
+              })
+            );
+          },
         })}
     </EuiForm>
   );

@@ -3576,54 +3576,8 @@ describe('xy_visualization', () => {
           },
           jest.fn()
         )
-      ).toEqual([
-        expect.objectContaining({
-          displayName: 'Keep global filters',
-          description:
-            'All the dimensions configured in this layer respect filters defined at kibana level.',
-          icon: 'filter',
-          isCompatible: true,
-          'data-test-subj': 'lnsXY_annotationLayer_keepFilters',
-        }),
-      ]);
+      ).toEqual([]);
     });
-  });
-
-  it('should return an action that performs a state update on click', () => {
-    const baseState = exampleState();
-    const setState = jest.fn();
-    const [action] = xyVisualization.getSupportedActionsForLayer?.(
-      'annotation',
-      {
-        ...baseState,
-        layers: [
-          ...baseState.layers,
-          {
-            layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
-            annotations: [exampleAnnotation2],
-            ignoreGlobalFilters: true,
-            indexPatternId: 'myIndexPattern',
-          },
-        ],
-      },
-      setState
-    )!;
-    action.execute(null);
-
-    expect(setState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        layers: expect.arrayContaining<XYByValueAnnotationLayerConfig>([
-          {
-            layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
-            annotations: [exampleAnnotation2],
-            ignoreGlobalFilters: false,
-            indexPatternId: 'myIndexPattern',
-          },
-        ]),
-      })
-    );
   });
 
   describe('layer settings', () => {

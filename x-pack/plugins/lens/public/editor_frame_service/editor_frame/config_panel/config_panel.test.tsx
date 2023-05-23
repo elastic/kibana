@@ -16,6 +16,7 @@ import {
   mockStoreDeps,
   MountStoreProps,
 } from '../../../mocks';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
@@ -150,6 +151,7 @@ describe('ConfigPanel', () => {
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
       uiActions,
+      dataViews: {} as DataViewsPublicPluginStart,
       getUserMessages: () => [],
     };
   }
