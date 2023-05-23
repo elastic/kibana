@@ -148,7 +148,7 @@ export const getDatatableRenderer = (dependencies: {
             columnCellValueActions={columnCellValueActions}
             columnFilterable={columnsFilterable}
             interactive={isInteractive()}
-            uiSettings={dependencies.uiSettings}
+            theme={dependencies.theme}
             renderComplete={renderComplete}
           />
         </I18nProvider>

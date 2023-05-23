@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 
@@ -30,20 +31,36 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   }
 
   return (
-    <EuiCallOut
-      title={
-        <>
-          {title} <FormattedDate value={date} fieldName="execution_summary.last_execution.date" />
-        </>
-      }
-      color={color}
-      iconType="warning"
-      data-test-subj="ruleStatusFailedCallOut"
+    <div
+      css={`
+        pre {
+          margin-block-end: 0;
+          margin-right: 24px; // Otherwise the copy button overlaps the scrollbar
+          padding-inline-end: 0;
+        }
+      `}
     >
-      {message.split('\n').map((line) => (
-        <p>{line}</p>
-      ))}
-    </EuiCallOut>
+      <EuiCallOut
+        title={
+          <>
+            {title} <FormattedDate value={date} fieldName="execution_summary.last_execution.date" />
+          </>
+        }
+        color={color}
+        iconType="warning"
+        data-test-subj="ruleStatusFailedCallOut"
+      >
+        <EuiCodeBlock
+          className="eui-fullWidth"
+          paddingSize="none"
+          isCopyable
+          overflowHeight={96}
+          transparentBackground
+        >
+          {message}
+        </EuiCodeBlock>
+      </EuiCallOut>
+    </div>
   );
 };
 
