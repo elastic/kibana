@@ -18,6 +18,7 @@ import {
   SavedObjectsClientContract,
   UiSettingsServiceStart,
   IClusterClient,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
@@ -28,7 +29,7 @@ import type { CancellationToken } from '@kbn/reporting-common';
 import type { Writable } from 'stream';
 import { CsvGenerator } from '@kbn/generate-csv';
 import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
-import { ReportingConfigType } from '../../config';
+import { ReportingConfigType, createConfig } from '../../config';
 import { ReportTaskParams } from '../../lib/tasks';
 import { decryptJobHeaders } from '../common';
 import { getFieldFormats } from '../../services';
@@ -50,15 +51,19 @@ export class CsvExportType {
   private pluginSetupDeps?: CsvExportSetupDeps;
   private pluginStartDeps?: CsvExportStartDeps;
   private readonly pluginStart$ = new Rx.ReplaySubject<CsvExportStartDeps>();
-  config: ReportingConfigType | undefined;
+  private config: ReportingConfigType;
 
-  constructor(private logger: Logger) {
+  constructor(
+    private core: CoreSetup,
+    private logger: Logger,
+    private context: PluginInitializerContext<ReportingConfigType>
+  ) {
     this.logger = logger.get('csv-export');
+    const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
+    this.config = config;
   }
 
-  setup(coreSetup: CoreSetup, setupDeps: CsvExportSetupDeps) {
-    this.config = this.getConfig();
-  }
+  setup(coreSetup: CoreSetup, setupDeps: CsvExportSetupDeps) {}
 
   start(coreStart: CoreStart, startDeps: CsvExportStartDeps) {}
 
@@ -86,7 +91,9 @@ export class CsvExportType {
   /*
    * Gives synchronous access to the config
    */
-  public getConfig = () => this.config;
+  public getConfig(): ReportingConfigType {
+    return this.config;
+  }
 
   public getFakeRequest(
     headers: Headers,
@@ -168,8 +175,9 @@ export class CsvExportType {
     stream: Writable,
     _logger: Logger
   ) {
-    const config = this.getConfig();
-    const { encryptionKey, csvConfig } = config;
+    const config: ReportingConfigType = this.getConfig();
+    const csvConfig = config.csv;
+    const { encryptionKey } = config;
 
     return async () => {
       const logger = _logger.get(`execute:${jobId}`);
