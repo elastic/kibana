@@ -52,7 +52,7 @@ export const Metadata = ({
   if (fetchMetadataError) {
     return (
       <EuiCallOut
-        title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorTitle', {
+        title={i18n.translate('xpack.infra.metadataEmbeddable.errorTitle', {
           defaultMessage: 'Sorry, there was an error',
         })}
         color="danger"
@@ -60,7 +60,7 @@ export const Metadata = ({
         data-test-subj="infraMetadataErrorCallout"
       >
         <FormattedMessage
-          id="xpack.infra.hostsViewPage.hostDetail.metadata.errorMessage"
+          id="xpack.infra.metadataEmbeddable.errorMessage"
           defaultMessage="There was an error loading your data. Try to {reload} and open the host details again."
           values={{
             reload: (
@@ -68,7 +68,7 @@ export const Metadata = ({
                 data-test-subj="infraMetadataReloadPageLink"
                 onClick={() => window.location.reload()}
               >
-                {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorAction', {
+                {i18n.translate('xpack.infra.metadataEmbeddable.errorAction', {
                   defaultMessage: 'reload the page',
                 })}
               </EuiLink>
