@@ -37,6 +37,7 @@ import type { Message } from '../assistant_context/types';
 import { ConversationSelector } from './conversation_selector';
 import { PromptEditor } from './prompt_editor';
 import { getDefaultSystemPrompt, getSuperheroPrompt } from './prompt/helpers';
+import * as i18n from './translations';
 import type { Prompt } from './types';
 import { getPromptById } from './prompt_editor/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
@@ -316,11 +317,11 @@ const AssistantComponent: React.FC<Props> = ({
           <ChatOptionsFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiToolTip position="right" content={'Clear chat'}>
+                <EuiToolTip position="right" content={i18n.CLEAR_CHAT}>
                   <EuiButtonIcon
                     display="base"
-                    iconType="trash"
-                    aria-label="Delete"
+                    iconType="cross"
+                    aria-label={i18n.CLEAR_CHAT}
                     color="danger"
                     onClick={() => {
                       setPromptTextPreview('');
@@ -332,11 +333,11 @@ const AssistantComponent: React.FC<Props> = ({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip position="right" content={'Submit message'}>
+                <EuiToolTip position="right" content={i18n.SUBMIT_MESSAGE}>
                   <EuiButtonIcon
                     display="base"
                     iconType="returnKey"
-                    aria-label="submit-message"
+                    aria-label={i18n.SUBMIT_MESSAGE}
                     color="primary"
                     onClick={handleButtonSendMessage}
                     isLoading={isLoading}

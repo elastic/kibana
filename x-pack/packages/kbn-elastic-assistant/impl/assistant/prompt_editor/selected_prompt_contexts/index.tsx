@@ -78,7 +78,7 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
           <EuiAccordion
             buttonContent={description}
             extraAction={
-              <EuiButtonIcon iconType="trash" onClick={() => unselectPromptContext(id)} />
+              <EuiButtonIcon iconType="cross" onClick={() => unselectPromptContext(id)} />
             }
             id={id}
             paddingSize="s"

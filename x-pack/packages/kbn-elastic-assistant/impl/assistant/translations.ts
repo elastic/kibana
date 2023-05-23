@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const CLEAR_CHAT = i18n.translate('xpack.elasticAssistant.assistant.clearChat', {
+  defaultMessage: 'Clear chat',
+});
+
 export const DEFAULT_ASSISTANT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.defaultAssistantTitle',
   {
@@ -73,3 +77,7 @@ export const SETTINGS_PROMPT_HELP_TEXT_TITLE = i18n.translate(
     defaultMessage: 'Context provided before every conversations',
   }
 );
+
+export const SUBMIT_MESSAGE = i18n.translate('xpack.elasticAssistant.assistant.submitMessage', {
+  defaultMessage: 'Submit message',
+});

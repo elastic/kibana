@@ -86,9 +86,16 @@ const SystemPromptComponent: React.FC<Props> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18n.ADD_SYSTEM_PROMPT_TOOLTIP} position="right">
+          <EuiToolTip
+            content={
+              showSelectSystemPrompt
+                ? i18n.CLEAR_SYSTEM_PROMPT_TOOLTIP
+                : i18n.ADD_SYSTEM_PROMPT_TOOLTIP
+            }
+            position="right"
+          >
             <EuiButtonIcon
-              iconType={showSelectSystemPrompt ? 'trash' : 'plus'}
+              iconType={showSelectSystemPrompt ? 'cross' : 'plus'}
               onClick={showSelectSystemPrompt ? clearSystemPrompt : onShowSelectSystemPrompt}
             />
           </EuiToolTip>
@@ -114,7 +121,7 @@ const SystemPromptComponent: React.FC<Props> = ({
 
           <EuiFlexItem grow={false}>
             <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT_TOOLTIP} position="right">
-              <EuiButtonIcon iconType="trash" onClick={clearSystemPrompt} />
+              <EuiButtonIcon iconType="cross" onClick={clearSystemPrompt} />
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
