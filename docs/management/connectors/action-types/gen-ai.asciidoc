@@ -43,10 +43,7 @@ xpack.actions.preconfigured:
     config:
       apiUrl: https://api.openai.com/v1/chat/completions
       apiProvider: 'Azure OpenAI'
-      headers:
-        testheader: testvalue
     secrets:
-      user: testuser
       apiKey: passwordkeystorevalue
 --
 
