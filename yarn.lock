@@ -2766,6 +2766,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aeroelastic@link:packages/kbn-aeroelastic":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
   version "0.0.0"
   uid ""

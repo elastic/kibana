@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Papa from 'papaparse';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Datatable } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
@@ -16,7 +15,7 @@ interface Arguments {
   newline: string;
 }
 
-export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Datatable> {
+export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Promise<Datatable>> {
   const { help, args: argHelp } = getFunctionHelp().csv;
   const errorMessages = getFunctionErrors().csv;
 
@@ -41,8 +40,9 @@ export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Data
         help: argHelp.newline,
       },
     },
-    fn(input, args) {
+    async fn(input, args) {
       const { data: csvString, delimiter, newline } = args;
+      const Papa = await import('papaparse');
 
       const config: Papa.ParseConfig = {
         transform: (val: string) => {

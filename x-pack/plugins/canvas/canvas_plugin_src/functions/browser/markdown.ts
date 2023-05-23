@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { compileFnName } from '@kbn/handlebars';
+import Handlebars, { compileFnName } from '@kbn/handlebars';
 import {
   Datatable,
-  Render,
   Style,
   ExpressionFunctionDefinition,
+  ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -32,7 +32,7 @@ export function markdown(): ExpressionFunctionDefinition<
   'markdown',
   Context,
   Arguments,
-  Promise<Render<Return>>
+  Promise<ExpressionValueRender<Return>>
 > {
   const { help, args: argHelp } = getFunctionHelp().markdown;
 
@@ -62,8 +62,6 @@ export function markdown(): ExpressionFunctionDefinition<
       },
     },
     fn: async (input, args) => {
-      // @ts-expect-error untyped local
-      const { Handlebars } = await import('../../../common/lib/handlebars');
       const compileFunctions = args.content.map((str) =>
         Handlebars[compileFnName](String(str), { knownHelpersOnly: true })
       );

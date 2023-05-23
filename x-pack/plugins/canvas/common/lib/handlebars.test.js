@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Handlebars } from '@kbn/handlebars';
 import { testTable } from '../../canvas_plugin_src/functions/common/__fixtures__/test_tables';
-import { Handlebars } from './handlebars';
 
 describe('handlebars', () => {
   it('registers math function and returns argument error', () => {
