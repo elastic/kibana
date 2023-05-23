@@ -20,7 +20,7 @@ interface AddMetadataFilterButtonProps {
   };
 }
 
-const filterAddedToastTitle = i18n.translate('xpack.infra.metadataEmbedd.filterAdded', {
+const filterAddedToastTitle = i18n.translate('xpack.infra.metadataEmbeddable.filterAdded', {
   defaultMessage: 'Filter was added',
 });
 
