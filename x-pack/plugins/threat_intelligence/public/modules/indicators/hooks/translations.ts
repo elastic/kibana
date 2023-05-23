@@ -13,3 +13,7 @@ export const DESCRIPTION = i18n.translate(
     defaultMessage: 'Indicator display name generated in the runtime ',
   }
 );
+
+export const INSPECT_BUTTON_TITLE = i18n.translate('xpack.threatIntelligence.inspectTitle', {
+  defaultMessage: 'Inspect',
+});

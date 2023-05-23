@@ -35,12 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
-      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.12.0')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await testPrivateLocations.installSyntheticsPackage();
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -64,13 +59,13 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const testMonitors = [
         projectMonitors.monitors[0],
-        { ...secondMonitor, name: '!@#$%^&*()_++[\\-\\]- wow name' },
+        { ...secondMonitor, name: '[] - invalid name' },
       ];
       try {
         const body = await monitorTestService.addProjectMonitors(project, testMonitors);
         expect(body.createdMonitors.length).eql(1);
         expect(body.failedMonitors[0].reason).eql(
-          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
+          'end of the stream or a document separator is expected at line 3, column 10:\n    name: [] - invalid name\n             ^'
         );
       } finally {
         await Promise.all([
@@ -97,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(editedBody.createdMonitors.length).eql(0);
         expect(editedBody.updatedMonitors.length).eql(2);
 
-        testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
+        testMonitors[1].name = '[] - invalid name';
 
         const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
         expect(editedBodyError.createdMonitors.length).eql(0);
@@ -107,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
           'Failed to update journey: test-id-2'
         );
         expect(editedBodyError.failedMonitors[0].reason).eql(
-          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
+          'end of the stream or a document separator is expected at line 3, column 10:\n    name: [] - invalid name\n             ^'
         );
       } finally {
         await Promise.all([

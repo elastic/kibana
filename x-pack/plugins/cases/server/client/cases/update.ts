@@ -436,12 +436,12 @@ export const update = async (
         return flattenCases;
       }
 
-      return [
-        ...flattenCases,
+      flattenCases.push(
         flattenCaseSavedObject({
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
-        }),
-      ];
+        })
+      );
+      return flattenCases;
     }, [] as Case[]);
 
     await userActionService.creator.bulkCreateUpdateCase({

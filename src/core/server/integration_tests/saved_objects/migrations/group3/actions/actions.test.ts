@@ -23,8 +23,6 @@ import {
   reindex,
   readWithPit,
   type ReadWithPit,
-  searchForOutdatedDocuments,
-  type SearchResponse,
   setWriteBlock,
   updateAliases,
   waitForReindexTask,
@@ -715,6 +713,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -724,14 +723,9 @@ describe('migration actions', () => {
         }
       `);
 
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      const results = await client.search({ index: 'reindex_target', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
@@ -755,6 +749,7 @@ describe('migration actions', () => {
             })),
           },
         },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -764,14 +759,9 @@ describe('migration actions', () => {
         }
       `);
 
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target_excluded_docs',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      const results = await client.search({ index: 'reindex_target_excluded_docs', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
@@ -788,6 +778,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -796,14 +787,10 @@ describe('migration actions', () => {
           "right": "reindex_succeeded",
         }
       `);
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target_2',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+
+      const results = await client.search({ index: 'reindex_target_2', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
           "doc 2_updated",
@@ -823,6 +810,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -840,6 +828,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -850,14 +839,9 @@ describe('migration actions', () => {
       `);
 
       // Assert that documents weren't overridden by the second, unscripted reindex
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target_3',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      const results = await client.search({ index: 'reindex_target_3', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
           "doc 2_updated",
@@ -872,13 +856,8 @@ describe('migration actions', () => {
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
       await createIndex({ client, indexName: 'reindex_target_4', mappings: { properties: {} } })();
-      const sourceDocs = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'existing_index_with_docs',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments
+      const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
+      const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[])
         .slice(0, 2)
         .map(({ _id, _source }) => ({
           _id,
@@ -899,6 +878,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -909,14 +889,9 @@ describe('migration actions', () => {
       `);
       // Assert that existing documents weren't overridden, but that missing
       // documents were added by the reindex
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target_4',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      const results = await client.search({ index: 'reindex_target_4', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
@@ -955,6 +930,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
@@ -994,6 +970,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
@@ -1017,6 +994,7 @@ describe('migration actions', () => {
         excludeOnUpgradeQuery: {
           match_all: {},
         },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -1038,6 +1016,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
@@ -1060,6 +1039,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: true,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
@@ -1088,6 +1068,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '0s' });
@@ -1348,7 +1329,8 @@ describe('migration actions', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_write_block'
+        'existing_index_with_write_block',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1367,7 +1349,8 @@ describe('migration actions', () => {
     it('rejects if there is an error', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'no_such_index'
+        'no_such_index',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1382,7 +1365,8 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        '.kibana_1'
+        '.kibana_1',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1403,7 +1387,8 @@ describe('migration actions', () => {
     it('resolves right when successful', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_docs'
+        'existing_index_with_docs',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1446,16 +1431,15 @@ describe('migration actions', () => {
       })();
 
       // Assert that we can't search over the unmapped fields of the document
-      const originalSearchResults = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'existing_index_without_mappings',
-          outdatedDocumentsQuery: {
-            match: { title: { query: 'doc' } },
-          },
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(originalSearchResults.length).toBe(0);
+
+      const originalSearchResults = await client.search({
+        index: 'existing_index_without_mappings',
+        size: 1000,
+        query: {
+          match: { title: { query: 'doc' } },
+        },
+      });
+      expect(originalSearchResults.hits?.hits.length).toBe(0);
 
       // Update and pickup mappings so that the title field is searchable
       const res = await updateAndPickupMappings({
@@ -1466,22 +1450,21 @@ describe('migration actions', () => {
             title: { type: 'text' },
           },
         },
+        batchSize: 1000,
       })();
       expect(Either.isRight(res)).toBe(true);
       const taskId = (res as Either.Right<UpdateAndPickupMappingsResponse>).right.taskId;
       await waitForPickupUpdatedMappingsTask({ client, taskId, timeout: '60s' })();
 
       // Repeat the search expecting to be able to find the existing documents
-      const pickedUpSearchResults = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'existing_index_without_mappings',
-          outdatedDocumentsQuery: {
-            match: { title: { query: 'doc' } },
-          },
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(pickedUpSearchResults.length).toBe(4);
+      const pickedUpSearchResults = await client.search({
+        index: 'existing_index_without_mappings',
+        size: 1000,
+        query: {
+          match: { title: { query: 'doc' } },
+        },
+      });
+      expect(pickedUpSearchResults.hits?.hits.length).toBe(4);
     });
   });
 
@@ -1903,13 +1886,8 @@ describe('migration actions', () => {
       `);
     });
     it('resolves right even if there were some version_conflict_engine_exception', async () => {
-      const existingDocs = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'existing_index_with_docs',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
+      const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
+      const existingDocs = response.hits?.hits as SavedObjectsRawDoc[];
 
       const task = bulkOverwriteTransformedDocuments({
         client,

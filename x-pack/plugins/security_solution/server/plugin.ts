@@ -130,8 +130,10 @@ export class Plugin implements ISecuritySolutionPlugin {
   private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
+    const serverConfig = createConfig(context);
+
     this.pluginContext = context;
-    this.config = createConfig(context);
+    this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
 
@@ -145,6 +147,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(this.config),
+      get serverConfig() {
+        return serverConfig;
+      },
       experimentalFeatures: this.config.experimentalFeatures,
     };
   }
@@ -424,7 +429,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       // from where authz can be derived)
       false
     );
-    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+    const {
+      authz,
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
+      createFilesClient,
+    } =
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
     let manifestManager: ManifestManager | undefined;
@@ -475,6 +487,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
+      createFleetFilesClient: createFilesClient,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         agentPolicyService,
