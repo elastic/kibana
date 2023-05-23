@@ -122,11 +122,7 @@ export interface IVectorSource extends ISource {
   getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
-  getDefaultFields(): Promise<Record<string, Record<string, string>>>;
-  addFeature(
-    geometry: Geometry | Position[],
-    defaultFields: Record<string, Record<string, string>>
-  ): Promise<void>;
+  addFeature(geometry: Geometry | Position[]): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
 
   /*
@@ -255,10 +251,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async supportsFeatureEditing(): Promise<boolean> {
     return false;
-  }
-
-  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
-    return {};
   }
 
   getFeatureActions({

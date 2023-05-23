@@ -33,19 +33,25 @@ export function initIndexingRoutes({
   dataPlugin: DataPluginStart;
   securityPlugin?: SecurityPluginStart;
 }) {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `/${INDEX_SOURCE_API_PATH}`,
-      validate: {
-        body: schema.object({
-          index: schema.string(),
-          mappings: schema.any(),
-        }),
-      },
+      access: 'internal',
       options: {
         body: {
           accepts: ['application/json'],
         },
+      },
+    })
+    .addVersion({
+      version: '1',
+      validate: {
+        request: {
+          body: schema.object({
+            index: schema.string(),
+            mappings: schema.any(),
+          }),
+        }
       },
     },
     async (context, request, response) => {
@@ -76,19 +82,25 @@ export function initIndexingRoutes({
     }
   );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: INDEX_FEATURE_PATH,
-      validate: {
-        body: schema.object({
-          index: schema.string(),
-          data: schema.any(),
-        }),
-      },
+      access: 'internal',
       options: {
         body: {
           accepts: ['application/json'],
           maxBytes: MAX_DRAWING_SIZE_BYTES,
+        },
+      },
+    })
+    .addVersion({
+      version: '1',
+      validate: {
+        request: {
+          body: schema.object({
+            index: schema.string(),
+            data: schema.any(),
+          }),
         },
       },
     },
@@ -111,16 +123,22 @@ export function initIndexingRoutes({
     }
   );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: `${INDEX_FEATURE_PATH}/{featureId}`,
+      access: 'internal',
+    })
+    .addVersion({
+      version: '1',
       validate: {
-        params: schema.object({
-          featureId: schema.string(),
-        }),
-        body: schema.object({
-          index: schema.string(),
-        }),
+        request: {
+          params: schema.object({
+            featureId: schema.string(),
+          }),
+          body: schema.object({
+            index: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, response) => {
@@ -166,13 +184,19 @@ export function initIndexingRoutes({
     }
   );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: GET_MATCHING_INDEXES_PATH,
+      access: 'internal',
+    })
+    .addVersion({
+      version: '1',
       validate: {
-        query: schema.object({
-          indexPattern: schema.string(),
-        }),
+        request: {
+          query: schema.object({
+            indexPattern: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, response) => {
@@ -186,13 +210,19 @@ export function initIndexingRoutes({
     }
   );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: CHECK_IS_DRAWING_INDEX,
+      access: 'internal',
+    })
+    .addVersion({
+      version: '1',
       validate: {
-        query: schema.object({
-          index: schema.string(),
-        }),
+        request: {
+          query: schema.object({
+            index: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, response) => {
