@@ -9,7 +9,7 @@ import { ProvidedType } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const COMMON_REQUEST_HEADERS = {
+const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
@@ -17,8 +17,14 @@ export type MlCommonAPI = ProvidedType<typeof MachineLearningCommonAPIProvider>;
 
 export function MachineLearningCommonAPIProvider({}: FtrProviderContext) {
   return {
-    async getCommonRequestHeader() {
-      return COMMON_REQUEST_HEADERS;
-    },
+    getCommonRequestHeader,
   };
+}
+
+export function getCommonRequestHeader(apiVersion?: string) {
+  if (apiVersion === undefined) {
+    return COMMON_REQUEST_HEADERS;
+  }
+
+  return Object.assign(COMMON_REQUEST_HEADERS, { 'elastic-api-version': apiVersion });
 }

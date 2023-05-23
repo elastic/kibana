@@ -11,7 +11,7 @@ import type { GetTransformsStatsResponseSchema } from '@kbn/transform-plugin/com
 import { isGetTransformsStatsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader())
         .send();
       transform.api.assertResponseStatusCode(200, status, body);
 
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader())
         .send();
       transform.api.assertResponseStatusCode(200, status, body);
 

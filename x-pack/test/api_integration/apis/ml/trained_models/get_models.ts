@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -38,9 +38,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns all trained models with associated pipelines including aliases', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models?with_pipelines=true`)
+        .get(`/internal/ml/trained_models?with_pipelines=true`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       // Created models + system model
@@ -52,9 +52,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns models without pipeline in case user does not have required permission', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models?with_pipelines=true`)
+        .get(`/internal/ml/trained_models?with_pipelines=true`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       // Created models + system model
@@ -65,9 +65,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns trained model by id', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models/dfa_regression_model_n_1`)
+        .get(`/internal/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.length).to.eql(1);
@@ -76,17 +76,17 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns 404 if requested trained model does not exist', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models/not_existing_model`)
+        .get(`/internal/ml/trained_models/not_existing_model`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(404, status, body);
     });
 
     it('returns an error for unauthorized user', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/trained_models/dfa_regression_model_n_1`)
+        .get(`/internal/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
     });
   });
