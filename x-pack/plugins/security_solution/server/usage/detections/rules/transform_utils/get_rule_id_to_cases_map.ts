@@ -22,9 +22,7 @@ export const getRuleIdToCasesMap = (
           cache.set(ruleId, cacheCount + 1);
         }
       }
-      return cache;
-    } else {
-      return cache;
     }
+    return cache;
   }, new Map<string, number>());
 };
