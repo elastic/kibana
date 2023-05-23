@@ -18,7 +18,7 @@ export interface ResolveFlyoutParamsConfig {
  * Resolves url parameters for the flyout, serialized as
  * rison string. NOTE: if user is already redirected to this route with flyout parameters set,
  * we simply use them. It will be the case when users are coming here using a link obtained
- * with Share Button on the Expnadable Flyout
+ * with Share Button on the Expandable Flyout
  */
 export const resolveFlyoutParams = (
   { index, alertId, isSecurityFlyoutEnabled }: ResolveFlyoutParamsConfig,

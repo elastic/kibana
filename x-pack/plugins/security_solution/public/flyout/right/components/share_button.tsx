@@ -20,7 +20,7 @@ interface ShareButtonProps {
 }
 
 /**
- * Puts alertUrl to users's clipboard. If current query string contains synced flyout state,
+ * Puts alertUrl to user's clipboard. If current query string contains synced flyout state,
  * it will be appended to the base alertUrl
  */
 export const ShareButton: FC<ShareButtonProps> = ({ alertUrl }) => {
