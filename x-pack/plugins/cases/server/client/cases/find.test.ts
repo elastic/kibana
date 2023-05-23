@@ -69,10 +69,9 @@ describe('find', () => {
       await expect(
         // @ts-expect-error foo is an invalid field
         find({ ...findRequest, foo: 'bar' }, clientArgs)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`
-        "Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: Excess keys are not allowed:
-        foo"
-      `);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+      );
     });
   });
 

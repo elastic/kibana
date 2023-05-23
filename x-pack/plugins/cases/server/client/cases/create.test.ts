@@ -90,10 +90,7 @@ describe('create', () => {
       await expect(
         // @ts-expect-error foo is an invalid field
         create({ ...theCase, foo: 'bar' }, clientArgs)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`
-        "Excess keys are not allowed:
-        foo"
-      `);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"foo\\""`);
     });
   });
 });
