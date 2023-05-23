@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
+import { AgentInstructionProps } from '../tutorial_typings';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import { INSTRUCTION_VARIANT } from '../instruction_variants';
-import { AgentInstructionProps } from '@kbn/apm-plugin/public/components/app/tutorials/tutorial_typings';
 
 export const createRailsAgentInstructions = (
   commonOptions: AgentInstructionProps
