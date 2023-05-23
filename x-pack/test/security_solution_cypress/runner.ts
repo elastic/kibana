@@ -24,6 +24,14 @@ const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
   return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
 };
 
+const retrieveInvestigationsIntegrations = (chunksTotal: number, chunkIndex: number) => {
+  const pattern = resolve(__dirname, '../../plugins/security_solution/cypress/e2e/investigations/**/*.cy.ts');
+  const integrationsPaths = globby.sync(pattern);
+  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
+
+  return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
+};
+
 export async function SecuritySolutionConfigurableCypressTestRunner(
   { getService }: FtrProviderContext,
   command: string,
@@ -79,7 +87,7 @@ export async function SecuritySolutionCypressCliIvestigationsTestRunner(
   totalCiJobs: number,
   ciJobNumber: number
   ) {
-  const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
+  const integrations = retrieveInvestigationsIntegrations(totalCiJobs, ciJobNumber);
   return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:investigations:run', {
     SPEC_LIST: integrations.join(','),
   });
