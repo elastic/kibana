@@ -11,18 +11,22 @@ import { useMemo } from 'react';
 import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 import { useMlKibana } from './kibana_context';
 
+const themeDefault = { darkMode: false };
+
 /**
  * Indicates if the currently applied theme is either dark or light.
  * @return {boolean} - Returns true if the currently applied theme is dark.
  */
 export function useCurrentKibanaTheme() {
-  const themeDefault = { darkMode: false };
-
   const {
     services: { theme },
   } = useMlKibana();
 
-  const { darkMode } = useObservable(theme?.theme$ ?? of(themeDefault), themeDefault);
+  const themeObservable$ = useMemo(() => {
+    return theme?.theme$ ?? of(themeDefault);
+  }, [theme]);
+
+  const { darkMode } = useObservable(themeObservable$, themeDefault);
 
   return darkMode;
 }
