@@ -400,7 +400,11 @@ export const ControlGeneralViewSelector = ({
                 <EuiText css={styles.conditionsBadge} size="xs">
                   <b>{i18n.conditions}</b>
                 </EuiText>
-                <EuiBadge title={conditionsAdded.join(',')} color="hollow">
+                <EuiBadge
+                  title={conditionsAdded.join(',')}
+                  color="hollow"
+                  data-test-subj="cloud-defend-conditions-count"
+                >
                   {conditionsAdded.length}
                 </EuiBadge>
               </>

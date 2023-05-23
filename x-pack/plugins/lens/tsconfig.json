@@ -66,11 +66,13 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
+    "@kbn/core-ui-settings-browser-mocks",
     "@kbn/visualization-ui-components",
     "@kbn/content-management-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/object-versioning",
     "@kbn/config-schema",
+    "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": [
     "target/**/*",
