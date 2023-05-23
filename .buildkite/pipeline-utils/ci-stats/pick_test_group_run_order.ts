@@ -225,6 +225,7 @@ export async function pickTestGroupRunOrder() {
           .map((t) => t.trim())
           .filter(Boolean)
       : ['build'];
+  console.log(`\n--- FTR_CONFIGS_DEPS: \n\t${FTR_CONFIGS_DEPS}`);
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
 
