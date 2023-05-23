@@ -93,6 +93,7 @@ import {
   ReferenceLines,
   computeChartMargins,
   getAxisGroupForReferenceLine,
+  getReferenceLinesFormattersMap,
 } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYLayerConfig } from '../../common/types';
@@ -452,7 +453,7 @@ export function XYChart({
           : Position.Bottom,
       })),
     ...groupedLineAnnotations,
-  ].filter(Boolean);
+  ].filter(nonNullable);
 
   const shouldHideDetails =
     annotations?.layers && annotations.layers.length > 0
@@ -800,6 +801,11 @@ export function XYChart({
     'settings'
   ) as Partial<SettingsProps>;
 
+  const referenceLinesFormatters = getReferenceLinesFormattersMap(
+    referenceLineLayers,
+    formatFactory
+  );
+
   return (
     <div css={chartContainerStyle}>
       {showLegend !== undefined && uiState && (
@@ -1073,6 +1079,7 @@ export function XYChart({
               paddingMap={linesPaddings}
               titles={titles}
               yAxesMap={yAxesMap}
+              formatters={referenceLinesFormatters}
             />
           ) : null}
           {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (

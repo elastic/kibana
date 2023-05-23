@@ -20,7 +20,7 @@ import {
 } from '../../helpers';
 import { ReferenceLineLayer } from './reference_line_layer';
 import { ReferenceLine } from './reference_line';
-import { getNextValuesForReferenceLines } from './utils';
+import { FormattersMap, getNextValuesForReferenceLines } from './utils';
 
 export interface ReferenceLinesProps {
   layers: CommonXYReferenceLineLayerConfig[];
@@ -30,6 +30,7 @@ export interface ReferenceLinesProps {
   paddingMap: Partial<Record<Position, number>>;
   titles?: LayersAccessorsTitles;
   yAxesMap: AxesMap;
+  formatters: FormattersMap;
 }
 
 export const ReferenceLines = ({ layers, titles = {}, ...rest }: ReferenceLinesProps) => {
