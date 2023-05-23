@@ -10,6 +10,7 @@ import {
   getCoreTransformsMock,
   getConversionTransformsMock,
   getModelVersionTransformsMock,
+  getModelVersionSchemasMock,
   getReferenceTransformsMock,
   resetAllMocks,
   validateTypeMigrationsMock,
@@ -39,17 +40,20 @@ describe('buildActiveMigrations', () => {
     ...parts,
   });
 
-  const transform = (type: TransformType, version: string): Transform => ({
+  const transform = (type: TransformType, version: string, deferred?: boolean): Transform => ({
+    ...(deferred != null ? { deferred } : {}),
     version,
     transformType: type,
     transform: jest.fn(),
   });
 
-  const expectTransform = (type: TransformType, version: string): Transform => ({
-    version,
-    transformType: type,
-    transform: expect.any(Function),
-  });
+  const expectTransform = (type: TransformType, version: string, deferred?: boolean): Transform =>
+    expect.objectContaining({
+      ...(deferred != null ? { deferred } : {}),
+      version,
+      transformType: type,
+      transform: expect.any(Function),
+    });
 
   const addType = (parts: Partial<SavedObjectsType>) => {
     typeRegistry.registerType(createType(parts));
@@ -123,7 +127,14 @@ describe('buildActiveMigrations', () => {
         migrations: {
           '7.12.0': jest.fn(),
           '7.16.0': jest.fn(),
-          '8.3.0': jest.fn(),
+          '8.3.0': {
+            transform: jest.fn(),
+          },
+          '8.4.0': {
+            // @ts-expect-error
+            deferred: true,
+            transform: jest.fn(),
+          },
         },
       });
 
@@ -131,9 +142,10 @@ describe('buildActiveMigrations', () => {
 
       expect(Object.keys(migrations).sort()).toEqual(['foo']);
       expect(migrations.foo.transforms).toEqual([
-        expectTransform(TransformType.Migrate, '7.12.0'),
-        expectTransform(TransformType.Migrate, '7.16.0'),
-        expectTransform(TransformType.Migrate, '8.3.0'),
+        expectTransform(TransformType.Migrate, '7.12.0', false),
+        expectTransform(TransformType.Migrate, '7.16.0', false),
+        expectTransform(TransformType.Migrate, '8.3.0', false),
+        expectTransform(TransformType.Migrate, '8.4.0', true),
       ]);
     });
   });
@@ -181,6 +193,60 @@ describe('buildActiveMigrations', () => {
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
       expect(migrations.foo.transforms).toEqual([expectTransform(TransformType.Migrate, '7.12.0')]);
       expect(migrations.bar.transforms).toEqual([expectTransform(TransformType.Migrate, '8.3.0')]);
+    });
+  });
+
+  describe('model version schemas', () => {
+    it('calls getModelVersionSchemas with the correct parameters', () => {
+      const foo = createType({ name: 'foo' });
+      const bar = createType({ name: 'bar' });
+
+      addType(foo);
+      addType(bar);
+
+      buildMigrations();
+
+      expect(getModelVersionSchemasMock).toHaveBeenCalledTimes(2);
+      expect(getModelVersionSchemasMock).toHaveBeenNthCalledWith(1, {
+        typeDefinition: foo,
+      });
+      expect(getModelVersionSchemasMock).toHaveBeenNthCalledWith(2, {
+        typeDefinition: bar,
+      });
+    });
+
+    it('adds the schemas from getModelVersionSchemas to each type', () => {
+      const foo = createType({ name: 'foo' });
+      const bar = createType({ name: 'bar' });
+
+      addType(foo);
+      addType(bar);
+
+      getModelVersionSchemasMock.mockImplementation(
+        ({ typeDefinition }: { typeDefinition: SavedObjectsType }) => {
+          if (typeDefinition.name === 'foo') {
+            return {
+              '7.10.0': jest.fn(),
+            };
+          } else {
+            return {
+              '8.3.0': jest.fn(),
+              '8.4.0': jest.fn(),
+            };
+          }
+        }
+      );
+
+      const migrations = buildMigrations();
+
+      expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
+      expect(migrations.foo.versionSchemas).toEqual({
+        '7.10.0': expect.any(Function),
+      });
+      expect(migrations.bar.versionSchemas).toEqual({
+        '8.3.0': expect.any(Function),
+        '8.4.0': expect.any(Function),
+      });
     });
   });
 
@@ -337,6 +403,73 @@ describe('buildActiveMigrations', () => {
         expectTransform(TransformType.Migrate, '8.4.2'),
         expectTransform(TransformType.Convert, '8.7.0'),
       ]);
+    });
+  });
+
+  describe('versions', () => {
+    it('returns the latest migrations versions', () => {
+      addType({
+        name: 'foo',
+        migrations: {
+          '7.12.0': jest.fn(),
+          '7.16.0': jest.fn(),
+          '8.3.0': jest.fn(),
+        },
+      });
+      getCoreTransformsMock.mockReturnValue([
+        transform(TransformType.Core, '8.8.0'),
+        transform(TransformType.Core, '8.9.0'),
+      ]);
+      getReferenceTransformsMock.mockReturnValue([
+        transform(TransformType.Reference, '7.12.0'),
+        transform(TransformType.Reference, '7.17.3'),
+      ]);
+      getConversionTransformsMock.mockReturnValue([
+        transform(TransformType.Convert, '7.14.0'),
+        transform(TransformType.Convert, '7.15.0'),
+      ]);
+
+      expect(buildMigrations()).toHaveProperty(
+        'foo.latestVersion',
+        expect.objectContaining({
+          [TransformType.Convert]: '7.15.0',
+          [TransformType.Core]: '8.9.0',
+          [TransformType.Migrate]: '8.3.0',
+          [TransformType.Reference]: '7.17.3',
+        })
+      );
+    });
+
+    it('returns the latest not deferred migrations versions', () => {
+      addType({
+        name: 'foo',
+        migrations: {
+          '7.12.0': {
+            // @ts-expect-error
+            deferred: true,
+            transform: jest.fn(),
+          },
+          '7.16.0': jest.fn(),
+          '8.3.0': {
+            // @ts-expect-error
+            deferred: true,
+            transform: jest.fn(),
+          },
+        },
+      });
+      getCoreTransformsMock.mockReturnValue([
+        transform(TransformType.Core, '8.7.0', true),
+        transform(TransformType.Core, '8.8.0'),
+        transform(TransformType.Core, '8.9.0', true),
+      ]);
+
+      expect(buildMigrations()).toHaveProperty(
+        'foo.immediateVersion',
+        expect.objectContaining({
+          [TransformType.Core]: '8.8.0',
+          [TransformType.Migrate]: '7.16.0',
+        })
+      );
     });
   });
 });

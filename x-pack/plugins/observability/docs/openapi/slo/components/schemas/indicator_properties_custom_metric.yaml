@@ -1,0 +1,106 @@
+title: Custom metric indicator type definition
+required:
+  - type
+  - params
+description: Defines properties for a custom metric indicator type
+type: object
+properties:
+  params:
+    description: An object containing the indicator parameters.
+    type: object
+    nullable: false
+    required:
+      - index
+      - timestampField
+      - good
+      - total
+    properties:
+      index:
+        description: The index or index pattern to use
+        type: string
+        example: my-service-*
+      filter:
+        description: the KQL query to filter the documents with.
+        type: string
+        example: 'field.environment : "production" and service.name : "my-service"'
+      timestampField:
+        description: >
+          The timestamp field used in the source indice.
+        type: string
+        example: timestamp
+      good:
+        description: >
+          An object defining the "good" metrics and equation
+        type: object
+        required:
+          - metrics
+          - equation
+        properties:
+          metrics:
+            description: List of metrics with their name, aggregation type, and field.
+            type: array
+            items:
+              type: object
+              required:
+                - name
+                - aggregation
+                - field
+              properties:
+                name:
+                  description: The name of the metric. Only valid options are A-Z
+                  type: string
+                  example: A
+                  pattern: '^[A-Z]$'
+                aggregation:
+                  description: The aggregation type of the metric. Only valid option is "sum"
+                  type: string
+                  example: sum
+                  enum: [sum]
+                field:
+                  description: The field of the metric.
+                  type: string
+                  example: processor.processed
+          equation:
+            description: The equation to calculate the "good" metric.
+            type: string
+            example: A
+      total:
+        description: >
+          An object defining the "total" metrics and equation
+        type: object
+        required:
+          - metrics
+          - equation
+        properties:
+          metrics:
+            description: List of metrics with their name, aggregation type, and field.
+            type: array
+            items:
+              type: object
+              required:
+                - name
+                - aggregation
+                - field
+              properties:
+                name:
+                  description: The name of the metric. Only valid options are A-Z
+                  type: string
+                  example: A
+                  pattern: '^[A-Z]$'
+                aggregation:
+                  description: The aggregation type of the metric. Only valid option is "sum"
+                  type: string
+                  example: sum
+                  enum: [sum]
+                field:
+                  description: The field of the metric.
+                  type: string
+                  example: processor.processed
+          equation:
+            description: The equation to calculate the "total" metric.
+            type: string
+            example: A
+  type:
+    description: The type of indicator.
+    type: string
+    example: sli.metric.custom
