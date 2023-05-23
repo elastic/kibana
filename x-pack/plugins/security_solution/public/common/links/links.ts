@@ -153,7 +153,7 @@ const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> | und
   normalizedAppLinksUpdater$.getValue()[id];
 
 const processAppLinks = (appLinks: AppLinkItems, linksPermissions: LinksPermissions): LinkItem[] =>
-  appLinks.reduce<LinkItem[]>((acc, { ...appLink }) => {
+  appLinks.reduce<LinkItem[]>((acc, appLink) => {
     if (!isLinkAllowed(appLink, linksPermissions)) {
       return acc;
     }
@@ -168,6 +168,8 @@ const processAppLinks = (appLinks: AppLinkItems, linksPermissions: LinksPermissi
       const childrenLinks = processAppLinks(appLink.links, linksPermissions);
       if (childrenLinks.length > 0) {
         appLink.links = childrenLinks;
+      } else {
+        delete appLink.links;
       }
     }
     acc.push(appLink);
