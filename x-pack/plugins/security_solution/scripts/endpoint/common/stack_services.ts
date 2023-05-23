@@ -44,7 +44,7 @@ export interface RuntimeServices {
 interface CreateRuntimeServicesOptions {
   kibanaUrl: string;
   elasticsearchUrl: string;
-  fleetServerUrl: string;
+  fleetServerUrl: string | undefined;
   username: string;
   password: string;
   log?: ToolingLog;

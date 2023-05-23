@@ -22,6 +22,7 @@ export const agentEmulatorRunner: RunFn = async (cliContext) => {
     password: cliContext.flags.password as string,
     kibanaUrl: cliContext.flags.kibana as string,
     elasticsearchUrl: cliContext.flags.elasticsearch as string,
+    fleetServerUrl: cliContext.flags.fleetServer as string | undefined,
     asSuperuser: cliContext.flags.asSuperuser as boolean,
     log: cliContext.log,
     actionResponseDelay,

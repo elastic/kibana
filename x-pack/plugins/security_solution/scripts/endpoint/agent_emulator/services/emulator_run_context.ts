@@ -21,7 +21,7 @@ export interface EmulatorRunContextConstructorOptions {
   password: string;
   kibanaUrl: string;
   elasticsearchUrl: string;
-  fleetServerUrl: string;
+  fleetServerUrl: string | undefined;
   actionResponseDelay: number;
   checkinInterval: number;
   asSuperuser?: boolean;
@@ -39,7 +39,7 @@ export class EmulatorRunContext {
   private readonly password: string;
   private readonly kibanaUrl: string;
   private readonly elasticsearchUrl: string;
-  private readonly fleetServerUrl: string;
+  private readonly fleetServerUrl: string | undefined;
   private readonly actionResponseDelay: number;
   private readonly checkinInterval: number;
   private readonly asSuperuser: boolean = false;
