@@ -24,7 +24,6 @@ export async function createDocSource(
   indexPatternsService: DataViewsCommonService
 ): Promise<CreateDocSourceResp> {
   try {
-    console.log('index', index);
     await createIndex(index, mappings, asCurrentUser);
     const { id: indexPatternId } = await indexPatternsService.createAndSave({ title: index }, true);
 
