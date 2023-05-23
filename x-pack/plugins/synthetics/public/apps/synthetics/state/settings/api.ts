@@ -16,6 +16,8 @@ import {
   DynamicSettingsSaveResponse,
   DynamicSettingsSaveType,
   DynamicSettingsType,
+  LocationMonitorsResponse,
+  LocationMonitorsType,
 } from '../../../../../common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
@@ -33,6 +35,23 @@ export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
   return await apiService.post(apiPath, settings, DynamicSettingsSaveType);
+};
+
+export const getLocationMonitors = async (): Promise<any> => {
+  const response = await apiService.get<LocationMonitorsResponse>(
+    SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
+    undefined,
+    LocationMonitorsType
+  );
+  if (response.status === 200) {
+    return response.payload?.aggregations.locations.buckets.map(
+      ({ key: id, doc_count: count }) => ({
+        id,
+        count,
+      })
+    );
+  }
+  return [];
 };
 
 export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
