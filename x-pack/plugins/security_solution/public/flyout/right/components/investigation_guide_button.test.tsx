@@ -31,7 +31,7 @@ describe('<InvestigationGuideButton />', () => {
   });
 
   it('should not render investigation guide button when dataFormattedForFieldBrowser is null', () => {
-    const { queryByTestId } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
         <RightPanelContext.Provider
           value={{ ...mockContextValue, dataFormattedForFieldBrowser: null }}
@@ -41,11 +41,11 @@ describe('<InvestigationGuideButton />', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should not render investigation guide button when rule id is null', () => {
-    const { queryByTestId } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
         <RightPanelContext.Provider
           value={{
@@ -63,18 +63,18 @@ describe('<InvestigationGuideButton />', () => {
         </RightPanelContext.Provider>
       </ExpandableFlyoutContext.Provider>
     );
-    expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should not render investigation guide button when investigation guide is not available', () => {
     mockUseRuleWithFallback.mockReturnValue({ rule: {} });
-    const { queryByTestId } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
         <RightPanelContext.Provider value={mockContextValue}>
           <InvestigationGuideButton />
         </RightPanelContext.Provider>
       </ExpandableFlyoutContext.Provider>
     );
-    expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
-import React, { createContext, useMemo } from 'react';
+import React, { createContext } from 'react';
 import styled from 'styled-components';
 import type { GetBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
@@ -15,7 +15,6 @@ import { useRuleWithFallback } from '../../../detection_engine/rule_management/l
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { getRuleId } from './helpers';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -24,16 +23,34 @@ export const Indent = styled.div`
 
 export const BasicAlertDataContext = createContext<Partial<GetBasicDataFromDetailsData>>({});
 
-const InvestigationGuideViewComponent: React.FC<{
+interface InvestigationGuideViewProps {
+  /**
+   * An array of events data
+   */
   data: TimelineEventsDetailsItem[];
+  /**
+   * Boolean value indicating whether to show the full view of investigation guide, defaults to false and shows partial text
+   * with Read more button
+   */
   showFullView?: boolean;
+  /**
+   * Boolean value indicating whether to show investigation guide text title, defaults to true and shows title
+   */
   showTitle?: boolean;
-}> = ({ data, showFullView = false, showTitle = true }) => {
-  const ruleId = useMemo(() => getRuleId(data), [data]);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
-  const basicAlertData = useBasicDataFromDetailsData(data);
+}
 
-  if (!ruleId || !maybeRule?.note) {
+/**
+ * Investigation guide that shows the markdown text of rule.note
+ */
+const InvestigationGuideViewComponent: React.FC<InvestigationGuideViewProps> = ({
+  data,
+  showFullView = false,
+  showTitle = true,
+}) => {
+  const basicAlertData = useBasicDataFromDetailsData(data);
+  const { rule: maybeRule } = useRuleWithFallback(basicAlertData.ruleId);
+
+  if (!basicAlertData.ruleId || !maybeRule?.note) {
     return null;
   }
 

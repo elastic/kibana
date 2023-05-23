@@ -14,7 +14,6 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { BrowserFields } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
@@ -189,16 +188,4 @@ export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
  */
 export function hasHoverOrRowActions(field: string): boolean {
   return !FIELDS_WITHOUT_ACTIONS[field];
-}
-
-/**
- * Helper function to get rule id from events data
- * Returns empty string if data is null or rule id not found
- */
-export function getRuleId(data: TimelineEventsDetailsItem[] | null): string {
-  if (!data) {
-    return '';
-  }
-  const item = data.find((d) => d.field === 'signal.rule.id' || d.field === ALERT_RULE_UUID);
-  return Array.isArray(item?.originalValue) ? item?.originalValue[0] : item?.originalValue ?? '';
 }

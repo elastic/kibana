@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { getRuleId } from '../../../common/components/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { LeftPanelKey, LeftPanelInvestigationTabPath } from '../../left';
 import { INVESTIGATION_GUIDE_BUTTON_TEST_ID } from './test_ids';
 import { INVESTIGATION_GUIDE_TITLE } from './translations';
@@ -17,14 +17,11 @@ import { INVESTIGATION_GUIDE_TITLE } from './translations';
 /**
  * Investigation guide button that opens Investigation section in the left panel
  */
-export const InvestigationGuideButton: React.FC = memo(() => {
+export const InvestigationGuideButton: React.FC = () => {
   const { openLeftPanel } = useExpandableFlyoutContext();
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
 
-  const ruleId = useMemo(
-    () => getRuleId(dataFormattedForFieldBrowser),
-    [dataFormattedForFieldBrowser]
-  );
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
   const goToInvestigationsTab = useCallback(() => {
@@ -51,6 +48,6 @@ export const InvestigationGuideButton: React.FC = memo(() => {
       {INVESTIGATION_GUIDE_TITLE}
     </EuiButton>
   );
-});
+};
 
 InvestigationGuideButton.displayName = 'InvestigationGuideButton';
