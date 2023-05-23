@@ -4,9 +4,6 @@
 <titleabbrev>Install with Docker</titleabbrev>
 ++++
 
-// REMOVE! JUST FOR TESTING:
-:release-state: releases
-
 :docker-repo:     docker.elastic.co/kibana/kibana
 :docker-image:    {docker-repo}:{version}
 :es-docker-repo:  docker.elastic.co/elasticsearch/elasticsearch
