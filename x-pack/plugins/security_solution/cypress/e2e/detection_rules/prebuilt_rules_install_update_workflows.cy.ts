@@ -6,6 +6,7 @@
  */
 
 import type { AssetReference, BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
+import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   ELASTIC_RULES_BTN,
@@ -19,6 +20,7 @@ import {
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
   createNewRuleAsset,
+  getRuleAssets,
   installAvailableRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
@@ -65,31 +67,24 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
     });
 
-    it.only('should install rules from the Fleet package when user clicks on CTA', () => {
+    it('should install rules from the Fleet package when user clicks on CTA', () => {
       cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
 
       /* Retrieve how many rules were installed from the Fleet package */
-      cy.wait('@installPackage').then(({ response }) => {
-        const packageAssets = response?.body.items.find(
-          ({ name }: BulkInstallPackageInfo) => name === 'security_detection_engine'
-        ).result.assets;
+      cy.wait('@installPackage').then(() => {
+        getRuleAssets().then((response) => {
+          const ruleIds = response.body.hits.hits.map(
+            (hit: { _source: { ['security-rule']: Rule } }) => hit._source['security-rule'].rule_id
+          );
 
-        const rulesWithHistoricalVersions = packageAssets.filter(
-          ({ type }: AssetReference) => type === 'security-rule'
-        );
+          const numberOfRulesToInstall = [...new Set(ruleIds)].length;
+          cy.get(LOAD_PREBUILT_RULES_BTN).click();
+          cy.get(LOAD_PREBUILT_RULES_BTN).should('have.attr', 'disabled');
+          cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
+          cy.get(TOASTER).should('be.visible').contains('Installed pre-packaged rules');
 
-        // Get unique rules to install by removing version appendix
-        // from rule id and then removing duplicates
-        const numberOfRulesToInstall = [
-          ...new Set(rulesWithHistoricalVersions.map(({ id }: AssetReference) => id.split('_')[0])),
-        ].length;
-
-        cy.get(LOAD_PREBUILT_RULES_BTN).click();
-        cy.get(LOAD_PREBUILT_RULES_BTN).should('have.attr', 'disabled');
-        cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
-        cy.get(TOASTER).should('be.visible').contains('Installed pre-packaged rules');
-
-        cy.get(ELASTIC_RULES_BTN).contains(numberOfRulesToInstall);
+          cy.get(ELASTIC_RULES_BTN).contains(numberOfRulesToInstall);
+        });
       });
     });
   });

@@ -88,20 +88,28 @@ export const createNewRuleAsset = ({
   );
 };
 
-export const installAvailableRules = () => {
-  cy.waitUntil(
-    () => {
-      return cy
-        .request({
-          method: 'PUT',
-          url: 'api/detection_engine/rules/prepackaged',
-          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
-          failOnStatusCode: false,
-        })
-        .then((response) => response.status === 200);
+export const getRuleAssets = (index: string | undefined = '.kibana_security_solution') => {
+  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search?size=10000`;
+  return cy.request({
+    method: 'GET',
+    url,
+    headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+    failOnStatusCode: false,
+    body: {
+      query: {
+        term: { type: { value: 'security-rule' } },
+      },
     },
-    { interval: 500, timeout: 12000 }
-  );
+  });
+};
+
+export const installAvailableRules = () => {
+  return cy.request({
+    method: 'PUT',
+    url: 'api/detection_engine/rules/prepackaged',
+    headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+    failOnStatusCode: false,
+  });
 };
 
 /* Prevent the installation of the `security_detection_engine` package from Fleet
