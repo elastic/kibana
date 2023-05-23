@@ -64,14 +64,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
-import {
-  RepositoryHelpers,
-  CommonHelper,
-  EncryptionHelper,
-  ValidationHelper,
-  PreflightCheckHelper,
-  SerializerHelper,
-} from './apis/helpers';
+import type { RepositoryHelpers } from './apis/helpers';
 import {
   type ApiExecutionContext,
   performCreate,
@@ -93,6 +86,7 @@ import {
   performUpdateObjectsSpaces,
   performCollectMultiNamespaceReferences,
 } from './apis';
+import { createRepositoryHelpers } from './utils';
 
 /**
  * Constructor options for {@link SavedObjectsRepository}
@@ -198,42 +192,16 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     this.serializer = serializer;
     this.logger = logger;
     this.extensions = extensions;
-
-    const commonHelper = new CommonHelper({
-      spaceExtension: extensions?.spacesExtension,
-      encryptionExtension: extensions?.encryptionExtension,
-      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
-      defaultIndex: index,
-      kibanaVersion: migrator.kibanaVersion,
-      registry: typeRegistry,
-    });
-    const encryptionHelper = new EncryptionHelper({
-      encryptionExtension: extensions?.encryptionExtension,
-      securityExtension: extensions?.securityExtension,
-    });
-    const validationHelper = new ValidationHelper({
-      registry: typeRegistry,
+    this.helpers = createRepositoryHelpers({
       logger,
-      kibanaVersion: migrator.kibanaVersion,
-    });
-    const preflightCheckHelper = new PreflightCheckHelper({
-      getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
-      createPointInTimeFinder: commonHelper.createPointInTimeFinder.bind(commonHelper),
-      serializer,
-      registry: typeRegistry,
       client: this.client,
-    });
-    const serializerHelper = new SerializerHelper({
-      registry: typeRegistry,
+      index,
+      typeRegistry,
       serializer,
+      extensions,
+      migrator,
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
     });
-    this.helpers = {
-      common: commonHelper,
-      preflight: preflightCheckHelper,
-      validation: validationHelper,
-      encryption: encryptionHelper,
-      serializer: serializerHelper,
-    };
     this.apiExecutionContext = {
       client: this.client,
       extensions: this.extensions,

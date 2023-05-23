@@ -13,7 +13,20 @@ import type {
   ValidationHelper,
   PreflightCheckHelper,
   SerializerHelper,
+  MigrationHelper,
 } from '../lib/apis/helpers';
+
+export type MigrationHelperMock = jest.Mocked<PublicMethodsOf<MigrationHelper>>;
+
+const createMigrationHelperMock = (): MigrationHelperMock => {
+  const mock: MigrationHelperMock = {
+    migrateToLatestKnownVersion: jest.fn(),
+  };
+
+  mock.migrateToLatestKnownVersion.mockImplementation((doc) => doc);
+
+  return mock;
+};
 
 export type CommonHelperMock = jest.Mocked<PublicMethodsOf<CommonHelper>>;
 
@@ -88,6 +101,7 @@ export interface RepositoryHelpersMock {
   validation: ValidationHelperMock;
   preflight: PreflightCheckHelperMock;
   serializer: SerializerHelperMock;
+  migration: MigrationHelperMock;
 }
 
 const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
@@ -97,6 +111,7 @@ const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
     validation: createValidationHelperMock(),
     preflight: createPreflightCheckHelperMock(),
     serializer: createSerializerHelperMock(),
+    migration: createMigrationHelperMock(),
   };
 };
 
@@ -107,4 +122,5 @@ export const apiHelperMocks = {
   createValidationHelper: createValidationHelperMock,
   createSerializerHelper: createSerializerHelperMock,
   createPreflightCheckHelper: createPreflightCheckHelperMock,
+  createMigrationHelper: createMigrationHelperMock,
 };

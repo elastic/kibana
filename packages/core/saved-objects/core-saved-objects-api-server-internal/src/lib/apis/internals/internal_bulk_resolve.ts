@@ -187,7 +187,7 @@ export async function internalBulkResolve<T>(
     const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc, {
       migrationVersionCompatibility,
     });
-    const migrated = migrator.migrateDocument(object) as SavedObject<T>;
+    const migrated = migrator.migrateDocument(object, { allowDowngrade: true }) as SavedObject<T>;
 
     if (!encryptionExtension?.isEncryptableType(migrated.type)) {
       return migrated;
