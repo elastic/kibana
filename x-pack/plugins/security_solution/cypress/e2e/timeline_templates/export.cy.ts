@@ -17,7 +17,7 @@ import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import { searchByTitle } from '../../tasks/table_pagination';
 
-describe.skip('Export timelines', () => {
+describe('Export timelines', () => {
   before(() => {
     cleanKibana();
     cy.intercept({

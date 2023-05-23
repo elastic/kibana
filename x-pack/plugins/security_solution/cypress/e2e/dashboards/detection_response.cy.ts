@@ -54,11 +54,13 @@ describe('Detection response view', () => {
             .then((hostNameEl) => {
               const hostName = hostNameEl.text();
               investigateDashboardItemInTimeline(HOST_TABLE_ROW_TOTAL_ALERTS);
-              cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
-              cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should(
-                'contain.text',
-                `host.name: "${hostName}"ANDkibana.alert.workflow_status: "open"`
-              );
+              cy.get(QUERY_TAB_BUTTON).should('be.visible').should('contain.text', alertCount);
+              cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
+                .should('be.visible')
+                .should(
+                  'contain.text',
+                  `host.name: "${hostName}"ANDkibana.alert.workflow_status: "open"`
+                );
             });
         });
     });
@@ -73,10 +75,12 @@ describe('Detection response view', () => {
               const userName = userNameEl.text();
               investigateDashboardItemInTimeline(USER_TABLE_ROW_TOTAL_ALERTS);
               cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
-              cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should(
-                'contain.text',
-                `user.name: "${userName}"ANDkibana.alert.workflow_status: "open"`
-              );
+              cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
+                .should('be.visible')
+                .should(
+                  'contain.text',
+                  `user.name: "${userName}"ANDkibana.alert.workflow_status: "open"`
+                );
             });
         });
     });
@@ -91,10 +95,12 @@ describe('Detection response view', () => {
               const ruleName = ruleNameEl.text();
               investigateDashboardItemInTimeline(RULE_TABLE_ROW_TOTAL_ALERTS);
               cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
-              cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should(
-                'contain.text',
-                `kibana.alert.rule.name: "${ruleName}"ANDkibana.alert.workflow_status: "open"`
-              );
+              cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
+                .should('be.visible')
+                .should(
+                  'contain.text',
+                  `kibana.alert.rule.name: "${ruleName}"ANDkibana.alert.workflow_status: "open"`
+                );
             });
         });
     });
@@ -119,7 +125,7 @@ describe('Detection response view', () => {
                 expect(url.pathname.endsWith(ALERTS_URL)).eq(true);
               });
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
@@ -144,7 +150,7 @@ describe('Detection response view', () => {
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               const hostName = hostNameEl.text();
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
               cy.get(CONTROL_FRAMES).should('have.length', 3);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
@@ -173,7 +179,7 @@ describe('Detection response view', () => {
                 expect(url.pathname.endsWith(ALERTS_URL)).eq(true);
               });
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
@@ -198,7 +204,7 @@ describe('Detection response view', () => {
               cy.get(USER_TABLE_ROW_SEV(severityVal)).click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
               cy.get(CONTROL_FRAMES).should('have.length', 3);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
@@ -223,7 +229,7 @@ describe('Detection response view', () => {
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               const ruleName = ruleNameEl.text();
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');

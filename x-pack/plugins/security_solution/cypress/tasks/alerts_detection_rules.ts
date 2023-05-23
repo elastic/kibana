@@ -77,19 +77,19 @@ import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
 
 export const enableRule = (rulePosition: number) => {
-  cy.get(RULE_SWITCH).eq(rulePosition).click();
+  cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
 };
 
 export const editFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).should('be.visible');
-  cy.get(COLLAPSED_ACTION_BTN).first().click();
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(EDIT_RULE_ACTION_BTN).should('be.visible');
   cy.get(EDIT_RULE_ACTION_BTN).click();
 };
 
 export const duplicateFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).should('be.visible');
-  cy.get(COLLAPSED_ACTION_BTN).first().click();
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(DUPLICATE_RULE_ACTION_BTN).should('be.visible');
   cy.get(DUPLICATE_RULE_ACTION_BTN).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
@@ -102,12 +102,13 @@ export const duplicateFirstRule = () => {
  * flake.
  */
 export const duplicateRuleFromMenu = () => {
+  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click({ force: true });
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(ALL_ACTIONS).click();
+  cy.get(ALL_ACTIONS).pipe(click);
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
 
   // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).click();
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(click);
   cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
@@ -123,12 +124,12 @@ export const checkDuplicatedRule = () => {
 };
 
 export const deleteFirstRule = () => {
-  cy.get(COLLAPSED_ACTION_BTN).first().click();
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(DELETE_RULE_ACTION_BTN).click();
 };
 
 export const deleteSelectedRules = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DELETE_RULE_BULK_BTN).click();
 };
 
@@ -139,6 +140,7 @@ export const deleteRuleFromDetailsPage = () => {
   // increase the cy.wait(). The reason we cannot use cypress pipe is because multiple clicks on ALL_ACTIONS
   // causes the pop up to show and then the next click for it to hide. Multiple clicks can cause
   // the DOM to queue up and once we detect that the element is visible it can then become invisible later
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(1000);
   cy.get(ALL_ACTIONS).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
@@ -147,7 +149,7 @@ export const deleteRuleFromDetailsPage = () => {
 
 export const duplicateSelectedRulesWithoutExceptions = () => {
   cy.log('Duplicate selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
   cy.get(DUPLICATE_WITHOUT_EXCEPTIONS_OPTION).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
@@ -155,7 +157,7 @@ export const duplicateSelectedRulesWithoutExceptions = () => {
 
 export const duplicateSelectedRulesWithExceptions = () => {
   cy.log('Duplicate selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
   cy.get(DUPLICATE_WITH_EXCEPTIONS_OPTION).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
@@ -163,7 +165,7 @@ export const duplicateSelectedRulesWithExceptions = () => {
 
 export const duplicateSelectedRulesWithNonExpiredExceptions = () => {
   cy.log('Duplicate selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
   cy.get(DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
@@ -171,13 +173,13 @@ export const duplicateSelectedRulesWithNonExpiredExceptions = () => {
 
 export const enableSelectedRules = () => {
   cy.log('Enable selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(ENABLE_RULE_BULK_BTN).click();
 };
 
 export const disableSelectedRules = () => {
   cy.log('Disable selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DISABLE_RULE_BULK_BTN).click();
 };
 
@@ -191,8 +193,8 @@ export const exportRule = (name: string) => {
 
 export const filterBySearchTerm = (term: string) => {
   cy.log(`Filter rules by search term: "${term}"`);
-  cy.get(RULE_SEARCH_FIELD).focus();
-  cy.get(RULE_SEARCH_FIELD).type(`${term}{enter}`);
+  cy.get(RULE_SEARCH_FIELD).type(term, { force: true });
+  cy.get(RULE_SEARCH_FIELD).trigger('search', { waitForAnimations: true });
 };
 
 export const filterByTags = (tags: string[]) => {
@@ -222,23 +224,23 @@ export const filterByElasticRules = () => {
 };
 
 export const filterByCustomRules = () => {
-  cy.get(CUSTOM_RULES_BTN).click();
+  cy.get(CUSTOM_RULES_BTN).click({ force: true });
 };
 
 export const filterByEnabledRules = () => {
-  cy.get(ENABLED_RULES_BTN).click();
+  cy.get(ENABLED_RULES_BTN).click({ force: true });
 };
 
 export const filterByDisabledRules = () => {
-  cy.get(DISABLED_RULES_BTN).click();
+  cy.get(DISABLED_RULES_BTN).click({ force: true });
 };
 
 export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).first().click();
+  cy.get(RULE_NAME).first().click({ force: true });
 };
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {
-  cy.contains(RULE_NAME, ruleName).click();
+  cy.contains(RULE_NAME, ruleName).click({ force: true });
 };
 
 export const loadPrebuiltDetectionRules = () => {
@@ -264,7 +266,7 @@ export const openIntegrationsPopover = () => {
 };
 
 export const reloadDeletedRules = () => {
-  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click({ force: true });
 };
 
 /**
@@ -476,7 +478,7 @@ export const expectToContainRule = (
 };
 
 const selectOverwriteRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).check();
+  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).should('be.checked');
 };
 
@@ -489,12 +491,12 @@ export const expectManagementTableRules = (ruleNames: string[]): void => {
 };
 
 const selectOverwriteExceptionsRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).check();
+  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).should('be.checked');
 };
 
 const selectOverwriteConnectorsRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).check();
+  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).should('be.checked');
 };
 

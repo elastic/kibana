@@ -60,7 +60,7 @@ export const addExceptionEntryFieldValueOfItemX = (
 };
 
 export const searchExceptionEntryFieldWithPrefix = (fieldPrefix: string, index = 0) => {
-  cy.get(FIELD_INPUT).eq(index).click();
+  cy.get(FIELD_INPUT).eq(index).click({ force: true });
   cy.get(FIELD_INPUT).eq(index).type(fieldPrefix);
 };
 
@@ -71,7 +71,7 @@ export const showFieldConflictsWarningTooltipWithMessage = (message: string, ind
 };
 
 export const showMappingConflictsWarningMessage = (message: string, index = 0) => {
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON).eq(index).click();
+  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON).eq(index).click({ force: true });
   cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION).eq(index).should('have.text', message);
 };
 
@@ -118,23 +118,22 @@ export const addExceptionFlyoutItemName = (name: string) => {
   cy.get(EXCEPTION_ITEM_NAME_INPUT).scrollIntoView();
   cy.get(EXCEPTION_ITEM_NAME_INPUT).should('be.visible');
   cy.get(EXCEPTION_ITEM_NAME_INPUT).first().focus();
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`);
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT)
+    .type(`${name}{enter}`, { force: true })
+    .should('have.value', name);
 };
 
 export const editExceptionFlyoutItemName = (name: string) => {
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).clear();
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`);
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).clear().type(`${name}{enter}`).should('have.value', name);
 };
 
 export const selectBulkCloseAlerts = () => {
   cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
-  cy.get(CLOSE_ALERTS_CHECKBOX).click();
+  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
 };
 
 export const selectCloseSingleAlerts = () => {
-  cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).click();
+  cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).click({ force: true });
 };
 
 export const addExceptionConditions = (exception: Exception) => {

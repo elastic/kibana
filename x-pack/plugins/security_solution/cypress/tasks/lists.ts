@@ -27,8 +27,8 @@ export const createListsIndex = () => {
 
 export const waitForListsIndex = () => {
   cy.request({ url: '/api/lists/index', retryOnStatusCodeFailure: true }).then((response) => {
-    // cypress-recurse
     if (response.status !== 200) {
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(7500);
     }
   });
@@ -40,15 +40,15 @@ export const waitForValueListsModalToBeLoaded = () => {
 };
 
 export const openValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click();
+  return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click({ force: true });
 };
 
 export const closeValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LIST_CLOSE_BUTTON).click();
+  return cy.get(VALUE_LIST_CLOSE_BUTTON).click({ force: true });
 };
 
 export const selectValueListsFile = (file: string): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LIST_FILE_PICKER).attachFile(file).trigger('change');
+  return cy.get(VALUE_LIST_FILE_PICKER).attachFile(file).trigger('change', { force: true });
 };
 
 export const deleteValueListsFile = (file: string): Cypress.Chainable<JQuery<HTMLElement>> => {

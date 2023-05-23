@@ -48,7 +48,7 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timel
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-describe.skip('Timeline Templates', () => {
+describe('Timeline Templates', () => {
   before(() => {
     cleanKibana();
   });

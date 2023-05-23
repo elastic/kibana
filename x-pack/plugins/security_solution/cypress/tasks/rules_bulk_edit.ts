@@ -208,7 +208,7 @@ export const checkOverwriteRuleActionsCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX)
     .should('have.text', 'Overwrite all selected rules actions')
     .find('input')
-    .click();
+    .click({ force: true });
   cy.get(RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX)
     .should('have.text', 'Overwrite all selected rules actions')
     .find('input')

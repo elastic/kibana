@@ -13,15 +13,15 @@ import {
 import { waitForPageToBeLoaded } from './common';
 
 export const goToCreateNewCase = () => {
-  cy.get(ALL_CASES_CREATE_NEW_CASE_BTN, { timeout: 60000 }).click();
+  cy.get(ALL_CASES_CREATE_NEW_CASE_BTN, { timeout: 60000 }).click({ force: true });
   waitForPageToBeLoaded();
 };
 
 export const goToCaseDetails = () => {
   waitForPageToBeLoaded();
-  cy.get(ALL_CASES_NAME).click();
+  cy.get(ALL_CASES_NAME).click({ force: true });
 };
 
 export const goToEditExternalConnection = () => {
-  cy.get(EDIT_EXTERNAL_CONNECTION).click();
+  cy.get(EDIT_EXTERNAL_CONNECTION).click({ force: true });
 };

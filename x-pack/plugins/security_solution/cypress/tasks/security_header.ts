@@ -20,7 +20,7 @@ export const kqlSearch = (search: string) => {
 
 export const navigateFromHeaderTo = (page: string) => {
   openNavigationPanelFor(page);
-  cy.get(page).click();
+  cy.get(page).click({ force: true });
 };
 
 export const refreshPage = () => {

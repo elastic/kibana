@@ -12,10 +12,10 @@ import {
   UNCOMMON_PROCESSES_TAB,
 } from '../../screens/hosts/main';
 
-export const openAllHosts = () => cy.get(ALL_HOSTS_TAB).click();
+export const openAllHosts = () => cy.get(ALL_HOSTS_TAB).click({ force: true });
 
-export const openEvents = () => cy.get(EVENTS_TAB).click();
+export const openEvents = () => cy.get(EVENTS_TAB).click({ force: true });
 
-export const openUncommonProcesses = () => cy.get(UNCOMMON_PROCESSES_TAB).click();
+export const openUncommonProcesses = () => cy.get(UNCOMMON_PROCESSES_TAB).click({ force: true });
 
-export const openSessions = () => cy.get(SESSIONS_TAB).click();
+export const openSessions = () => cy.get(SESSIONS_TAB).click({ force: true });

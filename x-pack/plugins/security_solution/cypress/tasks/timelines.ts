@@ -36,7 +36,9 @@ export const importTimeline = (timeline: string) => {
 };
 
 export const openTimeline = (id?: string) => {
-  cy.get(id ? TIMELINE(id) : TIMELINE_NAME).click();
+  cy.get(id ? TIMELINE(id) : TIMELINE_NAME)
+    .should('be.visible')
+    .click();
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {

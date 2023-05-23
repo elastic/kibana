@@ -20,7 +20,7 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../objects/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-describe.skip('Export timelines', () => {
+describe('Export timelines', () => {
   before(() => {
     cleanKibana();
     login();
@@ -36,6 +36,11 @@ describe.skip('Export timelines', () => {
       cy.wrap(response).as('timelineResponse2');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId2');
     });
+    visitWithoutDateRange(TIMELINES_URL);
+  });
+
+  beforeEach(() => {
+    login();
     visitWithoutDateRange(TIMELINES_URL);
   });
 

@@ -241,7 +241,8 @@ describe('Exceptions flyout', () => {
     addExceptionEntryFieldValueOfItemX('name{enter}', 1, 3);
     // This button will now read `Add non-nested button`
     cy.get(ADD_NESTED_BTN).scrollIntoView();
-    cy.get(ADD_NESTED_BTN).focus().click();
+    cy.get(ADD_NESTED_BTN).focus();
+    cy.get(ADD_NESTED_BTN).click();
     addExceptionEntryFieldValueOfItemX('@timestamp', 1, 4);
 
     // should have only deleted `user.id`
@@ -387,7 +388,7 @@ describe('Exceptions flyout', () => {
         });
 
         // try to save and see version conflict error
-        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
+        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click({ force: true });
 
         cy.get(EXCEPTION_FLYOUT_VERSION_CONFLICT).should('be.visible');
 
@@ -403,7 +404,7 @@ describe('Exceptions flyout', () => {
         deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
 
         // try to save and see error
-        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
+        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click({ force: true });
 
         cy.get(EXCEPTION_FLYOUT_LIST_DELETED_ERROR).should('be.visible');
       });

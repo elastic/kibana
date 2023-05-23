@@ -130,24 +130,24 @@ import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
-  cy.get(CREATE_AND_ENABLE_BTN).click();
+  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click();
+  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
   cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
-  cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click();
+  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
   cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const fillAboutRule = (rule: RuleCreateProps) => {
-  cy.get(RULE_NAME_INPUT).clear();
-  cy.get(RULE_NAME_INPUT).type(rule.name);
-  cy.get(RULE_DESCRIPTION_INPUT).clear();
-  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
+  cy.get(RULE_NAME_INPUT).clear({ force: true });
+  cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
 
   if (rule.severity) {
     fillSeverity(rule.severity);
@@ -158,7 +158,7 @@ export const fillAboutRule = (rule: RuleCreateProps) => {
   if (rule.tags) {
     fillRuleTags(rule.tags);
   }
-  cy.get(ADVANCED_SETTINGS_BTN).click();
+  cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
   if (rule.references) {
     fillReferenceUrls(rule.references);
@@ -177,12 +177,12 @@ export const fillAboutRule = (rule: RuleCreateProps) => {
 };
 
 export const expandAdvancedSettings = () => {
-  cy.get(ADVANCED_SETTINGS_BTN).click();
+  cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 };
 
 export const fillNote = (note: string = ruleFields.investigationGuide) => {
-  cy.get(INVESTIGATION_NOTES_TEXTAREA).clear();
-  cy.get(INVESTIGATION_NOTES_TEXTAREA).type(note);
+  cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true });
+  cy.get(INVESTIGATION_NOTES_TEXTAREA).type(note, { force: true });
 
   return note;
 };
@@ -191,18 +191,20 @@ export const fillMitre = (mitreAttacks: Threat[]) => {
   let techniqueIndex = 0;
   let subtechniqueInputIndex = 0;
   mitreAttacks.forEach((mitre, tacticIndex) => {
-    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click();
+    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
     cy.contains(MITRE_TACTIC, `${mitre.tactic.name} (${mitre.tactic.id})`).click();
 
     if (mitre.technique) {
       mitre.technique.forEach((technique) => {
-        cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click();
-        cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click();
+        cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
+        cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
         cy.contains(MITRE_TACTIC, `${technique.name} (${technique.id})`).click();
         if (technique.subtechnique) {
           technique.subtechnique.forEach((subtechnique) => {
-            cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click();
-            cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN).eq(subtechniqueInputIndex).click();
+            cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
+            cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
+              .eq(subtechniqueInputIndex)
+              .click({ force: true });
             cy.contains(MITRE_TACTIC, `${subtechnique.name} (${subtechnique.id})`).click();
             subtechniqueInputIndex++;
           });
@@ -211,20 +213,20 @@ export const fillMitre = (mitreAttacks: Threat[]) => {
       });
     }
 
-    cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click();
+    cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
   return mitreAttacks;
 };
 
 export const fillThreat = (threat: Threat = ruleFields.threat) => {
-  cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).first().click();
+  cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).first().click({ force: true });
   cy.contains(MITRE_TACTIC, threat.tactic.name).click();
   return threat;
 };
 
 export const fillThreatTechnique = (technique: ThreatTechnique = ruleFields.threatTechnique) => {
-  cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).first().click();
-  cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).first().click();
+  cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).first().click({ force: true });
+  cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).first().click({ force: true });
   cy.contains(MITRE_TACTIC, technique.name).click();
   return technique;
 };
@@ -232,18 +234,17 @@ export const fillThreatTechnique = (technique: ThreatTechnique = ruleFields.thre
 export const fillThreatSubtechnique = (
   subtechnique: ThreatSubtechnique = ruleFields.threatSubtechnique
 ) => {
-  cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).first().click();
-  cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN).first().click();
+  cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).first().click({ force: true });
+  cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN).first().click({ force: true });
   cy.contains(MITRE_TACTIC, subtechnique.name).click();
   return subtechnique;
 };
 
 export const fillFalsePositiveExamples = (falsePositives: string[] = ruleFields.falsePositives) => {
   falsePositives.forEach((falsePositive, index) => {
-    cy.get(FALSE_POSITIVES_INPUT).eq(index).clear();
-    cy.get(FALSE_POSITIVES_INPUT).eq(index).type(falsePositive);
-
-    cy.get(ADD_FALSE_POSITIVE_BTN).click();
+    cy.get(FALSE_POSITIVES_INPUT).eq(index).clear({ force: true });
+    cy.get(FALSE_POSITIVES_INPUT).eq(index).type(falsePositive, { force: true });
+    cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
   return falsePositives;
 };
@@ -256,54 +257,54 @@ export const importSavedQuery = (timelineId: string) => {
 };
 
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
-  cy.get(RULE_NAME_INPUT).clear();
-  cy.get(RULE_NAME_INPUT).type(ruleName);
-
+  cy.get(RULE_NAME_INPUT).clear({ force: true });
+  cy.get(RULE_NAME_INPUT).type(ruleName, { force: true });
   return ruleName;
 };
 
 export const fillDescription = (description: string = ruleFields.ruleDescription) => {
-  cy.get(RULE_DESCRIPTION_INPUT).clear();
-  cy.get(RULE_DESCRIPTION_INPUT).type(description);
+  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).type(description, { force: true });
 
   return description;
 };
 
 export const fillSeverity = (severity: string = ruleFields.ruleSeverity) => {
-  cy.get(SEVERITY_DROPDOWN).click();
+  cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${severity.toLowerCase()}`).click();
   return severity;
 };
 
 export const fillRiskScore = (riskScore: number = ruleFields.riskScore) => {
-  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`);
+  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`, { force: true });
   return riskScore;
 };
 
 export const fillRuleTags = (tags: string[] = ruleFields.ruleTags) => {
   tags.forEach((tag) => {
-    cy.get(TAGS_INPUT).type(`${tag}{enter}`);
+    cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
   return tags;
 };
 
 export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.referenceUrls) => {
   referenceUrls.forEach((url, index) => {
-    cy.get(REFERENCE_URLS_INPUT).eq(index).clear();
-    cy.get(REFERENCE_URLS_INPUT).eq(index).type(url);
-    cy.get(ADD_REFERENCE_URL_BTN).click();
+    cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true });
+    cy.get(REFERENCE_URLS_INPUT).eq(index).type(url, { force: true });
+
+    cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
   });
   return referenceUrls;
 };
 
 export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {
   fillAboutRule(rule);
-  getAboutContinueButton().should('exist').click();
+  getAboutContinueButton().should('exist').click({ force: true });
 };
 
 export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
-  cy.get(RULE_NAME_INPUT).type(rule.name);
-  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
+  cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
 
   cy.get(SEVERITY_MAPPING_OVERRIDE_OPTION).click();
   if (rule.severity_mapping) {
@@ -329,13 +330,13 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
     });
   }
 
-  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.risk_score}`);
+  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.risk_score}`, { force: true });
 
   if (rule.tags) {
     fillRuleTags(rule.tags);
   }
 
-  cy.get(ADVANCED_SETTINGS_BTN).click();
+  cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
   if (rule.references) {
     fillReferenceUrls(rule.references);
@@ -358,7 +359,7 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
     cy.get(COMBO_BOX_INPUT).type(`${rule.timestamp_override}{enter}`);
   });
 
-  getAboutContinueButton().should('exist').click();
+  getAboutContinueButton().should('exist').click({ force: true });
 };
 
 // called after import rule from saved timeline
@@ -384,7 +385,7 @@ export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .type(rule.query || '');
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
@@ -406,7 +407,7 @@ export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
 
     cy.get(LOOK_BACK_TIME_TYPE).select(additionalLookbackType);
   }
-  cy.get(SCHEDULE_CONTINUE_BUTTON).click();
+  cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
 export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) => {
@@ -454,11 +455,11 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
     .then((inputs) => {
       cy.wrap(inputs[thresholdField]).click();
       cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
-      cy.get(EUI_FILTER_SELECT_ITEM).click();
+      cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
       cy.wrap(inputs[threshold]).clear();
       cy.wrap(inputs[threshold]).type(`${rule.threshold.value}`);
     });
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
@@ -468,19 +469,19 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
-  cy.get(RULES_CREATION_PREVIEW_BUTTON).should('not.be.disabled').click();
-  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('not.be.disabled').click();
+  cy.get(RULES_CREATION_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
+  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('not.be.disabled').click({ force: true });
   cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
       if (text !== 'Rule Preview') {
-        cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click();
+        cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click({ force: true });
         cy.get(PREVIEW_HISTOGRAM).should('contain.text', 'Rule Preview');
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
 
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(`${RULES_CREATION_FORM} ${EQL_QUERY_INPUT}`).should('not.exist');
 };
 
@@ -632,7 +633,7 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCre
     indicatorIndexField: rule.threat_mapping[0].entries[0].value,
   });
   getCustomIndicatorQueryInput().type('{selectall}{enter}*:*');
-  getDefineContinueButton().should('exist').click();
+  getDefineContinueButton().should('exist').click({ force: true });
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
@@ -643,46 +644,48 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   const text = jobsAsArray
     .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
     .join('');
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click();
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
 
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
 
-  cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`);
-  getDefineContinueButton().should('exist').click();
+  cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
+    force: true,
+  });
+  getDefineContinueButton().should('exist').click({ force: true });
 };
 
 export const goToAboutStepTab = () => {
-  cy.get(ABOUT_EDIT_TAB).click();
+  cy.get(ABOUT_EDIT_TAB).click({ force: true });
 };
 
 export const goToScheduleStepTab = () => {
-  cy.get(SCHEDULE_EDIT_TAB).click();
+  cy.get(SCHEDULE_EDIT_TAB).click({ force: true });
 };
 
 export const goToActionsStepTab = () => {
-  cy.get(ACTIONS_EDIT_TAB).click();
+  cy.get(ACTIONS_EDIT_TAB).click({ force: true });
 };
 
 export const selectEqlRuleType = () => {
-  cy.get(EQL_TYPE).click();
+  cy.get(EQL_TYPE).click({ force: true });
 };
 
 export const selectIndicatorMatchType = () => {
-  cy.get(INDICATOR_MATCH_TYPE).click();
+  cy.get(INDICATOR_MATCH_TYPE).click({ force: true });
 };
 
 export const selectMachineLearningRuleType = () => {
   cy.get(MACHINE_LEARNING_TYPE).contains('Select');
-  cy.get(MACHINE_LEARNING_TYPE).click();
+  cy.get(MACHINE_LEARNING_TYPE).click({ force: true });
 };
 
 export const selectThresholdRuleType = () => {
-  cy.get(THRESHOLD_TYPE).click();
+  cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
 export const selectNewTermsRuleType = () => {
-  cy.get(NEW_TERMS_TYPE).click();
+  cy.get(NEW_TERMS_TYPE).click({ force: true });
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
@@ -708,7 +711,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
 
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
-    cy.get(REFRESH_BUTTON).click();
+    cy.get(REFRESH_BUTTON).click({ force: true });
     return cy
       .get(RULE_STATUS)
       .invoke('text')
@@ -727,11 +730,11 @@ export const selectAndLoadSavedQuery = (queryName: string, queryValue: string) =
 };
 
 export const checkLoadQueryDynamically = () => {
-  cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).check();
+  cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true });
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('be.checked');
 };
 
 export const uncheckLoadQueryDynamically = () => {
-  cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).uncheck();
+  cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true });
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('not.be.checked');
 };

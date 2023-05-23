@@ -21,7 +21,7 @@ import {
 
 export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
-  cy.get(GLOBAL_KQL_INPUT).should('be.visible');
+  cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).should('be.visible');
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click();
 };
 

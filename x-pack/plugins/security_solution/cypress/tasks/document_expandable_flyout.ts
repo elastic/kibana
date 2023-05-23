@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable cypress/unsafe-to-chain-command */
+
 import {
   DOCUMENT_DETAILS_FLYOUT_BODY,
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
@@ -93,10 +95,11 @@ export const openTakeActionButtonAndSelectItem = (option: string) => {
  * Scroll down to the flyout footer's take action button and open its dropdown
  */
 export const openTakeActionButton = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).within(() => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).click();
-  });
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER)
+    .scrollIntoView()
+    .within(() => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).click();
+    });
 };
 
 /**
@@ -111,10 +114,8 @@ export const selectTakeActionItem = (option: string) => {
 /**
  * Open the Overview tab in the document details expandable flyout right section
  */
-export const openOverviewTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).click();
-};
+export const openOverviewTab = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).scrollIntoView().click();
 
 /**
  * Toggle the Overview tab investigation section in the document details expandable flyout right section
@@ -139,10 +140,12 @@ export const toggleOverviewTabDescriptionSection = () =>
 /**
  * Toggle the Overview tab insights section in the document details expandable flyout right section
  */
-export const toggleOverviewTabInsightsSection = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER).click();
-};
+export const toggleOverviewTabInsightsSection = () =>
+  cy
+    .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER)
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
 
 /**
  * Toggle the Overview tab visualizations section in the document details expandable flyout right section

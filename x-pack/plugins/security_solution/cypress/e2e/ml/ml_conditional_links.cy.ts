@@ -25,7 +25,7 @@ import {
   mlNetworkSingleIpNullKqlQuery,
 } from '../../urls/ml_conditional_links';
 
-describe.skip('ml conditional links', () => {
+describe('ml conditional links', () => {
   beforeEach(() => {
     login();
   });

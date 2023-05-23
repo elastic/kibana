@@ -240,7 +240,7 @@ describe('Timeline scope', () => {
       clickAlertCheckbox();
       isNotSourcererSelection(`auditbeat-*`);
       isSourcererSelection(`${DEFAULT_ALERTS_INDEX}-default`);
-      cy.get(SOURCERER.alertCheckbox).uncheck();
+      cy.get(SOURCERER.alertCheckbox).uncheck({ force: true });
       defaultPatterns.forEach((pattern) => isSourcererSelection(pattern));
     });
 

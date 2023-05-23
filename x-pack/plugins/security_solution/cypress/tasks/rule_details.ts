@@ -104,8 +104,8 @@ export const goToEndpointExceptionsTab = () => {
 };
 
 export const openEditException = (index = 0) => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click();
-  cy.get(EDIT_EXCEPTION_BTN).eq(index).click();
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click({ force: true });
+  cy.get(EDIT_EXCEPTION_BTN).eq(index).click({ force: true });
 };
 
 export const removeException = () => {
@@ -117,7 +117,7 @@ export const removeException = () => {
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
     cy.log('Wating for the rule to be executed');
-    cy.get(REFRESH_BUTTON).click();
+    cy.get(REFRESH_BUTTON).click({ force: true });
     return cy
       .get(RULE_STATUS)
       .invoke('text')

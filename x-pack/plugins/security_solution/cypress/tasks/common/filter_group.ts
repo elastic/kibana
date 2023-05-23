@@ -27,7 +27,7 @@ import {
 import { waitForPageFilters } from '../alerts';
 
 export const openFilterGroupContextMenu = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click();
+  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
 };
 
 export const waitForFilterGroups = () => {
@@ -41,7 +41,7 @@ export const waitForFilterGroups = () => {
 
 export const resetFilterGroup = () => {
   openFilterGroupContextMenu();
-  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click();
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
 };
 
 export const editFilterGroupControls = () => {
@@ -51,7 +51,7 @@ export const editFilterGroupControls = () => {
 
 export const cancelFieldEditing = () => {
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('be.visible');
-  cy.get(FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS.CANCEL).trigger('click');
+  cy.get(FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS.CANCEL).should('be.visible').trigger('click');
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('not.exist');
 };
 
@@ -85,7 +85,9 @@ export const addNewFilterGroupControlValues = ({
 
   cy.get(FIELD_LABEL).should('have.value', fieldName);
   cy.get(FIELD_LABEL).clear();
-  cy.get(FIELD_LABEL).type(label).should('have.value', label);
+  cy.get(FIELD_LABEL).type(label);
+  cy.get(FIELD_LABEL).should('have.value', label);
+
   cy.get(SAVE).click();
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('not.exist');
   waitForPageFilters();
@@ -115,7 +117,9 @@ export const editFilterGroupControl = ({
 
   cy.get(FIELD_LABEL).should('have.value', fieldName);
   cy.get(FIELD_LABEL).clear();
-  cy.get(FIELD_LABEL).type(label).should('have.value', label);
+  cy.get(FIELD_LABEL).type(label);
+  cy.get(FIELD_LABEL).should('have.value', label);
+
   cy.get(SAVE).click();
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('not.exist');
 };

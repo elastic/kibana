@@ -39,7 +39,7 @@ import {
 } from '../screens/edit_connector';
 
 export const backToCases = () => {
-  cy.get(BACK_TO_CASES_BTN).click();
+  cy.get(BACK_TO_CASES_BTN).click({ force: true });
 };
 
 export const filterStatusOpen = () => {
@@ -48,29 +48,27 @@ export const filterStatusOpen = () => {
 };
 
 export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
-  cy.get(TITLE_INPUT).focus();
-  cy.get(TITLE_INPUT).filter(':visible').type(newCase.name);
+  cy.get(TITLE_INPUT).type(newCase.name, { force: true });
   newCase.tags.forEach((tag) => {
-    cy.get(TAGS_INPUT).type(`${tag}`);
-    cy.get(TAGS_INPUT).realPress('Enter');
+    cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
-  cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `);
+  cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `, { force: true });
 };
 
 export const attachTimeline = (newCase: TestCase) => {
-  cy.get(INSERT_TIMELINE_BTN).click();
+  cy.get(INSERT_TIMELINE_BTN).click({ force: true });
   cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
 };
 
 export const createCase = () => {
-  cy.get(SUBMIT_BTN).click();
+  cy.get(SUBMIT_BTN).click({ force: true });
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
 };
 
 export const fillJiraConnectorOptions = (jiraConnector: JiraConnectorOptions) => {
-  cy.get(CONNECTOR_SELECTOR).click();
-  cy.get(SELECT_JIRA).click();
+  cy.get(CONNECTOR_SELECTOR).click({ force: true });
+  cy.get(SELECT_JIRA).click({ force: true });
   cy.get(SELECT_ISSUE_TYPE).should('exist');
   cy.get(SELECT_ISSUE_TYPE).select(jiraConnector.issueType);
 
@@ -81,8 +79,8 @@ export const fillJiraConnectorOptions = (jiraConnector: JiraConnectorOptions) =>
 export const fillServiceNowConnectorOptions = (
   serviceNowConnectorOpions: ServiceNowconnectorOptions
 ) => {
-  cy.get(CONNECTOR_SELECTOR).click();
-  cy.get(SELECT_SN).click();
+  cy.get(CONNECTOR_SELECTOR).click({ force: true });
+  cy.get(SELECT_SN).click({ force: true });
   cy.get(SELECT_SEVERITY).should('exist');
   cy.get(SELECT_URGENCY).should('exist');
   cy.get(SELECT_IMPACT).should('exist');
@@ -94,13 +92,13 @@ export const fillServiceNowConnectorOptions = (
 export const fillIbmResilientConnectorOptions = (
   ibmResilientConnector: IbmResilientConnectorOptions
 ) => {
-  cy.get(CONNECTOR_SELECTOR).click();
-  cy.get(SELECT_RESILIENT).click();
+  cy.get(CONNECTOR_SELECTOR).click({ force: true });
+  cy.get(SELECT_RESILIENT).click({ force: true });
   cy.get(SELECT_INCIDENT_TYPE).should('exist');
   cy.get(SELECT_SEVERITY).should('exist');
   ibmResilientConnector.incidentTypes.forEach((incidentType) => {
-    cy.get(SELECT_INCIDENT_TYPE).type(`${incidentType}{enter}`);
+    cy.get(SELECT_INCIDENT_TYPE).type(`${incidentType}{enter}`, { force: true });
   });
-  cy.get(CONNECTOR_RESILIENT).click();
+  cy.get(CONNECTOR_RESILIENT).click({ force: true });
   cy.get(SELECT_SEVERITY).select(ibmResilientConnector.severity);
 };

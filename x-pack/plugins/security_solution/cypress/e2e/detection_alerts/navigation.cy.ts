@@ -45,8 +45,8 @@ describe.skip('Alert Details Page Navigation', () => {
             cy.get(ALERTS_REFRESH_BTN).click();
           }
         });
-        cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
-        cy.get(OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN).click();
+        cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+        cy.get(OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN).click({ force: true });
         cy.get(PAGE_TITLE).should('contain.text', rule.name);
         cy.url().should('include', '/summary');
       });
@@ -60,7 +60,7 @@ describe.skip('Alert Details Page Navigation', () => {
 
       it('should navigate to the details page from the alert flyout', () => {
         expandFirstAlert();
-        cy.get(OPEN_ALERT_DETAILS_PAGE).click();
+        cy.get(OPEN_ALERT_DETAILS_PAGE).click({ force: true });
         cy.get(PAGE_TITLE).should('contain.text', rule.name);
         cy.url().should('include', '/summary');
       });

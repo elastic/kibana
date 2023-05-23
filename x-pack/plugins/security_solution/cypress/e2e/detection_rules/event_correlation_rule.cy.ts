@@ -47,7 +47,7 @@ import {
   goToRuleDetails,
   goToTheRuleDetailsOf,
 } from '../../tasks/alerts_detection_rules';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -69,10 +69,10 @@ describe('EQL rules', () => {
 
   beforeEach(() => {
     login();
-    // deleteAlertsAndRules();
+    deleteAlertsAndRules();
   });
 
-  describe.only('Detection rules, EQL', () => {
+  describe('Detection rules, EQL', () => {
     const rule = getEqlRule();
     const expectedUrls = rule.references?.join('');
     const expectedFalsePositives = rule.false_positives?.join('');
@@ -115,7 +115,7 @@ describe('EQL rules', () => {
         });
         getDetails(TAGS_DETAILS).should('have.text', expectedTags);
       });
-      cy.get(INVESTIGATION_NOTES_TOGGLE).click();
+      cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));

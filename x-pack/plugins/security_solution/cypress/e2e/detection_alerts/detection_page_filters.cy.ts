@@ -103,8 +103,6 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
 describe('Detections : Page Filters', () => {
   before(() => {
     cleanKibana();
-    login();
-    visit(ALERTS_URL);
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
   });
 
@@ -258,14 +256,14 @@ describe('Detections : Page Filters', () => {
 
     openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click();
+    cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
     closePageFilterPopover(1);
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
     cy.get(OPTION_LIST_VALUES(1)).click();
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click();
+    cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
 
     // high should be scuccessfully selected.
     cy.get(OPTION_LIST_VALUES(1)).contains('high');

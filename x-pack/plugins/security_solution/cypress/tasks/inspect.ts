@@ -60,5 +60,5 @@ export const openLensVisualizationsInspectModal = (
 
 export const openTab = (tab: string) => {
   cy.get(tab).invoke('show');
-  cy.get(tab).click();
+  cy.get(tab).click({ force: true });
 };

@@ -28,11 +28,15 @@ export const addsFields = (fields: string[]) => {
 };
 
 export const addsHostGeoCityNameToTimeline = () => {
-  cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX).check();
+  cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX).check({
+    force: true,
+  });
 };
 
 export const addsHostGeoContinentNameToTimeline = () => {
-  cy.get(FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX).check();
+  cy.get(FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX).check({
+    force: true,
+  });
 };
 
 export const clearFieldsBrowser = () => {
@@ -46,13 +50,12 @@ export const clearFieldsBrowser = () => {
 };
 
 export const closeFieldsBrowser = () => {
-  cy.get(CLOSE_BTN).click();
+  cy.get(CLOSE_BTN).click({ force: true });
   cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.exist');
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT).clear();
-  cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName);
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).clear().type(fieldName);
 
   cy.waitUntil(() =>
     cy
@@ -62,31 +65,31 @@ export const filterFieldsBrowser = (fieldName: string) => {
 };
 
 export const toggleCategoryFilter = () => {
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click();
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click({ force: true });
 };
 
 export const toggleCategory = (category: string) => {
   toggleCategoryFilter();
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear();
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).type(category);
-
-  cy.get(FIELDS_BROWSER_CATEGORY_FILTER_OPTION(category)).click();
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear().type(category);
+  cy.get(FIELDS_BROWSER_CATEGORY_FILTER_OPTION(category)).click({ force: true });
   toggleCategoryFilter();
 };
 
 export const removesMessageField = () => {
-  cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck();
+  cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck({
+    force: true,
+  });
 };
 
 export const resetFields = () => {
-  cy.get(FIELDS_BROWSER_RESET_FIELDS).click();
+  cy.get(FIELDS_BROWSER_RESET_FIELDS).click({ force: true });
 };
 
 export const activateViewSelected = () => {
-  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click();
-  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click();
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click({ force: true });
 };
 export const activateViewAll = () => {
-  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click();
-  cy.get(FIELDS_BROWSER_VIEW_ALL).click();
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_ALL).click({ force: true });
 };
