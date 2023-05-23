@@ -112,6 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('unhappy paths', () => {
       for (const errorScenario of [
         { name: 'field is wrong type', queryParams: { perPage: true } },
+        { name: 'field is unknown', queryParams: { foo: 'bar' } },
         { name: 'page > 10k', queryParams: { page: 10001 } },
         { name: 'perPage > 10k', queryParams: { perPage: 10001 } },
         { name: 'page * perPage > 10k', queryParams: { page: 2, perPage: 9001 } },
@@ -134,28 +135,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
-    });
-
-    describe('unknown field', () => {
-      it('returns 200 when query params have unknown field', async () => {
-        const postedCase = await createCase(supertest, postCaseReq, 200);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-          expectedHttpCode: 200,
-        });
-
-        const caseComments = await findAttachments({
-          supertest,
-          caseId: postedCase.id,
-          query: { foo: 'bar' },
-          expectedHttpCode: 200,
-        });
-
-        expect(caseComments.comments.length).to.eql(1);
-      });
     });
 
     describe('rbac', () => {

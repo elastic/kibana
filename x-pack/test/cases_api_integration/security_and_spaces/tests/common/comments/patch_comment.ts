@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('unhappy path - removes alertId excess attributes for type user', async () => {
+    it('unhappy path - 400s when adding excess attributes for type user', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment({
         supertest,
@@ -228,44 +228,21 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
 
-      await updateComment({
-        supertest,
-        caseId: postedCase.id,
-        req: {
-          id: patchedCase.comments![0].id,
-          version: patchedCase.comments![0].version,
-          comment: 'a comment',
-          type: CommentType.user,
-          // @ts-expect-error
-          alertId: 'alertId',
-          owner: 'securitySolutionFixture',
-        },
-        expectedHttpCode: 200,
-      });
-    });
-
-    it('unhappy path - removes index excess attributes for type user', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment({
-        supertest,
-        caseId: postedCase.id,
-        params: postCommentUserReq,
-      });
-
-      await updateComment({
-        supertest,
-        caseId: postedCase.id,
-        req: {
-          id: patchedCase.comments![0].id,
-          version: patchedCase.comments![0].version,
-          comment: 'a comment',
-          type: CommentType.user,
-          // @ts-expect-error
-          index: 'index',
-          owner: 'securitySolutionFixture',
-        },
-        expectedHttpCode: 200,
-      });
+      for (const attribute of ['alertId', 'index']) {
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+            comment: 'a comment',
+            type: CommentType.user,
+            [attribute]: attribute,
+            owner: 'securitySolutionFixture',
+          },
+          expectedHttpCode: 400,
+        });
+      }
     });
 
     it('unhappy path - 400s when missing attributes for type alert', async () => {
@@ -302,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    it('unhappy path - removes excess attributes for type alert', async () => {
+    it('unhappy path - 400s when adding excess attributes for type alert', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment({
         supertest,
@@ -327,7 +304,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             [attribute]: attribute,
           },
-          expectedHttpCode: 200,
+          expectedHttpCode: 400,
         });
       }
     });
