@@ -214,6 +214,11 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
   if (incomingEmbeddable) {
+    const scrolltoIncomingEmbeddable = (container: DashboardContainer, id: string) => {
+      container.setScrollToPanelId(id);
+      container.setHighlightPanelId(id);
+    };
+
     initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
     if (
       incomingEmbeddable.embeddableId &&
@@ -234,11 +239,18 @@ export const initializeDashboard = async ({
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
+      untilDashboardReady().then((container) =>
+        scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
+      );
     } else {
       // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
-      untilDashboardReady().then((container) =>
-        container.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input)
-      );
+      untilDashboardReady().then(async (container) => {
+        const embeddable = await container.addNewEmbeddable(
+          incomingEmbeddable.type,
+          incomingEmbeddable.input
+        );
+        scrolltoIncomingEmbeddable(container, embeddable.id);
+      });
     }
   }
 
