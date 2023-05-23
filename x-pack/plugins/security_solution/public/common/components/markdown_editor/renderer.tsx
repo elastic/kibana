@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
-import { EuiMarkdownFormat, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import unified from 'unified';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -61,35 +61,41 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
   return (
     <>
       {platinumPluginDetected && (
-        <EuiCallOut
-          title="The following markdown may make use of subscription features"
-          color="primary"
-          iconType="lock"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.markdown.premiumPlugin"
-            defaultMessage="To use these interactive markdown features, you must {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href={application.getUrlForApp('management', {
-                    path: 'stack/license_management/home',
-                  })}
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.markdown.premiumPlugin"
-                    defaultMessage="start a trial or upgrade your subscription"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            title="The following markdown may make use of subscription features"
+            color="primary"
+            iconType="lock"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.premiumPlugin"
+              defaultMessage="To use these interactive markdown features, you must {link}."
+              values={{
+                link: (
+                  <EuiLink
+                    href={application.getUrlForApp('management', {
+                      path: 'stack/license_management/home',
+                    })}
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.markdown.premiumPlugin"
+                      defaultMessage="start a trial or upgrade your subscription"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
       )}
       {markdownParseResult !== null && (
-        <EuiCallOut title="Invalid markdown detected" color="danger" iconType="error">
-          {markdownParseResult}
-        </EuiCallOut>
+        <>
+          <EuiCallOut title="Invalid markdown detected" color="danger" iconType="error">
+            {markdownParseResult}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
       )}
       <EuiMarkdownFormat
         parsingPluginList={parsingPlugins}
