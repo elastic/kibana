@@ -16,11 +16,6 @@ export enum SortOrder {
   desc = 'desc',
 }
 
-// export interface SortField<Field = string> {
-//   field: Field;
-//   order: SortOrder;
-// }
-
 export interface RequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: ResponseActionsQueries;
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
