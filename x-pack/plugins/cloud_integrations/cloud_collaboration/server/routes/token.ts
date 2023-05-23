@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getClientAuthToken } from '@cord-sdk/server';
+import jwt from 'jsonwebtoken';
 
 import { IRouter } from '@kbn/core/server';
 import type { SecurityPluginSetup, AuthenticatedUser } from '@kbn/security-plugin/server';
@@ -66,7 +66,30 @@ export const registerTokenRoute = ({
         });
       }
 
-      const token = getClientAuthToken(appId, secret, {
+      // const token = getClientAuthToken(appId, secret, {
+      //   // The user ID can be any identifier that makes sense to your application.
+      //   // As long as it's unique per-user, Cord can use it to represent your user.
+      //   user_id: userId,
+
+      //   // Same as above. An organization ID can be any unique string. Organizations
+      //   // are groups of users.
+      //   organization_id: cloudId,
+
+      //   // By supplying the  `user_details` object, you can create the user in
+      //   // Cord's backend on-the-fly. No need to pre-sync your users.
+      //   user_details: {
+      //     email: userEmail,
+      //     name: userId,
+      //   },
+
+      //   // By supplying the `organization_details` object, just like the user,
+      //   // Cord will create the organization on-the-fly.
+      //   organization_details: {
+      //     name: cloudId,
+      //   },
+      // });
+
+      const payload = {
         // The user ID can be any identifier that makes sense to your application.
         // As long as it's unique per-user, Cord can use it to represent your user.
         user_id: userId,
@@ -87,6 +110,11 @@ export const registerTokenRoute = ({
         organization_details: {
           name: cloudId,
         },
+      };
+
+      const token = jwt.sign({ ...payload, app_id: appId }, secret, {
+        algorithm: 'HS512',
+        expiresIn: '1 hour',
       });
 
       const body: GetCollaborationTokenDataResponseBody = {
