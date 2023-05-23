@@ -133,8 +133,7 @@ export const parser: Plugin = function () {
 
 const resultFormat = '0,0.[000]a';
 
-// receives the configuration from the parser and renders
-const InsightComponent = ({
+const LicensedInsightComponent = ({
   label,
   description,
   providers,
@@ -209,25 +208,8 @@ const InsightComponent = ({
       };
     }
   }, [oldestTimestamp, relativeTimerange]);
-
-  const isPlatinum = useLicense().isAtLeast('platinum');
-
   if (isQueryLoading) {
-    return <EuiLoadingSpinner size="l" />;
-  } else if (isPlatinum === false) {
-    return (
-      <>
-        <EuiButton
-          isDisabled={true}
-          iconSide={'left'}
-          iconType={'timeline'}
-          data-test-subj="insight-investigate-in-timeline-button-license"
-        >
-          {`${label}`}
-        </EuiButton>
-        <div>{description}</div>
-      </>
-    );
+    return <EuiLoadingSpinner />;
   } else {
     return (
       <>
@@ -245,6 +227,43 @@ const InsightComponent = ({
         </InvestigateInTimelineButton>
         <div>{description}</div>
       </>
+    );
+  }
+};
+
+// receives the configuration from the parser and renders
+const InsightComponent = ({
+  label,
+  description,
+  providers,
+  relativeFrom,
+  relativeTo,
+}: InsightComponentProps) => {
+  const isPlatinum = useLicense().isAtLeast('platinum');
+
+  if (isPlatinum === false) {
+    return (
+      <>
+        <EuiButton
+          isDisabled={true}
+          iconSide={'left'}
+          iconType={'timeline'}
+          data-test-subj="insight-investigate-in-timeline-button-license"
+        >
+          {`${label}`}
+        </EuiButton>
+        <div>{description}</div>
+      </>
+    );
+  } else {
+    return (
+      <LicensedInsightComponent
+        label={label}
+        description={description}
+        providers={providers}
+        relativeFrom={relativeFrom}
+        relativeTo={relativeTo}
+      />
     );
   }
 };
