@@ -6,10 +6,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
-import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { GenAiRunActionParams } from '../../common/gen_ai/types';
-import { SUB_ACTION } from '../../common/gen_ai/constants';
 
 export interface EmailActionParams {
   to: string[];
@@ -72,24 +69,6 @@ export interface TeamsActionParams {
 }
 
 export interface WebhookActionParams {
-  body?: string;
-}
-
-export interface GenerativeAiActionParams {
-  subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;
-  subActionParams: GenAiRunActionParams;
-}
-
-export interface GenerativeAiConfig {
-  apiProvider: OpenAiProviderType;
-  apiUrl: string;
-}
-
-export interface GenerativeAiSecrets {
-  apiKey: string;
-}
-
-export interface GenerativeAiActionParams {
   body?: string;
 }
 

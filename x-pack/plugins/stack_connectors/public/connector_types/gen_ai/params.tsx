@@ -12,14 +12,26 @@ import {
   ActionConnectorMode,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SUB_ACTION } from '../../../common/gen_ai/constants';
-import { GenerativeAiActionParams } from '../types';
+import { DEFAULT_BODY, DEFAULT_BODY_AZURE } from './constants';
+import { OpenAiProviderType, SUB_ACTION } from '../../../common/gen_ai/constants';
+import { GenerativeAiActionConnector, GenerativeAiActionParams } from './types';
 
 const GenerativeAiParamsFields: React.FunctionComponent<
   ActionParamsProps<GenerativeAiActionParams>
-> = ({ actionParams, editAction, index, messageVariables, executionMode, errors }) => {
+> = ({
+  actionConnector,
+  actionParams,
+  editAction,
+  index,
+  messageVariables,
+  executionMode,
+  errors,
+}) => {
   const { subAction, subActionParams } = actionParams;
+
   const { body } = subActionParams ?? {};
+
+  const typedActionConnector = actionConnector as unknown as GenerativeAiActionConnector;
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
@@ -31,9 +43,16 @@ const GenerativeAiParamsFields: React.FunctionComponent<
 
   useEffect(() => {
     if (!subActionParams) {
-      editAction('subActionParams', {}, index);
+      // default to OpenAiProviderType.OpenAi sample data
+      let sampleBody = DEFAULT_BODY;
+
+      if (typedActionConnector?.config?.apiProvider === OpenAiProviderType.AzureAi) {
+        // update sample data if AzureAi
+        sampleBody = DEFAULT_BODY_AZURE;
+      }
+      editAction('subActionParams', { body: sampleBody }, index);
     }
-  }, [editAction, index, subActionParams]);
+  }, [typedActionConnector?.config?.apiProvider, editAction, index, subActionParams]);
 
   const editSubActionParams = useCallback(
     (params: GenerativeAiActionParams['subActionParams']) => {

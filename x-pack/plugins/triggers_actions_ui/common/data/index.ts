@@ -19,8 +19,3 @@ export interface TimeSeriesResultRow {
 }
 
 export type MetricResult = [string, number]; // [iso date, value]
-
-export enum OpenAiProviderType {
-  OpenAi = 'OpenAI',
-  AzureAi = 'Azure OpenAI',
-}

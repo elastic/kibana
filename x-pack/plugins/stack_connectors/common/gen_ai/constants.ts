@@ -18,3 +18,7 @@ export enum SUB_ACTION {
   RUN = 'run',
   TEST = 'test',
 }
+export enum OpenAiProviderType {
+  OpenAi = 'OpenAI',
+  AzureAi = 'Azure OpenAI',
+}

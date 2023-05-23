@@ -7,7 +7,6 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
 import { GenAiRunActionParamsSchema } from '../../../common/gen_ai/schema';
 import type {
   GenAiConfig,
@@ -16,7 +15,7 @@ import type {
   GenAiRunActionResponse,
 } from '../../../common/gen_ai/types';
 import { GenAiBaseApiResponseSchema } from './api_schema';
-import { SUB_ACTION } from '../../../common/gen_ai/constants';
+import { OpenAiProviderType, SUB_ACTION } from '../../../common/gen_ai/constants';
 
 export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets> {
   private url;

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { GEN_AI_CONNECTOR_ID } from '../../common/gen_ai/constants';
+export { OpenAiProviderType, GEN_AI_CONNECTOR_ID } from '../../common/gen_ai/constants';

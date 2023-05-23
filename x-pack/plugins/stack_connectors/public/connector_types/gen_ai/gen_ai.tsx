@@ -7,23 +7,16 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  ActionTypeModel as ConnectorTypeModel,
-  GenericValidationResult,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SUB_ACTION } from '../../../common/gen_ai/constants';
 import { GEN_AI_CONNECTOR_ID, GEN_AI_TITLE } from '../../../common/gen_ai/constants';
-import { GenerativeAiActionParams, GenerativeAiConfig, GenerativeAiSecrets } from '../types';
+import { GenerativeAiActionParams, GenerativeAiConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];
   body: string[];
 }
-export function getConnectorType(): ConnectorTypeModel<
-  GenerativeAiConfig,
-  GenerativeAiSecrets,
-  GenerativeAiActionParams
-> {
+export function getConnectorType(): GenerativeAiConnector {
   return {
     id: GEN_AI_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),

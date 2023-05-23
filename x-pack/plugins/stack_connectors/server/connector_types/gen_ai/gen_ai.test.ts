@@ -7,9 +7,8 @@
 
 import { GenAiConnector } from './gen_ai';
 import { GenAiBaseApiResponseSchema } from './api_schema';
-import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { GEN_AI_CONNECTOR_ID } from '../../../common/gen_ai/constants';
+import { GEN_AI_CONNECTOR_ID, OpenAiProviderType } from '../../../common/gen_ai/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 

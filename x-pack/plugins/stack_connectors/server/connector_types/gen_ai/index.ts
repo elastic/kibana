@@ -14,8 +14,11 @@ import { GeneralConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
-import { GEN_AI_CONNECTOR_ID, GEN_AI_TITLE } from '../../../common/gen_ai/constants';
+import {
+  GEN_AI_CONNECTOR_ID,
+  GEN_AI_TITLE,
+  OpenAiProviderType,
+} from '../../../common/gen_ai/constants';
 import { GenAiConfigSchema, GenAiSecretsSchema } from '../../../common/gen_ai/schema';
 import { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
 import { GenAiConnector } from './gen_ai';

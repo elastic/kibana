@@ -9,7 +9,8 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import GenerativeAiParamsFields from './params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
-import { SUB_ACTION } from '../../../common/gen_ai/constants';
+import { OpenAiProviderType, SUB_ACTION } from '../../../common/gen_ai/constants';
+import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
 
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
@@ -50,26 +51,49 @@ describe('Gen AI Params Fields renders', () => {
     expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
     expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
-  it('useEffect handles the case when subAction and subActionParams are undefined', () => {
-    const actionParams = {
-      subAction: undefined,
-      subActionParams: undefined,
-    };
-    const editAction = jest.fn();
-    const errors = {};
-    render(
-      <GenerativeAiParamsFields
-        actionParams={actionParams}
-        editAction={editAction}
-        index={0}
-        messageVariables={messageVariables}
-        errors={errors}
-      />
-    );
-    expect(editAction).toHaveBeenCalledTimes(2);
-    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
-    expect(editAction).toHaveBeenCalledWith('subActionParams', {}, 0);
-  });
+  test.each([OpenAiProviderType.OpenAi, OpenAiProviderType.AzureAi])(
+    'useEffect handles the case when subAction and subActionParams are undefined and apiProvider is %p',
+    (apiProvider) => {
+      const actionParams = {
+        subAction: undefined,
+        subActionParams: undefined,
+      };
+      const editAction = jest.fn();
+      const errors = {};
+      const actionConnector = {
+        secrets: {
+          apiKey: 'apiKey',
+        },
+        id: 'test',
+        actionTypeId: '.gen-ai',
+        isPreconfigured: false,
+        isDeprecated: false,
+        name: 'My GenAI Connector',
+        config: {
+          apiProvider,
+          apiUrl: DEFAULT_URL,
+        },
+      };
+      render(
+        <GenerativeAiParamsFields
+          actionParams={actionParams}
+          actionConnector={actionConnector}
+          editAction={editAction}
+          index={0}
+          messageVariables={messageVariables}
+          errors={errors}
+        />
+      );
+      expect(editAction).toHaveBeenCalledTimes(2);
+      expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
+      if (apiProvider === OpenAiProviderType.OpenAi) {
+        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY }, 0);
+      }
+      if (apiProvider === OpenAiProviderType.AzureAi) {
+        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY_AZURE }, 0);
+      }
+    }
+  );
 
   it('handles the case when subAction only is undefined', () => {
     const actionParams = {

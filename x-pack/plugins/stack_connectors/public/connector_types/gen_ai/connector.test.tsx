@@ -10,7 +10,7 @@ import GenerativeAiConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OpenAiProviderType } from '@kbn/triggers-actions-ui-plugin/common';
+import { OpenAiProviderType } from '../../../common/gen_ai/constants';
 
 describe('GenerativeAiConnectorFields renders', () => {
   test('open ai connector fields are rendered', async () => {
