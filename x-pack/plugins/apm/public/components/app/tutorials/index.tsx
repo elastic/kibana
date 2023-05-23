@@ -8,6 +8,7 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { Introduction } from './introduction';
 import { InstructionsSet } from './instructions_set';
@@ -16,6 +17,7 @@ import { Footer } from './footer';
 
 export function Tutorials() {
   const { services } = useKibana<ApmPluginStartDeps>();
+  const { config } = useApmPluginContext();
   const { docLinks, observabilityShared } = services;
   const guideLink =
     docLinks?.links.kibana.guide ||
@@ -25,6 +27,7 @@ export function Tutorials() {
 
   const commonOptions = {
     baseUrl,
+    config,
   };
 
   const serverless = serverlessInstructions(commonOptions);

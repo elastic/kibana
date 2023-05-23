@@ -11,8 +11,12 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import { INSTRUCTION_VARIANT } from '../instruction_variants';
+import { AgentInstructionProps } from '../tutorial_typings';
 
-export const createGoAgentInstructions = (baseUrl: string): EuiStepProps[] => {
+export const createGoAgentInstructions = (
+  commonOptions: AgentInstructionProps
+): EuiStepProps[] => {
+  const { baseUrl, managedServiceUrl } = commonOptions;
   const codeBlock = `\
 import (
   "net/http"
@@ -62,7 +66,7 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
           <EuiSpacer />
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.GO}
-            apmServerUrl="achyut"
+            apmServerUrl={managedServiceUrl}
             secretToken="tug"
             apiKey="tugKey"
           />

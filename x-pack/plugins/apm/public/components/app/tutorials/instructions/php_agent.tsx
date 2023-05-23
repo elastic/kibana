@@ -11,8 +11,12 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import { INSTRUCTION_VARIANT } from '../instruction_variants';
+import { AgentInstructionProps } from '../tutorial_typings';
 
-export const createPhpAgentInstructions = (baseUrl: string): EuiStepProps[] => {
+export const createPhpAgentInstructions = (
+  commonOptions: AgentInstructionProps
+): EuiStepProps[] => {
+  const { baseUrl, managedServiceUrl } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.php.download.title', {
@@ -76,7 +80,7 @@ export const createPhpAgentInstructions = (baseUrl: string): EuiStepProps[] => {
           </EuiMarkdownFormat>
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.PHP}
-            apmServerUrl="achyut"
+            apmServerUrl={managedServiceUrl}
             secretToken="tug"
             apiKey="tugKey"
           />

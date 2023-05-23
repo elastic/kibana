@@ -11,10 +11,12 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import { INSTRUCTION_VARIANT } from '../instruction_variants';
+import { AgentInstructionProps } from '../tutorial_typings';
 
 export const createDjangoAgentInstructions = (
-  baseUrl: string
+  commonOptions: AgentInstructionProps
 ): EuiStepProps[] => {
+  const { baseUrl, managedServiceUrl } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.django.install.title', {
@@ -51,7 +53,7 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
           <EuiSpacer />
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.DJANGO}
-            apmServerUrl="achyut"
+            apmServerUrl={managedServiceUrl}
             secretToken="tug"
             apiKey="tugKey"
           />

@@ -18,10 +18,12 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AgentInstructionProps } from '../tutorial_typings';
 
 export const createOpenTelemetryAgentInstructions = (
-  baseUrl: string
+  commonOptions: AgentInstructionProps
 ): EuiStepProps[] => {
+  const { baseUrl, managedServiceUrl } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.otel.download.title', {
@@ -59,7 +61,7 @@ export const createOpenTelemetryAgentInstructions = (
           </EuiMarkdownFormat>
           <EuiSpacer />
           <OpenTelemetryInstructions
-            apmServerUrl="achyut"
+            apmServerUrl={managedServiceUrl}
             secretToken="hello"
             apiKey="tugAPIKey"
             apiId="myId"

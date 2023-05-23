@@ -11,10 +11,12 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import { INSTRUCTION_VARIANT } from '../instruction_variants';
+import { AgentInstructionProps } from '@kbn/apm-plugin/public/components/app/tutorials/tutorial_typings';
 
 export const createRailsAgentInstructions = (
-  baseUrl: string
+  commonOptions: AgentInstructionProps
 ): EuiStepProps[] => {
+  const { baseUrl, managedServiceUrl } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.rails.install.title', {
@@ -50,7 +52,7 @@ export const createRailsAgentInstructions = (
           <EuiSpacer />
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.RAILS}
-            apmServerUrl="achyut"
+            apmServerUrl={managedServiceUrl}
             secretToken="tug"
             apiKey="tugKey"
           />

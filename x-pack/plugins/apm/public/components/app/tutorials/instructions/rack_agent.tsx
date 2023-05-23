@@ -11,10 +11,12 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import { INSTRUCTION_VARIANT } from '../instruction_variants';
+import { AgentInstructionProps } from '@kbn/apm-plugin/public/components/app/tutorials/tutorial_typings';
 
 export const createRackAgentInstructions = (
-  baseUrl: string
+  commonOptions: AgentInstructionProps
 ): EuiStepProps[] => {
+  const { baseUrl, managedServiceUrl } = commonOptions;
   const codeBlock = `# config.ru
   require 'sinatra/base'
 
@@ -95,7 +97,7 @@ export const createRackAgentInstructions = (
           <EuiSpacer />
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.RACK}
-            apmServerUrl="achyut"
+            apmServerUrl={managedServiceUrl}
             secretToken="tug"
             apiKey="tugKey"
           />

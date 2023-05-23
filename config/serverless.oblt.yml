@@ -25,3 +25,10 @@ xpack.fleet.agentIdVerificationEnabled: false
 
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
+
+## Managed service endpoint. This will be injected by CP team in kibana.yml. Keeping it here for local development
+xpack.apm.managedServiceUrl: https://managed-service-1989.elastic.co
+
+xpack.fleet.packages:
+  - name: apm
+    version: latest

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ConfigSchema } from '../../..';
 import { INSTRUCTION_VARIANT } from './instruction_variants';
 import {
   createJavaAgentInstructions,
@@ -19,8 +20,20 @@ import {
   createPhpAgentInstructions,
   createOpenTelemetryAgentInstructions,
 } from './instructions';
+import { AgentInstructionProps } from './tutorial_typings';
 
-export function serverlessInstructions({ baseUrl }: { baseUrl: string }) {
+export function serverlessInstructions({
+  baseUrl,
+  config,
+}: {
+  baseUrl: string;
+  config: ConfigSchema;
+}) {
+  const commonOptions: AgentInstructionProps = {
+    baseUrl,
+    managedServiceUrl: config?.managedServiceUrl,
+  };
+
   return {
     title: i18n.translate('xpack.apm.tutorial.apmAgents.title', {
       defaultMessage: 'APM Agents',
@@ -28,43 +41,43 @@ export function serverlessInstructions({ baseUrl }: { baseUrl: string }) {
     instructionVariants: [
       {
         id: INSTRUCTION_VARIANT.NODE,
-        instructions: createNodeAgentInstructions(baseUrl),
+        instructions: createNodeAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.DJANGO,
-        instructions: createDjangoAgentInstructions(baseUrl),
+        instructions: createDjangoAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.FLASK,
-        instructions: createFlaskAgentInstructions(baseUrl),
+        instructions: createFlaskAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.RAILS,
-        instructions: createRailsAgentInstructions(baseUrl),
+        instructions: createRailsAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.RACK,
-        instructions: createRackAgentInstructions(baseUrl),
+        instructions: createRackAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.GO,
-        instructions: createGoAgentInstructions(baseUrl),
+        instructions: createGoAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.JAVA,
-        instructions: createJavaAgentInstructions(baseUrl),
+        instructions: createJavaAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.DOTNET,
-        instructions: createDotNetAgentInstructions(baseUrl),
+        instructions: createDotNetAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.PHP,
-        instructions: createPhpAgentInstructions(baseUrl),
+        instructions: createPhpAgentInstructions(commonOptions),
       },
       {
         id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
-        instructions: createOpenTelemetryAgentInstructions(baseUrl),
+        instructions: createOpenTelemetryAgentInstructions(commonOptions),
       },
     ],
   };

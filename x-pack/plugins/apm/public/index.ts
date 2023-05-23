@@ -14,6 +14,7 @@ export interface ConfigSchema {
     enabled: boolean;
   };
   latestAgentVersionsUrl: string;
+  managedServiceUrl?: string;
 }
 
 export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (

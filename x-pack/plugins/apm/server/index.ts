@@ -58,6 +58,7 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   serverlessOnboarding: schema.boolean({ defaultValue: false }),
+  managedServiceUrl: schema.string(),
 });
 
 // plugin config
@@ -117,6 +118,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     ui: true,
     latestAgentVersionsUrl: true,
     serverlessOnboarding: true,
+    managedServiceUrl: true,
   },
   schema: configSchema,
 };
