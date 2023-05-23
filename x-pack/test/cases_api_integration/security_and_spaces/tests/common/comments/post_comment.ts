@@ -274,7 +274,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s when adding excess attributes for type user', async () => {
+      it('removes excess attributes for type user', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         for (const attribute of ['alertId', 'index']) {
@@ -287,7 +287,7 @@ export default ({ getService }: FtrProviderContext): void => {
               comment: 'a comment',
               owner: 'securitySolutionFixture',
             },
-            expectedHttpCode: 400,
+            expectedHttpCode: 200,
           });
         }
       });
@@ -318,7 +318,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('400s when adding excess attributes for type alert', async () => {
+      it('removes excess attributes for type alert', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         for (const attribute of ['comment']) {
@@ -336,7 +336,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               owner: 'securitySolutionFixture',
             },
-            expectedHttpCode: 400,
+            expectedHttpCode: 200,
           });
         }
       });
