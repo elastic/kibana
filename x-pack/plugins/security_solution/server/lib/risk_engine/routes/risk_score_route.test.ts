@@ -109,8 +109,6 @@ describe('GET risk_engine/scores route', () => {
           expect.objectContaining({ range: { start: 'now-30d', end: 'now-20d' } })
         );
       });
-
-      it.todo('rejects if date range is invalid');
     });
 
     describe('data filter', () => {
@@ -147,8 +145,6 @@ describe('GET risk_engine/scores route', () => {
           })
         );
       });
-
-      it.todo('rejects if filter is invalid');
     });
   });
 });
