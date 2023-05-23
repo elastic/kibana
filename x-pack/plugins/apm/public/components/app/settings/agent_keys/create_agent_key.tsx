@@ -80,15 +80,18 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
         privileges.push(PrivilegeType.AGENT_CONFIG);
       }
 
-      const { agentKey } = await callApmApi('POST /api/apm/agent_keys', {
-        signal: null,
-        params: {
-          body: {
-            name,
-            privileges,
+      const { agentKey } = await callApmApi(
+        'POST /api/apm/agent_keys 2023-05-22',
+        {
+          signal: null,
+          params: {
+            body: {
+              name,
+              privileges,
+            },
           },
-        },
-      });
+        }
+      );
 
       onSuccess(agentKey);
     } catch (error) {
