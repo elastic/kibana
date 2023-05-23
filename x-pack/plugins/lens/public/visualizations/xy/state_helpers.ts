@@ -192,8 +192,13 @@ export function getPersistableState(state: XYState) {
             annotations: layer.annotations,
             ignoreGlobalFilters: layer.ignoreGlobalFilters,
           };
-
           persistableLayers.push(persistableLayer);
+
+          savedObjectReferences.push({
+            type: 'index-pattern',
+            id: layer.indexPatternId,
+            name: getLayerReferenceName(layer.layerId),
+          });
         }
       } else {
         const { indexPatternId, ...persistableLayer } = layer;

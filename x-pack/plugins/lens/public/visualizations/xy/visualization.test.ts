@@ -3528,9 +3528,31 @@ describe('xy_visualization', () => {
       const { state: persistableState, savedObjectReferences } =
         xyVisualization.getPersistableState!(state);
 
+      expect(savedObjectReferences).toHaveLength(4);
+
+      expect(savedObjectReferences.filter(({ type }) => type === 'index-pattern'))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "some-index-pattern",
+            "name": "xy-visualization-layer-layer-id",
+            "type": "index-pattern",
+          },
+          Object {
+            "id": "some-index-pattern",
+            "name": "xy-visualization-layer-layer-id2",
+            "type": "index-pattern",
+          },
+        ]
+      `);
+
+      const annotationGroupRefs = savedObjectReferences.filter(
+        ({ type }) => type === 'event-annotation-group'
+      );
+
       expect(persistableState.layers).toEqual([
         {
-          annotationGroupRef: savedObjectReferences[0].name,
+          annotationGroupRef: annotationGroupRefs[0].name,
           layerId: 'layer-id',
           layerType: 'annotations',
           persistanceType: 'linked',
@@ -3538,7 +3560,7 @@ describe('xy_visualization', () => {
           ignoreGlobalFilters: layers[0].ignoreGlobalFilters,
         },
         {
-          annotationGroupRef: savedObjectReferences[1].name,
+          annotationGroupRef: annotationGroupRefs[1].name,
           layerId: 'layer-id2',
           layerType: 'annotations',
           persistanceType: 'linked',
