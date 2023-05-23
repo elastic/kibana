@@ -2097,18 +2097,6 @@
       }
     }
   },
-  "observability-onboarding-state": {
-    "properties": {
-      "state": {
-        "type": "object",
-        "dynamic": false
-      },
-      "progress": {
-        "type": "object",
-        "dynamic": false
-      }
-    }
-  },
   "ml-job": {
     "properties": {
       "job_id": {
