@@ -6,3 +6,4 @@
  */
 
 export * from './data_stream_selector';
+export * from './types';

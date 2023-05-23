@@ -43,27 +43,23 @@ export const createPureDataStreamsStateMachine = (
               target: 'loaded',
               actions: ['storeInCache', 'storeDataStreams', 'storeSearch'],
             },
-            LOADING_FAILED: {
-              target: 'loadingFailed',
-            },
+            LOADING_FAILED: 'loadingFailed',
           },
         },
         loaded: {
           on: {
-            SEARCH_DATA_STREAMS: {
-              target: 'debouncingSearch',
-            },
+            SEARCH: 'debouncingSearch',
           },
         },
         debouncingSearch: {
           entry: 'storeSearch',
           on: {
-            SEARCH_DATA_STREAMS: {
+            SEARCH: {
               target: 'debouncingSearch',
             },
           },
           after: {
-            500: {
+            SEARCH_DELAY: {
               target: 'loading',
             },
           },
@@ -73,7 +69,7 @@ export const createPureDataStreamsStateMachine = (
           exit: 'clearError',
           on: {
             RELOAD_DATA_STREAMS: 'loading',
-            SEARCH_DATA_STREAMS: 'debouncingSearch',
+            SEARCH: 'debouncingSearch',
           },
         },
       },
@@ -113,6 +109,13 @@ export const createPureDataStreamsStateMachine = (
             : {}
         ),
         clearError: assign((_context) => ({ error: null })),
+      },
+      delays: {
+        SEARCH_DELAY: (_context, event) => {
+          if (event.type !== 'SEARCH' || !event.delay) return 0;
+
+          return event.delay;
+        },
       },
     }
   );

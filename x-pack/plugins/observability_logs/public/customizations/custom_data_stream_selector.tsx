@@ -11,11 +11,8 @@ import { DataStream, SearchStrategy } from '../../common/data_streams';
 import { DataStreamSelector, SearchHandler } from '../components/data_stream_selector';
 import { InternalStateProvider, useDataView } from '../utils/internal_state_container_context';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
-import {
-  ObservabilityLogsPluginProvider,
-  ObservabilityLogsPluginProviderProps,
-} from '../hooks/use_kibana';
 import { DataStreamsProvider, useDataStreamsContext } from '../hooks/use_data_streams';
+import { IDataStreamsClient } from '../services/data_streams';
 
 interface CustomDataStreamSelectorProps {
   stateContainer: DiscoverStateContainer;
@@ -31,7 +28,6 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     integrations,
     isLoading: isLoadingIntegrations,
     loadMore,
-    search: integrationsSearch,
     searchIntegrations,
   } = useIntegrationsContext();
 
@@ -41,7 +37,6 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     isLoading: isLoadingStreams,
     loadDataStreams,
     reloadDataStreams,
-    search: dataStreamsSearch,
     searchDataStreams,
   } = useDataStreamsContext();
 
@@ -62,8 +57,6 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     }
   };
 
-  // TODO: handle search states for different strategies
-
   return (
     <DataStreamSelector
       key={dataView.id}
@@ -77,7 +70,6 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
       onStreamSelected={handleStreamSelection}
       onStreamsEntryClick={loadDataStreams}
       onStreamsReload={reloadDataStreams}
-      search={integrationsSearch}
       title={dataView.getName()}
     />
   );
@@ -86,26 +78,23 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
 // eslint-disable-next-line import/no-default-export
 export default CustomDataStreamSelector;
 
-export type CustomDataStreamSelectorBuilderProps = ObservabilityLogsPluginProviderProps &
-  CustomDataStreamSelectorProps;
+export type CustomDataStreamSelectorBuilderProps = CustomDataStreamSelectorProps & {
+  dataStreamsClient: IDataStreamsClient;
+};
 
 function withProviders(Component: React.FunctionComponent<CustomDataStreamSelectorProps>) {
   return function ComponentWithProviders({
-    core,
-    plugins,
-    pluginStart,
     stateContainer,
+    dataStreamsClient,
   }: CustomDataStreamSelectorBuilderProps) {
     return (
-      <ObservabilityLogsPluginProvider core={core} plugins={plugins} pluginStart={pluginStart}>
-        <InternalStateProvider value={stateContainer.internalState}>
-          <IntegrationsProvider dataStreamsClient={pluginStart.dataStreamsService.client}>
-            <DataStreamsProvider dataStreamsClient={pluginStart.dataStreamsService.client}>
-              <Component stateContainer={stateContainer} />
-            </DataStreamsProvider>
-          </IntegrationsProvider>
-        </InternalStateProvider>
-      </ObservabilityLogsPluginProvider>
+      <InternalStateProvider value={stateContainer.internalState}>
+        <IntegrationsProvider dataStreamsClient={dataStreamsClient}>
+          <DataStreamsProvider dataStreamsClient={dataStreamsClient}>
+            <Component stateContainer={stateContainer} />
+          </DataStreamsProvider>
+        </IntegrationsProvider>
+      </InternalStateProvider>
     );
   };
 }

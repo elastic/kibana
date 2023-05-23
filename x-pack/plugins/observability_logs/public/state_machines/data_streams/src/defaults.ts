@@ -13,6 +13,7 @@ export const DEFAULT_CONTEXT: DefaultDataStreamsContext = {
   dataStreams: null,
   error: null,
   search: {
+    datasetQuery: '',
     sortOrder: 'asc',
   },
 };

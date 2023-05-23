@@ -64,13 +64,14 @@ const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
   const searchDataStreams: SearchDataStreams = useCallback(
     (searchParams) =>
       dataStreamsStateService.send({
-        type: 'SEARCH_DATA_STREAMS',
+        type: 'SEARCH',
+        delay: search.name !== searchParams.name ? 500 : 0,
         search: {
           datasetQuery: searchParams.name,
           sortOrder: searchParams.sortOrder,
         },
       }),
-    [dataStreamsStateService]
+    [dataStreamsStateService, search]
   );
 
   return {
