@@ -428,7 +428,7 @@ export function useModelActions({
         enabled: (item) => {
           // TODO check for permissions to delete ingest pipelines.
           // ATM undefined means pipelines fetch failed server-side.
-          return !isPopulatedObject(item.pipelines);
+          return item.state !== MODEL_STATE.STARTED && !isPopulatedObject(item.pipelines);
         },
       },
       {
