@@ -7,3 +7,4 @@
  */
 
 export { analytics } from './analytics';
+export { devtools } from './devtools';

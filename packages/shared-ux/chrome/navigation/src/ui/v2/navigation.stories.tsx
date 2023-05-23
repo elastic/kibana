@@ -268,6 +268,7 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
           </Navigation.Group>
 
           <Navigation.Bucket preset="analytics" />
+          <Navigation.Bucket preset="devtools" />
         </Navigation>
       </NavigationProvider>
     </NavigationWrapper>
