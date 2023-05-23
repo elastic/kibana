@@ -22,7 +22,9 @@ interface PdfResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
+export type GetScreenshotsFn = (
+  options: PdfScreenshotOptions
+) => Rx.Observable<PdfScreenshotResult>;
 
 export function generatePdfObservable(
   config: ReportingConfigType,

@@ -20,19 +20,26 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import {
+  PdfScreenshotOptions,
+  PdfScreenshotResult,
+  ScreenshottingStart,
+} from '@kbn/screenshotting-plugin/server';
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
+import { catchError, map, mergeMap, switchMap, takeUntil, tap } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import { JobParamsPDFV2, UrlOrUrlLocatorTuple } from '../../../common/types';
+import {
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  REPORTING_TRANSACTION_TYPE,
+} from '../../../common/constants';
+import { JobParamsPDFV2 } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { ReportingConfigType } from '../../config';
 import { decryptJobHeaders, getCustomLogo } from '../common';
-import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 import { ReportingServerInfo } from '../../core';
+import { generatePdfObservable, GetScreenshotsFn } from './lib/generate_pdf';
 export type {
   JobParamsPDFV2,
   TaskPayloadPDFV2,
@@ -162,6 +169,24 @@ export class PdfExportType {
     };
   }
 
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
+    return Rx.defer(() => this.getPluginStartDeps()).pipe(
+      switchMap(({ screenshotting }) => {
+        return screenshotting.getScreenshots({
+          ...options,
+          urls: options.urls
+            ? options.urls.map((url) =>
+                typeof url === 'string'
+                  ? url
+                  : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+              )
+            : null,
+        } as PdfScreenshotOptions);
+      })
+    );
+  }
+
   createJob(jobParams: JobParamsPDFV2) {
     // create the payload that gets stored in .kibana-reporting-*
     return {
@@ -197,12 +222,7 @@ export class PdfExportType {
         mergeMap(({ logo, headers }) => {
           const { browserTimezone, layout, title, locatorParams } = job;
 
-          const urls = locatorParams.map((locator) => [
-            getFullRedirectAppUrl(this.config, this.getServerInfo(), job.spaceId, job.forceNow),
-            locator,
-          ]) as UrlOrUrlLocatorTuple[];
-
-          const screenshotFn = () =>
+          const screenshotFn: GetScreenshotsFn = () =>
             this.getScreenshots({
               format: 'pdf',
               title,
@@ -210,13 +230,12 @@ export class PdfExportType {
               browserTimezone,
               headers,
               layout,
-              urls,
             });
           apmGetAssets?.end();
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
           return generatePdfObservable(
-            this.getConfig(),
+            this.config,
             this.getServerInfo(),
             screenshotFn,
             job,
