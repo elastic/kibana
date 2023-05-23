@@ -7,7 +7,7 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
-  Direction,
+  SortOrder,
   Inspect,
   Maybe,
   RequestBasicOptions,
@@ -18,7 +18,7 @@ export interface ActionRequestOptions extends RequestBasicOptions {
   alertIds: string[];
   agentId?: string;
   sort: {
-    direction: Direction;
+    order: SortOrder;
     field: string;
   };
 }

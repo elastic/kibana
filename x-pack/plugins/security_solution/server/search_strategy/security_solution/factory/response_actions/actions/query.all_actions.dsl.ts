@@ -12,7 +12,7 @@ import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
 import type { ActionRequestOptions } from '../../../../../../common/search_strategy/security_solution/response_actions';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 
-export const buildActionsQuery = ({
+export const buildResponseActionsQuery = ({
   alertIds,
   sort,
 }: ActionRequestOptions): ISearchRequestParams => {
@@ -36,7 +36,7 @@ export const buildActionsQuery = ({
       sort: [
         {
           [sort.field]: {
-            order: sort.direction,
+            order: sort.order,
           },
         },
       ],

@@ -45,7 +45,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         agent: {
           id: [this.seededUUIDv4()],
         },
-        hosts: undefined,
         EndpointActions: {
           action_id: this.seededUUIDv4(),
           expiration: this.randomFutureDate(timeStamp),

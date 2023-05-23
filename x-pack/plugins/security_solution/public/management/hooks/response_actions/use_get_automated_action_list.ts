@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { compact, map } from 'lodash';
 import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
-import { Direction } from '../../../../common/search_strategy/security_solution/response_actions/types';
+import { SortOrder } from '../../../../common/search_strategy/security_solution/response_actions/types';
 import type {
   ActionResponsesRequestOptions,
   ActionRequestOptions,
@@ -25,12 +25,12 @@ import type {
 } from '../../../../common/endpoint/schema/automated_actions';
 
 interface GetAutomatedActionsListOptions {
-  skip?: boolean;
+  enabled: boolean;
 }
 
 export const useGetAutomatedActionList = (
   query: EndpointAutomatedActionListRequestQuery,
-  { skip }: GetAutomatedActionsListOptions
+  { enabled }: GetAutomatedActionsListOptions
 ) => {
   const { data } = useKibana().services;
 
@@ -43,7 +43,7 @@ export const useGetAutomatedActionList = (
           {
             alertIds,
             sort: {
-              direction: Direction.desc,
+              order: SortOrder.desc,
               field: '@timestamp',
             },
             factoryQueryType: ResponseActionsQueries.actions,
@@ -59,13 +59,13 @@ export const useGetAutomatedActionList = (
         items: compact(map(responseData.edges, '_source')),
       };
     },
-    enabled: !skip,
+    enabled,
     keepPreviousData: true,
   });
 };
 
 interface GetAutomatedActionResponseListOptions {
-  skip?: boolean;
+  enabled: boolean;
   action: LogsEndpointActionWithHosts;
   isLive?: boolean;
 }
@@ -79,7 +79,7 @@ type GetAutomatedActionResponseListResponse = Pick<
 
 export const useGetAutomatedActionResponseList = (
   query: EndpointAutomatedActionResponseRequestQuery,
-  { skip = false, action: requestAction, isLive = false }: GetAutomatedActionResponseListOptions
+  { enabled, action: requestAction, isLive = false }: GetAutomatedActionResponseListOptions
 ) => {
   const { data } = useKibana().services;
   const { expiration, actionId, agent } = query;
@@ -93,7 +93,7 @@ export const useGetAutomatedActionResponseList = (
             actionId,
             expiration,
             sort: {
-              direction: Direction.desc,
+              order: SortOrder.desc,
               field: '@timestamp',
             },
             agents: (Array.isArray(agent.id) ? agent.id : [agent.id]).length,
@@ -118,7 +118,7 @@ export const useGetAutomatedActionResponseList = (
     },
     select: (response) => combineResponse(requestAction, response),
     keepPreviousData: true,
-    enabled: !skip,
+    enabled,
     refetchInterval: isLive ? 5000 : false,
   });
 };
@@ -127,8 +127,8 @@ const combineResponse = (
   action: LogsEndpointActionWithHosts,
   responseData: GetAutomatedActionResponseListResponse
 ): ActionDetails => {
-  const { rule, hosts } = action;
-  const { parameters, alert_id: alertId, comment, command } = action.EndpointActions.data;
+  const { rule } = action;
+  const { parameters, alert_id: alertId, comment, command, hosts } = action.EndpointActions.data;
 
   return {
     id: action.EndpointActions.action_id,

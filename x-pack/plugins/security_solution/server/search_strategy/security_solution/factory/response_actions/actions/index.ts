@@ -8,7 +8,7 @@
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
-import { buildActionsQuery } from './query.all_actions.dsl';
+import { buildResponseActionsQuery } from './query.all_actions.dsl';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
   ActionRequestOptions,
@@ -18,14 +18,14 @@ import type {
 
 export const allActions: SecuritySolutionFactory<ResponseActionsQueries.actions> = {
   buildDsl: (options: ActionRequestOptions) => {
-    return buildActionsQuery(options);
+    return buildResponseActionsQuery(options);
   },
   parse: async (
     options: ActionRequestOptions,
     response: IEsSearchResponse
   ): Promise<ActionRequestStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildActionsQuery(options))],
+      dsl: [inspectStringifyObject(buildResponseActionsQuery(options))],
     };
 
     return {

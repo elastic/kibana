@@ -144,7 +144,6 @@ export const actionCreateService = (
       agent: {
         id: payload.endpoint_ids,
       },
-      hosts: payload.hosts,
       EndpointActions: {
         action_id: actionID,
         expiration: moment().add(2, 'weeks').toISOString(),
@@ -154,6 +153,7 @@ export const actionCreateService = (
           command: payload.command,
           comment: payload.comment ?? undefined,
           ...(payload.alert_ids ? { alert_id: payload.alert_ids } : {}),
+          ...(payload.hosts ? { hosts: payload.hosts } : {}),
           parameters: getActionParameters() ?? undefined,
         },
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,

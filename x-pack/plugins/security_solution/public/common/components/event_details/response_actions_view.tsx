@@ -46,7 +46,7 @@ export const useResponseActionsView = ({
     {
       alertIds: [alertId],
     },
-    { skip: shouldEarlyReturn }
+    { enabled: !shouldEarlyReturn }
   );
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;

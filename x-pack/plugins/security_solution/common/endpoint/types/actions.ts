@@ -122,7 +122,6 @@ export interface LogsEndpointAction {
   agent: {
     id: string | string[];
   };
-  hosts: Record<string, { name: string }> | undefined;
   EndpointActions: EndpointActionFields & ActionRequestFields;
   error?: EcsError;
   user: {
@@ -135,7 +134,12 @@ export interface LogsEndpointAction {
 }
 
 export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
-  hosts: Record<string, { name: string }>;
+  EndpointActions: EndpointActionFields &
+    ActionRequestFields & {
+      data: EndpointActionData & {
+        hosts: Record<string, { name: string }>;
+      };
+    };
 }
 
 /**
@@ -194,6 +198,7 @@ export interface EndpointActionData<
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
   alert_id?: string[];
+  hosts?: Record<string, { name: string }>;
 }
 
 export interface FleetActionResponseData {

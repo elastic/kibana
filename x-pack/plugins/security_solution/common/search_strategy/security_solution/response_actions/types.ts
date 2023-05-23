@@ -11,15 +11,15 @@ import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery
 import type { LogsEndpointActionWithHosts } from '../../../endpoint/types';
 import type { ResponseActionsQueries } from '.';
 
-export enum Direction {
+export enum SortOrder {
   asc = 'asc',
   desc = 'desc',
 }
 
-export interface SortField<Field = string> {
-  field: Field;
-  direction: Direction;
-}
+// export interface SortField<Field = string> {
+//   field: Field;
+//   order: SortOrder;
+// }
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: ResponseActionsQueries;

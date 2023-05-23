@@ -8,8 +8,8 @@
 import { EuiComment, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo } from 'react';
+import type { LogsEndpointActionWithHosts } from '../../../../common/endpoint/types/actions';
 import { useUserPrivileges } from '../user_privileges';
-import type { LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
@@ -31,7 +31,7 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
   const canReadEndpoint = canReadActionsLogManagement && canAccessEndpointActionsLogManagement;
   const { data: expandedAction } = useGetAutomatedActionResponseList(
     { actionId, expiration, agent },
-    { skip: !canReadEndpoint, action, isLive }
+    { enabled: canReadEndpoint, action, isLive }
   );
 
   useEffect(() => {
