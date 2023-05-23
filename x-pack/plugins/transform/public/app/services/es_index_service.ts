@@ -12,7 +12,8 @@ import { addInternalBasePath } from '../../../common/constants';
 export class IndexService {
   async canDeleteIndex(http: HttpSetup) {
     const privilege = await http.get<{ hasAllPrivileges: boolean }>(
-      addInternalBasePath(`privileges`)
+      addInternalBasePath(`privileges`),
+      { version: '1' }
     );
     if (!privilege) {
       return false;
