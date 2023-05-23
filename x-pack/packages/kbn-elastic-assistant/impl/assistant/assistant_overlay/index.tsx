@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiModal } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant } from '..';

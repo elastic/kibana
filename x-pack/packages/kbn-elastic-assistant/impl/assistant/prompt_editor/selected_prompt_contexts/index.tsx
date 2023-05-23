@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../../content/prompts/system/translations';

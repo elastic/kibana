@@ -7,6 +7,7 @@
 
 import { EuiAvatar, EuiCommentList, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import type { PromptContext } from '../prompt_context/types';

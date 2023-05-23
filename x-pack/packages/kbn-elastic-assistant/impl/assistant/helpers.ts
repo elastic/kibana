@@ -49,7 +49,32 @@ export async function fetchVirusTotalReport({
 }: {
   hash: string;
   settings: AssistantUiSettings;
-}): Promise<unknown> {
+}): Promise<{
+  attributes: {
+    last_analysis_stats: {
+      malicious: number | string;
+      suspicious: number | string;
+      undetected: number | string;
+      timeout: number | string;
+    };
+    magic: string;
+    meaningful_name: string;
+    sha256: string;
+  };
+  data: {
+    attributes: {
+      last_analysis_stats: {
+        malicious: number | string;
+        suspicious: number | string;
+        undetected: number | string;
+        timeout: number | string;
+      };
+      magic: string;
+      meaningful_name: string;
+      sha256: string;
+    };
+  };
+}> {
   const url = `${virusTotal.baseUrl}/files/${hash}`;
 
   const response = await fetch(url, {
@@ -79,9 +104,7 @@ export const handleOpenAlerts = async ({ chatHistory, setChatHistory }: HandleOp
   const dateTimeString = new Date().toLocaleString();
   try {
     if (response) {
-      console.log('Response from Open Alerts API:', response);
       const formattedResponseComponent = formatOpenAlertsResponse(response);
-      console.log('Response from formatting', formattedResponseComponent);
       setChatHistory([
         ...chatHistory,
         {
@@ -90,11 +113,8 @@ export const handleOpenAlerts = async ({ chatHistory, setChatHistory }: HandleOp
           timestamp: dateTimeString,
         },
       ]);
-    } else {
-      console.error('Error: Response from Open Alerts API is empty or undefined.');
     }
   } catch (error) {
-    console.error('Error while fetching Open Alerts:', error);
     setChatHistory([
       ...chatHistory,
       {
@@ -122,7 +142,6 @@ export const handleFileHash = async ({
   const dateTimeString = new Date().toLocaleString();
   try {
     const result = await fetchVirusTotalReport({ hash, settings: { virusTotal, openAI } });
-    console.log('VirusTotal response:', result);
     const markdownReport = formatVirusTotalResponse(result);
     setChatHistory([
       ...chatHistory,
@@ -130,7 +149,6 @@ export const handleFileHash = async ({
     ]);
     // setLastResponse(markdownReport);
   } catch (error) {
-    console.error('Error while fetching VirusTotal report:', error);
     setChatHistory([
       ...chatHistory,
       {
@@ -142,7 +160,21 @@ export const handleFileHash = async ({
   }
 };
 
-export const formatVirusTotalResponse = (response: any) => {
+export const formatVirusTotalResponse = (response: {
+  data: {
+    attributes: {
+      last_analysis_stats: {
+        malicious: number | string;
+        suspicious: number | string;
+        undetected: number | string;
+        timeout: number | string;
+      };
+      magic: string;
+      meaningful_name: string;
+      sha256: string;
+    };
+  };
+}) => {
   const { data } = response;
   const { attributes } = data;
 
@@ -165,9 +197,27 @@ export const formatVirusTotalResponse = (response: any) => {
   return mdResponse;
 };
 
-export const formatOpenAlertsResponse = (response: any): string => {
-  console.log('Open alerts response:', response);
-
+export const formatOpenAlertsResponse = (
+  response:
+    | Array<{
+        _source: {
+          host?: {
+            risk?: {
+              calculated_level?: string | number | undefined;
+            };
+          };
+          'kibana.alert.rule.name': string | undefined;
+          'kibana.alert.reason': string | undefined;
+          'kibana.alert.severity': string | number | undefined;
+          user?: {
+            risk?: {
+              calculated_level?: string | number | undefined;
+            };
+          };
+        };
+      }>
+    | undefined
+): string => {
   // Check if the response object has the hits property and if it has any elements.
   if (!response || response.length === 0) {
     return 'An error occurred while formatting alerts.';
@@ -179,7 +229,7 @@ export const formatOpenAlertsResponse = (response: any): string => {
     '| # | Alert Name | Severity | Event Reason | User Risk Score | Host Risk Score |\n';
   formattedAlerts += '|---|------------|----------|----------|----------|----------|\n';
 
-  response.forEach((alert: any, index: any) => {
+  response.forEach((alert, index: number) => {
     const { _source } = alert;
 
     const alertName = _source['kibana.alert.rule.name'];
@@ -199,9 +249,9 @@ export const formatOpenAlertsResponse = (response: any): string => {
 };
 
 export interface HandleFileUploadProps {
-  files: FileList | null;
   virusTotal: AssistantUiSettings['virusTotal'];
   chatHistory: Message[];
+  files: File[] | undefined;
   setChatHistory: (value: Message[]) => void;
   setFilePickerKey: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -279,15 +329,34 @@ export const handleFileUpload = async ({
           },
         ]);
         setFilePickerKey((prevKey) => prevKey + 1);
-      } else {
-        console.error('Error: Response from VirusTotal API is empty or undefined.');
       }
     }
   };
   fileReader.readAsArrayBuffer(file);
 };
 
-export const formatFileVirusTotalResponse = (response: any, sha256Hash: any) => {
+export const formatFileVirusTotalResponse = (
+  response: {
+    data: {
+      attributes: {
+        results: {
+          Elastic: {
+            category: string;
+            engine_version: string;
+            result: string;
+          };
+        };
+        stats: {
+          malicious: number | string;
+          suspicious: number | string;
+          undetected: number | string;
+          timeout: number | string;
+        };
+      };
+    };
+  },
+  sha256Hash: string
+) => {
   if (!response || !response.data) {
     return 'An error occurred while processing your request.';
   }
@@ -296,7 +365,6 @@ export const formatFileVirusTotalResponse = (response: any, sha256Hash: any) => 
   const { attributes } = data;
   const { results } = attributes;
 
-  console.log(response);
   const stats = response.data.attributes.stats;
   // const links = response.data.attributes.links;
   const result =

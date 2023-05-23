@@ -8,6 +8,7 @@
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import React from 'react';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import { css } from '@emotion/react';

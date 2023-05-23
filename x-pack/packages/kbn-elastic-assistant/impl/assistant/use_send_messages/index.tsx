@@ -32,9 +32,6 @@ export const useSendMessages = (): UseSendMessages => {
         //   baseUrl: apiConfig.openAI.baseUrl,
         //   apiKey: apiConfig.openAI.apiKey,
         // });
-      } catch (e) {
-        console.error(e);
-        throw e;
       } finally {
         setIsLoading(false);
       }
