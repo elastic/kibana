@@ -8,10 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DEFAULT_RISK_SCORE_IDENTIFIER_PAGE_SIZE,
-  RISK_SCORES_URL,
-} from '../../../../common/constants';
+import { DEFAULT_RISK_SCORE_PAGE_SIZE, RISK_SCORES_URL } from '../../../../common/constants';
 import { riskScoresRequestSchema } from '../../../../common/risk_engine/risk_scoring/risk_scores_request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
@@ -41,6 +38,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
         after_keys: userAfterKeys,
         data_view_id: dataViewId,
         debug,
+        page_size: userPageSize,
         identifier_type: identifierType,
         filter,
         range: userRange,
@@ -59,12 +57,12 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
 
         const afterKeys = userAfterKeys ?? {};
         const range = userRange ?? { start: 'now-15d', end: 'now' };
-        const identifierPageSize = DEFAULT_RISK_SCORE_IDENTIFIER_PAGE_SIZE;
+        const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
 
         const result = await riskScore.getScores({
           afterKeys,
           debug,
-          identifierPageSize,
+          pageSize,
           identifierType,
           index,
           filter,

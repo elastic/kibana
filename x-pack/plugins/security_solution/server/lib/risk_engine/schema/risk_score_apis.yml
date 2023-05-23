@@ -46,6 +46,10 @@ components:
           type: array
           items:
             $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
+        page_size:
+          description: Specifies how many scores will be returned in a given response. Note that this value is per `identifier_type`, i.e. a value of 10 will return 10 host scores and 10 user scores, if available. To avoid missed data, keep this value consistent while paginating through scores.
+          default: 1000
+          type: number
         identifier_type:
           description: Used to restrict the type of risk scores being returned. If unspecified, both `host` and `user` scores will be returned.
           allOf:

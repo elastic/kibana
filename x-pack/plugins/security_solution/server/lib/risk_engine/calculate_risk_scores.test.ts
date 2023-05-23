@@ -24,7 +24,7 @@ describe('calculateRiskScores()', () => {
       esClient,
       logger,
       index: 'index',
-      identifierPageSize: 500,
+      pageSize: 500,
       range: { start: 'now - 15d', end: 'now' },
     };
   });

@@ -131,12 +131,12 @@ const buildReduceScript = ({
 const buildIdentifierTypeAggregation = ({
   afterKeys,
   identifierType,
-  identifierPageSize,
+  pageSize,
   weights,
 }: {
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
-  identifierPageSize: number;
+  pageSize: number;
   weights?: RiskScoreWeight[];
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
@@ -144,7 +144,7 @@ const buildIdentifierTypeAggregation = ({
 
   return {
     composite: {
-      size: identifierPageSize,
+      size: pageSize,
       sources: [
         {
           [identifierField]: {
@@ -202,7 +202,7 @@ export const calculateRiskScores = async ({
   identifierType,
   index,
   logger,
-  identifierPageSize,
+  pageSize,
   range,
   weights,
 }: {
@@ -231,7 +231,7 @@ export const calculateRiskScores = async ({
         aggs[_identifierType] = buildIdentifierTypeAggregation({
           afterKeys: userAfterKeys,
           identifierType: _identifierType,
-          identifierPageSize,
+          pageSize,
           weights,
         });
         return aggs;

@@ -20,6 +20,7 @@ export const riskScoresRequestSchema = t.exact(
     data_view_id: DataViewId,
     debug: t.boolean,
     filter: t.unknown,
+    page_size: t.number,
     identifier_type: t.keyof({ user: null, host: null }),
     range: t.type({
       start: t.string,
