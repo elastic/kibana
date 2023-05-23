@@ -480,6 +480,7 @@ export const useFetchDataDriftResult = ({
           index: referenceIndex,
           body: {
             size: 0,
+            ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
             aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
           },
         };
@@ -488,6 +489,7 @@ export const useFetchDataDriftResult = ({
           index: productionIndex,
           body: {
             size: 0,
+            ...(prodRangeFilter ? { query: { bool: { filter: [prodRangeFilter] } } } : {}),
             aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
           },
         };

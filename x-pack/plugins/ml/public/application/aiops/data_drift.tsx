@@ -14,7 +14,6 @@ import { useMlKibana } from '../contexts/kibana';
 import { useMlContext } from '../contexts/ml';
 import { MlPageHeader } from '../components/page_header';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
-import { HelpMenu } from '../components/help_menu';
 
 export const DataDriftWithDocCountPage: FC = () => {
   const { services } = useMlKibana();
@@ -23,6 +22,7 @@ export const DataDriftWithDocCountPage: FC = () => {
   const dataView = context.currentDataView;
   const savedSearch = context.selectedSavedSearch;
 
+  console.log('services', services);
   return (
     <>
       <MlPageHeader>
@@ -30,7 +30,7 @@ export const DataDriftWithDocCountPage: FC = () => {
           <EuiFlexItem grow={false}>
             <FormattedMessage
               id="xpack.ml.DataDriftWithDocCount.pageHeader"
-              defaultMessage="Doc count"
+              defaultMessage="Data drift"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -59,7 +59,6 @@ export const DataDriftWithDocCountPage: FC = () => {
           ])}
         />
       )}
-      <HelpMenu docLink={services.docLinks.links.ml.guide} />
     </>
   );
 };

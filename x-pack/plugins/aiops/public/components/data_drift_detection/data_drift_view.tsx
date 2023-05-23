@@ -30,10 +30,9 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { WindowParameters } from '@kbn/aiops-utils';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { getDataDriftType, useFetchDataDriftResult } from './use_data_drift_result';
 import { NUMERIC_TYPE_LABEL } from './constants';
-import { Histogram, ComparisionHistogram, Feature, DataDriftField } from './types';
+import { Histogram, ComparisionHistogram, Feature, DataDriftField, TimeRange } from './types';
 
 const formatSignificanceLevel = (significanceLevel: number) => {
   if (significanceLevel < 1e-6) {
@@ -143,17 +142,6 @@ export const DataDriftView = ({
   windowParameters?: WindowParameters;
   dataView: DataView;
 }) => {
-  const {
-    data: { dataViews },
-  } = useAiopsAppContext();
-
-  const [tempTimeRanges, setTempTimeRanges] = useState({
-    reference: { start: 'now-30m', end: 'now' },
-    production: { start: 'now-30m', end: 'now' },
-  });
-
-  const [referenceDataView, setReferenceDataView] = useState<DataView | undefined>(dataView);
-  const [productionDataView, setProductionDataView] = useState<DataView | undefined>(dataView);
   const [fetchInfo, setFetchIno] = useState<
     | {
         fields: DataDriftField[];

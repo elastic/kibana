@@ -6,10 +6,9 @@
  */
 
 import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { parse } from 'query-string';
+import { cacheDataViewsContract } from '../../../util/index_utils';
 import { checkBasicLicense } from '../../../license';
 import { DataDriftWithDocCountPage } from '../../../aiops/data_drift';
 import { ML_PAGES } from '../../../../locator';
@@ -17,7 +16,6 @@ import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { MlPageHeader } from '../../../components/page_header';
 
 export const dataDriftRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -38,7 +36,6 @@ export const dataDriftRouteFactory = (
       }),
     },
   ],
-  enableDatePicker: true,
   'data-test-subj': 'mlPageModelManagement',
 });
 
@@ -52,21 +49,12 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     deps.getSavedSearchDeps,
     {
       checkBasicLicense,
+      cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
     }
   );
 
   return (
     <PageLoader context={context}>
-      <MlPageHeader>
-        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.modelManagement.trainedModelsHeader"
-              defaultMessage="Data Drift"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </MlPageHeader>
       <DataDriftWithDocCountPage />
     </PageLoader>
   );
