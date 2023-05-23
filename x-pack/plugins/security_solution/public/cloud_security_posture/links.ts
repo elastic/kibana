@@ -6,9 +6,10 @@
  */
 import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName, SERVER_APP_ID } from '../../common/constants';
+import type { SecurityPageName } from '../../common/constants';
+import { SERVER_APP_ID } from '../../common/constants';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
-import type { LinkCategories, LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import { IconExceptionLists } from '../management/icons/exception_lists';
 
 const commonLinkProperties: Partial<LinkItem> = {
@@ -34,7 +35,7 @@ export const dashboardLinks: LinkItem = {
   ...commonLinkProperties,
 };
 
-export const manageLinks: LinkItem = {
+export const benchmarksLink: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
@@ -45,15 +46,3 @@ export const manageLinks: LinkItem = {
   landingIcon: IconExceptionLists,
   ...commonLinkProperties,
 };
-
-export const manageCategories: LinkCategories = [
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurityPosture', {
-      defaultMessage: 'CLOUD SECURITY',
-    }),
-    linkIds: [
-      SecurityPageName.cloudSecurityPostureBenchmarks,
-      SecurityPageName.cloudDefendPolicies,
-    ],
-  },
-];

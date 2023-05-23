@@ -6,7 +6,7 @@
  */
 
 import { transparentize, type EuiThemeComputed } from '@elastic/eui';
-import { css, injectGlobal } from '@emotion/css';
+import { css } from '@emotion/css';
 
 const EUI_HEADER_HEIGHT = '93px';
 const PANEL_LEFT_OFFSET = '248px';
@@ -17,25 +17,17 @@ export const panelClass = 'solutionSideNavPanel';
 export const SolutionSideNavPanelStyles = (
   euiTheme: EuiThemeComputed<{}>,
   { $bottomOffset, $topOffset }: { $bottomOffset?: string; $topOffset?: string } = {}
-) => {
-  // We need to add the banner height to the top space when the header banner is present
-  injectGlobal(`
-    body.kbnBody--hasHeaderBanner .${panelClass} {
-      top: calc(${EUI_HEADER_HEIGHT} + ${euiTheme.size.xl});
-    }
-  `);
+) => css`
+  position: fixed;
+  top: ${$topOffset ?? EUI_HEADER_HEIGHT};
+  left: ${PANEL_LEFT_OFFSET};
+  bottom: 0;
+  width: ${PANEL_WIDTH};
+  height: inherit;
 
-  return css`
-    position: fixed;
-    top: ${$topOffset ?? EUI_HEADER_HEIGHT};
-    left: ${PANEL_LEFT_OFFSET};
-    bottom: 0;
-    width: ${PANEL_WIDTH};
-    height: inherit;
-
-    // If the bottom bar is visible add padding to the navigation
-    ${$bottomOffset != null &&
-    `
+  // If the bottom bar is visible add padding to the navigation
+  ${$bottomOffset != null &&
+  `
       height: inherit;
       bottom: ${$bottomOffset};
       box-shadow:
@@ -47,27 +39,31 @@ export const SolutionSideNavPanelStyles = (
         inset 0 -6px ${euiTheme.size.xs} -${euiTheme.size.xs} rgb(0 0 0 / 15%);
       `}
 
-    .solutionSideNavPanelLink {
-      .solutionSideNavPanelLinkItem {
-        background-color: transparent; /* originally white, it prevents panel to remove the bottom inset box shadow */
-        &:hover {
-          background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
-        }
-        dt {
-          color: ${euiTheme.colors.primaryText};
-        }
-        dd {
-          color: ${euiTheme.colors.darkestShade};
-        }
+  .solutionSideNavPanelLink {
+    .solutionSideNavPanelLinkItem {
+      background-color: transparent; /* originally white, it prevents panel to remove the bottom inset box shadow */
+      &:hover {
+        background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+      }
+      dt {
+        color: ${euiTheme.colors.primaryText};
+      }
+      dd {
+        color: ${euiTheme.colors.darkestShade};
       }
     }
-  `;
-};
+  }
+`;
 
-export const SolutionSideNavTitleStyles = (
-  euiTheme: EuiThemeComputed<{}>,
-  { $paddingTop = false }: { $paddingTop?: boolean } = {}
-) => css`
+export const SolutionSideNavTitleStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   padding-left: ${euiTheme.size.s};
-  ${$paddingTop && `padding-top: ${euiTheme.size.s};`}
+  padding-top: ${euiTheme.size.s};
+`;
+
+export const SolutionSideNavCategoryTitleStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  padding-left: ${euiTheme.size.s};
+`;
+
+export const SolutionSideNavCategoryAccordionStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  margin-bottom: ${euiTheme.size.s};
 `;

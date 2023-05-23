@@ -6,4 +6,13 @@
  */
 
 export { SolutionSideNav, type SolutionSideNavProps } from './src';
-export type { SolutionSideNavItem, LinkCategory, LinkCategories, Tracker } from './src/types';
+export { LinkCategoryType, SolutionSideNavItemPosition } from './src/types';
+export type {
+  SolutionSideNavItem,
+  LinkCategory,
+  TitleLinkCategory,
+  AccordionLinkCategory,
+  SeparatorLinkCategory,
+  LinkCategories,
+  Tracker,
+} from './src/types';

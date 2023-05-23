@@ -127,6 +127,7 @@ export enum SecurityPageName {
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
   rulesCreate = 'rules-create',
+  rulesLanding = 'rules-landing',
   sessions = 'sessions',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -158,6 +159,7 @@ export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const RULES_PATH = '/rules' as const;
+export const RULES_LANDING_PATH = '/rules/landing' as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;

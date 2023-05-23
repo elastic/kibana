@@ -7,9 +7,10 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { AppLinkItems } from './types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
-import { links as detectionLinks } from '../../detections/links';
+import { links as alertsLinks } from '../../detections/links';
+import { links as rulesLinks } from '../../rules/links';
 import { links as timelinesLinks } from '../../timelines/links';
-import { getCasesLinkItems } from '../../cases/links';
+import { links as casesLinks } from '../../cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
 import { exploreLinks } from '../../explore/links';
 import { gettingStartedLinks } from '../../overview/links';
@@ -17,16 +18,15 @@ import { rootLinks as cloudSecurityPostureRootLinks } from '../../cloud_security
 import type { StartPlugins } from '../../types';
 import { dashboardsLandingLinks } from '../../dashboards/links';
 
-const casesLinks = getCasesLinkItems();
-
-export const links = Object.freeze([
+export const links: AppLinkItems = Object.freeze([
   dashboardsLandingLinks,
-  detectionLinks,
+  alertsLinks,
   cloudSecurityPostureRootLinks,
-  timelinesLinks,
   casesLinks,
-  exploreLinks,
+  timelinesLinks,
   indicatorsLinks,
+  exploreLinks,
+  rulesLinks,
   gettingStartedLinks,
   managementLinks,
 ]);
@@ -39,12 +39,13 @@ export const getFilteredLinks = async (
 
   return Object.freeze([
     dashboardsLandingLinks,
-    detectionLinks,
+    alertsLinks,
     cloudSecurityPostureRootLinks,
-    timelinesLinks,
     casesLinks,
-    exploreLinks,
+    timelinesLinks,
     indicatorsLinks,
+    exploreLinks,
+    rulesLinks,
     gettingStartedLinks,
     managementFilteredLinks,
   ]);

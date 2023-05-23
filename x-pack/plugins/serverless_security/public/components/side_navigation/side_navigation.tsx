@@ -9,19 +9,15 @@ import React from 'react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { SolutionSideNav } from '@kbn/security-solution-side-nav';
-import {
-  usePartitionFooterNavItems,
-  useSideNavItems,
-  useSideNavSelectedId,
-} from '../../hooks/use_side_nav_items';
+import { useSideNavItems, useSideNavSelectedId } from '../../hooks/use_side_nav_items';
+import { CATEGORIES } from './categories';
 
 export const SecuritySideNavigation: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const sideNavItems = useSideNavItems();
-  const selectedId = useSideNavSelectedId(sideNavItems);
-  const [items, footerItems] = usePartitionFooterNavItems(sideNavItems);
+  const items = useSideNavItems();
+  const selectedId = useSideNavSelectedId(items);
 
-  const isLoading = items.length === 0 && footerItems.length === 0;
+  const isLoading = items.length === 0;
 
   return isLoading ? (
     <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />
@@ -33,7 +29,7 @@ export const SecuritySideNavigation: React.FC = () => {
       children={
         <SolutionSideNav
           items={items}
-          footerItems={footerItems}
+          categories={CATEGORIES}
           selectedId={selectedId}
           panelTopOffset={`calc(${euiTheme.size.l} * 2)`}
         />

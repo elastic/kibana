@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
+  EuiAccordion,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -26,14 +27,22 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { SolutionSideNavItem, LinkCategories } from './types';
+import {
+  type SolutionSideNavItem,
+  type LinkCategories,
+  isAccordionLinkCategory,
+  isTitleLinkCategory,
+  isSeparatorLinkCategory,
+} from './types';
 import { BetaBadge } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { useTelemetryContext } from './telemetry/telemetry_context';
 import {
   SolutionSideNavPanelStyles,
   panelClass,
+  SolutionSideNavCategoryTitleStyles,
   SolutionSideNavTitleStyles,
+  SolutionSideNavCategoryAccordionStyles,
 } from './solution_side_nav_panel.styles';
 
 export interface SolutionSideNavPanelProps {
@@ -45,18 +54,8 @@ export interface SolutionSideNavPanelProps {
   bottomOffset?: string;
   topOffset?: string;
 }
-export interface SolutionSideNavPanelCategoriesProps {
-  categories: LinkCategories;
-  items: SolutionSideNavItem[];
-  onClose: () => void;
-}
-export interface SolutionSideNavPanelItemsProps {
-  items: SolutionSideNavItem[];
-  onClose: () => void;
-}
-
 /**
- * Renders the side navigation panel for secondary links
+ * Renders the secondary navigation panel for the nested link items
  */
 export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.memo(
   function SolutionSideNavPanel({
@@ -80,7 +79,7 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
       $bottomOffset,
       $topOffset,
     });
-    const solutionSideNavTitleStyles = SolutionSideNavTitleStyles(euiTheme, { $paddingTop: true });
+    const solutionSideNavTitleStyles = SolutionSideNavTitleStyles(euiTheme);
     const panelClasses = classNames(panelClass, 'eui-yScroll', solutionSideNavPanelStyles);
     const titleClasses = classNames(solutionSideNavTitleStyles);
 
@@ -103,7 +102,6 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
               <EuiPanel
                 className={panelClasses}
                 hasShadow={hasShadow}
-                // $bottomOffset={bottomOffsetLargerBreakpoint}
                 borderRadius="none"
                 paddingSize="m"
                 data-test-subj="solutionSideNavPanel"
@@ -138,16 +136,21 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
   }
 );
 
+interface SolutionSideNavPanelCategoriesProps {
+  categories: LinkCategories;
+  items: SolutionSideNavItem[];
+  onClose: () => void;
+}
+/**
+ * Renders all the categories for the secondary navigation panel.
+ * Links that do not belong to any category are ignored
+ */
 const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesProps> = React.memo(
   function SolutionSideNavPanelCategories({ categories, items, onClose }) {
-    const { euiTheme } = useEuiTheme();
-    const sideNavTitleStyles = SolutionSideNavTitleStyles(euiTheme);
-    const titleClasses = classNames(sideNavTitleStyles);
-
     return (
       <>
-        {categories.map(({ label, linkIds }) => {
-          const links = linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
+        {categories.map((category, index) => {
+          const categoryItems = category.linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
             const link = items.find((item) => item.id === linkId);
             if (link) {
               acc.push(link);
@@ -155,26 +158,116 @@ const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesPro
             return acc;
           }, []);
 
-          if (!links.length) {
+          if (!categoryItems.length) {
             return null;
           }
 
-          return (
-            <Fragment key={label}>
-              <EuiTitle size="xxxs" className={titleClasses}>
-                <h2>{label}</h2>
-              </EuiTitle>
-              <EuiHorizontalRule margin="xs" />
-              <SolutionSideNavPanelItems items={links} onClose={onClose} />
-              <EuiSpacer size="l" />
-            </Fragment>
-          );
+          if (isTitleLinkCategory(category)) {
+            return (
+              <SolutionSideNavPanelTitleCategory
+                label={category.label}
+                items={categoryItems}
+                onClose={onClose}
+                key={category.label}
+              />
+            );
+          }
+          if (isAccordionLinkCategory(category)) {
+            return (
+              <SolutionSideNavPanelAccordionCategory
+                label={category.label}
+                items={categoryItems}
+                onClose={onClose}
+                key={category.label}
+              />
+            );
+          }
+          if (isSeparatorLinkCategory(category)) {
+            return (
+              <SolutionSideNavPanelSeparatorCategory
+                items={categoryItems}
+                onClose={onClose}
+                key={index}
+              />
+            );
+          }
+          return null;
         })}
       </>
     );
   }
 );
 
+interface SolutionSideNavPanelTitleCategoryProps {
+  label: string;
+  items: SolutionSideNavItem[];
+  onClose: () => void;
+}
+/**
+ * Renders a title category for the secondary navigation panel.
+ */
+const SolutionSideNavPanelTitleCategory: React.FC<SolutionSideNavPanelTitleCategoryProps> =
+  React.memo(function SolutionSideNavPanelTitleCategory({ label, onClose, items }) {
+    const { euiTheme } = useEuiTheme();
+    const sideNavTitleStyles = SolutionSideNavCategoryTitleStyles(euiTheme);
+    const titleClasses = classNames(sideNavTitleStyles);
+    return (
+      <>
+        <EuiTitle size="xxxs" className={titleClasses}>
+          <h2>{label}</h2>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+        <SolutionSideNavPanelItems items={items} onClose={onClose} />
+        <EuiSpacer size="l" />
+      </>
+    );
+  });
+
+interface SolutionSideNavPanelAccordionCategoryProps {
+  label: string;
+  items: SolutionSideNavItem[];
+  onClose: () => void;
+}
+/**
+ * Renders an accordion category for the secondary navigation panel.
+ */
+const SolutionSideNavPanelAccordionCategory: React.FC<SolutionSideNavPanelAccordionCategoryProps> =
+  React.memo(function SolutionSideNavPanelAccordionCategory({ label, onClose, items }) {
+    const { euiTheme } = useEuiTheme();
+    const sideNavAccordionStyles = SolutionSideNavCategoryAccordionStyles(euiTheme);
+    const accordionClasses = classNames(sideNavAccordionStyles);
+    return (
+      <EuiAccordion id={label} buttonContent={label} className={accordionClasses}>
+        <SolutionSideNavPanelItems items={items} onClose={onClose} />
+      </EuiAccordion>
+    );
+  });
+
+interface SolutionSideNavPanelSeparatorCategoryProps {
+  items: SolutionSideNavItem[];
+  onClose: () => void;
+}
+/**
+ * Renders a separator category for the secondary navigation panel.
+ */
+const SolutionSideNavPanelSeparatorCategory: React.FC<SolutionSideNavPanelSeparatorCategoryProps> =
+  React.memo(function SolutionSideNavPanelSeparatorCategory({ onClose, items }) {
+    return (
+      <>
+        <EuiSpacer size="l" />
+        <SolutionSideNavPanelItems items={items} onClose={onClose} />
+        <EuiSpacer size="l" />
+      </>
+    );
+  });
+
+interface SolutionSideNavPanelItemsProps {
+  items: SolutionSideNavItem[];
+  onClose: () => void;
+}
+/**
+ * Renders the items for the secondary navigation panel.
+ */
 const SolutionSideNavPanelItems: React.FC<SolutionSideNavPanelItemsProps> = React.memo(
   function SolutionSideNavPanelItems({ items, onClose }) {
     const panelLinkClassNames = classNames('solutionSideNavPanelLink');

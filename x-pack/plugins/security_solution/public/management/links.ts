@@ -18,57 +18,39 @@ import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
   EVENT_FILTERS_PATH,
-  EXCEPTIONS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  RULES_CREATE_PATH,
-  RULES_PATH,
   SecurityPageName,
   SERVER_APP_ID,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
-  CREATE_NEW_RULE,
   ENDPOINTS,
   EVENT_FILTERS,
-  EXCEPTIONS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
-  RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
-import {
-  manageCategories as cloudSecurityPostureCategories,
-  manageLinks as cloudSecurityPostureLinks,
-} from '../cloud_security_posture/links';
 import { manageLinks as cloudDefendLinks } from '../cloud_defend/links';
 import { IconActionHistory } from './icons/action_history';
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
 import { IconEndpointPolicies } from './icons/endpoint_policies';
 import { IconEventFilters } from './icons/event_filters';
-import { IconExceptionLists } from './icons/exception_lists';
 import { IconHostIsolation } from './icons/host_isolation';
-import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 const categories = [
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.siem', {
-      defaultMessage: 'SIEM',
-    }),
-    linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
-  },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
       defaultMessage: 'ENDPOINTS',
@@ -83,7 +65,6 @@ const categories = [
       SecurityPageName.responseActionsHistory,
     ],
   },
-  ...cloudSecurityPostureCategories,
 ];
 
 export const links: LinkItem = {
@@ -101,48 +82,6 @@ export const links: LinkItem = {
   ],
   categories,
   links: [
-    {
-      id: SecurityPageName.rules,
-      title: RULES,
-      description: i18n.translate('xpack.securitySolution.appLinks.rulesDescription', {
-        defaultMessage:
-          "Create and manage rules to check for suspicious source events, and create alerts when a rule's conditions are met.",
-      }),
-
-      landingIcon: IconSiemRules,
-      path: RULES_PATH,
-      globalSearchKeywords: [
-        i18n.translate('xpack.securitySolution.appLinks.rules', {
-          defaultMessage: 'Rules',
-        }),
-      ],
-      links: [
-        {
-          id: SecurityPageName.rulesCreate,
-          title: CREATE_NEW_RULE,
-          path: RULES_CREATE_PATH,
-          skipUrlState: true,
-          hideTimeline: true,
-        },
-      ],
-    },
-    {
-      id: SecurityPageName.exceptions,
-      title: EXCEPTIONS,
-      description: i18n.translate('xpack.securitySolution.appLinks.exceptionsDescription', {
-        defaultMessage:
-          'Create and manage shared exception lists to prevent the creation of unwanted alerts.',
-      }),
-      landingIcon: IconExceptionLists,
-      path: EXCEPTIONS_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-      globalSearchKeywords: [
-        i18n.translate('xpack.securitySolution.appLinks.exceptions', {
-          defaultMessage: 'Exception lists',
-        }),
-      ],
-    },
     {
       id: SecurityPageName.endpoints,
       description: i18n.translate('xpack.securitySolution.appLinks.endpointsDescription', {
@@ -226,7 +165,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
-    cloudSecurityPostureLinks,
     cloudDefendLinks,
   ],
 };

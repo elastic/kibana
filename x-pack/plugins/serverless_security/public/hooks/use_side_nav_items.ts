@@ -7,17 +7,61 @@
 
 import { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
-import { partition } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
+import { SolutionSideNavItem, SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
 import { useKibana } from '../services';
-import { useGetLinkProps } from './use_link_props';
+import { type GetLinkProps, useGetLinkProps } from './use_link_props';
 import { useNavLinks } from './use_nav_links';
 
-const isFooterNavItem = (id: string) =>
-  id === SecurityPageName.landing || id === SecurityPageName.administration;
+type NavigationLink = ReturnType<typeof useNavLinks>[number];
 
+const isBottomNavItem = (id: string) =>
+  id === SecurityPageName.landing || id === SecurityPageName.administration;
 const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
+
+/**
+ * Formats generic navigation links into the shape expected by the `SolutionSideNav`
+ */
+const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): SolutionSideNavItem => ({
+  id: navLink.id,
+  label: navLink.title,
+  position: isBottomNavItem(navLink.id)
+    ? SolutionSideNavItemPosition.bottom
+    : SolutionSideNavItemPosition.top,
+  ...getLinkProps({ deepLinkId: navLink.id }),
+  ...(navLink.categories?.length && { categories: navLink.categories }),
+  ...(navLink.links?.length && {
+    items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
+      if (!current.disabled) {
+        acc.push({
+          id: current.id,
+          label: current.title,
+          description: current.description,
+          isBeta: current.isBeta,
+          betaOptions: current.betaOptions,
+          ...getLinkProps({ deepLinkId: current.id }),
+        });
+      }
+      return acc;
+    }, []),
+  }),
+});
+
+/**
+ * Formats the get started navigation links into the shape expected by the `SolutionSideNav`
+ */
+const formatGetStartedLink = (
+  navLink: NavigationLink,
+  getLinkProps: GetLinkProps
+): SolutionSideNavItem => ({
+  id: navLink.id,
+  label: navLink.title.toUpperCase(),
+  position: SolutionSideNavItemPosition.bottom,
+  ...getLinkProps({ deepLinkId: navLink.id }),
+  labelSize: 'xs',
+  iconType: 'launch',
+  appendSeparator: true,
+});
 
 // DFS for the sideNavItem matching the current `pathname`, returns all item hierarchy when found
 const findItemsByPath = (
@@ -53,37 +97,9 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
           return items;
         }
         if (isGetStartedNavItem(navLink.id)) {
-          items.push({
-            id: navLink.id,
-            label: navLink.title.toUpperCase(),
-            ...getLinkProps({ deepLinkId: navLink.id }),
-            labelSize: 'xs',
-            iconType: 'launch',
-            appendSeparator: true,
-          });
+          items.push(formatGetStartedLink(navLink, getLinkProps));
         } else {
-          // default sideNavItem formatting
-          items.push({
-            id: navLink.id,
-            label: navLink.title,
-            ...getLinkProps({ deepLinkId: navLink.id }),
-            ...(navLink.categories?.length && { categories: navLink.categories }),
-            ...(navLink.links?.length && {
-              items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
-                if (!current.disabled) {
-                  acc.push({
-                    id: current.id,
-                    label: current.title,
-                    description: current.description,
-                    isBeta: current.isBeta,
-                    betaOptions: current.betaOptions,
-                    ...getLinkProps({ deepLinkId: current.id }),
-                  });
-                }
-                return acc;
-              }, []),
-            }),
-          });
+          items.push(formatLink(navLink, getLinkProps));
         }
         return items;
       }, []),
@@ -116,16 +132,6 @@ const useAddExternalSideNavItems = (securitySideNavItems: SolutionSideNavItem[])
 
   return sideNavItemsWithExternals;
 };
-
-/**
- * Partitions the sideNavItems into main and footer SideNavItems
- * @param sideNavItems array for all SideNavItems
- * @returns `[items, footerItems]` to be used in the side navigation component
- */
-export const usePartitionFooterNavItems = (
-  sideNavItems: SolutionSideNavItem[]
-): [SolutionSideNavItem[], SolutionSideNavItem[]] =>
-  useMemo(() => partition((item) => !isFooterNavItem(item.id), sideNavItems), [sideNavItems]);
 
 /**
  * Returns the selected item id, which is the root item in the links hierarchy
