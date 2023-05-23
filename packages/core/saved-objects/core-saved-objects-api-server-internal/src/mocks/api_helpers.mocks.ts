@@ -20,10 +20,12 @@ export type MigrationHelperMock = jest.Mocked<PublicMethodsOf<MigrationHelper>>;
 
 const createMigrationHelperMock = (): MigrationHelperMock => {
   const mock: MigrationHelperMock = {
-    migrateToLatestKnownVersion: jest.fn(),
+    migrateInputDocument: jest.fn(),
+    migrateStorageDocument: jest.fn(),
   };
 
-  mock.migrateToLatestKnownVersion.mockImplementation((doc) => doc);
+  mock.migrateInputDocument.mockImplementation((doc) => doc);
+  mock.migrateStorageDocument.mockImplementation((doc) => doc);
 
   return mock;
 };

@@ -86,7 +86,7 @@ export const performGet = async <T>(
 
   let migrated: SavedObject<T>;
   try {
-    migrated = migrationHelper.migrateToLatestKnownVersion(document) as SavedObject<T>;
+    migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
   } catch (error) {
     throw SavedObjectsErrorHelpers.decorateGeneralError(
       error,

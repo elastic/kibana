@@ -23,10 +23,20 @@ export class MigrationHelper {
   }
 
   /**
-   * Migrate the document to the latest know version by this instance,
-   * allowing potentially downgrading from higher versions.
+   * Migrate the given SO document, throwing if a downgrade if required.
+   * This function is meant to be used by write-access APIs (create...) for documents provided as input.
+   * before storing it in the index. It will therefor throw if the document is in a higher / unknown version.
    */
-  migrateToLatestKnownVersion(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
+  migrateInputDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
+    return this.migrator.migrateDocument(document, { allowDowngrade: false });
+  }
+
+  /**
+   * Migrate the given SO document, accepting downgrades.
+   * This function is meant to be used by read-access APIs (get, search...) for documents fetched from the index.
+   * before returning it from the API. It will therefor accept downgrading the document.
+   */
+  migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.migrator.migrateDocument(document, { allowDowngrade: true });
   }
 }

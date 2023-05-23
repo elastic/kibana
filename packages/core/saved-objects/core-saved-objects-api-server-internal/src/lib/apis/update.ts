@@ -109,7 +109,7 @@ export const performUpdate = async <T>(
       savedObjectNamespaces = preflightResult!.savedObjectNamespaces;
     }
 
-    const migrated = migrationHelper.migrateToLatestKnownVersion({
+    const migrated = migrationHelper.migrateInputDocument({
       id,
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),

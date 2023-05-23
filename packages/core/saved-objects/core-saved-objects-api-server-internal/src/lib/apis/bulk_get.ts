@@ -204,7 +204,7 @@ export const performBulkGet = async <T>(
       const document = getSavedObjectFromSource(registry, type, id, doc, {
         migrationVersionCompatibility,
       });
-      const migrated = migrationHelper.migrateToLatestKnownVersion(document);
+      const migrated = migrationHelper.migrateStorageDocument(document);
 
       return migrated;
     }),

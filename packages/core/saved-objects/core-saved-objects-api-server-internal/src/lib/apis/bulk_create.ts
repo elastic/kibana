@@ -214,7 +214,7 @@ export const performBulkCreate = async <T>(
       const originId = Object.keys(object).includes('originId')
         ? object.originId
         : existingOriginId;
-      const migrated = migrationHelper.migrateToLatestKnownVersion({
+      const migrated = migrationHelper.migrateInputDocument({
         id: object.id,
         type: object.type,
         attributes: await encryptionHelper.optionallyEncryptAttributes(

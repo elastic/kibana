@@ -239,7 +239,7 @@ export const performFind = async <T = unknown, A = unknown>(
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
         (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => {
-          const savedObject = migrationHelper.migrateToLatestKnownVersion(
+          const savedObject = migrationHelper.migrateStorageDocument(
             serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
               migrationVersionCompatibility,
             })

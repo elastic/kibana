@@ -97,7 +97,7 @@ export const incrementCounterInternal = async <T>(
   }
 
   // attributes: { [counterFieldName]: incrementBy },
-  const migrated = migrationHelper.migrateToLatestKnownVersion({
+  const migrated = migrationHelper.migrateInputDocument({
     id,
     type,
     ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
