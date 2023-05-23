@@ -5,25 +5,36 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-
 import { appContextService } from '../../services';
 
 import type { FleetRequestHandler } from '../../types';
-import type { GetUninstallTokensRequestSchema } from '../../types/rest_spec/uninstall_token';
 
-export const getUninstallTokensHandler: FleetRequestHandler<
-  undefined,
-  TypeOf<typeof GetUninstallTokensRequestSchema.query>
-> = async (context, request, response) => {
+export const getUninstallTokensHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
   const uninstallTokenService = appContextService.getUninstallTokenService();
+  if (!uninstallTokenService) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: 'Uninstall Token Service is unavailable.' },
+    });
+  }
 
-  const items = (await uninstallTokenService?.getAllTokens()) ?? {};
+  try {
+    const items = await uninstallTokenService.getAllTokens();
 
-  return response.ok({
-    body: {
-      items,
-      total: Object.keys(items ?? {}).length,
-    },
-  });
+    return response.ok({
+      body: {
+        items,
+        total: Object.keys(items).length,
+      },
+    });
+  } catch {
+    return response.customError({
+      statusCode: 500,
+      body: { message: 'Failed to get uninstall tokens.' },
+    });
+  }
 };
