@@ -176,8 +176,6 @@ You can click through to any URL with the values from that row.
 [role="screenshot"]
 image::images/highlights-ml-dfa-drilldown-2.png[Data frame analytics results table]
 
-
-
 [discrete]
 === Alerting
 
@@ -186,10 +184,19 @@ image::images/highlights-ml-dfa-drilldown-2.png[Data frame analytics results tab
 
 Schedule single or recurring maintenance windows to reduce alert noise and suppress notifications.
 For example, if you have a planned outage or event, a maintenance window prevents false alarms during this period.
-// For more information, check <<maintenance-windows>>.
+For more information, check <<maintenance-windows>>.
 
 [role="screenshot"]
 image::images/highlights-maintenance-windows.png[Viewing maintenance windows in {kib}]
+
+[discrete]
+==== Slack connector improvements
+
+The <<slack-action-type,Slack connector>> now enables you to pick your channel when you create rule actions. Thus, you no longer need a separate connector for each Slack channel.
+
+[role="screenshot"]
+image::images/highlights-slack-action.png[Creating a rule with Slack connector actions]
+
 
 [discrete]
 === Cases
