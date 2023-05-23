@@ -31,30 +31,16 @@ With7DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '7d', isRollin
 export const With30DaysRolling = Template.bind({});
 With30DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '30d', isRolling: true } }) };
 
-export const WithMonthlyCalendarStartingToday = Template.bind({});
-WithMonthlyCalendarStartingToday.args = {
+export const WithWeeklyCalendar = Template.bind({});
+WithWeeklyCalendar.args = {
   slo: buildSlo({
-    timeWindow: { duration: '1M', calendar: { startTime: new Date().toISOString() } },
+    timeWindow: { duration: '1w', isCalendar: true },
   }),
 };
 
 export const WithMonthlyCalendar = Template.bind({});
 WithMonthlyCalendar.args = {
   slo: buildSlo({
-    timeWindow: { duration: '1M', calendar: { startTime: '2022-01-01T00:00:00.000Z' } },
-  }),
-};
-
-export const WithBiWeeklyCalendar = Template.bind({});
-WithBiWeeklyCalendar.args = {
-  slo: buildSlo({
-    timeWindow: { duration: '2w', calendar: { startTime: '2023-01-01T00:00:00.000Z' } },
-  }),
-};
-
-export const WithQuarterlyCalendar = Template.bind({});
-WithQuarterlyCalendar.args = {
-  slo: buildSlo({
-    timeWindow: { duration: '1Q', calendar: { startTime: '2022-01-01T00:00:00.000Z' } },
+    timeWindow: { duration: '1M', isCalendar: true },
   }),
 };

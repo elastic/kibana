@@ -9,6 +9,7 @@ import type { Agent } from '@kbn/fleet-plugin/common';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import {
+  createAgentPolicyTask,
   getAgentByHostName,
   getEndpointIntegrationVersion,
   reassignAgentPolicy,
@@ -48,13 +49,7 @@ describe('Endpoints page', () => {
         initialAgentData = agentData;
       });
       getEndpointIntegrationVersion().then((version) => {
-        const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
-
-        cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-          policyName,
-          endpointPackageVersion: version,
-          agentPolicyName: policyName,
-        }).then((data) => {
+        createAgentPolicyTask(version).then((data) => {
           response = data;
         });
       });

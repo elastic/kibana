@@ -18,11 +18,12 @@ import {
   DurationUnit,
   Indicator,
   KQLCustomIndicator,
+  MetricCustomIndicator,
   SLO,
   StoredSLO,
 } from '../../../domain/models';
 import { Paginated } from '../slo_repository';
-import { sevenDays, twoMinute } from './duration';
+import { oneWeek, twoMinute } from './duration';
 import { sevenDaysRolling } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
@@ -63,6 +64,29 @@ export const createKQLCustomIndicator = (
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+export const createMetricCustomIndicator = (
+  params: Partial<MetricCustomIndicator['params']> = {}
+): Indicator => ({
+  type: 'sli.metric.custom',
+  params: {
+    index: 'my-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      metrics: [
+        { name: 'A', aggregation: 'sum', field: 'total' },
+        { name: 'B', aggregation: 'sum', field: 'processed' },
+      ],
+      equation: 'A - B',
+    },
+    total: {
+      metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
+      equation: 'A',
+    },
     timestampField: 'log_timestamp',
     ...params,
   },
@@ -137,8 +161,8 @@ export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
     timeWindow: {
-      duration: sevenDays(),
-      calendar: { startTime: new Date('2022-10-01T00:00:00.000Z') },
+      duration: oneWeek(),
+      isCalendar: true,
     },
     ...params,
   });

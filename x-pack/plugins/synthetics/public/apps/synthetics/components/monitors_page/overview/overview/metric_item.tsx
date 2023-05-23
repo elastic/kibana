@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
 import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';

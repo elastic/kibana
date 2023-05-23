@@ -15,7 +15,7 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
-} from '@kbn/observability-plugin/public';
+} from '@kbn/observability-shared-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import React, { useState } from 'react';
