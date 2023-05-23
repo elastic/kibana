@@ -185,7 +185,7 @@ documents where any sub-field of `datastream` contains “logs”, use the follo
 datastream.*: logs
 -------------------
 
-NOTE: When using wildcards to query multiple fields, errors may occur if the fields are of
+NOTE: When using wildcards to query multiple fields, errors might occur if the fields are of
 different types. For example, if `datastream.*` matches both numeric and string fields, the
 above query will result in an error since numeric fields cannot be queried for string values.
 
