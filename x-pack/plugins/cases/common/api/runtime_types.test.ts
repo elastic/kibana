@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { BulkCreateCommentRequestRt, CommentType } from './cases';
 
 import { decodeWithExcessOrThrow } from './runtime_types';
 
@@ -52,23 +53,17 @@ describe('runtime_types', () => {
         a: rt.string,
       });
 
-      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: 'hi', b: 1 }))
-        .toThrowErrorMatchingInlineSnapshot(`
-        "Excess keys are not allowed:
-        b"
-      `);
+      expect(() =>
+        decodeWithExcessOrThrow(schemaRt)({ a: 'hi', b: 1 })
+      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"b\\""`);
     });
 
-    it('throws when an excess field exists for rt.type', () => {
+    it('does not throw when an excess field exists for rt.type', () => {
       const schemaRt = rt.type({
         a: rt.string,
       });
 
-      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: 'hi', b: 1 }))
-        .toThrowErrorMatchingInlineSnapshot(`
-        "Excess keys are not allowed:
-        b"
-      `);
+      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: 'hi', b: 1 })).not.toThrow();
     });
 
     it('throws when a nested excess field exists for rt.strict', () => {
@@ -78,23 +73,17 @@ describe('runtime_types', () => {
         }),
       });
 
-      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: { b: 'hi', c: 1 } }))
-        .toThrowErrorMatchingInlineSnapshot(`
-        "Excess keys are not allowed:
-        a.c"
-      `);
+      expect(() =>
+        decodeWithExcessOrThrow(schemaRt)({ a: { b: 'hi', c: 1 } })
+      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"c\\""`);
     });
 
-    it('throws when a nested excess field exists for rt.type', () => {
+    it('does not throw when a nested excess field exists for rt.type', () => {
       const schemaRt = rt.type({
         a: rt.type({ b: rt.string }),
       });
 
-      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: { b: 'hi', c: 1 } }))
-        .toThrowErrorMatchingInlineSnapshot(`
-        "Excess keys are not allowed:
-        a.c"
-      `);
+      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: { b: 'hi', c: 1 } })).not.toThrow();
     });
 
     it('returns the object after decoding for rt.type', () => {
@@ -111,6 +100,16 @@ describe('runtime_types', () => {
       });
 
       expect(decodeWithExcessOrThrow(schemaRt)({ a: 'hi' })).toStrictEqual({ a: 'hi' });
+    });
+
+    describe('BulkCreateCommentRequestRt', () => {
+      it('does not throw an error for BulkCreateCommentRequestRt', () => {
+        expect(() =>
+          decodeWithExcessOrThrow(BulkCreateCommentRequestRt)([
+            { comment: 'hi', type: CommentType.user, owner: 'owner' },
+          ])
+        ).not.toThrow();
+      });
     });
   });
 });

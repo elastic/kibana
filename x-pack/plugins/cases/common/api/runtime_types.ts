@@ -11,8 +11,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
-import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { strictKeysRt } from '@kbn/io-ts-utils';
+import { formatErrors, exactCheck } from '@kbn/securitysolution-io-ts-utils';
 
 type ErrorFactory = (message: string) => Error;
 
@@ -24,11 +23,16 @@ export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) =>
 
 /**
  * This function will throw if a required field is missing or an excess field is present.
+ * NOTE: This will only throw for an excess field if the type passed in leverages exact from io-ts.
  */
 export const decodeWithExcessOrThrow =
   <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
   (inputValue: I): A =>
-    pipe(strictKeysRt(runtimeType).decode(inputValue), fold(throwErrors(createError), identity));
+    pipe(
+      runtimeType.decode(inputValue),
+      (decoded) => exactCheck(inputValue, decoded),
+      fold(throwErrors(createError), identity)
+    );
 
 /**
  * This function will throw if a required field is missing.
