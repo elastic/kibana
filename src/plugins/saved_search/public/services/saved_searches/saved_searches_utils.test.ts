@@ -33,6 +33,7 @@ describe('saved_searches_utils', () => {
           'id',
           attributes,
           ['tags-1', 'tags-2'],
+          [],
           createSearchSourceMock(),
           {}
         )
@@ -49,6 +50,7 @@ describe('saved_searches_utils', () => {
           "hideChart": true,
           "id": "id",
           "isTextBasedQuery": false,
+          "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
