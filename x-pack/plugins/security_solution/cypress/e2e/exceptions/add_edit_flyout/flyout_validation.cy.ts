@@ -317,7 +317,7 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     cy.get(CONFIRM_BTN).should('be.enabled');
   });
 
-  it.skip('Warns users about mapping conflicts on problematic field selection', async () => {
+  it('Warns users about mapping conflicts on problematic field selection', async () => {
     // open add exception modal
     openExceptionFlyoutFromEmptyViewerPrompt();
 
