@@ -54,7 +54,7 @@ export async function analyzeFile(
   const { getHttp } = await lazyLoadModules();
   const body = JSON.stringify(file);
   return await getHttp().fetch<FindFileStructureResponse>({
-    path: `/internal/file_data_visualizer/analyze_file`,
+    path: `/internal/file_upload/analyze_file`,
     method: 'POST',
     version: '1',
     body,

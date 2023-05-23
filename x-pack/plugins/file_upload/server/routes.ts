@@ -94,7 +94,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
    */
   router.versioned
     .post({
-      path: '/internal/file_data_visualizer/analyze_file',
+      path: '/internal/file_upload/analyze_file',
       access: 'internal',
       options: {
         body: {
