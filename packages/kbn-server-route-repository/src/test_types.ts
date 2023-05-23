@@ -132,9 +132,9 @@ type TestRepository = typeof repository;
 // EndpointOf should return all valid endpoints of a repository
 
 assertType<Array<EndpointOf<TestRepository>>>([
-  // 'GET /internal/endpoint_with_params',
+  'GET /internal/endpoint_with_params',
   'GET /internal/endpoint_without_params',
-  // 'GET /internal/endpoint_with_optional_params',
+  'GET /internal/endpoint_with_optional_params',
 ]);
 
 // @ts-expect-error Type '"this_endpoint_does_not_exist"' is not assignable to type '"endpoint_without_params" | "endpoint_with_params" | "endpoint_with_optional_params"'
