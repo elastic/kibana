@@ -436,7 +436,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       )}
 
       {!allResultsData?.edges.length ? (
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
         </EuiPanel>
       ) : (
