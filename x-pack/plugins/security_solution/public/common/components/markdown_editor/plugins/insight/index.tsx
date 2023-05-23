@@ -239,7 +239,7 @@ const InsightComponent = ({
   relativeFrom,
   relativeTo,
 }: InsightComponentProps) => {
-  const isPlatinum = useLicense().isAtLeast('platinum');
+  const isPlatinum = useLicense().isPlatinumPlus();
 
   if (isPlatinum === false) {
     return (
@@ -248,7 +248,7 @@ const InsightComponent = ({
           isDisabled={true}
           iconSide={'left'}
           iconType={'timeline'}
-          data-test-subj="insight-investigate-in-timeline-button-license"
+          data-test-subj="insight-investigate-in-timeline-button"
         >
           {`${label}`}
         </EuiButton>
