@@ -43,8 +43,9 @@ try {
   try {
     ftrConfigsManifest = loadAbnormal();
   } catch (e) {
-    const msg = `\n### Could not load ${FTR_CONFIGS_MANIFEST_REL} abnormally either, Error: \n  ${e}`;
-    throw new Error(msg);
+    throw new Error(
+      `\n### Could not load ${FTR_CONFIGS_MANIFEST_REL} abnormally either, Error: \n  ${e}`
+    );
   }
 }
 
