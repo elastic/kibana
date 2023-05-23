@@ -15,7 +15,7 @@ import { Processes, type ProcessesProps } from './processes';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 
 export default {
-  title: 'infra/Host Details View/Components/Processes',
+  title: 'infra/Asset Details View/Components/Processes',
   decorators: [
     (wrappedStory) => <EuiCard title="Processes">{wrappedStory()}</EuiCard>,
     (wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>,

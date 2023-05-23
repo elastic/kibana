@@ -24,7 +24,7 @@ const mockServices = {
 };
 
 export default {
-  title: 'infra/Host Details View/Components/Metadata Table',
+  title: 'infra/Asset Details View/Components/Metadata Table',
   decorators: [
     (wrappedStory) => <EuiCard title="Metadata Table">{wrappedStory()}</EuiCard>,
     (wrappedStory) => (

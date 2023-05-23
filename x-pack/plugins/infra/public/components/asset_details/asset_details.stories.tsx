@@ -16,7 +16,7 @@ import { AssetDetails, FlyoutTabIds, type AssetDetailsProps } from './asset_deta
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 
 export default {
-  title: 'infra/Host Details View/Asset Details',
+  title: 'infra/Asset Details View/Asset Details Embeddable',
   decorators: [
     (wrappedStory) => <EuiCard title="Asset Details">{wrappedStory()}</EuiCard>,
     (wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>,

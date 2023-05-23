@@ -27,7 +27,7 @@ const mockServices = {
 };
 
 export default {
-  title: 'infra/Host Details View/Components/Links',
+  title: 'infra/Asset Details View/Components/Links',
   decorators: [
     (wrappedStory) => <EuiCard title="Link to Uptime">{wrappedStory()}</EuiCard>,
     (wrappedStory) => (
