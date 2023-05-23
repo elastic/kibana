@@ -75,16 +75,17 @@ export const COMPACT_CUSTOM_PATTERNS_LOOKUP = {
 
 type FormatTypesWithCompactVariants = keyof typeof COMPACT_CUSTOM_PATTERNS_LOOKUP;
 
-function isBitFormat(serializedFieldFormat: SerializedFieldFormat) {
+function isBitFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
   return (
-    serializedFieldFormat.id === 'number' &&
+    serializedFieldFormat?.id === 'number' &&
     /bitd/.test(`${serializedFieldFormat.params?.pattern || ''}`)
   );
 }
 
 function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
   const uiSettings = getUiSettingsService();
-  if (serializedFieldFormat?.id === 'duration') {
+  const formatId = serializedFieldFormat?.id || 'number';
+  if (formatId === 'duration') {
     return {
       ...serializedFieldFormat,
       params: {
@@ -104,14 +105,11 @@ function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undef
   // * if format is falling back to the Advanced settings one, then override only if not touched
   // * if format is not specified it's coming from text based languages, so threat is "number"
   if (
-    !serializedFieldFormat?.id ||
-    (serializedFieldFormat.id &&
-      serializedFieldFormat.id in COMPACT_CUSTOM_PATTERNS_LOOKUP &&
-      (!serializedFieldFormat.params || serializedFieldFormat.params?.formatOverride) &&
-      // due to legacy configuration of lens bit formatter this was set as "number" with a custom format
-      !isBitFormat(serializedFieldFormat))
+    formatId in COMPACT_CUSTOM_PATTERNS_LOOKUP &&
+    (!serializedFieldFormat?.params || serializedFieldFormat.params?.formatOverride) &&
+    // due to legacy configuration of lens bit formatter this was set as "number" with a custom format
+    !isBitFormat(serializedFieldFormat)
   ) {
-    const formatId = serializedFieldFormat?.id || 'number';
     const { uiSettingsKey, patternFn, overrideCheck } =
       COMPACT_CUSTOM_PATTERNS_LOOKUP[formatId as FormatTypesWithCompactVariants];
     // If the format was set in Lens use the custom pattern
