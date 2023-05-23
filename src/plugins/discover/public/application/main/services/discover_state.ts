@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import {
   createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -99,10 +98,6 @@ export interface DiscoverStateContainer {
    * Internal shared state that's used at several places in the UI
    */
   internalState: DiscoverInternalStateContainer;
-  /**
-   * kbnUrlStateStorage - it keeps the state in sync with the URL
-   */
-  kbnUrlStateStorage: IKbnUrlStateStorage;
   /**
    * State of saved search, the saved object of Discover
    */
@@ -448,7 +443,6 @@ export function getDiscoverStateContainer({
   };
 
   return {
-    kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
     internalState: internalStateContainer,
     dataState: dataStateContainer,
