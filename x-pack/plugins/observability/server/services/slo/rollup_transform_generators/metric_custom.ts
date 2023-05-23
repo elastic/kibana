@@ -9,7 +9,7 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import { metricCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { InvalidTransformError } from '../../../errors';
-import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
+import { getSLORollupTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { getElastichsearchQueryOrThrow, RollupTransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
@@ -25,12 +25,12 @@ type MetricCustomMetricDef =
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class MetricCustomTransformGenerator extends RollupTransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public generate(slo: SLO): TransformPutTransformRequest {
     if (!metricCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
-    return getSLOTransformTemplate(
+    return getSLORollupTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
