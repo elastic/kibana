@@ -29,7 +29,7 @@ import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hoo
 
 import { ElasticsearchAssetType, KibanaAssetType } from '../../../../../types';
 
-import type { AllowedAssetType } from './types'; // FIX
+import type { AllowedAssetType } from './types';
 
 interface Props {
   type: AllowedAssetType;
