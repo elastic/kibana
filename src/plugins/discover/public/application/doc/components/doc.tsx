@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -46,11 +46,6 @@ export function Doc(props: DocProps) {
   const { locator, chrome, docLinks } = useDiscoverServices();
   const indexExistsLink = docLinks.links.apis.indexExists;
 
-  const singleDocTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    singleDocTitle.current?.focus();
-  }, []);
-
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...getRootBreadcrumbs(props.referrer),
@@ -64,8 +59,6 @@ export function Doc(props: DocProps) {
         id="singleDocTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSingleDocTitle"
-        tabIndex={-1}
-        ref={singleDocTitle}
       >
         {i18n.translate('discover.doc.pageTitle', {
           defaultMessage: 'Single document - #{id}',

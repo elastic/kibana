@@ -49,9 +49,9 @@ export function validateTypeMigrations({
       `Migrations map for type ${type.name} should be an object like { '2.0.0': (doc) => doc }.`
     );
 
-    Object.entries(migrationMap).forEach(([version, fn]) => {
+    Object.entries(migrationMap).forEach(([version, migration]) => {
       assertValidSemver(kibanaVersion, version, type.name);
-      assertValidTransform(fn, version, type.name);
+      assertValidTransform(migration, version, type.name);
       if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
         throw new Error(
           `Migration for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
@@ -169,9 +169,14 @@ const assertValidConvertToMultiNamespaceType = (
   }
 };
 
-const assertValidTransform = (fn: any, version: string, type: string) => {
-  if (typeof fn !== 'function') {
-    throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
+const assertValidTransform = (migration: any, version: string, type: string) => {
+  if (
+    !(typeof migration === 'object' && typeof migration.transform === 'function') &&
+    typeof migration !== 'function'
+  ) {
+    throw new Error(
+      `Invalid migration ${type}.${version}: expected a function or an object, but got ${migration}.`
+    );
   }
 };
 
