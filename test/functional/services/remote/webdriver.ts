@@ -14,8 +14,6 @@ import { map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
-// @ts-ignore types not available
-import geckoDriver from 'geckodriver';
 import { Builder, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
@@ -246,25 +244,14 @@ async function attemptToCreateCommand(
           firefoxOptions.headless();
         }
 
-        // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
-        if (process.platform === 'win32') {
-          const session = await new Builder()
-            .forBrowser(browserType)
-            .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
-            .build();
-          return {
-            session,
-            consoleLog$: Rx.EMPTY,
-          };
-        }
-
-        // if (process.platform === 'linux') {
-        firefoxOptions.addArguments('--host').addArguments('::1');
         const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+          .setFirefoxService(
+            new firefox.ServiceBuilder()
+            // .enableVerboseLogging().setStdio('inherit')
+            // .addArguments('--host', '::1')
+          )
           .build();
         return {
           session,
