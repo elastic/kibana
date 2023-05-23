@@ -56,18 +56,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
   };
 
-  const clickDownloadCsv = async () => {
+  const clickGenerateCsvReport = async () => {
     log.debug('click "More"');
     await dashboardPanelActions.clickContextMenuMoreItem();
 
-    const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
+    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
     await testSubjects.existOrFail(actionItemTestSubj); // wait for the full panel to display or else the test runner could click the wrong option!
-    log.debug('click "Download CSV"');
+    log.debug('click "Generate CSV report"');
     await testSubjects.click(actionItemTestSubj);
-    await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
+    await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 
-  describe('Download CSV', () => {
+  describe('Generate CSV Report', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);
@@ -94,23 +94,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reporting.teardownEcommerce();
       });
 
-      it('Download CSV export of a saved search panel', async function () {
+      it('Generate CSV report of a saved search panel', async function () {
         await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
         await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv();
+        await clickGenerateCsvReport();
 
         const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
         expectSnapshot(csvFile).toMatch();
       });
 
-      it('Downloads a filtered CSV export of a saved search panel', async function () {
+      it('Generates a filtered CSV report of a saved search panel', async function () {
         await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
 
         // add a filter
         await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
 
         await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv();
+        await clickGenerateCsvReport();
 
         const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
         expectSnapshot(csvFile).toMatch();
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ); // panel title is hidden
         await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
-        await clickDownloadCsv();
+        await clickGenerateCsvReport();
         await testSubjects.existOrFail('csvDownloadStarted');
 
         const csvFile = await getDownload(getCsvPath('Ecommerce Data')); // file exists with proper name
@@ -156,9 +156,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
-      it('Downloads filtered Discover saved search report', async () => {
+      it('Generates filtered Discover saved search report', async () => {
         await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
-        await clickDownloadCsv();
+        await clickGenerateCsvReport();
 
         const csvFile = await getDownload(getCsvPath(TEST_SEARCH_TITLE));
         expectSnapshot(csvFile).toMatch();
@@ -189,9 +189,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 
-      it('Download CSV export of a saved search panel', async () => {
+      it('Generates CSV report of a saved search panel', async () => {
         await clickActionsMenu('namessearch');
-        await clickDownloadCsv();
+        await clickGenerateCsvReport();
 
         const csvFile = await getDownload(getCsvPath('namessearch'));
         expectSnapshot(csvFile).toMatch();

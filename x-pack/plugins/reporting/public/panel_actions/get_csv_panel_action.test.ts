@@ -107,7 +107,7 @@ describe('GetCsvReportPanelAction', () => {
     await firstValueFrom(mockStartServices$);
     await panel.execute(context);
 
-    expect(apiClient.createReportingJob).toHaveBeenCalledWith({
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
       browserTimezone: undefined,
       columns: [],
       objectType: 'search',
@@ -142,7 +142,7 @@ describe('GetCsvReportPanelAction', () => {
     await firstValueFrom(mockStartServices$);
     await panel.execute(context);
 
-    expect(apiClient.createReportingJob).toHaveBeenCalledWith({
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
       browserTimezone: undefined,
       columns: ['column_a', 'column_b'],
       objectType: 'search',

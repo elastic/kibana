@@ -77,28 +77,28 @@ export function createScenarios(
   const getSavedSearchPanel = async (savedSearchTitle: string) => {
     return await testSubjects.find(`embeddablePanelHeading-${savedSearchTitle.replace(' ', '')}`);
   };
-  const tryDashboardDownloadCsvFail = async (savedSearchTitle: string) => {
+  const tryDashboardGenerateCsvFail = async (savedSearchTitle: string) => {
     const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
     await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
     await dashboardPanelActions.clickContextMenuMoreItem();
-    const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
+    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
     await testSubjects.existOrFail(actionItemTestSubj);
     /* wait for the full panel to display or else the test runner could click the wrong option! */ await testSubjects.click(
       actionItemTestSubj
     );
     await testSubjects.existOrFail('downloadCsvFail');
   };
-  const tryDashboardDownloadCsvNotAvailable = async (savedSearchTitle: string) => {
+  const tryDashboardGenerateCsvNotAvailable = async (savedSearchTitle: string) => {
     const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
     await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
     await dashboardPanelActions.clickContextMenuMoreItem();
-    await testSubjects.missingOrFail('embeddablePanelAction-downloadCsvReport');
+    await testSubjects.missingOrFail('embeddablePanelAction-generateCsvReport');
   };
-  const tryDashboardDownloadCsvSuccess = async (savedSearchTitle: string) => {
+  const tryDashboardGenerateCsvSuccess = async (savedSearchTitle: string) => {
     const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
     await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
     await dashboardPanelActions.clickContextMenuMoreItem();
-    const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
+    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
     await testSubjects.existOrFail(actionItemTestSubj);
     /* wait for the full panel to display or else the test runner could click the wrong option! */ await testSubjects.click(
       actionItemTestSubj
@@ -148,9 +148,9 @@ export function createScenarios(
     openSavedDashboard,
     openSavedSearch,
     openCanvasWorkpad,
-    tryDashboardDownloadCsvFail,
-    tryDashboardDownloadCsvNotAvailable,
-    tryDashboardDownloadCsvSuccess,
+    tryDashboardGenerateCsvFail,
+    tryDashboardGenerateCsvNotAvailable,
+    tryDashboardGenerateCsvSuccess,
     tryDiscoverCsvFail,
     tryDiscoverCsvNotAvailable,
     tryDiscoverCsvSuccess,
