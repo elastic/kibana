@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case, CommentRequest } from '../../../common/api';
-import { BulkCreateCommentRequestRt, throwErrors } from '../../../common/api';
+import { BulkCreateCommentRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -36,10 +31,7 @@ export const bulkCreate = async (
 ): Promise<Case> => {
   const { attachments, caseId } = args;
 
-  pipe(
-    BulkCreateCommentRequestRt.decode(attachments),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
+  decodeWithExcessOrThrow(BulkCreateCommentRequestRt)(attachments);
 
   const {
     logger,

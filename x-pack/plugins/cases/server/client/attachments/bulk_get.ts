@@ -6,18 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import { partition } from 'lodash';
 import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type { BulkGetAttachmentsResponse, CommentAttributes } from '../../../common/api';
 import {
-  throwErrors,
+  decodeWithExcessOrThrow,
   BulkGetAttachmentsResponseRt,
   BulkGetAttachmentsRequestRt,
-  excess,
 } from '../../../common/api';
 import { flattenCommentSavedObjects } from '../../common/utils';
 import { createCaseError } from '../../common/error';
@@ -46,10 +42,7 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = pipe(
-      excess(BulkGetAttachmentsRequestRt.type).decode({ ids: attachmentIDs }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: attachmentIDs });
 
     throwErrorIfIdsExceedTheLimit(request.ids);
 

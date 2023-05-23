@@ -66,67 +66,12 @@ describe('find', () => {
     it('should not have foo:bar attribute in request payload', async () => {
       const search = 'sample_text';
       const findRequest = createCasesClientMockFindRequest({ search });
-      // @ts-expect-error
-      await find({ ...findRequest, foo: 'bar' }, clientArgs);
-
-      expect(clientArgs.services.caseService.findCasesGroupedByID).toBeCalledTimes(1);
-      expect(clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0])
-        .toMatchInlineSnapshot(`
-        Object {
-          "caseOptions": Object {
-            "assignees": Array [],
-            "filter": Object {
-              "arguments": Array [
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "cases.attributes.status",
-                    },
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "0",
-                    },
-                  ],
-                  "function": "is",
-                  "type": "function",
-                },
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "cases.attributes.severity",
-                    },
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "0",
-                    },
-                  ],
-                  "function": "is",
-                  "type": "function",
-                },
-              ],
-              "function": "and",
-              "type": "function",
-            },
-            "owner": Array [],
-            "reporters": Array [],
-            "search": "sample_text",
-            "searchFields": Array [
-              "title",
-              "description",
-            ],
-            "severity": "low",
-            "sortField": "created_at",
-            "sortOrder": "desc",
-            "status": "open",
-            "tags": Array [],
-          },
-        }
+      await expect(
+        // @ts-expect-error foo is an invalid field
+        find({ ...findRequest, foo: 'bar' }, clientArgs)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: Excess keys are not allowed:
+        foo"
       `);
     });
   });

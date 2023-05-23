@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import type { UserActionFindResponse } from '../../../common/api';
 import {
   UserActionFindRequestRt,
-  throwErrors,
+  decodeWithExcessOrThrow,
   UserActionFindResponseRt,
-  excess,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
@@ -40,10 +34,7 @@ export const find = async (
     // supertest and query-string encode a single entry in an array as just a string so make sure we have an array
     const types = asArray(params.types);
 
-    const queryParams = pipe(
-      excess(UserActionFindRequestRt.type).decode({ ...params, types }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(UserActionFindRequestRt)({ ...params, types });
 
     const [authorizationFilterRes] = await Promise.all([
       authorization.getAuthorizationFilter(Operations.findUserActions),

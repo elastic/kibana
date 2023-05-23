@@ -86,105 +86,13 @@ describe('create', () => {
       jest.clearAllMocks();
     });
 
-    it('should not have foo:bar attribute in request payload of createUserAction', async () => {
-      // @ts-expect-error
-      await create({ ...theCase, foo: 'bar' }, clientArgs);
-
-      expect(clientArgs.services.userActionService.creator.createUserAction).toBeCalledTimes(1);
-      expect(clientArgs.services.userActionService.creator.createUserAction.mock.calls[0][0])
-        .toMatchInlineSnapshot(`
-        Object {
-          "caseId": "mock-id-1",
-          "owner": "securitySolution",
-          "payload": Object {
-            "assignees": Array [
-              Object {
-                "uid": "1",
-              },
-            ],
-            "connector": Object {
-              "fields": null,
-              "id": ".none",
-              "name": "None",
-              "type": ".none",
-            },
-            "description": "testing sir",
-            "owner": "securitySolution",
-            "settings": Object {
-              "syncAlerts": true,
-            },
-            "severity": "low",
-            "tags": Array [],
-            "title": "My Case",
-          },
-          "type": "create_case",
-          "user": Object {
-            "email": "damaged_raccoon@elastic.co",
-            "full_name": "Damaged Raccoon",
-            "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-            "username": "damaged_raccoon",
-          },
-        }
-      `);
-    });
-
-    it('should not have foo:bar attribute in request payload of notifyAssignees', async () => {
-      // @ts-expect-error
-      await create({ ...theCase, foo: 'bar' }, clientArgs);
-
-      expect(clientArgs.services.notificationService.notifyAssignees).toBeCalledTimes(1);
-      expect(clientArgs.services.notificationService.notifyAssignees.mock.calls[0][0])
-        .toMatchInlineSnapshot(`
-        Object {
-          "assignees": Array [
-            Object {
-              "uid": "1",
-            },
-          ],
-          "theCase": Object {
-            "attributes": Object {
-              "assignees": Array [],
-              "closed_at": null,
-              "closed_by": null,
-              "connector": Object {
-                "fields": null,
-                "id": "none",
-                "name": "none",
-                "type": ".none",
-              },
-              "created_at": "2019-11-25T21:54:48.952Z",
-              "created_by": Object {
-                "email": "testemail@elastic.co",
-                "full_name": "elastic",
-                "username": "elastic",
-              },
-              "description": "This is a brand new case of a bad meanie defacing data",
-              "duration": null,
-              "external_service": null,
-              "owner": "securitySolution",
-              "settings": Object {
-                "syncAlerts": true,
-              },
-              "severity": "low",
-              "status": "open",
-              "tags": Array [
-                "defacement",
-              ],
-              "title": "Super Bad Security Issue",
-              "updated_at": "2019-11-25T21:54:48.952Z",
-              "updated_by": Object {
-                "email": "testemail@elastic.co",
-                "full_name": "elastic",
-                "username": "elastic",
-              },
-            },
-            "id": "mock-id-1",
-            "references": Array [],
-            "type": "cases",
-            "updated_at": "2019-11-25T21:54:48.952Z",
-            "version": "WzAsMV0=",
-          },
-        }
+    it('should throw an error with an excess field exists', async () => {
+      await expect(
+        // @ts-expect-error foo is an invalid field
+        create({ ...theCase, foo: 'bar' }, clientArgs)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "Excess keys are not allowed:
+        foo"
       `);
     });
   });
