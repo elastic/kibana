@@ -32,6 +32,9 @@ import { packageServiceMock } from '../services/epm/package_service.mock';
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
 
+// export all mocks from fleet files client
+export * from '../services/files/mocks';
+
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
   data: ReturnType<typeof dataPluginMock.createStartContract>;

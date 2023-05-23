@@ -97,16 +97,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
               model.pipelines = {
                 ...(pipelinesResponse.get(model.model_id) ?? {}),
                 ...(model.metadata?.model_aliases ?? []).reduce((acc, alias) => {
-                  return {
-                    ...acc,
-                    ...(pipelinesResponse.get(alias) ?? {}),
-                  };
+                  return Object.assign(acc, pipelinesResponse.get(alias) ?? {});
                 }, {}),
                 ...(modelDeploymentsMap[model.model_id] ?? []).reduce((acc, deploymentId) => {
-                  return {
-                    ...acc,
-                    ...(pipelinesResponse.get(deploymentId) ?? {}),
-                  };
+                  return Object.assign(acc, pipelinesResponse.get(deploymentId) ?? {});
                 }, {}),
               };
             }
