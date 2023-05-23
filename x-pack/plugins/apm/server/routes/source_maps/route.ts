@@ -50,7 +50,7 @@ function throwNotImplementedIfSourceMapNotAvailable(
 }
 
 const listSourceMapRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/sourcemaps',
+  endpoint: 'GET /api/apm/sourcemaps 2023-05-22',
   options: { tags: ['access:apm'] },
   params: t.partial({
     query: t.partial({
@@ -88,7 +88,7 @@ const listSourceMapRoute = createApmServerRoute({
 });
 
 const uploadSourceMapRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/sourcemaps',
+  endpoint: 'POST /api/apm/sourcemaps 2023-05-22',
   options: {
     tags: ['access:apm', 'access:apm_write'],
     body: { accepts: ['multipart/form-data'] },
@@ -170,7 +170,7 @@ const uploadSourceMapRoute = createApmServerRoute({
 });
 
 const deleteSourceMapRoute = createApmServerRoute({
-  endpoint: 'DELETE /api/apm/sourcemaps/{id}',
+  endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-05-22',
   options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     path: t.type({

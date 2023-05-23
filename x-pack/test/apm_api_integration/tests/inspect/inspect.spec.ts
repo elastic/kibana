@@ -83,7 +83,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
         it('for agent configs', async () => {
           const { status, body } = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/settings/agent-configuration',
+            endpoint: 'GET /api/apm/settings/agent-configuration 2023-05-22',
             params: {
               query: {
                 _inspect: true,

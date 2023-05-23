@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { Logger } from '@kbn/logging';
 import { MigrationLogger } from '../core/migration_logger';
+import { maxVersion } from './pipelines/utils';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
 import { type Transform, type TransformFn, TransformType } from './types';
 
@@ -84,4 +85,22 @@ export function transformComparator(a: Transform, b: Transform) {
   }
 
   return Semver.compare(a.version, b.version) || aPriority - bPriority;
+}
+
+/**
+ * Returns true if the given document has an higher version that the last known version, false otherwise
+ */
+export function downgradeRequired(
+  doc: SavedObjectUnsanitizedDoc,
+  latestVersions: Record<TransformType, string>
+): boolean {
+  const docTypeVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
+  const latestMigrationVersion = maxVersion(
+    latestVersions[TransformType.Migrate],
+    latestVersions[TransformType.Convert]
+  );
+  if (!docTypeVersion || !latestMigrationVersion) {
+    return false;
+  }
+  return Semver.gt(docTypeVersion, latestMigrationVersion);
 }

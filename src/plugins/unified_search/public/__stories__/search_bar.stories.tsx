@@ -83,6 +83,7 @@ const services = {
   uiSettings: {
     get: () => {},
   },
+  settings: { client: { get: () => {} } },
   savedObjects: action('savedObjects'),
   notifications: action('notifications'),
   http: {

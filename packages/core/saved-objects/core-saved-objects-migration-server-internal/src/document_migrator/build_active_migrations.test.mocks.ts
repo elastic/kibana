@@ -17,9 +17,11 @@ jest.doMock('./internal_transforms', () => ({
 }));
 
 export const getModelVersionTransformsMock = jest.fn();
+export const getModelVersionSchemasMock = jest.fn();
 
 jest.doMock('./model_version', () => ({
   getModelVersionTransforms: getModelVersionTransformsMock,
+  getModelVersionSchemas: getModelVersionSchemasMock,
 }));
 
 export const validateTypeMigrationsMock = jest.fn();
@@ -33,5 +35,6 @@ export const resetAllMocks = () => {
   getReferenceTransformsMock.mockReset().mockReturnValue([]);
   getConversionTransformsMock.mockReset().mockReturnValue([]);
   getModelVersionTransformsMock.mockReset().mockReturnValue([]);
+  getModelVersionSchemasMock.mockReset().mockReturnValue({});
   validateTypeMigrationsMock.mockReset();
 };
