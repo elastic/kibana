@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { QueryType } from '@kbn/elastic-assistant';
+
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 /** Represents the Timeline data providers */
 
@@ -31,8 +33,6 @@ export interface QueryMatch {
   displayValue?: string | number | boolean;
   operator: QueryOperator;
 }
-
-export type QueryType = 'eql' | 'kql' | 'dsl' | 'json' | 'no-type';
 
 export interface DataProvider {
   /** Uniquely identifies a data provider */

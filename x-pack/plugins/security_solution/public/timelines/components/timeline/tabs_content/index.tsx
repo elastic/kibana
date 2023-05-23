@@ -6,12 +6,13 @@
  */
 
 import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { Assistant } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { css } from '@emotion/react';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
@@ -35,7 +36,6 @@ import {
 } from './selectors';
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { SecurityAssistant } from '../../../../security_assistant/security_assistant';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -46,6 +46,11 @@ const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScr
   })
 )<{ $isVisible: boolean; isOverflowYScroll?: boolean }>`
   flex: 1;
+`;
+
+const AssistantTabContainer = styled.div`
+  overflow-y: auto;
+  width: 100%;
 `;
 
 const QueryTabContent = lazy(() => import('../query_tab_content'));
@@ -132,17 +137,20 @@ const PinnedTab: React.FC<{
 ));
 PinnedTab.displayName = 'PinnedTab';
 
-const SecurityAssistantTab: React.FC<{
+const AssistantTab: React.FC<{
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
   shouldRefocusPrompt: boolean;
 }> = memo(({ renderCellValue, rowRenderers, timelineId, shouldRefocusPrompt }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <SecurityAssistant conversationId={'timeline'} shouldRefocusPrompt={shouldRefocusPrompt} />
+    <AssistantTabContainer>
+      <Assistant conversationId={'timeline'} shouldRefocusPrompt={shouldRefocusPrompt} />
+    </AssistantTabContainer>
   </Suspense>
 ));
-SecurityAssistantTab.displayName = 'SecurityAssistant';
+
+AssistantTab.displayName = 'AssistantTab';
 
 type ActiveTimelineTabProps = BasicTimelineTab & {
   activeTimelineTab: TimelineTabs;
@@ -234,7 +242,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             overflow: hidden !important;
           `}
         >
-          <SecurityAssistantTab
+          <AssistantTab
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}

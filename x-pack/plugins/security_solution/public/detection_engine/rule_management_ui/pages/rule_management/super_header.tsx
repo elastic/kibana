@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import {
+  getUniquePromptContextId,
+  useAssistantContextRegistry,
+  useAssistantOverlay,
+} from '@kbn/elastic-assistant';
+import type { PromptContext } from '@kbn/elastic-assistant';
 import type { ReactNode } from 'react';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { HeaderPage } from '../../../../common/components/header_page';
+import React, { useCallback, useMemo } from 'react';
 
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useRulesTableContext } from '../../components/rules_table/rules_table/rules_table_context';
-import { useSecurityAssistantOverlay } from '../../../../security_assistant/assistant_overlay/use_security_assistant_overlay';
-import { getUniquePromptContextId } from '../../../../security_assistant/security_assistant_context/helpers';
-import { useSecurityAssistantContext } from '../../../../security_assistant/security_assistant_context';
-import { getPromptContextFromDetectionRules } from '../../../../security_assistant/prompt_context/helpers';
+import { HeaderPage } from '../../../../common/components/header_page';
+import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+
+import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
 
 export const SuperHeader: React.FC<{ children: ReactNode }> = React.memo(({ children }) => {
   const memoizedChildren = useMemo(() => children, [children]);
@@ -29,9 +33,9 @@ export const SuperHeader: React.FC<{ children: ReactNode }> = React.memo(({ chil
   );
 
   // Add Rules promptContext
-  const { registerPromptContext, unRegisterPromptContext } = useSecurityAssistantContext();
   const promptContextId = useMemo(() => getUniquePromptContextId(), []);
-  const { MagicButton } = useSecurityAssistantOverlay({
+
+  const { MagicButton } = useAssistantOverlay({
     conversationId: 'detectionRules',
     promptContextId: 'testing',
   });
@@ -41,19 +45,19 @@ export const SuperHeader: React.FC<{ children: ReactNode }> = React.memo(({ chil
     [selectedRules]
   );
 
-  useEffect(() => {
-    registerPromptContext({
+  const promptContext: PromptContext = useMemo(
+    () => ({
       category: 'detection-rules',
       description: i18n.RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
       id: promptContextId,
       getPromptContext,
       suggestedUserPrompt: i18n.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
       tooltip: i18n.RULE_MANAGEMENT_CONTEXT_TOOLTIP,
-    });
+    }),
+    [getPromptContext, promptContextId]
+  );
 
-    return () => unRegisterPromptContext(promptContextId);
-  }, [getPromptContext, promptContextId, registerPromptContext, unRegisterPromptContext]);
-  // End promptContext logic
+  useAssistantContextRegistry(promptContext);
 
   return (
     <HeaderPage

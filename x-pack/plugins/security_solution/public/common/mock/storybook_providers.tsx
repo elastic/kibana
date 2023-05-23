@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AssistantUiSettings } from '@kbn/elastic-assistant';
+import { AssistantProvider } from '@kbn/elastic-assistant';
 import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -15,7 +17,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { SecurityAssistantProvider } from '../../security_assistant/security_assistant_context';
 import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import { SUB_PLUGINS_REDUCER } from './utils';
@@ -47,6 +48,18 @@ const coreMock = {
 
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
+const mockApiConfig: AssistantUiSettings = {
+  virusTotal: {
+    apiKey: 'mock',
+    baseUrl: 'https://www.virustotal.com/api/v3',
+  },
+  openAI: {
+    apiKey: 'mock',
+    baseUrl:
+      'https://example.com/openai/deployments/example/chat/completions?api-version=2023-03-15-preview',
+  },
+};
+
 /**
  * A utility for wrapping components in Storybook that provides access to the most common React contexts used by security components.
  * It is a simplified version of TestProvidersComponent.
@@ -62,9 +75,16 @@ export const StorybookProviders: React.FC = ({ children }) => {
         <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-              <SecurityAssistantProvider httpFetch={http.fetch}>
+              <AssistantProvider
+                apiConfig={mockApiConfig}
+                augmentMessageCodeBlocks={jest.fn()}
+                conversations={{}}
+                getComments={jest.fn()}
+                httpFetch={http.fetch}
+                setConversations={jest.fn()}
+              >
                 {children}
-              </SecurityAssistantProvider>
+              </AssistantProvider>
             </ThemeProvider>
           </ReduxStoreProvider>
         </CellActionsProvider>

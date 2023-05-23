@@ -16,10 +16,9 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/ui-theme",
     "@kbn/core-http-browser",
-    "@kbn/core-http-browser-mocks",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n",
+    "@kbn/timelines-plugin"
   ]
 }

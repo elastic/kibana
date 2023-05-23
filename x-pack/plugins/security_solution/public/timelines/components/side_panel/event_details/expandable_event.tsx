@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HelloWorld } from '@kbn/elastic-assistant';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiButtonIcon,
@@ -21,7 +21,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { NewChat } from '../../../../assistant/new_chat';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
 import {
@@ -36,7 +36,6 @@ import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
-import { NewChat } from '../../../../security_assistant/new_chat';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -150,9 +149,6 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
                 {promptContextId != null && (
                   <>
-                    <EuiFlexItem grow={false}>
-                      <HelloWorld />
-                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <NewChat promptContextId={promptContextId} />
                     </EuiFlexItem>

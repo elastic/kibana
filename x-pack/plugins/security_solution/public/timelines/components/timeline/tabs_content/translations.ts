@@ -25,6 +25,13 @@ export const ANALYZER_TAB = i18n.translate(
   }
 );
 
+export const ASSISTANT_TAB = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.assistantTabTitle',
+  {
+    defaultMessage: 'Security assistant',
+  }
+);
+
 export const NOTES_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.notesTabTimelineTitle',
   {

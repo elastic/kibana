@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AssistantUiSettings } from '@kbn/elastic-assistant';
+import { AssistantProvider } from '@kbn/elastic-assistant';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -35,7 +37,18 @@ import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 import { CASES_FEATURE_ID } from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
-import { SecurityAssistantProvider } from '../../security_assistant/security_assistant_context';
+
+const mockApiConfig: AssistantUiSettings = {
+  virusTotal: {
+    apiKey: 'mock',
+    baseUrl: 'https://www.virustotal.com/api/v3',
+  },
+  openAI: {
+    apiKey: 'mock',
+    baseUrl:
+      'https://example.com/openai/deployments/example/chat/completions?api-version=2023-03-15-preview',
+  },
+};
 
 const state: State = mockGlobalState;
 
@@ -70,7 +83,14 @@ export const TestProvidersComponent: React.FC<Props> = ({
       <MockKibanaContextProvider>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <SecurityAssistantProvider httpFetch={http.fetch}>
+            <AssistantProvider
+              apiConfig={mockApiConfig}
+              augmentMessageCodeBlocks={jest.fn()}
+              conversations={{}}
+              getComments={jest.fn()}
+              httpFetch={http.fetch}
+              setConversations={jest.fn()}
+            >
               <QueryClientProvider client={queryClient}>
                 <ExpandableFlyoutProvider>
                   <ConsoleManager>
@@ -82,7 +102,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
                   </ConsoleManager>
                 </ExpandableFlyoutProvider>
               </QueryClientProvider>
-            </SecurityAssistantProvider>
+            </AssistantProvider>
           </ThemeProvider>
         </ReduxStoreProvider>
       </MockKibanaContextProvider>
@@ -107,7 +127,14 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
       <MockKibanaContextProvider>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <SecurityAssistantProvider httpFetch={http.fetch}>
+            <AssistantProvider
+              apiConfig={mockApiConfig}
+              augmentMessageCodeBlocks={jest.fn()}
+              conversations={{}}
+              getComments={jest.fn()}
+              httpFetch={http.fetch}
+              setConversations={jest.fn()}
+            >
               <UserPrivilegesProvider
                 kibanaCapabilities={
                   {
@@ -122,7 +149,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                   <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                 </CellActionsProvider>
               </UserPrivilegesProvider>
-            </SecurityAssistantProvider>
+            </AssistantProvider>
           </ThemeProvider>
         </ReduxStoreProvider>
       </MockKibanaContextProvider>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AssistantProvider } from '@kbn/elastic-assistant';
+import type { AssistantUiSettings } from '@kbn/elastic-assistant';
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo } from 'react';
@@ -17,6 +19,10 @@ import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
+
+import { getComments } from '../assistant/get_comments';
+import { augmentMessageCodeBlocks, SECURITY_ASSISTANT_UI_SETTING_KEY } from '../assistant/helpers';
+import { useConversationStore } from '../assistant/use_conversation_store';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
@@ -24,15 +30,11 @@ import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_c
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
 import type { State } from '../common/store';
-import {
-  SECURITY_ASSISTANT_UI_SETTING_KEY,
-  SecurityAssistantProvider,
-} from '../security_assistant/security_assistant_context';
+import { ASSISTANT_TITLE } from './translations';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
-import type { SecurityAssistantUiSettings } from '../security_assistant/helpers';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -58,7 +60,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
     uiActions,
     uiSettings,
   } = useKibana().services;
-  const apiConfig = uiSettings.get<SecurityAssistantUiSettings>(SECURITY_ASSISTANT_UI_SETTING_KEY);
+  const apiConfig = uiSettings.get<AssistantUiSettings>(SECURITY_ASSISTANT_UI_SETTING_KEY);
+  const { conversations, setConversations } = useConversationStore();
+
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   return (
     <EuiErrorBoundary>
@@ -67,7 +71,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
           <ReduxStoreProvider store={store}>
             <KibanaThemeProvider theme$={theme$}>
               <EuiThemeProvider darkMode={darkMode}>
-                <SecurityAssistantProvider apiConfig={apiConfig} httpFetch={http.fetch}>
+                <AssistantProvider
+                  apiConfig={apiConfig}
+                  augmentMessageCodeBlocks={augmentMessageCodeBlocks}
+                  conversations={conversations}
+                  getComments={getComments}
+                  httpFetch={http.fetch}
+                  setConversations={setConversations}
+                  title={ASSISTANT_TITLE}
+                >
                   <MlCapabilitiesProvider>
                     <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                       <ManageUserInfo>
@@ -87,7 +99,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                       </ManageUserInfo>
                     </UserPrivilegesProvider>
                   </MlCapabilitiesProvider>
-                </SecurityAssistantProvider>
+                </AssistantProvider>
               </EuiThemeProvider>
             </KibanaThemeProvider>
             <ErrorToastDispatcher />

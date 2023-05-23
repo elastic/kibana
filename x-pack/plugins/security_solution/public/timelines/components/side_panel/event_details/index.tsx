@@ -5,12 +5,20 @@
  * 2.0.
  */
 
+import type { PromptContext } from '@kbn/elastic-assistant';
+import {
+  getUniquePromptContextId,
+  useAssistantContextRegistry,
+  USER_PROMPTS,
+} from '@kbn/elastic-assistant';
 import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import deepEqual from 'fast-deep-equal';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+
+import { getPromptContextFromEventDetailsItem } from '../../../../assistant/helpers';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -21,9 +29,6 @@ import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
-import { useSecurityAssistantContext } from '../../../../security_assistant/security_assistant_context';
-import { getUniquePromptContextId } from '../../../../security_assistant/security_assistant_context/helpers';
-import { getPromptContextFromEventDetailsItem } from '../../../../security_assistant/prompt_context/helpers';
 import {
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,
   ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
@@ -32,7 +37,6 @@ import {
   SUMMARY_VIEW,
   TIMELINE_VIEW,
 } from '../../../../common/components/event_details/translations';
-import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '../../../../security_assistant/content/prompts/user/translations';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -88,7 +92,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
 
-  const { registerPromptContext, unRegisterPromptContext } = useSecurityAssistantContext();
+  const view = useMemo(() => (isFlyoutView ? SUMMARY_VIEW : TIMELINE_VIEW), [isFlyoutView]);
+
   const promptContextId = useMemo(() => getUniquePromptContextId(), []);
 
   const getPromptContext = useCallback(
@@ -96,29 +101,21 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  useEffect(() => {
-    const view = isFlyoutView ? SUMMARY_VIEW : TIMELINE_VIEW;
-
-    registerPromptContext({
+  const promptContext: PromptContext = useMemo(
+    () => ({
       category: isAlert ? 'alert' : 'event',
       description: isAlert
         ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(view)
         : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),
       id: promptContextId,
       getPromptContext,
-      suggestedUserPrompt: EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
+      suggestedUserPrompt: USER_PROMPTS.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
       tooltip: isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-    });
+    }),
+    [getPromptContext, isAlert, promptContextId, view]
+  );
 
-    return () => unRegisterPromptContext(promptContextId);
-  }, [
-    getPromptContext,
-    isAlert,
-    isFlyoutView,
-    promptContextId,
-    registerPromptContext,
-    unRegisterPromptContext,
-  ]);
+  useAssistantContextRegistry(promptContext);
 
   const header = useMemo(
     () =>
