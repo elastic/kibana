@@ -14,7 +14,7 @@ export interface Case {
   title: string;
   description: string;
   status: CaseStatuses;
-  totalComments: number;
+  totalComment: number;
   created_at: string;
   created_by: {
     email: string | null | undefined;

@@ -40,6 +40,7 @@ export const useGetEndpointActionList = (
   return useQuery<ActionListApiResponse, IHttpFetchError<ErrorType>>({
     queryKey: ['get-action-list', query],
     ...options,
+    keepPreviousData: true,
     queryFn: async () => {
       return http.get<ActionListApiResponse>(path, {
         query: {

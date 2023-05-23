@@ -1609,6 +1609,9 @@
       "shipper": {
         "dynamic": false,
         "properties": {}
+      },
+      "allow_edit": {
+        "enabled": false
       }
     }
   },

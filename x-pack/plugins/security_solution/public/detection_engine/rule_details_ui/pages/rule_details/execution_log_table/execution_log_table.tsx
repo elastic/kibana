@@ -20,6 +20,7 @@ import {
   EuiSwitch,
   EuiBasicTable,
   EuiButton,
+  EuiDescriptionList,
 } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -60,8 +61,15 @@ import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useExecutionResults } from '../../../../rule_monitoring';
 import { useRuleDetailsContext } from '../rule_details_context';
+import { useExpandableRows } from '../../../../rule_monitoring/components/basic/tables/use_expandable_rows';
+import { TextBlock } from '../../../../rule_monitoring/components/basic/text/text_block';
 import * as i18n from './translations';
-import { EXECUTION_LOG_COLUMNS, GET_EXECUTION_LOG_METRICS_COLUMNS } from './execution_log_columns';
+import {
+  EXECUTION_LOG_COLUMNS,
+  getMessageColumn,
+  getExecutionLogMetricsColumns,
+  expanderColumn,
+} from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
@@ -361,7 +369,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       {
         field: EXECUTION_UUID_FIELD_NAME,
         name: i18n.COLUMN_ACTIONS,
-        width: '5%',
+        width: '64px',
         actions: [
           {
             name: 'Edit',
@@ -386,13 +394,49 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     [onFilterByExecutionIdCallback]
   );
 
-  const executionLogColumns = useMemo(
-    () =>
-      showMetricColumns
-        ? [...EXECUTION_LOG_COLUMNS, ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks), ...actions]
-        : [...EXECUTION_LOG_COLUMNS, ...actions],
-    [actions, docLinks, showMetricColumns]
+  const getItemId = useCallback((item: RuleExecutionResult): string => {
+    return `${item.execution_uuid}`;
+  }, []);
+
+  const renderExpandedItem = useCallback(
+    (item: RuleExecutionResult) => (
+      <EuiDescriptionList
+        className="eui-fullWidth"
+        listItems={[
+          {
+            title: i18n.ROW_DETAILS_MESSAGE,
+            description: <TextBlock text={item.security_message} />,
+          },
+        ]}
+      />
+    ),
+    []
   );
+
+  const rows = useExpandableRows<RuleExecutionResult>({
+    getItemId,
+    renderItem: renderExpandedItem,
+  });
+
+  const executionLogColumns = useMemo(() => {
+    const columns = [...EXECUTION_LOG_COLUMNS];
+
+    if (showMetricColumns) {
+      columns.push(getMessageColumn('20%'), ...getExecutionLogMetricsColumns(docLinks));
+    } else {
+      columns.push(getMessageColumn('50%'));
+    }
+
+    columns.push(
+      ...actions,
+      expanderColumn({
+        toggleRowExpanded: rows.toggleRowExpanded,
+        isRowExpanded: rows.isRowExpanded,
+      })
+    );
+
+    return columns;
+  }, [actions, docLinks, showMetricColumns, rows.toggleRowExpanded, rows.isRowExpanded]);
 
   return (
     <EuiPanel hasBorder>
@@ -478,6 +522,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         sorting={sorting}
         pagination={pagination}
         onChange={onTableChangeCallback}
+        itemId={getItemId}
+        itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
+        isExpandable={true}
       />
     </EuiPanel>
   );
