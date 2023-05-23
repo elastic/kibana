@@ -14406,9 +14406,9 @@ elastic-apm-node@^3.38.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-"elastic-apm-node@git+https://github.com/afharo/apm-agent-nodejs.git#add-agent.setGlobalLabel":
-  version "3.45.0"
-  resolved "git+https://github.com/afharo/apm-agent-nodejs.git#6f90794d5cae01aa0a4120dc1b51f17bdd2f1fb4"
+"elastic-apm-node@git+https://github.com/elastic/apm-agent-nodejs.git":
+  version "3.46.0"
+  resolved "git+https://github.com/elastic/apm-agent-nodejs.git#4f8cbe0d2c01562e6ace59ddf3851fa1ff8a0c16"
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.4.1"
