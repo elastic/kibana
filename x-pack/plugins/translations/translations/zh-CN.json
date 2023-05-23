@@ -35298,8 +35298,6 @@
     "xpack.stackConnectors.components.index.jsonDocAriaLabel": "代码编辑器",
     "xpack.stackConnectors.components.index.preconfiguredIndex": "Elasticsearch 索引",
     "xpack.stackConnectors.components.index.preconfiguredIndexDocLink": "查看文档。",
-    "xpack.stackConnectors.components.index.refreshLabel": "刷新索引",
-    "xpack.stackConnectors.components.index.refreshTooltip": "刷新影响的分片以使此操作对搜索可见。",
     "xpack.stackConnectors.components.index.resetDefaultIndexLabel": "重置默认索引",
     "xpack.stackConnectors.components.index.selectMessageText": "将数据索引到 Elasticsearch 中。",
     "xpack.stackConnectors.components.jira.apiTokenTextFieldLabel": "API 令牌",
