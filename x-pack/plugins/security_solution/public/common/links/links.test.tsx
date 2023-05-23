@@ -22,6 +22,7 @@ import {
 import { createCapabilities } from './test_utils';
 import { hasCapabilities } from '../lib/capabilities';
 import { UpsellingService } from '../lib/upsellings';
+import React from 'react';
 
 const defaultAppLinks: AppLinkItems = [
   {
@@ -179,6 +180,74 @@ describe('Security links', () => {
       });
 
       expect(result.current).toStrictEqual([networkLinkItem]);
+    });
+
+    it('should return unauthorized page when page has upselling', async () => {
+      const upselling = new UpsellingService();
+      upselling.registerPages({ [SecurityPageName.network]: () => <span /> });
+
+      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const networkLinkItem = {
+        id: SecurityPageName.network,
+        title: 'Network',
+        path: '/network',
+        capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${CASES_FEATURE_ID}.write_cases`],
+        experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
+        hideWhenExperimentalKey: 'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
+        licenseType: 'basic' as const,
+      };
+
+      await act(async () => {
+        updateAppLinks(
+          [
+            {
+              ...networkLinkItem,
+              // The following links should be filtered out because network link is unauthorized
+              links: [
+                {
+                  id: SecurityPageName.networkDns,
+                  title: 'dns',
+                  path: '/dns',
+                },
+                {
+                  id: SecurityPageName.networkHttp,
+                  title: 'Http',
+                  path: '/http',
+                },
+              ],
+            },
+            {
+              // should be excluded by license with all its links
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
+              licenseType: 'platinum',
+              links: [
+                {
+                  id: SecurityPageName.hostsEvents,
+                  title: 'Events',
+                  path: '/events',
+                },
+              ],
+            },
+          ],
+          {
+            capabilities: {
+              ...mockCapabilities,
+              [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+            },
+            experimentalFeatures: {
+              flagEnabled: true,
+              flagDisabled: false,
+            } as unknown as typeof mockExperimentalDefaults,
+            license: { hasAtLeast: licenseBasicMock } as unknown as ILicense,
+            upselling,
+          }
+        );
+        await waitForNextUpdate();
+      });
+
+      expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }]);
     });
   });
 
