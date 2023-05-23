@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 
-export function useIntersectionRef<ElementType extends HTMLElement = HTMLButtonElement>() {
+interface IntersectionOptions {
+  onIntersecting?: () => void;
+}
+
+export function useIntersectionRef<ElementType extends HTMLElement = HTMLButtonElement>({
+  onIntersecting,
+}: IntersectionOptions = {}) {
   const [intersectionRef, setRef] = useState<ElementType | null>(null);
 
   const intersection = useIntersection(
@@ -16,5 +22,11 @@ export function useIntersectionRef<ElementType extends HTMLElement = HTMLButtonE
     { root: null, threshold: 0.5 }
   );
 
-  return [intersection, setRef] as [IntersectionObserverEntry | null, typeof setRef];
+  useEffect(() => {
+    if (intersection?.isIntersecting && onIntersecting) {
+      onIntersecting();
+    }
+  }, [intersection, onIntersecting]);
+
+  return [setRef, intersection] as [typeof setRef, IntersectionObserverEntry | null];
 }

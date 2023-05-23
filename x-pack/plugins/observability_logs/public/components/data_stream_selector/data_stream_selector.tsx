@@ -5,92 +5,34 @@
  * 2.0.
  */
 
-import React, { RefCallback, useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonGroup,
-  EuiButtonProps,
-  EuiContextMenu,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPopover,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
-import { PackageIcon } from '@kbn/fleet-plugin/public';
-
+import { EuiContextMenu, EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import { getIntegrationId, IntegrationId, SortOrder } from '../../../common';
+import React, { useCallback, useMemo, useState } from 'react';
 import { dynamic } from '../../../common/dynamic';
-import {
-  DATA_VIEW_POPOVER_CONTENT_WIDTH,
-  INTEGRATION_PANEL_ID,
-  POPOVER_ID,
-  UNCATEGORIZED_STREAMS_PANEL_ID,
-  contextMenuStyles,
-  integrationsLabel,
-  selectViewLabel,
-  sortOptions,
-  sortOrdersLabel,
-  uncategorizedLabel,
-} from './constants';
-import { getPopoverButtonStyles } from './data_stream_selector.utils';
-
-import { useBoolean } from '../../hooks/use_boolean';
-
-import { DataStream, Integration, SearchStrategy } from '../../../common/data_streams';
-import { LoadMoreIntegrations } from '../../hooks/use_integrations';
-import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import type { DataStreamSelectionHandler } from '../../customizations/custom_data_stream_selector';
-import { DataStreamSkeleton } from './data_stream_skeleton';
+import { useBoolean } from '../../hooks/use_boolean';
+import { useIntersectionRef } from '../../hooks/use_intersection_ref';
+import {
+  contextMenuStyles,
+  DATA_VIEW_POPOVER_CONTENT_WIDTH,
+  integrationsLabel,
+  INTEGRATION_PANEL_ID,
+  selectViewLabel,
+  uncategorizedLabel,
+  UNCATEGORIZED_STREAMS_PANEL_ID,
+} from './constants';
+import { DataStreamsPopover } from './sub_components/data_streams_popover';
+import { DataStreamSkeleton } from './sub_components/data_streams_skeleton';
+import { SearchControls, useSearchStrategy } from './sub_components/search_controls';
+import { CurrentPanelId, DataStreamSelectorProps } from './types';
+import { buildIntegrationsTree, setIntegrationListSpy } from './utils';
 
 /**
  * Lazy load hidden components
  */
-const DataStreamsList = dynamic(() => import('./data_streams_list'), {
+const DataStreamsList = dynamic(() => import('./sub_components/data_streams_list'), {
   fallback: <DataStreamSkeleton />,
 });
-
-type CurrentPanelId =
-  | typeof INTEGRATION_PANEL_ID
-  | typeof UNCATEGORIZED_STREAMS_PANEL_ID
-  | IntegrationId;
-
-export interface SearchParams {
-  name?: string;
-  sortOrder?: SortOrder;
-  strategy: SearchStrategy;
-  integrationId?: CurrentPanelId;
-}
-
-type PartialSearchParams = Pick<SearchParams, 'name' | 'sortOrder'>;
-
-export type SearchHandler = (params: SearchParams) => void;
-
-export interface DataStreamSelectorProps {
-  title: string;
-  search: PartialSearchParams;
-  integrations: Integration[] | null;
-  dataStreams: DataStream[] | null;
-  dataStreamsError?: Error | null;
-  isLoadingIntegrations: boolean;
-  isLoadingStreams: boolean;
-  /* Triggered when a search or sorting is performed on integrations */
-  onSearch: SearchHandler;
-  /* Triggered when we reach the bottom of the integration list and want to load more */
-  onIntegrationsLoadMore: LoadMoreIntegrations;
-  /* Triggered when the uncategorized streams entry is selected */
-  onStreamsEntryClick: () => void;
-  /* Triggered when retrying to load the data streams */
-  onStreamsReload: () => void;
-  /* Triggered when a data stream entry is selected */
-  onStreamSelected: DataStreamSelectionHandler;
-}
 
 export function DataStreamSelector({
   title,
@@ -99,25 +41,19 @@ export function DataStreamSelector({
   onSearch,
   onIntegrationsLoadMore,
   onStreamSelected,
-  search,
   dataStreamsError,
   isLoadingStreams,
   onStreamsEntryClick,
   onStreamsReload,
   dataStreams,
 }: DataStreamSelectorProps) {
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
-  const [loadMoreIntersection, setSpyRef] = useIntersectionRef();
-
-  useEffect(() => {
-    if (loadMoreIntersection?.isIntersecting) {
-      onIntegrationsLoadMore();
-    }
-  }, [loadMoreIntersection, onIntegrationsLoadMore]);
+  const [setSpyRef] = useIntersectionRef({ onIntersecting: onIntegrationsLoadMore });
 
   const [currentPanel, setCurrentPanel] = useState<CurrentPanelId>(INTEGRATION_PANEL_ID);
+
+  const [search, handleSearch] = useSearchStrategy({ id: currentPanel, onSearch });
 
   const handlePanelChange = ({ panelId }: { panelId: EuiContextMenuPanelId }) => {
     setCurrentPanel(panelId as CurrentPanelId);
@@ -182,37 +118,19 @@ export function DataStreamSelector({
     ...integrationPanels,
   ];
 
-  const button = (
-    <DataStreamButton onClick={togglePopover} fullWidth={isMobile}>
-      {title}
-    </DataStreamButton>
-  );
-
-  const handleSearch = (params: PartialSearchParams) => {
-    const strategy = getSearchStrategy(currentPanel);
-    return onSearch({
-      ...params,
-      strategy,
-      ...(strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS && { integrationId: currentPanel }),
-    });
-  };
-  const searchValue = search;
-
   return (
-    <EuiPopover
-      id={POPOVER_ID}
-      button={button}
+    <DataStreamsPopover
+      title={title}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
-      buffer={8}
-      {...(isMobile && { display: 'block' })}
+      onClick={togglePopover}
     >
       <EuiContextMenuPanel title={selectViewLabel}>
         <SearchControls
-          search={searchValue}
+          key={currentPanel}
+          search={search}
           onSearch={handleSearch}
-          isLoading={isLoadingIntegrations}
+          isLoading={isLoadingIntegrations || isLoadingStreams}
         />
         <EuiHorizontalRule margin="none" />
         <EuiContextMenu
@@ -223,113 +141,6 @@ export function DataStreamSelector({
           css={contextMenuStyles}
         />
       </EuiContextMenuPanel>
-    </EuiPopover>
+    </DataStreamsPopover>
   );
 }
-
-interface DataStreamButtonProps extends EuiButtonProps {
-  onClick: () => void;
-}
-
-const DataStreamButton = (props: DataStreamButtonProps) => {
-  const buttonStyles = getPopoverButtonStyles({ fullWidth: props.fullWidth });
-
-  return <EuiButton css={buttonStyles} iconType="arrowDown" iconSide="right" {...props} />;
-};
-
-interface SearchControlsProps {
-  isLoading: boolean;
-  search: PartialSearchParams;
-  onSearch: (params: PartialSearchParams) => void;
-}
-
-const SearchControls = ({ search, onSearch, isLoading }: SearchControlsProps) => {
-  const handleQueryChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    const name = event.target.value;
-    onSearch({ ...search, name });
-  };
-
-  const handleSortChange = (id: string) => {
-    onSearch({ ...search, sortOrder: id as SearchParams['sortOrder'] });
-  };
-
-  return (
-    <EuiContextMenuItem disabled css={{ width: DATA_VIEW_POPOVER_CONTENT_WIDTH }}>
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem>
-          <EuiFieldSearch
-            compressed
-            incremental
-            onChange={handleQueryChange}
-            isLoading={isLoading}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            isIconOnly
-            buttonSize="compressed"
-            options={sortOptions}
-            legend={sortOrdersLabel}
-            idSelected={search.sortOrder as SortOrder}
-            onChange={handleSortChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiContextMenuItem>
-  );
-};
-
-interface IntegrationsTree {
-  items: EuiContextMenuPanelItemDescriptor[];
-  panels: EuiContextMenuPanelDescriptor[];
-}
-
-interface IntegrationsTreeParams {
-  integrations: Integration[];
-  onStreamSelected: DataStreamSelectionHandler;
-}
-
-const buildIntegrationsTree = ({ integrations, onStreamSelected }: IntegrationsTreeParams) => {
-  return integrations.reduce(
-    (res: IntegrationsTree, integration) => {
-      const entryId: CurrentPanelId = getIntegrationId(integration);
-      const { name, version, dataStreams } = integration;
-
-      res.items.push({
-        name,
-        icon: <PackageIcon packageName={name} version={version} size="m" tryApi />,
-        panel: entryId,
-      });
-
-      res.panels.push({
-        id: entryId,
-        title: name,
-        width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-        items: dataStreams.map((stream) => ({
-          name: stream.title,
-          onClick: () =>
-            onStreamSelected({ title: `[${name}] ${stream.title}`, name: stream.name }),
-        })),
-      });
-
-      return res;
-    },
-    { items: [], panels: [] }
-  );
-};
-
-const setIntegrationListSpy = (
-  items: EuiContextMenuPanelItemDescriptor[],
-  spyRef: RefCallback<HTMLButtonElement>
-) => {
-  const lastItem = items.at(-1);
-  if (lastItem) {
-    lastItem.buttonRef = spyRef;
-  }
-};
-
-const getSearchStrategy = (panelId: CurrentPanelId) => {
-  if (panelId === UNCATEGORIZED_STREAMS_PANEL_ID) return SearchStrategy.DATA_STREAMS;
-  if (panelId === INTEGRATION_PANEL_ID) return SearchStrategy.INTEGRATIONS;
-  return SearchStrategy.INTEGRATIONS_DATA_STREAMS;
-};

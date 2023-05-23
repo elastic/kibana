@@ -23,7 +23,7 @@ import {
 export const createPureIntegrationsStateMachine = (
   initialContext: DefaultIntegrationsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAZgBsAVjLTOATlly18gCwAOHbL0AaEAE9EshSoBMigL73TaTDnzFSZekVwQaUVgAZAHkAQQARZAA5AHEAfQBlAFUAYRSAUXTwrK5eJBBBYVFUcSkEOQB2NRVdTk5pHV0DI1MLBAq9eTJ5NUVNO0dnDCw8YvJvX38gsMjYuIAxUORAnJ5xQpEPUpkdGy75PQrDPW19Y9bEGwayWQqHJxAXEfcScZ8-VCgAWSJsMGmItF4sk0plsuFcushJsxPkyjY9HoyFdDooLggDF1pIpsfIBg8nm4xl53v4fn8AbN4otlqs8gJocVtggEUiUXd0VVlEpcfihq5Rh43r42CEInEvsEAErpOLRAAq6RiUtC8uQwSiCUh+Q2TLhiCOSJ6fWkdnRqk4shud0Gj2GRKFJJFEFYCXSoSlKQAEnKoorlar1ZrtQyilt9e19N1ev00eYDdiyKjbYTBa8yABjAAWYAzAGsyb8wKmXqRQgA3XAEei4ABG1ZEZg4ax1jPDoDKek4XVR5u71Xq6lu935z2J2dzBc+5OL9rTZcr1brDfQTfY0npBTbsI7iE6SOkvfjCF6FWtI7tAtL5AgYFrRCoGf8CTAuGw2dd7s9PoVSpVao1LUW1DGESgjVRFCNGxZEtaR5Dgq5pHRWQNG6PlLzHR1b3vR9n1fd8s1YCRYHQfAwDIXAADNMGwAAKRQ6gASlYEtiWwh9UCfT4XzfbMQy3MMd0kA0o2NWN0T0ZRkwJOdrzIdjcO4-CP2I0jMAo6iwDohjOGY1isLvDiuKgHiCPXTddXbYTygUZRVA0LQmnOY8dAqK08QvfT01gZSs2fdA-lwABbWBPw9b1ElSDIsjpKFBLA3cWT0K1ZEUDQOWPHobCTNRmhtGSr2JHzeL87iAtfEKwu-BYlhWCFgIE0DmVZZFDwytpoM4c8U1k4kJg+KB5irehRRmCVpVlX8AwA4MGssoSykNaMTTNTKlG6grMPTfr-CG6s2BlMVwl9f1-yDICLO3BLrKWsTTTjNp4J0JN8tHB1ttJT49pGl03XCn8-T-QNAP4+brsW0SY3u9FGi6zh8oeVAiFveB8i80g4qaiMAFp5HRXGesKx0qBoTYGGYSBMb1RLpGkVD5FkBFoePGw1GqHQVs83rHR2z4qassoEOetQKiUepGjOFoXJ0ap7sJrbPF574i35hbEF2TlemRUXFA8+X3sV95KdbeLmUg9m6ZsCpOGSqwrB0TlWbINR0PR8gJ3zQs-jdithuXRhV1V8GZE4HRpDIThoMMdrEF6JFXK5on0wUzi8JKoPmVUCozzxHpbk6PFaZhmXbEThXyGKgj-MCkKM4jEv5CqA4Y4xcOy4N4UBu+42QOp6zFCtshs9kaOHsuTg7PxRwgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMADgDMZWdIBMAVk5rlAFgDsagJwAaEAE9EG3Uum7dKzrO1rtm2QDYAvh5NpMOfMSkZPREuBA0UKwAMgDyAIIAIsgAcgDiAPoAygCqAMK5AKIFCcVcvEgggsKiqOJSCGrqZNI29trSBtJaJuYI8vLSZGrObu6yanbao14+GFh4NeQhYRHR8Ulp6QBicchRpTziVSKBdRZNLXac7Z3dZueyZAbaKro2avIuU7ozIL7zARIS1C4VQUAAskRsGA1okUhkcvkiiUEmUjkITmIKvVpJxdAYyG9ZLZOP1ZCoOsZ7gh1IMVNoDAZZI5OM8DG4VL9-v5FsEQRFIdDYRsMjs9gdygIMTUzggutpFAyVPY3M9WbjpD1EC5FLiDPJdOS3PKJly5jzAsCwmxYol0uCYgAlArpFIAFQKqUdcTdyBiyUyaIqxxl2MQxIJ8nJ+gMuj0CjcWr6jLIblZ8mc8jxnBNZr8C0tfOtEFYmQKcUduQAEkGpdVTmGEBGyFHXoY44b5InqfZOISNJxrhMNI1VHmAbyIGAAEZEKgAYwimTAuGw84AFqXy5Wa4dg9KG6B6uo3NoyMrVU4OXjDbokwrHh1XpxlcSHNptOOLUCyFPZwulxXNdNwkWB0HwMAyFwAAzTBsAACjLCtq3SEoojiABNABKVhuQLH8-znVBFzBZdVw3WtKgPLEj0QClbBba4DBUNVtGUJN8UfJx8XUZ45AMNQv3woJCIA0igI3VhQPAzAoNgsAEKQndUIKdDsNw81hPIUTiMA8j13YaRJSo+saMkOj7AJXQ3AmU8HFjOMk2UIZB0HWxmVjD8fm8P5NMBIJYAk9cl3QaFcAAW1gLdkKrLI8kKYoJXRUzakbRo1GaVprg6LpZCTCYCQ-Z9pC7RwDAcIT-PIQL9JCsLIui5SxX2VE9zrTFUtohoLiym5cqTNx9CUATmTePRVDYyreWWUEoC2XACHoG11ntJ0XXdT1vV9f1AzakyOtleVFWYlU1U6HMkwzFRU3TVRyQK9l5CmwsZoiebFrYJTq0okND3MmkbCsLMlVY9jqTUaQ3FTZjBsNB9rIMLwfNQIgp3gCo8Kq5KDsbABabtenxshXJJ0m3Oen8qBoE4GGYSBsdDLqXnyzgoeUWx1DGlRjU-HzMem-kwQZv7j0NYbHAzWM01Ve8FBbQH+kZHKsyevm-IFlYwUFMBhbMnEsysV5PijOwPkZS63F1Zi43oilXjjCmghm+n9xS2VrL7Zj2XxdLSXaS7ZAJFRjaVhlNA+R3tJnIiSKgMjgN1zr-vUYPCWUEdpDY4PNWpBlFFVbn3FULoVHGXnZnzKqyBq4C6pXSLE9lUuoYmZQowZTpZCHDiPiGewFAVO2u28iuJxewW5oWpaIEbxsOmc1tvYhhy1HvQbodeSGWnaNQOW8rwgA */
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
       context: initialContext,
@@ -33,9 +33,7 @@ export const createPureIntegrationsStateMachine = (
       initial: 'uninitialized',
       states: {
         uninitialized: {
-          always: {
-            target: 'loading',
-          },
+          always: 'loading',
         },
         loading: {
           invoke: {
@@ -46,9 +44,7 @@ export const createPureIntegrationsStateMachine = (
               target: 'loaded',
               actions: ['storeInCache', 'storeIntegrationsResponse', 'storeSearch'],
             },
-            LOADING_FAILED: {
-              target: 'loadingFailed',
-            },
+            LOADING_FAILED: 'loadingFailed',
           },
         },
         loadingMore: {
@@ -60,39 +56,25 @@ export const createPureIntegrationsStateMachine = (
               target: 'loaded',
               actions: ['storeInCache', 'appendIntegrations', 'storeSearch'],
             },
-            LOADING_FAILED: {
-              target: 'loadingFailed',
-            },
+            LOADING_FAILED: 'loadingFailed',
           },
         },
         loaded: {
           on: {
-            LOAD_MORE_INTEGRATIONS: 'checkingMoreIntegrationsAvailability',
-            SEARCH_INTEGRATIONS: {
-              target: 'debouncingSearch',
-            },
-          },
-        },
-        checkingMoreIntegrationsAvailability: {
-          always: [
-            {
+            LOAD_MORE_INTEGRATIONS: {
               cond: 'hasMoreIntegrations',
               target: 'loadingMore',
             },
-            {
-              target: 'loaded',
-            },
-          ],
+            SEARCH: 'debouncingSearch',
+          },
         },
         debouncingSearch: {
           entry: 'storeSearch',
           on: {
-            SEARCH_INTEGRATIONS: {
-              target: 'debouncingSearch',
-            },
+            SEARCH: 'debouncingSearch',
           },
           after: {
-            500: [
+            SEARCH_DELAY: [
               {
                 cond: 'isStreamSearch',
                 target: 'searchingStreams',
@@ -110,20 +92,20 @@ export const createPureIntegrationsStateMachine = (
           on: {
             SEARCH_SUCCEEDED: {
               target: 'loaded',
-              actions: ['storeIntegrations'],
+              actions: 'storeIntegrations',
             },
-            SEARCH_FAILED: {
-              target: 'loadingFailed',
-            },
+            SEARCH_FAILED: 'loadingFailed',
           },
         },
         loadingFailed: {
           entry: ['clearCache', 'storeError'],
           exit: 'clearError',
           on: {
-            LOAD_MORE_INTEGRATIONS: 'checkingMoreIntegrationsAvailability',
-            RELOAD_INTEGRATIONS: 'loading',
-            SEARCH_INTEGRATIONS: 'debouncingSearch',
+            LOAD_MORE_INTEGRATIONS: {
+              cond: 'hasMoreIntegrations',
+              target: 'loadingMore',
+            },
+            SEARCH: 'debouncingSearch',
           },
         },
       },
@@ -189,6 +171,13 @@ export const createPureIntegrationsStateMachine = (
         hasMoreIntegrations: (context) => Boolean(context.search.searchAfter),
         isStreamSearch: (context) =>
           context.search.strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS,
+      },
+      delays: {
+        SEARCH_DELAY: (_context, event) => {
+          if (event.type !== 'SEARCH' || !event.delay) return 0;
+
+          return event.delay;
+        },
       },
     }
   );

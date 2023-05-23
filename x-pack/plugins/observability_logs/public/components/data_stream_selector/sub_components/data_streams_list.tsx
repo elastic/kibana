@@ -13,16 +13,16 @@ import {
   noDataStreamsDescriptionLabel,
   noDataStreamsLabel,
   noDataRetryLabel,
-} from './constants';
-import { DataStream } from '../../../common/data_streams';
-import { DataStreamSkeleton } from './data_stream_skeleton';
-import { SearchHandler } from './data_stream_selector';
+} from '../constants';
+import { DataStream } from '../../../../common/data_streams';
+import { DataStreamSkeleton } from './data_streams_skeleton';
+import { DataStreamSelectionHandler } from '../types';
 
 interface DataStreamListProps {
   dataStreams: DataStream[] | null;
-  error?: Error | null;
+  error: Error | null;
   isLoading: boolean;
-  onStreamClick: SearchHandler;
+  onStreamClick: DataStreamSelectionHandler;
   onRetry: () => void;
 }
 

@@ -21,6 +21,7 @@ export interface SearchIntegrationsParams {
   name?: string;
   sortOrder?: SortOrder;
   strategy: SearchStrategy;
+  integrationId?: string;
 }
 
 export type SearchIntegrations = (params: SearchIntegrationsParams) => void;
@@ -58,13 +59,16 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   const searchIntegrations: SearchIntegrations = useCallback(
     (searchParams) =>
       integrationsStateService.send({
-        type: 'SEARCH_INTEGRATIONS',
+        type: 'SEARCH',
+        delay: search.name !== searchParams.name ? 500 : 0,
         search: {
-          ...searchParams,
           nameQuery: searchParams.name,
+          strategy: searchParams.strategy,
+          sortOrder: searchParams.sortOrder,
+          integrationId: searchParams.integrationId,
         },
       }),
-    [integrationsStateService]
+    [integrationsStateService, search]
   );
 
   const loadMore = useCallback(

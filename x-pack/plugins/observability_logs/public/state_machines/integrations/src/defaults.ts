@@ -14,6 +14,7 @@ export const DEFAULT_CONTEXT: DefaultIntegrationsContext = {
   integrations: null,
   error: null,
   search: {
+    nameQuery: '',
     sortOrder: 'asc',
   },
 };

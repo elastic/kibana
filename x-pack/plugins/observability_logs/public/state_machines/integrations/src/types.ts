@@ -56,10 +56,6 @@ export type IntegrationTypestate =
   | {
       value: 'searchingStreams';
       context: DefaultIntegrationsContext;
-    }
-  | {
-      value: 'checkingMoreIntegrationsAvailability';
-      context: DefaultIntegrationsContext;
     };
 
 export type IntegrationsContext = IntegrationTypestate['context'];
@@ -82,12 +78,10 @@ export type IntegrationsEvent =
       error: Error;
     }
   | {
-      type: 'RELOAD_INTEGRATIONS';
-    }
-  | {
       type: 'LOAD_MORE_INTEGRATIONS';
     }
   | {
-      type: 'SEARCH_INTEGRATIONS';
+      type: 'SEARCH';
       search: IntegrationsSearchParams;
+      delay?: number;
     };

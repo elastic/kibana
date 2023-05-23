@@ -22,8 +22,6 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
   public start(core: CoreStart, plugins: ObservabilityLogsStartDeps) {
     const { discover } = plugins;
 
-    const getStartServices = () => ({ core, plugins, pluginStart });
-
     const dataStreamsService = this.dataStreamsService.start({
       http: core.http,
     });
@@ -39,7 +37,7 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
       customizations.set({
         id: 'search_bar',
         CustomDataViewPicker: createLazyCustomDataStreamSelector({
-          ...getStartServices(),
+          dataStreamsClient: dataStreamsService.client,
           stateContainer,
         }),
       });

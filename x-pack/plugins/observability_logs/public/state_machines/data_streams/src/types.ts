@@ -64,6 +64,7 @@ export type DataStreamsEvent =
       type: 'RELOAD_DATA_STREAMS';
     }
   | {
-      type: 'SEARCH_DATA_STREAMS';
+      type: 'SEARCH';
       search: DataStreamsSearchParams;
+      delay?: number;
     };
