@@ -19,27 +19,31 @@ import { PLUGIN_ID } from '../../../../common';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { LanguageDefinition } from '../languages/types';
 import './select_client.scss';
-export interface Props {
+interface SelectClientProps {
   setSelectedLanguage: (language: LanguageDefinition) => void;
   languages: LanguageDefinition[];
   selectedLanguage: LanguageDefinition;
-  children?: React.ReactNode;
 }
 
-export const LanguageClientPanels: React.ReactFragment = (SelectClientProps: Props) => {
+export const LanguageClientPanels: React.FC<SelectClientProps> = ({
+  setSelectedLanguage,
+  languages,
+  selectedLanguage,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { http } = useKibanaServices();
-  const panelItems = SelectClientProps.languages.map((language) => (
+  const panelItems = languages.map((language, index) => (
     <EuiPanel
+      key={`panel.${index}`}
       hasBorder
       borderRadius="m"
       className={
-        SelectClientProps.selectedLanguage === language
+        selectedLanguage === language
           ? 'serverlessSearchSelectClientPanelSelectedBorder'
           : 'serverlessSearchSelectClientPanelBorder'
       }
-      onClick={() => SelectClientProps.setSelectedLanguage(language)}
-      color={SelectClientProps.selectedLanguage === language ? 'primary' : 'plain'}
+      onClick={() => setSelectedLanguage(language)}
+      color={selectedLanguage === language ? 'primary' : 'plain'}
     >
       <EuiFlexGroup direction="column" justifyContent="center">
         <EuiFlexItem grow={false}>
@@ -50,10 +54,7 @@ export const LanguageClientPanels: React.ReactFragment = (SelectClientProps: Pro
             width={euiTheme.size.xl}
           />
           <EuiSpacer size="s" />
-          <EuiText
-            textAlign="center"
-            color={SelectClientProps.selectedLanguage === language ? 'default' : 'subdued'}
-          >
+          <EuiText textAlign="center" color={selectedLanguage === language ? 'default' : 'subdued'}>
             <h5>{language.name}</h5>
           </EuiText>
         </EuiFlexItem>

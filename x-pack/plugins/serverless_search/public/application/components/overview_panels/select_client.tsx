@@ -5,73 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { PLUGIN_ID } from '../../../../common';
 
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { LanguageDefinition } from '../languages/types';
 import { OverviewPanel } from './overview_panel';
 import { docLinks } from '../../../../common/doc_links';
-interface SelectClientProps {
-  setSelectedLanguage: (language: LanguageDefinition) => void;
-  languages: LanguageDefinition[];
-  selectedLanguage: LanguageDefinition;
-}
-export const SelectClientPanel: React.FC<SelectClientProps> = ({
-  setSelectedLanguage,
-  languages,
-  selectedLanguage,
-}) => {
-  const { http } = useKibanaServices();
-  const { euiTheme } = useEuiTheme();
+import './select_client.scss';
 
-  const panelItems = languages.map((language) => (
-    <EuiPanel
-      hasBorder
-      borderRadius="m"
-      onClick={() => setSelectedLanguage(language)}
-      css={
-        selectedLanguage === language
-          ? css`
-              border: 1px solid ${euiTheme.colors.primary};
-            `
-          : css`
-              border: 1px solid ${euiTheme.colors.lightShade};
-            `
-      }
-      color={selectedLanguage === language ? 'primary' : 'plain'}
-    >
-      <EuiFlexGroup direction="column" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiImage
-            alt=""
-            src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${language.iconType}`)}
-            height="32px"
-            width="32px"
-          />
-          <EuiSpacer size="s" />
-          <EuiText textAlign="center" color={selectedLanguage === language ? 'default' : 'subdued'}>
-            <h5>{language.name}</h5>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  ));
+export const SelectClientPanel: React.FC = ({ children }) => {
+  const { http } = useKibanaServices();
 
   return (
     <OverviewPanel
@@ -104,11 +49,7 @@ export const SelectClientPanel: React.FC<SelectClientProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="xs" direction="row">
-            {panelItems.map((panelItem, index) => (
-              <EuiFlexItem key={`panelItem.${index}`}>{panelItem}</EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          {children}
           <EuiSpacer size="l" />
           <EuiCallOut
             title={i18n.translate('xpack.serverlessSearch.selectClient.callout.title', {
