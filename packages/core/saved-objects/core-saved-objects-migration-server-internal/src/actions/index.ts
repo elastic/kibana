@@ -12,7 +12,6 @@ import type { RetryableEsClientError } from './catch_retryable_es_client_errors'
 import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
 export {
-  BATCH_SIZE,
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
   INDEX_NUMBER_OF_SHARDS,
@@ -117,12 +116,6 @@ export type {
 export { checkForUnknownDocs } from './check_for_unknown_docs';
 
 export { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
-
-export type {
-  SearchResponse,
-  SearchForOutdatedDocumentsOptions,
-} from './search_for_outdated_documents';
-export { searchForOutdatedDocuments } from './search_for_outdated_documents';
 
 export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
 export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';

@@ -7,7 +7,7 @@
 
 import React, { FC, Suspense } from 'react';
 
-import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
+import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 import type { ExplainLogRateSpikesAppStateProps } from './components/explain_log_rate_spikes';
 import type { LogCategorizationAppStateProps } from './components/log_categorization';
 import type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
@@ -18,7 +18,7 @@ const ExplainLogRateSpikesAppStateLazy = React.lazy(
 
 const LazyWrapper: FC = ({ children }) => (
   <EuiErrorBoundary>
-    <Suspense fallback={<EuiLoadingContent lines={3} />}>{children}</Suspense>
+    <Suspense fallback={<EuiSkeletonText lines={3} />}>{children}</Suspense>
   </EuiErrorBoundary>
 );
 
