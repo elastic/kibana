@@ -69,18 +69,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(parseFloat(result[0].pValue)).to.be.lessThan(parseFloat(result[4].pValue));
     });
 
+    it('allows change point selection for detailed view', async () => {
+      await aiops.changePointDetectionPage.getTable(0).selectAllRows();
+      await aiops.changePointDetectionPage.viewSelected();
+      await aiops.changePointDetectionPage.assertDetailedView(5);
+      await aiops.changePointDetectionPage.closeFlyout();
+      // deselect
+      await aiops.changePointDetectionPage.getTable(0).selectAllRows();
+    });
+
     it('supports a quick filter actions', async () => {
       await aiops.changePointDetectionPage
         .getTable(0)
         .invokeAction(0, 'aiopsChangePointFilterForValue');
       const resultFor = await aiops.changePointDetectionPage.getTable(0).parseTable();
       expect(resultFor.length).to.eql(1);
-    });
-
-    it('allows change point selection for detailed view', async () => {
-      await aiops.changePointDetectionPage.getTable(0).selectAllRows();
-      await aiops.changePointDetectionPage.viewSelected();
-      await aiops.changePointDetectionPage.closeFlyout();
     });
 
     it('supports multiple configurations for change point detection', async () => {

@@ -17,6 +17,7 @@ export function ChangePointDetectionPageProvider(
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const elasticChart = getService('elasticChart');
 
   return {
     async navigateToIndexPatternSelection() {
@@ -96,6 +97,16 @@ export function ChangePointDetectionPageProvider(
         );
         await testSubjects.existOrFail('aiopsChangePointDetectionSelectedCharts');
       });
+    },
+
+    async assertDetailedView(expectedChartCount: number) {
+      const testSubj = 'aiopsChangePointDetectionSelectedCharts > xyVisChart';
+      await elasticChart.waitForRenderComplete(testSubj);
+      const changePointCharts = await testSubjects.findAll(testSubj);
+      expect(changePointCharts.length).to.eql(
+        expectedChartCount,
+        `Expected ${expectedChartCount} charts in the flyout (got '${changePointCharts.length}')`
+      );
     },
 
     async closeFlyout() {
