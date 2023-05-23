@@ -10,8 +10,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
 
-import { useCurrentEuiTheme } from '../../../../components/color_range_legend/use_color_range';
-
+import { useCurrentEuiTheme } from '../../../../contexts/kibana';
 import type {
   QuestionAnsweringInference,
   FormattedQuestionAnsweringResult,

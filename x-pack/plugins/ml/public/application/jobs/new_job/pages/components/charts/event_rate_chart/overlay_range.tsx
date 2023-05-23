@@ -8,8 +8,8 @@
 import React, { FC } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, LineAnnotation, AnnotationDomainType, Position } from '@elastic/charts';
+import { useCurrentEuiTheme } from '../../../../../../contexts/kibana';
 import { timeFormatter } from '../../../../../../../../common/util/date_utils';
-import { useCurrentEuiTheme } from '../../../../../../components/color_range_legend';
 
 interface Props {
   overlayKey: number;

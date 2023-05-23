@@ -6,14 +6,10 @@
  */
 
 import d3 from 'd3';
-import { useMemo } from 'react';
-import { euiLightVars as euiThemeLight, euiDarkVars as euiThemeDark } from '@kbn/ui-theme';
+import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
-
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
-import { useMlKibana } from '../../contexts/kibana';
+import { useCurrentEuiTheme } from '../../contexts/kibana';
 
 /**
  * Custom color scale factory that takes the amount of feature influencers
@@ -190,20 +186,3 @@ export const useColorRange = (
 };
 
 export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
-
-export function useCurrentKibanaTheme() {
-  const themeDefault = { darkMode: false };
-
-  const {
-    services: { theme },
-  } = useMlKibana();
-
-  const { darkMode } = useObservable(theme?.theme$ ?? of(themeDefault), themeDefault);
-
-  return darkMode;
-}
-
-export function useCurrentEuiTheme() {
-  const isDarkMode = useCurrentKibanaTheme();
-  return useMemo(() => ({ euiTheme: isDarkMode ? euiThemeDark : euiThemeLight }), [isDarkMode]);
-}

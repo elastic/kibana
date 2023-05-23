@@ -57,8 +57,7 @@ import {
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useMlApiContext } from '../../../../contexts/kibana';
-import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
+import { useCurrentEuiTheme, useMlApiContext } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';

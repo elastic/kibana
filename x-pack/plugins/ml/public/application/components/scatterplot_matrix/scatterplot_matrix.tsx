@@ -33,10 +33,9 @@ import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 
 import { getCombinedRuntimeMappings } from '../data_grid';
-import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useCurrentEuiTheme, useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
-import { useCurrentEuiTheme } from '../color_range_legend';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../vega_chart';

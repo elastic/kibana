@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCurrentEuiTheme } from '../../../../../../components/color_range_legend';
+import { useCurrentEuiTheme } from '../../../../../../contexts/kibana';
 import {
   JobCreatorType,
   isMultiMetricJobCreator,

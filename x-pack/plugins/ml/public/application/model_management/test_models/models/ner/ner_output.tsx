@@ -18,10 +18,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import {
-  useCurrentEuiTheme,
-  EuiThemeType,
-} from '../../../../components/color_range_legend/use_color_range';
+import { useCurrentEuiTheme } from '../../../../contexts/kibana';
+import { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
 import type { NerInference, NerResponse } from './ner_inference';
 import { INPUT_TYPE } from '../inference_base';
 

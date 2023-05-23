@@ -41,7 +41,7 @@ import {
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
-import { useCurrentKibanaTheme } from '../components/color_range_legend/use_color_range';
+import { useCurrentEuiTheme, useCurrentKibanaTheme } from '../contexts/kibana';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
@@ -53,7 +53,6 @@ import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { Y_AXIS_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './swimlane_annotation_container';
-import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 declare global {
   interface Window {
