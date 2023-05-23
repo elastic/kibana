@@ -9,7 +9,12 @@ import { badRequest } from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { FileAttachmentMetadataRt, FILE_ATTACHMENT_TYPE, throwErrors } from '../../common/api';
+import {
+  FileAttachmentMetadataRt,
+  FILE_ATTACHMENT_TYPE,
+  throwErrors,
+  excess,
+} from '../../common/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
 export const registerInternalAttachments = (
@@ -20,7 +25,7 @@ export const registerInternalAttachments = (
 
 const schemaValidator = (data: unknown): void => {
   const fileMetadata = pipe(
-    FileAttachmentMetadataRt.decode(data),
+    excess(FileAttachmentMetadataRt.type).decode(data),
     fold(throwErrors(badRequest), identity)
   );
 

@@ -12,7 +12,12 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import type { CasesMetricsRequest, CasesMetricsResponse } from '../../../common/api';
-import { CasesMetricsRequestRt, CasesMetricsResponseRt, throwErrors } from '../../../common/api';
+import {
+  CasesMetricsRequestRt,
+  CasesMetricsResponseRt,
+  throwErrors,
+  excess,
+} from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
@@ -26,7 +31,7 @@ export const getCasesMetrics = async (
   const { logger } = clientArgs;
 
   const queryParams = pipe(
-    CasesMetricsRequestRt.decode(params),
+    excess(CasesMetricsRequestRt).decode(params),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

@@ -17,7 +17,12 @@ import type {
   CasesBulkGetRequest,
   CaseAttributes,
 } from '../../../common/api';
-import { CasesBulkGetRequestRt, throwErrors, CasesBulkGetResponseRt } from '../../../common/api';
+import {
+  CasesBulkGetRequestRt,
+  throwErrors,
+  excess,
+  CasesBulkGetResponseRt,
+} from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
@@ -42,7 +47,7 @@ export const bulkGet = async (
 
   try {
     const request = pipe(
-      CasesBulkGetRequestRt.decode(params),
+      excess(CasesBulkGetRequestRt.type).decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

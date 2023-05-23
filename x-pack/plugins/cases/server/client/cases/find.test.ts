@@ -69,75 +69,65 @@ describe('find', () => {
       // @ts-expect-error
       await find({ ...findRequest, foo: 'bar' }, clientArgs);
 
-      expect(clientArgs.services.caseService.findCasesGroupedByID).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Object {
-              "caseOptions": Object {
-                "assignees": Array [],
-                "filter": Object {
+      expect(clientArgs.services.caseService.findCasesGroupedByID).toBeCalledTimes(1);
+      expect(clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0])
+        .toMatchInlineSnapshot(`
+        Object {
+          "caseOptions": Object {
+            "assignees": Array [],
+            "filter": Object {
+              "arguments": Array [
+                Object {
                   "arguments": Array [
                     Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "cases.attributes.status",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "0",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.status",
                     },
                     Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "cases.attributes.severity",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "0",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "0",
                     },
                   ],
-                  "function": "and",
+                  "function": "is",
                   "type": "function",
                 },
-                "owner": Array [],
-                "reporters": Array [],
-                "search": "sample_text",
-                "searchFields": Array [
-                  "title",
-                  "description",
-                ],
-                "severity": "low",
-                "sortField": "created_at",
-                "sortOrder": "desc",
-                "status": "open",
-                "tags": Array [],
-              },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.severity",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "0",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+              ],
+              "function": "and",
+              "type": "function",
             },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
+            "owner": Array [],
+            "reporters": Array [],
+            "search": "sample_text",
+            "searchFields": Array [
+              "title",
+              "description",
+            ],
+            "severity": "low",
+            "sortField": "created_at",
+            "sortOrder": "desc",
+            "status": "open",
+            "tags": Array [],
           },
-        ],
-      }
-        `);
+        }
+      `);
     });
   });
 

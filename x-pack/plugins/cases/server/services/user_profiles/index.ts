@@ -17,7 +17,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SuggestUserProfilesRequestRt, throwErrors } from '../../../common/api';
+import { SuggestUserProfilesRequestRt, throwErrors, excess } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { LicensingService } from '../licensing';
@@ -74,7 +74,7 @@ export class UserProfileService {
 
   public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
     const params = pipe(
-      SuggestUserProfilesRequestRt.decode(request.body),
+      excess(SuggestUserProfilesRequestRt).decode(request.body),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

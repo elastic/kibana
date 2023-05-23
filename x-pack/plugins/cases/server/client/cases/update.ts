@@ -37,6 +37,7 @@ import {
   CaseStatuses,
   CommentType,
   throwErrors,
+  excess,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -317,7 +318,7 @@ export const update = async (
   } = clientArgs;
 
   const query = pipe(
-    CasesPatchRequestRt.decode(cases),
+    excess(CasesPatchRequestRt.type).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

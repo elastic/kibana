@@ -266,76 +266,66 @@ describe('update', () => {
         clientArgs
       );
 
-      expect(clientArgs.services.notificationService.bulkNotifyAssignees).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).toBeCalledTimes(1);
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees.mock.calls[0][0])
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "assignees": Array [
               Object {
+                "uid": "1",
+              },
+            ],
+            "theCase": Object {
+              "attributes": Object {
                 "assignees": Array [
                   Object {
                     "uid": "1",
                   },
                 ],
-                "theCase": Object {
-                  "attributes": Object {
-                    "assignees": Array [
-                      Object {
-                        "uid": "1",
-                      },
-                    ],
-                    "closed_at": null,
-                    "closed_by": null,
-                    "connector": Object {
-                      "fields": null,
-                      "id": "none",
-                      "name": "none",
-                      "type": ".none",
-                    },
-                    "created_at": "2019-11-25T21:54:48.952Z",
-                    "created_by": Object {
-                      "email": "testemail@elastic.co",
-                      "full_name": "elastic",
-                      "username": "elastic",
-                    },
-                    "description": "This is a brand new case of a bad meanie defacing data",
-                    "duration": null,
-                    "external_service": null,
-                    "owner": "securitySolution",
-                    "settings": Object {
-                      "syncAlerts": true,
-                    },
-                    "severity": "low",
-                    "status": "open",
-                    "tags": Array [
-                      "defacement",
-                    ],
-                    "title": "Super Bad Security Issue",
-                    "updated_at": "2019-11-25T21:54:48.952Z",
-                    "updated_by": Object {
-                      "email": "testemail@elastic.co",
-                      "full_name": "elastic",
-                      "username": "elastic",
-                    },
-                  },
-                  "id": "mock-id-1",
-                  "references": Array [],
-                  "type": "cases",
-                  "updated_at": "2019-11-25T21:54:48.952Z",
-                  "version": "WzAsMV0=",
+                "closed_at": null,
+                "closed_by": null,
+                "connector": Object {
+                  "fields": null,
+                  "id": "none",
+                  "name": "none",
+                  "type": ".none",
+                },
+                "created_at": "2019-11-25T21:54:48.952Z",
+                "created_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
+                },
+                "description": "This is a brand new case of a bad meanie defacing data",
+                "duration": null,
+                "external_service": null,
+                "owner": "securitySolution",
+                "settings": Object {
+                  "syncAlerts": true,
+                },
+                "severity": "low",
+                "status": "open",
+                "tags": Array [
+                  "defacement",
+                ],
+                "title": "Super Bad Security Issue",
+                "updated_at": "2019-11-25T21:54:48.952Z",
+                "updated_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
                 },
               },
-            ],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
+              "id": "mock-id-1",
+              "references": Array [],
+              "type": "cases",
+              "updated_at": "2019-11-25T21:54:48.952Z",
+              "version": "WzAsMV0=",
+            },
           },
-        ],
-      }
-        `);
+        ]
+      `);
     });
   });
 });

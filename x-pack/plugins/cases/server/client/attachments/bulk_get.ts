@@ -17,6 +17,7 @@ import {
   throwErrors,
   BulkGetAttachmentsResponseRt,
   BulkGetAttachmentsRequestRt,
+  excess,
 } from '../../../common/api';
 import { flattenCommentSavedObjects } from '../../common/utils';
 import { createCaseError } from '../../common/error';
@@ -46,7 +47,7 @@ export async function bulkGet(
 
   try {
     const request = pipe(
-      BulkGetAttachmentsRequestRt.decode({ ids: attachmentIDs }),
+      excess(BulkGetAttachmentsRequestRt.type).decode({ ids: attachmentIDs }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

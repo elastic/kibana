@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
+import { throwErrors, CasePushRequestParamsRt, excess } from '../../../../common/api';
 import { CASE_PUSH_URL } from '../../../../common/constants';
 import type { CaseRoute } from '../types';
 import { createCaseError } from '../../../common/error';
@@ -25,7 +25,7 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
 
       const params = pipe(
-        CasePushRequestParamsRt.decode(request.params),
+        excess(CasePushRequestParamsRt.type).decode(request.params),
         fold(throwErrors(Boom.badRequest), identity)
       );
 

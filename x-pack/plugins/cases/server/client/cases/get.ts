@@ -29,6 +29,7 @@ import {
   AllReportersFindRequestRt,
   CasesByAlertIDRequestRt,
   CasesByAlertIdRt,
+  excess,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
@@ -70,7 +71,7 @@ export const getCasesByAlertID = async (
 
   try {
     const queryParams = pipe(
-      CasesByAlertIDRequestRt.decode(options),
+      excess(CasesByAlertIDRequestRt.type).decode(options),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -299,7 +300,7 @@ export async function getTags(
 
   try {
     const queryParams = pipe(
-      AllTagsFindRequestRt.decode(params),
+      excess(AllTagsFindRequestRt.type).decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -336,7 +337,7 @@ export async function getReporters(
 
   try {
     const queryParams = pipe(
-      AllReportersFindRequestRt.decode(params),
+      excess(AllReportersFindRequestRt.type).decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

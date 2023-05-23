@@ -15,6 +15,7 @@ import {
   UserActionFindRequestRt,
   throwErrors,
   UserActionFindResponseRt,
+  excess,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
@@ -40,7 +41,7 @@ export const find = async (
     const types = asArray(params.types);
 
     const queryParams = pipe(
-      UserActionFindRequestRt.decode({ ...params, types }),
+      excess(UserActionFindRequestRt.type).decode({ ...params, types }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

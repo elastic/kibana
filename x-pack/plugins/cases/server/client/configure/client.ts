@@ -32,6 +32,7 @@ import {
   ConfigurationPatchRequestRt,
   GetConfigurationFindRequestRt,
   throwErrors,
+  excess,
 } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -146,7 +147,7 @@ async function get(
   } = clientArgs;
   try {
     const queryParams = pipe(
-      GetConfigurationFindRequestRt.decode(params),
+      excess(GetConfigurationFindRequestRt.type).decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -260,6 +261,18 @@ async function update(
     );
 
     const { version, ...queryWithoutVersion } = request;
+
+    /**
+     * Excess function does not supports union or intersection types.
+     * For that reason we need to check manually for excess properties
+     * in the partial attributes.
+     *
+     * The owner attribute should not be allowed.
+     */
+    pipe(
+      excess(ConfigurationPatchRequestRt.types[0].type).decode(queryWithoutVersion),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,

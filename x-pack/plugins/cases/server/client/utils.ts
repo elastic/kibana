@@ -39,6 +39,7 @@ import {
   ExternalReferenceSORt,
   ExternalReferenceNoSORt,
   PersistableStateAttachmentRt,
+  excess,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import {
@@ -61,11 +62,17 @@ export const decodeCommentRequest = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (isCommentRequestTypeUser(comment)) {
-    pipe(ContextTypeUserRt.decode(comment), fold(throwErrors(badRequest), identity));
+    pipe(excess(ContextTypeUserRt.type).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeActions(comment)) {
-    pipe(ActionsCommentRequestRt.decode(comment), fold(throwErrors(badRequest), identity));
+    pipe(
+      excess(ActionsCommentRequestRt.type).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
   } else if (isCommentRequestTypeAlert(comment)) {
-    pipe(AlertCommentRequestRt.decode(comment), fold(throwErrors(badRequest), identity));
+    pipe(
+      excess(AlertCommentRequestRt.type).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
     /**
@@ -111,7 +118,10 @@ export const decodeCommentRequest = (
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
-    pipe(PersistableStateAttachmentRt.decode(comment), fold(throwErrors(badRequest), identity));
+    pipe(
+      excess(PersistableStateAttachmentRt.type).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
   } else {
     /**
      * This assertion ensures that TS will show an error
@@ -127,9 +137,15 @@ const decodeExternalReferenceAttachment = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
-    pipe(ExternalReferenceSORt.decode(attachment), fold(throwErrors(badRequest), identity));
+    pipe(
+      excess(ExternalReferenceSORt.type).decode(attachment),
+      fold(throwErrors(badRequest), identity)
+    );
   } else {
-    pipe(ExternalReferenceNoSORt.decode(attachment), fold(throwErrors(badRequest), identity));
+    pipe(
+      excess(ExternalReferenceNoSORt.type).decode(attachment),
+      fold(throwErrors(badRequest), identity)
+    );
   }
 
   const metadata = attachment.externalReferenceMetadata;

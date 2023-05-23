@@ -11,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import type { ConfigurationPatchRequest } from '../../../../common/api';
-import { CaseConfigureRequestParamsRt, throwErrors } from '../../../../common/api';
+import { CaseConfigureRequestParamsRt, throwErrors, excess } from '../../../../common/api';
 import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -22,7 +22,7 @@ export const patchCaseConfigureRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const params = pipe(
-        CaseConfigureRequestParamsRt.decode(request.params),
+        excess(CaseConfigureRequestParamsRt.type).decode(request.params),
         fold(throwErrors(Boom.badRequest), identity)
       );
 

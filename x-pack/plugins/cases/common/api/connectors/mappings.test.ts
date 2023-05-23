@@ -42,5 +42,17 @@ describe('Mappings', () => {
         right: defaultRequest,
       });
     });
+
+    it('removes foo:bar attributes from mappings', () => {
+      const query = ConnectorMappingsRt.decode({
+        ...defaultRequest,
+        mappings: [{ ...defaultRequest.mappings[0], foo: 'bar' }],
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, mappings: [{ ...defaultRequest.mappings[0] }] },
+      });
+    });
   });
 });

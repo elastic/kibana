@@ -12,7 +12,7 @@ describe('mappings', () => {
   describe('ConnectorMappingsPartialRt', () => {
     it('strips excess fields from the object', () => {
       const res = decodeOrThrow(ConnectorMappingsPartialRt)({ bananas: 'yes', owner: 'hi' });
-      expect(res).toMatchObject({
+      expect(res).toStrictEqual({
         owner: 'hi',
       });
     });
