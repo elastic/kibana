@@ -26,6 +26,8 @@ export const inputQuery = (query: string, options?: { parseSpecialCharSequences:
   cy.get(LIVE_QUERY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
+  cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
   cy.contains('Submit').click();
 };
 

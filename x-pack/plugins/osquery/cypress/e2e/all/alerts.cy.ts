@@ -404,7 +404,9 @@ describe('Alert Event Details', () => {
       cy.getBySel('expand-event').first().click({ force: true });
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
-      cy.contains('Run a set of queries in a pack').click();
+      // TODO change wait - button is not interactive when we click it
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.contains('Run a set of queries in a pack').wait(500).click();
       cy.getBySel('select-live-pack').within(() => {
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
       });
