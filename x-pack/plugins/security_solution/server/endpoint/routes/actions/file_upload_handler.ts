@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { createFile, deleteFile, setFileActionId } from '../../services';
 import type {
   ResponseActionUploadParameters,
   ResponseActionUploadOutputContent,
@@ -66,11 +65,10 @@ export const getActionFileUploadHandler = (
   SecuritySolutionRequestHandlerContext
 > => {
   const logger = endpointContext.logFactory.get('uploadAction');
-  const maxFileBytes = endpointContext.serverConfig.maxUploadResponseActionFileBytes;
 
   return async (context, req, res) => {
+    const fleetFiles = await endpointContext.service.getFleetFilesClient('to-host');
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const fileStream = req.body.file as HapiReadableStream;
     const { file: _, parameters: userParams, ...actionPayload } = req.body;
     const uploadParameters: ResponseActionUploadParameters = {
@@ -82,18 +80,12 @@ export const getActionFileUploadHandler = (
     };
 
     try {
-      const createdFile = await createFile({
-        esClient,
-        logger,
-        fileStream,
-        agents: actionPayload.endpoint_ids,
-        maxFileBytes,
-      });
+      const createdFile = await fleetFiles.create(fileStream, actionPayload.endpoint_ids);
 
-      uploadParameters.file_id = createdFile.file.id;
-      uploadParameters.file_name = createdFile.file.name;
-      uploadParameters.file_sha256 = createdFile.file.hash?.sha256;
-      uploadParameters.file_size = createdFile.file.size;
+      uploadParameters.file_id = createdFile.id;
+      uploadParameters.file_name = createdFile.name;
+      uploadParameters.file_sha256 = createdFile.sha256;
+      uploadParameters.file_size = createdFile.size;
     } catch (err) {
       return errorHandler(logger, res, err);
     }
@@ -117,7 +109,7 @@ export const getActionFileUploadHandler = (
       // already been created and potentially dispatched to Endpoint. Action ID is not
       // needed by the Endpoint or fleet-server's API, so no need to fail here
       try {
-        await setFileActionId(esClient, logger, data);
+        await fleetFiles.update(uploadParameters.file_id, { actionId: data.id });
       } catch (e) {
         logger.warn(`Attempt to update File meta with Action ID failed: ${e.message}`, e);
       }
@@ -132,7 +124,7 @@ export const getActionFileUploadHandler = (
       if (uploadParameters.file_id) {
         // Try to delete the created file since creating the action threw an error
         try {
-          await deleteFile(esClient, logger, uploadParameters.file_id);
+          await fleetFiles.delete(uploadParameters.file_id);
         } catch (e) {
           logger.error(
             `Attempt to clean up file (after action creation was unsuccessful) failed; ${e.message}`,
