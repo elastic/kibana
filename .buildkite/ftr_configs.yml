@@ -39,6 +39,7 @@ disabled:
   - x-pack/test/security_solution_cypress/ccs_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
   - x-pack/test/security_solution_cypress/cli_config_parallel.ts
+  - x-pack/test/security_solution_cypress/cli_config_investigations_parallel.ts
   - x-pack/test/security_solution_cypress/config.firefox.ts
   - x-pack/test/security_solution_cypress/config.ts
   - x-pack/test/security_solution_cypress/response_ops_cli_config.ts
