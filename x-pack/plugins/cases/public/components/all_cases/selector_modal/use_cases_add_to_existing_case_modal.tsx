@@ -79,7 +79,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           const content = props.noAttachmentsToaster?.content;
           casesToasts.showInfoToast(title, content);
 
-          // return;
+          return;
         }
 
         startTransaction({ appId, attachments });

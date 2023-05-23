@@ -29,7 +29,6 @@ const registerLensActions = ({
   storage,
 }: CaseUIActionProps) => {
   const addToNewCaseAction = createAddToNewCaseLensAction({
-    // order: 42,
     core,
     plugins,
     caseContextProps,
@@ -39,7 +38,6 @@ const registerLensActions = ({
   plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
 
   const addToExistingCaseAction = createAddToExistingCaseLensAction({
-    // order: 41,
     core,
     plugins,
     caseContextProps,
