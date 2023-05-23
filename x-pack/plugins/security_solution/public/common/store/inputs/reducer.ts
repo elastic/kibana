@@ -45,7 +45,7 @@ import type { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
 
-const { socTrends: socTrendsUnused, ...timeRangeSettings } = getTimeRangeSettings(false);
+const timeRangeSettings = getTimeRangeSettings(false);
 
 export const initialInputsState: InputsState = {
   global: {

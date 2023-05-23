@@ -51,13 +51,13 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
   );
   const markdownParseResult = useMemo(() => {
     try {
-      throw new Error('error with the markdown, line 5 column 4');
       processor.processSync(children);
       return null;
     } catch (err) {
-      return String(err);
+      return String(err.message);
     }
   }, [children, processor]);
+
   return (
     <>
       {platinumPluginDetected && (
