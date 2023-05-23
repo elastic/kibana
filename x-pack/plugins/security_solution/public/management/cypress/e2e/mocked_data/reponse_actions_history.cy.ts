@@ -14,7 +14,7 @@ describe('Response actions history page', () => {
   // let actionData: ReturnTypeFromChainable<typeof indexActionResponses>;
 
   before(() => {
-    indexEndpointHosts().then((indexEndpoints) => {
+    indexEndpointHosts({ numResponseActions: 11 }).then((indexEndpoints) => {
       endpointData = indexEndpoints;
     });
   });
