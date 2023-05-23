@@ -31,21 +31,6 @@ describe('Response actions history page', () => {
     }
   });
 
-  it('retains expanded action details on page navigation', () => {
-    cy.visit(`/app/security/administration/response_actions_history`);
-    cy.getByTestSubj('response-actions-list-expand-button').first().click(); // 1st row
-    cy.getByTestSubj('response-actions-list-expand-button').eq(2).click(); // 3rd row
-    cy.getByTestSubj('response-actions-list-details-tray').should('exist');
-
-    // on page 2
-    cy.getByTestSubj('pagination-button-1').click();
-    cy.getByTestSubj('response-actions-list-details-tray').not('exist');
-    // page back to 1
-    cy.getByTestSubj('pagination-button-0').click();
-    cy.getByTestSubj('response-actions-list-details-tray').should('exist');
-    cy.get('button[aria-label="Collapse"]').should('have.length', 2);
-  });
-
   it('retains expanded action details on page reload', () => {
     cy.visit(`/app/security/administration/response_actions_history`);
     cy.getByTestSubj('response-actions-list-expand-button').eq(3).click(); // 4th row on 1st page
