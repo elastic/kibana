@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AssetReference, BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
-import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
+import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
+import type { Rule } from '../../../public/detection_engine/rule_management/logic/types';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   ELASTIC_RULES_BTN,
