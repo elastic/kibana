@@ -33,7 +33,7 @@ import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { convertFieldSpecToFieldOption, useTriggerUiActionServices } from '../util';
-import { TextBasedLanguagesEditor } from '@kbn/unified-search-plugin/public';
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { AggregateQuery } from '@kbn/es-query';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -215,7 +215,7 @@ export const EsqlQueryExpression: React.FC<
             </h5>
           </EuiTitle>
           {JSON.stringify(esqlQuery)}
-          <TextBasedLanguagesEditor
+          <TextBasedLangEditor
             query={esqlQuery}
             onTextLangQueryChange={(query: AggregateQuery) => {
               setEsqlQuery(query);
