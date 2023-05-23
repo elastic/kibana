@@ -21,7 +21,7 @@ interface RawAggregatedDataResponse {
   };
 }
 
-const req: IEsSearchRequest = {
+const searchRequest: IEsSearchRequest = {
   params: {
     body: {
       aggs: {
@@ -65,7 +65,8 @@ export const useFetchUniqueHosts = (): UseUniqueValuesValue => {
 
   const { data, isLoading, isError } = useQuery(
     [QUERY_KEY],
-    () => createFetchAggregatedData<RawAggregatedDataResponse>(searchService, req, AGG_KEY),
+    () =>
+      createFetchAggregatedData<RawAggregatedDataResponse>(searchService, searchRequest, AGG_KEY),
     {
       select: (res) => res.aggregations[AGG_KEY].buckets.length,
       keepPreviousData: true,

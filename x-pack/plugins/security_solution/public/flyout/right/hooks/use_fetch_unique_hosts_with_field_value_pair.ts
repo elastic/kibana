@@ -6,8 +6,8 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import type { IEsSearchRequest } from '@kbn/data-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import { createFetchAggregatedData } from '../utils/fetch_aggregated_data';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsSelectors } from '../../../common/store';
@@ -76,6 +76,35 @@ export const useFetchUniqueHostsWithFieldPair = ({
   const globalTime = useGlobalTime();
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
 
+  const searchRequest = buildSearchRequest(field, values, from, to);
+
+  const { data, isLoading, isError } = useQuery(
+    [QUERY_KEY, field, values],
+    () =>
+      createFetchAggregatedData<RawAggregatedDataResponse>(searchService, searchRequest, AGG_KEY),
+    {
+      select: (res) => res.aggregations[AGG_KEY].buckets.length,
+      keepPreviousData: true,
+    }
+  );
+
+  return {
+    loading: isLoading,
+    error: isError,
+    count: data || 0,
+  };
+};
+
+/**
+ * Build the search request for the field/values pair, for a date range from/to.
+ * The request contains aggregation by host.name field.
+ */
+const buildSearchRequest = (
+  field: string,
+  values: string[],
+  from: string,
+  to: string
+): IEsSearchRequest => {
   const query = buildEsQuery(
     undefined,
     [],
@@ -104,7 +133,8 @@ export const useFetchUniqueHostsWithFieldPair = ({
       },
     ]
   );
-  const req: IEsSearchRequest = {
+
+  return {
     params: {
       body: {
         query,
@@ -119,20 +149,5 @@ export const useFetchUniqueHostsWithFieldPair = ({
         size: 0,
       },
     },
-  };
-
-  const { data, isLoading, isError } = useQuery(
-    [QUERY_KEY, field, values],
-    () => createFetchAggregatedData<RawAggregatedDataResponse>(searchService, req, AGG_KEY),
-    {
-      select: (res) => res.aggregations[AGG_KEY].buckets.length,
-      keepPreviousData: true,
-    }
-  );
-
-  return {
-    loading: isLoading,
-    error: isError,
-    count: data || 0,
   };
 };
