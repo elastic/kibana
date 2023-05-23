@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { VersionedTransformer } from '../../document_migrator';
+export const convertModelVersionBackwardConversionSchemaMock = jest.fn();
 
-export const createDocumentMigrator = (): jest.Mocked<VersionedTransformer> => {
+jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-base-server-internal');
   return {
-    migrate: jest.fn().mockImplementation((doc: unknown) => doc),
-    migrateAndConvert: jest.fn().mockImplementation((doc: unknown) => [doc]),
+    ...actual,
+    convertModelVersionBackwardConversionSchema: convertModelVersionBackwardConversionSchemaMock,
   };
-};
+});
