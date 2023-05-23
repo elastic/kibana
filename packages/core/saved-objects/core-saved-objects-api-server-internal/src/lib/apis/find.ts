@@ -13,6 +13,7 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObjectsRawDoc,
   CheckAuthorizationResult,
+  type SavedObject,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -48,7 +49,6 @@ export const performFind = async <T = unknown, A = unknown>(
     allowedTypes: rawAllowedTypes,
     mappings,
     client,
-    serializer,
     migrator,
     extensions = {},
   }: ApiExecutionContext
@@ -229,22 +229,32 @@ export const performFind = async <T = unknown, A = unknown>(
     return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
   }
 
-  const result = {
-    ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
-    page,
-    per_page: perPage,
-    total: body.hits.total,
-    saved_objects: body.hits.hits.map(
-      (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
-        ...serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
-          migrationVersionCompatibility,
-        }),
-        score: hit._score!,
-        sort: hit.sort,
-      })
-    ),
-    pit_id: body.pit_id,
-  } as SavedObjectsFindResponse<T, A>;
+  let result: SavedObjectsFindResponse<T, A>;
+  try {
+    result = {
+      ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
+      page,
+      per_page: perPage,
+      total: body.hits.total,
+      saved_objects: body.hits.hits.map(
+        (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
+          ...(migrator.migrateDocument(
+            serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
+              migrationVersionCompatibility,
+            })
+          ) as SavedObject),
+          score: hit._score!,
+          sort: hit.sort,
+        })
+      ),
+      pit_id: body.pit_id,
+    } as typeof result;
+  } catch (error) {
+    throw SavedObjectsErrorHelpers.decorateGeneralError(
+      error,
+      'Failed to migrate document to the latest version.'
+    );
+  }
 
   if (disableExtensions) {
     return result;
