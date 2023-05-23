@@ -25,6 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
       const resp = await supertest
         .post(`/internal/file_upload/index_exists`)
         .set('kbn-xsrf', 'kibana')
+        .set('version', '1')
         .send({
           index: 'logstash-2015.09.22',
         })
@@ -37,6 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
       const resp = await supertest
         .post(`/internal/file_upload/index_exists`)
         .set('kbn-xsrf', 'kibana')
+        .set('version', '1')
         .send({
           index: 'myNewIndex',
         })
