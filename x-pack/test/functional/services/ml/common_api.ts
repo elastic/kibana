@@ -9,7 +9,7 @@ import { ProvidedType } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const COMMON_REQUEST_HEADERS = {
+export const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
