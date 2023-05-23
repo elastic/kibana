@@ -91,16 +91,7 @@ export class TimelinePageObject extends FtrService {
   async clickRefresh(): Promise<void> {
     await this.ensureTimelineIsOpen();
     await this.testSubjects.findService.clickByCssSelector(TIMELINE_CSS_SELECTOR.refreshButton);
-
-    await this.retry.waitFor(
-      'Timeline refresh button to be enabled',
-      async (): Promise<boolean> => {
-        const refreshButton = await this.testSubjects.findService.byCssSelector(
-          TIMELINE_CSS_SELECTOR.refreshButton
-        );
-        return (await refreshButton.isDisplayed()) && (await refreshButton.isEnabled());
-      }
-    );
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   /**
