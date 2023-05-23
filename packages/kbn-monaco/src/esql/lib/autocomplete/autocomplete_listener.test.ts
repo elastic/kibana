@@ -144,6 +144,7 @@ describe('autocomplete_listener', () => {
       'to_string',
       'date_format',
       'date_trunc',
+      'auto_bucket',
       'is_finite',
       'is_infinite',
       'case',
