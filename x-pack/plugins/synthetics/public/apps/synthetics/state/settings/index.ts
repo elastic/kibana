@@ -17,6 +17,11 @@ import {
 import { ActionConnector } from './api';
 import { syncGlobalParamsAction } from './actions';
 
+export interface LocationMonitor {
+  id: string;
+  count: number;
+}
+
 export interface DynamicSettingsState {
   settings?: DynamicSettings;
   loadError?: IHttpSerializedFetchError;
@@ -24,7 +29,7 @@ export interface DynamicSettingsState {
   loading: boolean;
   connectors?: ActionConnector[];
   connectorsLoading?: boolean;
-  locationMonitors: Array<{ id: string; count: number }>;
+  locationMonitors: LocationMonitor[];
   locationMonitorsLoading?: boolean;
 }
 
