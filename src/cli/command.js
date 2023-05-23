@@ -110,7 +110,7 @@ Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn
     const ret = fn.apply(this, args);
     if (ret && typeof ret.then === 'function') {
       ret.then(null, function (e) {
-        console.error('FATAL CLI ERROR', e.stack);
+        console.log('FATAL CLI ERROR', e.stack);
         process.exit(1);
       });
     }
