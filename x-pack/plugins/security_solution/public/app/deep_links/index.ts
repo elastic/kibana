@@ -78,8 +78,9 @@ import {
   USERS_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { appLinks$, hasCapabilities } from '../../common/links';
+import { appLinks$ } from '../../common/links';
 import type { AppLinkItems } from '../../common/links/types';
+import { hasCapabilities } from '../../common/lib/capabilities';
 
 export const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
@@ -591,7 +592,7 @@ export function hasFeaturesCapability(
     return true;
   }
 
-  return hasCapabilities(features, capabilities);
+  return hasCapabilities(capabilities, features);
 }
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {
