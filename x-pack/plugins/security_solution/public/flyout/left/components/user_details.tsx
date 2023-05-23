@@ -183,7 +183,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
-            <EuiText>{`Hosts: ${totalCount}`}</EuiText>
+            <EuiText>{`${i18n.RELATED_HOSTS_TITLE}: ${totalCount}`}</EuiText>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -11,6 +11,7 @@ import type { InspectResponse } from '../../../../types';
 import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/security_solution/related_entities';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import { useSearchStrategy } from '../../use_search_strategy';
+import { FAIL_RELATED_USERS } from './translations';
 
 export interface UseHostRelatedUsersResult {
   inspect: InspectResponse;
@@ -45,7 +46,7 @@ export const useHostRelatedUsers = ({
       totalCount: 0,
       relatedUsers: [],
     },
-    errorMessage: 'error',
+    errorMessage: FAIL_RELATED_USERS,
     abort: skip,
   });
 
