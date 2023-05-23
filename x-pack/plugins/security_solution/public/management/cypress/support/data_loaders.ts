@@ -115,7 +115,14 @@ export const dataLoaders = (
 
     indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
       const { kbnClient, esClient } = await stackServicesPromise;
-      const { count: numHosts, version, os, isolation, withResponseActions } = options;
+      const {
+        count: numHosts,
+        version,
+        os,
+        isolation,
+        withResponseActions,
+        numResponseActions,
+      } = options;
 
       return cyLoadEndpointDataHandler(esClient, kbnClient, {
         numHosts,
@@ -123,6 +130,7 @@ export const dataLoaders = (
         os,
         isolation,
         withResponseActions,
+        numResponseActions,
       });
     },
 
