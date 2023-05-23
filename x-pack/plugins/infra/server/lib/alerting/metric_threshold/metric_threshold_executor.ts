@@ -110,7 +110,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       executionId,
     });
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid } = services;
+    const {
+      alertWithLifecycle,
+      savedObjectsClient,
+      getAlertUuid,
+      getAlertStartedDate,
+      getAlertByAlertUuid,
+    } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (
       id,
@@ -150,11 +156,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
+        const indexedStartedAt =
+          getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
 
         alert.scheduleActions(actionGroupId, {
           alertDetailsUrl: await getAlertUrl(
             alertUuid,
             spaceId,
+            indexedStartedAt,
             libs.alertsLocator,
             libs.basePath.publicBaseUrl
           ),
@@ -314,12 +323,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           evaluationValues
         );
         const alertUuid = getAlertUuid(group);
+        const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
           alertDetailsUrl: await getAlertUrl(
             alertUuid,
             spaceId,
+            indexedStartedAt,
             libs.alertsLocator,
             libs.basePath.publicBaseUrl
           ),
@@ -367,6 +378,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
+      const timestamp = startedAt.toISOString();
+      const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
@@ -376,6 +389,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         alertDetailsUrl: await getAlertUrl(
           alertUuid,
           spaceId,
+          indexedStartedAt,
           libs.alertsLocator,
           libs.basePath.publicBaseUrl
         ),
@@ -388,7 +402,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           }
           return c.metric;
         }),
-        timestamp: startedAt.toISOString(),
+        timestamp,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
 

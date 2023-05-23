@@ -184,6 +184,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
             alertDetailsUrl: await getAlertUrl(
               alertUuid,
               spaceId,
+              indexedStartedAt,
               libs.alertsLocator,
               libs.basePath.publicBaseUrl
             ),
@@ -1035,7 +1036,13 @@ const processRecoveredAlerts = async ({
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
-      alertDetailsUrl: await getAlertUrl(alertUuid, spaceId, alertsLocator, basePath.publicBaseUrl),
+      alertDetailsUrl: await getAlertUrl(
+        alertUuid,
+        spaceId,
+        indexedStartedAt,
+        alertsLocator,
+        basePath.publicBaseUrl
+      ),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),

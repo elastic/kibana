@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { isEmpty, isError } from 'lodash';
@@ -145,28 +146,35 @@ export const getViewInInventoryAppUrl = ({
 export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
   addSpaceIdToPath(basePath.publicBaseUrl, spaceId, LINK_TO_METRICS_EXPLORER);
 
-export const getAlertDetailsUrl = (
-  basePath: IBasePath,
-  spaceId: string,
-  alertUuid: string | null
-) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
-
 export const getAlertUrl = async (
   alertUuid: string | null,
   spaceId: string,
+  startedAt: string | null,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>,
   publicBaseUrl?: string
 ) => {
   if (!publicBaseUrl || !alertsLocator || !alertUuid) return '';
+
+  const rangeFrom =
+    startedAt && moment(startedAt).isBefore(moment().subtract(15, 'minute').toISOString())
+      ? moment(startedAt).subtract('5', 'minute').toISOString()
+      : undefined;
 
   return (
     await alertsLocator.getLocation({
       baseUrl: publicBaseUrl,
       spaceId,
       kuery: `kibana.alert.uuid: "${alertUuid}"`,
+      rangeFrom,
     })
   ).path;
 };
+
+export const getAlertDetailsUrl = (
+  basePath: IBasePath,
+  spaceId: string,
+  alertUuid: string | null
+) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;
