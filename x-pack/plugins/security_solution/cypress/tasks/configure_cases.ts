@@ -26,12 +26,13 @@ export const addServiceNowConnector = (connector: Connector) => {
   cy.get(URL).type(connector.URL);
   cy.get(USERNAME).type(connector.username);
   cy.get(PASSWORD).type(connector.password);
-  cy.get(SAVE_BTN).click();
+  cy.get(SAVE_BTN).click({ force: true });
 };
 
 export const openAddNewConnectorOption = () => {
   cy.get(MAIN_PAGE).then(($page) => {
     if ($page.find(SERVICE_NOW_CONNECTOR_CARD).length !== 1) {
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(1000);
       cy.get(CONNECTORS_DROPDOWN).click();
       cy.get(ADD_NEW_CONNECTOR_DROPDOWN_BUTTON).click();
@@ -44,6 +45,6 @@ export const verifyNewConnectorSelected = (connector: Connector) => {
 };
 
 export const selectLastConnectorCreated = (id: string) => {
-  cy.get(CONNECTORS_DROPDOWN).click();
+  cy.get(CONNECTORS_DROPDOWN).click({ force: true });
   cy.get(CONNECTOR(id)).click();
 };

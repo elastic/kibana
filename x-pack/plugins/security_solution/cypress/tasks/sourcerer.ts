@@ -35,7 +35,8 @@ const openTimelineSourcerer = () => {
   cy.get(SOURCERER.wrapperTimeline).should('be.visible');
 };
 export const openAdvancedSettings = () => {
-  cy.get(SOURCERER.advancedSettings).should('be.visible').click();
+  cy.get(SOURCERER.advancedSettings).should('be.visible');
+  cy.get(SOURCERER.advancedSettings).click();
 };
 
 const clickOutOfSelector = () => {

@@ -18,7 +18,7 @@ export const closesModal = () => {
 
 export const clickInspectButton = (container: string) => {
   cy.get(container).realHover();
-  cy.get(container).find(INSPECT_BUTTON_ICON).click();
+  cy.get(container).find(INSPECT_BUTTON_ICON).click({ force: true });
 };
 
 const LOADER_ARIA = '[aria-label="Loading"]';

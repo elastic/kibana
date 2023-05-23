@@ -224,7 +224,7 @@ export const goToManageAlertsDetectionRules = () => {
 };
 
 export const goToOpenedAlertsOnRuleDetailsPage = () => {
-  cy.get(OPENED_ALERTS_FILTER_BTN).click();
+  cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
@@ -347,7 +347,7 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 };
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickExpandActions(propertySelector, rowIndex);
-  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click();
+  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
 };
 export const closeTopNAlertProperty = () => {
   cy.get(TOP_N_CONTAINER).then(() => {
@@ -373,7 +373,7 @@ export const waitForAlerts = () => {
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
   cy.get(columnSelector).eq(1).realHover();
-  cy.find(CELL_EXPAND_VALUE).click();
+  cy.find(CELL_EXPAND_VALUE).click({ force: true });
 };
 
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable cypress/unsafe-to-chain-command */
+
 import {
   CASE_ACTION_WRAPPER,
   CASE_ELLIPSE_BUTTON,
@@ -54,31 +56,28 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 const createNewCaseFromCases = () => {
   navigateToCasesPage();
-  cy.get(CREATE_CASE_BUTTON).click();
-  cy.get(NEW_CASE_NAME_INPUT).should('be.visible').click();
-  cy.get(NEW_CASE_NAME_INPUT).should('be.visible').type('case');
-  cy.get(NEW_CASE_DESCRIPTION_INPUT).should('be.visible').click();
-  cy.get(NEW_CASE_DESCRIPTION_INPUT).should('be.visible').type('case description');
-  cy.get(NEW_CASE_CREATE_BUTTON).click();
+  cy.get(CREATE_CASE_BUTTON).should('be.visible').click();
+  cy.get(NEW_CASE_NAME_INPUT).should('be.visible').click().type('case');
+  cy.get(NEW_CASE_DESCRIPTION_INPUT).should('be.visible').click().type('case description');
+  cy.get(NEW_CASE_CREATE_BUTTON).should('be.visible').click();
 };
 
 const deleteCase = () => {
-  cy.get(CASE_ACTION_WRAPPER).find(CASE_ELLIPSE_BUTTON).click();
-  cy.get(CASE_ELLIPSE_DELETE_CASE_OPTION).click();
-  cy.get(CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON).click();
+  cy.get(CASE_ACTION_WRAPPER).find(CASE_ELLIPSE_BUTTON).should('be.visible').click();
+  cy.get(CASE_ELLIPSE_DELETE_CASE_OPTION).should('be.visible').click();
+  cy.get(CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON).should('be.visible').click();
 };
 
+// Skipping these for now as the feature is protected behind a feature flag set to false by default
+// To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
 describe.skip(
   'Alert details expandable flyout right panel footer',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { testIsolation: false },
   () => {
     before(() => {
       cleanKibana();
-      createRule(getNewRule());
-    });
-
-    beforeEach(() => {
       login();
+      createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
@@ -86,19 +85,15 @@ describe.skip(
 
     it('should display footer take action button on all tabs', () => {
       openOverviewTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
-
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView().should('be.visible');
       cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
       openTableTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView().should('be.visible');
       cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
       openJsonTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView().should('be.visible');
       cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
       // reset state for next test
@@ -107,7 +102,7 @@ describe.skip(
 
     // TODO this will change when add to existing case is improved
     //  https://github.com/elastic/security-team/issues/6298
-    it.skip('should add to existing case', () => {
+    it('should add to existing case', () => {
       createNewCaseFromCases();
 
       navigateToAlertsPage();

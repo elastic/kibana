@@ -64,12 +64,11 @@ describe('Investigate in timeline', () => {
 
       // Click on the last button that lets us investigate in timeline.
       // We expect this to be the `process.args` row.
-      const investigateButton = cy
-        .get(ALERT_FLYOUT)
+      cy.get(ALERT_FLYOUT)
         .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
-        .last();
-      investigateButton.should('have.text', alertCount);
-      investigateButton.click();
+        .last()
+        .should('have.text', alertCount)
+        .click();
 
       // Make sure a new timeline is created and opened
       cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');

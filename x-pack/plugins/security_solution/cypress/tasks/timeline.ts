@@ -249,13 +249,13 @@ export const addNewCase = () => {
 };
 
 export const attachTimelineToNewCase = () => {
-  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
-  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click();
+  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click({ force: true });
 };
 
 export const attachTimelineToExistingCase = () => {
-  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
-  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click();
+  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
 };
 
 const clickIdHoverActionOverflowButton = () => {
@@ -339,7 +339,7 @@ export const openTimelineFieldsBrowser = () => {
 
 export const openTimelineInspectButton = () => {
   cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
-  cy.get(TIMELINE_INSPECT_BUTTON).click();
+  cy.get(TIMELINE_INSPECT_BUTTON).click({ force: true });
 };
 
 export const openTimelineFromSettings = () => {

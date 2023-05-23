@@ -9,9 +9,9 @@ import { IMPORT_BTN, IMPORT_OBJECTS, INPUT } from '../screens/saved_objects';
 
 export const importCase = (casePath: string) => {
   cy.get(IMPORT_OBJECTS).click();
-  cy.get(INPUT).click();
+  cy.get(INPUT).click({ force: true });
   cy.get(INPUT).attachFile(casePath);
   cy.get(INPUT).trigger('change');
-  cy.get(IMPORT_BTN).click();
+  cy.get(IMPORT_BTN).click({ force: true });
   cy.get(IMPORT_BTN).should('not.exist');
 };

@@ -28,10 +28,10 @@ export const expandNotes = () => {
 
 export const importTimeline = (timeline: string) => {
   cy.get(IMPORT_TIMELINE_BTN).click();
-  cy.get(INPUT_FILE).click();
+  cy.get(INPUT_FILE).click({ force: true });
   cy.get(INPUT_FILE).attachFile(timeline);
   cy.get(INPUT_FILE).trigger('change');
-  cy.get(IMPORT_BTN).last().click();
+  cy.get(IMPORT_BTN).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };
 

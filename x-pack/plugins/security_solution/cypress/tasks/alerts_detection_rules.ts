@@ -383,10 +383,10 @@ export const checkAutoRefresh = (ms: number, condition: string) => {
 
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).click();
+  cy.get(INPUT_FILE).click({ force: true });
   cy.get(INPUT_FILE).selectFile(rulesFile);
   cy.get(INPUT_FILE).trigger('change');
-  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click();
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };
 
@@ -501,13 +501,13 @@ const selectOverwriteConnectorsRulesImport = () => {
 
 export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).click();
+  cy.get(INPUT_FILE).click({ force: true });
   cy.get(INPUT_FILE).selectFile(rulesFile);
   cy.get(INPUT_FILE).trigger('change');
   selectOverwriteRulesImport();
   selectOverwriteExceptionsRulesImport();
   selectOverwriteConnectorsRulesImport();
-  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click();
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };
 

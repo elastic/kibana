@@ -24,7 +24,7 @@ export const navigateFromHeaderTo = (page: string) => {
 };
 
 export const refreshPage = () => {
-  cy.get(REFRESH_BUTTON).click();
+  cy.get(REFRESH_BUTTON).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
 };
 

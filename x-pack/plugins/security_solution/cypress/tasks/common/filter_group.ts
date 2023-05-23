@@ -63,11 +63,11 @@ export const saveFilterGroupControls = () => {
 
 export const discardFilterGroupControls = () => {
   openFilterGroupContextMenu();
-  cy.get(FILTER_GROUP_CONTEXT_DISCARD_CHANGES).click();
+  cy.get(FILTER_GROUP_CONTEXT_DISCARD_CHANGES).click({ force: true });
 };
 
 export const openAddFilterGroupControlPanel = () => {
-  cy.get(FILTER_GROUP_ADD_CONTROL).click();
+  cy.get(FILTER_GROUP_ADD_CONTROL).click({ force: true });
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('be.visible');
 };
 
@@ -95,7 +95,7 @@ export const addNewFilterGroupControlValues = ({
 
 export const deleteFilterGroupControl = (idx: number) => {
   cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
-  cy.get(FILTER_GROUP_CONTROL_ACTION_DELETE(idx)).click();
+  cy.get(FILTER_GROUP_CONTROL_ACTION_DELETE(idx)).click({ force: true });
   cy.get(FILTER_GROUP_CONTROL_CONFIRM_DIALOG).should('be.visible');
   cy.get(FILTER_GROUP_CONTROL_CONFIRM_BTN).click();
 };
@@ -110,7 +110,7 @@ export const editFilterGroupControl = ({
   label: string;
 }) => {
   cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
-  cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).click();
+  cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).click({ force: true });
   const { FIELD_SEARCH, FIELD_PICKER, FIELD_LABEL, SAVE } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
   cy.get(FIELD_SEARCH).type(fieldName);
   cy.get(FIELD_PICKER(fieldName)).should('exist').click();

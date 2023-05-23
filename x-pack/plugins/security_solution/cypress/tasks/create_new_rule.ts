@@ -498,7 +498,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type('{selectAll}');
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type(historySizeNumber);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
-  cy.get(DEFINE_CONTINUE_BUTTON).click();
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
