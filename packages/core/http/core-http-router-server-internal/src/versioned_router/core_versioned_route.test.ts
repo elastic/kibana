@@ -9,12 +9,18 @@
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { schema } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
-import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core-http-server';
+import type {
+  IRouter,
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteConfig,
+} from '@kbn/core-http-server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 import { passThroughValidation } from './core_versioned_route';
 import { CoreKibanaRequest } from '../request';
+import { Method } from './types';
 
 const createRequest = (
   {
@@ -203,5 +209,33 @@ describe('Versioned route', () => {
     expect(validatedParams).toBe(true);
     expect(validatedQuery).toBe(true);
     expect(validatedOutputBody).toBe(true);
+  });
+  it('passes through the expected values to the IRouter registrar', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const opts: Parameters<typeof versionedRouter.post>[0] = {
+      path: '/test/{id}',
+      access: 'internal',
+      options: {
+        authRequired: true,
+        tags: ['access:test'],
+        timeout: { payload: 60_000, idleSocket: 10_000 },
+        xsrfRequired: false,
+      },
+    };
+
+    versionedRouter.post(opts);
+    expect(router.post).toHaveBeenCalledTimes(1);
+    const { access, options } = opts;
+
+    const expectedRouteConfig: RouteConfig<unknown, unknown, unknown, Method> = {
+      path: opts.path,
+      options: { access, ...options },
+      validate: passThroughValidation,
+    };
+
+    expect(router.post).toHaveBeenCalledWith(
+      expect.objectContaining(expectedRouteConfig),
+      expect.any(Function)
+    );
   });
 });
