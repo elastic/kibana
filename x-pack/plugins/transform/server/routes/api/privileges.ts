@@ -26,7 +26,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
     .addVersion(
       {
         version: '1',
-        validate: {},
+        validate: false,
       },
       license.guardApiRoute(async (ctx, req, res) => {
         const privilegesResult: Privileges = {
