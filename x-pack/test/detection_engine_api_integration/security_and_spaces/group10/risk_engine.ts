@@ -13,8 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
-  deleteAllSignals,
   createRule,
   waitForSignalsToBePresent,
   waitForRuleSuccess,
@@ -124,14 +124,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
-        await deleteAllSignals(es);
+        await deleteAllAlerts(supertest, log, es);
 
         await deleteAllRules(supertest, log);
         await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteAllSignals(es);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
