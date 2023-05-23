@@ -43,9 +43,9 @@ aborted: false
 */`,
   configureClient: `const { Client } = require('@elastic/elasticsearch');
 const client = Client({
-node: 'https://project-name-abc123.elastic.cloud',
+node: 'https://my-deployment-url',
 auth: {
-    apiKey: 'VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw=='
+    apiKey: 'your_api_key'
 }
 });`,
   docLink: docLinks.jsClient,
