@@ -88,6 +88,13 @@ const navItems: ChromeNavigationNodeViewModel[] = [
         }),
         href: '/app/visualize',
       },
+      {
+        id: 'explore_maps',
+        title: i18n.translate('xpack.serverlessSearch.nav.explore.maps', {
+          defaultMessage: 'Maps',
+        }),
+        href: '/app/maps',
+      },
     ],
   },
   {
