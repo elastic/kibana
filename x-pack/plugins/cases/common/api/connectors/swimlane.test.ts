@@ -11,7 +11,7 @@ describe('SwimlaneFieldsRT', () => {
   it('has expected attributes in request', () => {
     const query = SwimlaneFieldsRT.decode({ caseId: 'basic-case-id' });
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: { caseId: 'basic-case-id' },
     });
@@ -20,7 +20,7 @@ describe('SwimlaneFieldsRT', () => {
   it('removes foo:bar attributes from request', () => {
     const query = SwimlaneFieldsRT.decode({ caseId: 'basic-case-id', foo: 'bar' });
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: { caseId: 'basic-case-id' },
     });

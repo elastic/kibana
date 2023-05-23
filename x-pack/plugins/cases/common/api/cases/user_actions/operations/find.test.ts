@@ -21,7 +21,7 @@ describe('Find UserActions', () => {
     it('has expected attributes in request', () => {
       const query = UserActionFindRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           ...defaultRequest,
@@ -34,7 +34,7 @@ describe('Find UserActions', () => {
     it('removes foo:bar attributes from request', () => {
       const query = UserActionFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           ...defaultRequest,
@@ -78,7 +78,7 @@ describe('Find UserActions', () => {
     it('has expected attributes in request', () => {
       const query = UserActionFindResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -87,7 +87,7 @@ describe('Find UserActions', () => {
     it('removes foo:bar attributes from request', () => {
       const query = UserActionFindResponseRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -99,7 +99,7 @@ describe('Find UserActions', () => {
         userActions: [{ ...defaultRequest.userActions[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

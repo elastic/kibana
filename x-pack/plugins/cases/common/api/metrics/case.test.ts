@@ -22,7 +22,7 @@ describe('Metrics case', () => {
     it('has expected attributes in request', () => {
       const query = SingleCaseMetricsRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -34,7 +34,7 @@ describe('Metrics case', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -47,7 +47,7 @@ describe('Metrics case', () => {
     it('has expected attributes in request', () => {
       const query = CasesMetricsRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -59,7 +59,7 @@ describe('Metrics case', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -68,7 +68,7 @@ describe('Metrics case', () => {
     it('removes foo:bar attributes from when partial fields', () => {
       const query = CasesMetricsRequestRt.decode({ features: ['mttr'], to: 'now-1d', foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           features: ['mttr'],
@@ -86,8 +86,8 @@ describe('Metrics case', () => {
           total: 3,
           values: [
             { name: 'first-host', id: 'first-host-id', count: 3 },
-            { id: 'second-host-id', count: 2 },
-            { id: 'third-host-id', count: 3 },
+            { id: 'second-host-id', count: 2, name: undefined },
+            { id: 'third-host-id', count: 3, name: undefined },
           ],
         },
         users: {
@@ -119,7 +119,7 @@ describe('Metrics case', () => {
     it('has expected attributes in request', () => {
       const query = SingleCaseMetricsResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -131,7 +131,7 @@ describe('Metrics case', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -143,7 +143,7 @@ describe('Metrics case', () => {
         alerts: { ...defaultRequest.alerts, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -155,7 +155,7 @@ describe('Metrics case', () => {
         alerts: { ...defaultRequest.alerts, hosts: { ...defaultRequest.alerts.hosts, foo: 'bar' } },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -167,7 +167,7 @@ describe('Metrics case', () => {
         alerts: { ...defaultRequest.alerts, users: { ...defaultRequest.alerts.users, foo: 'bar' } },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -179,7 +179,7 @@ describe('Metrics case', () => {
         connectors: { total: 1, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -191,7 +191,7 @@ describe('Metrics case', () => {
         actions: { ...defaultRequest.actions, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -206,7 +206,7 @@ describe('Metrics case', () => {
         },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -224,7 +224,7 @@ describe('Metrics case', () => {
         },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -236,7 +236,7 @@ describe('Metrics case', () => {
         lifespan: { ...defaultRequest.lifespan, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -251,7 +251,7 @@ describe('Metrics case', () => {
         },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -264,7 +264,7 @@ describe('Metrics case', () => {
     it('has expected attributes in request', () => {
       const query = CasesMetricsResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -276,7 +276,7 @@ describe('Metrics case', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           mttr: null,

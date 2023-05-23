@@ -104,7 +104,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = RelatedCaseInfoRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -113,7 +113,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = RelatedCaseInfoRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -125,7 +125,7 @@ describe('Case', () => {
         totals: { ...defaultRequest.totals, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -136,7 +136,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = SettingsRt.decode({ syncAlerts: true });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { syncAlerts: true },
       });
@@ -145,7 +145,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = SettingsRt.decode({ syncAlerts: false, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { syncAlerts: false },
       });
@@ -169,7 +169,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CaseFullExternalServiceRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -178,7 +178,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CaseFullExternalServiceRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -190,7 +190,7 @@ describe('Case', () => {
         pushed_by: { ...defaultRequest.pushed_by, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -232,7 +232,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CaseAttributesRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -241,7 +241,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CaseAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -253,7 +253,7 @@ describe('Case', () => {
         connector: { ...defaultRequest.connector, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -265,7 +265,7 @@ describe('Case', () => {
         created_by: { ...defaultRequest.created_by, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -294,7 +294,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasePostRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -303,7 +303,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasePostRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -315,7 +315,7 @@ describe('Case', () => {
         connector: { ...defaultRequest.connector, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -345,7 +345,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasesFindRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest, page: 1, perPage: 10 },
       });
@@ -354,7 +354,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasesFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest, page: 1, perPage: 10 },
       });
@@ -365,7 +365,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasesByAlertIDRequestRt.decode({ owner: 'cases' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { owner: 'cases' },
       });
@@ -374,7 +374,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasesByAlertIDRequestRt.decode({ owner: ['cases'], foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { owner: ['cases'] },
       });
@@ -392,7 +392,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CaseResolveResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -401,7 +401,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CaseResolveResponseRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -422,7 +422,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasesFindResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -431,7 +431,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasesFindResponseRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -443,7 +443,7 @@ describe('Case', () => {
         cases: [{ ...basicCase, foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -460,7 +460,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasePatchRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -469,7 +469,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasePatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -490,7 +490,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasesPatchRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -499,7 +499,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasesPatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -516,7 +516,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasesRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -525,7 +525,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasesRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -541,7 +541,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasePushRequestParamsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -550,7 +550,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasePushRequestParamsRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -575,7 +575,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = ExternalServiceResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -584,7 +584,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = ExternalServiceResponseRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -593,11 +593,10 @@ describe('Case', () => {
     it('removes foo:bar attributes from comments', () => {
       const query = ExternalServiceResponseRt.decode({
         ...defaultRequest,
-        comments: [{ ...defaultRequest.comments[0] }],
-        foo: 'bar',
+        comments: [{ ...defaultRequest.comments[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -612,7 +611,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = AllReportersFindRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -621,7 +620,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = AllReportersFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -636,7 +635,7 @@ describe('Case', () => {
     it('has expected attributes in request', () => {
       const query = CasesBulkGetRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -645,7 +644,7 @@ describe('Case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CasesBulkGetRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

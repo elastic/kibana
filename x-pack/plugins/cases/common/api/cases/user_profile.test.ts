@@ -18,7 +18,7 @@ describe('userProfile', () => {
     it('has expected attributes in request', () => {
       const query = SuggestUserProfilesRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           name: 'damaged_raccoon',
@@ -35,7 +35,7 @@ describe('userProfile', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           name: 'damaged_raccoon',
@@ -47,7 +47,7 @@ describe('userProfile', () => {
     it('removes foo:bar attributes from request', () => {
       const query = SuggestUserProfilesRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           name: 'damaged_raccoon',
@@ -64,7 +64,7 @@ describe('userProfile', () => {
         uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -78,7 +78,7 @@ describe('userProfile', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',

@@ -85,7 +85,7 @@ export const jsonObjectRt: rt.Type<JsonObject> = rt.recursion('JsonObject', () =
 
 type Type = rt.InterfaceType<rt.Props> | GenericIntersectionC;
 
-export const getTypeForCertainFields = (type: Type, fields: string[] = []): Type => {
+export const getTypeForCertainFields = (type: Type, fields: string[] = []): Type | rt.ExactC<rt.TypeC<rt.Props>> => {
   if (fields.length === 0) {
     return type;
   }
@@ -99,13 +99,13 @@ export const getTypeForCertainFields = (type: Type, fields: string[] = []): Type
     }
   }
 
-  return rt.type(typeProps);
+  return rt.strict(typeProps);
 };
 
 export const getTypeForCertainFieldsFromArray = (
   type: rt.ArrayType<Type>,
   fields: string[] = []
-): rt.ArrayType<Type> => {
+): rt.ArrayType<Type| rt.ExactC<rt.TypeC<rt.Props>>> => {
   if (fields.length === 0) {
     return type;
   }

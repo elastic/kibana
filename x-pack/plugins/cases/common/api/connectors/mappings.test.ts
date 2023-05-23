@@ -5,35 +5,9 @@
  * 2.0.
  */
 
-import { ConnectorMappingsAttributesRT, ConnectorMappingsRt } from './mappings';
+import { ConnectorMappingsRt } from './mappings';
 
 describe('Mappings', () => {
-  describe('ConnectorMappingsAttributesRT', () => {
-    const defaultRequest = {
-      action_type: 'append',
-      source: 'description',
-      target: 'not_mapped',
-    };
-
-    it('has expected attributes in request', () => {
-      const query = ConnectorMappingsAttributesRT.decode(defaultRequest);
-
-      expect(query).toMatchObject({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = ConnectorMappingsAttributesRT.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toMatchObject({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-  });
-
   describe('ConnectorMappingsRt', () => {
     const defaultRequest = {
       mappings: [
@@ -54,7 +28,7 @@ describe('Mappings', () => {
     it('has expected attributes in request', () => {
       const query = ConnectorMappingsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -63,7 +37,7 @@ describe('Mappings', () => {
     it('removes foo:bar attributes from request', () => {
       const query = ConnectorMappingsRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

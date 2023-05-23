@@ -6,7 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { ActionTypes, CaseSeverity, ConnectorTypes } from '../../../common/api';
+import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
@@ -86,27 +86,126 @@ describe('create', () => {
       jest.clearAllMocks();
     });
 
-    it('should not have foo:bar attribute in request payload', async () => {
+    it('should not have foo:bar attribute in request payload of createUserAction', async () => {
       // @ts-expect-error
       await create({ ...theCase, foo: 'bar' }, clientArgs);
 
-      expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          type: ActionTypes.create_case,
-          caseId: caseSO.id,
-          user: clientArgs.user,
-          payload: {
-            ...theCase,
-            foo: 'bar',
+      expect(clientArgs.services.userActionService.creator.createUserAction).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "caseId": "mock-id-1",
+              "owner": "securitySolution",
+              "payload": Object {
+                "assignees": Array [
+                  Object {
+                    "uid": "1",
+                  },
+                ],
+                "connector": Object {
+                  "fields": null,
+                  "id": ".none",
+                  "name": "None",
+                  "type": ".none",
+                },
+                "description": "testing sir",
+                "owner": "securitySolution",
+                "settings": Object {
+                  "syncAlerts": true,
+                },
+                "severity": "low",
+                "tags": Array [],
+                "title": "My Case",
+              },
+              "type": "create_case",
+              "user": Object {
+                "email": "damaged_raccoon@elastic.co",
+                "full_name": "Damaged Raccoon",
+                "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                "username": "damaged_raccoon",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
           },
-          owner: caseSO.attributes.owner,
-        })
-      );
+        ],
+      }
+    `);
+    });
 
-      expect(clientArgs.services.notificationService.notifyAssignees).not.toHaveBeenCalledWith({
-        assignees: theCase.assignees,
-        theCase: { ...caseSO, foo: 'bar' },
-      });
+    it('should not have foo:bar attribute in request payload of notifyAssignees', async () => {
+      // @ts-expect-error
+      await create({ ...theCase, foo: 'bar' }, clientArgs);
+
+      expect(clientArgs.services.notificationService.notifyAssignees).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "assignees": Array [
+                Object {
+                  "uid": "1",
+                },
+              ],
+              "theCase": Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": null,
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "mock-id-1",
+                "references": Array [],
+                "type": "cases",
+                "updated_at": "2019-11-25T21:54:48.952Z",
+                "version": "WzAsMV0=",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+      `);
     });
   });
 });

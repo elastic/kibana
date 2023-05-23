@@ -14,7 +14,7 @@ describe('Alerts', () => {
 
       const query = AlertResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -27,7 +27,7 @@ describe('Alerts', () => {
       ];
       const query = AlertResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -37,7 +37,7 @@ describe('Alerts', () => {
       const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
       const query = AlertResponseRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

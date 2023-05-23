@@ -50,7 +50,7 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentAttributesBasicRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -59,7 +59,7 @@ describe('Comments', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CommentAttributesBasicRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -76,7 +76,7 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = ContextTypeUserRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -85,7 +85,7 @@ describe('Comments', () => {
     it('removes foo:bar attributes from request', () => {
       const query = ContextTypeUserRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -107,7 +107,7 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = AlertCommentRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -116,7 +116,7 @@ describe('Comments', () => {
     it('removes foo:bar attributes from request', () => {
       const query = AlertCommentRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -128,7 +128,7 @@ describe('Comments', () => {
         rule: { id: 'rule-id-1', name: 'Awesome rule', foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -154,7 +154,7 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = ActionsCommentRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -163,7 +163,7 @@ describe('Comments', () => {
     it('removes foo:bar attributes from request', () => {
       const query = ActionsCommentRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -184,7 +184,7 @@ describe('Comments', () => {
         },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -205,7 +205,7 @@ describe('Comments', () => {
         },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -224,18 +224,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = ExternalReferenceRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = ExternalReferenceRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
@@ -248,9 +248,31 @@ describe('Comments', () => {
         },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from externalReferenceStorage with soType', () => {
+      const query = ExternalReferenceRt.decode({
+        ...defaultRequest,
+        externalReferenceStorage: {
+          type: ExternalReferenceStorageType.savedObject,
+          soType: 'awesome',
+          foo: 'bar',
+        },
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          externalReferenceStorage: {
+            type: ExternalReferenceStorageType.savedObject,
+            soType: 'awesome',
+          },
+        },
       });
     });
   });
@@ -265,18 +287,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = PersistableStateAttachmentRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = PersistableStateAttachmentRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
@@ -286,9 +308,12 @@ describe('Comments', () => {
         persistableStateAttachmentState: { test_foo: 'foo', foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: {
+          ...defaultRequest,
+          persistableStateAttachmentState: { test_foo: 'foo', foo: 'bar' },
+        },
       });
     });
   });
@@ -302,18 +327,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -339,18 +364,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -376,18 +401,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentResponseTypeUserRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentResponseTypeUserRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -418,18 +443,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentResponseTypeAlertsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentResponseTypeAlertsRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
@@ -444,9 +469,9 @@ describe('Comments', () => {
         },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -481,18 +506,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentResponseTypeActionsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentResponseTypeActionsRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -521,9 +546,9 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentResponseTypeExternalReferenceRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
@@ -533,9 +558,9 @@ describe('Comments', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -562,18 +587,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentResponseTypePersistableStateRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentResponseTypePersistableStateRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -594,18 +619,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentPatchRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentPatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -613,7 +638,6 @@ describe('Comments', () => {
   describe('CommentPatchAttributesRt', () => {
     const defaultRequest = {
       type: CommentType.actions,
-      comment: 'I just isolated the host!',
       actions: {
         targets: [
           {
@@ -628,18 +652,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentPatchAttributesRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentPatchAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -672,18 +696,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = CommentsFindResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = CommentsFindResponseRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
@@ -693,9 +717,9 @@ describe('Comments', () => {
         comments: [{ ...defaultRequest.comments[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -710,18 +734,18 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = FindCommentsQueryParamsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
       const query = FindCommentsQueryParamsRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest },
+        right: defaultRequest,
       });
     });
   });
@@ -739,7 +763,7 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = FindCommentsArgsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -748,7 +772,7 @@ describe('Comments', () => {
     it('removes foo:bar attributes from request', () => {
       const query = FindCommentsArgsRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -767,7 +791,7 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = BulkCreateCommentRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -778,7 +802,7 @@ describe('Comments', () => {
         { comment: 'Solve this fast!', type: CommentType.user, owner: 'cases', foo: 'bar' },
       ]);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -789,7 +813,7 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = BulkGetAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'] });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ids: ['abc', 'xyz'] },
       });
@@ -798,7 +822,7 @@ describe('Comments', () => {
     it('removes foo:bar attributes from request', () => {
       const query = BulkGetAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'], foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ids: ['abc', 'xyz'] },
       });
@@ -839,7 +863,7 @@ describe('Comments', () => {
     it('has expected attributes in request', () => {
       const query = BulkGetAttachmentsResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -848,7 +872,7 @@ describe('Comments', () => {
     it('removes foo:bar attributes from request', () => {
       const query = BulkGetAttachmentsResponseRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -860,7 +884,7 @@ describe('Comments', () => {
         attachments: [{ ...defaultRequest.attachments[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -872,7 +896,7 @@ describe('Comments', () => {
         errors: [{ ...defaultRequest.errors[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

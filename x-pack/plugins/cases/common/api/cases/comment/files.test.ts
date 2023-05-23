@@ -23,7 +23,7 @@ describe('Files', () => {
     it('has expected attributes in request', () => {
       const query = SingleFileAttachmentMetadataRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -32,7 +32,7 @@ describe('Files', () => {
     it('removes foo:bar attributes from request', () => {
       const query = SingleFileAttachmentMetadataRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -49,7 +49,7 @@ describe('Files', () => {
     it('has expected attributes in request', () => {
       const query = FileAttachmentMetadataRt.decode({ files: [defaultRequest] });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           files: [
@@ -64,7 +64,7 @@ describe('Files', () => {
     it('removes foo:bar attributes from request', () => {
       const query = FileAttachmentMetadataRt.decode({ files: [{ ...defaultRequest, foo: 'bar' }] });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           files: [
@@ -80,7 +80,7 @@ describe('Files', () => {
     it('has expected attributes in request', () => {
       const query = BulkDeleteFileAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'] });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ids: ['abc', 'xyz'] },
       });
@@ -89,7 +89,7 @@ describe('Files', () => {
     it('removes foo:bar attributes from request', () => {
       const query = BulkDeleteFileAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'], foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ids: ['abc', 'xyz'] },
       });

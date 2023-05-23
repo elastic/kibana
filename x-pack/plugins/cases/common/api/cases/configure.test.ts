@@ -7,12 +7,12 @@
 
 import { ConnectorTypes } from '../connectors';
 import {
-  CaseConfigureAttributesRt,
+  ConfigurationAttributesRt,
   CaseConfigureRequestParamsRt,
-  CaseConfigureResponseRt,
-  CasesConfigurePatchRt,
-  CasesConfigureRequestRt,
-  GetConfigureFindRequestRt,
+  ConfigurationRt,
+  ConfigurationPatchRequestRt,
+  ConfigurationRequestRt,
+  GetConfigurationFindRequestRt,
 } from './configure';
 
 describe('configure', () => {
@@ -30,7 +30,7 @@ describe('configure', () => {
     fields: null,
   };
 
-  describe('CasesConfigureRequestRt', () => {
+  describe('ConfigurationRequestRt', () => {
     const defaultRequest = {
       connector: serviceNow,
       closure_type: 'close-by-user',
@@ -38,25 +38,25 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CasesConfigureRequestRt.decode(defaultRequest);
+      const query = ConfigurationRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CasesConfigureRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = ConfigurationRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
   });
 
-  describe('CasesConfigurePatchRt', () => {
+  describe('ConfigurationPatchRequestRt', () => {
     const defaultRequest = {
       connector: serviceNow,
       closure_type: 'close-by-user',
@@ -64,25 +64,25 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CasesConfigurePatchRt.decode(defaultRequest);
+      const query = ConfigurationPatchRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CasesConfigurePatchRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = ConfigurationPatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
   });
 
-  describe('CaseConfigureAttributesRt', () => {
+  describe('ConfigurationAttributesRt', () => {
     const defaultRequest = {
       connector: resilient,
       closure_type: 'close-by-user',
@@ -102,25 +102,25 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CaseConfigureAttributesRt.decode(defaultRequest);
+      const query = ConfigurationAttributesRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CaseConfigureAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = ConfigurationAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
   });
 
-  describe('CaseConfigureResponseRt', () => {
+  describe('ConfigurationRt', () => {
     const defaultRequest = {
       connector: serviceNow,
       closure_type: 'close-by-user',
@@ -146,54 +146,54 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CaseConfigureResponseRt.decode(defaultRequest);
+      const query = ConfigurationRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CaseConfigureResponseRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = ConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from mappings', () => {
-      const query = CaseConfigureResponseRt.decode({
+      const query = ConfigurationRt.decode({
         ...defaultRequest,
         mappings: [{ ...defaultRequest.mappings[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
   });
 
-  describe('GetConfigureFindRequestRt', () => {
+  describe('GetConfigurationFindRequestRt', () => {
     const defaultRequest = {
       owner: ['cases'],
     };
 
     it('has expected attributes in request', () => {
-      const query = GetConfigureFindRequestRt.decode(defaultRequest);
+      const query = GetConfigurationFindRequestRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = GetConfigureFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = GetConfigurationFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -208,7 +208,7 @@ describe('configure', () => {
     it('has expected attributes in request', () => {
       const query = CaseConfigureRequestParamsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -217,7 +217,7 @@ describe('configure', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CaseConfigureRequestParamsRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

@@ -14,7 +14,7 @@ describe('Assignee', () => {
     it('has expected attributes in request', () => {
       const query = CaseAssigneesRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -23,9 +23,18 @@ describe('Assignee', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CaseAssigneesRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: [{ ...defaultRequest[0] }],
+        right: [defaultRequest[0]],
+      });
+    });
+
+    it('removes foo:bar attributes from assignees', () => {
+      const query = CaseAssigneesRt.decode([{ uid: '1', foo: 'bar' }, { uid: '2' }]);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: [{ uid: '1' }, { uid: '2' }],
       });
     });
   });

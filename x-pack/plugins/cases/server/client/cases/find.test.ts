@@ -69,14 +69,75 @@ describe('find', () => {
       // @ts-expect-error
       await find({ ...findRequest, foo: 'bar' }, clientArgs);
 
-      const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
-
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          caseOptions: { ...call.caseOptions },
-          foo: 'bar',
-        })
-      );
+      expect(clientArgs.services.caseService.findCasesGroupedByID).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "caseOptions": Object {
+                "assignees": Array [],
+                "filter": Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases.attributes.status",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "0",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases.attributes.severity",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "0",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "and",
+                  "type": "function",
+                },
+                "owner": Array [],
+                "reporters": Array [],
+                "search": "sample_text",
+                "searchFields": Array [
+                  "title",
+                  "description",
+                ],
+                "severity": "low",
+                "sortField": "created_at",
+                "sortOrder": "desc",
+                "status": "open",
+                "tags": Array [],
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+        `);
     });
   });
 

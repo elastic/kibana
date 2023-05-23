@@ -22,7 +22,7 @@ describe('Comment', () => {
     it('has expected attributes in request', () => {
       const query = CommentUserActionPayloadRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -31,7 +31,7 @@ describe('Comment', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CommentUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -42,7 +42,7 @@ describe('Comment', () => {
         comment: { ...defaultRequest.comment, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -63,7 +63,7 @@ describe('Comment', () => {
     it('has expected attributes in request', () => {
       const query = CommentUserActionRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -72,7 +72,7 @@ describe('Comment', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CommentUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -84,7 +84,7 @@ describe('Comment', () => {
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

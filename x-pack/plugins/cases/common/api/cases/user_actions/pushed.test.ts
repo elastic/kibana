@@ -33,7 +33,7 @@ describe('Pushed', () => {
     it('has expected attributes in request', () => {
       const query = PushedUserActionPayloadWithoutConnectorIdRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -45,7 +45,7 @@ describe('Pushed', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -56,7 +56,7 @@ describe('Pushed', () => {
         externalService: { ...defaultRequest.externalService, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -83,7 +83,7 @@ describe('Pushed', () => {
     it('has expected attributes in request', () => {
       const query = PushedUserActionPayloadRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -92,7 +92,7 @@ describe('Pushed', () => {
     it('removes foo:bar attributes from request', () => {
       const query = PushedUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -103,7 +103,7 @@ describe('Pushed', () => {
         externalService: { ...defaultRequest.externalService, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -132,7 +132,7 @@ describe('Pushed', () => {
     it('has expected attributes in request', () => {
       const query = PushedUserActionWithoutConnectorIdRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -141,7 +141,7 @@ describe('Pushed', () => {
     it('removes foo:bar attributes from request', () => {
       const query = PushedUserActionWithoutConnectorIdRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -153,7 +153,7 @@ describe('Pushed', () => {
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -183,7 +183,7 @@ describe('Pushed', () => {
     it('has expected attributes in request', () => {
       const query = PushedUserActionRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -192,7 +192,7 @@ describe('Pushed', () => {
     it('removes foo:bar attributes from request', () => {
       const query = PushedUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -204,7 +204,7 @@ describe('Pushed', () => {
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

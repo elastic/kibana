@@ -42,7 +42,7 @@ describe('GetCaseConnectorsResponseRt', () => {
   it('has expected attributes in request', () => {
     const query = GetCaseConnectorsResponseRt.decode(defaultReq);
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultReq,
     });
@@ -53,7 +53,7 @@ describe('GetCaseConnectorsResponseRt', () => {
       'servicenow-1': { ...defaultReq['servicenow-1'], externalService, foo: 'bar' },
     });
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultReq,
     });
@@ -67,7 +67,7 @@ describe('GetCaseConnectorsResponseRt', () => {
       },
     });
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultReq,
     });
@@ -81,7 +81,7 @@ describe('GetCaseConnectorsResponseRt', () => {
       },
     });
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultReq,
     });

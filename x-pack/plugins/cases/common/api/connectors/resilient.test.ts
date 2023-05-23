@@ -16,7 +16,7 @@ describe('ResilientFieldsRT', () => {
   it('has expected attributes in request', () => {
     const query = ResilientFieldsRT.decode(defaultRequest);
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultRequest,
     });
@@ -28,7 +28,7 @@ describe('ResilientFieldsRT', () => {
       foo: 'bar',
     });
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultRequest,
     });

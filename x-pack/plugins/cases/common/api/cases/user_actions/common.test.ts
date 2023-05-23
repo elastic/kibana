@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { UserActionCommonAttributesRt, CaseUserActionInjectedIdsRt } from './common';
+import {
+  UserActionCommonAttributesRt,
+  CaseUserActionInjectedIdsRt,
+  CaseUserActionInjectedDeprecatedIdsRt,
+} from './common';
 
 describe('Common', () => {
   describe('UserActionCommonAttributesRt', () => {
@@ -23,7 +27,7 @@ describe('Common', () => {
     it('has expected attributes in request', () => {
       const query = UserActionCommonAttributesRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -32,7 +36,7 @@ describe('Common', () => {
     it('removes foo:bar attributes from request', () => {
       const query = UserActionCommonAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -47,7 +51,7 @@ describe('Common', () => {
     it('has expected attributes in request', () => {
       const query = CaseUserActionInjectedIdsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -56,7 +60,33 @@ describe('Common', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CaseUserActionInjectedIdsRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+  });
+
+  describe('CaseUserActionInjectedDeprecatedIdsRt', () => {
+    const defaultRequest = {
+      action_id: 'basic-action-id',
+      case_id: 'basic-case-id',
+      comment_id: 'basic-comment-id',
+    };
+
+    it('has expected attributes in request', () => {
+      const query = CaseUserActionInjectedDeprecatedIdsRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = CaseUserActionInjectedDeprecatedIdsRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

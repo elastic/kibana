@@ -111,92 +111,84 @@ export const CasesMetricsRequestRt = rt.intersection([
 ]);
 
 export const SingleCaseMetricsResponseRt = rt.exact(
-  rt.partial(
-    rt.strict({
-      alerts: rt.exact(
-        rt.partial(
-          rt.strict({
-            /**
-             * Number of alerts attached to the case
-             */
-            count: rt.number,
-            /**
-             * Host information represented from the alerts attached to this case
-             */
-            hosts: AlertHostsMetricsRt,
-            /**
-             * User information represented from the alerts attached to this case
-             */
-            users: AlertUsersMetricsRt,
-          }).type.props
-        )
-      ),
+  rt.partial({
+    alerts: rt.exact(
+      rt.partial({
+        /**
+         * Number of alerts attached to the case
+         */
+        count: rt.number,
+        /**
+         * Host information represented from the alerts attached to this case
+         */
+        hosts: AlertHostsMetricsRt,
+        /**
+         * User information represented from the alerts attached to this case
+         */
+        users: AlertUsersMetricsRt,
+      })
+    ),
+    /**
+     * External connectors associated with the case
+     */
+    connectors: rt.strict({
       /**
-       * External connectors associated with the case
+       * Total number of connectors in the case
        */
-      connectors: rt.strict({
-        /**
-         * Total number of connectors in the case
-         */
-        total: rt.number,
-      }),
+      total: rt.number,
+    }),
+    /**
+     * Actions taken within the case
+     */
+    actions: rt.exact(
+      rt.partial({
+        isolateHost: rt.strict({
+          /**
+           * Isolate host action information
+           */
+          isolate: rt.strict({
+            /**
+             * Total times the isolate host action has been performed
+             */
+            total: rt.number,
+          }),
+          /**
+           * Unisolate host action information
+           */
+          unisolate: rt.strict({
+            /**
+             * Total times the unisolate host action has been performed
+             */
+            total: rt.number,
+          }),
+        }),
+      })
+    ),
+    /**
+     * The case's open,close,in-progress details
+     */
+    lifespan: rt.strict({
       /**
-       * Actions taken within the case
+       * Date the case was created, in ISO format
        */
-      actions: rt.exact(
-        rt.partial(
-          rt.strict({
-            isolateHost: rt.strict({
-              /**
-               * Isolate host action information
-               */
-              isolate: rt.strict({
-                /**
-                 * Total times the isolate host action has been performed
-                 */
-                total: rt.number,
-              }),
-              /**
-               * Unisolate host action information
-               */
-              unisolate: rt.strict({
-                /**
-                 * Total times the unisolate host action has been performed
-                 */
-                total: rt.number,
-              }),
-            }),
-          }).type.props
-        )
-      ),
+      creationDate: rt.string,
       /**
-       * The case's open,close,in-progress details
+       * Date the case was closed, in ISO format. Will be null if the case is not currently closed
        */
-      lifespan: rt.strict({
-        /**
-         * Date the case was created, in ISO format
-         */
-        creationDate: rt.string,
-        /**
-         * Date the case was closed, in ISO format. Will be null if the case is not currently closed
-         */
-        closeDate: rt.union([rt.string, rt.null]),
-        /**
-         * The case's status information regarding durations in a specific status
-         */
-        statusInfo: StatusInfoRt,
-      }),
-    }).type.props
-  )
+      closeDate: rt.union([rt.string, rt.null]),
+      /**
+       * The case's status information regarding durations in a specific status
+       */
+      statusInfo: StatusInfoRt,
+    }),
+  })
 );
 
 export const CasesMetricsResponseRt = rt.exact(
-  rt.partial(
-    rt.strict({
-      /**
-       * The average resolve time of all cases in seconds
-       */
-      mttr: rt.union([rt.number, rt.null]),
-    }).type.props
-  )
+  rt.partial({
+    /**
+     * The average resolve time of all cases in seconds
+     */
+    mttr: rt.union([rt.number, rt.null]),
+  })
 );

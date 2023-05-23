@@ -40,7 +40,7 @@ describe('Create case', () => {
     it('has expected attributes in request', () => {
       const query = CreateCaseUserActionRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -49,7 +49,7 @@ describe('Create case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CreateCaseUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -61,7 +61,7 @@ describe('Create case', () => {
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -97,7 +97,7 @@ describe('Create case', () => {
     it('has expected attributes in request', () => {
       const query = CreateCaseUserActionWithoutConnectorIdRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -109,7 +109,7 @@ describe('Create case', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -121,7 +121,7 @@ describe('Create case', () => {
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

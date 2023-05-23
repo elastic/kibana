@@ -23,6 +23,6 @@ export interface ConnectorMappingsPersistedAttributes {
 export type ConnectorMappingsTransformed = ConnectorMappings;
 export type ConnectorMappingsSavedObjectTransformed = SavedObject<ConnectorMappingsTransformed>;
 
-export const ConnectorMappingsPartialRt = rt.exact(rt.partial(ConnectorMappingsRt.props));
+export const ConnectorMappingsPartialRt = rt.exact(rt.partial(ConnectorMappingsRt.type.props));
 
 export const ConnectorMappingsTransformedRt = ConnectorMappingsRt;

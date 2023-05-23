@@ -17,7 +17,7 @@ describe('JiraFieldsRT', () => {
   it('has expected attributes in request', () => {
     const query = JiraFieldsRT.decode(defaultRequest);
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultRequest,
     });
@@ -29,7 +29,7 @@ describe('JiraFieldsRT', () => {
       foo: 'bar',
     });
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultRequest,
     });

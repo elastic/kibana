@@ -38,7 +38,7 @@ describe('Response', () => {
     it('has expected attributes in request', () => {
       const query = UserActionsRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: [...defaultRequest],
       });
@@ -47,7 +47,7 @@ describe('Response', () => {
     it('removes foo:bar attributes from request', () => {
       const query = UserActionsRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -58,7 +58,7 @@ describe('Response', () => {
         { ...defaultRequest[0], payload: { ...defaultRequest[0].payload, foo: 'bar' } },
       ]);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -75,7 +75,7 @@ describe('Response', () => {
     it('has expected attributes in request', () => {
       const query = CaseUserActionStatsResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -84,7 +84,7 @@ describe('Response', () => {
     it('removes foo:bar attributes from request', () => {
       const query = CaseUserActionStatsResponseRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

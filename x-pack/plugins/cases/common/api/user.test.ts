@@ -18,7 +18,7 @@ describe('User', () => {
     it('has expected attributes in request', () => {
       const query = UserRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -30,7 +30,7 @@ describe('User', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -55,7 +55,7 @@ describe('User', () => {
     it('has expected attributes in request', () => {
       const query = UserWithProfileInfoRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -67,7 +67,7 @@ describe('User', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -79,7 +79,7 @@ describe('User', () => {
         avatar: { ...defaultRequest.avatar, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -104,7 +104,7 @@ describe('User', () => {
     it('has expected attributes in request', () => {
       const query = UsersRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -118,9 +118,9 @@ describe('User', () => {
         },
       ]);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
-        right: [{ ...defaultRequest[0] }],
+        right: [defaultRequest[0]],
       });
     });
   });
@@ -191,7 +191,7 @@ describe('User', () => {
     it('has expected attributes in request', () => {
       const query = GetCaseUsersResponseRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -203,7 +203,7 @@ describe('User', () => {
         foo: 'bar',
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -215,7 +215,7 @@ describe('User', () => {
         assignees: [{ ...defaultRequest.assignees[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest, assignees: [{ ...defaultRequest.assignees[0] }] },
       });
@@ -227,7 +227,7 @@ describe('User', () => {
         unassignedUsers: [{ ...defaultRequest.unassignedUsers[1], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest, unassignedUsers: [{ ...defaultRequest.unassignedUsers[1] }] },
       });
@@ -239,7 +239,7 @@ describe('User', () => {
         participants: [{ ...defaultRequest.participants[0], foo: 'bar' }],
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest, participants: [{ ...defaultRequest.participants[0] }] },
       });
@@ -254,7 +254,7 @@ describe('User', () => {
         },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

@@ -17,7 +17,7 @@ describe('Assignees', () => {
     it('has expected attributes in request', () => {
       const query = AssigneesUserActionPayloadRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -26,7 +26,7 @@ describe('Assignees', () => {
     it('removes foo:bar attributes from request', () => {
       const query = AssigneesUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -43,7 +43,7 @@ describe('Assignees', () => {
     it('has expected attributes in request', () => {
       const query = AssigneesUserActionRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -52,9 +52,28 @@ describe('Assignees', () => {
     it('removes foo:bar attributes from request', () => {
       const query = AssigneesUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from assignees', () => {
+      const query = AssigneesUserActionRt.decode({
+        type: ActionTypes.assignees,
+        payload: {
+          assignees: [{ uid: '1', foo: 'bar' }, { uid: '2' }, { uid: '3' }],
+        },
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          type: ActionTypes.assignees,
+          payload: {
+            assignees: [{ uid: '1' }, { uid: '2' }, { uid: '3' }],
+          },
+        },
       });
     });
 
@@ -64,7 +83,7 @@ describe('Assignees', () => {
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

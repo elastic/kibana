@@ -19,7 +19,7 @@ describe('ServiceNowITSMFieldsRT', () => {
   it('has expected attributes in request', () => {
     const query = ServiceNowITSMFieldsRT.decode(defaultReq);
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultReq,
     });
@@ -28,7 +28,7 @@ describe('ServiceNowITSMFieldsRT', () => {
   it('removes foo:bar attributes from request', () => {
     const query = ServiceNowITSMFieldsRT.decode({ ...defaultReq, foo: 'bar' });
 
-    expect(query).toMatchObject({
+    expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultReq,
     });

@@ -18,7 +18,7 @@ describe('Delete_case', () => {
     it('has expected attributes in request', () => {
       const query = DeleteCaseUserActionRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -27,7 +27,7 @@ describe('Delete_case', () => {
     it('removes foo:bar attributes from request', () => {
       const query = DeleteCaseUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -36,7 +36,7 @@ describe('Delete_case', () => {
     it('removes foo:bar attributes from payload', () => {
       const query = DeleteCaseUserActionRt.decode({ ...defaultRequest, payload: { foo: 'bar' } });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });

@@ -31,8 +31,8 @@ export type ConfigurationTransformedAttributes = ConfigurationAttributes;
 export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;
 
 export const ConfigurationPartialAttributesRt = rt.intersection([
-  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.props)),
-  rt.exact(rt.partial(ConfigurationActivityFieldsRt.props)),
+  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.type.props)),
+  rt.exact(rt.partial(ConfigurationActivityFieldsRt.type.props)),
   rt.exact(
     rt.partial({
       owner: rt.string,

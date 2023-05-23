@@ -18,7 +18,7 @@ describe('Severity', () => {
     it('has expected attributes in request', () => {
       const query = SeverityUserActionPayloadRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -27,7 +27,7 @@ describe('Severity', () => {
     it('removes foo:bar attributes from request', () => {
       const query = SeverityUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -45,7 +45,7 @@ describe('Severity', () => {
     it('has expected attributes in request', () => {
       const query = SeverityUserActionRt.decode(defaultRequest);
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -54,7 +54,7 @@ describe('Severity', () => {
     it('removes foo:bar attributes from request', () => {
       const query = SeverityUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
@@ -66,7 +66,7 @@ describe('Severity', () => {
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toMatchObject({
+      expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
       });
