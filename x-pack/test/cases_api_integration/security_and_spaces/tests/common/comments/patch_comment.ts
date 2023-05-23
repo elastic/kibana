@@ -228,20 +228,20 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
 
-        await updateComment({
-          supertest,
-          caseId: postedCase.id,
-          req: {
-            id: patchedCase.comments![0].id,
-            version: patchedCase.comments![0].version,
-            comment: 'a comment',
-            type: CommentType.user,
-            // @ts-expect-error
-            alertId: 'alertId',
-            owner: 'securitySolutionFixture',
-          },
-          expectedHttpCode: 200,
-        });
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          comment: 'a comment',
+          type: CommentType.user,
+          // @ts-expect-error
+          alertId: 'alertId',
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 200,
+      });
     });
 
     it('unhappy path - removes index excess attributes for type user', async () => {
@@ -252,20 +252,20 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
 
-        await updateComment({
-          supertest,
-          caseId: postedCase.id,
-          req: {
-            id: patchedCase.comments![0].id,
-            version: patchedCase.comments![0].version,
-            comment: 'a comment',
-            type: CommentType.user,
-            // @ts-expect-error
-            index: 'index',
-            owner: 'securitySolutionFixture',
-          },
-          expectedHttpCode: 200,
-        });
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          comment: 'a comment',
+          type: CommentType.user,
+          // @ts-expect-error
+          index: 'index',
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 200,
+      });
     });
 
     it('unhappy path - 400s when missing attributes for type alert', async () => {
