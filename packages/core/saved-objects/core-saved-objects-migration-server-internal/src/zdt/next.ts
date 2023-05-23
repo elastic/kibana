@@ -71,6 +71,7 @@ export const nextActionMap = (context: MigratorContext) => {
         client,
         index: state.currentIndex,
         mappings: { properties: state.additiveMappingChanges },
+        batchSize: context.batchSize,
       }),
     UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask({
@@ -84,7 +85,7 @@ export const nextActionMap = (context: MigratorContext) => {
         index: state.currentIndex,
         meta: setMetaMappingMigrationComplete({
           meta: state.currentIndexMeta,
-          versions: context.typeModelVersions,
+          versions: context.typeVirtualVersions,
         }),
       }),
     UPDATE_ALIASES: (state: UpdateAliasesState) =>
@@ -172,7 +173,7 @@ export const nextActionMap = (context: MigratorContext) => {
         index: state.currentIndex,
         meta: setMetaDocMigrationComplete({
           meta: state.currentIndexMeta,
-          versions: context.typeModelVersions,
+          versions: context.typeVirtualVersions,
         }),
       }),
     UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: (

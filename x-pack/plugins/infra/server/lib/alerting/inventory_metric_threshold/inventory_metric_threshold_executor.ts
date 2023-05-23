@@ -372,12 +372,10 @@ const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
 ) =>
-  list
-    .map(mapFn)
-    .reduce(
-      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
-      {}
-    );
+  list.map(mapFn).reduce<Record<string, any>>((result, value, i) => {
+    result[`condition${i}`] = value;
+    return result;
+  }, {});
 
 export const FIRED_ACTIONS: ActionGroup<typeof FIRED_ACTIONS_ID> = {
   id: FIRED_ACTIONS_ID,

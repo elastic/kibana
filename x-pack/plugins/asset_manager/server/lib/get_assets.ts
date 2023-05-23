@@ -23,6 +23,8 @@ export async function getAssets({
   size = 100,
   filters = {},
 }: GetAssetsOptions): Promise<Asset[]> {
+  // Maybe it makes the most sense to validate the filters here?
+
   const { from = 'now-24h', to = 'now' } = filters;
   const dsl: SearchRequest = {
     index: ASSETS_INDEX_PREFIX + '*',
@@ -62,7 +64,7 @@ export async function getAssets({
       });
     }
 
-    if (filters.type) {
+    if (filters.type?.length) {
       musts.push({
         terms: {
           ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],

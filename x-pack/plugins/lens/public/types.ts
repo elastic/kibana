@@ -45,6 +45,7 @@ import type {
   DragContextState,
   DropType,
 } from '@kbn/dom-drag-drop';
+import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -246,6 +247,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchFilters?: Filter[];
   title?: string;
   description?: string;
+  panelTimeRange?: TimeRange;
   visTypeTitle?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
@@ -803,21 +805,6 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
-export interface AccessorConfig {
-  columnId: string;
-  triggerIconType?:
-    | 'color'
-    | 'disabled'
-    | 'colorBy'
-    | 'none'
-    | 'invisible'
-    | 'aggregate'
-    | 'custom';
-  customIcon?: IconType;
-  color?: string;
-  palette?: string[] | Array<{ color: string; stop: number }>;
-}
-
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
   dimensionEditorGroupLabel?: string;
@@ -910,6 +897,7 @@ export interface SuggestionRequest<T = unknown> {
    */
   subVisualizationId?: string;
   activeData?: Record<string, Datatable>;
+  allowMixed?: boolean;
 }
 
 /**

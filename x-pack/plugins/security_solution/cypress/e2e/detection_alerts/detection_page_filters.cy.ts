@@ -11,10 +11,12 @@ import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
   FILTER_GROUP_CHANGED_BANNER,
+  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
   FILTER_GROUP_SAVE_CHANGES_POPOVER,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
+  FILTER_GROUP_CONTROL_ACTION_EDIT,
 } from '../../screens/common/filter_group';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -37,8 +39,10 @@ import { navigateFromHeaderTo } from '../../tasks/security_header';
 import { ALERTS, CASES } from '../../screens/security_header';
 import {
   addNewFilterGroupControlValues,
+  cancelFieldEditing,
   deleteFilterGroupControl,
   discardFilterGroupControls,
+  editFilterGroupControl,
   editFilterGroupControls,
   saveFilterGroupControls,
 } from '../../tasks/common/filter_group';
@@ -97,7 +101,7 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
   });
 };
 
-describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
+describe('Detections : Page Filters', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -116,10 +120,23 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
   });
 
   context('Alert Page Filters Customization ', { testIsolation: false }, () => {
-    it('Add New Controls', () => {
+    beforeEach(() => {
+      resetFilters();
+    });
+    it('should be able to delete Controls', () => {
+      waitForPageFilters();
+      editFilterGroupControls();
+      deleteFilterGroupControl(3);
+      cy.get(CONTROL_FRAMES).should((sub) => {
+        expect(sub.length).lt(4);
+      });
+      discardFilterGroupControls();
+    });
+    it('should be able to add new Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
       editFilterGroupControls();
+      deleteFilterGroupControl(3);
       addNewFilterGroupControlValues({
         fieldName,
         label,
@@ -129,18 +146,20 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
-    it('Delete Controls', () => {
-      waitForPageFilters();
+    it('should be able to edit Controls', () => {
+      const fieldName = 'event.module';
+      const label = 'EventModule';
       editFilterGroupControls();
-      deleteFilterGroupControl(3);
-      cy.get(CONTROL_FRAMES).should((sub) => {
-        expect(sub.length).lt(4);
-      });
+      editFilterGroupControl({ idx: 3, fieldName, label });
+      cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
+      cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
       discardFilterGroupControls();
+      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
     it('should not sync to the URL in edit mode but only in view mode', () => {
       cy.url().then((urlString) => {
         editFilterGroupControls();
+        deleteFilterGroupControl(3);
         addNewFilterGroupControlValues({ fieldName: 'event.module', label: 'Event Module' });
         cy.url().should('eq', urlString);
         saveFilterGroupControls();
@@ -264,6 +283,7 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
 
   it('Custom filters from URLS are populated & changed banner is displayed', () => {
     visitAlertsPageWithCustomFilters(customFilters);
+    waitForPageFilters();
 
     assertFilterControlsWithFilterObject(customFilters);
 
@@ -272,14 +292,14 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
 
   it('Changed banner should hide on saving changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
-
+    waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
     saveFilterGroupControls();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
   it('Changed banner should hide on discarding changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
-
+    waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
     discardFilterGroupControls();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
@@ -287,7 +307,23 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
 
   it('Changed banner should hide on Reset', () => {
     visitAlertsPageWithCustomFilters(customFilters);
+    waitForPageFilters();
     resetFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
+  });
+
+  it('Number fields are not visible in field edit panel', () => {
+    const idx = 3;
+    const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
+    editFilterGroupControls();
+    cy.get(CONTROL_FRAME_TITLE).eq(idx).trigger('mouseover');
+    cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).trigger('click', { force: true });
+    cy.get(FILTER_FIELD_TYPE).should('be.visible').trigger('click');
+    cy.get(FIELD_TYPES.STRING).should('be.visible');
+    cy.get(FIELD_TYPES.BOOLEAN).should('be.visible');
+    cy.get(FIELD_TYPES.IP).should('be.visible');
+    cy.get(FIELD_TYPES.NUMBER).should('not.exist');
+    cancelFieldEditing();
+    discardFilterGroupControls();
   });
 });

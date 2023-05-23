@@ -272,7 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
             .send(httpMonitorJson);
 
           expect(apiResponse.status).eql(403);
-          expect(apiResponse.body.message).eql('Unable to create synthetics-monitor');
+          expect(apiResponse.body.message).eql('Forbidden');
         });
     });
 

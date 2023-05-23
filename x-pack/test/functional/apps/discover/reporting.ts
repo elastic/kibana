@@ -87,8 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('single-timefilter-search');
 
         // get shared URL value
-        await PageObjects.share.clickShareTopNavButton();
-        const sharedURL = await PageObjects.share.getSharedUrl();
+        const sharedURL = await browser.getCurrentUrl();
 
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();

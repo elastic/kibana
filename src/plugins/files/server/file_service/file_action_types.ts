@@ -83,6 +83,26 @@ export interface GetByIdArgs {
 }
 
 /**
+ * Arguments to bulk get multiple files by their IDs.
+ */
+export interface BulkGetByIdArgs {
+  /**
+   * File IDs.
+   */
+  ids: string[];
+  /**
+   * Flag to indicate if an Error is thrown if any of the file id is not found. If set to `false`, "null" will be returned.
+   * @default true
+   */
+  throwIfNotFound?: boolean;
+  /**
+   * Format of the response, either a list of File[] (sorted by id passed) or a map `{[fileId: string]: File}`
+   * @default "array"
+   */
+  format?: 'array' | 'map';
+}
+
+/**
  * Arguments to filter for files.
  *
  * @note Individual values in a filter are "OR"ed together filters are "AND"ed together.

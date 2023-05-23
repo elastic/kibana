@@ -36,6 +36,7 @@ import {
   listFiles,
   findAttachments,
   bulkCreateAttachments,
+  getAllComments,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -516,18 +517,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               auth: { user: superUser, space: 'space1' },
             }),
-            findAttachments({
+            getAllComments({
               supertest: supertestWithoutAuth,
               caseId: postedCase.id,
-              query: {
-                perPage: MAX_DOCS_PER_PAGE,
-              },
               auth: { user: secAllUser, space: 'space1' },
             }),
           ]);
 
           expect(filesAfterDelete.total).to.be(1);
-          expect(attachmentsAfterDelete.comments.length).to.be(1);
+          expect(attachmentsAfterDelete.length).to.be(1);
         });
       });
 

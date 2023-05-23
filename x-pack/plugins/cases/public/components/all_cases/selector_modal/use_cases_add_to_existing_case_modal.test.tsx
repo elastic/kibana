@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { CaseStatuses, StatusAll } from '../../../../common';
 import type { AppMockRenderer } from '../../../common/mock';
 import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
@@ -58,7 +58,7 @@ const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTyp
 
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
-    createAttachments: jest.fn(),
+    mutateAsync: jest.fn(),
   });
 
   const dispatch = jest.fn();
@@ -144,7 +144,7 @@ describe('use cases add to existing case modal hook', () => {
 
   it('should call getAttachments with the case info', async () => {
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test', owner: 'cases' } as CaseUI);
       return null;
     });
 
@@ -153,13 +153,13 @@ describe('use cases add to existing case modal hook', () => {
 
     await waitFor(() => {
       expect(getAttachments).toHaveBeenCalledTimes(1);
-      expect(getAttachments).toHaveBeenCalledWith({ theCase: { id: 'test' } });
+      expect(getAttachments).toHaveBeenCalledWith({ theCase: { id: 'test', owner: 'cases' } });
     });
   });
 
   it('should show a toaster info when no attachments are defined and noAttachmentsToaster is defined', async () => {
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test', owner: 'cases' } as CaseUI);
       return null;
     });
 
@@ -182,7 +182,7 @@ describe('use cases add to existing case modal hook', () => {
 
   it('should show a toaster info when no attachments are defined and noAttachmentsToaster is not defined', async () => {
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test', owner: 'cases' } as CaseUI);
       return null;
     });
 
@@ -204,7 +204,7 @@ describe('use cases add to existing case modal hook', () => {
   it('should call createAttachments when a case is selected and show a toast message', async () => {
     const mockBulkCreateAttachments = jest.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
-      createAttachments: mockBulkCreateAttachments,
+      mutateAsync: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -213,7 +213,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test', owner: 'cases' } as CaseUI);
       return null;
     });
 
@@ -224,8 +224,8 @@ describe('use cases add to existing case modal hook', () => {
       expect(mockBulkCreateAttachments).toHaveBeenCalledTimes(1);
       expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
         caseId: 'test',
-        data: [alertComment],
-        throwOnError: true,
+        caseOwner: 'cases',
+        attachments: [alertComment],
       });
     });
     expect(mockedToastSuccess).toHaveBeenCalled();
@@ -235,7 +235,7 @@ describe('use cases add to existing case modal hook', () => {
     const mockBulkCreateAttachments = jest.fn();
 
     useCreateAttachmentsMock.mockReturnValueOnce({
-      createAttachments: mockBulkCreateAttachments,
+      mutateAsync: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -244,7 +244,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test', owner: 'cases' } as CaseUI);
       return null;
     });
 
@@ -259,7 +259,7 @@ describe('use cases add to existing case modal hook', () => {
   it('should not call createAttachments nor show toast success when a case is not selected', async () => {
     const mockBulkCreateAttachments = jest.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
-      createAttachments: mockBulkCreateAttachments,
+      mutateAsync: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -285,7 +285,7 @@ describe('use cases add to existing case modal hook', () => {
   it('should not show toast success when a case is selected with attachments and fails to update attachments', async () => {
     const mockBulkCreateAttachments = jest.fn().mockRejectedValue(new Error('Impossible'));
     useCreateAttachmentsMock.mockReturnValueOnce({
-      createAttachments: mockBulkCreateAttachments,
+      mutateAsync: mockBulkCreateAttachments,
     });
 
     const mockedToast = jest.fn();
@@ -295,7 +295,7 @@ describe('use cases add to existing case modal hook', () => {
 
     // simulate a case selected
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test', owner: 'cases' } as CaseUI);
       return null;
     });
 
@@ -305,8 +305,8 @@ describe('use cases add to existing case modal hook', () => {
     await waitFor(() => {
       expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
         caseId: 'test',
-        data: [alertComment],
-        throwOnError: true,
+        caseOwner: 'cases',
+        attachments: [alertComment],
       });
     });
 

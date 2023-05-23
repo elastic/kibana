@@ -49,7 +49,6 @@ describe('EphemeralTaskLifecycle', () => {
         max_attempts: 9,
         poll_interval: 6000000,
         version_conflict_threshold: 80,
-        max_poll_inactivity_cycles: 10,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,
         monitored_stats_required_freshness: 5000,
@@ -72,11 +71,13 @@ describe('EphemeralTaskLifecycle', () => {
         },
         unsafe: {
           exclude_task_types: [],
+          authenticate_background_task_utilization: true,
         },
         event_loop_delay: {
           monitor: true,
           warn_threshold: 5000,
         },
+        worker_utilization_running_average_window: 5,
         ...config,
       },
       elasticsearchAndSOAvailability$,

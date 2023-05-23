@@ -7,23 +7,21 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { useDispatch } from 'react-redux';
+import { getGlobalParamAction, deleteGlobalParams } from '../../../state/global_params';
 import { syncGlobalParamsAction } from '../../../state/settings';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import { syntheticsParamType } from '../../../../../../common/types/saved_objects';
 import { NO_LABEL, YES_LABEL } from '../../monitors_page/management/monitor_list_table/labels';
 import { ListParamItem } from './params_list';
 
 export const DeleteParam = ({
-  setRefreshList,
   items,
   setIsDeleteModalVisible,
 }: {
-  setRefreshList: React.Dispatch<React.SetStateAction<number>>;
   items: ListParamItem[];
   setIsDeleteModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -39,10 +37,7 @@ export const DeleteParam = ({
 
   const { status } = useFetcher(() => {
     if (isDeleting && savedObjects) {
-      return savedObjects.client.bulkDelete(
-        items.map(({ id }) => ({ type: syntheticsParamType, id })),
-        { force: true }
-      );
+      return deleteGlobalParams({ ids: items.map(({ id }) => id) });
     }
   }, [items, isDeleting]);
 
@@ -89,9 +84,10 @@ export const DeleteParam = ({
     if (status === FETCH_STATUS.SUCCESS || status === FETCH_STATUS.FAILURE) {
       setIsDeleting(false);
       setIsDeleteModalVisible(false);
-      setRefreshList(Date.now());
+      dispatch(getGlobalParamAction.get());
+      dispatch(syncGlobalParamsAction.get());
     }
-  }, [setIsDeleting, isDeleting, status, setIsDeleteModalVisible, name, setRefreshList, dispatch]);
+  }, [setIsDeleting, isDeleting, status, setIsDeleteModalVisible, name, dispatch]);
 
   return (
     <EuiConfirmModal

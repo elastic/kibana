@@ -44,6 +44,7 @@ describe('migrationsStateActionMachine', () => {
       '.kibana_cases': ['typeD', 'typeE'],
     },
     targetMappings: { properties: {} },
+    coreMigrationVersionPerType: {},
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
     migrationsConfig: {
@@ -56,6 +57,7 @@ describe('migrationsStateActionMachine', () => {
       retryAttempts: 5,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnNonMigratorNodes: false,
       },
     },
     typeRegistry,
@@ -98,7 +100,8 @@ describe('migrationsStateActionMachine', () => {
       abort,
     });
     const logs = loggingSystemMock.collect(mockLogger);
-    const doneLog = logs.info.splice(8, 1)[0][0];
+    // the 'done' log is the 5th entry in the list
+    const doneLog = logs.info.splice(4, 1)[0][0];
     expect(doneLog).toMatch(/\[.my-so-index\] Migration completed after \d+ms/);
     expect(logs).toMatchSnapshot();
   });

@@ -11,7 +11,7 @@ import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import {
   BulkCreateCommentRequest,
-  CaseResponse,
+  Case,
   CaseStatuses,
   CommentRequestExternalReferenceSOType,
   CommentType,
@@ -80,7 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   const validateCommentsIgnoringOrder = (
-    comments: CaseResponse['comments'],
+    comments: Case['comments'],
     attachments: BulkCreateCommentRequest
   ) => {
     expect(comments?.length).to.eql(attachments.length);

@@ -29,7 +29,7 @@ import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 type Config =
-  APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
+  APIReturnType<'GET /api/apm/settings/agent-configuration 2023-05-22'>['configurations'][0];
 
 interface Props {
   status: FETCH_STATUS;

@@ -38,6 +38,7 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { registerActionFileUploadRoute } from './file_upload_handler';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -175,6 +176,8 @@ export function registerResponseActionRoutes(
       )
     );
   }
+
+  registerActionFileUploadRoute(router, endpointContext);
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -195,7 +198,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     try {
       action = await endpointContext.service
         .getActionCreateService()
-        .createAction({ ...req.body, command, user }, casesClient);
+        .createAction({ ...req.body, command, user }, { casesClient });
     } catch (err) {
       return res.customError({
         statusCode: 500,

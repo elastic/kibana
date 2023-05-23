@@ -10,16 +10,27 @@ import React, { useEffect, useState } from 'react';
 import { EuiPopoverFooter, EuiSpacer } from '@elastic/eui';
 import { type FieldVisualizeButtonProps, getFieldVisualizeButton } from '../field_visualize_button';
 import { FieldCategorizeButtonProps, getFieldCategorizeButton } from '../field_categorize_button';
+import { ErrorBoundary } from '../error_boundary';
 
 export type FieldPopoverFooterProps = FieldVisualizeButtonProps | FieldCategorizeButtonProps;
 
-export const FieldPopoverFooter: React.FC<FieldPopoverFooterProps> = (props) => {
+const FieldPopoverFooterComponent: React.FC<FieldPopoverFooterProps> = (props) => {
   const [visualizeButton, setVisualizeButton] = useState<JSX.Element | null>(null);
   const [categorizeButton, setCategorizeButton] = useState<JSX.Element | null>(null);
 
   useEffect(() => {
-    getFieldVisualizeButton(props).then(setVisualizeButton);
-    getFieldCategorizeButton(props).then(setCategorizeButton);
+    getFieldVisualizeButton(props)
+      .then(setVisualizeButton)
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      });
+    getFieldCategorizeButton(props)
+      .then(setCategorizeButton)
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      });
   }, [props]);
 
   return visualizeButton || categorizeButton ? (
@@ -29,4 +40,12 @@ export const FieldPopoverFooter: React.FC<FieldPopoverFooterProps> = (props) => 
       {categorizeButton}
     </EuiPopoverFooter>
   ) : null;
+};
+
+export const FieldPopoverFooter: React.FC<FieldPopoverFooterProps> = (props) => {
+  return (
+    <ErrorBoundary>
+      <FieldPopoverFooterComponent {...props} />
+    </ErrorBoundary>
+  );
 };

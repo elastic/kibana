@@ -651,33 +651,6 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
-    expect(logger.debug).toHaveBeenCalledTimes(7);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
-    expect(logger.debug).nthCalledWith(
-      2,
-      `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
-    );
-    expect(logger.debug).nthCalledWith(
-      3,
-      `no scheduling of actions for rule test:1: '${RULE_NAME}': has active maintenance windows test-id-1,test-id-2.`
-    );
-    expect(logger.debug).nthCalledWith(
-      4,
-      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
-    );
-    expect(logger.debug).nthCalledWith(
-      5,
-      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
-    );
-    expect(logger.debug).nthCalledWith(
-      6,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
-    );
-    expect(logger.debug).nthCalledWith(
-      7,
-      'Updating rule task for test rule with id 1 - {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"} - {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
-    );
-
     const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
 
     testAlertingEventLogCalls({
@@ -2767,6 +2740,7 @@ describe('Task Runner', () => {
                 group: 'default',
               },
               flappingHistory: [true],
+              maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
             },
@@ -2934,6 +2908,7 @@ describe('Task Runner', () => {
                 group: 'default',
               },
               flappingHistory: [true],
+              maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
             },
@@ -2950,6 +2925,7 @@ describe('Task Runner', () => {
                 group: 'default',
               },
               flappingHistory: [true],
+              maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
             },

@@ -14,7 +14,7 @@ import type { ChromeNavControls } from './nav_controls';
 import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
-import { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
+import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and

@@ -63,7 +63,6 @@
     "@kbn/global-search-plugin",
     "@kbn/utility-types",
     "@kbn/utility-types-jest",
-    "@kbn/test-jest-helpers",
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/rison",
@@ -96,5 +95,7 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-http-router-server-internal",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-file-types",
   ]
 }

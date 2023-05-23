@@ -11,7 +11,7 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CaseSeverity,
-  CasesResponse,
+  Cases,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
@@ -597,7 +597,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           // does NOT updates alert status when the status is updated and syncAlerts=false
-          const updatedIndWithStatus: CasesResponse = (await setStatus({
+          const updatedIndWithStatus: Cases = (await setStatus({
             supertest,
             cases: [
               {
@@ -611,7 +611,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses['in-progress'],
               },
             ],
-          })) as CasesResponse;
+          })) as Cases;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
 
@@ -730,7 +730,7 @@ export default ({ getService }: FtrProviderContext): void => {
             signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
 
-          const updatedIndWithStatus: CasesResponse = (await setStatus({
+          const updatedIndWithStatus: Cases = (await setStatus({
             supertest,
             cases: [
               {
@@ -739,7 +739,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses.closed,
               },
             ],
-          })) as CasesResponse;
+          })) as Cases;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
           await es.indices.refresh({ index: signalsIndex2 });

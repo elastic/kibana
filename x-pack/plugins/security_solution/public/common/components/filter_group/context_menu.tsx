@@ -48,7 +48,7 @@ export const FilterGroupContextMenu = () => {
     [toggleContextMenu]
   );
 
-  const resetSelection = useCallback(() => {
+  const resetSelection = useCallback(async () => {
     if (!controlGroupInputUpdates) return;
 
     // remove existing embeddables
@@ -56,9 +56,10 @@ export const FilterGroupContextMenu = () => {
       panels: {},
     });
 
-    initialControls.forEach((control, idx) => {
-      controlGroup?.addOptionsListControl({
-        controlId: String(idx),
+    for (let counter = 0; counter < initialControls.length; counter++) {
+      const control = initialControls[counter];
+      await controlGroup?.addOptionsListControl({
+        controlId: String(counter),
         hideExclude: true,
         hideSort: true,
         hidePanelTitles: true,
@@ -68,9 +69,8 @@ export const FilterGroupContextMenu = () => {
         dataViewId: dataViewId ?? '',
         ...control,
       });
-    });
+    }
 
-    controlGroup?.reload();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [

@@ -140,6 +140,56 @@ describe('FileService', () => {
     expect(myFile?.id).toMatch(id);
   });
 
+  it('retrieves a file using the bulk method', async () => {
+    const { id } = await createDisposableFile({ fileKind, name: 'test' });
+    const [myFile] = await fileService.bulkGetById({ ids: [id] });
+    expect(myFile?.id).toMatch(id);
+  });
+
+  it('retrieves multiple files using the bulk method', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const file2 = await createDisposableFile({ fileKind, name: 'test' });
+    const [myFile1, myFile2] = await fileService.bulkGetById({ ids: [file1.id, file2.id] });
+    expect(myFile1?.id).toMatch(file1.id);
+    expect(myFile2?.id).toMatch(file2.id);
+  });
+
+  it('throws if one of the file does not exists', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    expect(async () => {
+      await fileService.bulkGetById({ ids: [file1.id, unknownID] });
+    }).rejects.toThrowError(`File [${unknownID}] not found`);
+  });
+
+  it('does not throw if one of the file does not exists', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    const [myFile1, myFile2] = await fileService.bulkGetById({
+      ids: [file1.id, unknownID],
+      throwIfNotFound: false,
+    });
+
+    expect(myFile1?.id).toBe(file1?.id);
+    expect(myFile2).toBe(null);
+  });
+
+  it('returns the files under a map of id/File', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    const myFiles = await fileService.bulkGetById({
+      ids: [file1.id, unknownID],
+      throwIfNotFound: false,
+      format: 'map',
+    });
+
+    expect(myFiles[file1?.id]?.id).toBe(file1?.id);
+    expect(myFiles[unknownID]).toBe(null);
+  });
+
   it('lists files', async () => {
     await Promise.all([
       createDisposableFile({ fileKind, name: 'test-1' }),
