@@ -30,7 +30,7 @@ jest.mock('../../rule_management/api/api');
 jest.mock('@kbn/securitysolution-list-api');
 
 // Broken during Jest 29 upgrade
-describe.skip('useFetchOrCreateRuleExceptionList', () => {
+describe('useFetchOrCreateRuleExceptionList', () => {
   let fetchRuleById: jest.SpyInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
   let patchRule: jest.SpyInstance<ReturnType<typeof rulesApi.patchRule>>;
   let addExceptionList: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionList>>;
