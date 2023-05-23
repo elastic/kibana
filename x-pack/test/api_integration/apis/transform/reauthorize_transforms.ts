@@ -9,7 +9,7 @@ import { ReauthorizeTransformsRequestSchema } from '@kbn/transform-plugin/common
 import expect from '@kbn/expect';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   function generateHeaders(apiKey: SecurityCreateApiKeyResponse) {
     return {
-      ...COMMON_REQUEST_HEADERS,
+      ...getCommonRequestHeader(),
       'es-secondary-authorization': `ApiKey ${apiKey.encoded}`,
     };
   }
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_UNAUTHORIZED,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_UNAUTHORIZED)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
         expect(body[transformCreatedByViewerId].success).to.eql(
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
         expect(body[transformCreatedByViewerId].success).to.eql(
@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
         expect(body[transformCreatedByViewerId].success).to.eql(
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -252,7 +252,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send([...reqBody, { id: invalidTransformId }]);
         transform.api.assertResponseStatusCode(200, status, body);
 
