@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiLink,
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
@@ -321,7 +322,9 @@ export const ElasticsearchOverview = () => {
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
             <FooterIcon
-              src={`${assetBasePath}invite_users_icon.png`}
+              // TODO: update with real link
+              href="https://elastic.co"
+              imgSrc={`${assetBasePath}invite_users_icon.png`}
               title={i18n.translate('xpack.serverlessSearch.footer.inviteUsers.title', {
                 defaultMessage: 'Invite more users',
               })}
@@ -329,7 +332,9 @@ export const ElasticsearchOverview = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <FooterIcon
-              src={`${assetBasePath}billing_icon.png`}
+              // TODO: update with real link
+              href="https://elastic.co"
+              imgSrc={`${assetBasePath}billing_icon.png`}
               title={i18n.translate('xpack.serverlessSearch.footer.billing.title', {
                 defaultMessage: 'Billing and usage',
               })}
@@ -337,7 +342,8 @@ export const ElasticsearchOverview = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <FooterIcon
-              src={`${assetBasePath}community_icon.png`}
+              href="https://www.elastic.co/community/"
+              imgSrc={`${assetBasePath}community_icon.png`}
               title={i18n.translate('xpack.serverlessSearch.footer.community.title', {
                 defaultMessage: 'Join the community',
               })}
@@ -345,7 +351,9 @@ export const ElasticsearchOverview = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <FooterIcon
-              src={`${assetBasePath}feedback_icon.png`}
+              // TODO: update with real link
+              href="https://www.elastic.co/kibana/feedback"
+              imgSrc={`${assetBasePath}feedback_icon.png`}
               title={i18n.translate('xpack.serverlessSearch.footer.feedback.title', {
                 defaultMessage: 'Give feedback',
               })}
@@ -376,11 +384,17 @@ const FooterCardImage = ({
   </div>
 );
 
-const FooterIcon = ({ src, title }: { src: string; title: string }) => (
-  <>
-    <EuiImage size={120} src={src} alt="" />
-    <EuiText color="ghost" textAlign="center">
-      <h5>{title}</h5>
-    </EuiText>
-  </>
+const FooterIcon = ({ href, imgSrc, title }: { href: string; imgSrc: string; title: string }) => (
+  <EuiLink href={href} target="_blank" external={false}>
+    <EuiFlexGroup direction="column" alignItems="center">
+      <EuiFlexItem>
+        <EuiImage size={120} src={imgSrc} alt="" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color="ghost">
+          <h5>{title}</h5>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiLink>
 );
