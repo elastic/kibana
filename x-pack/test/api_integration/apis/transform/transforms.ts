@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import { isGetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -80,7 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
     );
   }
 
-  describe('/api/transform/transforms', function () {
+  describe('/internal/transform/transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -95,12 +95,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('/transforms', function () {
       it('should return a list of transforms for super-user', async () => {
         const { body, status } = await supertest
-          .get('/api/transform/transforms')
+          .get('/internal/transform/transforms')
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -109,12 +109,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a list of transforms for transform view-only user', async () => {
         const { body, status } = await supertest
-          .get(`/api/transform/transforms`)
+          .get(`/internal/transform/transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -125,12 +125,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('/transforms/{transformId}', function () {
       it('should return a specific transform configuration for super-user', async () => {
         const { body, status } = await supertest
-          .get('/api/transform/transforms/transform-test-get-1')
+          .get('/internal/transform/transforms/transform-test-get-1')
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -139,12 +139,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a specific transform configuration transform view-only user', async () => {
         const { body, status } = await supertest
-          .get(`/api/transform/transforms/transform-test-get-1`)
+          .get(`/internal/transform/transforms/transform-test-get-1`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -153,12 +153,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should report 404 for a non-existing transform', async () => {
         const { body, status } = await supertest
-          .get('/api/transform/transforms/the-non-existing-transform')
+          .get('/internal/transform/transforms/the-non-existing-transform')
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send();
         transform.api.assertResponseStatusCode(404, status, body);
       });

@@ -18,6 +18,7 @@ export interface SendRequestConfig {
    * HttpFetchOptions#asSystemRequest.
    */
   asSystemRequest?: boolean;
+  version?: string;
 }
 
 export interface SendRequestResponse<D = any, E = any> {

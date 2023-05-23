@@ -7,11 +7,13 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { API_BASE_PATH } from '../../../common/constants';
+import { addInternalBasePath } from '../../../common/constants';
 
 export class IndexService {
   async canDeleteIndex(http: HttpSetup) {
-    const privilege = await http.get<{ hasAllPrivileges: boolean }>(`${API_BASE_PATH}privileges`);
+    const privilege = await http.get<{ hasAllPrivileges: boolean }>(
+      addInternalBasePath(`privileges`)
+    );
     if (!privilege) {
       return false;
     }
