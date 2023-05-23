@@ -70,6 +70,7 @@
     "@kbn/content-management-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/maps-vector-tile-utils",
+    "@kbn/core-http-common",
   ],
   "exclude": [
     "target/**/*",
