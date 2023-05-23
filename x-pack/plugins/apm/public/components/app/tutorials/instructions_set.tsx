@@ -49,7 +49,7 @@ export function InstructionsSet({ instructions }: InstructionSetProps) {
     setSelectedTab(tab);
   };
 
-  const InstructionTabs = ({ agentTabs }: { agentTabs: AgentTab[] }) => {
+  function InstructionTabs({ agentTabs }: { agentTabs: AgentTab[] }) {
     return (
       <EuiTabs>
         {agentTabs.map((tab) => (
@@ -63,15 +63,15 @@ export function InstructionsSet({ instructions }: InstructionSetProps) {
         ))}
       </EuiTabs>
     );
-  };
+  }
 
-  const InstructionSteps = ({
+  function InstructionSteps({
     instructionVariants,
     tab,
   }: {
     instructionVariants: InstructionVariant[];
     tab: string;
-  }) => {
+  }) {
     const selectInstructionSteps = instructionVariants.find((variant) => {
       return variant.id === tab;
     });
@@ -83,7 +83,7 @@ export function InstructionsSet({ instructions }: InstructionSetProps) {
     return (
       <EuiSteps titleSize="xs" steps={selectInstructionSteps.instructions} />
     );
-  };
+  }
 
   return (
     <EuiSplitPanel.Outer>
