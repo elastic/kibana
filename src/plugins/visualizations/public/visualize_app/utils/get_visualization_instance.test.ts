@@ -65,6 +65,7 @@ describe('getVisualizationInstance', () => {
         searchSource: {},
         title: 'savedSearchTitle',
       })),
+      getAll: jest.fn(),
       getNew: jest.fn().mockImplementation(() => ({})),
       save: jest.fn().mockImplementation(() => ({})),
     };

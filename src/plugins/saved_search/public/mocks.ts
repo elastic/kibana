@@ -14,6 +14,7 @@ const savedSearchStartMock = () => ({
     title: 'savedSearchTitle',
     searchSource: searchSourceInstanceMock,
   })),
+  getAll: jest.fn(),
   getNew: jest.fn().mockImplementation(() => ({
     searchSource: searchSourceInstanceMock,
   })),
