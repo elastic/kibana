@@ -9,13 +9,14 @@
 import * as t from 'io-ts';
 import {
   budgetingMethodSchema,
-  combinedSloSchema,
   compositeSloIdSchema,
   dateType,
   rollingTimeWindowSchema,
   summarySchema,
   tagsSchema,
   targetSchema,
+  weightedAverageCompositeMethodSchema,
+  weightedAverageSourceSchema,
 } from '../schema';
 
 const createCompositeSLOParamsSchema = t.type({
@@ -25,7 +26,8 @@ const createCompositeSLOParamsSchema = t.type({
       timeWindow: rollingTimeWindowSchema,
       budgetingMethod: budgetingMethodSchema,
       objective: targetSchema,
-      combinedSlos: t.array(combinedSloSchema),
+      compositeMethod: weightedAverageCompositeMethodSchema,
+      sources: t.array(weightedAverageSourceSchema),
     }),
     t.partial({ id: compositeSloIdSchema, tags: tagsSchema }),
   ]),
@@ -41,6 +43,8 @@ const compositeSLOResponseSchema = t.type({
   timeWindow: rollingTimeWindowSchema,
   budgetingMethod: budgetingMethodSchema,
   objective: targetSchema,
+  compositeMethod: weightedAverageCompositeMethodSchema,
+  sources: t.array(weightedAverageSourceSchema),
   tags: tagsSchema,
   createdAt: dateType,
   updatedAt: dateType,
@@ -57,7 +61,8 @@ const updateCompositeSLOParamsSchema = t.type({
   }),
   body: t.partial({
     name: t.string,
-    combinedSlos: t.array(combinedSloSchema),
+    compositeMethod: weightedAverageCompositeMethodSchema,
+    sources: t.array(weightedAverageSourceSchema),
     timeWindow: rollingTimeWindowSchema,
     budgetingMethod: budgetingMethodSchema,
     objective: targetSchema,

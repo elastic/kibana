@@ -22,7 +22,8 @@ export const compositeSlo: SavedObjectsType = {
       id: { type: 'keyword' },
       name: { type: 'text' },
       budgetingMethod: { type: 'keyword' },
-      combinedSlos: {
+      compositeMethod: { type: 'keyword' },
+      sources: {
         properties: {
           id: { type: 'keyword' },
           revision: { type: 'integer' },
