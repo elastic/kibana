@@ -49,6 +49,7 @@ describe('DocumentMigratorPipeline', () => {
       transforms,
       immediateVersion: latestVersions(versions),
       latestVersion: latestVersions(versions),
+      versionSchemas: {},
     };
   };
 

@@ -6289,21 +6289,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.VISUALIZE_ENABLE_LABS_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_ENABLE_LABS_SETTING",
-        "description": [],
-        "signature": [
-          "\"visualize:enableLabs\""
-        ],
-        "path": "src/plugins/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.VisualizeEmbeddableContract",
         "type": "Type",
         "tags": [],
@@ -6643,8 +6628,6 @@
             "section": "def-public.VisualizeEmbeddable",
             "text": "VisualizeEmbeddable"
           },
-          " | ",
-          "DisabledLabEmbeddable",
           " | undefined>; readonly type: \"visualization\"; inject: (_state: ",
           {
             "pluginId": "embeddable",
@@ -6741,8 +6724,6 @@
             "section": "def-public.VisualizeEmbeddable",
             "text": "VisualizeEmbeddable"
           },
-          " | ",
-          "DisabledLabEmbeddable",
           ">; readonly savedObjectMetaData: ",
           {
             "pluginId": "savedObjectsFinder",
@@ -7045,23 +7026,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-server.VISUALIZE_ENABLE_LABS_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_ENABLE_LABS_SETTING",
-        "description": [],
-        "signature": [
-          "\"visualize:enableLabs\""
-        ],
-        "path": "src/plugins/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "visualizations",
