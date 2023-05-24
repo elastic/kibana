@@ -48,12 +48,6 @@ export interface BackgroundTaskUtilRouteParams {
   usageCounter?: UsageCounter;
 }
 
-// Create an internal and public route so we can test out experimental metrics
-const routeOptions = [
-  { basePath: 'internal', isInternal: true },
-  { basePath: 'api', isInternal: false },
-];
-
 export function backgroundTaskUtilizationRoute(
   params: BackgroundTaskUtilRouteParams
 ): Observable<MonitoredUtilization> {
@@ -68,6 +62,16 @@ export function backgroundTaskUtilizationRoute(
     getClusterClient,
     usageCounter,
   } = params;
+
+  // Create an internal and public route so we can test out experimental metrics
+  const routeOptions = [
+    { basePath: 'internal', isInternal: true, isAuthenticated: true },
+    {
+      basePath: 'api',
+      isInternal: false,
+      isAuthenticated: config.unsafe.authenticate_background_task_utilization ?? true,
+    },
+  ];
 
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
 
@@ -110,6 +114,9 @@ export function backgroundTaskUtilizationRoute(
         // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
         // options: { tags: ['access:taskManager'] },
         validate: false,
+        options: {
+          authRequired: routeOption.isAuthenticated ?? true,
+        },
       },
       async function (
         _: RequestHandlerContext,
@@ -118,7 +125,7 @@ export function backgroundTaskUtilizationRoute(
       ): Promise<IKibanaResponse> {
         // If we are able to count usage, we want to check whether the user has access to
         // the `taskManager` feature, which is only available as part of the Global All privilege.
-        if (usageCounter) {
+        if (usageCounter && routeOption.isAuthenticated) {
           const clusterClient = await getClusterClient();
           const hasPrivilegesResponse = await clusterClient
             .asScoped(req)

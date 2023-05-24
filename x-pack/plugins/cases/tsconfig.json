@@ -65,6 +65,7 @@
     "@kbn/utility-types-jest",
     "@kbn/ui-actions-plugin",
     "@kbn/core-lifecycle-browser",
+    "@kbn/core-saved-objects-api-server-mocks",
   ],
   "exclude": [
     "target/**/*",

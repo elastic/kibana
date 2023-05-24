@@ -106,6 +106,16 @@ export default function (providerContext: FtrProviderContext) {
         await uninstallPackage(pkgName, pkgUpdateVersion);
       });
 
+      describe('Data Streams endpoint', () => {
+        it('Allows the fetching of data streams', async () => {
+          const res = await supertest
+            .get(`/api/fleet/epm/data_streams?uncategorisedOnly=false&datasetQuery=datastreams`)
+            .expect(200);
+          const dataStreams = res.body.items;
+          expect(dataStreams.length).to.be(6);
+        });
+      });
+
       it('should list the logs and metrics datastream', async function () {
         await asyncForEach(namespaces, async (namespace) => {
           const resLogsDatastream = await es.transport.request<any>(
