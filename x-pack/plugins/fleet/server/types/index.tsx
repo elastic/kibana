@@ -78,7 +78,6 @@ export type {
   FullAgentPolicyInputStream,
   DownloadSourceBase,
   DownloadSource,
-  DownloadSourceAttributes,
   PackageVerificationStatus,
   BulkInstallPackageInfo,
   PackageAssetReference,
