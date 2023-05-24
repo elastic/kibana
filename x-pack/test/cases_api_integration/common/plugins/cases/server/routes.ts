@@ -6,7 +6,6 @@
  */
 
 import { createHash } from 'crypto';
-import semverCompare from 'semver/functions/compare';
 import type { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
