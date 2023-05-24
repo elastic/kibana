@@ -44,7 +44,7 @@ xpack.actions.preconfigured:
       apiUrl: https://api.openai.com/v1/chat/completions
       apiProvider: 'Azure OpenAI'
     secrets:
-      apiKey: passwordkeystorevalue
+      apiKey: superlongapikey
 --
 
 Config defines information for the connector type.

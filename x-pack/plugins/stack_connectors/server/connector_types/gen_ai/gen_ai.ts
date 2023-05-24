@@ -53,7 +53,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     if (error.response.status === 401) {
       return 'Unauthorized API Error';
     }
-    return `API Error: ${error.response?.statusText}`;
+    return `API Error: ${error.response?.status} - ${error.response?.statusText}`;
   }
 
   public async runApi({ body }: GenAiRunActionParams): Promise<GenAiRunActionResponse> {

@@ -50,7 +50,13 @@ export const configValidator = (
       configObject.apiProvider !== OpenAiProviderType.OpenAi &&
       configObject.apiProvider !== OpenAiProviderType.AzureAi
     ) {
-      throw new Error('API Provider is not supported');
+      throw new Error(
+        `API Provider is not supported${
+          configObject.apiProvider && configObject.apiProvider.length
+            ? `: ${configObject.apiProvider}`
+            : ``
+        }`
+      );
     }
 
     return configObject;

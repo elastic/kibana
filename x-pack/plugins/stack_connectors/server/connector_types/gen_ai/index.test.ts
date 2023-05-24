@@ -57,11 +57,11 @@ describe('Generative AI Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring Generative AI action: Error: Invalid URL: example.com/do-something"'
+        '"Error configuring Generative AI action: Error: URL Error: Invalid URL: example.com/do-something"'
       );
     });
 
-    test('config validation failed when the OpenAI API provider is invalid', () => {
+    test('config validation failed when the OpenAI API provider is empty', () => {
       const config: GenAiConfig = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: '',
@@ -70,6 +70,18 @@ describe('Generative AI Connector', () => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
         '"Error configuring Generative AI action: Error: API Provider is not supported"'
+      );
+    });
+
+    test('config validation failed when the OpenAI API provider is invalid', () => {
+      const config: GenAiConfig = {
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiProvider: 'bad-one',
+      };
+      expect(() => {
+        configValidator(config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        '"Error configuring Generative AI action: Error: API Provider is not supported: bad-one"'
       );
     });
 
