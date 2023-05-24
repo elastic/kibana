@@ -28,7 +28,6 @@ import {
   externalService,
   originalCases,
   updatedCases,
-  comment,
   attachments,
   updatedAssigneesCases,
   originalCasesWithAssignee,
@@ -43,6 +42,7 @@ import {
   createUserActionSO,
   pushConnectorUserAction,
 } from './test_utils';
+import { comment } from '../../mocks';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();

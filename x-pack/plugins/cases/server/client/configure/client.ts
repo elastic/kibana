@@ -130,7 +130,7 @@ export const createConfigurationSubClient = (
   });
 };
 
-async function get(
+export async function get(
   params: GetConfigurationFindRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
@@ -233,7 +233,7 @@ function isConnectorSupported(
   );
 }
 
-async function update(
+export async function update(
   configurationId: string,
   req: ConfigurationPatchRequest,
   clientArgs: CasesClientArgs,

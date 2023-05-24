@@ -23,5 +23,15 @@ describe('get', () => {
         'The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
       );
     });
+
+    it('throws with excess fields', async () => {
+      await expect(
+        findComment(
+          // @ts-expect-error: excess attribute
+          { caseID: 'mock-id', queryParams: { page: 2, perPage: 9001 }, foo: 'bar' },
+          clientArgs
+        )
+      ).rejects.toThrow('invalid keys "foo"');
+    });
   });
 });

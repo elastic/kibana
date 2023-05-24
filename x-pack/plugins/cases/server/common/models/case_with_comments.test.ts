@@ -7,37 +7,14 @@
 
 import type { AttributesTypeAlerts } from '../../../common/api';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { createCasesClientMockArgs } from '../../client/mocks';
-import { mockCaseComments, mockCases } from '../../mocks';
+import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
 
 describe('CaseCommentModel', () => {
   const theCase = mockCases[0];
   const clientArgs = createCasesClientMockArgs();
   const createdDate = '2023-04-07T12:18:36.941Z';
-  const userComment = {
-    comment: 'Wow, good luck catching that bad meanie!',
-    type: CommentType.user as const,
-    owner: SECURITY_SOLUTION_OWNER,
-  };
-
-  const singleAlert = {
-    type: CommentType.alert as const,
-    owner: SECURITY_SOLUTION_OWNER,
-    alertId: 'test-id-1',
-    index: 'test-index-1',
-    rule: {
-      id: 'rule-id-1',
-      name: 'rule-name-1',
-    },
-  };
-
-  const multipleAlert = {
-    ...singleAlert,
-    alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
-    index: ['test-index-3', 'test-index-4', 'test-index-5'],
-  };
 
   clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
   clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
@@ -65,7 +42,7 @@ describe('CaseCommentModel', () => {
     it('does not remove comments when filtering out duplicate alerts', async () => {
       await model.createComment({
         id: 'comment-1',
-        commentReq: userComment,
+        commentReq: comment,
         createdDate,
       });
 
@@ -107,7 +84,7 @@ describe('CaseCommentModel', () => {
     it('does not remove alerts not attached to the case', async () => {
       await model.createComment({
         id: 'comment-1',
-        commentReq: singleAlert,
+        commentReq: alertComment,
         createdDate,
       });
 
@@ -284,7 +261,7 @@ describe('CaseCommentModel', () => {
 
       await model.createComment({
         id: 'comment-1',
-        commentReq: singleAlert,
+        commentReq: alertComment,
         createdDate,
       });
 
@@ -298,11 +275,11 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...userComment,
+            ...comment,
           },
           {
             id: 'comment-2',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-3',
@@ -334,7 +311,7 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...singleAlert,
+            ...alertComment,
           },
         ],
       });
@@ -414,7 +391,7 @@ describe('CaseCommentModel', () => {
 
       await model.createComment({
         id: 'comment-1',
-        commentReq: singleAlert,
+        commentReq: alertComment,
         createdDate,
       });
 
@@ -426,15 +403,15 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...userComment,
+            ...comment,
           },
           {
             id: 'comment-2',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-3',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-4',
@@ -470,11 +447,11 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...userComment,
+            ...comment,
           },
           {
             id: 'comment-2',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-3',
@@ -522,11 +499,11 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...userComment,
+            ...comment,
           },
           {
             id: 'comment-2',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-3',

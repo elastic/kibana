@@ -8,9 +8,17 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { CasesClientArgs } from '../types';
-import { getConnectors } from './client';
+import { getConnectors, get, update } from './client';
+import { createCasesClientInternalMock, createCasesClientMockArgs } from '../mocks';
 
 describe('client', () => {
+  const clientArgs = createCasesClientMockArgs();
+  const casesClientInternal = createCasesClientInternalMock();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('getConnectors', () => {
     const logger = loggingSystemMock.createLogger();
     const actionsClient = actionsClientMock.create();
@@ -197,6 +205,24 @@ describe('client', () => {
           referencedByCount: 1,
         },
       ]);
+    });
+  });
+
+  describe('get', () => {
+    it('throws with excess fields', async () => {
+      await expect(
+        // @ts-expect-error: excess attribute
+        get({ owner: 'cases', foo: 'bar' }, clientArgs, casesClientInternal)
+      ).rejects.toThrow('invalid keys "foo"');
+    });
+  });
+
+  describe('update', () => {
+    it('throws with excess fields', async () => {
+      await expect(
+        // @ts-expect-error: excess attribute
+        update('test-id', { version: 'test-version', foo: 'bar' }, clientArgs, casesClientInternal)
+      ).rejects.toThrow('invalid keys "foo"');
     });
   });
 });
