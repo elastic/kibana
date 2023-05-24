@@ -6,30 +6,41 @@
  */
 
 import { EuiFilterButton } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { FILTER_NAMES } from '../translations';
 
 interface ActionsLogWithRuleToggleProps {
-  isFlyout: boolean;
   dataTestSubj?: string;
+  onChangeWithAutomatedActionsFilter: () => void;
+  isFlyout: boolean;
 }
-
-export const ActionsLogWithRuleToggle = React.memo(
-  ({ isFlyout, dataTestSubj }: ActionsLogWithRuleToggleProps) => {
+export const AutomatedActionsFilter = React.memo(
+  ({
+    dataTestSubj,
+    onChangeWithAutomatedActionsFilter,
+    isFlyout,
+  }: ActionsLogWithRuleToggleProps) => {
     const { withAutomatedActions: withAutomatedActionsUrlParam, setUrlWithAutomatedActions } =
       useActionHistoryUrlParams();
+    const [value, setValue] = useState(withAutomatedActionsUrlParam);
 
     const onClick = useCallback(() => {
       if (!isFlyout) {
-        // set and show `withAutomatedActions` URL param on history page
         setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
       }
-    }, [isFlyout, setUrlWithAutomatedActions, withAutomatedActionsUrlParam]);
+      setValue((prevState) => !prevState);
+      onChangeWithAutomatedActionsFilter();
+    }, [
+      isFlyout,
+      onChangeWithAutomatedActionsFilter,
+      setUrlWithAutomatedActions,
+      withAutomatedActionsUrlParam,
+    ]);
 
     return (
       <EuiFilterButton
-        hasActiveFilters={withAutomatedActionsUrlParam}
+        hasActiveFilters={value}
         onClick={onClick}
         data-test-subj={`${dataTestSubj}-automated-responses-filter`}
       >
@@ -39,4 +50,4 @@ export const ActionsLogWithRuleToggle = React.memo(
   }
 );
 
-ActionsLogWithRuleToggle.displayName = 'ActionsLogWithRuleToggle';
+AutomatedActionsFilter.displayName = 'AutomatedActionsFilter';

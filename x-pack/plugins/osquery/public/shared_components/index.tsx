@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { getLazyOsqueryResult } from './lazy_osquery_result';
 export { getLazyOsqueryResults } from './lazy_osquery_results';
 export { getLazyOsqueryAction } from './lazy_osquery_action';
 export { getLazyLiveQueryField } from './lazy_live_query_field';
