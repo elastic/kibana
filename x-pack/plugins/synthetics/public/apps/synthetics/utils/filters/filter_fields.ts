@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { invert } from 'lodash';
-import { DataStream, ServiceLocations } from '../../../../../../../common/runtime_types';
-import { MonitorFilterState } from '../../../../state';
+import { DataStream, ServiceLocations } from '../../../../../common/runtime_types';
+import { MonitorFilterState } from '../../state';
 
 export type SyntheticsMonitorFilterField = keyof Omit<MonitorFilterState, 'query'>;
 
