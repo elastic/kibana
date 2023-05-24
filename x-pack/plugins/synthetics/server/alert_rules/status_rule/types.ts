@@ -18,4 +18,6 @@ export interface MonitorSummaryStatusRule {
   monitorName: string;
   locationName: string;
   lastErrorMessage: string;
+  stateId: string | null;
+  monitorUrlLabel: string;
 }

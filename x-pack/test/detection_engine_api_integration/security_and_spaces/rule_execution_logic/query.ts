@@ -44,7 +44,7 @@ import {
   createExceptionListItem,
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getOpenSignals,
   getPreviewAlerts,
   getRuleForSignalTesting,
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllRules(supertest, log);
     });
 
@@ -1911,7 +1911,7 @@ export default ({ getService }: FtrProviderContext) => {
             const firstDoc = { id, '@timestamp': timestamp, agent: { name: 'agent-1' } };
             const secondDoc = { id, '@timestamp': laterTimestamp, agent: { name: 'agent-1' } };
             const thirdDoc = { id, '@timestamp': laterTimestamp, agent: { name: 'agent-2' } };
-            const missingFieldDoc1 = { id, '@timestamp': laterTimestamp };
+            const missingFieldDoc1 = { id, '@timestamp': timestamp };
             const missingFieldDoc2 = { id, '@timestamp': laterTimestamp };
 
             await indexListOfDocuments([

@@ -5777,7 +5777,7 @@
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_utils.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-import-export-server-internal",
@@ -6581,7 +6581,7 @@
         "tags": [],
         "label": "SavedObjectMigrationMap",
         "description": [
-          "\nA map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.\nThe map's keys must be valid semver versions, and they cannot exceed the current Kibana version.\n\nFor a given document, only migrations with a higher version number than that of the document will be applied.\nMigrations are executed in order, starting from the lowest version and ending with the highest one.\n"
+          "\nA map of {@link SavedObjectMigration | migrations} to be used for a given type.\nThe map's keys must be valid semver versions, and they cannot exceed the current Kibana version.\n\nFor a given document, only migrations with a higher version number than that of the document will be applied.\nMigrations are executed in order, starting from the lowest version and ending with the highest one.\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
         "deprecated": false,
@@ -6592,7 +6592,7 @@
             "id": "def-common.SavedObjectMigrationMap.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[version: string]: SavedObjectMigrationFn<any, any>",
+            "label": "[version: string]: SavedObjectMigration<any, any>",
             "description": [],
             "signature": [
               "[version: string]:  ",
@@ -6600,14 +6600,143 @@
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectMigrationFn",
-                "text": "SavedObjectMigrationFn"
+                "section": "def-common.SavedObjectMigration",
+                "text": "SavedObjectMigration"
               },
               "<any, any>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectMigrationParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectMigrationParams",
+        "description": [
+          "\nSaved Objects migration with parameters."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationParams",
+            "text": "SavedObjectMigrationParams"
+          },
+          "<InputAttributes, MigratedAttributes>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectMigrationParams.deferred",
+            "type": "boolean",
+            "tags": [
+              "default"
+            ],
+            "label": "deferred",
+            "description": [
+              "\nA flag that can defer the migration until either an object is accessed (read) or if there is another non-deferred migration with a higher version."
+            ],
+            "signature": [
+              "false | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectMigrationParams.transform",
+            "type": "Function",
+            "tags": [],
+            "label": "transform",
+            "description": [
+              "{@inheritDoc SavedObjectMigrationFn}"
+            ],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<InputAttributes>, context: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationContext",
+                "text": "SavedObjectMigrationContext"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<MigratedAttributes>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.SavedObjectMigrationParams.transform.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
+                  "[] | undefined; }"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.SavedObjectMigrationParams.transform.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectMigrationContext",
+                    "text": "SavedObjectMigrationContext"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -7802,74 +7931,164 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
-        "id": "def-common.SavedObjectsModelExpansionChange",
+        "id": "def-common.SavedObjectsModelDataBackfillChange",
         "type": "Interface",
         "tags": [],
-        "label": "SavedObjectsModelExpansionChange",
+        "label": "SavedObjectsModelDataBackfillChange",
         "description": [
-          "\n{@link SavedObjectsModelChange | model change} representing an expansion.\n\nA model expansion can do either, or both, or those:\n- add new mappings\n- migrate data in a backward-compatible way\n"
+          "\nA {@link SavedObjectsModelChange | model change} used to backfill fields introduced in the same model version.\n"
         ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server",
             "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsModelExpansionChange",
-            "text": "SavedObjectsModelExpansionChange"
+            "section": "def-common.SavedObjectsModelDataBackfillChange",
+            "text": "SavedObjectsModelDataBackfillChange"
           },
           "<PreviousAttributes, NewAttributes>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsModelExpansionChange.type",
+            "id": "def-common.SavedObjectsModelDataBackfillChange.type",
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nThe type of {@link SavedObjectsModelChange | change}, used to identify them internally."
-            ],
+            "description": [],
             "signature": [
-              "\"expansion\""
+              "\"data_backfill\""
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsModelExpansionChange.transformation",
-            "type": "Object",
+            "id": "def-common.SavedObjectsModelDataBackfillChange.transform",
+            "type": "Function",
             "tags": [],
-            "label": "transformation",
+            "label": "transform",
             "description": [
-              "\n(optional) A bidirectional transformation to migrate the document from and/or to the previous model version."
+              "\nThe backfill function to run."
             ],
             "signature": [
+              "(document: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelBidirectionalTransformation",
-                "text": "SavedObjectModelBidirectionalTransformation"
+                "section": "def-common.SavedObjectModelTransformationDoc",
+                "text": "SavedObjectModelTransformationDoc"
               },
-              "<PreviousAttributes, NewAttributes> | undefined"
+              "<PreviousAttributes>, context: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectModelTransformationContext",
+                "text": "SavedObjectModelTransformationContext"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectModelTransformationResult",
+                "text": "SavedObjectModelTransformationResult"
+              },
+              "<NewAttributes>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.SavedObjectsModelDataBackfillChange.transform.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "document",
+                "description": [],
+                "signature": [
+                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
+                  "[] | undefined; }"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.SavedObjectsModelDataBackfillChange.transform.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectModelTransformationContext",
+                    "text": "SavedObjectModelTransformationContext"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectsModelMappingsAdditionChange",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsModelMappingsAdditionChange",
+        "description": [
+          "\nA {@link SavedObjectsModelChange | model change} adding new mappings.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsModelMappingsAdditionChange.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"mappings_addition\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsModelExpansionChange.addedMappings",
+            "id": "def-common.SavedObjectsModelMappingsAdditionChange.addedMappings",
             "type": "Object",
             "tags": [],
             "label": "addedMappings",
             "description": [
-              "\n(optional) The new mappings introduced in this version."
+              "\nThe new mappings introduced in this version."
             ],
             "signature": [
               {
@@ -7878,26 +8097,55 @@
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
                 "section": "def-common.SavedObjectsMappingProperties",
                 "text": "SavedObjectsMappingProperties"
-              },
-              " | undefined"
+              }
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectsModelMappingsDeprecationChange",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsModelMappingsDeprecationChange",
+        "description": [
+          "\nA {@link SavedObjectsModelChange | model change} flagging mappings as being deprecated.\nDeprecated mappings should no longer be used and will eventually be deleted later."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsModelMappingsDeprecationChange.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"mappings_deprecation\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsModelExpansionChange.deprecatedMappings",
+            "id": "def-common.SavedObjectsModelMappingsDeprecationChange.deprecatedMappings",
             "type": "Array",
             "tags": [],
             "label": "deprecatedMappings",
             "description": [
-              "\n(optional) A list of paths to mappings to flag as deprecated. Deprecated mappings should no longer be used and will\neventually be deleted later."
+              "\nA list of paths to mappings to flag as deprecated."
             ],
             "signature": [
-              "string[] | undefined"
+              "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7911,7 +8159,7 @@
         "tags": [],
         "label": "SavedObjectsModelVersion",
         "description": [
-          "\nRepresents a model version of a given savedObjects type.\n\nModel versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs\nby exposing an unified way of describing the changes of shape or data of a type.\n"
+          "\nRepresents a model version of a given saved object type.\n\nModel versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs\nby exposing an unified way of describing the changes of shape or data of a type.\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
         "deprecated": false,
@@ -7919,22 +8167,45 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsModelVersion.modelChange",
-            "type": "Object",
+            "id": "def-common.SavedObjectsModelVersion.changes",
+            "type": "Array",
             "tags": [],
-            "label": "modelChange",
+            "label": "changes",
             "description": [
-              "\nThe {@link SavedObjectsModelChange | changes} associated with this version."
+              "\nThe list of {@link SavedObjectsModelChange | changes} associated with this version."
             ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsModelExpansionChange",
-                "text": "SavedObjectsModelExpansionChange"
+                "section": "def-common.SavedObjectsModelChange",
+                "text": "SavedObjectsModelChange"
               },
-              "<any, any>"
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsModelVersion.schemas",
+            "type": "Object",
+            "tags": [],
+            "label": "schemas",
+            "description": [
+              "\nThe {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.\n\nSchemas are used to validate / convert the shape and/or content of the documents at various stages of their usages."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsModelVersionSchemaDefinitions",
+                "text": "SavedObjectsModelVersionSchemaDefinitions"
+              },
+              " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
             "deprecated": false,
@@ -7974,6 +8245,45 @@
               }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectsModelVersionSchemaDefinitions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsModelVersionSchemaDefinitions",
+        "description": [
+          "\nThe schemas associated with this model version.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsModelVersionSchemaDefinitions.forwardCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "forwardCompatibility",
+            "description": [
+              "\nThe schema applied when retrieving documents of a higher version from the cluster.\nUsed for multi-version compatibility in managed environments.\n\nWhen retrieving a savedObject document from an index, if the version of the document\nis higher than the latest version known of the Kibana instance, the document will go\nthrough the `forwardCompatibility` schema of the associated model version.\n\nE.g a Kibana instance with model version `2` for type `foo` types fetches a `foo` document\nat model version `3`. The document will then go through the `forwardCompatibility`\nof the model version 2 (if present).\n\nSee {@link SavedObjectModelVersionForwardCompatibilitySchema} for more info."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+                "text": "SavedObjectModelVersionForwardCompatibilitySchema"
+              },
+              "<unknown, unknown> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9806,7 +10116,7 @@
               "\nThe {@link SavedObjectsNamespaceType | namespace type} for the type."
             ],
             "signature": [
-              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
@@ -9971,27 +10281,27 @@
             "references": [
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/utils.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
                 "plugin": "actions",
@@ -10160,10 +10470,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
@@ -10900,6 +11206,38 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectMigration",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectMigration",
+        "description": [
+          "\nSaved Objects migration.\nIt can be either a {@link SavedObjectMigrationFn | migration function} or a {@link SavedObjectMigrationParams | migration object}."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationFn",
+            "text": "SavedObjectMigrationFn"
+          },
+          "<InputAttributes, MigratedAttributes> | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationParams",
+            "text": "SavedObjectMigrationParams"
+          },
+          "<InputAttributes, MigratedAttributes>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-common.SavedObjectMigrationFn",
         "type": "Type",
         "tags": [],
@@ -10978,6 +11316,92 @@
               }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectModelDataBackfillFn",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectModelDataBackfillFn",
+        "description": [
+          "\nA data backfill function associated with a {@link SavedObjectsModelDataBackfillChange | data backfill} change.\n"
+        ],
+        "signature": [
+          "(document: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectModelTransformationDoc",
+            "text": "SavedObjectModelTransformationDoc"
+          },
+          "<InputAttributes>, context: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectModelTransformationContext",
+            "text": "SavedObjectModelTransformationContext"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectModelTransformationResult",
+            "text": "SavedObjectModelTransformationResult"
+          },
+          "<OutputAttributes>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectModelDataBackfillFn.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "document",
+            "description": [],
+            "signature": [
+              "SavedObjectDoc<InputAttributes> & { references?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[] | undefined; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectModelDataBackfillFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectModelTransformationContext",
+                "text": "SavedObjectModelTransformationContext"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11093,6 +11517,72 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectModelVersionForwardCompatibilityFn",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectModelVersionForwardCompatibilityFn",
+        "description": [
+          "\nPlain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}"
+        ],
+        "signature": [
+          "(attributes: InAttrs) => OutAttrs"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectModelVersionForwardCompatibilityFn.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "InAttrs"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectModelVersionForwardCompatibilitySchema",
+        "description": [
+          "\nSchema used when retrieving a document of a higher version to convert them to the older version.\n\nThese schemas can be defined in multiple ways:\n- A `@kbn/config-schema`'s Object schema, that will receive the document's attributes\n- An arbitrary function that will receive the document's attributes as parameter and should return the converted attributes\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any> | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectModelVersionForwardCompatibilityFn",
+            "text": "SavedObjectModelVersionForwardCompatibilityFn"
+          },
+          "<InAttrs, OutAttrs>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -11620,19 +12110,35 @@
         "tags": [],
         "label": "SavedObjectsModelChange",
         "description": [
-          "\nIdentify the model change associated with a given {@link SavedObjectsModelVersion}.\n\nAt the moment, Only one type of change is supported: {@link SavedObjectsModelExpansionChange | expansions}.\n"
+          "\nRepresents a change of model associated with a given {@link SavedObjectsModelVersion}.\n\nThe existing types of model changes are:\n  - 'mappings_addition' ({@link SavedObjectsModelMappingsAdditionChange}\n  - 'mappings_deprecation' ({@link SavedObjectsModelMappingsDeprecationChange}\n  - 'data_backfill' ({@link SavedObjectsModelDataBackfillChange}\n"
         ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server",
             "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsModelExpansionChange",
-            "text": "SavedObjectsModelExpansionChange"
+            "section": "def-common.SavedObjectsModelMappingsAdditionChange",
+            "text": "SavedObjectsModelMappingsAdditionChange"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsModelMappingsDeprecationChange",
+            "text": "SavedObjectsModelMappingsDeprecationChange"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsModelDataBackfillChange",
+            "text": "SavedObjectsModelDataBackfillChange"
           },
           "<any, any>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts",
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,14 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { deletePermissionError } from '../../synthetics_service/private_location/synthetics_private_location';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -20,9 +16,8 @@ import {
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   formatTelemetryDeleteEvent,
@@ -41,22 +36,14 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     }),
   },
   writeAccess: true,
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response } = routeContext;
     const { monitorId } = request.params;
 
     try {
       const errors = await deleteMonitor({
-        savedObjectsClient,
-        server,
+        routeContext,
         monitorId,
-        syntheticsMonitorClient,
-        request,
       });
 
       if (errors && errors.length > 0) {
@@ -77,18 +64,13 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 });
 
 export const deleteMonitor = async ({
-  savedObjectsClient,
-  server,
+  routeContext,
   monitorId,
-  syntheticsMonitorClient,
-  request,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
+  routeContext: RouteContext;
   monitorId: string;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
-  request: KibanaRequest;
 }) => {
+  const { savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
   const { logger, telemetry, stackVersion } = server;
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
@@ -125,7 +107,10 @@ export const deleteMonitor = async ({
     );
     const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 
-    const [errors] = await Promise.all([deleteSyncPromise, deletePromise]);
+    const [errors] = await Promise.all([deleteSyncPromise, deletePromise]).catch((e) => {
+      server.logger.error(e);
+      throw e;
+    });
 
     sendTelemetryEvents(
       logger,
@@ -141,6 +126,10 @@ export const deleteMonitor = async ({
 
     return errors;
   } catch (e) {
+    server.logger.error(
+      `Unable to delete Synthetics monitor ${monitor.attributes[ConfigKey.NAME]}`
+    );
+
     if (monitorWithSecret) {
       await restoreDeletedMonitor({
         monitorId,

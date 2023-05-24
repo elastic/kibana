@@ -39,7 +39,7 @@ export function InstallElasticAgent() {
 
   function onContinue() {
     setState({ ...getState(), elasticAgentPlatform, alternativeShippers });
-    goToStep('importData');
+    goToStep('collectLogs');
   }
 
   function createAlternativeShipperToggle(
@@ -58,7 +58,21 @@ export function InstallElasticAgent() {
   }
 
   return (
-    <StepPanel title="Install the Elastic Agent">
+    <StepPanel
+      title="Install the Elastic Agent"
+      panelFooter={
+        <StepPanelFooter
+          items={[
+            <EuiButton color="ghost" fill onClick={onBack}>
+              Back
+            </EuiButton>,
+            <EuiButton color="primary" fill onClick={onContinue}>
+              Continue
+            </EuiButton>,
+          ]}
+        />
+      }
+    >
       <StepPanelContent>
         <EuiText color="subdued">
           <p>
@@ -130,16 +144,6 @@ export function InstallElasticAgent() {
           </EuiFlexGroup>
         </LogsTypeSection>
       </StepPanelContent>
-      <StepPanelFooter
-        items={[
-          <EuiButton color="ghost" fill onClick={onBack}>
-            Back
-          </EuiButton>,
-          <EuiButton color="primary" fill onClick={onContinue}>
-            Continue
-          </EuiButton>,
-        ]}
-      />
     </StepPanel>
   );
 }

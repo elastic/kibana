@@ -11,7 +11,7 @@ import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/sea
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  deleteSignalsIndex,
+  deleteAllAlerts,
   createSignalsIndex,
   deleteAllRules,
   getRuleForSignalTesting,
@@ -40,6 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
   const secureBsearch = getService('secureBsearch');
   const log = getService('log');
   const kbnClient = getService('kibanaServer');
+  const es = getService('es');
 
   const SPACE1 = 'space1';
 
@@ -66,6 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
           },
@@ -87,6 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
             pagination: {
@@ -127,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
@@ -142,6 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
@@ -163,6 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
           },
@@ -172,6 +177,38 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result.message).to.be(
           `The privateRuleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
         );
+      });
+
+      it('should be able to handle runtime fields on alerts from siem rules', async () => {
+        const runtimeFieldValue = 'hello world';
+        const runtimeFieldKey = 'hello_world';
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAllEsRead.username,
+            password: obsOnlySpacesAllEsRead.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            featureIds: [AlertConsumers.SIEM],
+            runtimeMappings: {
+              [runtimeFieldKey]: {
+                type: 'keyword',
+                script: {
+                  source: `emit('${runtimeFieldValue}')`,
+                },
+              },
+            },
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        });
+        expect(result.rawResponse.hits.total).to.eql(1);
+        const runtimeFields = result.rawResponse.hits.hits.map(
+          (hit) => hit.fields?.[runtimeFieldKey]
+        );
+        expect(runtimeFields.every((field) => field === runtimeFieldValue));
       });
     });
 
@@ -192,6 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.APM],
           },
@@ -216,6 +254,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [],
           },

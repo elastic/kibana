@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
+import { docLinks } from '../common/doc_links';
 import {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
@@ -14,19 +16,40 @@ import {
 } from './types';
 
 export class ServerlessSearchPlugin
-  implements Plugin<ServerlessSearchPluginSetup, ServerlessSearchPluginStart>
+  implements
+    Plugin<
+      ServerlessSearchPluginSetup,
+      ServerlessSearchPluginStart,
+      ServerlessSearchPluginSetupDependencies,
+      ServerlessSearchPluginStartDependencies
+    >
 {
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     _setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
+    core.application.register({
+      id: 'serverlessElasticsearch',
+      title: 'Elasticsearch',
+      appRoute: '/app/elasticsearch',
+      async mount({ element }: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart, { cloud, security }] = await core.getStartServices();
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        const userProfile = await security.userProfiles.getCurrent();
+
+        return await renderApp(element, coreStart, { cloud, userProfile });
+      },
+    });
     return {};
   }
 
   public start(
-    _core: CoreStart,
-    _startDeps: ServerlessSearchPluginStartDependencies
+    core: CoreStart,
+    { serverless }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
+    serverless.setSideNavComponent(createComponent(core, { serverless }));
     return {};
   }
 

@@ -23,6 +23,15 @@ export interface BaseState extends ControlState {
   readonly retryCount: number;
   readonly retryDelay: number;
   readonly logs: MigrationLog[];
+  /**
+   * When true, will fully skip document migration, and will transition directly to DONE
+   * after the INDEX_STATE_UPDATE_DONE stage.
+   *
+   * This flag is set to `true` in the following scenarios:
+   * - on nodes without the `migrator` role, the flag will always be `true`.
+   * - if the migrator create the index, the workflow will set the flag to `true` given there is nothing to migrate.
+   */
+  readonly skipDocumentMigration: boolean;
 }
 
 /** Initial state before any action is performed */
@@ -56,13 +65,6 @@ export interface PostInitState extends BaseState {
    * All operations updating this field will update in the state accordingly.
    */
   readonly currentIndexMeta: IndexMappingMeta;
-  /**
-   * When true, will fully skip document migration after the INDEX_STATE_UPDATE_DONE stage.
-   * Used when 'upgrading' a fresh cluster (via CREATE_TARGET_INDEX), as we create
-   * the index with the correct meta and because we're sure we don't need to migrate documents
-   * in that case.
-   */
-  readonly newIndexCreation: boolean;
 }
 
 /**

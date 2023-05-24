@@ -78,20 +78,44 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   agent: {
     id: true,
   },
+  cloud: {
+    availability_zone: true,
+    provider: true,
+    region: true,
+  },
+  cloud_defend: true,
+  container: {
+    id: true,
+    image: {
+      name: true,
+      tag: true,
+      hash: true,
+    },
+  },
   destination: {
     port: true,
   },
   dll: {
+    Ext: {
+      relative_file_creation_time: true,
+      relative_file_name_modify_time: true,
+    },
     code_signature: {
       status: true,
       subject_name: true,
+      trusted: true,
+    },
+    name: true,
+    path: true,
+    pe: {
+      original_file_name: true,
+      imphash: true,
+    },
+    hash: {
+      sha256: true,
     },
   },
-  dns: {
-    question: {
-      name: true,
-    },
-  },
+  dns: true,
   event: true,
   group: {
     name: true,
@@ -118,6 +142,15 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     transport: true,
     type: true,
   },
+  orchestrator: {
+    namespace: true,
+    resource: {
+      parent: {
+        type: true,
+      },
+      type: true,
+    },
+  },
   process: {
     args: true,
     args_count: true,
@@ -126,13 +159,25 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       trusted: true,
     },
     command_line: true,
+    end: true,
     entity_id: true,
+    entry_leader: true,
     executable: true,
+    exit_code: true,
     Ext: {
+      api: {
+        name: true,
+      },
+      effective_parent: {
+        executable: true,
+        name: true,
+      },
       token: {
         integrity_level_name: true,
       },
     },
+    group: true,
+    interactive: true,
     name: true,
     parent: {
       args: true,
@@ -151,6 +196,10 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       },
     },
     pid: true,
+    session_leader: true,
+    start: true,
+    user: true,
+    tty: true,
     working_directory: true,
   },
   registry: {
@@ -235,7 +284,13 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   file: {
+    directory: true,
     Ext: {
+      entropy: true,
+      header_bytes: true,
+      original: {
+        name: true,
+      },
       windows: {
         zone_identifier: true,
       },

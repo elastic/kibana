@@ -11,9 +11,14 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { RouteContext } from '../../legacy_uptime/routes';
 import { normalizeSecrets } from '../utils';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
-import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
+import {
+  PrivateConfig,
+  SyntheticsPrivateLocation,
+} from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
 import {
   ConfigData,
@@ -29,7 +34,6 @@ import {
   SyntheticsMonitorWithSecrets,
   MonitorServiceLocation,
 } from '../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;
@@ -47,8 +51,7 @@ export class SyntheticsMonitorClient {
     allPrivateLocations: PrivateLocation[],
     spaceId: string
   ) {
-    const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
-      [];
+    const privateConfigs: PrivateConfig[] = [];
     const publicConfigs: ConfigData[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
@@ -78,25 +81,17 @@ export class SyntheticsMonitorClient {
       }
     }
 
-    let newPolicies;
+    const newPolicies = this.privateLocationAPI.createPackagePolicies(
+      privateConfigs,
+      request,
+      savedObjectsClient,
+      allPrivateLocations,
+      spaceId
+    );
 
-    if (privateConfigs.length > 0) {
-      newPolicies = await this.privateLocationAPI.createMonitors(
-        privateConfigs,
-        request,
-        savedObjectsClient,
-        allPrivateLocations,
-        spaceId
-      );
-    }
+    const syncErrors = this.syntheticsService.addConfigs(publicConfigs);
 
-    let syncErrors;
-
-    if (publicConfigs.length > 0) {
-      syncErrors = await this.syntheticsService.addConfig(publicConfigs);
-    }
-
-    return { newPolicies, syncErrors };
+    return await Promise.all([newPolicies, syncErrors]);
   }
 
   async editMonitors(
@@ -106,11 +101,11 @@ export class SyntheticsMonitorClient {
       previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
       decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
     }>,
-    request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract,
+    routeContext: RouteContext,
     allPrivateLocations: PrivateLocation[],
     spaceId: string
   ) {
+    const { request, savedObjectsClient } = routeContext;
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
       [];
 
@@ -151,7 +146,11 @@ export class SyntheticsMonitorClient {
       }
     }
 
-    await this.privateLocationAPI.editMonitors(
+    if (deletedPublicConfigs.length > 0) {
+      await this.syntheticsService.deleteConfigs(deletedPublicConfigs);
+    }
+
+    const privateEditPromise = this.privateLocationAPI.editMonitors(
       privateConfigs,
       request,
       savedObjectsClient,
@@ -159,13 +158,16 @@ export class SyntheticsMonitorClient {
       spaceId
     );
 
-    if (deletedPublicConfigs.length > 0) {
-      await this.syntheticsService.deleteConfigs(deletedPublicConfigs);
-    }
+    const publicConfigsPromise = this.syntheticsService.editConfig(publicConfigs);
 
-    if (publicConfigs.length > 0) {
-      return await this.syntheticsService.editConfig(publicConfigs);
-    }
+    const [publicSyncErrors, privateEditResponse] = await Promise.all([
+      publicConfigsPromise,
+      privateEditPromise,
+    ]);
+
+    const { failedUpdates: failedPolicyUpdates } = privateEditResponse;
+
+    return { failedPolicyUpdates, publicSyncErrors };
   }
   async deleteMonitors(
     monitors: SyntheticsMonitorWithId[],

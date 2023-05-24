@@ -146,6 +146,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiFlyout.screenReaderNonModalDialog": "You are in a non-modal dialog. To close the dialog, press Escape.",
           "euiForm.addressFormErrors": "Please address the highlighted errors.",
           "euiFormControlLayoutClearButton.label": "Clear input",
+          "euiFormControlLayoutDelimited.delimiterLabel": "to",
           "euiFullscreenSelector.fullscreenButton": "Enter fullscreen",
           "euiFullscreenSelector.fullscreenButtonActive": "Exit fullscreen",
           "euiHeaderLinks.appNavigation": "App menu",

@@ -13,6 +13,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -28,6 +29,7 @@ import {
   type SavedObjectsTypeMappingDefinitions,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  type MigrateDocumentOptions,
   type KibanaMigratorStatus,
   type MigrationResult,
   type IndexTypesMap,
@@ -52,6 +54,7 @@ export interface KibanaMigratorOptions {
   docLinks: DocLinksServiceStart;
   waitForMigrationCompletion: boolean;
   defaultIndexTypesMap?: IndexTypesMap;
+  nodeRoles: NodeRoles;
 }
 
 /**
@@ -74,6 +77,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly docLinks: DocLinksServiceStart;
   private readonly waitForMigrationCompletion: boolean;
   private readonly defaultIndexTypesMap: IndexTypesMap;
+  private readonly nodeRoles: NodeRoles;
   public readonly kibanaVersion: string;
 
   /**
@@ -89,6 +93,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     docLinks,
     defaultIndexTypesMap = DEFAULT_INDEX_TYPES_MAP,
     waitForMigrationCompletion,
+    nodeRoles,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -105,6 +110,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       log: this.log,
     });
     this.waitForMigrationCompletion = waitForMigrationCompletion;
+    this.nodeRoles = nodeRoles;
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
@@ -159,6 +165,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       docLinks: this.docLinks,
       serializer: this.serializer,
       elasticsearchClient: this.client,
+      nodeRoles: this.nodeRoles,
     });
   }
 
@@ -170,7 +177,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     });
 
     this.log.debug('Applying registered migrations for the following saved object types:');
-    Object.entries(this.documentMigrator.migrationVersion)
+    Object.entries(this.documentMigrator.getMigrationVersion())
       .sort(([t1, v1], [t2, v2]) => {
         return Semver.compare(v1, v2);
       })
@@ -237,7 +244,13 @@ export class KibanaMigrator implements IKibanaMigrator {
                 migrateDoc: this.documentMigrator.migrateAndConvert,
                 rawDocs,
               }),
-            migrationVersionPerType: this.documentMigrator.migrationVersion,
+            coreMigrationVersionPerType: this.documentMigrator.getMigrationVersion({
+              includeDeferred: false,
+              migrationType: 'core',
+            }),
+            migrationVersionPerType: this.documentMigrator.getMigrationVersion({
+              includeDeferred: false,
+            }),
             indexPrefix: indexName,
             migrationsConfig: this.soMigrationsConfig,
             typeRegistry: this.typeRegistry,
@@ -254,7 +267,10 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.activeMappings;
   }
 
-  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.documentMigrator.migrate(doc);
+  public migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
+    { allowDowngrade = false }: MigrateDocumentOptions = {}
+  ): SavedObjectUnsanitizedDoc {
+    return this.documentMigrator.migrate(doc, { allowDowngrade });
   }
 }

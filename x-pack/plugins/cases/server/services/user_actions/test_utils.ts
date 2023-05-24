@@ -10,8 +10,8 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
 import { omit, get } from 'lodash';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -67,7 +67,7 @@ export const createConnectorUserAction = (
 };
 
 export const createUserActionSO = ({
-  action,
+  action = Actions.create,
   attributesOverrides,
   commentId,
   connectorId,
@@ -76,7 +76,7 @@ export const createUserActionSO = ({
   type,
   references = [],
 }: {
-  action: ActionCategory;
+  action?: ActionCategory;
   type?: string;
   payload?: Record<string, unknown>;
   attributesOverrides?: Partial<CaseUserActionAttributesWithoutConnectorId>;
@@ -84,7 +84,7 @@ export const createUserActionSO = ({
   connectorId?: string;
   pushedConnectorId?: string;
   references?: SavedObjectReference[];
-}): SavedObject<CaseUserActionAttributesWithoutConnectorId> => {
+} = {}): SavedObject<CaseUserActionAttributesWithoutConnectorId> => {
   const defaultParams = {
     action,
     created_at: 'abc',

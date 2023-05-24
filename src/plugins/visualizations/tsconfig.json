@@ -46,7 +46,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/analytics",
     "@kbn/content-management-content-editor",
-    "@kbn/core-saved-objects-api-browser",
     "@kbn/core-overlays-browser",
     "@kbn/config-schema",
     "@kbn/usage-collection-plugin",
@@ -54,7 +53,11 @@
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/object-versioning",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-utils-server"
   ],
   "exclude": [
     "target/**/*",

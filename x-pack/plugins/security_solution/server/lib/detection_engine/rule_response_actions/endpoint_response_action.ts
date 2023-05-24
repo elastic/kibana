@@ -13,15 +13,18 @@ import type { AlertsWithAgentType } from './types';
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
   endpointAppContextService: EndpointAppContextService,
-  { alertIds, agentIds, ruleId, ruleName }: AlertsWithAgentType
+  { alertIds, agentIds, ruleId, ruleName, hosts }: AlertsWithAgentType
 ) =>
-  each(agentIds, (agent) =>
-    endpointAppContextService.getActionCreateService().createAction({
-      endpoint_ids: [agent],
-      alert_ids: alertIds,
-      comment: responseAction.params.comment,
-      command: responseAction.params.command,
-      rule_id: ruleId,
-      rule_name: ruleName,
-    })
+  Promise.all(
+    each(agentIds, async (agent) =>
+      endpointAppContextService.getActionCreateService().createActionFromAlert({
+        hosts,
+        endpoint_ids: [agent],
+        alert_ids: alertIds,
+        comment: responseAction.params.comment,
+        command: responseAction.params.command,
+        rule_id: ruleId,
+        rule_name: ruleName,
+      })
+    )
   );

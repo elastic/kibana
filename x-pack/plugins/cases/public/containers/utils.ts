@@ -13,8 +13,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import type { ToastInputFields } from '@kbn/core/public';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
-  CasesConfigurationsResponse,
-  CasesConfigureResponse,
+  Configurations,
+  Configuration,
   UserActions,
   CasePatchRequest,
   CaseResolveResponse,
@@ -28,8 +28,8 @@ import {
   CaseRt,
   CasesRt,
   throwErrors,
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
+  ConfigurationsRt,
+  ConfigurationRt,
   UserActionsRt,
   CommentType,
   CaseResolveResponseRt,
@@ -67,18 +67,15 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
 export const decodeCasesResponse = (respCase?: Cases) =>
   pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
-export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
+export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
   return pipe(
-    CaseConfigurationsResponseRt.decode(respCase),
+    ConfigurationsRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 };
 
-export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
-  pipe(
-    CaseConfigureResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+export const decodeCaseConfigureResponse = (respCase?: Configuration) =>
+  pipe(ConfigurationRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseUserActionsResponse = (respUserActions?: UserActions) =>
   pipe(UserActionsRt.decode(respUserActions), fold(throwErrors(createToasterPlainError), identity));
