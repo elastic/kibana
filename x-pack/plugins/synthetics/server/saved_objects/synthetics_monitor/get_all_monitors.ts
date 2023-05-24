@@ -12,10 +12,10 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import pMap from 'p-map';
 import { intersection } from 'lodash';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { periodToMs } from '../../routes/overview_status/overview_status';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,

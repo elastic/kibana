@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
   ConfigKey,
@@ -29,7 +30,6 @@ import {
   DEFAULT_FIELDS,
   DEFAULT_NAMESPACE_STRING,
 } from '../../../common/constants/monitor_defaults';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
