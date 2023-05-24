@@ -39,22 +39,26 @@ For JSON-formatted server status details, use the `localhost:5601/api/status` AP
 
 [float]
 [[not-ready]]
-=== {kib} not ready
+=== Troubleshoot {kib} UI error
 
-If you receive a {kib} UI error on any page that the `{kib} Server is not Ready yet`, sequentially:
+Troubleshoot the `{kib} Server is not Ready yet` error.
 
-. Confirm connectivity to {es} from within a {kib} node:
+. From within a {kib} node, confirm the connection to {es}:
 +
 [source,sh]
 ----
 `curl -XGET elasticsearch_ip_or_hostname:9200/`
 ----
-. Guarantee the health of Kibana-backing indices which should all three report and should each show `status:green` and `status:open`:
+. Guarantee the health of the three {kib}-backing indices.  All indices must appear and display `status:green` and `status:open`:
 +
 [source,sh]
 ----
 `curl -XGET elasticsearch_ip_or_hostname:9200/_cat/indices/.kibana,.kibana_task_manager,.kibana_security_session?v=true`
 ----
-. <<start-stop,Shutdown>> all {kib} nodes. Choosing a {kib} node at random, update its config to set <<change-overall-log-level,debug logging>>, <<start it up,start-stop>>, and check its start-up debug logs for `ERROR` messages or other start-up issues. For example, the previous two steps could demonstrate as
-** Errors `master_not_discovered_exception` or `Unable to revive connection` if Kibana cannot connect to a healthy Elasticsearch cluster.
-** Errors `index_not_green_timeout` if one or more Kibana-backing indices are not healthy.
+. <<start-stop,Shut down all {kib} nodes>>. 
+. Choose any {kib} node, then update the config to set the <<change-overall-log-level,debug logging>>.
+. <<start-stop,Start the node>>, then check the start-up debug logs for `ERROR` messages or other start-up issues. 
++
+For example:
+* When {kib} is unable to connect to a healthy {es} cluster, the `master_not_discovered_exception` or `Unable to revive connection` errors appear.
+* When one or more {kib}-backing indices are unhealthy, the `index_not_green_timeout` error appears.
