@@ -12,7 +12,8 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
-import { formatErrors, exactCheck } from '@kbn/securitysolution-io-ts-utils';
+import { exactCheck } from '@kbn/securitysolution-io-ts-utils/src/exact_check';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils/src/format_errors';
 
 type ErrorFactory = (message: string) => Error;
 
