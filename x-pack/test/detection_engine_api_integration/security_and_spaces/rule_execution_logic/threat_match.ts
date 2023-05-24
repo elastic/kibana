@@ -39,7 +39,7 @@ import {
   previewRule,
   getOpenSignals,
   getPreviewAlerts,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
   createRule,
 } from '../../utils';
@@ -145,7 +145,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('Threat match type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/155304
+  describe.skip('Threat match type rules', () => {
     before(async () => {
       // await deleteSignalsIndex(supertest, log);
       // await deleteAllAlerts(supertest, log);
@@ -154,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

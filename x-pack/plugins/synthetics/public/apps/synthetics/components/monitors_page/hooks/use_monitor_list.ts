@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
+import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 import {
   fetchMonitorListAction,
   quietFetchMonitorListAction,
@@ -17,9 +18,8 @@ import {
   updateManagementPageStateAction,
 } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
-import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 
-export function useMonitorList() {
+export function useMonitorList(query?: string) {
   const dispatch = useDispatch();
   const isInitialMount = useRef(true);
 
@@ -40,11 +40,11 @@ export function useMonitorList() {
   // Periodically refresh
   useEffect(() => {
     if (!isInitialMount.current) {
-      dispatch(quietFetchMonitorListAction(pageState));
+      dispatch(quietFetchMonitorListAction({ ...pageState, query }));
     }
-    // specifically only want to run this on refreshInterval change
+    // specifically only want to run this on refreshInterval change on query change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh]);
+  }, [lastRefresh, query]);
 
   // On initial mount, load the page
   useDebounce(
