@@ -111,10 +111,10 @@ export type UMRouteHandler = ({
   subject,
 }: UptimeRouteContext) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
-export interface RouteContext {
+export interface RouteContext<Query = Record<string, any>> {
   uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
-  request: SyntheticsRequest;
+  request: KibanaRequest<Record<string, any>, Query, Record<string, any>>;
   response: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;

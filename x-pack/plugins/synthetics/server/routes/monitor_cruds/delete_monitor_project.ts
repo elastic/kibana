@@ -45,13 +45,16 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       values: monitorsToDelete.map((id: string) => `${id}`),
     })}`;
 
-    const { saved_objects: monitors } = await getMonitors({
-      ...routeContext,
-      request: {
-        ...request,
-        query: { ...request.query, filter: deleteFilter, fields: [], perPage: 500 },
+    const { saved_objects: monitors } = await getMonitors(
+      {
+        ...routeContext,
+        request: {
+          ...request,
+          query: { ...request.query, filter: deleteFilter, perPage: 500 },
+        },
       },
-    });
+      { fields: [] }
+    );
 
     const {
       integrations: { writeIntegrationPolicies },
