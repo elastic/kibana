@@ -6,8 +6,8 @@
  */
 
 import type {
-  CasesConfigurePatch,
-  CasesConfigureRequest,
+  ConfigurationPatchRequest,
+  ConfigurationRequest,
   ActionConnector,
   ActionTypeConnector,
 } from '../../../../common/api';
@@ -25,12 +25,12 @@ export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfig
   Promise.resolve(caseConfigurationCamelCaseResponseMock);
 
 export const postCaseConfigure = async (
-  caseConfiguration: CasesConfigureRequest,
+  caseConfiguration: ConfigurationRequest,
   signal: AbortSignal
 ): Promise<CaseConfigure> => Promise.resolve(caseConfigurationCamelCaseResponseMock);
 
 export const patchCaseConfigure = async (
-  caseConfiguration: CasesConfigurePatch,
+  caseConfiguration: ConfigurationPatchRequest,
   signal: AbortSignal
 ): Promise<CaseConfigure> => Promise.resolve(caseConfigurationCamelCaseResponseMock);
 

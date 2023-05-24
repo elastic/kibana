@@ -1788,10 +1788,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
               },
@@ -1958,14 +1954,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/overview/containers/overview_cti_links/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/overview/containers/overview_cti_links/index.tsx"
               },
               {
                 "plugin": "synthetics",
