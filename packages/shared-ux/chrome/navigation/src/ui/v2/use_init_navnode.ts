@@ -7,7 +7,7 @@
  */
 
 import { ChromeNavLink } from '@kbn/core-chrome-browser';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
@@ -58,7 +58,7 @@ function createInternalNavNode(
   };
 }
 
-export const useInitNavNode = (node: NodeProps) => {
+export const useInitNavNode = (node: NodeProps & { itemRender?: () => ReactElement }) => {
   /**
    * Map of children nodes
    */

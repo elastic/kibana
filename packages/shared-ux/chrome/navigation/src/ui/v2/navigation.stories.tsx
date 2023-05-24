@@ -287,13 +287,9 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
             <Navigation.Group id="root">
               <Navigation.Item id="item1" title="Get started" />
               <Navigation.Item id="item2" title="Alerts" />
-              <Navigation.Item
-                id="seb"
-                title="I am so cool"
-                itemRender={() => (
-                  <span style={{ color: 'blue', fontStyle: 'italic' }}>I am so cool </span>
-                )}
-              />
+              <Navigation.Item id="seb2" title="I am also cool">
+                <span style={{ color: 'blue', fontStyle: 'italic' }}>I am also cool </span>
+              </Navigation.Item>
             </Navigation.Group>
 
             <Navigation.Group id="group:settings" title="Settings">

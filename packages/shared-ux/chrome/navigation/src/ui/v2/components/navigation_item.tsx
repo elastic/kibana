@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, ReactElement, ReactNode } from 'react';
 
 import { NodeProps } from '../types';
 import { useInitNavNode } from '../use_init_navnode';
@@ -14,12 +14,22 @@ import { useInitNavNode } from '../use_init_navnode';
 interface Props extends NodeProps {
   element?: string;
   unstyled?: boolean;
-  itemRender?: () => React.ReactNode;
+}
+
+function isReactElement(element: ReactNode): element is ReactElement {
+  return React.isValidElement(element);
 }
 
 function NavigationItemComp(props: Props) {
   const { element, unstyled = false, children, ...node } = props;
-  const { navNode } = useInitNavNode(node);
+
+  let itemRender: (() => ReactElement) | undefined;
+
+  if (!unstyled && children && isReactElement(children)) {
+    itemRender = () => children;
+  }
+
+  const { navNode } = useInitNavNode({ ...node, itemRender });
 
   if (!navNode || !unstyled) {
     return null;
