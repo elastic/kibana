@@ -17,6 +17,7 @@ import { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { getReasonFromError } from '../lib/error_with_reason';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import { mockedRawRuleSO } from './fixtures';
 
 // create mocks
 const rulesClient = rulesClientMock.create();
@@ -55,6 +56,7 @@ describe('rule_loader', () => {
     jest.resetAllMocks();
     encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
       mockGetDecrypted({
+        ...mockedRawRuleSO.attributes,
         apiKey,
         enabled,
         consumer,
@@ -84,7 +86,7 @@ describe('rule_loader', () => {
 
       test('without API key, any execution history, or validator', async () => {
         encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
-          mockGetDecrypted({ enabled, consumer })
+          mockGetDecrypted({ ...mockedRawRuleSO.attributes, enabled, consumer, apiKey: undefined })
         );
 
         contextMock = getTaskRunnerContext(ruleParams, 0);

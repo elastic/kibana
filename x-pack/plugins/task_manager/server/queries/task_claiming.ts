@@ -246,14 +246,8 @@ export class TaskClaiming {
         }
         return true;
       } catch (e) {
-        // Remove only the doc with unknown key ???
-        if (e.message.includes('definition for this key is missing')) {
-          this.logger.debug(
-            `Task Manager has skipped claiming ${doc.id} as it has unknown params.`
-          );
-          return false;
-        }
-        return true;
+        this.logger.debug(`Task Manager has skipped claiming ${doc.id} as it has invalid params.`);
+        return false;
       }
     });
   }

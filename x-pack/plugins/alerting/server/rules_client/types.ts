@@ -23,7 +23,7 @@ import {
   IntervalSchedule,
   SanitizedRule,
   RuleSnoozeSchedule,
-  RawAlertsFilter,
+  RawRuleAlertsFilter,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
@@ -80,7 +80,7 @@ export type NormalizedAlertActionWithGeneratedValues = Omit<
   'uuid' | 'alertsFilter'
 > & {
   uuid: string;
-  alertsFilter?: RawAlertsFilter;
+  alertsFilter?: RawRuleAlertsFilter;
 };
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {

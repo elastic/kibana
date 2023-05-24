@@ -13,7 +13,7 @@ import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { rawRuleSchema } from '..';
+import { isValidationError } from '../lib/error_with_reason';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -710,10 +710,6 @@ export class TaskRunner<
         async () => this.prepareToRun()
       );
 
-      rawRuleSchema.validate(preparedResult.rawRule);
-      // @ts-ignore
-      this.ruleType.validate.params.validate(preparedResult.rawRule.params);
-
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));
@@ -733,6 +729,14 @@ export class TaskRunner<
         ).rule.schedule
       );
     } catch (err) {
+      if (isValidationError(err)) {
+        this.logger.debug(`Task Runner has skipped executing ${ruleId} as it has invalid params.`);
+        return {
+          state: originalState,
+          schedule: { interval: '0s' },
+          monitoring: this.ruleMonitoring.getMonitoring(),
+        };
+      }
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
     }

@@ -28,3 +28,10 @@ export function getReasonFromError(error: Error): RuleExecutionStatusErrorReason
 export function isErrorWithReason(error: Error | ErrorWithReason): error is ErrorWithReason {
   return error instanceof ErrorWithReason;
 }
+
+export function isValidationError(error: Error): boolean {
+  if (isErrorWithReason(error)) {
+    return error.reason === 'validate';
+  }
+  return false;
+}

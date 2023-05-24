@@ -8,6 +8,7 @@
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
+import { rawRuleSchema } from '..';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -70,6 +71,7 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   let validatedParams: Params;
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
+    rawRuleSchema.validate(rawRule);
   } catch (err) {
     throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
   }
@@ -83,7 +85,6 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
 
   return {
     rule,
-    rawRule,
     fakeRequest,
     apiKey,
     rulesClient,

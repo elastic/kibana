@@ -116,29 +116,29 @@ export async function registerMetricThresholdRuleType(
     }
   );
 
-  const paramsShema = schema.object(
-    {
-      criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion, customCriterion])),
-      groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-      filterQuery: schema.maybe(
-        schema.string({
-          validate: validateIsStringElasticsearchJSONFilter,
-        })
-      ),
-      sourceId: schema.string(),
-      alertOnNoData: schema.maybe(schema.boolean()),
-      alertOnGroupDisappear: schema.maybe(schema.boolean()),
-    },
-    { unknowns: 'allow' }
-  );
-
   alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.alertName', {
       defaultMessage: 'Metric threshold',
     }),
     validate: {
-      params: paramsShema,
+      params: schema.object(
+        {
+          criteria: schema.arrayOf(
+            schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
+          ),
+          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          filterQuery: schema.maybe(
+            schema.string({
+              validate: validateIsStringElasticsearchJSONFilter,
+            })
+          ),
+          sourceId: schema.string(),
+          alertOnNoData: schema.maybe(schema.boolean()),
+          alertOnGroupDisappear: schema.maybe(schema.boolean()),
+        },
+        { unknowns: 'allow' }
+      ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
