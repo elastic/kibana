@@ -29,7 +29,7 @@ export const dataDriftRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('DATA_DRIFT_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftLabel', {
         defaultMessage: 'Data Drift',

@@ -84,6 +84,16 @@ const getChangePointDetectionBreadcrumbs = (navigateToPath: NavigateToPath, base
   },
 ];
 
+const getTrainedModelsBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.selectDataViewLabel', {
+      defaultMessage: 'Select Data View',
+    }),
+  },
+];
+
 export const indexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -197,7 +207,7 @@ export const dataDriftIndexOrSearchRouteFactory = (
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getExplainLogRateSpikesBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getTrainedModelsBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {

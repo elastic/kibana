@@ -29,6 +29,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { WindowParameters } from '@kbn/aiops-utils';
 import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { getDataDriftType, useFetchDataDriftResult } from './use_data_drift_result';
 import { NUMERIC_TYPE_LABEL } from './constants';
@@ -317,26 +318,42 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
 
     {
       field: 'featureName',
-      name: 'Feature name',
+      name: i18n.translate('xpack.aiops.dataDrift.fieldNameLabel', {
+        defaultMessage: 'Field name',
+      }),
       'data-test-subj': 'mlDataDriftOverviewTableFeatureName',
       sortable: true,
       textOnly: true,
     },
     {
       field: 'featureType',
-      name: 'Feature type',
+      name: i18n.translate('xpack.aiops.dataDrift.fieldTypeLabel', {
+        defaultMessage: 'Field type',
+      }),
       'data-test-subj': 'mlDataDriftOverviewTableFeatureType',
       sortable: true,
       textOnly: true,
     },
     {
       field: 'driftDetected',
-      name: 'Drift detected',
+      name: i18n.translate('xpack.aiops.dataDrift.driftDetectedLabel', {
+        defaultMessage: 'Field type',
+      }),
       'data-test-subj': 'mlDataDriftOverviewTableDriftDetected',
       sortable: true,
       textOnly: true,
       render: (driftDetected: boolean) => {
-        return <span>{driftDetected ? 'Yes' : 'No'}</span>;
+        return (
+          <span>
+            {driftDetected
+              ? i18n.translate('xpack.aiops.dataDrift.fieldTypeYesLabel', {
+                  defaultMessage: 'Yes',
+                })
+              : i18n.translate('xpack.aiops.dataDrift.driftDetectedNoLabel', {
+                  defaultMessage: 'No',
+                })}
+          </span>
+        );
       },
     },
     {
@@ -432,7 +449,9 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
 
   return (
     <EuiBasicTable
-      tableCaption="Data drift overview"
+      tableCaption={i18n.translate('xpack.aiops.dataDrift.dataDriftTableCaption', {
+        defaultMessage: 'Data drift overview',
+      })}
       items={features}
       rowHeader="featureName"
       columns={columns}
