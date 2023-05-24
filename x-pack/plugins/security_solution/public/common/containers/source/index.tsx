@@ -149,7 +149,7 @@ export const useFetchIndex = (
     dataView: undefined,
     loading: false,
   });
-  const { addError } = useAppToasts();
+  const { addError, addWarning } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
@@ -169,11 +169,15 @@ export const useFetchIndex = (
           // the extra functions provided by IIndexPatternFieldList
           let fields = dv.fields as FieldSpec[];
           if (includeUnmapped) {
-            fields = await data.dataViews.getFieldsForIndexPattern(dv, {
-              pattern: '',
-              includeUnmapped: true,
-            });
-            dv.fields = fieldList(fields);
+            try {
+              fields = await data.dataViews.getFieldsForIndexPattern(dv, {
+                pattern: '',
+                includeUnmapped: true,
+              });
+              dv.fields = fieldList(fields);
+            } catch (error) {
+              addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
+            }
           }
           const { browserFields } = getDataViewStateFromIndexFields(
             iNames,
@@ -200,7 +204,15 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [addError, data.dataViews, dataViewIdOrIndexNames, includeUnmapped, isIndexNameArray, state]
+    [
+      addError,
+      addWarning,
+      data.dataViews,
+      dataViewIdOrIndexNames,
+      includeUnmapped,
+      isIndexNameArray,
+      state,
+    ]
   );
 
   useEffect(() => {
