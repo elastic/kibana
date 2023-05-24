@@ -12,8 +12,8 @@ import type {
 import type { ExceptionList, ExceptionListItem, RuleExceptionItem } from '../../objects/exception';
 import { rootRequest } from '../common';
 
-export const createEndpointExceptionList = () =>
-  rootRequest({
+export const createEndpointExceptionList = <T = unknown>() =>
+  rootRequest<T>({
     method: 'POST',
     url: '/api/endpoint_list',
     headers: { 'kbn-xsrf': 'cypress-creds' },

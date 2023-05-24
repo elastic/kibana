@@ -22,7 +22,7 @@ export const cleanFleet = () => {
 };
 
 const deleteAgentPolicies = () => {
-  return rootRequest({
+  return rootRequest<{ items: Array<{ id: string }> }>({
     method: 'GET',
     url: 'api/fleet/agent_policies',
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -41,7 +41,7 @@ const deleteAgentPolicies = () => {
 };
 
 const deletePackagePolicies = () => {
-  return rootRequest({
+  return rootRequest<{ items: Array<{ id: string }> }>({
     method: 'GET',
     url: 'api/fleet/package_policies',
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -58,12 +58,12 @@ const deletePackagePolicies = () => {
 };
 
 const deletePackages = () => {
-  return rootRequest({
+  return rootRequest<{ items: Array<{ status: string; name: string; version: string }> }>({
     method: 'GET',
     url: 'api/fleet/epm/packages',
     headers: { 'kbn-xsrf': 'cypress-creds' },
   }).then((response) => {
-    response.body.items.forEach((item: { status: string; name: string; version: string }) => {
+    response.body.items.forEach((item) => {
       if (item.status === 'installed') {
         rootRequest({
           method: 'DELETE',

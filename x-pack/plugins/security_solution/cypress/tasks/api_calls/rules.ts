@@ -9,8 +9,8 @@ import { rootRequest } from '../common';
 import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
 import type { RuleCreateProps } from '../../../common/detection_engine/rule_schema';
 
-export const createRule = (rule: RuleCreateProps) => {
-  return rootRequest({
+export const createRule = <T = unknown>(rule: RuleCreateProps) => {
+  return rootRequest<T>({
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
     body: rule,

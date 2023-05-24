@@ -7,12 +7,12 @@
 
 import { rootRequest } from '../common';
 
-export const createSavedQuery = (
+export const createSavedQuery = <T = unknown>(
   title: string,
   query: string,
   filterKey: string = 'agent.hostname'
 ) =>
-  rootRequest({
+  rootRequest<T>({
     method: 'POST',
     url: '/api/saved_query/_create',
     body: {

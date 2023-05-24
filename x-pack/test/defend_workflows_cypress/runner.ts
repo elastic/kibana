@@ -16,7 +16,7 @@ type RunnerEnv = Record<string, string | undefined>;
 
 async function withFleetAgent(
   { getService }: FtrProviderContext,
-  runner: (runnerEnv: RunnerEnv) => Promise<void>
+  runner: (runnerEnv: RunnerEnv) => RunnerEnv
 ) {
   const log = getService('log');
   const config = getService('config');

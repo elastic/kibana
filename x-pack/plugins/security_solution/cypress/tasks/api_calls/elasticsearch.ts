@@ -19,7 +19,7 @@ export const deleteIndex = (index: string) => {
 export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocuments: number) => {
   cy.waitUntil(
     () =>
-      rootRequest({
+      rootRequest<{ hits: { hits: unknown[] } }>({
         method: 'GET',
         url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
         headers: { 'kbn-xsrf': 'cypress-creds' },
