@@ -571,7 +571,7 @@ describe('TableListView', () => {
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Name A-Z ',
-        'Name Z-A - Checked option. ', // now this option is checked
+        'Name Z-A. Checked option. ', // now this option is checked
         'Recently updated ',
         'Least recently updated ',
       ]);

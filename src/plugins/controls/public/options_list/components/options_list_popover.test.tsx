@@ -143,7 +143,7 @@ describe('Options list popover', () => {
     expect(title).toEqual('Ignored selection');
     const invalidSelection = findTestSubject(popover, 'optionsList-control-ignored-selection-woof');
     expect(invalidSelection.find('.euiSelectableListItem__text').text()).toEqual(
-      'woof - Checked option.'
+      'woof. Checked option.'
     );
     expect(invalidSelection.hasClass('optionsList__selectionInvalid')).toBe(true);
   });
