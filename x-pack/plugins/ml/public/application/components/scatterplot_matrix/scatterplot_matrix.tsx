@@ -29,11 +29,12 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 
 import { getCombinedRuntimeMappings } from '../data_grid';
-import { useCurrentEuiThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
 
@@ -148,7 +149,10 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     { items: any[]; backgroundItems: any[]; columns: string[]; messages: string[] } | undefined
   >();
 
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const {
+    services: { theme },
+  } = useMlKibana();
+  const { euiTheme } = useCurrentEuiThemeVars(theme);
 
   // formats the array of field names for EuiComboBox
   const fieldOptions = useMemo(

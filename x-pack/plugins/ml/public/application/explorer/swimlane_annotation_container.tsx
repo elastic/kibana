@@ -10,7 +10,8 @@ import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useCurrentEuiThemeVars } from '../contexts/kibana';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
+import { useMlKibana } from '../contexts/kibana';
 import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
 
@@ -36,8 +37,10 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
   tooltipService,
 }) => {
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
-
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const {
+    services: { theme },
+  } = useMlKibana();
+  const { euiTheme } = useCurrentEuiThemeVars(theme);
 
   useEffect(() => {
     if (canvasRef.current !== null && Array.isArray(annotationsData)) {

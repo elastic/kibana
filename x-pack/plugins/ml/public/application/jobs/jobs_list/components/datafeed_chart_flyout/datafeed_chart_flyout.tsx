@@ -48,6 +48,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import {
   CombinedJobWithStats,
@@ -57,7 +58,7 @@ import {
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useCurrentEuiThemeVars, useMlApiContext } from '../../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
@@ -141,7 +142,10 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     results: { getDatafeedResultChartData },
   } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const {
+    services: { theme },
+  } = useMlKibana();
+  const { euiTheme } = useCurrentEuiThemeVars(theme);
 
   const handleChange = (date: moment.Moment) => setEndDate(date);
 

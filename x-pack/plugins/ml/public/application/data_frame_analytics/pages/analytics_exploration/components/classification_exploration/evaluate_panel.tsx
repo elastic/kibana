@@ -20,7 +20,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useCurrentEuiThemeVars, useMlKibana } from '../../../../../contexts/kibana';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../../../../../components/vega_chart';
@@ -105,9 +106,9 @@ function getHelpText(dataSubsetTitle: string): string {
 
 export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, searchQuery }) => {
   const {
-    services: { docLinks },
+    services: { docLinks, theme },
   } = useMlKibana();
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const { euiTheme } = useCurrentEuiThemeVars(theme);
 
   const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
   const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);

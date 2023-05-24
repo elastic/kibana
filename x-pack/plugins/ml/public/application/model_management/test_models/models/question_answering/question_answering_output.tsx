@@ -10,7 +10,8 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
 
-import { useCurrentEuiThemeVars } from '../../../../contexts/kibana';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
+import { useMlKibana } from '../../../../contexts/kibana';
 import type {
   QuestionAnsweringInference,
   FormattedQuestionAnsweringResult,
@@ -60,7 +61,10 @@ function insertHighlighting(result: FormattedQuestionAnsweringResult, inputText:
 }
 
 const ResultBadge = ({ children }: { children: ReactNode }) => {
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const {
+    services: { theme },
+  } = useMlKibana();
+  const { euiTheme } = useCurrentEuiThemeVars(theme);
   return (
     <EuiBadge
       color={euiTheme.euiColorVis5_behindText}

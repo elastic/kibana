@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
 import { useMemo } from 'react';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
-import { useMlKibana } from './kibana_context';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 const themeDefault = { darkMode: false };
 
@@ -17,11 +17,7 @@ const themeDefault = { darkMode: false };
  * Indicates if the currently applied theme is either dark or light.
  * @return {boolean} - Returns true if the currently applied theme is dark.
  */
-export function useIsDarkTheme() {
-  const {
-    services: { theme },
-  } = useMlKibana();
-
+export function useIsDarkTheme(theme: ThemeServiceStart) {
   const themeObservable$ = useMemo(() => {
     return theme?.theme$ ?? of(themeDefault);
   }, [theme]);
@@ -34,7 +30,7 @@ export function useIsDarkTheme() {
 /**
  * Returns an EUI theme definition based on the currently applied theme.
  */
-export function useCurrentEuiThemeVars() {
-  const isDarkMode = useIsDarkTheme();
+export function useCurrentEuiThemeVars(theme: ThemeServiceStart) {
+  const isDarkMode = useIsDarkTheme(theme);
   return useMemo(() => ({ euiTheme: isDarkMode ? euiThemeDark : euiThemeLight }), [isDarkMode]);
 }

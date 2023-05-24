@@ -41,7 +41,7 @@ import {
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
-import { useCurrentEuiThemeVars, useIsDarkTheme } from '../contexts/kibana';
+import { useCurrentEuiThemeVars, useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
@@ -53,6 +53,7 @@ import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { Y_AXIS_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './swimlane_annotation_container';
+import { useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {
@@ -190,8 +191,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const isDarkTheme = useIsDarkTheme();
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const {
+    services: { theme: themeService },
+  } = useMlKibana();
+
+  const isDarkTheme = useIsDarkTheme(themeService);
+  const { euiTheme } = useCurrentEuiThemeVars(themeService);
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();

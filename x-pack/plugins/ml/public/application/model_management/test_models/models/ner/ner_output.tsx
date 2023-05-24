@@ -18,7 +18,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { useCurrentEuiThemeVars } from '../../../../contexts/kibana';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
+import { useMlKibana } from '../../../../contexts/kibana';
 import { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
 import type { NerInference, NerResponse } from './ner_inference';
 import { INPUT_TYPE } from '../inference_base';
@@ -86,7 +87,10 @@ const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
 };
 
 const Lines: FC<{ result: NerResponse }> = ({ result }) => {
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const {
+    services: { theme },
+  } = useMlKibana();
+  const { euiTheme } = useCurrentEuiThemeVars(theme);
   const lineSplit: JSX.Element[] = [];
   result.response.forEach(({ value, entity }) => {
     if (entity === null) {
@@ -144,7 +148,10 @@ const EntityBadge = ({
   entity: estypes.MlTrainedModelEntities;
   children: ReactNode;
 }) => {
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const {
+    services: { theme },
+  } = useMlKibana();
+  const { euiTheme } = useCurrentEuiThemeVars(theme);
   return (
     <EuiBadge
       // @ts-expect-error colors are correct in ENTITY_TYPES

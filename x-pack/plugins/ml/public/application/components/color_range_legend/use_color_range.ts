@@ -9,7 +9,8 @@ import d3 from 'd3';
 import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
-import { useCurrentEuiThemeVars } from '../../contexts/kibana';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
+import { useMlKibana } from '../../contexts/kibana';
 
 /**
  * Custom color scale factory that takes the amount of feature influencers
@@ -148,7 +149,11 @@ export const useColorRange = (
   colorRangeScale = COLOR_RANGE_SCALE.LINEAR,
   featureCount = 1
 ) => {
-  const { euiTheme } = useCurrentEuiThemeVars();
+  const {
+    services: { theme },
+  } = useMlKibana();
+
+  const { euiTheme } = useCurrentEuiThemeVars(theme);
 
   const colorRanges: Record<COLOR_RANGE, string[]> = {
     [COLOR_RANGE.BLUE]: [
