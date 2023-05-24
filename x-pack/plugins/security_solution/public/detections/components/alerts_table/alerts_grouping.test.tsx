@@ -58,8 +58,8 @@ const mockOptions = [
   { label: 'sourceIP', key: 'source.ip' },
 ];
 
-jest.mock('./grouping_settings', () => {
-  const actual = jest.requireActual('./grouping_settings');
+jest.mock('../../../common/utils/alerts', () => {
+  const actual = jest.requireActual('../../../common/utils/alerts');
 
   return {
     ...actual,

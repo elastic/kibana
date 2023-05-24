@@ -137,7 +137,7 @@ export const useGetGroupSelector = ({
   );
 
   useEffect(() => {
-    if (options.length === 0) {
+    if (options.length === 0 && defaultGroupingOptions.length > 0) {
       return setOptions(
         defaultGroupingOptions.find((o) => selectedGroups.find((selected) => selected === o.key))
           ? defaultGroupingOptions
