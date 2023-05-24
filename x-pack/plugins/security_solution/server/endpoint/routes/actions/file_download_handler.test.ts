@@ -80,9 +80,8 @@ describe('Response Actions file download API', () => {
 
       validateActionIdMock.mockImplementation(async () => {});
 
-      fleetFilesClientMock = (await apiTestSetup.endpointAppContextMock.service.getFleetFilesClient(
-        'from-host'
-      )) as jest.Mocked<FleetFromHostFileClientInterface>;
+      fleetFilesClientMock =
+        (await apiTestSetup.endpointAppContextMock.service.getFleetFromHostFilesClient()) as jest.Mocked<FleetFromHostFileClientInterface>;
     });
 
     it('should error if action ID is invalid', async () => {
