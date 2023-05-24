@@ -25,10 +25,10 @@ export const fetchAnalyticsCollections = async (
   query: string = ''
 ): Promise<AnalyticsCollection[]> => {
   try {
-    const collections = await client.asCurrentUser.transport.request<CollectionsListResponse>({
-      method: 'GET',
-      path: `/_application/analytics/${query}`,
-    });
+    const collections: CollectionsListResponse =
+      await client.asCurrentUser.searchApplication.getBehavioralAnalytics({
+        name: query,
+      });
 
     return Object.keys(collections).map((value) => {
       const entry = collections[value];
