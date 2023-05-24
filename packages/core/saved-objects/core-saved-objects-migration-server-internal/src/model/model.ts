@@ -880,19 +880,27 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (isTypeof(left, 'es_response_too_large')) {
-        const batchSize = Math.floor(stateP.batchSize / 2);
-        return {
-          ...stateP,
-          batchSize,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'warning',
-              message: `Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
-            },
-          ],
-        };
+        if (stateP.batchSize === 1) {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: `After reducing the read batch size to a single document, the Elasticsearch response content length was ${left.contentLength}bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.`,
+          };
+        } else {
+          const batchSize = Math.max(Math.floor(stateP.batchSize / 2), 1);
+          return {
+            ...stateP,
+            batchSize,
+            controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'warning',
+                message: `Read a batch with a response content length of ${left.contentLength} bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
+              },
+            ],
+          };
+        }
       } else {
         throwBadResponse(stateP, left);
       }
@@ -1203,19 +1211,27 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (isTypeof(left, 'es_response_too_large')) {
-        const batchSize = Math.floor(stateP.batchSize / 2);
-        return {
-          ...stateP,
-          batchSize,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'warning',
-              message: `Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
-            },
-          ],
-        };
+        if (stateP.batchSize === 1) {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: `After reducing the read batch size to a single document, the response content length was ${left.contentLength} bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.`,
+          };
+        } else {
+          const batchSize = Math.max(Math.floor(stateP.batchSize / 2), 1);
+          return {
+            ...stateP,
+            batchSize,
+            controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'warning',
+                message: `Read a batch with a response content length of ${left.contentLength} bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
+              },
+            ],
+          };
+        }
       } else {
         throwBadResponse(stateP, left);
       }

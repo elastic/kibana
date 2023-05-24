@@ -287,12 +287,10 @@ export function getMigrationType({
 export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): string =>
   `${indexPrefix}_${kibanaVersion}_reindex_temp`;
 
-/** Increase batchSize by 20% until a maximum of defaultBatchSize */
+/** Increase batchSize by 20% until a maximum of maxBatchSize */
 export const increaseBatchSize = (
   stateP: OutdatedDocumentsSearchRead | ReindexSourceToTempRead
 ) => {
   const increasedBatchSize = Math.floor(stateP.batchSize * 1.2);
-  return increasedBatchSize > stateP.defaultBatchSize
-    ? stateP.defaultBatchSize
-    : increasedBatchSize;
+  return increasedBatchSize > stateP.maxBatchSize ? stateP.maxBatchSize : increasedBatchSize;
 };

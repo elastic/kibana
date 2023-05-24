@@ -82,10 +82,10 @@ export interface BaseState extends ControlState {
    * When writing batches, we limit the number of documents in a batch
    * (batchSize) as well as the size of the batch in bytes (maxBatchSizeBytes).
    */
-  readonly defaultBatchSize: number;
+  readonly maxBatchSize: number;
   /**
    * The number of documents to process in each batch. Under most circumstances
-   * batchSize == defaultBatchSize. But if we fail to read a batch because of a
+   * batchSize == maxBatchSize. But if we fail to read a batch because of a
    * Nodejs `RangeError` we'll temporarily half `batchSize` and retry.
    */
   readonly batchSize: number;

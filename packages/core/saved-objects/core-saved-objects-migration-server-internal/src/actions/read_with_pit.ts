@@ -110,6 +110,11 @@ export const readWithPit =
         ) {
           return Either.left({
             type: 'es_response_too_large' as const,
+            contentLength: Number.parseInt(
+              e.message.match(/The content length \((\d+)\) is bigger than the maximum/)?.[1] ??
+                '-1',
+              10
+            ),
           });
         } else {
           throw e;

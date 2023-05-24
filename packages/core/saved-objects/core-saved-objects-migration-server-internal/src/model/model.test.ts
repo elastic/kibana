@@ -86,8 +86,9 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
-    defaultBatchSize: 1000,
+    maxBatchSize: 1000,
     maxBatchSizeBytes: 1e8,
+    maxReadBatchSizeBytes: 1234,
     discardUnknownObjects: false,
     discardCorruptObjects: false,
     indexPrefix: '.kibana',
@@ -1833,7 +1834,7 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(1);
-        expect(newState.defaultBatchSize).toBe(1000);
+        expect(newState.maxBatchSize).toBe(1000);
         expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
@@ -1845,7 +1846,7 @@ describe('migrations v2 model', () => {
         `);
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM increases batchSize if < defaultBatchSize', () => {
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM increases batchSize if < maxBatchSize', () => {
         const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
         const lastHitSortValue = [123456];
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
@@ -1856,27 +1857,63 @@ describe('migrations v2 model', () => {
         const newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
         expect(newState.batchSize).toBe(600);
-        expect(newState.defaultBatchSize).toBe(1000);
+        expect(newState.maxBatchSize).toBe(1000);
       });
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
           type: 'es_response_too_large',
+          contentLength: 4567,
         });
         const newState = model(state, res) as ReindexSourceToTempRead;
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
         expect(newState.progress.processed).toBe(undefined); // don't increment progress
         expect(newState.batchSize).toBe(500); // halves the batch size
-        expect(newState.defaultBatchSize).toBe(1000); // leaves defaultBatchSize unchanged
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
               "level": "warning",
-              "message": "Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+              "message": "Read a batch with a response content length of 4567 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
             },
           ]
         `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large will not reduce batch size below 1', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1.5 }, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+            },
+          ]
+        `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if left es_response_too_large and batchSize already 1', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1 }, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"After reducing the read batch size to a single document, the Elasticsearch response content length was 2345bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+        );
       });
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if no outdated documents to reindex', () => {
@@ -2341,7 +2378,7 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(10);
-        expect(newState.defaultBatchSize).toBe(1000);
+        expect(newState.maxBatchSize).toBe(1000);
         expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
@@ -2384,7 +2421,7 @@ describe('migrations v2 model', () => {
         `);
       });
 
-      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM increases batchSize if < defaultBatchSize', () => {
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM increases batchSize if < maxBatchSize', () => {
         const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
         const lastHitSortValue = [123456];
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
@@ -2395,27 +2432,63 @@ describe('migrations v2 model', () => {
         const newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
         expect(newState.batchSize).toBe(600);
-        expect(newState.defaultBatchSize).toBe(1000);
+        expect(newState.maxBatchSize).toBe(1000);
       });
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
           type: 'es_response_too_large',
+          contentLength: 3456,
         });
         const newState = model(state, res) as ReindexSourceToTempRead;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
         expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
         expect(newState.progress.processed).toBe(undefined); // don't increment progress
         expect(newState.batchSize).toBe(500); // halves the batch size
-        expect(newState.defaultBatchSize).toBe(1000); // leaves defaultBatchSize unchanged
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
               "level": "warning",
-              "message": "Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+              "message": "Read a batch with a response content length of 3456 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
             },
           ]
         `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large will not reduce batch size below 1', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1.5 }, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+            },
+          ]
+        `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if left es_response_too_large and batchSize already 1', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1 }, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"After reducing the read batch size to a single document, the response content length was 2345 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+        );
       });
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT if no outdated documents to transform', () => {

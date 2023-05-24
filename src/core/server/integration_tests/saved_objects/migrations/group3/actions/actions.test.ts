@@ -715,6 +715,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -751,6 +752,7 @@ describe('migration actions', () => {
             })),
           },
         },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -780,6 +782,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -812,6 +815,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -829,6 +833,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -879,6 +884,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -931,6 +937,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
@@ -970,6 +977,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
@@ -993,6 +1001,7 @@ describe('migration actions', () => {
         excludeOnUpgradeQuery: {
           match_all: {},
         },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -1014,6 +1023,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
@@ -1036,6 +1046,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: true,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
@@ -1064,6 +1075,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '0s' });
@@ -1278,7 +1290,8 @@ describe('migration actions', () => {
       });
       const leftResponse = (await readWithPitTask()) as Either.Left<EsResponseTooLargeError>;
 
-      await expect(leftResponse.left.type).toBe('es_response_too_large');
+      expect(leftResponse.left.type).toBe('es_response_too_large');
+      expect(leftResponse.left.contentLength).toBe(3184);
     });
 
     it('rejects if PIT does not exist', async () => {

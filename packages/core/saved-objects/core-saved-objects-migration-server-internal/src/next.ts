@@ -260,6 +260,7 @@ export const nextActionMap = (
         reindexScript: state.preMigrationScript,
         requireAlias: false,
         excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        batchSize: state.batchSize,
       }),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask({ client, taskId: state.legacyReindexTaskId, timeout: '60s' }),

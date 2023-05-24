@@ -77,7 +77,6 @@ describe('createInitialState', () => {
         "batchSize": 1000,
         "controlState": "INIT",
         "currentAlias": ".kibana_task_manager",
-        "defaultBatchSize": 1000,
         "discardCorruptObjects": false,
         "discardUnknownObjects": false,
         "excludeFromUpgradeFilterHooks": Object {},
@@ -216,6 +215,7 @@ describe('createInitialState', () => {
         "knownTypes": Array [],
         "legacyIndex": ".kibana_task_manager",
         "logs": Array [],
+        "maxBatchSize": 1000,
         "maxBatchSizeBytes": 104857600,
         "maxReadBatchSizeBytes": 524288000,
         "migrationDocLinks": Object {

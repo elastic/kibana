@@ -38,6 +38,7 @@ describe('reindex', () => {
       reindexScript: Option.none,
       requireAlias: false,
       excludeOnUpgradeQuery: {},
+      batchSize: 1000,
     });
     try {
       await task();
