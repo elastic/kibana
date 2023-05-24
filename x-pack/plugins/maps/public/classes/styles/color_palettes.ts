@@ -198,7 +198,8 @@ export function getOrdinalMbColorRampStops(
   return palette.reduce(
     (accu: Array<number | string>, stopColor: string, idx: number, srcArr: string[]) => {
       const stopNumber = min + (delta * idx) / srcArr.length;
-      return [...accu, stopNumber, stopColor];
+      accu.push(stopNumber, stopColor);
+      return accu;
     },
     []
   );
@@ -228,7 +229,8 @@ export function getPercentilesMbColorRampStops(
     palette.reverse();
   }
   return palette.reduce((accu: Array<number | string>, stopColor: string, idx: number) => {
-    return [...accu, percentiles[idx].value, stopColor];
+    accu.push(percentiles[idx].value, stopColor);
+    return accu;
   }, []);
 }
 
