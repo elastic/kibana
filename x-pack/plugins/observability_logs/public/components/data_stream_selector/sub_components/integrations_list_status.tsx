@@ -12,7 +12,6 @@ import { Integration } from '../../../../common/data_streams';
 import {
   errorLabel,
   noDataRetryLabel,
-  noDataStreamsLabel,
   noIntegrationsDescriptionLabel,
   noIntegrationsLabel,
 } from '../constants';
