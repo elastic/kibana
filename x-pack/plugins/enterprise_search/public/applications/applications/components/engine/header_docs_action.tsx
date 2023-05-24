@@ -9,6 +9,8 @@ import React from 'react';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { docLinks } from '../../../shared/doc_links';
 
 export const EngineHeaderDocsAction: React.FC = () => (
@@ -17,11 +19,13 @@ export const EngineHeaderDocsAction: React.FC = () => (
       <EuiButtonEmpty
         data-telemetry-id="entSearchApplications-engineHeader-documentationLink"
         data-test-subj="engine-documentation-link"
-        href={docLinks.enterpriseSearchEngines}
+        href={docLinks.searchApplications}
         target="_blank"
         iconType="documents"
       >
-        Search Application Docs
+        {i18n.translate('xpack.enterpriseSearch.content.engine.header.searchApplicationsDoc', {
+          defaultMessage: 'Search Applications Doc',
+        })}
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
