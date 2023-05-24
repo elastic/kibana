@@ -11,6 +11,7 @@ import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -241,6 +242,10 @@ export const removeDimension = createAction<{
   columnId: string;
   datasourceId?: string;
 }>('lens/removeDimension');
+export const registerLibraryAnnotationGroup = createAction<{
+  group: EventAnnotationGroupConfig;
+  id: string;
+}>('lens/registerLibraryAnnotationGroup');
 
 export const lensActions = {
   setState,
@@ -275,6 +280,7 @@ export const lensActions = {
   changeIndexPattern,
   removeDimension,
   syncLinkedDimensions,
+  registerLibraryAnnotationGroup,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -1205,6 +1211,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           linkedDimension.columnId && // if there's no columnId, there's no dimension to remove
           remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId })
       );
+    },
+    [registerLibraryAnnotationGroup.type]: (
+      state,
+      {
+        payload: { group, id },
+      }: {
+        payload: { group: EventAnnotationGroupConfig; id: string };
+      }
+    ) => {
+      state.annotationGroups[id] = group;
     },
   });
 };

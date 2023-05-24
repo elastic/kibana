@@ -270,10 +270,10 @@ export const getXyVisualization = ({
     return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
-  getSupportedLayers(state, frame, extraArg) {
+  getSupportedLayers(state, frame) {
     return [
       supportedDataLayer,
-      getAnnotationsSupportedLayer(Boolean(extraArg), state, frame),
+      getAnnotationsSupportedLayer(state, frame),
       getReferenceSupportedLayer(state, frame),
     ];
   },
@@ -727,6 +727,12 @@ export const getXyVisualization = ({
           await props.ensureIndexPattern(
             loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
           );
+
+          props.registerLibraryAnnotationGroup({
+            id: loadedGroupInfo.annotationGroupId,
+            group: loadedGroupInfo,
+          });
+
           props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
         }}
       />
@@ -972,10 +978,9 @@ export const getXyVisualization = ({
   },
 
   isEqual(state1, references1, state2, references2, annotationGroups) {
-    return isEqual(
-      injectReferences(state1, annotationGroups, references1),
-      injectReferences(state2, annotationGroups, references2)
-    );
+    const injected1 = injectReferences(state1, annotationGroups, references1);
+    const injected2 = injectReferences(state2, annotationGroups, references2);
+    return isEqual(injected1, injected2);
   },
 
   getVisualizationInfo(state, frame) {

@@ -26,12 +26,11 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LayerType } from '../../../../common/types';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { AddLayerButton } from '../../../visualizations/xy/add_layer';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { LayerType } from '@kbn/visualizations-plugin/common';
 
 jest.mock('../../../id_generator');
 
@@ -44,6 +43,11 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
     },
   };
 });
+
+const addNewLayer = (instance: ReactWrapper, type: LayerType = LayerTypes.REFERENCELINE) =>
+  act(() => {
+    instance.find(`button[data-test-subj="${type}"]`).first().simulate('click');
+  });
 
 const waitMs = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -120,19 +124,17 @@ describe('ConfigPanel', () => {
         ...visualizationMap.testVis,
         getLayerIds: () => Object.keys(frame.datasourceLayers),
         getAddLayerButtonComponent: (props) => {
-          // TODO this is currently a copy of the XY add layer menu.
-          // this test should just use some generic component to exercise the flows
           return (
-            <AddLayerButton
-              {...props}
-              eventAnnotationService={{} as EventAnnotationServiceType}
-              onAddLayerFromAnnotationGroup={async (loadedGroupInfo) => {
-                if (loadedGroupInfo.dataViewSpec) {
-                  await props.ensureIndexPattern(loadedGroupInfo.dataViewSpec);
-                }
-                props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
-              }}
-            />
+            <>
+              <button
+                data-test-subj={LayerTypes.REFERENCELINE}
+                onClick={() => props.addLayer(LayerTypes.REFERENCELINE)}
+              />
+              <button
+                data-test-subj={LayerTypes.ANNOTATIONS}
+                onClick={() => props.addLayer(LayerTypes.ANNOTATIONS)}
+              />
+            </>
           );
         },
       } as Visualization,
@@ -276,35 +278,13 @@ describe('ConfigPanel', () => {
         }),
       });
 
-      act(() => {
-        instance.find('button[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
-      });
+      addNewLayer(instance);
       const focusedEl = document.activeElement;
       expect(focusedEl?.children[0].getAttribute('data-test-subj')).toEqual('lns-layerPanel-1');
     });
   });
 
   describe('initial default value', () => {
-    function clickToAddLayer(
-      instance: ReactWrapper,
-      layerType: LayerType = LayerTypes.REFERENCELINE
-    ) {
-      // TODO - this test shouldn't know about the internals of a specific visualization's add layer menu
-      act(() => {
-        instance.find('button[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
-      });
-      instance.update();
-      act(() => {
-        instance
-          .find(`[data-test-subj="lnsLayerAddButton-${layerType}"]`)
-          .first()
-          .simulate('click');
-      });
-      instance.update();
-
-      return waitMs(0);
-    }
-
     function clickToAddDimension(instance: ReactWrapper) {
       act(() => {
         instance.find('[data-test-subj="lns-empty-dimension"]').last().simulate('click');
@@ -327,7 +307,7 @@ describe('ConfigPanel', () => {
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
       const { instance, lensStore } = await prepareAndMountComponent(props);
-      await clickToAddLayer(instance);
+      addNewLayer(instance);
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
       expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
@@ -357,8 +337,8 @@ describe('ConfigPanel', () => {
       ]);
       const props = getDefaultProps({ datasourceMap, visualizationMap });
       const { instance, lensStore } = await prepareAndMountComponent(props);
-      await clickToAddLayer(instance);
 
+      addNewLayer(instance);
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
       expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
     });
@@ -384,7 +364,7 @@ describe('ConfigPanel', () => {
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
       const { instance, lensStore } = await prepareAndMountComponent(props);
-      await clickToAddLayer(instance);
+      addNewLayer(instance);
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
       expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
@@ -494,9 +474,7 @@ describe('ConfigPanel', () => {
       const props = getDefaultProps({ visualizationMap, datasourceMap });
       const { instance, lensStore } = await prepareAndMountComponent(props);
 
-      act(() => {
-        instance.find(AddLayerButton).prop('addLayer')(LayerTypes.ANNOTATIONS);
-      });
+      addNewLayer(instance, LayerTypes.ANNOTATIONS);
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
 

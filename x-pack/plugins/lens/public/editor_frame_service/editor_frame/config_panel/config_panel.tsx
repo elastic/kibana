@@ -13,7 +13,6 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
 import { AddLayerFunction, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
@@ -32,6 +31,7 @@ import {
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
+  registerLibraryAnnotationGroup,
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
 
@@ -316,11 +316,12 @@ export function LayerPanels(
       })}
       {!hideAddLayerButton &&
         activeVisualization?.getAddLayerButtonComponent?.({
-          visualization: activeVisualization,
-          visualizationState: visualization.state,
-          layersMeta: props.framePublicAPI,
+          supportedLayers: activeVisualization.getSupportedLayers(
+            visualization.state,
+            props.framePublicAPI
+          ),
           addLayer,
-          ensureIndexPattern: async (specOrId: DataViewSpec | string) => {
+          ensureIndexPattern: async (specOrId) => {
             let indexPatternId;
 
             if (typeof specOrId === 'string') {
@@ -349,6 +350,8 @@ export function LayerPanels(
               })
             );
           },
+          registerLibraryAnnotationGroup: (groupInfo) =>
+            dispatchLens(registerLibraryAnnotationGroup(groupInfo)),
         })}
     </EuiForm>
   );

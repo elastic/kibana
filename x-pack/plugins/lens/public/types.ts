@@ -1005,6 +1005,21 @@ interface VisualizationStateFromContextChangeProps {
 export type AddLayerFunction<T = unknown> = (layerType: LayerType, extraArg?: T) => void;
 
 export type AnnotationGroups = Record<string, EventAnnotationGroupConfig>;
+
+export interface VisualizationLayerDescription {
+  type: LayerType;
+  label: string;
+  icon?: IconType;
+  noDatasource?: boolean;
+  disabled?: boolean;
+  toolTipContent?: string;
+  initialDimensions?: Array<{
+    columnId: string;
+    groupId: string;
+    staticValue?: unknown;
+    autoTimeField?: boolean;
+  }>;
+}
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -1084,21 +1099,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     state?: T,
     frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
     extraArg?: ExtraAppendLayerArg // included so the visualization can decide whether initial values make sense
-  ) => Array<{
-    type: LayerType;
-    label: string;
-    icon?: IconType;
-    noDatasource?: boolean;
-    disabled?: boolean;
-    toolTipContent?: string;
-    initialDimensions?: Array<{
-      columnId: string;
-      groupId: string;
-      staticValue?: unknown;
-      autoTimeField?: boolean;
-    }>;
-    canAddViaMenu?: boolean;
-  }>;
+  ) => VisualizationLayerDescription[];
   /**
    * returns a list of custom actions supported by the visualization layer.
    * Default actions like delete/clear are not included in this list and are managed by the editor frame
@@ -1231,11 +1232,13 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     hideTooltip?: boolean;
   }) => JSX.Element | null;
   getAddLayerButtonComponent?: (props: {
-    visualization: Visualization;
-    visualizationState: T;
+    supportedLayers: VisualizationLayerDescription[];
     addLayer: AddLayerFunction;
-    layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
     ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
+    registerLibraryAnnotationGroup: (groupInfo: {
+      id: string;
+      group: EventAnnotationGroupConfig;
+    }) => void;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
