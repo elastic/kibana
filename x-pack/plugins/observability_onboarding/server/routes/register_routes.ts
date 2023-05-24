@@ -66,13 +66,6 @@ export function registerRoutes({
             logger,
             params: decodedParams,
             plugins,
-            core: {
-              setup: core,
-              start: async () => {
-                const [coreStart] = await core.getStartServices();
-                return coreStart;
-              },
-            },
           })) as any;
 
           if (data === undefined) {

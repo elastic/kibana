@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ObservabilityOnboardingServerRouteRepository } from '.';
 import {
   ObservabilityOnboardingPluginSetupDependencies,
@@ -25,10 +25,6 @@ export interface ObservabilityOnboardingRouteHandlerResources {
         Required<ObservabilityOnboardingPluginStartDependencies>[key]
       >;
     };
-  };
-  core: {
-    setup: CoreSetup;
-    start: () => Promise<CoreStart>;
   };
 }
 
