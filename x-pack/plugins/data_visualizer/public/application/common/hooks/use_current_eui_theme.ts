@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
-import { of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
 import { useDataVisualizerKibana } from '../../kibana_context';
-
-const themeDefault = { darkMode: false };
 
 export function useCurrentEuiTheme() {
   const {
     services: { theme },
   } = useDataVisualizerKibana();
 
-  const themeObservable$ = useMemo(() => {
-    return theme?.theme$ ?? of(themeDefault);
-  }, [theme]);
-
-  const { darkMode } = useObservable(themeObservable$, themeDefault);
-
-  return useMemo(() => (darkMode ? euiThemeDark : euiThemeLight), [darkMode]);
+  return useCurrentEuiThemeVars(theme);
 }
