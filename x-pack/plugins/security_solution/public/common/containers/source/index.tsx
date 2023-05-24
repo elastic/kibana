@@ -10,7 +10,7 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
-import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
@@ -42,11 +42,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (
-    title: string,
-    fields: IIndexPatternFieldList,
-    _includeUnmapped: boolean = false
-  ): DataViewBase =>
+  (title: string, fields: FieldSpec[], _includeUnmapped: boolean = false): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -140,7 +136,7 @@ export const useFetchIndex = (
     dataView: undefined,
     loading: false,
   });
-  const { addError } = useAppToasts();
+  const { addError, addWarning } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
@@ -155,6 +151,18 @@ export const useFetchIndex = (
             includeUnmapped
           );
 
+          let fieldsWithUnmappedInfo = null;
+          if (includeUnmapped) {
+            try {
+              fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
+                pattern: '',
+                includeUnmapped: true,
+              });
+            } catch (error) {
+              addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
+            }
+          }
+
           previousIndexesName.current = dv.getIndexPattern().split(',');
 
           setState({
@@ -163,7 +171,11 @@ export const useFetchIndex = (
             browserFields,
             indexes: dv.getIndexPattern().split(','),
             indexExists: dv.getIndexPattern().split(',').length > 0,
-            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
+            indexPatterns: getIndexFields(
+              dv.getIndexPattern(),
+              fieldsWithUnmappedInfo ?? dv.fields,
+              includeUnmapped
+            ),
           });
         } catch (exc) {
           setState({
@@ -180,7 +192,7 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [addError, data.dataViews, includeUnmapped, indexNames, state]
+    [addError, addWarning, data.dataViews, includeUnmapped, indexNames, state]
   );
 
   useEffect(() => {
