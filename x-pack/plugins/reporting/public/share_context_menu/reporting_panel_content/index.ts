@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { Props, ReportingPanelProps } from './reporting_panel_content';
+export type { ReportingPanelProps } from './reporting_panel_content';
 export { ReportingPanelContent } from './reporting_panel_content';

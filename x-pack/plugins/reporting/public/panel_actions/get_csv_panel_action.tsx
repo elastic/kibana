@@ -140,14 +140,14 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       objectType: 'search',
     });
 
-    await this.apiClient.createReportingJob('csv_searchsource', decoratedJobParams).then((job) => {
+    // FIXME
+    await this.apiClient.createReportingJob('csv_searchsource', decoratedJobParams).then((job) =>
       showToasts(job.objectType, {
-        intl: context.intl,
         apiClient: this.apiClient,
         toasts: this.toasts,
         theme: this.theme,
         // onClose: this.onClose,
-      });
-    });
+      })
+    );
   }
 }

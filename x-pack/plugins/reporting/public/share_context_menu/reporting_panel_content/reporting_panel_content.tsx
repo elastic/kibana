@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n, type InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component, ReactElement } from 'react';
 import url from 'url';
 import {
@@ -54,8 +54,6 @@ export interface ReportingPanelProps {
   theme: ThemeServiceSetup;
 }
 
-export type Props = ReportingPanelProps & { intl: InjectedIntl };
-
 interface State {
   isStale: boolean;
   absoluteUrl: string;
@@ -64,10 +62,10 @@ interface State {
   isCreatingReportJob: boolean;
 }
 
-class ReportingPanelContentUi extends Component<Props, State> {
+export class ReportingPanelContent extends Component<ReportingPanelProps, State> {
   private mounted?: boolean;
 
-  constructor(props: Props) {
+  constructor(props: ReportingPanelProps) {
     super(props);
 
     // Get objectType from job params
@@ -82,7 +80,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     };
   }
 
-  private getAbsoluteReportGenerationUrl = (props: Props) => {
+  private getAbsoluteReportGenerationUrl = (props: ReportingPanelProps) => {
     const relativePath = this.props.apiClient.getReportingJobPath(
       props.reportType,
       this.props.apiClient.getDecoratedJobParams(this.props.getJobParams(true))
@@ -90,7 +88,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return url.resolve(window.location.href, relativePath); // FIXME: '(from: string, to: string): string' is deprecated
   };
 
-  public componentDidUpdate(_prevProps: Props, prevState: State) {
+  public componentDidUpdate(_prevProps: ReportingPanelProps, prevState: State) {
     if (this.props.layoutId && this.props.layoutId !== prevState.layoutId) {
       this.setState({
         ...prevState,
@@ -277,7 +275,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
   };
 
   private async createReportingJob() {
-    const { intl } = this.props;
     const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(
       this.props.getJobParams()
     );
@@ -288,7 +285,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
       .createReportingJob(this.props.reportType, decoratedJobParams)
       .then((job) =>
         showToasts(job.objectType, {
-          intl,
           apiClient: this.props.apiClient,
           toasts: this.props.toasts,
           theme: this.props.theme,
@@ -302,5 +298,3 @@ class ReportingPanelContentUi extends Component<Props, State> {
       });
   }
 }
-
-export const ReportingPanelContent = injectI18n(ReportingPanelContentUi);

@@ -6,13 +6,13 @@
  */
 
 import { ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { ReportingAPIClient } from '.';
 
 interface Deps {
-  intl: InjectedIntl;
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   theme: ThemeServiceSetup;
@@ -21,16 +21,16 @@ interface Deps {
 
 export const showReportRequestToasts = async (
   objectType: string,
-  { apiClient, onClose, intl, theme: { theme$ }, toasts }: Deps
+  { apiClient, onClose, theme: { theme$ }, toasts }: Deps
 ) => {
   try {
     toasts.addSuccess({
-      title: intl.formatMessage(
+      title: i18n.translate(
+        'xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle',
         {
-          id: 'xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle',
           defaultMessage: 'Queued report for {objectType}',
-        },
-        { objectType }
+          values: { objectType },
+        }
       ),
       text: toMountPoint(
         <FormattedMessage
@@ -57,8 +57,7 @@ export const showReportRequestToasts = async (
     }
   } catch (error) {
     toasts.addError(error, {
-      title: intl.formatMessage({
-        id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
+      title: i18n.translate('xpack.reporting.panelContent.notification.reportingErrorTitle', {
         defaultMessage: 'Unable to create report',
       }),
       toastMessage: (
