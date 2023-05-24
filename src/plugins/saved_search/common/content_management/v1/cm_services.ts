@@ -21,7 +21,7 @@ const savedSearchAttributesSchema = schema.object(
   {
     title: schema.string(),
     // todo might need to take a closer look at this
-    sort: schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 })),
+    sort: schema.maybe(schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 }))),
     // sort: schema.string(),
     columns: schema.arrayOf(schema.string()),
     description: schema.string(),

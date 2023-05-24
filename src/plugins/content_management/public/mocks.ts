@@ -8,14 +8,30 @@
 import { ContentManagementPublicStart, ContentManagementPublicSetup } from './types';
 
 const createSetupContract = (): ContentManagementPublicSetup => {
-  return {};
+  return {
+    registry: {
+      register: jest.fn(),
+    },
+  };
 };
 
 const createStartContract = (): ContentManagementPublicStart => {
-  return {};
+  return {
+    client: {
+      get: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      search: jest.fn(),
+    } as unknown as ContentManagementPublicStart['client'],
+    registry: {
+      get: jest.fn(),
+      getAll: jest.fn(),
+    },
+  };
 };
 
-export const dataPluginMock = {
+export const contentManagementMock = {
   createSetupContract,
   createStartContract,
 };
