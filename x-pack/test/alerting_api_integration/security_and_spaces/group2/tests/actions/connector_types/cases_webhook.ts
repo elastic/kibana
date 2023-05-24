@@ -257,7 +257,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
                 message:
                   'error validating action params: [subAction]: expected value to equal [pushToService]',
               });
