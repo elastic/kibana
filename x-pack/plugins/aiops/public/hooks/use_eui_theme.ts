@@ -5,26 +5,14 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-
 import { euiLightVars as euiThemeLight, euiDarkVars as euiThemeDark } from '@kbn/ui-theme';
 
-import { of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
 
-const themeDefault = { darkMode: false };
-
 export function useEuiTheme() {
   const { theme } = useAiopsAppContext();
-
-  const themeObservable$ = useMemo(() => {
-    return theme?.theme$ ?? of(themeDefault);
-  }, [theme]);
-
-  const { darkMode } = useObservable(themeObservable$, themeDefault);
-
-  return useMemo(() => (darkMode ? euiThemeDark : euiThemeLight), [darkMode]);
+  return useCurrentEuiThemeVars(theme);
 }
