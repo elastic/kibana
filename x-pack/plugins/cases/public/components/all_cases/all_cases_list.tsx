@@ -288,7 +288,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         <CasesTable
           columns={columns}
           data={data}
-          goToCreateCase={onRowClick}
+          goToCreateCase={onCreateCasePressed}
           isCasesLoading={isLoadingCases}
           isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}
