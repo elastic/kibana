@@ -53,6 +53,7 @@ describe('buildNewAlert', () => {
           instance: {
             id: 'alert-A',
           },
+          maintenance_window_ids: [],
           rule,
           status: 'active',
           uuid: legacyAlert.getUuid(),
@@ -85,6 +86,7 @@ describe('buildNewAlert', () => {
           instance: {
             id: 'alert-A',
           },
+          maintenance_window_ids: [],
           start: now,
           rule,
           status: 'active',

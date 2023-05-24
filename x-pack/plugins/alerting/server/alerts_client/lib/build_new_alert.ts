@@ -47,6 +47,7 @@ export const buildNewAlert = <
         instance: {
           id: legacyAlert.getId(),
         },
+        maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
         rule: rule.kibana?.alert.rule,
         status: 'active',
         uuid: legacyAlert.getUuid(),
@@ -55,9 +56,6 @@ export const buildNewAlert = <
           : {}),
         ...(!isEmpty(legacyAlert.getFlappingHistory())
           ? { flapping_history: legacyAlert.getFlappingHistory() }
-          : {}),
-        ...(!isEmpty(legacyAlert.getMaintenanceWindowIds())
-          ? { maintenance_window_ids: legacyAlert.getMaintenanceWindowIds() }
           : {}),
         ...(legacyAlert.getState().start ? { start: legacyAlert.getState().start } : {}),
       },

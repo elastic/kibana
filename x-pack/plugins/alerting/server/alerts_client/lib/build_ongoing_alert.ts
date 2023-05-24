@@ -61,6 +61,8 @@ export const buildOngoingAlert = <
         flapping: legacyAlert.getFlapping(),
         // Set latest rule configuration
         rule: rule.kibana?.alert.rule,
+        // Set latest maintenance window IDs
+        maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
         // Set latest duration as ongoing alerts should have updated duration
         ...(legacyAlert.getState().duration
           ? { duration: { us: legacyAlert.getState().duration } }
@@ -68,10 +70,6 @@ export const buildOngoingAlert = <
         // Set latest flapping history
         ...(!isEmpty(legacyAlert.getFlappingHistory())
           ? { flapping_history: legacyAlert.getFlappingHistory() }
-          : {}),
-        // Set latest maintenance window IDs
-        ...(!isEmpty(legacyAlert.getMaintenanceWindowIds())
-          ? { maintenance_window_ids: legacyAlert.getMaintenanceWindowIds() }
           : {}),
 
         // Fields that are explicitly not updated:

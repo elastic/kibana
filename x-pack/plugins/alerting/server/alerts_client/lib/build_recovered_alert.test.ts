@@ -44,6 +44,7 @@ const existingActiveAlert = {
       instance: {
         id: 'alert-A',
       },
+      maintenance_window_ids: ['maint-x'],
       start: '2023-03-28T12:27:28.159Z',
       rule,
       status: 'active',
@@ -67,6 +68,7 @@ const existingRecoveredAlert = {
       instance: {
         id: 'alert-A',
       },
+      maintenance_window_ids: ['maint-x'],
       start: '2023-03-27T12:27:28.159Z',
       rule,
       status: 'recovered',
@@ -77,7 +79,7 @@ const existingRecoveredAlert = {
 };
 
 describe('buildRecoveredAlert', () => {
-  test('should update alert document with recovered status and info from legacy alert', () => {
+  test('should update active alert document with recovered status and info from legacy alert', () => {
     const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
     legacyAlert
       .scheduleActions('default')
@@ -103,6 +105,7 @@ describe('buildRecoveredAlert', () => {
           instance: {
             id: 'alert-A',
           },
+          maintenance_window_ids: [],
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'recovered',
@@ -113,11 +116,12 @@ describe('buildRecoveredAlert', () => {
     });
   });
 
-  test('should update alert document with recovery status and updated rule data if rule definition has changed', () => {
+  test('should update active alert document with recovery status and updated rule data if rule definition has changed', () => {
     const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
     legacyAlert
       .scheduleActions('default')
       .replaceState({ end: '2023-03-30T12:27:28.159Z', duration: '36000000' });
+    legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
 
     expect(
       buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
@@ -152,6 +156,7 @@ describe('buildRecoveredAlert', () => {
           instance: {
             id: 'alert-A',
           },
+          maintenance_window_ids: ['maint-1', 'maint-321'],
           start: '2023-03-28T12:27:28.159Z',
           rule: {
             ...rule,
@@ -168,10 +173,11 @@ describe('buildRecoveredAlert', () => {
     });
   });
 
-  test('should update already recovered alert document with updated flapping history', () => {
+  test('should update already recovered alert document with updated flapping history but not maintenance window ids', () => {
     const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
     legacyAlert.scheduleActions('default');
     legacyAlert.setFlappingHistory([false, false, true, true]);
+    legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
 
     expect(
       buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
@@ -194,6 +200,7 @@ describe('buildRecoveredAlert', () => {
           instance: {
             id: 'alert-A',
           },
+          maintenance_window_ids: ['maint-x'],
           start: '2023-03-27T12:27:28.159Z',
           rule,
           status: 'recovered',

@@ -49,6 +49,10 @@ export const buildRecoveredAlert = <
   ActionGroupIds,
   RecoveryActionGroupId
 >): Alert & AlertData => {
+  // If we're updating an active alert to be recovered,
+  // persist any maintenance window IDs on the alert, otherwise
+  // we should only be changing fields related to flapping
+  let maintenanceWindowIds = alert.kibana.alert.status === 'active' ? legacyAlert.getMaintenanceWindowIds() : null;
   return {
     ...alert,
     // Update the timestamp to reflect latest update time
@@ -72,6 +76,10 @@ export const buildRecoveredAlert = <
         // Set latest flapping history
         ...(!isEmpty(legacyAlert.getFlappingHistory())
           ? { flapping_history: legacyAlert.getFlappingHistory() }
+          : {}),
+        // Set maintenance window IDs if defined
+        ...(maintenanceWindowIds
+          ? { maintenance_window_ids: maintenanceWindowIds }
           : {}),
 
         // Fields that are explicitly not updated:

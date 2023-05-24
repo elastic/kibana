@@ -79,6 +79,7 @@ describe('buildOngoingAlert', () => {
           instance: {
             id: 'alert-A',
           },
+          maintenance_window_ids: [],
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'active',
@@ -127,6 +128,7 @@ describe('buildOngoingAlert', () => {
           instance: {
             id: 'alert-A',
           },
+          maintenance_window_ids: [],
           start: '2023-03-28T12:27:28.159Z',
           rule: {
             ...rule,
@@ -180,6 +182,52 @@ describe('buildOngoingAlert', () => {
             id: 'alert-A',
           },
           maintenance_window_ids: ['maint-xyz'],
+          start: '2023-03-28T12:27:28.159Z',
+          rule,
+          status: 'active',
+          uuid: 'abcdefg',
+        },
+        space_ids: ['default'],
+      },
+    });
+  });
+
+  test('should update alert document with latest maintenance window ids', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'error' | 'warning'>('1');
+    legacyAlert.scheduleActions('error');
+    legacyAlert.setFlappingHistory([false, false, true, true]);
+
+    expect(
+      buildOngoingAlert<{}, {}, {}, 'error' | 'warning', 'recovered'>({
+        alert: {
+          ...existingAlert,
+          kibana: {
+            ...existingAlert.kibana,
+            alert: {
+              ...existingAlert.kibana.alert,
+              flapping_history: [true, false, false, false, true, true],
+              maintenance_window_ids: ['maint-1', 'maint-321'],
+            },
+          },
+        },
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-29T12:27:28.159Z',
+      kibana: {
+        alert: {
+          action_group: 'error',
+          duration: {
+            us: '0',
+          },
+          flapping: false,
+          flapping_history: [false, false, true, true],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'active',
