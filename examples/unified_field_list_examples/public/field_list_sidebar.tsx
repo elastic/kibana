@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ChildDragDropProvider, DragContext } from '@kbn/dom-drag-drop';
 import {
@@ -22,6 +22,7 @@ import {
   FieldListFilters,
   FieldListGrouped,
   FieldListGroupedProps,
+  FieldsGroupNames,
   useExistingFieldsFetcher,
   useGroupedFields,
   useQuerySubscriber,
@@ -36,10 +37,32 @@ export interface FieldListSidebarProps {
 export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({ dataView, services }) => {
   const dragDropContext = useContext(DragContext);
   const allFields = dataView.fields;
+  const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
   const activeDataViews = useMemo(() => [dataView], [dataView]);
   const querySubscriberResult = useQuerySubscriber({ data: services.data });
 
-  const { isProcessing } = useExistingFieldsFetcher({
+  const onSelectedFieldFilter = useCallback(
+    (field: DataViewField) => {
+      return selectedFieldNames.includes(field.name);
+    },
+    [selectedFieldNames]
+  );
+
+  const onAddFieldToWorkplace = useCallback(
+    (field: DataViewField) => {
+      setSelectedFieldNames((names) => [...names, field.name]);
+    },
+    [setSelectedFieldNames]
+  );
+
+  const onRemoveFieldFromWorkplace = useCallback(
+    (field: DataViewField) => {
+      setSelectedFieldNames((names) => names.filter((name) => name !== field.name));
+    },
+    [setSelectedFieldNames]
+  );
+
+  const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
     dataViews: activeDataViews, // if you need field existence info for more than one data view, you can specify it here
     query: querySubscriberResult.query,
     filters: querySubscriberResult.filters,
@@ -53,12 +76,37 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({ dataView, se
     allFields,
     services,
     isAffectedByGlobalFilter: Boolean(querySubscriberResult.filters?.length),
-    // onSelectedFieldFilter,
+    onSupportedFieldFilter,
+    onSelectedFieldFilter,
   });
 
+  const onRefreshFields = useCallback(() => {
+    refetchFieldsExistenceInfo();
+  }, [refetchFieldsExistenceInfo]);
+
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
-    (params) => <FieldListItem dataView={dataView} services={services} {...params} />,
-    [dataView, services]
+    (params) => (
+      <FieldListItem
+        dataView={dataView}
+        services={services}
+        isSelected={
+          params.groupName === FieldsGroupNames.SelectedFields ||
+          selectedFieldNames.includes(params.field.name)
+        }
+        onRefreshFields={onRefreshFields}
+        onAddFieldToWorkspace={onAddFieldToWorkplace}
+        onRemoveFieldFromWorkplace={onRemoveFieldFromWorkplace}
+        {...params}
+      />
+    ),
+    [
+      dataView,
+      services,
+      onRefreshFields,
+      selectedFieldNames,
+      onAddFieldToWorkplace,
+      onRemoveFieldFromWorkplace,
+    ]
   );
 
   return (
@@ -76,3 +124,7 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({ dataView, se
     </ChildDragDropProvider>
   );
 };
+
+function onSupportedFieldFilter(field: DataViewField): boolean {
+  return field.name !== '_source';
+}

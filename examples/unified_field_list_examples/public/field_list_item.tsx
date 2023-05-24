@@ -14,11 +14,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import {
+  AddFieldFilterHandler,
   FieldItemButton,
+  FieldItemButtonProps,
   FieldPopover,
   FieldPopoverHeader,
   FieldsGroupNames,
@@ -27,6 +29,7 @@ import {
   RenderFieldItemParams,
   useQuerySubscriber,
 } from '@kbn/unified-field-list-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AppPluginStartDependencies } from './types';
 
@@ -36,19 +39,29 @@ export interface FieldListItemProps extends RenderFieldItemParams<DataViewField>
     core: CoreStart;
     uiSettings: CoreStart['uiSettings'];
   };
+  isSelected: boolean;
+  onAddFieldToWorkspace: FieldItemButtonProps<DataViewField>['onAddFieldToWorkspace'];
+  onRemoveFieldFromWorkplace: FieldItemButtonProps<DataViewField>['onRemoveFieldFromWorkspace'];
+  onRefreshFields: () => void;
 }
 
 export function FieldListItem({
   dataView,
   services,
+  isSelected,
   field,
   fieldSearchHighlight,
   groupIndex,
   groupName,
   itemIndex,
   hideDetails,
+  onRefreshFields,
+  onAddFieldToWorkspace,
+  onRemoveFieldFromWorkplace,
 }: FieldListItemProps) {
-  const querySubscriberResult = useQuerySubscriber({ data: services.data });
+  const { dataViewFieldEditor, data } = services;
+  const querySubscriberResult = useQuerySubscriber({ data });
+  const filterManager = data?.query?.filterManager;
   const [infoIsOpen, setOpen] = useState(false);
 
   const togglePopover = useCallback(() => {
@@ -58,6 +71,11 @@ export function FieldListItem({
   const closePopover = useCallback(() => {
     setOpen(false);
   }, [setOpen]);
+
+  const closeFieldEditor = useRef<() => void | undefined>();
+  const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
+    closeFieldEditor.current = ref;
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -69,29 +87,79 @@ export function FieldListItem({
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const onAddFieldToWorkspace = useCallback(() => {
-    // TODO
+  const addFilterAndClose: AddFieldFilterHandler | undefined = useMemo(
+    () =>
+      filterManager && dataView
+        ? (clickedField, values, operation) => {
+            closePopover();
+            const newFilters = generateFilters(
+              filterManager,
+              clickedField,
+              values,
+              operation,
+              dataView
+            );
+            filterManager.addFilters(newFilters);
+          }
+        : undefined,
+    [dataView, filterManager, closePopover]
+  );
+
+  const editFieldAndClose = useMemo(
+    () =>
+      dataView
+        ? (fieldName?: string) => {
+            const ref = dataViewFieldEditor.openEditor({
+              ctx: {
+                dataView,
+              },
+              fieldName,
+              onSave: async () => {
+                onRefreshFields();
+              },
+            });
+            if (setFieldEditorRef) {
+              setFieldEditorRef(ref);
+            }
+            closePopover();
+          }
+        : undefined,
+    [dataViewFieldEditor, dataView, setFieldEditorRef, closePopover, onRefreshFields]
+  );
+
+  const removeFieldAndClose = useMemo(
+    () =>
+      dataView
+        ? async (fieldName: string) => {
+            const ref = dataViewFieldEditor.openDeleteModal({
+              ctx: {
+                dataView,
+              },
+              fieldName,
+              onDelete: async () => {
+                onRefreshFields();
+              },
+            });
+            if (setFieldEditorRef) {
+              setFieldEditorRef(ref);
+            }
+            closePopover();
+          }
+        : undefined,
+    [dataView, setFieldEditorRef, closePopover, dataViewFieldEditor, onRefreshFields]
+  );
+
+  useEffect(() => {
+    const cleanup = () => {
+      if (closeFieldEditor?.current) {
+        closeFieldEditor?.current();
+      }
+    };
+    return () => {
+      // Make sure to close the editor when unmounting
+      cleanup();
+    };
   }, []);
-
-  const addFilterAndClose = useCallback(() => {
-    closePopover();
-    // TODO
-  }, [closePopover]);
-
-  const editFieldAndClose = useCallback(() => {
-    closePopover();
-    // TODO
-  }, [closePopover]);
-
-  const removeFieldAndClose = useCallback(() => {
-    closePopover();
-    // TODO
-  }, [closePopover]);
-
-  const onAddFilter = useCallback(() => {
-    closePopover();
-    // TODO
-  }, [closePopover]);
 
   return (
     <li>
@@ -112,8 +180,10 @@ export function FieldListItem({
               size="xs"
               isActive={infoIsOpen}
               isEmpty={groupName === FieldsGroupNames.EmptyFields}
-              isSelected={groupName === FieldsGroupNames.SelectedFields}
+              isSelected={isSelected}
               onClick={togglePopover}
+              onAddFieldToWorkspace={onAddFieldToWorkspace}
+              onRemoveFieldFromWorkspace={onRemoveFieldFromWorkplace}
             />
           </DragDrop>
         }
@@ -141,7 +211,7 @@ export function FieldListItem({
                       fromDate={querySubscriberResult.fromDate}
                       toDate={querySubscriberResult.toDate}
                       dataViewOrDataViewId={dataView}
-                      onAddFilter={onAddFilter}
+                      onAddFilter={addFilterAndClose}
                       field={field}
                     />
                   )}

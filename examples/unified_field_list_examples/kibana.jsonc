@@ -16,6 +16,7 @@
       "unifiedFieldList",
       "data",
       "dataViews",
+      "dataViewFieldEditor",
       "charts",
       "fieldFormats"
     ]
