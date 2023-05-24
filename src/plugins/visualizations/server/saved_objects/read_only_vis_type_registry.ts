@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { getVisualizationSavedObjectType } from './visualization';
-export { registerReadOnlyVisType } from './read_only_vis_type_registry';
+const registry: string[] = [];
+
+export function registerReadOnlyVisType(visType: string) {
+  registry.push(visType);
+}
+
+export function isVisTypeReadOnly(visType?: string) {
+  return visType ? registry.includes(visType) : false;
+}
