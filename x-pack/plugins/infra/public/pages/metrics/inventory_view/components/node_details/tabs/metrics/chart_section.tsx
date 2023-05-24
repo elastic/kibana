@@ -13,7 +13,7 @@ import {
   Position,
   Settings,
   TickFormatter,
-  TooltipValue,
+  TooltipProps,
 } from '@elastic/charts';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
@@ -59,9 +59,9 @@ export const ChartSection = ({
 }: Props) => {
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const metrics = series.map((chartSeries) => chartSeries.metric);
-  const tooltipProps = {
-    headerFormatter: (tooltipValue: TooltipValue) =>
-      moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: ({ value }) =>
+      moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
   };
 
   return (

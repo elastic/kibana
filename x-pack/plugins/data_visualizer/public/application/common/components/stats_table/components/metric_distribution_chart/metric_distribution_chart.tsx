@@ -17,17 +17,12 @@ import {
   Position,
   ScaleType,
   Settings,
-  TooltipValue,
   TooltipHeaderFormatter,
 } from '@elastic/charts';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { kibanaFieldFormat } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
-
-interface ChartTooltipValue extends TooltipValue {
-  skipHeader?: boolean;
-}
 
 export interface MetricDistributionChartData {
   x: number;
