@@ -18,7 +18,7 @@ import {
   ScaleType,
   Settings,
   TooltipValue,
-  TooltipValueFormatter,
+  TooltipHeaderFormatter,
 } from '@elastic/charts';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
@@ -66,7 +66,7 @@ export const MetricDistributionChart: FC<Props> = ({
 
   const theme = useDataVizChartTheme();
 
-  const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
+  const headerFormatter: TooltipHeaderFormatter = (tooltipData) => {
     const xValue = tooltipData.value;
     const chartPoint: MetricDistributionChartData | undefined = chartData.find(
       (data) => data.x === xValue
