@@ -98,7 +98,7 @@ describe('FleetFromHostFilesClient', () => {
     });
   });
 
-  it('should create internal ES File client with expected arguments when type is `from-host', () => {
+  it('should create internal ES File client with expected arguments', () => {
     getFleetFilesInstance();
 
     expect(createEsFileClientMock).toHaveBeenCalledWith({
@@ -111,7 +111,7 @@ describe('FleetFromHostFilesClient', () => {
   });
 
   describe('#get() method', () => {
-    it('should retrieve file info for files `from-host`', async () => {
+    it('should retrieve file info', async () => {
       await expect(getFleetFilesInstance().get('123')).resolves.toEqual({
         actionId: '83484393-ddba-4f3c-9c7e-f492ee198a85',
         agents: ['eef9254d-f3ed-4518-889f-18714bd6cec1'],
