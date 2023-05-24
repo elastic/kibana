@@ -32,8 +32,6 @@ import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-
 import type { SerializableRecord } from '@kbn/utility-types';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { PersistableStateAttachmentTypeSetup } from '../../attachment_framework/types';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 describe('comments migrations', () => {
   const contextMock = savedObjectsServiceMock.createMigrationContext();
