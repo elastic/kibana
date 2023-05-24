@@ -27,7 +27,7 @@ export type RegisterFunction = (navNode: InternalNavigationNode) => {
 };
 
 export interface NodeProps {
-  children?: ((deepLink?: ChromeNavLink) => ReactNode) | ReactNode;
+  children?: ((navNode: InternalNavigationNode) => ReactNode) | ReactNode;
   id?: string;
   title?: string;
   link?: string;

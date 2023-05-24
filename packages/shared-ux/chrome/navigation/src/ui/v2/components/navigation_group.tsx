@@ -11,6 +11,7 @@ import React, { createContext, useCallback, useMemo, useContext } from 'react';
 import { useInitNavNode } from '../use_init_navnode';
 import type { NodeProps, RegisterFunction } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
+import { useNavigation } from './navigation';
 
 interface Context {
   register: RegisterFunction;
@@ -34,8 +35,11 @@ interface Props extends NodeProps {
 }
 
 function NavigationGroupComp(props: Props) {
-  const { children, defaultIsCollapsed, unstyled = false, ...node } = props;
+  const navigationContext = useNavigation();
+  const { children, defaultIsCollapsed, ...node } = props;
   const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node);
+
+  const unstyled = props.unstyled ?? navigationContext.unstyled;
 
   const renderContent = useCallback(() => {
     if (!path || !navNode) {

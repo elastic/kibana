@@ -10,6 +10,7 @@ import React, { Fragment, ReactElement, ReactNode } from 'react';
 
 import { NodeProps } from '../types';
 import { useInitNavNode } from '../use_init_navnode';
+import { useNavigation } from './navigation';
 
 interface Props extends NodeProps {
   element?: string;
@@ -21,7 +22,10 @@ function isReactElement(element: ReactNode): element is ReactElement {
 }
 
 function NavigationItemComp(props: Props) {
-  const { element, unstyled = false, children, ...node } = props;
+  const navigationContext = useNavigation();
+
+  const { element, children, ...node } = props;
+  const unstyled = props.unstyled ?? navigationContext.unstyled;
 
   let itemRender: (() => ReactElement) | undefined;
 
@@ -36,6 +40,9 @@ function NavigationItemComp(props: Props) {
   }
 
   if (children) {
+    if (typeof children === 'function') {
+      return children(navNode);
+    }
     return <>{children}</>;
   }
 

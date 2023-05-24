@@ -19,9 +19,17 @@ import { getI18nStrings } from '../../i18n_strings';
 
 interface Props {
   recentlyAccessed$?: Observable<RecentItem[]>;
+  /**
+   * If true, the recently accessed list will be collapsed by default.
+   * @default false
+   */
+  defaultIsCollapsed?: boolean;
 }
 
-export const RecentlyAccessed: FC<Props> = ({ recentlyAccessed$: recentlyAccessedProp$ }) => {
+export const RecentlyAccessed: FC<Props> = ({
+  recentlyAccessed$: recentlyAccessedProp$,
+  defaultIsCollapsed = false,
+}) => {
   const strings = getI18nStrings();
   const { recentlyAccessed$ } = useServices();
   const recentlyAccessed = useObservable(recentlyAccessedProp$ ?? recentlyAccessed$, []);
@@ -47,7 +55,7 @@ export const RecentlyAccessed: FC<Props> = ({ recentlyAccessed$: recentlyAccesse
       title={strings.recentlyAccessed}
       iconType="clock"
       isCollapsible={true}
-      initialIsOpen={true}
+      initialIsOpen={!defaultIsCollapsed}
       data-test-subj={`nav-bucket-recentlyAccessed`}
     >
       <EuiSideNav items={navItems} css={styles.euiSideNavItems} />

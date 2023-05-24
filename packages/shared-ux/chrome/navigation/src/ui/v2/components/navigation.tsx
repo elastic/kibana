@@ -30,6 +30,7 @@ import { RecentlyAccessed } from './recently_accessed';
 interface Context {
   register: RegisterFunction;
   updateFooterChildren: (children: ReactNode) => void;
+  unstyled: boolean;
 }
 
 const NavigationContext = createContext<Context>({
@@ -38,15 +39,17 @@ const NavigationContext = createContext<Context>({
     path: [],
   }),
   updateFooterChildren: () => {},
+  unstyled: false,
 });
 
 interface Props {
   children: ReactNode;
   homeRef: string;
+  unstyled?: boolean;
   onRootItemRemove?: (id: string) => void;
 }
 
-export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
+export function Navigation({ children, homeRef, onRootItemRemove, unstyled = false }: Props) {
   const { onProjectNavigationChange } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
@@ -98,8 +101,9 @@ export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
     () => ({
       register,
       updateFooterChildren: setFooterChildren,
+      unstyled,
     }),
-    [register]
+    [register, unstyled]
   );
 
   useEffect(() => {
@@ -115,7 +119,7 @@ export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
 
   return (
     <NavigationContext.Provider value={contextValue}>
-      <NavigationUI homeRef={homeRef} footerChildren={footerChildren}>
+      <NavigationUI homeRef={homeRef} footerChildren={footerChildren} unstyled={unstyled}>
         {children}
       </NavigationUI>
     </NavigationContext.Provider>
