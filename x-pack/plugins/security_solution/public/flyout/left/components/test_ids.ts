@@ -33,3 +33,5 @@ export const CORRELATIONS_DETAILS_TEST_ID = `${PREFIX}CorrelationsDetails` as co
 export const THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID = `threat-match-detected` as const;
 export const THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID =
   `${PREFIX}ThreatIntelligenceDetailsLoadingSpinner` as const;
+
+export const INVESTIGATION_TEST_ID = `${PREFIX}Investigation` as const;

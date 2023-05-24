@@ -24,6 +24,7 @@ import {
   enableMonitorAlertEffect,
   fetchMonitorListEffect,
   upsertMonitorEffect,
+  fetchMonitorFiltersEffect,
 } from './monitor_list';
 import { fetchMonitorOverviewEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
@@ -35,6 +36,7 @@ export const rootEffect = function* root(): Generator {
   yield all([
     fork(fetchSyntheticsEnablementEffect),
     fork(upsertMonitorEffect),
+    fork(fetchMonitorFiltersEffect),
     fork(fetchServiceLocationsEffect),
     fork(fetchMonitorListEffect),
     fork(fetchSyntheticsMonitorEffect),

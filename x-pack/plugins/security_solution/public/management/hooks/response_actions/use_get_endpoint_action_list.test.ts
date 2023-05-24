@@ -51,7 +51,7 @@ describe('useGetEndpointActionList hook', () => {
         pageSize: 20,
         startDate: 'now-5d',
         endDate: 'now',
-        withAutomatedActions: true,
+        withAutomatedActions: false,
       })
     );
 
@@ -66,7 +66,7 @@ describe('useGetEndpointActionList hook', () => {
         pageSize: 20,
         startDate: 'now-5d',
         userIds: ['*elastic*', '*citsale*'],
-        withAutomatedActions: true,
+        withAutomatedActions: false,
       },
     });
   });

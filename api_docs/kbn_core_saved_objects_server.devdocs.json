@@ -8195,7 +8195,7 @@
             "tags": [],
             "label": "schemas",
             "description": [
-              "\nThe {@link SavedObjectsModelVersionSchemaDefinitions} associated with this version.\n"
+              "\nThe {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.\n\nSchemas are used to validate / convert the shape and/or content of the documents at various stages of their usages."
             ],
             "signature": [
               {
@@ -8266,20 +8266,22 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsModelVersionSchemaDefinitions.create",
-            "type": "Object",
+            "id": "def-common.SavedObjectsModelVersionSchemaDefinitions.forwardCompatibility",
+            "type": "CompoundType",
             "tags": [],
-            "label": "create",
-            "description": [],
+            "label": "forwardCompatibility",
+            "description": [
+              "\nThe schema applied when retrieving documents of a higher version from the cluster.\nUsed for multi-version compatibility in managed environments.\n\nWhen retrieving a savedObject document from an index, if the version of the document\nis higher than the latest version known of the Kibana instance, the document will go\nthrough the `forwardCompatibility` schema of the associated model version.\n\nE.g a Kibana instance with model version `2` for type `foo` types fetches a `foo` document\nat model version `3`. The document will then go through the `forwardCompatibility`\nof the model version 2 (if present).\n\nSee {@link SavedObjectModelVersionForwardCompatibilitySchema} for more info."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelVersionCreateSchema",
-                "text": "SavedObjectModelVersionCreateSchema"
+                "section": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+                "text": "SavedObjectModelVersionForwardCompatibilitySchema"
               },
-              " | undefined"
+              "<unknown, unknown> | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
             "deprecated": false,
@@ -11519,11 +11521,47 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
-        "id": "def-common.SavedObjectModelVersionCreateSchema",
+        "id": "def-common.SavedObjectModelVersionForwardCompatibilityFn",
         "type": "Type",
         "tags": [],
-        "label": "SavedObjectModelVersionCreateSchema",
-        "description": [],
+        "label": "SavedObjectModelVersionForwardCompatibilityFn",
+        "description": [
+          "\nPlain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}"
+        ],
+        "signature": [
+          "(attributes: InAttrs) => OutAttrs"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectModelVersionForwardCompatibilityFn.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "InAttrs"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectModelVersionForwardCompatibilitySchema",
+        "description": [
+          "\nSchema used when retrieving a document of a higher version to convert them to the older version.\n\nThese schemas can be defined in multiple ways:\n- A `@kbn/config-schema`'s Object schema, that will receive the document's attributes\n- An arbitrary function that will receive the document's attributes as parameter and should return the converted attributes\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
@@ -11532,7 +11570,15 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<any>"
+          "<any> | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectModelVersionForwardCompatibilityFn",
+            "text": "SavedObjectModelVersionForwardCompatibilityFn"
+          },
+          "<InAttrs, OutAttrs>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
         "deprecated": false,
