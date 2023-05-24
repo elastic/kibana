@@ -165,8 +165,8 @@ export const AssetDetails = ({
               node={node}
               nodeType={nodeType}
               currentTime={currentTimeRange.to}
-              hostFlyoutOpen={hostFlyoutOpen}
-              setHostFlyoutState={setHostFlyoutState}
+              searchFilter={hostFlyoutOpen?.searchFilter}
+              setSearchFilter={setHostFlyoutState}
             />
           </div>
         )}
@@ -213,8 +213,8 @@ export const AssetDetails = ({
               node={node}
               nodeType={nodeType}
               currentTime={currentTimeRange.to}
-              hostFlyoutOpen={hostFlyoutOpen}
-              setHostFlyoutState={setHostFlyoutState}
+              searchFilter={hostFlyoutOpen?.searchFilter}
+              setSearchFilter={setHostFlyoutState}
             />
           </div>
         )}

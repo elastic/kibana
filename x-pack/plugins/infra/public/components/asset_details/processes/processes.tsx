@@ -30,20 +30,13 @@ import {
 import { getFieldByType } from '../../../../common/inventory_models';
 import type { HostNodeRow } from '../types';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
-import type { SetNewHostFlyoutOpen } from '../../../pages/metrics/hosts/hooks/use_host_flyout_open_url_state';
-import type { TabIds } from '../asset_details';
 
 export interface ProcessesProps {
   node: HostNodeRow;
   nodeType: InventoryItemType;
   currentTime: number;
-  hostFlyoutOpen?: {
-    clickedItemId: string;
-    selectedTabId: TabIds;
-    searchFilter: string;
-    metadataSearch: string;
-  };
-  setHostFlyoutState?: SetNewHostFlyoutOpen;
+  searchFilter?: string;
+  setSearchFilter?: (searchFilter: { searchFilter: string }) => void;
 }
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
@@ -55,14 +48,12 @@ export const Processes = ({
   currentTime,
   node,
   nodeType,
-  hostFlyoutOpen,
-  setHostFlyoutState,
+  searchFilter,
+  setSearchFilter,
 }: ProcessesProps) => {
   const [searchText, setSearchText] = useState('');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
-    hostFlyoutOpen?.searchFilter
-      ? Query.parse(hostFlyoutOpen.searchFilter)
-      : Query.parse(searchText) ?? Query.MATCH_ALL
+    searchFilter ? Query.parse(searchFilter) : Query.parse(searchText) ?? Query.MATCH_ALL
   );
 
   const [sortBy, setSortBy] = useState<SortBy>({
@@ -80,22 +71,15 @@ export const Processes = ({
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(
-    hostTerm,
-    currentTime,
-    sortBy,
-    parseSearchString(hostFlyoutOpen?.searchFilter ?? searchText)
-  );
+  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchFilter ?? searchText));
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>(
       (queryText) =>
-        setHostFlyoutState
-          ? setHostFlyoutState({ searchFilter: queryText })
-          : setSearchText(queryText),
+        setSearchFilter ? setSearchFilter({ searchFilter: queryText }) : setSearchText(queryText),
       500
     );
-  }, [setHostFlyoutState]);
+  }, [setSearchFilter]);
 
   const searchBarOnChange = useCallback(
     ({ query, queryText }) => {
@@ -107,11 +91,11 @@ export const Processes = ({
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
-    if (setHostFlyoutState) {
-      setHostFlyoutState({ searchFilter: '' });
+    if (setSearchFilter) {
+      setSearchFilter({ searchFilter: '' });
     }
     setSearchText('');
-  }, [setHostFlyoutState]);
+  }, [setSearchFilter]);
 
   return (
     <TabContent>
