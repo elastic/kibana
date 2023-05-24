@@ -91,6 +91,7 @@ const SortableControlInner = forwardRef<
         grow={grow}
         data-control-id={embeddableId}
         data-test-subj={`control-frame`}
+        data-render-complete="true"
         className={classNames('controlFrameWrapper', {
           'controlFrameWrapper-isDragging': isDragging,
           'controlFrameWrapper-isEditable': isEditable,

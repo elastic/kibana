@@ -10,7 +10,7 @@ import { FtrService } from '../ftr_provider_context';
 
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
-const DATA_LOADING_SELECTOR = '[data-loading="true"]';
+const DATA_LOADING_SELECTOR = '[data-loading]';
 
 export class RenderableService extends FtrService {
   private readonly log = this.ctx.getService('log');
