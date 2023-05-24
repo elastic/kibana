@@ -17,7 +17,7 @@ import {
   getSyntheticsFilterDisplayValues,
   SyntheticsMonitorFilterChangeHandler,
   LabelWithCountValue,
-} from './filter_fields';
+} from '../../../../utils/filters/filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
 
