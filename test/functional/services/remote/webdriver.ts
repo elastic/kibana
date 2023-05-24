@@ -227,9 +227,10 @@ async function attemptToCreateCommand(
       case 'firefox': {
         const firefoxOptions = new firefox.Options();
         // Firefox 65+ supports logging console output to stdout
-        firefoxOptions.set('moz:firefoxOptions', {
-          prefs: { 'devtools.console.stdout.content': true },
-        });
+        // firefoxOptions.set('moz:firefoxOptions', {
+        //   prefs: { 'devtools.console.stdout.content': true },
+        // });
+        firefoxOptions.setPreference('dom.always_stop_slow_scripts', true);
         firefoxOptions.setPreference('browser.download.folderList', 2);
         firefoxOptions.setPreference('browser.download.manager.showWhenStarting', false);
         firefoxOptions.setPreference('browser.download.dir', downloadDir);
@@ -237,10 +238,11 @@ async function attemptToCreateCommand(
           'browser.helperApps.neverAsk.saveToDisk',
           'application/comma-separated-values, text/csv, text/plain'
         );
+        firefoxOptions.setPreference('dom.ipc.processCount', 8);
         firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
-          // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
+          // See: https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/
           firefoxOptions.headless();
         }
 

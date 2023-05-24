@@ -50,6 +50,7 @@ while read -r config; do
   fi
 
   echo "--- $ node scripts/functional_tests --bail --config $config"
+  export MOZ_REMOTE_SETTINGS_DEVTOOLS=1
   start=$(date +%s)
 
   # prevent non-zero exit code from breaking the loop
