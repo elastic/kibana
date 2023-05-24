@@ -36,3 +36,8 @@ export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>
 
 export const selectMonitorUpsertStatus = (configId: string) => (state: SyntheticsAppState) =>
   state.monitorList.monitorUpsertStatuses?.[configId] ?? null;
+
+export const selectMonitorFilterOptions = createSelector(
+  selectMonitorListState,
+  (state) => state.monitorFilterOptions
+);

@@ -7,7 +7,7 @@
 
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { UpsertMonitorRequest } from '..';
-import { API_URLS } from '../../../../../common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
@@ -15,6 +15,7 @@ import {
   MonitorManagementListResultCodec,
   ServiceLocationErrors,
   SyntheticsMonitor,
+  MonitorFiltersResult,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
@@ -75,4 +76,8 @@ export const fetchCreateMonitor = async ({
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+};
+
+export const fetchMonitorFilters = async (): Promise<MonitorFiltersResult> => {
+  return await apiService.get(SYNTHETICS_API_URLS.FILTERS);
 };
