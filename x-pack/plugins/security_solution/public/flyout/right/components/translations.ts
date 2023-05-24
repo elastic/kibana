@@ -194,3 +194,10 @@ export const ANALYZER_PREVIEW_TEXT = i18n.translate(
     defaultMessage: 'analyzer preview.',
   }
 );
+
+export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
+  {
+    defaultMessage: 'Investigation guide',
+  }
+);

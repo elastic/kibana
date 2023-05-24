@@ -21,12 +21,21 @@ export interface GetBasicDataFromDetailsData {
   timestamp: string;
   data: TimelineEventsDetailsItem[] | null;
   ruleDescription: string;
+  ruleId: string;
 }
 
 export const useBasicDataFromDetailsData = (
   data: TimelineEventsDetailsItem[] | null
 ): GetBasicDataFromDetailsData => {
   const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data);
+
+  const ruleId = useMemo(
+    () =>
+      isAlert
+        ? getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data)
+        : getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data),
+    [isAlert, data]
+  );
 
   const ruleName = useMemo(
     () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, data),
@@ -71,8 +80,20 @@ export const useBasicDataFromDetailsData = (
       timestamp,
       data,
       ruleDescription,
+      ruleId,
     }),
-    [agentId, alertId, hostName, isAlert, ruleName, timestamp, userName, data, ruleDescription]
+    [
+      agentId,
+      alertId,
+      hostName,
+      isAlert,
+      ruleName,
+      timestamp,
+      userName,
+      data,
+      ruleDescription,
+      ruleId,
+    ]
   );
 };
 

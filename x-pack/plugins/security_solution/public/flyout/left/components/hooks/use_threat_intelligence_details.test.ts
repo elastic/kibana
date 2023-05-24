@@ -67,6 +67,7 @@ describe('useThreatIntelligenceDetails', () => {
       indexName: 'test-index',
       eventId: 'test-event-id',
       getFieldsData: () => {},
+      dataFormattedForFieldBrowser: null,
     });
   });
 
