@@ -13,8 +13,8 @@ import {
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
 import { privateLocationsSavedObject } from './private_locations';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { ConfigKey, DynamicSettings } from '../../../../common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../../../common/constants';
+import { ConfigKey, DynamicSettingsAttributes } from '../../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
 import { UptimeConfig } from '../../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
@@ -47,28 +47,31 @@ export const registerUptimeSavedObjects = (
 
 export interface UMSavedObjectsAdapter {
   config: UptimeConfig | null;
-  getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
-  setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
+  getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettingsAttributes>;
+  setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettingsAttributes>;
 }
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   config: null,
   getUptimeDynamicSettings: async (client) => {
     try {
-      const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
-      return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
+      const obj = await client.get<DynamicSettingsAttributes>(
+        umDynamicSettings.name,
+        settingsObjectId
+      );
+      return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
     } catch (getErr) {
       const config = savedObjectsAdapter.config;
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         if (config?.index) {
-          return { ...DYNAMIC_SETTINGS_DEFAULTS, heartbeatIndices: config.index };
+          return { ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES, heartbeatIndices: config.index };
         }
-        return DYNAMIC_SETTINGS_DEFAULTS;
+        return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
       }
       throw getErr;
     }
   },
-  setUptimeDynamicSettings: async (client, settings) => {
+  setUptimeDynamicSettings: async (client, settings: DynamicSettingsAttributes) => {
     await client.create(umDynamicSettings.name, settings, {
       id: settingsObjectId,
       overwrite: true,
