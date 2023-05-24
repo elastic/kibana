@@ -18,6 +18,8 @@ import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predic
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
 
+// This is particularly useful in case of a text based languages where
+// it's no possible to use a missingBucketLabel
 const emptySliceLabel = i18n.translate('expressionPartitionVis.emptySlice', {
   defaultMessage: '(empty)',
 });
@@ -63,7 +65,7 @@ export const getLayers = (
   return columns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? emptySliceLabel : col.name),
-      showAccessor: (d: Datum) => d !== emptySliceLabel,
+      showAccessor: (d: Datum) => true,
       nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
       fillLabel:
         layerIndex === 0 && chartType === ChartTypes.MOSAIC
