@@ -320,8 +320,12 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
-          .auth(UNPRIVILEGED_USERNAME, 'changeme')
-          .expect(403);
+          .auth('unprivileged_test_user_2', 'changeme')
+          .expect(200);
+
+        expect(res.kspm.status).to.be('unprivileged');
+        expect(res.cspm.status).to.be('unprivileged');
+        expect(res.vuln_mgmt.status).to.be('unprivileged');
       });
     });
 
