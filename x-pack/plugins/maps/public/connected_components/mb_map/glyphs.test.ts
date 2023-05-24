@@ -108,7 +108,7 @@ describe('EMS disabled', () => {
   test('should return kibana fonts template URL before canAccessEmsFontsPromise resolves', () => {
     expect(getGlyphs()).toEqual({
       isEmsFont: false,
-      glyphUrlTemplate: 'abc/api/internal/fonts/{fontstack}/{range}',
+      glyphUrlTemplate: 'abc/internal/maps/fonts/{fontstack}/{range}',
     });
   });
 
