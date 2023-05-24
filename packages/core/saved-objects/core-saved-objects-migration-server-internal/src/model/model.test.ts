@@ -1853,10 +1853,17 @@ describe('migrations v2 model', () => {
           outdatedDocuments,
           lastHitSortValue,
           totalHits: 1,
+          processedDocs: 1,
         });
-        const newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
-        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
+        let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
         expect(newState.batchSize).toBe(600);
+        newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(720);
+        newState = model({ ...state, batchSize: 720 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(864);
+        newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
         expect(newState.maxBatchSize).toBe(1000);
       });
 
@@ -2421,17 +2428,24 @@ describe('migrations v2 model', () => {
         `);
       });
 
-      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM increases batchSize if < maxBatchSize', () => {
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM increases batchSize up to maxBatchSize', () => {
         const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
         const lastHitSortValue = [123456];
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments,
           lastHitSortValue,
           totalHits: 1,
+          processedDocs: [],
         });
-        const newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
-        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
+        let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
         expect(newState.batchSize).toBe(600);
+        newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(720);
+        newState = model({ ...state, batchSize: 720 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(864);
+        newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
         expect(newState.maxBatchSize).toBe(1000);
       });
 
