@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { execSync } from 'child_process';
 import type { Config } from '../../functional_test_runner';
 import { DedicatedTaskRunner } from '../../functional_test_runner/lib';
 import { parseRawFlags, getArgValue, remapPluginPaths } from './kibana_cli_args';
@@ -26,33 +25,19 @@ export async function runKibanaServer(options: {
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
 }) {
-  const showMeTheArgMax = () => execSync(`getconf ARG_MAX`).toString();
-  try {
-    const argMax = showMeTheArgMax();
-    // eslint-disable-next-line no-console
-    console.log(`\n### argMax: \n\t${argMax}`);
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(`\n !!! Failed trying for ARG_MAX: ${e}`);
-  }
   const { config, procs } = options;
   const runOptions = options.config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
   const useTaskRunner = options.config.get('kbnTestServer.useDedicatedTaskRunner');
 
-  const cmd = installDir
-    ? process.platform.startsWith('win')
-      ? Path.resolve(installDir, 'bin/kibana.bat')
-      : Path.resolve(installDir, 'bin/kibana')
-    : process.execPath;
-
-  // eslint-disable-next-line no-console
-  console.log(`\n### cmd: \n\t${cmd}`);
-
   const procRunnerOpts = {
     cwd: installDir || REPO_ROOT,
-    cmd,
+    cmd: installDir
+      ? process.platform.startsWith('win')
+        ? Path.resolve(installDir, 'bin/kibana.bat')
+        : Path.resolve(installDir, 'bin/kibana')
+      : process.execPath,
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -83,22 +68,6 @@ export async function runKibanaServer(options: {
     kbnFlags = remapPluginPaths(kbnFlags, installDir);
   }
 
-  const args = [
-    ...prefixArgs,
-    ...parseRawFlags([
-      ...kbnFlags,
-      ...(!useTaskRunner
-        ? []
-        : [
-            '--node.roles=["ui"]',
-            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
-          ]),
-    ]),
-  ];
-  // eslint-disable-next-line no-console
-  console.log(`\n### args: \n${JSON.stringify(args, null, 2)}`);
-  // eslint-disable-next-line no-console
-  console.log(`\n### arg flattened length: \n\t${args.join(' ').length}`);
   const mainName = useTaskRunner ? 'kbn-ui' : 'kibana';
   const promises = [
     // main process
@@ -107,30 +76,24 @@ export async function runKibanaServer(options: {
       writeLogsToPath: options.logsDir
         ? Path.resolve(options.logsDir, `${mainName}.log`)
         : undefined,
-      args,
+      args: [
+        ...prefixArgs,
+        ...parseRawFlags([
+          ...kbnFlags,
+          ...(!useTaskRunner
+            ? []
+            : [
+                '--node.roles=["ui"]',
+                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
+              ]),
+        ]),
+      ],
     }),
   ];
 
   if (useTaskRunner) {
     const mainUuid = getArgValue(kbnFlags, 'server.uuid');
 
-    const argsTaskRunner = [
-      ...prefixArgs,
-      ...parseRawFlags([
-        ...kbnFlags,
-        `--server.port=${DedicatedTaskRunner.getPort(config.get('servers.kibana.port'))}`,
-        '--node.roles=["background_tasks"]',
-        `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${uuidv4()}`)}`,
-        ...(typeof mainUuid === 'string' && mainUuid
-          ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
-          : []),
-        ...(devMode ? ['--no-optimizer'] : []),
-      ]),
-    ];
-    // eslint-disable-next-line no-console
-    console.log(`\n### argsTaskRunner: \n${JSON.stringify(argsTaskRunner, null, 2)}`);
-    // eslint-disable-next-line no-console
-    console.log(`\n### argsTaskRunner flattened length: \n\t${argsTaskRunner.join(' ').length}`);
     // dedicated task runner
     promises.push(
       procs.run('kbn-tasks', {
@@ -138,7 +101,19 @@ export async function runKibanaServer(options: {
         writeLogsToPath: options.logsDir
           ? Path.resolve(options.logsDir, 'kbn-tasks.log')
           : undefined,
-        args,
+        args: [
+          ...prefixArgs,
+          ...parseRawFlags([
+            ...kbnFlags,
+            `--server.port=${DedicatedTaskRunner.getPort(config.get('servers.kibana.port'))}`,
+            '--node.roles=["background_tasks"]',
+            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${uuidv4()}`)}`,
+            ...(typeof mainUuid === 'string' && mainUuid
+              ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
+              : []),
+            ...(devMode ? ['--no-optimizer'] : []),
+          ]),
+        ],
       })
     );
   }
