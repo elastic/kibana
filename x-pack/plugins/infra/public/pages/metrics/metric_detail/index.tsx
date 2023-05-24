@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';

@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip, IconType } from '@elastic/eui';
 import { TimeRange } from '@kbn/es-query';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import type { CloudProvider, HostNodeRow } from '../hooks/use_hosts_table';
 

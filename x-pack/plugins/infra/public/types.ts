@@ -48,15 +48,19 @@ import { InventoryViewsServiceStart } from './services/inventory_views';
 import { LogViewsServiceStart } from './services/log_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
+import { InfraLocators } from './locators';
 
 // Our own setup and start contract values
-export type InfraClientSetupExports = void;
+export interface InfraClientSetupExports {
+  locators: InfraLocators;
+}
 
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
   logViews: LogViewsServiceStart;
   metricsExplorerViews: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
+  locators: InfraLocators;
   ContainerMetricsTable: (
     props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
   ) => JSX.Element;
