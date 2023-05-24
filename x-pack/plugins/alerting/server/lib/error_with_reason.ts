@@ -31,7 +31,7 @@ export function isErrorWithReason(error: Error | ErrorWithReason): error is Erro
 
 export function isValidationError(error: Error): boolean {
   if (isErrorWithReason(error)) {
-    return error.reason === 'validate';
+    return error.reason === RuleExecutionStatusErrorReasons.Validate;
   }
   return false;
 }

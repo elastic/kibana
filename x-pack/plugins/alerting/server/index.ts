@@ -55,7 +55,6 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
-export type { PublicFrameworkAlertsService } from './alerts_service';
 export {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
@@ -63,6 +62,7 @@ export {
   ECS_CONTEXT,
   TOTAL_FIELDS_LIMIT,
   getComponentTemplate,
+  type PublicFrameworkAlertsService,
   createOrUpdateIlmPolicy,
   createOrUpdateComponentTemplate,
   getIndexTemplate,
@@ -70,8 +70,6 @@ export {
   createConcreteWriteIndex,
   installWithTimeout,
 } from './alerts_service';
-
-export { rawRuleSchema } from './raw_rule_schema';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

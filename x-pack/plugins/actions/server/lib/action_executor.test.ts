@@ -739,7 +739,7 @@ describe('action executor', () => {
     expect(result).toEqual({
       actionId: '1',
       status: 'error',
-      retry: false,
+      retry: true,
       message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
     });
   });
@@ -778,7 +778,7 @@ describe('action executor', () => {
     expect(result).toEqual({
       actionId: '1',
       status: 'error',
-      retry: false,
+      retry: true,
       message: `error validating action type connector: config must be defined`,
     });
   });
@@ -816,8 +816,42 @@ describe('action executor', () => {
     expect(result).toEqual({
       actionId: '1',
       status: 'error',
-      retry: false,
+      retry: true,
       message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
+    });
+  });
+
+  test('throws an error when action data is invalid', async () => {
+    const actionType: jest.Mocked<ActionType> = {
+      id: 'test',
+      name: 'Test',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({ foo: schema.boolean() }) },
+      },
+      executor: jest.fn(),
+    };
+    const actionSavedObject = {
+      id: '1',
+      type: 'action',
+      attributes: {
+        name: '1',
+        actionTypeId: 'test',
+      },
+      references: [],
+    };
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+    const result = await actionExecutor.execute(executeParams);
+    expect(result).toEqual({
+      actionId: '1',
+      status: 'error',
+      retry: true,
+      message: '[isMissingSecrets]: expected value of type [boolean] but got [undefined]',
     });
   });
 

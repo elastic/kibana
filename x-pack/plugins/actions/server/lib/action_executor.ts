@@ -483,7 +483,7 @@ function validateAction(
       actionId,
       status: 'error',
       message: err.message,
-      retry: false,
+      retry: true,
     });
   }
 }
