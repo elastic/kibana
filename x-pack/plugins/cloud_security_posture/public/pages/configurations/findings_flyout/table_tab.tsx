@@ -17,7 +17,7 @@ import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 
-interface ResourceItem {
+interface FlattenedItem {
   key: string; // flattened dot notation object path for CspFinding['resource'];
   value: unknown;
 }
@@ -39,43 +39,43 @@ const getDescriptionDisplay = (value: unknown) => {
   return <EuiText size="s">{value as string}</EuiText>;
 };
 
-const search: EuiInMemoryTableProps<ResourceItem>['search'] = {
+const search: EuiInMemoryTableProps<FlattenedItem>['search'] = {
   box: {
     incremental: true,
   },
 };
 
-const sorting: EuiInMemoryTableProps<ResourceItem>['sorting'] = {
+const sorting: EuiInMemoryTableProps<FlattenedItem>['sorting'] = {
   sort: {
     field: 'key',
     direction: 'asc',
   },
 };
 
-const pagination: EuiInMemoryTableProps<ResourceItem>['pagination'] = {
+const pagination: EuiInMemoryTableProps<FlattenedItem>['pagination'] = {
   initialPageSize: 100,
   showPerPageOptions: false,
 };
 
-const columns: EuiInMemoryTableProps<ResourceItem>['columns'] = [
+const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
   {
     field: 'key',
-    name: i18n.translate('xpack.csp.flyout.resource.fieldLabel', { defaultMessage: 'Field' }),
+    name: i18n.translate('xpack.csp.flyout.tableTab.fieldLabel', { defaultMessage: 'Field' }),
     width: '25%',
   },
   {
     field: 'value',
-    name: i18n.translate('xpack.csp.flyout.resource.fieldValueLabel', { defaultMessage: 'Value' }),
+    name: i18n.translate('xpack.csp.flyout.tableTab.fieldValueLabel', { defaultMessage: 'Value' }),
     render: (value, record) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
   },
 ];
 
-const getFlattenedItems = (resource: CspFinding['resource']) =>
+const getFlattenedItems = (resource: CspFinding) =>
   Object.entries(getFlattenedObject(resource)).map(([key, value]) => ({ key, value }));
 
-export const ResourceTab = ({ data }: { data: CspFinding }) => (
+export const TableTab = ({ data }: { data: CspFinding }) => (
   <EuiInMemoryTable
-    items={getFlattenedItems(data.resource)}
+    items={getFlattenedItems(data)}
     columns={columns}
     sorting={sorting}
     search={search}
