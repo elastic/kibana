@@ -33,9 +33,11 @@ export default function ({ getService }: FtrProviderContext) {
         const servicePath = `${config.basePath}/has_user_${config.serviceKey}`;
 
         it('should return false if no index patterns', async () => {
-          const response = await supertest.get(servicePath);
-          expect(response.status).to.be(200);
-          expect(response.body.result).to.be(false);
+          await retry.waitFor('false response', async () => {
+            const response = await supertest.get(servicePath);
+            expect(response.status).to.be(200);
+            return response.body.result === false;
+          });
         });
 
         it('should return true if has index pattern with user data', async () => {
