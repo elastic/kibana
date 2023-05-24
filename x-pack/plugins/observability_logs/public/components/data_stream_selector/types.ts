@@ -15,6 +15,8 @@ export interface DataStreamSelectorProps {
   title: string;
   /* The integrations list, each integration includes its data streams */
   integrations: Integration[] | null;
+  /* Any error occurred to show when the user preview the integrations */
+  integrationsError?: Error | null;
   /* The generic data stream list */
   dataStreams: DataStream[] | null;
   /* Any error occurred to show when the user preview the generic data streams */
@@ -27,6 +29,8 @@ export interface DataStreamSelectorProps {
   onSearch: SearchHandler;
   /* Triggered when we reach the bottom of the integration list and want to load more */
   onIntegrationsLoadMore: LoadMoreIntegrations;
+  /* Triggered when we reach the bottom of the integration list and want to load more */
+  onIntegrationsReload: LoadMoreIntegrations;
   /* Triggered when the uncategorized streams entry is selected */
   onStreamsEntryClick: () => void;
   /* Triggered when retrying to load the data streams */

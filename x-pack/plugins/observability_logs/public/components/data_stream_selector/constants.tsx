@@ -13,7 +13,7 @@ export const UNCATEGORIZED_STREAMS_PANEL_ID = 'uncategorized_streams_panel';
 
 export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 300;
 
-export const contextMenuStyles = { maxHeight: 320 };
+export const contextMenuStyles = { maxHeight: 440 };
 
 export const selectDatasetLabel = i18n.translate(
   'xpack.observabilityLogs.dataStreamSelector.selectDataset',
@@ -45,6 +45,19 @@ export const noDataStreamsDescriptionLabel = i18n.translate(
   {
     defaultMessage:
       "Looks like you don't have data stream or your search does not match any of them.",
+  }
+);
+
+export const noIntegrationsLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.noIntegrations',
+  { defaultMessage: 'No integrations found' }
+);
+
+export const noIntegrationsDescriptionLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.noIntegrationsDescription',
+  {
+    defaultMessage:
+      "Looks like you don't have integrations or your search does not match any of them.",
   }
 );
 
