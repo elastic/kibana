@@ -6,7 +6,7 @@ API_ENDPOINT=$2
 updateStepProgress() {
   echo "  GET $API_ENDPOINT/step/$1?status=$2"
   curl --request GET \
-    --url "$API_ENDPOINT/step/$1?status=$2" \
+    --url "$API_ENDPOINT/step/$1?status=$2 2023-05-24" \
     --header "Authorization: ApiKey $API_KEY_ENCODED" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true"

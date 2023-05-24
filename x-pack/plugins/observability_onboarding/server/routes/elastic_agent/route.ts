@@ -13,7 +13,7 @@ import { getESHosts } from '../custom_logs/get_es_hosts';
 import { generateYml } from './generate_yml';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/elastic_agent/config',
+  endpoint: 'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
   options: { tags: [] },
   async handler(resources): Promise<string> {
     const { core, plugins, request } = resources;

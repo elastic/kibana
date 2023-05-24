@@ -88,7 +88,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
 });
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/custom_logs/step/{name}',
+  endpoint:
+    'GET /api/observability_onboarding/custom_logs/step/{name} 2023-05-24',
   options: { tags: [] },
   params: t.type({
     path: t.type({

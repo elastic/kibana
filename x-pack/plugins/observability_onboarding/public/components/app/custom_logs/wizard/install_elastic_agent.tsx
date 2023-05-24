@@ -66,7 +66,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (CurrentStep === InstallElasticAgent && installShipperSetup) {
         return callApi(
-          'GET /api/observability_onboarding/elastic_agent/config',
+          'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
           {
             headers: {
               authorization: `ApiKey ${installShipperSetup.apiKeyEncoded}`,
