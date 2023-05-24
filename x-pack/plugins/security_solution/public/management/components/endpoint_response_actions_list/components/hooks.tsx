@@ -27,7 +27,7 @@ import { StatusBadge } from './status_badge';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
-const defaultDateRangeOptions = Object.freeze({
+export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   autoRefreshOptions: {
     enabled: false,
     duration: 10000,
@@ -39,8 +39,9 @@ const defaultDateRangeOptions = Object.freeze({
 
 export const useDateRangePicker = (isFlyout: boolean) => {
   const { setUrlDateRangeFilters } = useActionHistoryUrlParams();
-  const [dateRangePickerState, setDateRangePickerState] =
-    useState<DateRangePickerValues>(defaultDateRangeOptions);
+  const [dateRangePickerState, setDateRangePickerState] = useState<DateRangePickerValues>(
+    DEFAULT_DATE_RANGE_OPTIONS
+  );
 
   const updateActionListDateRanges = useCallback(
     ({ start, end }) => {

@@ -14,6 +14,7 @@ import {
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
+import { DEFAULT_DATE_RANGE_OPTIONS } from './hooks';
 
 interface UrlParamsActionsLogFilters {
   commands: string;
@@ -63,8 +64,8 @@ export const actionsLogFiltersFromUrlParams = (
     commands: [],
     hosts: [],
     statuses: [],
-    startDate: 'now-24h/h',
-    endDate: 'now',
+    startDate: DEFAULT_DATE_RANGE_OPTIONS.startDate,
+    endDate: DEFAULT_DATE_RANGE_OPTIONS.endDate,
     users: [],
     withOutputs: [],
     withAutomatedActions: undefined,
@@ -107,12 +108,8 @@ export const actionsLogFiltersFromUrlParams = (
   actionsLogFilters.commands = urlCommands.length ? urlCommands : undefined;
   actionsLogFilters.hosts = urlHosts.length ? urlHosts : undefined;
   actionsLogFilters.statuses = urlStatuses.length ? urlStatuses : undefined;
-  actionsLogFilters.startDate = urlParams.startDate
-    ? String(urlParams.startDate)
-    : actionsLogFilters.startDate;
-  actionsLogFilters.endDate = urlParams.endDate
-    ? String(urlParams.endDate)
-    : actionsLogFilters.endDate;
+  actionsLogFilters.startDate = urlParams.startDate ? String(urlParams.startDate) : undefined;
+  actionsLogFilters.endDate = urlParams.endDate ? String(urlParams.endDate) : undefined;
   actionsLogFilters.users = urlUsers.length ? urlUsers : undefined;
   actionsLogFilters.withOutputs = urlWithOutputs.length ? urlWithOutputs : undefined;
   actionsLogFilters.withAutomatedActions = urlParams.withAutomatedActions ? true : undefined;
