@@ -427,10 +427,6 @@ export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   t.interface({
     secrets: t.string,
   }),
-  t.type({
-    updatedAt: t.string,
-    createdAt: t.string,
-  }),
 ]);
 
 export type Secret = typeof secretKeys[number];

@@ -8,7 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import {
   getMonitorAction,
@@ -43,7 +43,7 @@ export const useSelectedMonitor = (monId?: string) => {
     monitorId && monitorFromList && monitorFromList[ConfigKey.CONFIG_ID] === monitorId;
   const isLoadedSyntheticsMonitorValid =
     monitorId && syntheticsMonitor && syntheticsMonitor[ConfigKey.CONFIG_ID] === monitorId;
-  const availableMonitor = isLoadedSyntheticsMonitorValid
+  const availableMonitor: EncryptedSyntheticsSavedMonitor | null = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
     ? monitorFromList

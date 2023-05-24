@@ -42,11 +42,14 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
       const { decrypted } = request.query;
 
       if (!decrypted) {
-        const { attributes } = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
+        const { attributes, ...rest } = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
           syntheticsMonitorType,
           monitorId
         );
-        return attributes;
+        return Object.assign(attributes, {
+          created_at: rest.created_at,
+          updated_at: rest.updated_at,
+        });
       } else {
         // only user with write permissions can decrypt the monitor
         const canSave =

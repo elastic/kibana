@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsSavedMonitor,
   EncryptedSyntheticsMonitorCodec,
   PingsResponse,
   PingsResponseType,
@@ -62,8 +62,8 @@ export const fetchSyntheticsMonitor = async ({
   monitorId,
 }: {
   monitorId: string;
-}): Promise<EncryptedSyntheticsMonitor> =>
-  apiService.get<EncryptedSyntheticsMonitor>(
+}): Promise<EncryptedSyntheticsSavedMonitor> =>
+  apiService.get<EncryptedSyntheticsSavedMonitor>(
     API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
     undefined,
     EncryptedSyntheticsMonitorCodec
