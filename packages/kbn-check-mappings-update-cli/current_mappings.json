@@ -2109,14 +2109,13 @@
       "budgetingMethod": {
         "type": "keyword"
       },
-      "combinedSlos": {
+      "compositeMethod": {
+        "type": "keyword"
+      },
+      "sources": {
         "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "revision": {
-            "type": "integer"
-          }
+          "id": { "type": "keyword" },
+          "revision": { "type": "integer" }
         }
       },
       "tags": {
