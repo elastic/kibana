@@ -40,18 +40,6 @@ export const DataStreamsList = ({
     return <DataStreamSkeleton />;
   }
 
-  if (isEmpty) {
-    return (
-      <EuiEmptyPrompt
-        iconType="search"
-        paddingSize="m"
-        title={<h2>{noDataStreamsLabel}</h2>}
-        titleSize="s"
-        body={<p>{noDataStreamsDescriptionLabel}</p>}
-      />
-    );
-  }
-
   if (hasError) {
     return (
       <EuiEmptyPrompt
@@ -74,6 +62,18 @@ export const DataStreamsList = ({
           />
         }
         actions={[<EuiButton onClick={onRetry}>{noDataRetryLabel}</EuiButton>]}
+      />
+    );
+  }
+
+  if (isEmpty) {
+    return (
+      <EuiEmptyPrompt
+        iconType="search"
+        paddingSize="m"
+        title={<h2>{noDataStreamsLabel}</h2>}
+        titleSize="s"
+        body={<p>{noDataStreamsDescriptionLabel}</p>}
       />
     );
   }

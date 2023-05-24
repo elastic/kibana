@@ -60,7 +60,7 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
     (searchParams) =>
       integrationsStateService.send({
         type: 'SEARCH',
-        delay: search.name !== searchParams.name ? 500 : 0,
+        delay: search.name !== searchParams.name ? 300 : 0,
         search: {
           nameQuery: searchParams.name,
           strategy: searchParams.strategy,
@@ -68,7 +68,7 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
           integrationId: searchParams.integrationId,
         },
       }),
-    [integrationsStateService, search]
+    [integrationsStateService, search.name]
   );
 
   const loadMore = useCallback(

@@ -9,6 +9,8 @@ import { HttpStart } from '@kbn/core/public';
 import { FindDataStreamsError, FindIntegrationsError } from '../../../common/data_streams/errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
+  formatSearch,
+  DATA_STREAMS_URL,
   FindDataStreamsRequestQuery,
   findDataStreamsRequestQueryRT,
   FindDataStreamsResponse,
@@ -17,8 +19,7 @@ import {
   findIntegrationsRequestQueryRT,
   FindIntegrationsResponse,
   findIntegrationsResponseRT,
-  getDataStreamsUrl,
-  getIntegrationsUrl,
+  INTEGRATIONS_URL,
 } from '../../../common';
 
 import { IDataStreamsClient } from './types';
@@ -29,6 +30,7 @@ const defaultIntegrationsParams = {
 
 const defaultDataStreamsParams = {
   type: 'logs',
+  uncategorisedOnly: true,
 };
 
 export class DataStreamsClient implements IDataStreamsClient {
@@ -45,14 +47,11 @@ export class DataStreamsClient implements IDataStreamsClient {
         new FindIntegrationsError(`Failed to decode integrations search param: ${message}"`)
     )(search);
 
-    // const response = await this.http.get(getIntegrationsUrl(decodedSearch)).catch((error) => {
-    //   throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
-    // });
-    const response = await fetch('http://localhost:3000' + getIntegrationsUrl(decodedSearch))
-      .then((res) => res.json())
-      .catch((error) => {
-        throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
-      });
+    const query = formatSearch(decodedSearch);
+
+    const response = await this.http.get(INTEGRATIONS_URL, { query }).catch((error) => {
+      throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
+    });
 
     const data = decodeOrThrow(
       findIntegrationsResponseRT,
@@ -74,14 +73,11 @@ export class DataStreamsClient implements IDataStreamsClient {
         new FindDataStreamsError(`Failed to decode data streams search param: ${message}"`)
     )(search);
 
-    // const response = await this.http.get(getDataStreamsUrl(decodedSearch)).catch((error) => {
-    //   throw new FindDataStreamsError(`Failed to fetch data streams": ${error}`);
-    // });
-    const response = await fetch('http://localhost:3000' + getDataStreamsUrl(decodedSearch))
-      .then((res) => res.json())
-      .catch((error) => {
-        throw new FindDataStreamsError(`Failed to decode data streams response: ${error}"`);
-      });
+    const query = formatSearch(decodedSearch);
+
+    const response = await this.http.get(DATA_STREAMS_URL, { query }).catch((error) => {
+      throw new FindDataStreamsError(`Failed to fetch data streams": ${error}`);
+    });
 
     const data = decodeOrThrow(
       findDataStreamsResponseRT,
