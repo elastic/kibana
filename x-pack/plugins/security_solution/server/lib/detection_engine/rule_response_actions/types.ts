@@ -17,4 +17,5 @@ export interface AlertsWithAgentType {
   alertIds: string[];
   ruleId?: string;
   ruleName?: string;
+  hosts: Record<string, { name: string }>;
 }

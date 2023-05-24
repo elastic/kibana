@@ -20,7 +20,9 @@ export type Params = Pick<
   | 'navigationTree'
   | 'platformConfig'
   | 'recentlyAccessed$'
+  | 'navLinks$'
   | 'recentlyAccessedFilter'
+  | 'onProjectNavigationChange'
 >;
 
 export class StorybookMock extends AbstractStorybookMock<
@@ -51,6 +53,8 @@ export class StorybookMock extends AbstractStorybookMock<
       navigateToUrl,
       loadingCount$: params.loadingCount$ ?? new BehaviorSubject(0),
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
+      navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
+      onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
     };
   }
 

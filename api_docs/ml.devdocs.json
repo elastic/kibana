@@ -719,7 +719,7 @@
             "tags": [],
             "label": "fullJob",
             "description": [
-              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint."
+              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /internal/ml/jobs/jobs_summary endpoint."
             ],
             "signature": [
               "CombinedJob",
@@ -1607,7 +1607,7 @@
             "tags": [],
             "label": "fullJob",
             "description": [
-              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint."
+              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /internal/ml/jobs/jobs_summary endpoint."
             ],
             "signature": [
               "CombinedJob",
@@ -2481,7 +2481,7 @@
             "tags": [],
             "label": "fullJob",
             "description": [
-              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint."
+              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /internal/ml/jobs/jobs_summary endpoint."
             ],
             "signature": [
               "CombinedJob",

@@ -25,7 +25,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
-  const { core } = dependencies;
+  const { core, serverless } = dependencies;
   const { chrome, http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
@@ -34,8 +34,10 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     basePath,
     loadingCount$: http.getLoadingCount$(),
     recentlyAccessed$: chrome.recentlyAccessed.get$(),
+    navLinks$: chrome.navLinks.getNavLinks$(),
     navigateToUrl,
     navIsOpen: true,
+    onProjectNavigationChange: serverless.setNavigation,
   };
 
   return (
