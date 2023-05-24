@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
@@ -16,7 +17,6 @@ import {
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   getMonitorFilters,
