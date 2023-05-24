@@ -441,17 +441,14 @@ export const getCaseConnectors = async (
     }
   );
 
-  return Object.keys(res).reduce(
-    (acc, connectorId) => ({
-      ...acc,
-      [connectorId]: {
-        ...convertToCamelCase<GetCaseConnectorsResponse[string], CaseConnectors[string]>(
-          res[connectorId]
-        ),
-      },
-    }),
-    {}
-  );
+  return Object.keys(res).reduce<CaseConnectors>((acc, connectorId) => {
+    acc[connectorId] = {
+      ...convertToCamelCase<GetCaseConnectorsResponse[string], CaseConnectors[string]>(
+        res[connectorId]
+      ),
+    };
+    return acc;
+  }, {});
 };
 
 export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> => {

@@ -22,4 +22,5 @@ export enum SYNTHETICS_API_URLS {
   NETWORK_EVENTS = `/internal/synthetics/network_events`,
   JOURNEY_SCREENSHOT = `/internal/synthetics/journey/screenshot/{checkGroup}/{stepIndex}`,
   DELETE_PACKAGE_POLICY = `/internal/synthetics/monitor/policy/{packagePolicyId}`,
+  FILTERS = '/internal/synthetics/monitor/filters',
 }

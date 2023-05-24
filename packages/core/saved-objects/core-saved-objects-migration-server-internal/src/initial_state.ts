@@ -7,28 +7,29 @@
  */
 
 import * as Option from 'fp-ts/Option';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  getOutdatedDocumentsQuery,
+  type OutdatedDocumentsQueryParams,
+} from './get_outdated_documents_query';
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
 import { getTempIndexName } from './model/helpers';
 
-export interface CreateInitialStateParams {
+export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
   indexTypesMap: IndexTypesMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
-  migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
@@ -46,6 +47,7 @@ export const createInitialState = ({
   indexTypesMap,
   targetMappings,
   preMigrationScript,
+  coreMigrationVersionPerType,
   migrationVersionPerType,
   indexPrefix,
   migrationsConfig,
@@ -53,37 +55,10 @@ export const createInitialState = ({
   docLinks,
   logger,
 }: CreateInitialStateParams): InitState => {
-  const outdatedDocumentsQuery: QueryDslQueryContainer = {
-    bool: {
-      should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
-        bool: {
-          must: [
-            { term: { type } },
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      must: { exists: { field: 'migrationVersion' } },
-                      must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
-                    },
-                  },
-                  {
-                    bool: {
-                      must_not: [
-                        { exists: { field: 'migrationVersion' } },
-                        { term: { typeMigrationVersion: latestVersion } },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      })),
-    },
-  };
+  const outdatedDocumentsQuery = getOutdatedDocumentsQuery({
+    coreMigrationVersionPerType,
+    migrationVersionPerType,
+  });
 
   const reindexTargetMappings: IndexMapping = {
     dynamic: false,

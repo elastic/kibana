@@ -33,6 +33,7 @@ export interface ReindexParams {
    * index for backup purposes, but won't be available in the upgraded index.
    */
   excludeOnUpgradeQuery: QueryDslQueryContainer;
+  /** Number of documents Elasticsearch will read/write in each batch */
   batchSize: number;
 }
 

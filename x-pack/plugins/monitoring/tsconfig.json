@@ -19,7 +19,6 @@
     "@kbn/features-plugin",
     "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/observability-plugin",
     "@kbn/telemetry-collection-xpack-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/expect",

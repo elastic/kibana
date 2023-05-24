@@ -79,7 +79,7 @@ describe('readWithPit', () => {
     }
     await expect(task()).resolves.toEqual({
       _tag: 'Left',
-      left: { type: 'es_response_too_large' },
+      left: { contentLength: 536870889, type: 'es_response_too_large' },
     });
   });
 

@@ -93,6 +93,7 @@ export const FieldsConfig: FC = () => {
         return (
           <React.Fragment key={key}>
             <FieldPanel
+              data-test-subj={`aiopsChangePointPanel_${index}`}
               fieldConfig={fieldConfig}
               onChange={(value) => onChange(value, index)}
               onRemove={onRemove.bind(null, index)}
@@ -105,7 +106,11 @@ export const FieldsConfig: FC = () => {
           </React.Fragment>
         );
       })}
-      <EuiButton onClick={onAdd} disabled={fieldConfigs.length >= MAX_CHANGE_POINT_CONFIGS}>
+      <EuiButton
+        onClick={onAdd}
+        disabled={fieldConfigs.length >= MAX_CHANGE_POINT_CONFIGS}
+        data-test-subj={'aiopsChangePointAddConfig'}
+      >
         <FormattedMessage
           id="xpack.aiops.changePointDetection.addButtonLabel"
           defaultMessage="Add"
@@ -121,6 +126,7 @@ export interface FieldPanelProps {
   onChange: (update: FieldConfig) => void;
   onRemove: () => void;
   onSelectionChange: (update: SelectedChangePoint[]) => void;
+  'data-test-subj': string;
 }
 
 /**
@@ -137,6 +143,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
   onRemove,
   removeDisabled,
   onSelectionChange,
+  'data-test-subj': dataTestSubj,
 }) => {
   const { combinedQuery, requestParams } = useChangePointDetectionContext();
 
@@ -151,7 +158,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
   return (
-    <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
+    <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>

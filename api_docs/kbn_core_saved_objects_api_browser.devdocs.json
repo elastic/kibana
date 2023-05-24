@@ -1788,10 +1788,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
               },
@@ -1961,10 +1957,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_location_monitors.ts"
               },
               {
@@ -1978,14 +1970,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
               },
               {
                 "plugin": "savedObjects",

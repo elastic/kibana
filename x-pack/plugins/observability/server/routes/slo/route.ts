@@ -31,6 +31,7 @@ import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
   KQLCustomTransformGenerator,
+  MetricCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
@@ -45,6 +46,7 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
   'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
   'sli.kql.custom': new KQLCustomTransformGenerator(),
+  'sli.metric.custom': new MetricCustomTransformGenerator(),
 };
 
 const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerContext) => {
@@ -53,7 +55,7 @@ const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerCont
 };
 
 const createSLORoute = createObservabilityServerRoute({
-  endpoint: 'POST /api/observability/slos',
+  endpoint: 'POST /api/observability/slos 2023-05-22',
   options: {
     tags: ['access:slo_write'],
   },
@@ -80,7 +82,7 @@ const createSLORoute = createObservabilityServerRoute({
 });
 
 const updateSLORoute = createObservabilityServerRoute({
-  endpoint: 'PUT /api/observability/slos/{id}',
+  endpoint: 'PUT /api/observability/slos/{id} 2023-05-22',
   options: {
     tags: ['access:slo_write'],
   },
@@ -106,7 +108,7 @@ const updateSLORoute = createObservabilityServerRoute({
 });
 
 const deleteSLORoute = createObservabilityServerRoute({
-  endpoint: 'DELETE /api/observability/slos/{id}',
+  endpoint: 'DELETE /api/observability/slos/{id} 2023-05-22',
   options: {
     tags: ['access:slo_write'],
   },
@@ -138,7 +140,7 @@ const deleteSLORoute = createObservabilityServerRoute({
 });
 
 const getSLORoute = createObservabilityServerRoute({
-  endpoint: 'GET /api/observability/slos/{id}',
+  endpoint: 'GET /api/observability/slos/{id} 2023-05-22',
   options: {
     tags: ['access:slo_read'],
   },
@@ -163,7 +165,7 @@ const getSLORoute = createObservabilityServerRoute({
 });
 
 const enableSLORoute = createObservabilityServerRoute({
-  endpoint: 'POST /api/observability/slos/{id}/enable',
+  endpoint: 'POST /api/observability/slos/{id}/enable 2023-05-22',
   options: {
     tags: ['access:slo_write'],
   },
@@ -189,7 +191,7 @@ const enableSLORoute = createObservabilityServerRoute({
 });
 
 const disableSLORoute = createObservabilityServerRoute({
-  endpoint: 'POST /api/observability/slos/{id}/disable',
+  endpoint: 'POST /api/observability/slos/{id}/disable 2023-05-22',
   options: {
     tags: ['access:slo_write'],
   },
@@ -215,7 +217,7 @@ const disableSLORoute = createObservabilityServerRoute({
 });
 
 const findSLORoute = createObservabilityServerRoute({
-  endpoint: 'GET /api/observability/slos',
+  endpoint: 'GET /api/observability/slos 2023-05-22',
   options: {
     tags: ['access:slo_read'],
   },
