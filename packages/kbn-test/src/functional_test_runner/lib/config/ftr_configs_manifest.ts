@@ -26,26 +26,20 @@ interface FtrConfigsManifest {
 }
 let ftrConfigsManifest: FtrConfigsManifest;
 
-const loadNormal = (): FtrConfigsManifest => {
-  const x = Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL);
-  return JsYaml.safeLoad(Fs.readFileSync(x, 'utf8'));
-};
-
-const loadAbnormal = (): FtrConfigsManifest => {
-  const fromRepoRootIntoKbn = Path.resolve(REPO_ROOT, '../kibana', FTR_CONFIGS_MANIFEST_REL);
-  return JsYaml.safeLoad(Fs.readFileSync(fromRepoRootIntoKbn, 'utf8'));
-};
+const load = (x: string): FtrConfigsManifest => JsYaml.safeLoad(Fs.readFileSync(x, 'utf8'));
 try {
-  ftrConfigsManifest = loadNormal();
+  ftrConfigsManifest = load(Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL));
 } catch (_) {
+  const abnormalPath = Path.resolve(REPO_ROOT, '../kibana', FTR_CONFIGS_MANIFEST_REL);
   // eslint-disable-next-line no-console
-  console.error(`\n### Could not load ${FTR_CONFIGS_MANIFEST_REL} normally, Error: \n  ${_}`);
+  console.error(`\n### Could not load ${FTR_CONFIGS_MANIFEST_REL} normally,
+(meaning we could not load it from ${REPO_ROOT}),
+Error: \n  ${_},
+Now we'll try to load it from ${abnormalPath}`);
   try {
-    ftrConfigsManifest = loadAbnormal();
+    ftrConfigsManifest = load(abnormalPath);
   } catch (e) {
-    throw new Error(
-      `\n### Could not load ${FTR_CONFIGS_MANIFEST_REL} abnormally either, Error: \n  ${e}`
-    );
+    throw new Error(`\n### Could not load ${abnormalPath} either, Error: \n  ${e}`);
   }
 }
 
