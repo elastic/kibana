@@ -251,17 +251,22 @@ export class EndpointAppContextService {
     return this.startDependencies.actionCreateService;
   }
 
-  public async getFleetFilesClient(
-    type: FleetFileTransferDirection
-  ): Promise<FleetFromHostFileClientInterface> {
+  public async getFleetToHostFilesClient() {
     if (!this.startDependencies?.createFleetFilesClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.startDependencies.createFleetFilesClient(
+    return this.startDependencies.createFleetFilesClient.toHost(
       'endpoint',
-      type,
       this.startDependencies.config.maxUploadResponseActionFileBytes
     );
+  }
+
+  public async getFleetFromHostFilesClient(): Promise<FleetFromHostFileClientInterface> {
+    if (!this.startDependencies?.createFleetFilesClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.createFleetFilesClient.fromHost('endpoint');
   }
 }

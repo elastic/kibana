@@ -239,7 +239,7 @@ export interface FleetStartContract {
     toHost: (
       /** The integration package name */
       packageName: string,
-      /** Type of file */
+      /** Max file size allow to be created (in bytes) */
       maxSizeBytes?: number
     ) => FleetToHostFileClientInterface;
 
