@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { TooltipHeaderFormatter, TooltipValue } from '@elastic/charts';
+import type { TooltipHeaderFormatter } from '@elastic/charts';
 import {
   Chart,
   LineSeries,

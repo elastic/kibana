@@ -90,7 +90,7 @@ export function StackedBarChart({
         </EuiPanel>
       </TooltipContainer>
     );
-  }
+  };
 
   return (
     <Chart size={{ height }}>
