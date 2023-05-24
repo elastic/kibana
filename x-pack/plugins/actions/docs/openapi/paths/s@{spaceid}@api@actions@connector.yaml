@@ -18,6 +18,7 @@ post:
           oneOf:
             - $ref: '../components/schemas/create_connector_request_cases_webhook.yaml'
             - $ref: '../components/schemas/create_connector_request_email.yaml'
+            - $ref: '../components/schemas/create_connector_request_genai.yaml'
             - $ref: '../components/schemas/create_connector_request_index.yaml'
             - $ref: '../components/schemas/create_connector_request_jira.yaml'
             - $ref: '../components/schemas/create_connector_request_opsgenie.yaml'
