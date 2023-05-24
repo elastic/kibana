@@ -94,18 +94,34 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         usageStatsClient.incrementCopySavedObjects({ headers, createNewCopies, overwrite })
       );
 
-      const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        startServices.savedObjects,
-        request
-      );
-      const sourceSpaceId = getSpacesService().getSpaceId(request);
-      const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
-        objects,
-        includeReferences,
-        overwrite,
-        createNewCopies,
-      });
-      return response.ok({ body: copyResponse });
+      try {
+        const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+          startServices.savedObjects,
+          request
+        );
+        const sourceSpaceId = getSpacesService().getSpaceId(request);
+        const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
+          objects,
+          includeReferences,
+          overwrite,
+          createNewCopies,
+        });
+        return response.ok({ body: copyResponse });
+      } catch (e: any) {
+        if (e.type === 'object-fetch-error' && e.attributes?.objects) {
+          return response.notFound({
+            body: {
+              message: 'Saved objects not found',
+              attributes: {
+                objects: e.attributes?.objects.map((obj: SavedObjectIdentifier) => ({
+                  id: obj.id,
+                  type: obj.type,
+                })),
+              },
+            },
+          });
+        } else throw e;
+      }
     })
   );
 
