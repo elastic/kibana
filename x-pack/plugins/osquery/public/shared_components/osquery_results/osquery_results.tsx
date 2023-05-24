@@ -10,7 +10,8 @@ import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
 
-import { KibanaContextProvider } from '../../common/lib/kibana';
+import { EmptyPrompt } from '../../routes/components/empty_prompt';
+import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { queryClient } from '../../query_client';
 import { KibanaThemeProvider } from '../../shared_imports';
@@ -22,27 +23,33 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   ruleName,
   actionItems,
   ecsData,
-}) => (
-  <div data-test-subj={'osquery-results'}>
-    {actionItems?.map((item) => {
-      const actionId = item.fields?.action_id?.[0];
-      const queryId = item.fields?.['queries.action_id']?.[0];
-      const startDate = item.fields?.['@timestamp'][0];
+}) => {
+  const { read } = useKibana().services.application.capabilities.osquery;
 
-      return (
-        <OsqueryResult
-          key={actionId}
-          actionId={actionId}
-          queryId={queryId}
-          startDate={startDate}
-          ruleName={ruleName}
-          ecsData={ecsData}
-        />
-      );
-    })}
-    <EuiSpacer size="s" />
-  </div>
-);
+  return !read ? (
+    <EmptyPrompt />
+  ) : (
+    <div data-test-subj={'osquery-results'}>
+      {actionItems?.map((item) => {
+        const actionId = item.fields?.action_id?.[0];
+        const queryId = item.fields?.['queries.action_id']?.[0];
+        const startDate = item.fields?.['@timestamp'][0];
+
+        return (
+          <OsqueryResult
+            key={actionId}
+            actionId={actionId}
+            queryId={queryId}
+            startDate={startDate}
+            ruleName={ruleName}
+            ecsData={ecsData}
+          />
+        );
+      })}
+      <EuiSpacer size="s" />
+    </div>
+  );
+};
 
 export const OsqueryActionResults = React.memo(OsqueryActionResultsComponent);
 

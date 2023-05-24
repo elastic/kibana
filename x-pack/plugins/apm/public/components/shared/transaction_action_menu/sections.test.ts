@@ -61,6 +61,7 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
+        infraLinksAvailable: false,
       })
     ).toEqual([
       [
@@ -122,6 +123,7 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
+        infraLinksAvailable: true,
       })
     ).toEqual([
       [
@@ -202,6 +204,7 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
+        infraLinksAvailable: true,
       })
     ).toEqual([
       [

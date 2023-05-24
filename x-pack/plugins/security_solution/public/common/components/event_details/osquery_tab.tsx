@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { EuiCode, EuiEmptyPrompt, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { RawEventData } from './types';
-import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useKibana } from '../../lib/kibana';
@@ -52,33 +50,15 @@ export const useOsqueryTab = ({
   ecsData?: Ecs;
 }) => {
   const {
-    services: { osquery, application },
+    services: { osquery },
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
-
-  const emptyPrompt = useMemo(
-    () => (
-      <EuiEmptyPrompt
-        iconType="logoOsquery"
-        title={<h2>{PERMISSION_DENIED}</h2>}
-        titleSize="xs"
-        body={
-          <FormattedMessage
-            id="xpack.securitySolution.osquery.results.missingPrivileges"
-            defaultMessage="To access these results, ask your administrator for {osquery} Kibana
-              privileges."
-            values={{
-              // eslint-disable-next-line react/jsx-no-literals
-              osquery: <EuiCode>osquery</EuiCode>,
-            }}
-          />
-        }
-      />
-    ),
-    []
+  const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
+    'endpointResponseActionsEnabled'
   );
 
-  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled || !ecsData;
+  const shouldEarlyReturn =
+    !rawEventData || !responseActionsEnabled || !ecsData || endpointResponseActionsEnabled;
   const alertId = rawEventData?._id ?? '';
 
   const { OsqueryResults, fetchAllLiveQueries } = osquery;
@@ -124,14 +104,8 @@ export const useOsqueryTab = ({
     content: (
       <>
         <TabContentWrapper data-test-subj="osqueryViewWrapper">
-          {!application?.capabilities?.osquery?.read ? (
-            emptyPrompt
-          ) : (
-            <>
-              <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
-              <EuiSpacer size="s" />
-            </>
-          )}
+          <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
+          <EuiSpacer size="s" />
         </TabContentWrapper>
       </>
     ),
