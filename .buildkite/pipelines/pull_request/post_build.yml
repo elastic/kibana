@@ -9,4 +9,4 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
-      minCpuPlatform: 'Intel Cascade Lake'
+      preemptible: true

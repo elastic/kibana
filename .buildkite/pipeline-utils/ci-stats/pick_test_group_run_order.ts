@@ -408,7 +408,7 @@ export async function pickTestGroupRunOrder() {
               image: 'family/kibana-ubuntu-2004',
               imageProject: 'elastic-images-qa',
               machineType: 'n2-standard-4',
-              minCpuPlatform: 'Intel Cascade Lake',
+              preemptible: true,
             },
             retry: {
               automatic: [
@@ -432,7 +432,7 @@ export async function pickTestGroupRunOrder() {
               image: 'family/kibana-ubuntu-2004',
               imageProject: 'elastic-images-qa',
               machineType: 'n2-standard-4',
-              minCpuPlatform: 'Intel Cascade Lake',
+              preemptible: true,
             },
             retry: {
               automatic: [
@@ -473,7 +473,7 @@ export async function pickTestGroupRunOrder() {
                     image: 'family/kibana-ubuntu-2004',
                     imageProject: 'elastic-images-qa',
                     machineType: 'n2-standard-4',
-                    minCpuPlatform: 'Intel Cascade Lake',
+                    preemptible: true,
                   },
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,

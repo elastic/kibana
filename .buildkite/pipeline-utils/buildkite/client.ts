@@ -35,6 +35,7 @@ export interface BuildkiteStep {
     imageProject?: string;
     machineType?: string;
     minCpuPlatform?: string;
+    preemptible?: boolean;
   };
   timeout_in_minutes?: number;
   key?: string;
