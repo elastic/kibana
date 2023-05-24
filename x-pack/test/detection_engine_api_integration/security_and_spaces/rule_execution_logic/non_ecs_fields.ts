@@ -56,7 +56,6 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154277
   describe('Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
@@ -272,7 +271,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { errors } = await indexAndCreatePreviewAlert(document);
 
       expect(errors).toContain(
-        'Bulk Indexing of signals failed: failed to parse field [client.geo.location] of type [geo_point]'
+        'Bulk Indexing of signals failed: [1:1192] failed to parse field [client.geo.location] of type [geo_point]'
       );
     });
 

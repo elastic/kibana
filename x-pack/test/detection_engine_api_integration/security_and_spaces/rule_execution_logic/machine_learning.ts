@@ -72,7 +72,10 @@ export default ({ getService }: FtrProviderContext) => {
       // as the job looks for certain indices on start
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
+      console.log('HERE');
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
+      console.log('--------HERE 2');
+
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
     after(async () => {

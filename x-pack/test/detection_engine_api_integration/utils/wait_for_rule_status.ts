@@ -53,7 +53,7 @@ export const waitForRuleStatus = async (
       const rule = response.body;
       const ruleStatus = rule?.execution_summary?.last_execution.status;
       const ruleStatusDate = rule?.execution_summary?.last_execution.date;
-
+      console.log('STATUS:', ruleStatus, rule?.execution_summary);
       return (
         rule != null &&
         ruleStatus === expectedStatus &&

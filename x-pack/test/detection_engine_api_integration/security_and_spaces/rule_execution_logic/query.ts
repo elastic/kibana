@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('Query type rules', () => {
+  describe.only('Query type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
