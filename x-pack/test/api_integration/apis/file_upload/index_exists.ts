@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -25,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
       const resp = await supertest
         .post(`/internal/file_upload/index_exists`)
         .set('kbn-xsrf', 'kibana')
-        .set('version', '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: 'logstash-2015.09.22',
         })
@@ -38,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
       const resp = await supertest
         .post(`/internal/file_upload/index_exists`)
         .set('kbn-xsrf', 'kibana')
-        .set('version', '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: 'myNewIndex',
         })
