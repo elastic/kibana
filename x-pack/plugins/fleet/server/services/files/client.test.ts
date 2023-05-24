@@ -31,7 +31,7 @@ import type { FileCustomMeta } from './types';
 
 import { createFromHostEsSearchResponseMock, createHapiReadableStreamMock } from './mocks';
 
-import { FleetFilesClient } from './client';
+import { FleetFromHostFilesClient } from './client_from_host';
 import type { HostUploadedFileMetadata } from './types';
 
 jest.mock('@kbn/files-plugin/server');
@@ -50,10 +50,10 @@ describe('When using FleetFilesClient', () => {
 
   const getFleetFilesInstance = (
     type: FleetFileTransferDirection = 'from-host'
-  ): FleetFilesClient => {
+  ): FleetFromHostFilesClient => {
     loggerMock = loggingSystemMock.createLogger();
 
-    return new FleetFilesClient(esClientMock, loggerMock, 'foo', type, 12345);
+    return new FleetFromHostFilesClient(esClientMock, loggerMock, 'foo', type, 12345);
   };
 
   beforeEach(async () => {

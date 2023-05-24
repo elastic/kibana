@@ -12,8 +12,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   FleetStartContract,
   MessageSigningServiceInterface,
-  FleetFileClientInterface,
-  FleetFileTransferDirection,
+  FleetFromHostFileClientInterface,
 } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -254,7 +253,7 @@ export class EndpointAppContextService {
 
   public async getFleetFilesClient(
     type: FleetFileTransferDirection
-  ): Promise<FleetFileClientInterface> {
+  ): Promise<FleetFromHostFileClientInterface> {
     if (!this.startDependencies?.createFleetFilesClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }

@@ -65,9 +65,9 @@ import {
 } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
-import { FleetFilesClient } from './services/files/client';
+import { FleetFromHostFilesClient } from './services/files/client_from_host';
 
-import type { FleetFileClientInterface, FleetFileTransferDirection } from './services/files/types';
+import type { FleetFromHostFileClientInterface } from './services/files/types';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -128,6 +128,8 @@ import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
+import type { FleetToHostFileClientInterface } from './services/files/types';
+import { FleetToHostFilesClient } from './services/files/client_to_host';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -227,14 +229,31 @@ export interface FleetStartContract {
    * @param type
    * @param maxSizeBytes
    */
-  createFilesClient: (
-    /** The integration package name */
-    packageName: string,
-    /** Type of file */
-    type: FleetFileTransferDirection,
-    /** Max size for files created when `type` is `to-host` */
-    maxSizeBytes?: number
-  ) => FleetFileClientInterface;
+  createFilesClient: Readonly<{
+    /**
+     * Client to interact with files that will be sent to a host.
+     * @param packageName
+     * @param type
+     * @param maxSizeBytes
+     */
+    toHost: (
+      /** The integration package name */
+      packageName: string,
+      /** Type of file */
+      maxSizeBytes?: number
+    ) => FleetToHostFileClientInterface;
+
+    /**
+     * Client to interact with files that were sent from the host
+     * @param packageName
+     * @param type
+     * @param maxSizeBytes
+     */
+    fromHost: (
+      /** The integration package name */
+      packageName: string
+    ) => FleetFromHostFileClientInterface;
+  }>;
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
@@ -586,15 +605,24 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
-      createFilesClient: (packageName, type, maxFileBytes) => {
-        return new FleetFilesClient(
-          core.elasticsearch.client.asInternalUser,
-          this.initializerContext.logger.get('fleetFiles', packageName),
-          packageName,
-          type,
-          maxFileBytes
-        );
-      },
+      createFilesClient: Object.freeze({
+        fromHost: (packageName) => {
+          return new FleetFromHostFilesClient(
+            core.elasticsearch.client.asInternalUser,
+            this.initializerContext.logger.get('fleetFiles', packageName),
+            packageName
+          );
+        },
+
+        toHost: (packageName, maxFileBytes) => {
+          return new FleetToHostFilesClient(
+            core.elasticsearch.client.asInternalUser,
+            this.initializerContext.logger.get('fleetFiles', packageName),
+            packageName,
+            maxFileBytes
+          );
+        },
+      }),
       messageSigningService,
       uninstallTokenService,
     };
