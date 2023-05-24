@@ -26,7 +26,10 @@ function flatten(obj: any, keyPrefix = '') {
       nestedRows.push(
         ...obj[key]
           .map((nestedRow: any) => flatten(nestedRow, prefix + key))
-          .reduce((acc: any, object: any) => [...acc, ...object], [])
+          .reduce((acc: unknown[], object: unknown[]) => {
+            acc.push(...object);
+            return acc;
+          }, [])
       );
     } else if (typeof obj[key] === 'object' && obj[key] !== null) {
       const subRows = flatten(obj[key], prefix + key);

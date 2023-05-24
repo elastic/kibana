@@ -1316,7 +1316,9 @@ describe('SavedObjectsRepository', () => {
         version: encodeHitVersion(doc),
         attributes: doc._source![type],
         references: doc._source!.references || [],
-        migrationVersion: doc._source!.migrationVersion,
+        coreMigrationVersion: expect.any(String),
+        typeMigrationVersion: expect.any(String),
+        managed: expect.any(Boolean),
       });
 
       it(`returns early for empty objects argument`, async () => {
@@ -1388,6 +1390,24 @@ describe('SavedObjectsRepository', () => {
             expect.objectContaining({ namespaces: expect.any(Array) }),
           ],
         });
+      });
+
+      it('migrates the fetched documents', async () => {
+        const response = getMockMgetResponse(registry, [obj1, obj2]);
+        client.mget.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+        migrator.migrateDocument.mockReturnValue(
+          'migrated' as unknown as ReturnType<typeof migrator.migrateDocument>
+        );
+
+        await expect(bulkGet(repository, [obj1, obj2])).resolves.toHaveProperty('saved_objects', [
+          'migrated',
+          'migrated',
+        ]);
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expect(migrator.migrateDocument).nthCalledWith(1, expect.objectContaining({ id: obj1.id }));
+        expect(migrator.migrateDocument).nthCalledWith(2, expect.objectContaining({ id: obj2.id }));
       });
     });
   });
@@ -3910,6 +3930,9 @@ describe('SavedObjectsRepository', () => {
             attributes: doc._source![doc._source!.type],
             references: [],
             namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : ['default'],
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: expect.any(String),
+            managed: expect.any(Boolean),
           });
         });
       });
@@ -3937,6 +3960,9 @@ describe('SavedObjectsRepository', () => {
             attributes: doc._source![doc._source!.type],
             references: [],
             namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: expect.any(String),
+            managed: expect.any(Boolean),
           });
         });
       });
@@ -3951,6 +3977,30 @@ describe('SavedObjectsRepository', () => {
         await test('unknownType');
         await test(HIDDEN_TYPE);
         await test(['unknownType', HIDDEN_TYPE]);
+      });
+
+      it('migrates the found document', async () => {
+        const noNamespaceSearchResults = generateIndexPatternSearchResults();
+        client.search.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(noNamespaceSearchResults)
+        );
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        await expect(repository.find({ type })).resolves.toHaveProperty(
+          'saved_objects.0.migrated',
+          true
+        );
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(
+          noNamespaceSearchResults.hits.hits.length
+        );
+        expect(migrator.migrateDocument).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type,
+            id: noNamespaceSearchResults.hits.hits[0]._id.replace(
+              /(index-pattern|config|globalType)\:/,
+              ''
+            ),
+          })
+        );
       });
     });
 
@@ -4272,6 +4322,9 @@ describe('SavedObjectsRepository', () => {
           },
           references: [],
           namespaces: ['default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
 
@@ -4299,6 +4352,20 @@ describe('SavedObjectsRepository', () => {
         const result = await getSuccess(client, repository, registry, type, id, {}, originId);
         expect(result).toMatchObject({ originId });
       });
+    });
+
+    it('migrates the fetched document', async () => {
+      migrator.migrateDocument.mockReturnValueOnce(
+        'migrated' as unknown as ReturnType<typeof migrator.migrateDocument>
+      );
+      await expect(getSuccess(client, repository, registry, type, id)).resolves.toBe('migrated');
+      expect(migrator.migrateDocument).toHaveBeenCalledTimes(1);
+      expect(migrator.migrateDocument).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id,
+          type,
+        })
+      );
     });
   });
 
