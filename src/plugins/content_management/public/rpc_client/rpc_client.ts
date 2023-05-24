@@ -70,7 +70,7 @@ export class RpcClient implements CrudClient {
       result = response.result;
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e.body);
+      console.log(`Content management client error: ${e.body.message}`);
       throw e;
     }
     return result;
