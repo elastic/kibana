@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { FC, lazy, Suspense } from 'react';
 import { PanelSpinner } from './panel_spinner';
-import type { Props } from './reporting_panel_content';
+import type { ReportingPanelProps } from './reporting_panel_content';
 
 const LazyComponent = lazy(() =>
   import('./reporting_panel_content').then(({ ReportingPanelContent }) => ({
@@ -16,7 +16,7 @@ const LazyComponent = lazy(() =>
   }))
 );
 
-export const ReportingPanelContent: FC<Omit<Props, 'intl'>> = (props) => {
+export const ReportingPanelContent: FC<Omit<ReportingPanelProps, 'intl'>> = (props) => {
   return (
     <Suspense fallback={<PanelSpinner />}>
       <LazyComponent {...props} />

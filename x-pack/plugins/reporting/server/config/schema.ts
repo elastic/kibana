@@ -58,7 +58,7 @@ const CaptureSchema = schema.object({
 const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
-  enablePanelActionDownload: schema.boolean({ defaultValue: true }),
+  enablePanelActionDownload: schema.boolean({ defaultValue: true }), // TODO: set this default to false. When false, use "Generate CSV Report" UX
   maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
     defaultValue: ByteSizeValue.parse('10mb'),
   }),
