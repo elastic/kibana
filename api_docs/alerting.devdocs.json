@@ -4117,7 +4117,7 @@
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: (options: ",
           "MuteOptions",
-          ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listAlertTypes: () => Promise<Set<",
+          ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
           ">>; getSpaceId: () => string | undefined; getAlertFromRaw: (params: ",
           "GetAlertFromRawParams",
@@ -9433,6 +9433,28 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ISO_WEEKDAYS",
+        "type": "Array",
+        "tags": [],
+        "label": "ISO_WEEKDAYS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IsoWeekday",
+            "text": "IsoWeekday"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/alerting/common/iso_weekdays.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.IsoWeekday",
         "type": "Type",
         "tags": [],
@@ -9441,7 +9463,7 @@
         "signature": [
           "2 | 7 | 6 | 5 | 4 | 3 | 1"
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "x-pack/plugins/alerting/common/iso_weekdays.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

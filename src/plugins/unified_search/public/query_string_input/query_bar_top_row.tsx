@@ -13,6 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { throttle } from 'lodash';
@@ -46,7 +47,6 @@ import {
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import './query_bar.scss';
 
 export const strings = {
@@ -581,7 +581,7 @@ export const QueryBarTopRow = React.memo(
         isQueryLangSelected &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
-          <TextBasedLanguagesEditor
+          <TextBasedLangEditor
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
@@ -594,6 +594,7 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
+            data-test-subj="unifiedTextLangEditor"
           />
         )
       );

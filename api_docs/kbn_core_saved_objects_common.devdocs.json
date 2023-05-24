@@ -1754,50 +1754,6 @@
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
           },
@@ -2017,19 +1973,19 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "dashboard",
@@ -2046,14 +2002,6 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
           },
           {
             "plugin": "canvas",
@@ -3199,14 +3147,6 @@
             "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
           },
@@ -3258,7 +3198,7 @@
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
         "signature": [
-          "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+          "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
         ],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
         "deprecated": false,

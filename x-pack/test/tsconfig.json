@@ -16,14 +16,9 @@
     "./api_integration/apis/telemetry/fixtures/*.json",
     "./monitoring_api_integration/fixtures/**/*.json",
     "../../typings/**/*",
-    "../../packages/kbn-test/types/ftr_globals/**/*",
+    "../../packages/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    "*/plugins/**/*",
-    "*/packages/**/*",
-    "*/*/packages/**/*",
-  ],
+  "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
     { "path": "../../test/tsconfig.json" },
     "@kbn/core",
@@ -125,5 +120,9 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/ml-anomaly-utils",
+    "@kbn/infra-forge",
+    "@kbn/observability-shared-plugin",
+    "@kbn/maps-vector-tile-utils",
+    "@kbn/server-route-repository"
   ]
 }

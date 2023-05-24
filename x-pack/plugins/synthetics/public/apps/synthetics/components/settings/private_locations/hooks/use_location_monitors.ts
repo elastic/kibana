@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   monitorAttributes,

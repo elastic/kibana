@@ -55,6 +55,7 @@ describe('request diagnostics handler', () => {
 
   it('should return ok if agent supports request diagnostics', async () => {
     mockGetAgentById.mockResolvedValueOnce({
+      active: true,
       local_metadata: { elastic: { agent: { version: '8.7.0' } } },
     });
 
@@ -65,6 +66,7 @@ describe('request diagnostics handler', () => {
 
   it('should retur error if agent does not support request diagnostics', async () => {
     mockGetAgentById.mockResolvedValueOnce({
+      active: true,
       local_metadata: { elastic: { agent: { version: '8.6.0' } } },
     });
 

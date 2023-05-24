@@ -13,55 +13,60 @@ import {
   EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTab,
   EuiSpacer,
   EuiTabs,
+  EuiTab,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { LinkToUptime } from './links/link_to_uptime';
 import { LinkToApmServices } from './links/link_to_apm_services';
-import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
-import { metadataTab } from './metadata';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import { processesTab } from './processes';
 import { Metadata } from './metadata/metadata';
 import { Processes } from './processes/processes';
-import { FlyoutTabIds, useHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
+import { FlyoutTabIds } from '../../hooks/use_host_flyout_open_url_state';
+import type { Tab } from './flyout_wrapper';
+import { metadataTab } from './metadata';
+import { processesTab } from './processes';
 
-interface Props {
+type FLYOUT_TABS = 'metadata' | 'processes';
+export interface FlyoutProps {
   node: HostNodeRow;
   closeFlyout: () => void;
+  renderedTabsSet: React.MutableRefObject<Set<FLYOUT_TABS>>;
+  currentTimeRange: {
+    interval: string;
+    from: number;
+    to: number;
+  };
+  hostFlyoutOpen: {
+    clickedItemId: string;
+    selectedTabId: FLYOUT_TABS;
+    searchFilter: string;
+    metadataSearch: string;
+  };
+  onTabClick: (tab: Tab) => void;
 }
 
-const flyoutTabs = [metadataTab, processesTab];
 const NODE_TYPE = 'host' as InventoryItemType;
+const flyoutTabs: Tab[] = [metadataTab, processesTab];
 
-export const Flyout = ({ node, closeFlyout }: Props) => {
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+export const Flyout = ({
+  node,
+  closeFlyout,
+  onTabClick,
+  renderedTabsSet,
+  currentTimeRange,
+  hostFlyoutOpen,
+}: FlyoutProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const currentTimeRange = {
-    ...getDateRangeAsTimestamp(),
-    interval: '1m',
-  };
-
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
-
-  // This map allow to keep track of which tabs content have been rendered the first time.
-  // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
-  const renderedTabsSet = useLazyRef(() => new Set([hostFlyoutOpen.selectedTabId]));
 
   const tabEntries = flyoutTabs.map((tab) => (
     <EuiTab
       {...tab}
       key={tab.id}
-      onClick={() => {
-        renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
-        setHostFlyoutOpen({ selectedTabId: tab.id });
-      }}
+      onClick={() => onTabClick(tab)}
       isSelected={tab.id === hostFlyoutOpen.selectedTabId}
     >
       {tab.name}

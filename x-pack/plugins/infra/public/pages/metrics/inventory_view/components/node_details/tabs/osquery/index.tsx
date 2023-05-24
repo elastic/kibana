@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../../../../hooks/use_kibana';
@@ -41,7 +41,7 @@ const TabComponent = (props: TabProps) => {
     if (loading || !OsqueryAction) {
       return (
         <TabContent>
-          <EuiLoadingContent lines={10} />
+          <EuiSkeletonText lines={10} />
         </TabContent>
       );
     }

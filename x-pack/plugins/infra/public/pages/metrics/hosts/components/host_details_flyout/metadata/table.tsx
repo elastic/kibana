@@ -27,7 +27,7 @@ interface Row {
   value: string | string[] | undefined;
 }
 
-interface Props {
+export interface Props {
   rows: Row[];
   loading: boolean;
 }

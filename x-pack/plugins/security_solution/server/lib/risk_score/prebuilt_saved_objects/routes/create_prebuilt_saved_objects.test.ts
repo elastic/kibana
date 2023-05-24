@@ -14,14 +14,14 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { getEmptySavedObjectsResponse } from '../../../detection_engine/routes/__mocks__/request_responses';
-import { findOrCreateRiskScoreTag } from '../helpers/find_or_create_tag';
+import { createRiskScoreTag } from '../helpers/create_risk_score_tag';
 import { createPrebuiltSavedObjectsRoute } from './create_prebuilt_saved_objects';
 
-jest.mock('../helpers/find_or_create_tag', () => {
-  const actual = jest.requireActual('../helpers/find_or_create_tag');
+jest.mock('../helpers/create_risk_score_tag', () => {
+  const actual = jest.requireActual('../helpers/create_risk_score_tag');
   return {
     ...actual,
-    findOrCreateRiskScoreTag: jest.fn(),
+    createRiskScoreTag: jest.fn(),
   };
 });
 
@@ -77,7 +77,7 @@ describe('createPrebuiltSavedObjects', () => {
   it.each([['hostRiskScoreDashboards'], ['userRiskScoreDashboards']])(
     'should create saved objects from given template - %p',
     async (templateName) => {
-      (findOrCreateRiskScoreTag as jest.Mock).mockResolvedValue({
+      (createRiskScoreTag as jest.Mock).mockResolvedValue({
         [templateName]: {
           success: true,
           error: null,

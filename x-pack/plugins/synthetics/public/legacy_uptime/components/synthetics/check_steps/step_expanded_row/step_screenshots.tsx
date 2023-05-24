@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { StepScreenshotDisplay } from '../../step_screenshot_display';
 import { JourneyStep } from '../../../../../../common/runtime_types/ping/synthetics';
 import { Ping } from '../../../../../../common/runtime_types/ping/ping';

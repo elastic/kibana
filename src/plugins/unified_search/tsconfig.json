@@ -31,7 +31,6 @@
     "@kbn/analytics",
     "@kbn/datemath",
     "@kbn/monaco",
-    "@kbn/language-documentation-popover",
     "@kbn/field-types",
     "@kbn/config",
     "@kbn/config-schema",
@@ -39,6 +38,8 @@
     "@kbn/react-field",
     "@kbn/ui-theme",
     "@kbn/saved-objects-management-plugin",
+    "@kbn/text-based-languages",
+    "@kbn/text-based-editor",
   ],
   "exclude": [
     "target/**/*",

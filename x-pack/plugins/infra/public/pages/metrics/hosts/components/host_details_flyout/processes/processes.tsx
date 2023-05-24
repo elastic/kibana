@@ -32,7 +32,7 @@ import {
 import type { HostNodeRow } from '../../../hooks/use_hosts_table';
 import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
 
-interface ProcessesProps {
+export interface ProcessesProps {
   node: HostNodeRow;
   nodeType: InventoryItemType;
   currentTime: number;
@@ -64,7 +64,12 @@ export const Processes = ({ currentTime, node, nodeType }: ProcessesProps) => {
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(hostFlyoutOpen.searchFilter));
+  } = useProcessList(
+    hostTerm,
+    currentTime,
+    sortBy,
+    parseSearchString(hostFlyoutOpen.searchFilter ?? '')
+  );
 
   const debouncedSearchOnChange = useMemo(
     () =>

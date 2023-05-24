@@ -22,6 +22,7 @@ export interface MlModelDeploymentStatus {
   nodeAllocationCount: number;
   startTime: number;
   targetAllocationCount: number;
+  threadsPerAllocation: number;
 }
 
 // TODO - we can remove this extension once the new types are available

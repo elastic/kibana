@@ -13,7 +13,7 @@ import type {
   NoParametersRequestSchema,
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
-  UploadActionRequestBody,
+  UploadActionApiRequestBody,
 } from '../schema/actions';
 import type {
   ResponseActionStatus,
@@ -133,6 +133,15 @@ export interface LogsEndpointAction {
   };
 }
 
+export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
+  EndpointActions: EndpointActionFields &
+    ActionRequestFields & {
+      data: EndpointActionData & {
+        hosts: Record<string, { name: string }>;
+      };
+    };
+}
+
 /**
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
@@ -189,6 +198,7 @@ export interface EndpointActionData<
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
   alert_id?: string[];
+  hosts?: Record<string, { name: string }>;
 }
 
 export interface FleetActionResponseData {
@@ -316,6 +326,13 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
+export interface ActionDetailsAgentState {
+  isCompleted: boolean;
+  wasSuccessful: boolean;
+  errors: undefined | string[];
+  completedAt: string | undefined;
+}
+
 export interface ActionDetails<
   TOutputContent extends object = object,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
@@ -360,15 +377,7 @@ export interface ActionDetails<
    * A map by Agent ID holding information about the action for the specific agent.
    * Helpful when action is sent to multiple agents
    */
-  agentState: Record<
-    string,
-    {
-      isCompleted: boolean;
-      wasSuccessful: boolean;
-      errors: undefined | string[];
-      completedAt: string | undefined;
-    }
-  >;
+  agentState: Record<string, ActionDetailsAgentState>;
   /**  action status */
   status: ResponseActionStatus;
   /** user that created the action */
@@ -477,16 +486,15 @@ export interface ActionFileInfoApiResponse {
  * NOTE: Most of the parameters below are NOT accepted via the API. They are inserted into
  * the action's parameters via the API route handler
  */
-export type ResponseActionUploadParameters = UploadActionRequestBody['parameters'] & {
-  file: {
-    sha256: string;
-    size: number;
-    file_name: string;
-    file_id: string;
-  };
+export type ResponseActionUploadParameters = UploadActionApiRequestBody['parameters'] & {
+  file_sha256: string;
+  file_size: number;
+  file_name: string;
+  file_id: string;
 };
 
 export interface ResponseActionUploadOutputContent {
+  code: string;
   /** Full path to the file on the host machine where it was saved */
   path: string;
   /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */

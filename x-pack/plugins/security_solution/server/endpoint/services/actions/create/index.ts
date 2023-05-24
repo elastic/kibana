@@ -61,6 +61,7 @@ type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
   rule_id?: string;
   rule_name?: string;
   error?: string;
+  hosts?: Record<string, { name: string }>;
 };
 
 interface CreateActionMetadata {
@@ -71,10 +72,13 @@ interface CreateActionMetadata {
 
 export interface ActionCreateService {
   createActionFromAlert: (payload: CreateActionPayload) => Promise<ActionDetails>;
-  createAction: (
+  createAction: <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
     payload: CreateActionPayload,
     metadata: CreateActionMetadata
-  ) => Promise<ActionDetails>;
+  ) => Promise<ActionDetails<TOutputContent, TParameters>>;
 }
 
 export const actionCreateService = (
@@ -149,6 +153,7 @@ export const actionCreateService = (
           command: payload.command,
           comment: payload.comment ?? undefined,
           ...(payload.alert_ids ? { alert_id: payload.alert_ids } : {}),
+          ...(payload.hosts ? { hosts: payload.hosts } : {}),
           parameters: getActionParameters() ?? undefined,
         },
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,

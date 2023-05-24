@@ -659,7 +659,7 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should allow `override` parameter', () => {
+    it('should allow `overwrite` parameter', () => {
       expect(() => {
         UploadActionRequestSchema.body.validate({
           endpoint_ids: ['endpoint_id'],
@@ -676,10 +676,10 @@ describe('actions schemas', () => {
         UploadActionRequestSchema.body.validate({
           endpoint_ids: ['endpoint_id'],
           parameters: {
-            override: true,
+            overwrite: true,
           },
         });
-      }).toThrow();
+      }).toThrow('[file]: expected value of type [Stream] but got [undefined]');
     });
 
     it('should error if `file` is not a Stream', () => {
@@ -691,7 +691,7 @@ describe('actions schemas', () => {
           },
           file: {},
         });
-      }).toThrow();
+      }).toThrow('[file]: expected value of type [Stream] but got [Object]');
     });
   });
 });

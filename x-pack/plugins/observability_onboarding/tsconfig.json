@@ -22,6 +22,8 @@
     "@kbn/server-route-repository",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/i18n-react",
+    "@kbn/observability-shared-plugin",
   ],
   "exclude": [
     "target/**/*",

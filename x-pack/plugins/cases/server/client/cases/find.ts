@@ -17,7 +17,6 @@ import { CasesFindRequestRt, throwErrors, CasesFindResponseRt, excess } from '..
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions, constructSearch } from '../utils';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -41,10 +40,8 @@ export const find = async (
   } = clientArgs;
 
   try {
-    const fields = asArray(params.fields);
-
     const queryParams = pipe(
-      excess(CasesFindRequestRt).decode({ ...params, fields }),
+      excess(CasesFindRequestRt).decode({ ...params }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -96,7 +93,6 @@ export const find = async (
           ...caseQueryOptions,
           ...caseSearch,
           searchFields: asArray(queryParams.searchFields),
-          fields: includeFieldsRequiredForAuthentication(fields),
         },
       }),
       caseService.getCaseStatusStats({

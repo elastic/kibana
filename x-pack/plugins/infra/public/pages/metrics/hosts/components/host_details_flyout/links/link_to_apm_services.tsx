@@ -13,7 +13,7 @@ import { EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
-interface LinkToApmServicesProps {
+export interface LinkToApmServicesProps {
   hostName: string;
   apmField: string;
 }

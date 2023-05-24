@@ -16,7 +16,7 @@ import * as telemetry from '../../../common/lib/telemetry';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
-jest.mock('../../../common/components/dashboards/dashboards_table', () => ({
+jest.mock('../../components/dashboards_table', () => ({
   DashboardsTable: () => <span data-test-subj="dashboardsTable" />,
 }));
 
@@ -55,10 +55,8 @@ jest.mock('../../../common/links/nav_links', () => ({
 
 const CREATE_DASHBOARD_LINK = { isLoading: false, url: URL };
 const mockUseCreateSecurityDashboard = jest.fn(() => CREATE_DASHBOARD_LINK);
-jest.mock('../../../common/containers/dashboards/use_create_security_dashboard_link', () => {
-  const actual = jest.requireActual(
-    '../../../common/containers/dashboards/use_create_security_dashboard_link'
-  );
+jest.mock('../../hooks/use_create_security_dashboard_link', () => {
+  const actual = jest.requireActual('../../hooks/use_create_security_dashboard_link');
   return {
     ...actual,
     useCreateSecurityDashboardLink: () => mockUseCreateSecurityDashboard(),

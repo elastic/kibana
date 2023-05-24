@@ -11,7 +11,7 @@ import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 import {
-  commandToRBACMap,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
   CONSOLE_RESPONSE_ACTION_COMMANDS,
   type ResponseConsoleRbacControls,
 } from '../response_actions/constants';
@@ -129,7 +129,7 @@ describe('Endpoint Authz service', () => {
       const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice().reduce<
         ResponseConsoleRbacControls[]
       >((acc, e) => {
-        const item = commandToRBACMap[e];
+        const item = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e];
         if (!acc.includes(item)) {
           acc.push(item);
         }

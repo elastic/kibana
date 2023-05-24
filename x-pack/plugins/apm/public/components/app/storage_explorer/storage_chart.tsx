@@ -15,7 +15,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';

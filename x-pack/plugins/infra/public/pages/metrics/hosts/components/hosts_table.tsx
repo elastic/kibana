@@ -12,7 +12,7 @@ import { NoData } from '../../../../components/empty_states';
 import { HostNodeRow, useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
-import { Flyout } from './host_details_flyout/flyout';
+import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
@@ -78,7 +78,9 @@ export const HostsTable = () => {
           )
         }
       />
-      {isFlyoutOpen && clickedItem && <Flyout node={clickedItem} closeFlyout={closeFlyout} />}
+      {isFlyoutOpen && clickedItem && (
+        <FlyoutWrapper node={clickedItem} closeFlyout={closeFlyout} />
+      )}
     </>
   );
 };

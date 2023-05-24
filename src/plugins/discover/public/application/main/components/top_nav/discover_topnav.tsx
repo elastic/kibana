@@ -31,7 +31,6 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => Promise<void>;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 };
 
 export const DiscoverTopNav = ({
@@ -44,7 +43,6 @@ export const DiscoverTopNav = ({
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
-  persistDataView,
 }: DiscoverTopNavProps) => {
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
@@ -120,18 +118,8 @@ export const DiscoverTopNav = ({
         onOpenInspector,
         isPlainRecord,
         adHocDataViews,
-        persistDataView,
       }),
-    [
-      dataView,
-      navigateTo,
-      services,
-      stateContainer,
-      onOpenInspector,
-      isPlainRecord,
-      adHocDataViews,
-      persistDataView,
-    ]
+    [dataView, navigateTo, services, stateContainer, onOpenInspector, isPlainRecord, adHocDataViews]
   );
 
   const onEditDataView = async (editedDataView: DataView) => {

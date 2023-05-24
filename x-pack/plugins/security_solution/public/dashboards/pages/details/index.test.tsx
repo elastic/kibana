@@ -28,7 +28,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../common/components/dashboards/dashboard_renderer', () => ({
+jest.mock('../../components/dashboard_renderer', () => ({
   DashboardRenderer: jest
     .fn()
     .mockImplementation((props) => (

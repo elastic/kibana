@@ -25,7 +25,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('When user has all privileges for cases', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/156312
+    describe.skip('When user has all privileges for cases', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({

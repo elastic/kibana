@@ -4206,6 +4206,11 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          description: >-
+            Indicates whether the agent policy has tamper protection enabled.
+            Default false.
+          type: boolean
       required:
         - id
         - status
@@ -4258,6 +4263,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - name
         - namespace
@@ -4306,6 +4313,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - name
         - namespace

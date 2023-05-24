@@ -25,7 +25,7 @@ import {
   sendGetAgentTags,
   useFleetServerStandalone,
 } from '../../../hooks';
-import { AgentEnrollmentFlyout } from '../../../components';
+import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
 import {
   AgentStatusKueryHelper,
   ExperimentalFeaturesService,
@@ -133,6 +133,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
   const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
+  const [agentToGetUninstallCommand, setAgentToGetUninstallCommand] = useState<Agent | undefined>(
+    undefined
+  );
   const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
   const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
@@ -162,6 +165,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
+  // filters kuery
   const kuery = useMemo(() => {
     return getKuery({
       search,
@@ -207,6 +211,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           setAgentToAddRemoveTags(agent);
           setShowTagsAddRemove(!showTagsAddRemove);
         }}
+        onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
       />
     );
@@ -344,14 +349,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }, {} as { [k: string]: AgentPolicy });
   }, [agentPolicies]);
 
-  const isAgentSelectable = (agent: Agent) => {
-    if (!agent.active) return false;
-    if (!agent.policy_id) return true;
-
-    const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-    const isHosted = agentPolicy?.is_managed === true;
-    return !isHosted;
-  };
+  const isAgentSelectable = useCallback(
+    (agent: Agent) => {
+      if (!agent.active) return false;
+      if (!agent.policy_id) return true;
+      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+      const isHosted = agentPolicy?.is_managed === true;
+      return !isHosted;
+    },
+    [agentPoliciesIndexedById]
+  );
 
   const onSelectionChange = (newAgents: Agent[]) => {
     setSelectedAgents(newAgents);
@@ -450,6 +457,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
             hasFleetServer={agentToUnenrollHasFleetServer}
+          />
+        </EuiPortal>
+      )}
+      {agentToGetUninstallCommand && (
+        <EuiPortal>
+          <UninstallCommandFlyout
+            target="agent"
+            policyId={agentToGetUninstallCommand.policy_id}
+            onClose={() => {
+              setAgentToGetUninstallCommand(undefined);
+              refreshAgents({ refreshTags: true });
+            }}
           />
         </EuiPortal>
       )}

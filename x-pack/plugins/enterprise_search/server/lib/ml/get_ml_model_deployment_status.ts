@@ -84,6 +84,7 @@ export const getMlModelDeploymentStatus = async (
     nodeAllocationCount: modelDeployment?.allocation_status.allocation_count || 0,
     startTime: modelDeployment?.start_time || 0,
     targetAllocationCount: modelDeployment?.allocation_status.target_allocation_count || 0,
+    threadsPerAllocation: modelDeployment?.threads_per_allocation || 0,
   };
 };
 
@@ -97,6 +98,7 @@ function getDefaultStatusReturn(
     nodeAllocationCount: 0,
     startTime: 0,
     targetAllocationCount: 0,
+    threadsPerAllocation: 0,
   };
 }
 
