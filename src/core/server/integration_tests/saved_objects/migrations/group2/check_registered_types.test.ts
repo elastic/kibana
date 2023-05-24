@@ -78,6 +78,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "config": "179b3e2bc672626aafce3cf92093a113f456af38",
         "config-global": "8e8a134a2952df700d7d4ec51abb794bbd4cf6da",
         "connector_token": "5a9ac29fe9c740eb114e9c40517245c71706b005",
+        "composite-slo": "1e772665c30a509569b6739ed0afb22d61b36a6d",
         "core-usage-stats": "b3c04da317c957741ebcdedfea4524049fdc79ff",
         "csp-rule-template": "2a9d5f6481d8ca81d6e5ab0a7cc4ba0b59a93420",
         "dashboard": "cf7c9c2334decab716fe519780cb4dc52967a91d",

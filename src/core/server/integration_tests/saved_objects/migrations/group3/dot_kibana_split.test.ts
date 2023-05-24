@@ -193,6 +193,7 @@ describe('split .kibana index into multiple system indices', () => {
             "config",
             "config-global",
             "connector_token",
+            "composite-slo",
             "core-usage-stats",
             "csp-rule-template",
             "endpoint:user-artifact-manifest",
