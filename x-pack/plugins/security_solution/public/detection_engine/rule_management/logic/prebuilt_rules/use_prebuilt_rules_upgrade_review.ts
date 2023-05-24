@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { UseQueryOptions } from '@tanstack/react-query';
 import type { ReviewRuleUpgradeResponseBody } from '../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -18,12 +17,13 @@ import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../api/hooks/prebuil
  *
  * @returns useQuery result
  */
-export const usePrebuiltRulesUpgradeReview = () => {
+export const usePrebuiltRulesUpgradeReview = (
+  options?: UseQueryOptions<ReviewRuleUpgradeResponseBody>
+) => {
   const { addError } = useAppToasts();
 
-  return (
-    useFetchPrebuiltRulesUpgradeReviewQuery({
-      onError: (error: Error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
-    }).data?.attributes.rules ?? []
-  );
+  return useFetchPrebuiltRulesUpgradeReviewQuery({
+    onError: (error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
+    ...options,
+  });
 };

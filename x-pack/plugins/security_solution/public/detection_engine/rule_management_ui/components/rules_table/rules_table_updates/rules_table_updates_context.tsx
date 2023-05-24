@@ -37,6 +37,7 @@ import {
 } from '../rules_table/rules_table_defaults';
 import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
+import { usePrebuiltRulesUpgradeReview } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 
 export interface RulesTableUpdatesState {
   /**
@@ -117,7 +118,7 @@ export interface LoadingRules {
 }
 
 export interface RulesTableUpdatesActions {
-  reFetchRules: ReturnType<typeof useFindRules>['refetch'];
+  reFetchRules: ReturnType<typeof usePrebuiltRulesUpgradeReview>['refetch'];
   setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsPreflightInProgress: React.Dispatch<React.SetStateAction<boolean>>;
@@ -237,50 +238,53 @@ export const RulesTableUpdatesContextProvider = ({
     }
   }, [selectedRuleIds, isRefreshOn]);
 
-  // Fetch rules
+  // // Fetch rules
+  // const {
+  //   data: { rules, total } = { rules: [], total: 0 },
+  //   refetch,
+  //   dataUpdatedAt,
+  //   isFetched,
+  //   isFetching,
+  //   isLoading,
+  //   isRefetching,
+  // } = useFindRules(
+  //   {
+  //     filterOptions,
+  //     sortingOptions,
+  //     pagination,
+  //   },
+  //   {
+  //     refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
+  //     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+  //   }
+  // );
+
   const {
-    data: { rules, total } = { rules: [], total: 0 },
+    data: {
+      attributes: {
+        rules: rulesToUpgrade = [],
+        stats: { tags },
+      },
+    } = {
+      attributes: {
+        rules: [],
+        stats: { tags: [] },
+      },
+    },
     refetch,
     dataUpdatedAt,
     isFetched,
     isFetching,
     isLoading,
     isRefetching,
-  } = useFindRules(
-    {
-      filterOptions,
-      sortingOptions,
-      pagination,
-    },
-    {
-      refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
-      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
-    }
-  );
-  const rulesToUpgrade = useFetchPrebuiltRulesUpgradeReviewQuery().data?.attributes.rules || [];
-
-  // Fetch rules snooze settings
-  const {
-    data: rulesSnoozeSettings,
-    isLoading: isSnoozeSettingsLoading,
-    isFetching: isSnoozeSettingsFetching,
-    isError: isSnoozeSettingsFetchError,
-    refetch: refetchSnoozeSettings,
-  } = useFetchRulesSnoozeSettings(
-    rules.map((x) => x.id),
-    { enabled: rules.length > 0 }
-  );
-
-  const refetchRulesAndSnoozeSettings = useCallback(async () => {
-    const response = await refetch();
-    await refetchSnoozeSettings();
-
-    return response;
-  }, [refetch, refetchSnoozeSettings]);
+  } = usePrebuiltRulesUpgradeReview({
+    refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
+    keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+  });
 
   const actions = useMemo(
     () => ({
-      reFetchRules: refetchRulesAndSnoozeSettings,
+      reFetchRules: refetch,
       setFilterOptions: handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -293,43 +297,17 @@ export const RulesTableUpdatesContextProvider = ({
       setIsPreflightInProgress,
       clearFilters,
     }),
-    [
-      refetchRulesAndSnoozeSettings,
-      handleFilterOptionsChange,
-      setIsAllSelected,
-      setIsRefreshOn,
-      setLoadingRules,
-      setPage,
-      setPerPage,
-      setSelectedRuleIds,
-      setSortingOptions,
-      clearRulesSelection,
-      setIsPreflightInProgress,
-      clearFilters,
-    ]
+    [refetch, handleFilterOptionsChange, clearRulesSelection, clearFilters]
   );
 
   const providerValue = useMemo(() => {
-    const rulesSnoozeSettingsMap =
-      rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
-        map[snoozeSettings.id] = snoozeSettings;
-
-        return map;
-      }, {} as Record<string, RuleSnoozeSettings>) ?? {};
-
     return {
       state: {
         rules: rulesToUpgrade,
-        rulesSnoozeSettings: {
-          data: rulesSnoozeSettingsMap,
-          isLoading: isSnoozeSettingsLoading,
-          isFetching: isSnoozeSettingsFetching,
-          isError: isSnoozeSettingsFetchError,
-        },
         pagination: {
           page,
           perPage,
-          total,
+          total: rulesToUpgrade.length,
         },
         filterOptions,
         isPreflightInProgress,
@@ -348,20 +326,15 @@ export const RulesTableUpdatesContextProvider = ({
         isDefault: isDefaultState(filterOptions, sortingOptions, {
           page,
           perPage,
-          total,
+          total: rulesToUpgrade.length,
         }),
       },
       actions,
     };
   }, [
-    rules,
-    rulesSnoozeSettings,
-    isSnoozeSettingsLoading,
-    isSnoozeSettingsFetching,
-    isSnoozeSettingsFetchError,
+    rulesToUpgrade,
     page,
     perPage,
-    total,
     filterOptions,
     isPreflightInProgress,
     isActionInProgress,

@@ -301,12 +301,20 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     }
   );
-  const rulesToUpgrade = usePrebuiltRulesUpgradeReview();
-  const rulesToInstall = usePrebuiltRulesInstallReview();
-
-  if (rulesToInstall.length > 0) {
-    debugger;
-  }
+  const {
+    data: { attributes: { rules: rulesToUpgrade = [] } } = {
+      attributes: {
+        rules: [],
+      },
+    },
+  } = usePrebuiltRulesUpgradeReview();
+  const {
+    data: { attributes: { rules: rulesToInstall = [] } } = {
+      attributes: {
+        rules: [],
+      },
+    },
+  } = usePrebuiltRulesInstallReview();
 
   // Fetch rules snooze settings
   const {

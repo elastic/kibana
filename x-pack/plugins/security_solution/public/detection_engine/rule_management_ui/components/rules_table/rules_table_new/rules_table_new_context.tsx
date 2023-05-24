@@ -15,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -25,7 +26,6 @@ import type {
   PaginationOptions,
   SortingOptions,
 } from '../../../../rule_management/logic';
-import type { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
   DEFAULT_FILTER_OPTIONS,
@@ -33,7 +33,6 @@ import {
   DEFAULT_RULES_PER_PAGE,
   DEFAULT_SORTING_OPTIONS,
 } from '../rules_table/rules_table_defaults';
-import { useFetchPrebuiltRulesInstallReviewQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
 export interface RulesTableNewState {
@@ -115,7 +114,7 @@ export interface LoadingRules {
 }
 
 export interface RulesTableNewActions {
-  reFetchRules: ReturnType<typeof useFindRules>['refetch'];
+  reFetchRules: ReturnType<typeof usePrebuiltRulesInstallReview>['refetch'];
   setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsPreflightInProgress: React.Dispatch<React.SetStateAction<boolean>>;
@@ -124,7 +123,7 @@ export interface RulesTableNewActions {
    */
   setIsRefreshOn: React.Dispatch<React.SetStateAction<boolean>>;
   setLoadingRules: React.Dispatch<React.SetStateAction<LoadingRules>>;
-  // TODO: Handled by in-memory table?
+  // TODO: Handled by in-memory table? Should these be deleted?
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setPerPage: React.Dispatch<React.SetStateAction<number>>;
   setSelectedRuleIds: React.Dispatch<React.SetStateAction<string[]>>;
@@ -232,7 +231,6 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
   }, [selectedRuleIds, isRefreshOn]);
 
   const {
-    // data: ruleDetails,
     data: {
       attributes: {
         rules,
@@ -250,7 +248,7 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
     isFetching,
     isLoading,
     isRefetching,
-  } = useFetchPrebuiltRulesInstallReviewQuery({
+  } = usePrebuiltRulesInstallReview({
     refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
@@ -326,6 +324,7 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
     page,
     perPage,
     filterOptions,
+    tags,
     isPreflightInProgress,
     isActionInProgress,
     isAllSelected,

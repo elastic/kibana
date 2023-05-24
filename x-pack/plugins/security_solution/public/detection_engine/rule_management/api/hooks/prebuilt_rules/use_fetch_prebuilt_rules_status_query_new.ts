@@ -7,7 +7,7 @@
 import { useCallback } from 'react';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { GetPrebuiltRulesStatusResponseBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
+import type { PrebuiltRulesStatusStats } from '../../../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
 import { getPrebuiltRulesStatus } from '../../api';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
 import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/detection_engine/prebuilt_rules/api/urls';
@@ -15,13 +15,13 @@ import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/detectio
 export const PREBUILT_RULES_STATUS_QUERY_KEY = ['GET', GET_PREBUILT_RULES_STATUS_URL];
 
 export const useFetchPrebuiltRulesStatusQueryNew = (
-  options?: UseQueryOptions<GetPrebuiltRulesStatusResponseBody>
+  options?: UseQueryOptions<PrebuiltRulesStatusStats>
 ) => {
-  return useQuery<GetPrebuiltRulesStatusResponseBody>(
+  return useQuery<PrebuiltRulesStatusStats>(
     PREBUILT_RULES_STATUS_QUERY_KEY,
     async ({ signal }) => {
       const response = await getPrebuiltRulesStatus({ signal });
-      return response;
+      return response.attributes.stats;
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
