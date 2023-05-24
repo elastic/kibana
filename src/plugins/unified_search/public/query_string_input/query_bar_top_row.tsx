@@ -577,6 +577,11 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderTextLangEditor() {
+      const adHocDataview = props.indexPatterns?.[0];
+      let filtersByDate = false;
+      if (adHocDataview && typeof adHocDataview !== 'string') {
+        filtersByDate = Boolean(adHocDataview?.timeFieldName);
+      }
       return (
         isQueryLangSelected &&
         props.query &&
@@ -587,6 +592,7 @@ export const QueryBarTopRow = React.memo(
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
             isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
+            filtersByDate={filtersByDate}
             onTextLangQuerySubmit={() =>
               onSubmit({
                 query: queryRef.current,

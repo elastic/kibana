@@ -98,7 +98,7 @@ const renderHookWithContext = (
 
 describe('useTextBasedQueryLanguage', () => {
   test('a text based query should change state when loading and finished', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
@@ -191,11 +191,7 @@ describe('useTextBasedQueryLanguage', () => {
       query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
     });
 
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
-      });
-    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
   test('if its not a text based query coming along, it should be ignored', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
@@ -270,7 +266,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
     expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1'],
     });

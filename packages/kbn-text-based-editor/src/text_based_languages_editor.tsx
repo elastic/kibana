@@ -55,6 +55,7 @@ export interface TextBasedLanguagesEditorProps {
   onTextLangQuerySubmit: () => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
+  filtersByDate?: boolean;
   errors?: Error[];
   isDisabled?: boolean;
   isDarkMode?: boolean;
@@ -87,6 +88,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onTextLangQuerySubmit,
   expandCodeEditor,
   isCodeEditorExpanded,
+  filtersByDate = false,
   errors,
   isDisabled,
   isDarkMode,
@@ -537,6 +539,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         errors={editorErrors}
                         onErrorClick={onErrorClick}
                         refreshErrors={onTextLangQuerySubmit}
+                        filtersByDate={filtersByDate}
                       />
                     )}
                   </div>
@@ -608,6 +611,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           errors={editorErrors}
           onErrorClick={onErrorClick}
           refreshErrors={onTextLangQuerySubmit}
+          filtersByDate={filtersByDate}
         />
       )}
       {isCodeEditorExpanded && (
