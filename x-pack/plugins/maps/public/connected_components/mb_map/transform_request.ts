@@ -17,11 +17,11 @@ const FONTS = getHttp().basePath.prepend(FONTS_API_PATH);
 const GETTILE = getHttp().basePath.prepend(MVT_GETTILE_API_PATH);
 const GETGRIDTILE = getHttp().basePath.prepend(MVT_GETGRIDTILE_API_PATH);
 
-export function transformRequest(url: string, resourceType: string) {
+export function transformRequest(url: string, resourceType: string | undefined) {
   if (resourceType === 'Glyphs' && url.startsWith(FONTS)) {
     return {
       url,
-      method: 'GET',
+      method: 'GET' as 'GET',
       headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     }
   }
@@ -29,7 +29,7 @@ export function transformRequest(url: string, resourceType: string) {
   if (resourceType === 'Tile' && url.startsWith(GETTILE)) {
     return {
       url,
-      method: 'GET',
+      method: 'GET' as 'GET',
       headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     }
   }
@@ -37,8 +37,10 @@ export function transformRequest(url: string, resourceType: string) {
   if (resourceType === 'Tile' && url.startsWith(GETGRIDTILE)) {
     return {
       url,
-      method: 'GET',
+      method: 'GET' as 'GET',
       headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
     }
   }
+
+  return { url };
 }
