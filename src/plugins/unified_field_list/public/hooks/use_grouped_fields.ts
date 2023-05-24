@@ -16,7 +16,7 @@ import {
   type FieldListGroups,
   type FieldsGroupDetails,
   type FieldsGroup,
-  type FieldListItem,
+  type FieldListItemTypeBase,
   FieldsGroupNames,
   ExistenceFetchStatus,
 } from '../types';
@@ -27,7 +27,7 @@ import {
   type FieldFiltersParams,
 } from './use_field_filters';
 
-export interface GroupedFieldsParams<T extends FieldListItem> {
+export interface GroupedFieldsParams<T extends FieldListItemTypeBase> {
   dataViewId: string | null; // `null` is for text-based queries
   allFields: T[] | null; // `null` is for loading indicator
   services: {
@@ -45,7 +45,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSelectedFieldFilter?: (field: T) => boolean;
 }
 
-export interface GroupedFieldsResult<T extends FieldListItem> {
+export interface GroupedFieldsResult<T extends FieldListItemTypeBase> {
   fieldListFiltersProps: FieldFiltersResult<T>['fieldListFiltersProps'];
   fieldListGroupedProps: {
     fieldGroups: FieldListGroups<T>;
@@ -56,7 +56,7 @@ export interface GroupedFieldsResult<T extends FieldListItem> {
   };
 }
 
-export function useGroupedFields<T extends FieldListItem = DataViewField>({
+export function useGroupedFields<T extends FieldListItemTypeBase = DataViewField>({
   dataViewId,
   allFields,
   services,
@@ -389,7 +389,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 const collator = new Intl.Collator(undefined, {
   sensitivity: 'base',
 });
-function sortFields<T extends FieldListItem>(fieldA: T, fieldB: T) {
+function sortFields<T extends FieldListItemTypeBase>(fieldA: T, fieldB: T) {
   return collator.compare(fieldA.displayName || fieldA.name, fieldB.displayName || fieldB.name);
 }
 

@@ -14,16 +14,18 @@ import { AppPluginStartDependencies } from './types';
 import { UnifiedFieldListExampleApp } from './example_app';
 
 export const renderApp = (
-  { application }: CoreStart,
-  { data, navigation, unifiedSearch }: AppPluginStartDependencies,
+  core: CoreStart,
+  deps: AppPluginStartDependencies,
   { element }: AppMountParameters
 ) => {
   ReactDOM.render(
     <I18nProvider>
       <UnifiedFieldListExampleApp
-        navigation={navigation}
-        data={data}
-        unifiedSearch={unifiedSearch}
+        services={{
+          core,
+          uiSettings: core.uiSettings,
+          ...deps,
+        }}
       />
     </I18nProvider>,
     element

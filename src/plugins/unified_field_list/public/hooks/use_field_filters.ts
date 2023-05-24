@@ -11,7 +11,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
-import { type FieldListItem, type FieldTypeKnown, GetCustomFieldType } from '../types';
+import { type FieldListItemTypeBase, type FieldTypeKnown, GetCustomFieldType } from '../types';
 import { getFieldIconType } from '../utils/field_types';
 import { fieldNameWildcardMatcher } from '../utils/field_name_wildcard_matcher';
 
@@ -20,7 +20,7 @@ const htmlId = htmlIdGenerator('fieldList');
 /**
  * Input params for useFieldFilters hook
  */
-export interface FieldFiltersParams<T extends FieldListItem> {
+export interface FieldFiltersParams<T extends FieldListItemTypeBase> {
   allFields: T[] | null;
   getCustomFieldType?: GetCustomFieldType<T>;
   onSupportedFieldFilter?: (field: T) => boolean;
@@ -32,7 +32,7 @@ export interface FieldFiltersParams<T extends FieldListItem> {
 /**
  * Output of useFieldFilters hook
  */
-export interface FieldFiltersResult<T extends FieldListItem> {
+export interface FieldFiltersResult<T extends FieldListItemTypeBase> {
   fieldSearchHighlight: string;
   fieldListFiltersProps: FieldListFiltersProps<T>;
   onFilterField?: (field: T) => boolean;
@@ -46,7 +46,7 @@ export interface FieldFiltersResult<T extends FieldListItem> {
  * @param services
  * @public
  */
-export function useFieldFilters<T extends FieldListItem = DataViewField>({
+export function useFieldFilters<T extends FieldListItemTypeBase = DataViewField>({
   allFields,
   getCustomFieldType,
   onSupportedFieldFilter,

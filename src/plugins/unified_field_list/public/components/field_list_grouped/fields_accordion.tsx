@@ -18,10 +18,14 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem, FieldsGroupNames } from '../../types';
+import {
+  type FieldListItemTypeBase,
+  FieldsGroupNames,
+  type RenderFieldItemParams,
+} from '../../types';
 import './fields_accordion.scss';
 
-export interface FieldsAccordionProps<T extends FieldListItem> {
+export interface FieldsAccordionProps<T extends FieldListItemTypeBase> {
   initialIsOpen: boolean;
   onToggle: (open: boolean) => void;
   id: string;
@@ -35,20 +39,13 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   groupName: FieldsGroupNames;
   fieldSearchHighlight?: string;
   paginatedFields: T[];
-  renderFieldItem: (params: {
-    field: T;
-    hideDetails?: boolean;
-    itemIndex: number;
-    groupIndex: number;
-    groupName: FieldsGroupNames;
-    fieldSearchHighlight?: string;
-  }) => JSX.Element;
+  renderFieldItem: (params: RenderFieldItemParams<T>) => JSX.Element;
   renderCallout: () => JSX.Element;
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
 }
 
-function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
+function InnerFieldsAccordion<T extends FieldListItemTypeBase = DataViewField>({
   initialIsOpen,
   onToggle,
   id,
@@ -176,5 +173,5 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
 
 export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerFieldsAccordion;
 
-export const getFieldKey = (field: FieldListItem): string =>
+export const getFieldKey = (field: FieldListItemTypeBase): string =>
   `${field.name}-${field.displayName}-${field.type}`;

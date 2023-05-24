@@ -12,7 +12,7 @@ import classnames from 'classnames';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
 import { EuiButtonIcon, EuiButtonIconProps, EuiHighlight, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem, type GetCustomFieldType } from '../../types';
+import { type FieldListItemTypeBase, type GetCustomFieldType } from '../../types';
 import { FieldIcon, getFieldIconProps } from '../field_icon';
 import { fieldNameWildcardMatcher } from '../../utils/field_name_wildcard_matcher';
 import './field_item_button.scss';
@@ -20,7 +20,7 @@ import './field_item_button.scss';
 /**
  * Props of FieldItemButton component
  */
-export interface FieldItemButtonProps<T extends FieldListItem> {
+export interface FieldItemButtonProps<T extends FieldListItemTypeBase> {
   field: T;
   fieldSearchHighlight?: string;
   isSelected: boolean; // whether a field is under Selected section
@@ -62,7 +62,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param otherProps
  * @constructor
  */
-export function FieldItemButton<T extends FieldListItem = DataViewField>({
+export function FieldItemButton<T extends FieldListItemTypeBase = DataViewField>({
   field,
   fieldSearchHighlight,
   isSelected,

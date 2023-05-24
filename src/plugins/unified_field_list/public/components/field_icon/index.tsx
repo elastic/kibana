@@ -9,13 +9,13 @@
 import React, { Fragment } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldIconProps, GenericFieldIcon } from './field_icon';
-import { type FieldListItem } from '../../types';
+import { type FieldListItemTypeBase } from '../../types';
 
 const Fallback = () => <Fragment />;
 
 const LazyFieldIcon = React.lazy(() => import('./field_icon')) as GenericFieldIcon;
 
-function WrappedFieldIcon<T extends FieldListItem = DataViewField>(props: FieldIconProps) {
+function WrappedFieldIcon<T extends FieldListItemTypeBase = DataViewField>(props: FieldIconProps) {
   return (
     <React.Suspense fallback={<Fallback />}>
       <LazyFieldIcon {...props} />

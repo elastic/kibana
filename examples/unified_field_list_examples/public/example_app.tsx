@@ -7,38 +7,33 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import {
-  EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageSection,
   EuiPageSidebar,
   EuiTitle,
   EuiEmptyPrompt,
   EuiLoadingLogo,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
 
 interface UnifiedFieldListExampleAppProps {
-  navigation: NavigationPublicPluginStart;
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  services: FieldListSidebarProps['services'];
 }
 
 export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProps> = ({
-  navigation,
-  data,
-  unifiedSearch,
+  services,
 }) => {
+  const { navigation, data, unifiedSearch } = services;
   const { IndexPatternSelect } = unifiedSearch.ui;
   const [dataView, setDataView] = useState<DataView | null>();
-  const [_ /* fields */, setFields] = useState<DataViewField[]>();
 
   // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
   useEffect(() => {
@@ -49,11 +44,6 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
 
     setDefaultDataView();
   }, [data]);
-
-  // Update the fields list every time the data view is modified.
-  useEffect(() => {
-    setFields(dataView?.fields);
-  }, [dataView]);
 
   if (typeof dataView === 'undefined') {
     return (
@@ -77,46 +67,53 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
   }
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageSection>
-          <EuiTitle>
-            <h1>{PLUGIN_NAME}</h1>
-          </EuiTitle>
-          <EuiFlexGrid columns={4}>
-            <EuiFlexItem>
-              <IndexPatternSelect
-                placeholder={i18n.translate('searchSessionExample.selectDataViewPlaceholder', {
-                  defaultMessage: 'Select data view',
-                })}
-                indexPatternId={dataView?.id || ''}
-                onChange={async (dataViewId?: string) => {
-                  if (dataViewId) {
-                    const newDataView = await data.dataViews.get(dataViewId);
-                    setDataView(newDataView);
-                  } else {
-                    setDataView(undefined);
-                  }
-                }}
-                isClearable={false}
-                data-test-subj="dataViewSelector"
-              />
-            </EuiFlexItem>
-          </EuiFlexGrid>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-            indexPatterns={dataView ? [dataView] : undefined}
-          />
-          <EuiFlexGrid columns={4}>
-            <EuiFlexItem grow={false}>
-              <EuiPageSidebar>
-                <div style={{ background: 'blue' }}>test</div>
+    <EuiPage grow={true}>
+      <EuiPageBody paddingSize="s">
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h1>{PLUGIN_NAME}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <IndexPatternSelect
+              placeholder={i18n.translate('searchSessionExample.selectDataViewPlaceholder', {
+                defaultMessage: 'Select data view',
+              })}
+              indexPatternId={dataView?.id || ''}
+              onChange={async (dataViewId?: string) => {
+                if (dataViewId) {
+                  const newDataView = await data.dataViews.get(dataViewId);
+                  setDataView(newDataView);
+                } else {
+                  setDataView(undefined);
+                }
+              }}
+              isClearable={false}
+              data-test-subj="dataViewSelector"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <navigation.ui.TopNavMenu
+              appName={PLUGIN_ID}
+              showSearchBar={true}
+              useDefaultBehaviors={true}
+              indexPatterns={dataView ? [dataView] : undefined}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <RootDragDropProvider>
+              <EuiPageSidebar
+                css={css`
+                  flex: 1;
+                  width: 320px;
+                `}
+              >
+                <FieldListSidebar services={services} dataView={dataView} />
               </EuiPageSidebar>
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        </EuiPageSection>
+            </RootDragDropProvider>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageBody>
     </EuiPage>
   );

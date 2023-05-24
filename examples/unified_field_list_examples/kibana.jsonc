@@ -9,12 +9,15 @@
     "browser": true,
     "requiredPlugins": [
       "navigation",
-      "data",
       "developerExamples",
       "inspector",
       "kibanaUtils",
-      "share",
-      "unifiedSearch"
+      "unifiedSearch",
+      "unifiedFieldList",
+      "data",
+      "dataViews",
+      "charts",
+      "fieldFormats"
     ]
   }
 }

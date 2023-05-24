@@ -40,7 +40,7 @@ import {
   isKnownFieldType,
   KNOWN_FIELD_TYPE_LIST,
 } from '../../utils/field_types';
-import type { FieldListItem, FieldTypeKnown, GetCustomFieldType } from '../../types';
+import type { FieldListItemTypeBase, FieldTypeKnown, GetCustomFieldType } from '../../types';
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
 const popoverTitleStyle = css`
@@ -56,7 +56,7 @@ const filterButtonStyle = css`
 /**
  * Props for FieldTypeFilter component
  */
-export interface FieldTypeFilterProps<T extends FieldListItem> {
+export interface FieldTypeFilterProps<T extends FieldListItemTypeBase> {
   'data-test-subj': string;
   docLinks: CoreStart['docLinks'];
   allFields: T[] | null;
@@ -77,7 +77,7 @@ export interface FieldTypeFilterProps<T extends FieldListItem> {
  * @param onChange
  * @constructor
  */
-export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
+export function FieldTypeFilter<T extends FieldListItemTypeBase = DataViewField>({
   'data-test-subj': dataTestSubject,
   docLinks,
   allFields,

@@ -1,4 +1,4 @@
 .unifiedFieldList__fieldPopover__fieldPopoverPanel {
-  min-width: $euiSizeXXL * 6.5;
-  max-width: $euiSizeXXL * 7.5;
+  min-inline-size: $euiSizeXXL * 6.5 !important;
+  max-inline-size: $euiSizeXXL * 7.5 !important;
 }

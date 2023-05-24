@@ -9,7 +9,7 @@
 import React, { Fragment } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldListGroupedProps, GenericFieldListGrouped } from './field_list_grouped';
-import { type FieldListItem } from '../../types';
+import { type FieldListItemTypeBase } from '../../types';
 
 const Fallback = () => <Fragment />;
 
@@ -17,7 +17,7 @@ const LazyFieldListGrouped = React.lazy(
   () => import('./field_list_grouped')
 ) as GenericFieldListGrouped;
 
-function WrappedFieldListGrouped<T extends FieldListItem = DataViewField>(
+function WrappedFieldListGrouped<T extends FieldListItemTypeBase = DataViewField>(
   props: FieldListGroupedProps<T>
 ) {
   return (

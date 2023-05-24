@@ -10,12 +10,12 @@ import React from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
-import { type FieldListItem } from '../../types';
+import { type FieldListItemTypeBase } from '../../types';
 
 /**
  * Props for FieldListFilters component
  */
-export interface FieldListFiltersProps<T extends FieldListItem> {
+export interface FieldListFiltersProps<T extends FieldListItemTypeBase> {
   'data-test-subj'?: string;
   docLinks: FieldTypeFilterProps<T>['docLinks'];
   selectedFieldTypes?: FieldTypeFilterProps<T>['selectedFieldTypes'];
@@ -44,7 +44,7 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
  * @public
  * @constructor
  */
-function InnerFieldListFilters<T extends FieldListItem = DataViewField>({
+function InnerFieldListFilters<T extends FieldListItemTypeBase = DataViewField>({
   'data-test-subj': dataTestSubject = 'fieldListFilters',
   docLinks,
   selectedFieldTypes,
