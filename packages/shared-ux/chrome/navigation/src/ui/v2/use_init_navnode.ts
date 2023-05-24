@@ -13,7 +13,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { useNavigation as useNavigationServices } from '../../services';
 import { InternalNavigationNode, NodeProps, RegisterFunction, UnRegisterFunction } from './types';
 import { useRegisterTreeNode } from './use_register_tree_node';
-import { flattenObject } from './utils';
 
 function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {
   const id = _id ?? link;
@@ -90,19 +89,18 @@ export const useInitNavNode = (node: NodeProps) => {
    */
   const [nodePath, setNodePath] = useState<string[] | null>(null);
 
+  /**
+   * Whenever a child node is registered, we need to re-register the current node
+   * on the parent. This state keeps track when child node register.
+   */
+  const [childrenNodesUpdated, setChildrenNodesUpdated] = useState<string[]>([]);
+
+  /**
+   * Create a stable string reference of the node path to avoid infinite loops
+   */
   const nodePathToString = nodePath ? nodePath.join('.') : null;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stableNodePath = useMemo(() => nodePath, [nodePathToString]);
-
-  // We need a way to detect when children nodes have changed to re-register the group
-  // on the parent. We keep a unique string id of all the children ids in a ref
-  // so we can detect when this change happens.
-  // Without this mechanism, we would enter an infinite loop of re-registering the group.
-  const childrenNodeIds = useMemo(
-    () => Object.keys(flattenObject(childrenNodes)).sort().join('.'),
-    [childrenNodes]
-  );
-  const childrenIdsRef = useRef(childrenNodeIds);
 
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
@@ -115,16 +113,14 @@ export const useInitNavNode = (node: NodeProps) => {
     [node, id, deepLinks, stableNodePath]
   );
 
+  // Register the node on the parent whenever its properties change or whenever
+  // a child node is registered.
   const register = useCallback(() => {
     if (!internalNavNode) {
       return;
     }
 
-    const childrenChanged = childrenIdsRef.current !== childrenNodeIds;
-
-    if (!isRegistered.current || childrenChanged) {
-      childrenIdsRef.current = childrenNodeIds;
-
+    if (!isRegistered.current || childrenNodesUpdated.length > 0) {
       const children = Object.values(childrenNodes).sort((a, b) => {
         const aOrder = orderChildrenRef.current[a.id];
         const bOrder = orderChildrenRef.current[b.id];
@@ -137,21 +133,25 @@ export const useInitNavNode = (node: NodeProps) => {
       });
 
       const updatedPath = [...path, internalNavNode.id];
-      setNodePath(updatedPath);
       internalNavNode.path = updatedPath;
+
+      setNodePath(updatedPath);
+      setChildrenNodesUpdated([]);
 
       unregisterRef.current = unregister;
       isRegistered.current = true;
     }
-  }, [internalNavNode, registerNodeOnParent, childrenNodes, childrenNodeIds]);
+  }, [internalNavNode, childrenNodesUpdated.length, childrenNodes, registerNodeOnParent]);
 
-  const unregisterChildNode: UnRegisterFunction = useCallback((childId: string) => {
-    setChildrenNodes((prev) => {
-      const updatedItems = { ...prev };
-      delete updatedItems[childId];
-      return updatedItems;
-    });
-  }, []);
+  // Un-register from the parent. This will happen when the node is unmounted or if the deeplink
+  // is not active anymore.
+  const unregister = useCallback(() => {
+    isRegistered.current = false;
+    if (unregisterRef.current) {
+      unregisterRef.current(id);
+      unregisterRef.current = undefined;
+    }
+  }, [id]);
 
   const registerChildNode = useCallback<RegisterFunction>(
     (childNode) => {
@@ -168,22 +168,21 @@ export const useInitNavNode = (node: NodeProps) => {
       });
 
       orderChildrenRef.current[childNode.id] = idx.current++;
+      setChildrenNodesUpdated((prev) => [...prev, childNode.id]);
 
       return {
-        unregister: unregisterChildNode,
+        unregister: (childId: string) => {
+          setChildrenNodes((prev) => {
+            const updatedItems = { ...prev };
+            delete updatedItems[childId];
+            return updatedItems;
+          });
+        },
         path: childPath,
       };
     },
-    [stableNodePath, unregisterChildNode]
+    [stableNodePath]
   );
-
-  const unregister = useCallback(() => {
-    isRegistered.current = false;
-    if (unregisterRef.current) {
-      unregisterRef.current(id);
-      unregisterRef.current = undefined;
-    }
-  }, [id]);
 
   /** Register when mounting and whenever the internal nav node changes */
   useEffect(() => {

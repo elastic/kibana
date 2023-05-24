@@ -296,10 +296,10 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
               />
             </Navigation.Group>
 
-            <Navigation.Group id="settigns" title="Settings">
-              <Navigation.Item id="item1" title="Logs" />
-              <Navigation.Item id="item2" title="Signals" />
-              <Navigation.Item id="item3" title="Tracing" />
+            <Navigation.Group id="group:settings" title="Settings">
+              <Navigation.Item id="logs" title="Logs" />
+              <Navigation.Item id="signals" title="Signals" />
+              <Navigation.Item id="tracing" title="Tracing" />
             </Navigation.Group>
           </Navigation.Group>
 

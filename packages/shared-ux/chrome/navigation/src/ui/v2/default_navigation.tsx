@@ -57,27 +57,17 @@ export const DefaultNavigation: FC<DefaultNavigationProps> = ({ homeRef, navTree
         return (
           <React.Fragment key={id}>
             {item.children ? (
-              <Navigation.Group
-                id={item.id}
-                link={item.link}
-                title={item.title}
-                onRemove={() => onRemove([...path, id])}
-              >
+              <Navigation.Group id={item.id} link={item.link} title={item.title}>
                 {renderItems(item.children, [...path, id])}
               </Navigation.Group>
             ) : (
-              <Navigation.Item
-                id={item.id}
-                link={item.link}
-                title={item.title}
-                onRemove={() => onRemove([...path, id])}
-              />
+              <Navigation.Item id={item.id} link={item.link} title={item.title} />
             )}
           </React.Fragment>
         );
       });
     },
-    [removedItems, onRemove]
+    [removedItems]
   );
 
   const filteredNavTree = navTree.filter(({ id: _id, link }) => {
