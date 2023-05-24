@@ -14,7 +14,6 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
-  EuiSwitchEvent,
   Direction,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,19 +26,54 @@ import {
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 
+const SwitchWithTooltip = ({
+  label,
+  tooltip,
+  initialChecked,
+  onSwitchChange,
+  ...rest
+}: {
+  label: string;
+  tooltip: string;
+  initialChecked: boolean;
+  onSwitchChange: () => void;
+}) => {
+  const [checked, setChecked] = useState(initialChecked);
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="xs" {...rest}>
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          label={label}
+          checked={checked}
+          onChange={(event) => {
+            setChecked(event.target.checked);
+            onSwitchChange();
+          }}
+          {...rest}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          margin-top: 0px !important;
+        `}
+      >
+        <EuiIconTip content={tooltip} position="right" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 interface OptionsListEditorState {
   sortDirection: Direction;
   runPastTimeout?: boolean;
+  wildcardQuery?: boolean;
   singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
   sortBy: OptionsListSortBy;
-}
-
-interface SwitchProps {
-  checked: boolean;
-  onChange: (event: EuiSwitchEvent) => void;
 }
 
 export const OptionsListEditorOptions = ({
@@ -51,6 +85,7 @@ export const OptionsListEditorOptions = ({
     sortDirection: initialInput?.sort?.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction,
     sortBy: initialInput?.sort?.by ?? OPTIONS_LIST_DEFAULT_SORT.by,
     runPastTimeout: initialInput?.runPastTimeout,
+    wildcardQuery: initialInput?.wildcardQuery,
     singleSelect: initialInput?.singleSelect,
     hideExclude: initialInput?.hideExclude,
     hideExists: initialInput?.hideExists,
@@ -69,30 +104,6 @@ export const OptionsListEditorOptions = ({
     }
   }, [fieldType, onChange, state.sortBy]);
 
-  const SwitchWithTooltip = ({
-    switchProps,
-    label,
-    tooltip,
-  }: {
-    switchProps: SwitchProps;
-    label: string;
-    tooltip: string;
-  }) => (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiSwitch label={label} {...switchProps} />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          margin-top: 0px !important;
-        `}
-      >
-        <EuiIconTip content={tooltip} position="right" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <>
       <EuiFormRow>
@@ -110,12 +121,10 @@ export const OptionsListEditorOptions = ({
         <SwitchWithTooltip
           label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
           tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
-          switchProps={{
-            checked: Boolean(state.runPastTimeout),
-            onChange: () => {
-              onChange({ runPastTimeout: !state.runPastTimeout });
-              setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
-            },
+          initialChecked={Boolean(state.runPastTimeout)}
+          onSwitchChange={() => {
+            onChange({ runPastTimeout: !state.runPastTimeout });
+            setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
           }}
           data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
         />
