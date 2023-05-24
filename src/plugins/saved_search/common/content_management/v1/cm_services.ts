@@ -33,8 +33,9 @@ const savedSearchAttributesSchema = schema.object(
         )
       ),
     }),
-    hideChart: schema.boolean(),
-    isTextBasedQuery: schema.boolean(),
+    // todo
+    hideChart: schema.maybe(schema.oneOf([schema.boolean(), schema.any()])),
+    isTextBasedQuery: schema.maybe(schema.boolean()),
     usesAdHocDataView: schema.maybe(schema.boolean()),
     kibanaSavedObjectMeta: schema.object({
       searchSourceJSON: schema.string(),
@@ -44,6 +45,8 @@ const savedSearchAttributesSchema = schema.object(
     ),
     hideAggregatedPreview: schema.maybe(schema.boolean()),
     rowHeight: schema.maybe(schema.number()),
+    // check
+    hits: schema.maybe(schema.any()),
 
     timeRestore: schema.maybe(schema.boolean()),
     timeRange: schema.maybe(
@@ -60,6 +63,8 @@ const savedSearchAttributesSchema = schema.object(
     ),
     rowsPerPage: schema.maybe(schema.number()),
     breakdownField: schema.maybe(schema.string()),
+    // todo
+    version: schema.maybe(schema.number()),
   },
   { unknowns: 'forbid' }
 );
