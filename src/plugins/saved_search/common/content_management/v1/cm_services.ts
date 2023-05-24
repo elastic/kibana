@@ -34,15 +34,15 @@ const savedSearchAttributesSchema = schema.object(
       ),
     }),
     // todo
-    // hideChart: schema.maybe(schema.oneOf([schema.boolean(), schema.any()])),
+    hideChart: schema.maybe(schema.oneOf([schema.boolean(), schema.any()])),
     isTextBasedQuery: schema.maybe(schema.boolean()),
     usesAdHocDataView: schema.maybe(schema.boolean()),
     kibanaSavedObjectMeta: schema.object({
       searchSourceJSON: schema.string(),
     }),
-    // schema.maybe(
-    viewMode: schema.oneOf(
-      [schema.literal('documents'), schema.literal('aggregated')] // )
+
+    viewMode: schema.maybe(
+      schema.oneOf([schema.literal('documents'), schema.literal('aggregated')])
     ),
     hideAggregatedPreview: schema.maybe(schema.boolean()),
     rowHeight: schema.maybe(schema.number()),
