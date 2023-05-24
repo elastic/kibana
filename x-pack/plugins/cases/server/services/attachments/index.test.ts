@@ -54,6 +54,18 @@ describe('AttachmentService', () => {
         ).resolves.not.toThrow();
       });
 
+      it('strips excess fields', async () => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createUserAttachment({ foo: 'bar' }));
+
+        const res = await service.create({
+          attributes: createUserAttachment().attributes,
+          references: [],
+          id: '1',
+        });
+
+        expect(res).toStrictEqual(createUserAttachment());
+      });
+
       it('throws when the response is missing the attributes.comment', async () => {
         const invalidAttachment = createUserAttachment();
         unset(invalidAttachment, 'attributes.comment');
@@ -87,6 +99,18 @@ describe('AttachmentService', () => {
             ],
           })
         ).resolves.not.toThrow();
+      });
+
+      it('strips excess fields', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [createUserAttachment({ foo: 'bar' })],
+        });
+
+        const res = await service.bulkCreate({
+          attachments: [{ attributes: createUserAttachment().attributes, references: [], id: '1' }],
+        });
+
+        expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
       });
 
       it('throws when the response is missing the attributes.comment field', async () => {
@@ -173,6 +197,17 @@ describe('AttachmentService', () => {
         ).resolves.not.toThrow();
       });
 
+      it('strips excess fields', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment({ foo: 'bar' }));
+
+        const res = await service.update({
+          updatedAttributes: { comment: 'yes', type: CommentType.user, owner: 'hi' },
+          attachmentId: '1',
+        });
+
+        expect(res).toStrictEqual(createUserAttachment());
+      });
+
       it('throws when the response is missing the attributes.rule.name', async () => {
         const invalidAttachment = createAlertAttachment();
         unset(invalidAttachment, 'attributes.rule.name');
@@ -246,26 +281,40 @@ describe('AttachmentService', () => {
 
     describe('Decoding', () => {
       it('does not throw when the response has the required fields', async () => {
-        const updatedAttributes = createUserAttachment().attributes;
-
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [createUserAttachment()],
         });
+
+        const updatedAttributes = createUserAttachment().attributes;
 
         await expect(
           service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
         ).resolves.not.toThrow();
       });
 
-      it('throws when the response is missing the attributes.rule.name field', async () => {
-        const updatedAttributes = createAlertAttachment().attributes;
+      it('strips excess fields', async () => {
+        const updatedAttributes = createUserAttachment().attributes;
 
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [createUserAttachment({ foo: 'bar' })],
+        });
+
+        const res = await service.bulkUpdate({
+          comments: [{ attachmentId: '1', updatedAttributes }],
+        });
+
+        expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
+      });
+
+      it('throws when the response is missing the attributes.rule.name field', async () => {
         const invalidAttachment = createAlertAttachment();
         unset(invalidAttachment, 'attributes.rule.name');
 
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [invalidAttachment],
         });
+
+        const updatedAttributes = createAlertAttachment().attributes;
 
         await expect(
           service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
@@ -284,6 +333,16 @@ describe('AttachmentService', () => {
         );
 
         await expect(service.find({})).resolves.not.toThrow();
+      });
+
+      it('strips excess fields', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createSOFindResponse([{ ...createUserAttachment({ foo: 'bar' }), score: 0 }])
+        );
+
+        const res = await service.find({});
+
+        expect(res).toStrictEqual(createSOFindResponse([{ ...createUserAttachment(), score: 0 }]));
       });
 
       it('throws when the response is missing the attributes.rule.name field', async () => {

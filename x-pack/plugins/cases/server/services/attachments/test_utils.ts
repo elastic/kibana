@@ -18,10 +18,14 @@ import {
   FILE_ATTACHMENT_TYPE,
   CommentType,
 } from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { EXTERNAL_REFERENCE_REF_NAME } from '../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
+import { CASE_REF_NAME, EXTERNAL_REFERENCE_REF_NAME } from '../../common/constants';
 
-export const createUserAttachment = (): SavedObject<AttributesTypeUser> => {
+export const createUserAttachment = (attributes?: object): SavedObject<AttributesTypeUser> => {
   return {
     id: '1',
     type: CASE_COMMENT_SAVED_OBJECT,
@@ -43,12 +47,13 @@ export const createUserAttachment = (): SavedObject<AttributesTypeUser> => {
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      ...attributes,
     },
     references: [],
   };
 };
 
-export const createAlertAttachment = (): SavedObject<AttributesTypeAlerts> => {
+export const createAlertAttachment = (attributes?: object): SavedObject<AttributesTypeAlerts> => {
   return {
     id: '1',
     type: CASE_COMMENT_SAVED_OBJECT,
@@ -75,6 +80,7 @@ export const createAlertAttachment = (): SavedObject<AttributesTypeAlerts> => {
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      ...attributes,
     },
     references: [],
   };
@@ -104,7 +110,9 @@ const getFilesAttachmentReq = (): ExternalReferenceWithoutRefs => {
   };
 };
 
-export const createFileAttachment = (): SavedObject<CommentAttributesWithoutRefs> => {
+export const createFileAttachment = (
+  attributes?: object
+): SavedObject<CommentAttributesWithoutRefs> => {
   return {
     id: '1',
     type: CASE_COMMENT_SAVED_OBJECT,
@@ -125,7 +133,11 @@ export const createFileAttachment = (): SavedObject<CommentAttributesWithoutRefs
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      ...attributes,
     },
-    references: [{ id: 'my-id', name: EXTERNAL_REFERENCE_REF_NAME, type: FILE_SO_TYPE }],
+    references: [
+      { id: 'my-id', name: EXTERNAL_REFERENCE_REF_NAME, type: FILE_SO_TYPE },
+      { id: 'caseId', name: CASE_REF_NAME, type: CASE_SAVED_OBJECT },
+    ],
   };
 };

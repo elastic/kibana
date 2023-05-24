@@ -43,6 +43,15 @@ describe('AttachmentService getter', () => {
         await expect(attachmentGetter.bulkGet(['1'])).resolves.not.toThrow();
       });
 
+      it('strips excess fields', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [{ ...createUserAttachment({ foo: 'bar' }) }],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1']);
+        expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
+      });
+
       it('throws when the response is missing the attributes.comment field', async () => {
         const invalidAttachment = createUserAttachment();
         unset(invalidAttachment, 'attributes.comment');
@@ -70,6 +79,17 @@ describe('AttachmentService getter', () => {
         ).resolves.not.toThrow();
       });
 
+      it('strips excess fields', async () => {
+        const soFindRes = createSOFindResponse([
+          { ...createAlertAttachment({ foo: 'bar' }), score: 0 },
+        ]);
+
+        mockFinder(soFindRes);
+
+        const res = await attachmentGetter.getAllAlertsAttachToCase({ caseId: '1' });
+        expect(res).toStrictEqual([{ ...createAlertAttachment(), score: 0 }]);
+      });
+
       it('throws when the response is missing the attributes.alertId field', async () => {
         const invalidAlert = { ...createAlertAttachment(), score: 0 };
         unset(invalidAlert, 'attributes.alertId');
@@ -92,6 +112,15 @@ describe('AttachmentService getter', () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(createUserAttachment());
 
         await expect(attachmentGetter.get({ attachmentId: '1' })).resolves.not.toThrow();
+      });
+
+      it('strips excess fields', async () => {
+        unsecuredSavedObjectsClient.get.mockResolvedValue({
+          ...createUserAttachment({ foo: 'bar' }),
+        });
+
+        const res = await attachmentGetter.get({ attachmentId: '1' });
+        expect(res).toStrictEqual(createUserAttachment());
       });
 
       it('throws when the response is missing the attributes.comment field', async () => {
@@ -119,6 +148,20 @@ describe('AttachmentService getter', () => {
         await expect(
           attachmentGetter.getFileAttachments({ caseId: '1', fileIds: ['1'] })
         ).resolves.not.toThrow();
+      });
+
+      it('strips excess fields', async () => {
+        const soFindRes = createSOFindResponse([
+          { ...createFileAttachment({ foo: 'bar' }), score: 0 },
+        ]);
+
+        mockFinder(soFindRes);
+
+        const res = await attachmentGetter.getFileAttachments({ caseId: 'caseId', fileIds: ['1'] });
+
+        expect(res).toStrictEqual([
+          { ...createFileAttachment({ externalReferenceId: 'my-id' }), score: 0 },
+        ]);
       });
 
       it('throws when the response is missing the attributes.externalReferenceAttachmentTypeId field', async () => {
