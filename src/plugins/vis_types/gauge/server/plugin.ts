@@ -9,7 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup, Plugin, UiSettingsParams } from '@kbn/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext, UiSettingsParams } from '@kbn/core/server';
+import { GaugeConfig } from '../config';
+import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
 
@@ -34,9 +36,23 @@ export const getUiSettingsConfig: () => Record<string, UiSettingsParams<boolean>
   },
 });
 
-export class VisTypeGaugeServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
+interface GaugePluginSetupDependencies {
+  visualizations: VisualizationsServerSetup;
+}
+
+export class VisTypeGaugeServerPlugin implements Plugin<GaugePluginSetupDependencies> {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
+  }
+
+  public setup(core: CoreSetup, plugins: GaugePluginSetupDependencies) {
     core.uiSettings.register(getUiSettingsConfig());
+
+    const { readOnly } = this.initializerContext.config.get<GaugeConfig>();
+    if (readOnly) {
+      plugins.visualizations.registerReadOnlyVisType('gauge');
+      plugins.visualizations.registerReadOnlyVisType('goal');
+    }
 
     return {};
   }
