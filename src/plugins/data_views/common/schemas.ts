@@ -7,7 +7,7 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
-import { /* RUNTIME_FIELD_TYPES,*/ RuntimeType } from '../../../common';
+import { RuntimeType } from '.';
 
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -16,11 +16,11 @@ export const serializedFieldFormatSchema = schema.object({
 
 export const fieldSpecSchemaFields = {
   name: schema.string({
-    maxLength: 1_000,
+    maxLength: 1000,
   }),
   type: schema.string({
     defaultValue: 'string',
-    maxLength: 1_000,
+    maxLength: 1000,
   }),
   count: schema.maybe(
     schema.number({
@@ -29,7 +29,7 @@ export const fieldSpecSchemaFields = {
   ),
   script: schema.maybe(
     schema.string({
-      maxLength: 1_000_000,
+      maxLength: 1000000,
     })
   ),
   format: schema.maybe(serializedFieldFormatSchema),
