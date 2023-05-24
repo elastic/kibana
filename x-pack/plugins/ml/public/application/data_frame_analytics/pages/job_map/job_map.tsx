@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Cytoscape, Controls, JobMapLegend } from './components';
-import { useCurrentEuiTheme, useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { useCurrentEuiThemeVars, useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { EuiThemeType } from '../../../components/color_range_legend';
@@ -65,7 +65,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
     },
   } = useMlKibana();
   const locator = useMlLocator()!;
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentEuiThemeVars();
   const refresh = useRefresh();
 
   const redirectToAnalyticsManagementPage = async () => {

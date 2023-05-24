@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCurrentEuiTheme } from '../../../../../../contexts/kibana';
+import { useCurrentEuiThemeVars } from '../../../../../../contexts/kibana';
 import {
   JobCreatorType,
   isMultiMetricJobCreator,
@@ -14,7 +14,7 @@ import {
 import { getTimeBucketsFromCache, TimeBuckets } from '../../../../../../util/time_buckets';
 
 export function useChartColors() {
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentEuiThemeVars();
   return {
     LINE_COLOR: euiTheme.euiColorPrimary,
     MODEL_COLOR: euiTheme.euiColorPrimary,

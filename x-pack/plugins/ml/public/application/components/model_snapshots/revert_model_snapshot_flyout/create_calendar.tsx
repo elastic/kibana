@@ -21,7 +21,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { useCurrentEuiTheme } from '../../../contexts/kibana';
+import { useCurrentEuiThemeVars } from '../../../contexts/kibana';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
@@ -54,7 +54,7 @@ export const CreateCalendar: FC<Props> = ({
   const maxSelectableTimeMoment = moment(maxSelectableTimeStamp);
   const minSelectableTimeMoment = moment(minSelectableTimeStamp);
 
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentEuiThemeVars();
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {

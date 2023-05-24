@@ -57,7 +57,7 @@ import {
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useCurrentEuiTheme, useMlApiContext } from '../../../../contexts/kibana';
+import { useCurrentEuiThemeVars, useMlApiContext } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
@@ -141,7 +141,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     results: { getDatafeedResultChartData },
   } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentEuiThemeVars();
 
   const handleChange = (date: moment.Moment) => setEndDate(date);
 

@@ -41,7 +41,7 @@ import {
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
-import { useCurrentEuiTheme, useCurrentKibanaTheme } from '../contexts/kibana';
+import { useCurrentEuiThemeVars, useIsDarkTheme } from '../contexts/kibana';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
@@ -190,8 +190,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const isDarkTheme = useCurrentKibanaTheme();
-  const { euiTheme } = useCurrentEuiTheme();
+  const isDarkTheme = useIsDarkTheme();
+  const { euiTheme } = useCurrentEuiThemeVars();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();

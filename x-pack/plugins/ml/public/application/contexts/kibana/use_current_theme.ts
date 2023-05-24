@@ -17,7 +17,7 @@ const themeDefault = { darkMode: false };
  * Indicates if the currently applied theme is either dark or light.
  * @return {boolean} - Returns true if the currently applied theme is dark.
  */
-export function useCurrentKibanaTheme() {
+export function useIsDarkTheme() {
   const {
     services: { theme },
   } = useMlKibana();
@@ -34,7 +34,7 @@ export function useCurrentKibanaTheme() {
 /**
  * Returns an EUI theme definition based on the currently applied theme.
  */
-export function useCurrentEuiTheme() {
-  const isDarkMode = useCurrentKibanaTheme();
+export function useCurrentEuiThemeVars() {
+  const isDarkMode = useIsDarkTheme();
   return useMemo(() => ({ euiTheme: isDarkMode ? euiThemeDark : euiThemeLight }), [isDarkMode]);
 }

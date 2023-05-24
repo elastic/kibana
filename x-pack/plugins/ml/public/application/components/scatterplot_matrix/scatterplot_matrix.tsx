@@ -33,7 +33,7 @@ import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 
 import { getCombinedRuntimeMappings } from '../data_grid';
-import { useCurrentEuiTheme, useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useCurrentEuiThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
 
@@ -148,7 +148,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     { items: any[]; backgroundItems: any[]; columns: string[]; messages: string[] } | undefined
   >();
 
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentEuiThemeVars();
 
   // formats the array of field names for EuiComboBox
   const fieldOptions = useMemo(

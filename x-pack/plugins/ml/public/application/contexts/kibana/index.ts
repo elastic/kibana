@@ -14,4 +14,4 @@ export { useNotifications } from './use_notifications_context';
 export { useMlLocator, useMlLink } from './use_create_url';
 export { useMlApiContext } from './use_ml_api_context';
 export { useFieldFormatter } from './use_field_formatter';
-export { useCurrentEuiTheme, useCurrentKibanaTheme } from './use_current_theme';
+export { useCurrentEuiThemeVars, useIsDarkTheme } from './use_current_theme';
