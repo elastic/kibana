@@ -391,7 +391,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('406s when excess data sent', async () => {
+      it('400s when excess data sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({
           supertest,
@@ -405,7 +405,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          expectedHttpCode: 406,
+          expectedHttpCode: 400,
         });
       });
 
