@@ -23,6 +23,7 @@ import {
   getSyntheticsEnablementRoute,
 } from './synthetics_service/enablement';
 import {
+  getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorOverviewRoute,
   getSyntheticsMonitorRoute,
 } from './monitor_cruds/get_monitor';
@@ -52,7 +53,6 @@ import { addPrivateLocationRoute } from './settings/private_locations/add_privat
 import { deletePrivateLocationRoute } from './settings/private_locations/delete_private_location';
 import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
 import { getSyntheticsFilters } from './filters/filters';
-import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,

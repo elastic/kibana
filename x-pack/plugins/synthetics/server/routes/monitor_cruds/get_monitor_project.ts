@@ -37,25 +37,21 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
     const decodedSearchAfter = searchAfter ? decodeURI(searchAfter) : undefined;
 
     try {
-      const { saved_objects: monitors, total } = await getMonitors(
-        {
-          ...routeContext,
-          request: {
-            ...request,
-            query: {
-              ...request.query,
-              filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
-              perPage,
-              sortField: ConfigKey.JOURNEY_ID,
-              sortOrder: 'asc',
-              searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
-            },
+      const { saved_objects: monitors, total } = await getMonitors({
+        ...routeContext,
+        request: {
+          ...request,
+          query: {
+            ...request.query,
+            filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
+            fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
+            perPage,
+            sortField: ConfigKey.JOURNEY_ID,
+            sortOrder: 'asc',
+            searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
           },
         },
-        {
-          fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
-        }
-      );
+      });
       const projectMonitors = monitors.map((monitor) => ({
         journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],
         hash: monitor.attributes[ConfigKey.CONFIG_HASH] || '',
