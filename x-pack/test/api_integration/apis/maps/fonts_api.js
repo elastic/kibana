@@ -45,17 +45,25 @@ export default function ({ getService }) {
 
     it('should return 404 when file not found', async () => {
       await supertest
-        .get(`/internal/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/noGonaFindMe`)
+        .get(
+          `/internal/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/noGonaFindMe`
+        )
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(404);
     });
 
     it('should return 404 when file is not in font folder (..)', async () => {
-      await supertest.get(`/internal/maps/fonts/open_sans/..%2f0-255`).set(ELASTIC_HTTP_VERSION_HEADER, '1').expect(404);
+      await supertest
+        .get(`/internal/maps/fonts/open_sans/..%2f0-255`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .expect(404);
     });
 
     it('should return 404 when file is not in font folder (./..)', async () => {
-      await supertest.get(`/internal/maps/fonts/open_sans/.%2f..%2f0-255`).set(ELASTIC_HTTP_VERSION_HEADER, '1').expect(404);
+      await supertest
+        .get(`/internal/maps/fonts/open_sans/.%2f..%2f0-255`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .expect(404);
     });
   });
 }

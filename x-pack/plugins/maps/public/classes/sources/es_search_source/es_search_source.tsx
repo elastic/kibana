@@ -839,7 +839,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
   async addFeature(geometry: Geometry | Position[]) {
     const index = await this._getEditableIndex();
-    await addFeatureToIndex(index, geometry, this.getGeoFieldName(), await this._getNewFeatureFields());
+    await addFeatureToIndex(
+      index,
+      geometry,
+      this.getGeoFieldName(),
+      await this._getNewFeatureFields()
+    );
   }
 
   async deleteFeature(featureId: string) {
@@ -890,9 +895,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         })
     );
 
-    const mvtUrlServicePath = getHttp().basePath.prepend(
-      `${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
-    );
+    const mvtUrlServicePath = getHttp().basePath.prepend(`${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`);
 
     const tileUrlParams = getTileUrlParams({
       geometryFieldName: this._descriptor.geoField,
