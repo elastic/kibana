@@ -20,12 +20,13 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
+  wildcardSearch?: boolean;
   hideActionBar?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  placeholder?: string;
   hideSort?: boolean;
   exclude?: boolean;
-  placeholder?: string;
 }
 
 export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
@@ -64,6 +65,7 @@ export type OptionsListRequest = Omit<
   allowExpensiveQueries: boolean;
   timeRange?: TimeRange;
   runPastTimeout?: boolean;
+  wildcardSearch?: boolean;
   dataView: DataView;
   filters?: Filter[];
   field: FieldSpec;
@@ -79,6 +81,7 @@ export interface OptionsListRequestBody {
   sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
+  wildcardSearch?: boolean;
   runPastTimeout?: boolean;
   searchString?: string;
   fieldSpec?: FieldSpec;

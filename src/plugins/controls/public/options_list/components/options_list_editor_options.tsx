@@ -68,7 +68,7 @@ const SwitchWithTooltip = ({
 interface OptionsListEditorState {
   sortDirection: Direction;
   runPastTimeout?: boolean;
-  wildcardQuery?: boolean;
+  wildcardSearch?: boolean;
   singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
@@ -85,7 +85,7 @@ export const OptionsListEditorOptions = ({
     sortDirection: initialInput?.sort?.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction,
     sortBy: initialInput?.sort?.by ?? OPTIONS_LIST_DEFAULT_SORT.by,
     runPastTimeout: initialInput?.runPastTimeout,
-    wildcardQuery: initialInput?.wildcardQuery,
+    wildcardSearch: initialInput?.wildcardSearch,
     singleSelect: initialInput?.singleSelect,
     hideExclude: initialInput?.hideExclude,
     hideExists: initialInput?.hideExists,
@@ -115,6 +115,20 @@ export const OptionsListEditorOptions = ({
             setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
           }}
           data-test-subj={'optionsListControl__allowMultipleAdditionalSetting'}
+        />
+      </EuiFormRow>
+      <EuiFormRow>
+        <SwitchWithTooltip
+          label={'Enable substring search'}
+          tooltip={
+            'By default, searching only matches on a prefix. The results might take longer to populate.'
+          }
+          initialChecked={Boolean(state.wildcardSearch)}
+          onSwitchChange={() => {
+            onChange({ wildcardSearch: !state.wildcardSearch });
+            setState((s) => ({ ...s, wildcardSearch: !s.wildcardSearch }));
+          }}
+          data-test-subj={'optionsListControl__wildcareQueryAdditionalSetting'}
         />
       </EuiFormRow>
       <EuiFormRow>

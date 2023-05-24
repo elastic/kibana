@@ -40,6 +40,7 @@ export const ControlPanelDiffSystems: {
         hideExclude: hideExcludeA,
         selectedOptions: selectedA,
         singleSelect: singleSelectA,
+        wildcardSearch: wildcardSearchA,
         existsSelected: existsSelectedA,
         runPastTimeout: runPastTimeoutA,
         ...inputA
@@ -52,6 +53,7 @@ export const ControlPanelDiffSystems: {
         hideExclude: hideExcludeB,
         selectedOptions: selectedB,
         singleSelect: singleSelectB,
+        wildcardSearch: wildcardSearchB,
         existsSelected: existsSelectedB,
         runPastTimeout: runPastTimeoutB,
         ...inputB
@@ -63,6 +65,7 @@ export const ControlPanelDiffSystems: {
         Boolean(hideExistsA) === Boolean(hideExistsB) &&
         Boolean(hideExcludeA) === Boolean(hideExcludeB) &&
         Boolean(singleSelectA) === Boolean(singleSelectB) &&
+        Boolean(wildcardSearchA) === Boolean(wildcardSearchB) &&
         Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
         Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
         deepEqual(sortA ?? OPTIONS_LIST_DEFAULT_SORT, sortB ?? OPTIONS_LIST_DEFAULT_SORT) &&

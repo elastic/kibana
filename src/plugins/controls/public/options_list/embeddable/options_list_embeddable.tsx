@@ -286,7 +286,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString, allowExpensiveQueries },
-      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort, wildcardSearch },
     } = this.getState();
     this.dispatch.setLoading(true);
     if (searchString.valid) {
@@ -318,6 +318,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           filters,
           dataView,
           timeRange,
+          wildcardSearch,
           runPastTimeout,
           selectedOptions,
           allowExpensiveQueries,
