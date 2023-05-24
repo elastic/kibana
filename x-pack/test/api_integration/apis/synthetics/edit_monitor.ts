@@ -14,6 +14,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('EditMonitor', function () {
@@ -25,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
@@ -352,10 +354,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(toUpdate)
           .expect(500);
 
-        const response = await supertest
-          .get(`${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const response = await monitorTestService.getMonitor(monitorId);
 
         // ensure monitor was not updated
         expect(response.body.attributes.urls).eql(newMonitor.urls);
@@ -410,10 +409,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(toUpdate)
           .expect(200);
 
-        const updatedResponse = await supertest
-          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const updatedResponse = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
 
         // ensure monitor was updated
         expect(updatedResponse.body.attributes.urls).eql(toUpdate.urls);
@@ -430,10 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(toUpdate2)
           .expect(200);
 
-        const updatedResponse2 = await supertest
-          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const updatedResponse2 = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
 
         // ensure monitor was updated
         expect(updatedResponse2.body.attributes.urls).eql(toUpdate2.urls);

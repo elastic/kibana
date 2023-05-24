@@ -9,7 +9,8 @@ import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
 import { KbnClient, uriencode } from '@kbn/test';
 import pMap from 'p-map';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SyntheticsMonitor } from '../../../../common/runtime_types';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
 import { firstDownHit, getUpHit } from './data/sample_docs';
 
@@ -21,6 +22,24 @@ export class SyntheticsServices {
     this.kibanaUrl = params.kibanaUrl;
     this.requester = params.getService('kibanaServer').requester;
     this.params = params;
+  }
+
+  async getMonitor(monitorId: string): Promise<SyntheticsMonitor | null> {
+    try {
+      const { data } = await this.requester.request<{ attributes: SyntheticsMonitor }>({
+        description: 'get monitor by id',
+        path: API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
+        query: {
+          decrypted: true,
+        },
+        method: 'GET',
+      });
+      return data?.attributes;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
+      return null;
+    }
   }
 
   async enableMonitorManagedViaApi() {

@@ -11,6 +11,7 @@ import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
 
+let isDarkMode = false;
 let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
 let mapsEms: MapsEmsPluginPublicStart;
@@ -20,6 +21,10 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
   pluginsStart = plugins;
   mapsEms = plugins.mapsEms;
   emsSettings = mapsEms.createEMSSettings();
+
+  core.theme.theme$.subscribe(({ darkMode }) => {
+    isDarkMode = darkMode;
+  });
 }
 
 let isCloudEnabled = false;
@@ -35,7 +40,7 @@ export const getAutocompleteService = () => pluginsStart.unifiedSearch.autocompl
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
-export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
+export const getIsDarkMode = () => isDarkMode;
 export const getIndexPatternSelectComponent = () =>
   pluginsStart.unifiedSearch.ui.IndexPatternSelect;
 export const getSearchBar = () => pluginsStart.unifiedSearch.ui.SearchBar;

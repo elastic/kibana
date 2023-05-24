@@ -117,7 +117,7 @@ describe('Action List Handler', () => {
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
-        withAutomatedActions: true,
+        withAutomatedActions: false,
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({
