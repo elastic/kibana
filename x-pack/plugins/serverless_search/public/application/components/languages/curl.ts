@@ -11,7 +11,7 @@ import { LanguageDefinition, Languages } from './types';
 
 export const curlDefinition: LanguageDefinition = {
   buildSearchQuery: `TBD`,
-  configureClient: `TBD`,
+  configureClient: () => `TBD`,
   docLink: docLinks.apiIntro,
   iconType: 'cURL.svg',
   id: Languages.CURL,

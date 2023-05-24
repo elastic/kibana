@@ -41,11 +41,11 @@ bytes: 293,
 aborted: false
 }
 */`,
-  configureClient: `const { Client } = require('@elastic/elasticsearch');
+  configureClient: ({ url, apiKey }) => `const { Client } = require('@elastic/elasticsearch');
 const client = Client({
-node: 'https://my-deployment-url',
+node: '${url}',
 auth: {
-    apiKey: 'your_api_key'
+    apiKey: '${apiKey}'
 }
 });`,
   docLink: docLinks.jsClient,
