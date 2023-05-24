@@ -159,7 +159,6 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   return (
     <>
       <UseField
-        data-test-subj="config.apiProvider-select"
         path="config.apiProvider"
         component={SelectField}
         config={{
@@ -173,7 +172,7 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         }}
         componentProps={{
           euiFieldProps: {
-            'data-test-subj': 'emailServiceSelectInput',
+            'data-test-subj': 'config.apiProvider-select',
             options: providerOptions,
             fullWidth: true,
             hasNoInitialSelection: true,

@@ -22,7 +22,7 @@ export const assertURL = (url: string) => {
       throw new Error(`Invalid protocol`);
     }
   } catch (error) {
-    throw new Error(`${error.message}`);
+    throw new Error(`URL Error: ${error.message}`);
   }
 };
 
