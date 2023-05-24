@@ -55,7 +55,7 @@ describe('Custom data path finder', () => {
     process.argv = originalArgv;
   });
 
-  it('overrides absolute path.data when provided as command line argument', () => {
+  it('overrides path.data with absolute path when provided as command line argument', () => {
     process.argv = ['--foo', 'bar', '--path.data', '/some/data/path', '--baz', 'xyz'];
 
     /*
@@ -71,7 +71,7 @@ describe('Custom data path finder', () => {
     `);
   });
 
-  it('overrides relative path.data when provided as command line argument', () => {
+  it('overrides path.data with relative path when provided as command line argument', () => {
     process.argv = ['--foo', 'bar', '--path.data', 'data2', '--baz', 'xyz'];
 
     /*
@@ -98,7 +98,7 @@ describe('Custom data path finder', () => {
     `);
   });
 
-  it('overrides absolute path.data when when provided by kibana.yml', () => {
+  it('overrides path.data with absolute path when when provided by kibana.yml', () => {
     process.env.KBN_PATH_CONF = join(__dirname, '__fixtures__');
 
     expect(buildDataPaths()).toMatchInlineSnapshot(`
