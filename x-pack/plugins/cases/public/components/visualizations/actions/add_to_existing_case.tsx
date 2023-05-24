@@ -13,7 +13,7 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type { CaseUI } from '../../../../common';
 import { CommentType } from '../../../../common';
@@ -134,7 +134,8 @@ export const createAddToExistingCaseLensAction = ({
               </CasesProvider>
             </Router>
           </EuiThemeProvider>
-        </KibanaContextProvider>
+        </KibanaContextProvider>,
+        { theme$: theme.theme$ }
       );
 
       mount(targetDomElement);
