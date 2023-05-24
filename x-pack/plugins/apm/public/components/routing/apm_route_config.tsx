@@ -20,6 +20,7 @@ import { settings } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
+import { diagnostics } from './diagnostics';
 
 const ServiceGroupsTitle = i18n.translate(
   'xpack.apm.views.serviceGroups.title',
@@ -107,6 +108,7 @@ const apmRoutes = {
       ...settings,
       ...serviceDetail,
       ...mobileServiceDetail,
+      ...diagnostics,
       ...home,
     },
   },
