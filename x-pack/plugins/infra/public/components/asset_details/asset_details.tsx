@@ -19,13 +19,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import Metadata from './metadata/metadata';
 import { LinkToUptime } from './links/link_to_uptime';
 import { LinkToApmServices } from './links/link_to_apm_services';
-import { Processes } from './processes/processes';
 import type { HostNodeRow } from './types';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import type { SetNewHostFlyoutOpen } from '../../pages/metrics/hosts/hooks/use_host_flyout_open_url_state';
+import { AssetDetailsTabContent } from './tabsContent/tabs_content';
 
 export enum FlyoutTabIds {
   METADATA = 'metadata',
@@ -82,20 +81,12 @@ export const AssetDetails = ({
   nodeType = NODE_TYPE,
 }: AssetDetailsProps) => {
   const { euiTheme } = useEuiTheme();
-  const [selectedTabId, setSelectedTabId] = useState('metadata');
+  const [selectedTabId, setSelectedTabId] = useState<TabIds>('metadata');
 
   const onTabSelectClick = (tab: Tab) => {
     renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
     setSelectedTabId(tab.id);
   };
-
-  const persistMetadataSearchToUrlState =
-    setHostFlyoutState && hostFlyoutOpen
-      ? {
-          metadataSearchUrlState: hostFlyoutOpen.metadataSearch,
-          setMetadataSearchUrlState: setHostFlyoutState,
-        }
-      : undefined;
 
   const tabEntries = tabs.map((tab) => (
     <EuiTab
@@ -148,28 +139,17 @@ export const AssetDetails = ({
         >
           {tabEntries}
         </EuiTabs>
-        {renderedTabsSet.current.has(FlyoutTabIds.METADATA) && (
-          <div hidden={(hostFlyoutOpen?.selectedTabId ?? selectedTabId) !== FlyoutTabIds.METADATA}>
-            <Metadata
-              currentTimeRange={currentTimeRange}
-              node={node}
-              nodeType={nodeType}
-              showActionsColumn={showActionsColumn}
-              persistMetadataSearchToUrlState={persistMetadataSearchToUrlState}
-            />
-          </div>
-        )}
-        {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
-          <div hidden={(hostFlyoutOpen?.selectedTabId ?? selectedTabId) !== FlyoutTabIds.PROCESSES}>
-            <Processes
-              node={node}
-              nodeType={nodeType}
-              currentTime={currentTimeRange.to}
-              searchFilter={hostFlyoutOpen?.searchFilter}
-              setSearchFilter={setHostFlyoutState}
-            />
-          </div>
-        )}
+        <EuiSpacer size="l" />
+        <AssetDetailsTabContent
+          node={node}
+          nodeType={nodeType}
+          currentTimeRange={currentTimeRange}
+          hostFlyoutOpen={hostFlyoutOpen}
+          showActionsColumn={showActionsColumn}
+          renderedTabsSet={renderedTabsSet}
+          selectedTabId={hostFlyoutOpen?.selectedTabId ?? selectedTabId}
+          setHostFlyoutState={setHostFlyoutState}
+        />
       </>
     );
   }
@@ -196,28 +176,16 @@ export const AssetDetails = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {renderedTabsSet.current.has(FlyoutTabIds.METADATA) && (
-          <div hidden={(hostFlyoutOpen?.selectedTabId ?? selectedTabId) !== FlyoutTabIds.METADATA}>
-            <Metadata
-              currentTimeRange={currentTimeRange}
-              node={node}
-              nodeType={nodeType}
-              showActionsColumn={showActionsColumn}
-              persistMetadataSearchToUrlState={persistMetadataSearchToUrlState}
-            />
-          </div>
-        )}
-        {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
-          <div hidden={(hostFlyoutOpen?.selectedTabId ?? selectedTabId) !== FlyoutTabIds.PROCESSES}>
-            <Processes
-              node={node}
-              nodeType={nodeType}
-              currentTime={currentTimeRange.to}
-              searchFilter={hostFlyoutOpen?.searchFilter}
-              setSearchFilter={setHostFlyoutState}
-            />
-          </div>
-        )}
+        <AssetDetailsTabContent
+          node={node}
+          nodeType={nodeType}
+          currentTimeRange={currentTimeRange}
+          hostFlyoutOpen={hostFlyoutOpen}
+          showActionsColumn={showActionsColumn}
+          renderedTabsSet={renderedTabsSet}
+          selectedTabId={hostFlyoutOpen?.selectedTabId ?? selectedTabId}
+          setHostFlyoutState={setHostFlyoutState}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
