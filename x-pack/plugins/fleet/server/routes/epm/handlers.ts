@@ -76,9 +76,9 @@ import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type { ReauthorizeTransformRequestSchema, SimpleSOAssetAttributes } from '../../types';
-import { ElasticsearchAssetType, KibanaAssetType } from '../../../common/types/models';
-import type { AllowedAssetTypes, KibanaSavedObjectType } from '../../../common/types/models';
+import type { KibanaSavedObjectType, ElasticsearchAssetType } from '../../../common/types/models';
 import { getDataStreams } from '../../services/epm/data_streams';
+import { allowedAssetTypes } from '../../../common/constants';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -309,12 +309,6 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   TypeOf<typeof GetBulkAssetsRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const allowedAssetTypes: AllowedAssetTypes = [
-      KibanaAssetType.dashboard,
-      KibanaAssetType.search,
-      KibanaAssetType.visualization,
-      ElasticsearchAssetType.transform,
-    ];
     const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
 
     const savedObjectsClient = (await context.fleet).internalSoClient;
