@@ -49,11 +49,9 @@ export const useResponseActionsView = ({
     return;
   }
 
-  const expandedEventFieldsObject = {
-    ...expandDottedObject(rawEventData.fields),
-    _id: rawEventData._id,
-    _index: rawEventData._index,
-  } as ExpandedEventFieldsObject;
+  const expandedEventFieldsObject = expandDottedObject(
+    rawEventData.fields
+  ) as ExpandedEventFieldsObject;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;

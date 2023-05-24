@@ -71,7 +71,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the automated endpoint response action in rule + alerts
    */
-  endpointResponseActionsEnabled: true,
+  endpointResponseActionsEnabled: false,
 
   /**
    * Enables endpoint package level rbac
@@ -111,7 +111,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new security flyout over the current alert details flyout
    */
-  securityFlyoutEnabled: true,
+  securityFlyoutEnabled: false,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.

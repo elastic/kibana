@@ -19,8 +19,6 @@ export enum RESPONSE_ACTION_TYPES {
 }
 
 export interface ExpandedEventFieldsObject {
-  _id: string;
-  _index: string;
   agent?: {
     id: string[];
   };
