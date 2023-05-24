@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await supertestAPI
-        .get(`${API_URLS.SYNTHETICS_MONITORS}/${apiResponse.body.id}`)
+        .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', apiResponse.body.id))
         .set('kbn-xsrf', 'true')
         .expect(200);
 

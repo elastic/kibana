@@ -23,7 +23,9 @@ import { changeAlertsFilter } from '../../tasks/alerts';
 
 describe('Automated Response Actions', () => {
   const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
-  const unenrolledHost = 'Host unenrolled';
+  const hostname = Cypress.env('hostname');
+  const fleetHostname = `dev-fleet-server.${hostname}`;
+
   beforeEach(() => {
     login();
   });
@@ -75,37 +77,16 @@ describe('Automated Response Actions', () => {
 
       changeAlertsFilter('event.category: "file"');
       cy.getByTestSubj('expand-event').first().click();
-      cy.getByTestSubj('endpointViewTab').click();
-      cy.getByTestSubj('endpoint-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('endpoint-actions-results-table').within(() => {
-        cy.get('tbody tr').each(($tr, index) => {
-          cy.wrap($tr).within(() => {
-            cy.contains('Triggered by rule');
-            if (index === 0) {
-              cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(
-                endpointHostname
-              );
-              cy.getByTestSubj('endpoint-actions-results-table-column-status', {
-                timeout: 60000,
-              }).should(($status) => {
-                expect($status).to.contain('Successful');
-              });
-              cy.getByTestSubj('endpoint-actions-results-table-expand-button').click();
-              cy.wrap($tr).siblings().contains('isolate completed successfully');
-            }
-            if (index === 1) {
-              cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(
-                unenrolledHost
-              );
-              cy.getByTestSubj('endpoint-actions-results-table-column-status').contains('Failed');
-              cy.getByTestSubj('endpoint-actions-results-table-expand-button').click();
-              cy.wrap($tr)
-                .siblings()
-                .contains('The host does not have Elastic Defend integration installed');
-            }
-          });
-        });
-      });
+      cy.getByTestSubj('responseActionsViewTab').click();
+      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+
+      cy.getByTestSubj(`response-results-${endpointHostname}-details-tray`)
+        .should('contain', 'isolate completed successfully')
+        .and('contain', endpointHostname);
+
+      cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
+        .should('contain', 'The host does not have Elastic Defend integration installed')
+        .and('contain', 'dev-fleet-server');
     });
   });
 });
