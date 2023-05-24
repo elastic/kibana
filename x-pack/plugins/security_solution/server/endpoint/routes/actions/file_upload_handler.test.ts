@@ -38,7 +38,7 @@ describe('Upload response action create API handler', () => {
     httpRequestMock = testSetup.createRequestMock();
 
     fleetFilesClientMock =
-      (await testSetup.endpointAppContextMock.service.getFleetFromHostFilesClient()) as jest.Mocked<FleetToHostFileClientInterface>;
+      (await testSetup.endpointAppContextMock.service.getFleetToHostFilesClient()) as jest.Mocked<FleetToHostFileClientInterface>;
   });
 
   describe('registerActionFileUploadRoute()', () => {
