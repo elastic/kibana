@@ -8,6 +8,8 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Ecs } from '@kbn/cases-plugin/common';
+import type { SearchHit } from '../../../common/search_strategy';
 import { SecurityPageName } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
@@ -31,6 +33,10 @@ export interface LeftPanelContext {
    * Retrieves searchHit values for the provided field
    */
   getFieldsData: (field: string) => unknown | unknown[];
+
+  data: SearchHit | undefined;
+
+  ecs: Ecs | null;
 }
 
 export const LeftFlyoutContext = createContext<LeftPanelContext | undefined>(undefined);
@@ -51,7 +57,7 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, _, searchHit] = useTimelineEventsDetails({
+  const [loading, _, searchHit, ecs] = useTimelineEventsDetails({
     indexName: eventIndex,
     eventId: id ?? '',
     runtimeMappings: sourcererDataView.runtimeMappings,
@@ -61,8 +67,8 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
 
   const contextValue = useMemo(
     () =>
-      id && indexName ? { eventId: id, indexName, getFieldsData, data: searchHit } : undefined,
-    [id, indexName, getFieldsData, searchHit]
+      id && indexName ? { eventId: id, indexName, getFieldsData, data: searchHit, ecs } : undefined,
+    [id, indexName, getFieldsData, searchHit, ecs]
   );
 
   if (loading) {

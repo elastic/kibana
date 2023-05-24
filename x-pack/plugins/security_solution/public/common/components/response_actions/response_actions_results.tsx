@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
+import type { Ecs } from '@kbn/cases-plugin/common';
 import { EndpointResponseActionResults } from './endpoint_action_results';
 import type {
   LogsEndpointAction,
@@ -18,7 +18,7 @@ import { useKibana } from '../../lib/kibana';
 interface ResponseActionsResultsProps {
   actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
   ruleName?: string[];
-  ecsData: Ecs;
+  ecsData?: Ecs | null;
 }
 
 export const ResponseActionsResults = React.memo(

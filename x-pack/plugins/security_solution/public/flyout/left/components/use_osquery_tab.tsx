@@ -5,32 +5,26 @@
  * 2.0.
  */
 
-import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
   RawEventData,
 } from '../../../../common/types/response_actions';
-import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useKibana } from '../../lib/kibana';
-import { EventsViewType } from './event_details';
-import * as i18n from './translations';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import { useKibana } from '../../../common/lib/kibana';
 
-const TabContentWrapper = styled.div`
-  height: 100%;
-  position: relative;
-`;
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 
 export const useOsqueryTab = ({
   rawEventData,
   ecsData,
 }: {
-  rawEventData?: RawEventData;
-  ecsData?: Ecs;
+  rawEventData: SearchHit | undefined;
+  ecsData: Ecs | null;
 }) => {
   const {
     services: { osquery },
@@ -57,11 +51,11 @@ export const useOsqueryTab = ({
   }
 
   const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
+    (rawEventData as RawEventData).fields
   ) as ExpandedEventFieldsObject;
 
   const responseActions =
-    expandedEventFieldsObject.kibana?.alert?.rule?.parameters?.[0].response_actions;
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
   const osqueryResponseActions = responseActions?.filter(
     (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
@@ -75,22 +69,10 @@ export const useOsqueryTab = ({
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
-  return {
-    id: EventsViewType.osqueryView,
-    'data-test-subj': 'osqueryViewTab',
-    name: i18n.OSQUERY_VIEW,
-    append: (
-      <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-        {actionItems.length}
-      </EuiNotificationBadge>
-    ),
-    content: (
-      <>
-        <TabContentWrapper data-test-subj="osqueryViewWrapper">
-          <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
-          <EuiSpacer size="s" />
-        </TabContentWrapper>
-      </>
-    ),
-  };
+  return (
+    <>
+      <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
+      <EuiSpacer size="s" />
+    </>
+  );
 };

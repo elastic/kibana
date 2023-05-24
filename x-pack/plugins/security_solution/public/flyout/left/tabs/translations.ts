@@ -62,3 +62,10 @@ export const CORRELATIONS_BUTTON = i18n.translate(
     defaultMessage: 'Correlations',
   }
 );
+
+export const RESPONSES_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responsesButton',
+  {
+    defaultMessage: 'Responses',
+  }
+);

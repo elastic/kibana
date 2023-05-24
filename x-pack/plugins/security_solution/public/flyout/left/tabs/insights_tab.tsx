@@ -9,12 +9,14 @@ import React, { memo, useState } from 'react';
 
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
+import { RESPONSES_TAB_ID, ResponsesDetails } from '../components/responses_details';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
+  INSIGHTS_TAB_RESPONSES_BUTTON_TEST_ID,
 } from './test_ids';
 
 import {
@@ -23,6 +25,7 @@ import {
   THREAT_INTELLIGENCE_BUTTON,
   PREVALENCE_BUTTON,
   CORRELATIONS_BUTTON,
+  RESPONSES_BUTTON,
 } from './translations';
 import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
 import {
@@ -53,6 +56,11 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
     label: CORRELATIONS_BUTTON,
     'data-test-subj': INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
   },
+  {
+    id: RESPONSES_TAB_ID,
+    label: RESPONSES_BUTTON,
+    'data-test-subj': INSIGHTS_TAB_RESPONSES_BUTTON_TEST_ID,
+  },
 ];
 
 /**
@@ -82,6 +90,7 @@ export const InsightsTab: React.FC = memo(() => {
       {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && <ThreatIntelligenceDetails />}
       {activeInsightsId === PREVALENCE_TAB_ID && <PrevalenceDetails />}
       {activeInsightsId === CORRELATIONS_TAB_ID && <CorrelationsDetails />}
+      {activeInsightsId === RESPONSES_TAB_ID && <ResponsesDetails />}
     </>
   );
 });

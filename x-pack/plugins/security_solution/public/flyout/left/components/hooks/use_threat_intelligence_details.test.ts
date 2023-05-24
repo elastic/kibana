@@ -67,6 +67,11 @@ describe('useThreatIntelligenceDetails', () => {
       indexName: 'test-index',
       eventId: 'test-event-id',
       getFieldsData: () => {},
+      data: {
+        _id: 'testId',
+        _index: 'testIndex',
+      },
+      ecs: null,
     });
   });
 

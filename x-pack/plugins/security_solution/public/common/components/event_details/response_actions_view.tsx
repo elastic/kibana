@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { Ecs } from '@kbn/cases-plugin/common';
+import type {
+  ExpandedEventFieldsObject,
+  RawEventData,
+} from '../../../../common/types/response_actions';
 import { ResponseActionsResults } from '../response_actions/response_actions_results';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
@@ -16,7 +20,6 @@ import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import type { ExpandedEventFieldsObject, RawEventData } from './types';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -32,14 +35,8 @@ export const useResponseActionsView = ({
 }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
-  const expandedEventFieldsObject = rawEventData
-    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
-    : undefined;
+  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled;
 
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-
-  const shouldEarlyReturn = !ecsData || !responseActionsEnabled || !responseActions;
   const alertId = rawEventData?._id ?? '';
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
@@ -48,10 +45,22 @@ export const useResponseActionsView = ({
     },
     { enabled: !shouldEarlyReturn }
   );
+  if (shouldEarlyReturn) {
+    return;
+  }
+
+  const expandedEventFieldsObject = {
+    ...expandDottedObject(rawEventData.fields),
+    _id: rawEventData._id,
+    _index: rawEventData._index,
+  } as ExpandedEventFieldsObject;
+
+  const responseActions =
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
-  const totalItemCount = useMemo(() => automatedList?.items?.length ?? 0, [automatedList]);
+  const totalItemCount = automatedList?.items?.length ?? 0;
 
   if (shouldEarlyReturn || !responseActions?.length) {
     return;
