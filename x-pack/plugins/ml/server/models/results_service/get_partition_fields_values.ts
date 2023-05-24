@@ -231,10 +231,10 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
       },
       aggs: {
         ...ML_PARTITION_FIELDS.reduce((acc, key) => {
-          return {
-            ...acc,
-            ...getFieldAgg(key, isModelPlotSearch, searchTerm[key], fieldsConfig[key]),
-          };
+          return Object.assign(
+            acc,
+            getFieldAgg(key, isModelPlotSearch, searchTerm[key], fieldsConfig[key])
+          );
         }, {}),
       },
     };
@@ -250,9 +250,6 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
     );
 
     return ML_PARTITION_FIELDS.reduce((acc, key) => {
-      return {
-        ...acc,
-        ...getFieldObject(key, body.aggregations!),
-      };
+      return Object.assign(acc, getFieldObject(key, body.aggregations!));
     }, {});
   };

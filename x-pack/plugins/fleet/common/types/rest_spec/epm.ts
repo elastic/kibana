@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   AssetReference,
   CategorySummaryList,
@@ -13,6 +15,7 @@ import type {
   PackageUsageStats,
   InstallType,
   InstallSource,
+  EpmPackageInstallStatus,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -46,6 +49,26 @@ export interface GetPackagesResponse {
   response?: PackageList;
 }
 
+interface InstalledPackage {
+  name: string;
+  version: string;
+  status: EpmPackageInstallStatus;
+  dataStreams: Array<{
+    name: string;
+    title: string;
+  }>;
+}
+export interface GetInstalledPackagesResponse {
+  items: InstalledPackage[];
+  total: number;
+  searchAfter?: SortResults;
+}
+
+export interface GetEpmDataStreamsResponse {
+  items: Array<{
+    name: string;
+  }>;
+}
 export interface GetLimitedPackagesResponse {
   items: string[];
   // deprecated in 8.0

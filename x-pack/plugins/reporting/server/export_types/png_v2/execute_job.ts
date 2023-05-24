@@ -28,13 +28,26 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         mergeMap((headers) => {
-          const url = getFullRedirectAppUrl(reporting, job.spaceId, job.forceNow);
+          const url = getFullRedirectAppUrl(
+            reporting.getConfig(),
+            reporting.getServerInfo(),
+            job.spaceId,
+            job.forceNow
+          );
           const [locatorParams] = job.locatorParams;
 
           apmGetAssets?.end();
           apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
-          return generatePngObservable(reporting, jobLogger, {
+          const screenshotFn = () =>
+            reporting.getScreenshots({
+              headers,
+              browserTimezone: job.browserTimezone,
+              layout: { ...job.layout, id: 'preserve_layout' },
+              urls: [[url, locatorParams]],
+            });
+
+          return generatePngObservable(screenshotFn, jobLogger, {
             headers,
             browserTimezone: job.browserTimezone,
             layout: { ...job.layout, id: 'preserve_layout' },

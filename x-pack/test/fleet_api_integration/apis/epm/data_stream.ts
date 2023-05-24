@@ -106,6 +106,16 @@ export default function (providerContext: FtrProviderContext) {
         await uninstallPackage(pkgName, pkgUpdateVersion);
       });
 
+      describe('Data Streams endpoint', () => {
+        it('Allows the fetching of data streams', async () => {
+          const res = await supertest
+            .get(`/api/fleet/epm/data_streams?uncategorisedOnly=false&datasetQuery=datastreams`)
+            .expect(200);
+          const dataStreams = res.body.items;
+          expect(dataStreams.length).to.be(6);
+        });
+      });
+
       it('should list the logs and metrics datastream', async function () {
         await asyncForEach(namespaces, async (namespace) => {
           const resLogsDatastream = await es.transport.request<any>(
@@ -270,7 +280,7 @@ export default function (providerContext: FtrProviderContext) {
                 ...packagePolicyData.package,
                 experimental_data_stream_features: [
                   {
-                    data_stream: logsTemplateName,
+                    data_stream: metricsTemplateName,
                     features: {
                       synthetic_source: true,
                     },
@@ -287,7 +297,7 @@ export default function (providerContext: FtrProviderContext) {
       const pkgName = 'no_tsdb_to_tsdb';
       const pkgVersion = '0.1.0';
       const pkgUpdateVersion = '0.2.0';
-      const logsTemplateName = `logs-${pkgName}.test`;
+      const metricsTemplateName = `metrics-${pkgName}.test`;
       const namespace = 'default';
 
       skipIfNoDockerRegistry(providerContext);
@@ -300,7 +310,7 @@ export default function (providerContext: FtrProviderContext) {
         await es.transport.request(
           {
             method: 'POST',
-            path: `/${logsTemplateName}-${namespace}/_doc`,
+            path: `/${metricsTemplateName}-${namespace}/_doc`,
             body: {
               '@timestamp': '2015-01-01',
               logs_test_name: 'test',
@@ -319,7 +329,7 @@ export default function (providerContext: FtrProviderContext) {
         await es.transport.request(
           {
             method: 'DELETE',
-            path: `/_data_stream/${logsTemplateName}-${namespace}`,
+            path: `/_data_stream/${metricsTemplateName}-${namespace}`,
           },
           { meta: true }
         );
@@ -330,15 +340,15 @@ export default function (providerContext: FtrProviderContext) {
       it('rolls over data stream when index_mode: time_series is set in the updated package version', async () => {
         await installPackage(pkgName, pkgUpdateVersion);
 
-        const resLogsDatastream = await es.transport.request<any>(
+        const resMetricsDatastream = await es.transport.request<any>(
           {
             method: 'GET',
-            path: `/_data_stream/${logsTemplateName}-${namespace}`,
+            path: `/_data_stream/${metricsTemplateName}-${namespace}`,
           },
           { meta: true }
         );
 
-        expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
+        expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(2);
       });
     });
   });
