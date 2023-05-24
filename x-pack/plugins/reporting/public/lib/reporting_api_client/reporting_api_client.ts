@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { stringify } from 'query-string';
-import rison from '@kbn/rison';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import rison from '@kbn/rison';
+import moment from 'moment';
+import { stringify } from 'query-string';
 import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,
@@ -19,7 +19,7 @@ import {
   getRedirectAppPath,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import {
+import type {
   BaseParams,
   DownloadReportFn,
   JobId,

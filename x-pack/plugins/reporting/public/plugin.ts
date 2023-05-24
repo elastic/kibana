@@ -214,37 +214,47 @@ export class ReportingPublicPlugin
       navLinkStatus: AppNavLinkStatus.hidden,
     });
 
-    uiActions.addTriggerAction(
-      CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
-    );
-
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    startServices$.subscribe(([{ application }, { licensing }]) => {
+    startServices$.subscribe((startServices) => {
+      const [{ application }, { data, licensing }] = startServices;
       licensing.license$.subscribe((license) => {
+        uiActions.addTriggerAction(
+          CONTEXT_MENU_TRIGGER,
+          new ReportingCsvPanelAction({
+            apiClient,
+            application,
+            data,
+            license,
+            theme: core.theme,
+            toasts,
+            uiSettings,
+            usesUiCapabilities,
+          })
+        );
+
         share.register(
           reportingCsvShareProvider({
             apiClient,
+            application,
+            license,
+            theme: core.theme,
             toasts,
             uiSettings,
-            license,
-            application,
             usesUiCapabilities,
-            theme: core.theme,
           })
         );
 
         share.register(
           reportingScreenshotShareProvider({
             apiClient,
+            application,
+            license,
+            theme: core.theme,
             toasts,
             uiSettings,
-            license,
-            application,
             usesUiCapabilities,
-            theme: core.theme,
           })
         );
       });

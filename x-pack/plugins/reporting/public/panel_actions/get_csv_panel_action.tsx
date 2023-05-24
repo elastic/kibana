@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import * as Rx from 'rxjs';
-import type { CoreSetup } from '@kbn/core/public';
-import { CoreStart } from '@kbn/core/public';
+import type {
+  ApplicationStart,
+  IToasts,
+  IUiSettingsClient,
+  ThemeServiceSetup,
+} from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ISearchEmbeddable, SavedSearch } from '@kbn/discover-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { InjectedIntl } from '@kbn/i18n-react';
+import { ILicense } from '@kbn/licensing-plugin/public';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-common';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { CSV_REPORTING_ACTION } from '@kbn/reporting-common';
-import { checkLicense } from '../lib/license_check';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
-import type { ReportingPublicPluginStartDendencies } from '../plugin';
+import { checkLicense, ReportingAPIClient, showReportRequestToasts as showToasts } from '../lib';
+
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
 ): embeddable is ISearchEmbeddable {
@@ -27,29 +32,43 @@ function isSavedSearchEmbeddable(
 
 export interface ActionContext {
   embeddable: ISearchEmbeddable;
+  intl: InjectedIntl;
 }
 
 interface Params {
   apiClient: ReportingAPIClient;
-  core: CoreSetup;
-  startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
+  application: ApplicationStart;
+  data: DataPublicPluginStart;
+  license: ILicense;
+  uiSettings: IUiSettingsClient;
+  theme: ThemeServiceSetup;
+  toasts: IToasts;
   usesUiCapabilities: boolean;
 }
 
 export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
-  private licenseHasGenerateCsv: boolean = false;
-  private capabilityHasGenerateCsv: boolean = false;
   private apiClient: ReportingAPIClient;
-  private startServices$: Params['startServices$'];
+  private application: ApplicationStart;
+  private capabilityHasGenerateCsv: boolean = false;
+  private data: DataPublicPluginStart;
+  private license: ILicense;
+  private licenseHasGenerateCsv: boolean = false;
+  private theme: ThemeServiceSetup;
+  private toasts: IToasts;
+  private uiSettings: IUiSettingsClient;
   private usesUiCapabilities: boolean;
 
-  constructor({ apiClient, startServices$, usesUiCapabilities }: Params) {
-    this.apiClient = apiClient;
-
-    this.startServices$ = startServices$;
-    this.usesUiCapabilities = usesUiCapabilities;
+  constructor(params: Params) {
+    this.apiClient = params.apiClient;
+    this.application = params.application;
+    this.data = params.data;
+    this.license = params.license;
+    this.theme = params.theme;
+    this.toasts = params.toasts;
+    this.uiSettings = params.uiSettings;
+    this.usesUiCapabilities = params.usesUiCapabilities;
   }
 
   public getIconType() {
@@ -63,31 +82,25 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public async getSearchSource(savedSearch: SavedSearch, _embeddable: ISearchEmbeddable) {
-    const [{ uiSettings }, { data }] = await Rx.firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
-    return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
+    return await getSharingData(savedSearch.searchSource, savedSearch, {
+      uiSettings: this.uiSettings,
+      data: this.data,
+    });
   }
 
-  public isCompatible = async (context: ActionContext) => {
-    await new Promise<void>((resolve) => {
-      this.startServices$.subscribe(([{ application }, { licensing }]) => {
-        licensing.license$.subscribe((license) => {
-          const results = license.check('reporting', 'basic');
-          const { showLinks } = checkLicense(results);
-          this.licenseHasGenerateCsv = showLinks;
-        });
+  public async isCompatible(context: ActionContext) {
+    const results = this.license.check('reporting', 'basic');
+    const { showLinks } = checkLicense(results);
+    this.licenseHasGenerateCsv = showLinks;
 
-        if (this.usesUiCapabilities) {
-          // when xpack.reporting.roles.enabled=false, the feature is controlled by UI capabilities.
-          this.capabilityHasGenerateCsv = application.capabilities.dashboard?.downloadCsv === true; // NOTE: "download" can not be renamed
-        } else {
-          // when xpack.reporting.roles.enabled=true, the feature is controlled by the presence of the reporting_user role
-          this.capabilityHasGenerateCsv = true; // deprecated
-        }
-
-        resolve();
-      });
-    });
+    if (this.usesUiCapabilities) {
+      // when xpack.reporting.roles.enabled=false, the feature is controlled by UI capabilities.
+      this.capabilityHasGenerateCsv = this.application.capabilities.dashboard?.downloadCsv === true; // NOTE: "downloadCsv" can not be renamed
+    } else {
+      // when xpack.reporting.roles.enabled=true, the feature is controlled by the presence of the reporting_user role
+      this.capabilityHasGenerateCsv = true; // deprecated
+    }
 
     if (!this.licenseHasGenerateCsv || !this.capabilityHasGenerateCsv) {
       return false;
@@ -108,9 +121,9 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       return false;
     }
     return embeddable.getInput().viewMode !== ViewMode.EDIT;
-  };
+  }
 
-  public execute = async (context: ActionContext) => {
+  public async execute(context: ActionContext) {
     const { embeddable } = context;
 
     if (!isSavedSearchEmbeddable(embeddable) || !(await this.isCompatible(context))) {
@@ -127,8 +140,14 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       objectType: 'search',
     });
 
-    // FIXME: disable generation controls, prevent multi-click
-    // FIXME: show toast notification
-    await this.apiClient.createReportingJob('csv_searchsource', decoratedJobParams);
-  };
+    await this.apiClient.createReportingJob('csv_searchsource', decoratedJobParams).then((job) => {
+      showToasts(job.objectType, {
+        intl: context.intl,
+        apiClient: this.apiClient,
+        toasts: this.toasts,
+        theme: this.theme,
+        // onClose: this.onClose,
+      });
+    });
+  }
 }

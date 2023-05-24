@@ -15,12 +15,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n, type InjectedIntl } from '@kbn/i18n-react';
+import React, { Component, ReactElement } from 'react';
 import url from 'url';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   CSV_REPORT_TYPE,
   PDF_REPORT_TYPE,
@@ -29,7 +28,7 @@ import {
   PNG_REPORT_TYPE_V2,
 } from '../../../common/constants';
 import { BaseParams } from '../../../common/types';
-import { ReportingAPIClient } from '../../lib/reporting_api_client';
+import { ReportingAPIClient, showReportRequestToasts as showToasts } from '../../lib';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
 
@@ -277,7 +276,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.setState({ absoluteUrl });
   };
 
-  private createReportingJob = () => {
+  private async createReportingJob() {
     const { intl } = this.props;
     const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(
       this.props.getJobParams()
@@ -287,57 +286,21 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
     return this.props.apiClient
       .createReportingJob(this.props.reportType, decoratedJobParams)
-      .then(() => {
-        this.props.toasts.addSuccess({
-          title: intl.formatMessage(
-            {
-              id: 'xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle',
-              defaultMessage: 'Queued report for {objectType}',
-            },
-            { objectType: this.state.objectType }
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in {path}."
-              values={{
-                path: (
-                  <a href={this.props.apiClient.getManagementLink()}>
-                    <FormattedMessage
-                      id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                      defaultMessage="Stack Management &gt; Reporting"
-                    />
-                  </a>
-                ),
-              }}
-            />,
-            { theme$: this.props.theme.theme$ }
-          ),
-          'data-test-subj': 'queueReportSuccess',
-        });
-        if (this.props.onClose) {
-          this.props.onClose();
-        }
-        if (this.mounted) {
-          this.setState({ isCreatingReportJob: false });
-        }
-      })
-      .catch((error) => {
-        this.props.toasts.addError(error, {
-          title: intl.formatMessage({
-            id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
-            defaultMessage: 'Unable to create report',
-          }),
-          toastMessage: (
-            // eslint-disable-next-line react/no-danger
-            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-          ) as unknown as string,
-        });
+      .then((job) =>
+        showToasts(job.objectType, {
+          intl,
+          apiClient: this.props.apiClient,
+          toasts: this.props.toasts,
+          theme: this.props.theme,
+          onClose: this.props.onClose,
+        })
+      )
+      .finally(() => {
         if (this.mounted) {
           this.setState({ isCreatingReportJob: false });
         }
       });
-  };
+  }
 }
 
 export const ReportingPanelContent = injectI18n(ReportingPanelContentUi);
