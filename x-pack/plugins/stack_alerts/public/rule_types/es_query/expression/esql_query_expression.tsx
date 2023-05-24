@@ -115,7 +115,7 @@ export const EsqlQueryExpression: React.FC<
       setEsFields(convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())));
       setParam('timeField', dataView.timeFieldName);
     }
-  }, [dataView]);
+  }, [dataView, setParam]);
 
   const onTestQuery = useCallback(async () => {
     const isGroupAgg = isGroupAggregation(termField);
@@ -168,7 +168,6 @@ export const EsqlQueryExpression: React.FC<
     timeWindowSize,
     timeWindowUnit,
     currentRuleParams,
-    esQuery,
     data.search,
     index,
     timeField,

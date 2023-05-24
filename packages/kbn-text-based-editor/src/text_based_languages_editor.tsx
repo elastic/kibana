@@ -297,6 +297,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     };
   }, []);
 
+  useEffect(() => {
+    const queryStr: string = query[language] ?? '';
+    if (code !== queryStr) {
+      setCode(queryStr);
+    }
+  }, [code, language, query]);
+
   const calculateVisibleCode = useCallback(
     (width: number, force?: boolean) => {
       const containerWidth = containerRef.current?.offsetWidth;
