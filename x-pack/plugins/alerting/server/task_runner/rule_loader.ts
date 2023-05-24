@@ -8,7 +8,6 @@
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
-import { rawRuleSchema } from '..';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -21,6 +20,7 @@ import {
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { rawRuleSchema } from '../raw_rule_schema';
 
 export interface LoadRuleParams<Params extends RuleTypeParams> {
   paramValidator?: RuleTypeParamsValidator<Params>;
