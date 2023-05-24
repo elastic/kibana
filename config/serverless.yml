@@ -18,6 +18,7 @@ xpack.license_management.enabled: false
 #xpack.canvas.enabled: false #only disabable in dev-mode
 xpack.reporting.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
+data.search.sessions.enabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 # server.restrictInternalApis: true
