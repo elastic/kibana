@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { TIMELINE_SEARCHBOX, EUI_SELECTABLE_LIST_ITEM } from '../screens/common/controls';
 
 import {
@@ -227,9 +228,17 @@ export const checkOverwriteDataViewCheckbox = () => {
 };
 
 export const selectTimelineTemplate = (timelineTitle: string) => {
-  cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
-  cy.get(TIMELINE_SEARCHBOX).type(`${timelineTitle}{enter}`);
-  cy.get(TIMELINE_SEARCHBOX).should('not.exist');
+  recurse(
+    () => {
+      cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
+      cy.get(TIMELINE_SEARCHBOX).clear();
+      cy.get(TIMELINE_SEARCHBOX).type(`${timelineTitle}{enter}`);
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(500);
+      return cy.get(TIMELINE_SEARCHBOX).should(Cypress._.noop);
+    },
+    ($el) => !$el.length
+  );
 };
 
 /**
