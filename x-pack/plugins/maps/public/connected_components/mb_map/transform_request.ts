@@ -23,7 +23,7 @@ export function transformRequest(url: string, resourceType: string | undefined) 
       url,
       method: 'GET' as 'GET',
       headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
-    }
+    };
   }
 
   if (resourceType === 'Tile' && url.startsWith(GETTILE)) {
@@ -31,7 +31,7 @@ export function transformRequest(url: string, resourceType: string | undefined) 
       url,
       method: 'GET' as 'GET',
       headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
-    }
+    };
   }
 
   if (resourceType === 'Tile' && url.startsWith(GETGRIDTILE)) {
@@ -39,7 +39,7 @@ export function transformRequest(url: string, resourceType: string | undefined) 
       url,
       method: 'GET' as 'GET',
       headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
-    }
+    };
   }
 
   return { url };
