@@ -105,7 +105,7 @@ export class ExecuteReportTask implements ReportingTask {
     const executors = new Map<string, TaskExecutor>();
     for (const exportType of exportTypesRegistry.getAll()) {
       const exportTypeLogger = this.logger.get(exportType.jobType);
-      const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
+      const jobExecutor = exportType.runTask(reporting, exportTypeLogger);
       // The task will run the function with the job type as a param.
       // This allows us to retrieve the specific export type runFn when called to run an export
       executors.set(exportType.jobType, {

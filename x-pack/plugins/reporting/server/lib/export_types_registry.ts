@@ -14,15 +14,16 @@ import { getExportType as getTypePngV2 } from '../export_types/png_v2';
 import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
 
 import { CreateJobFn, ExportTypeDefinition } from '../types';
+import { PdfExportType } from '../export_types/printable_pdf_v2/types';
 
-type GetCallbackFn = (item: ExportTypeDefinition) => boolean;
+type GetCallbackFn = (item: PdfExportType) => boolean;
 
 export class ExportTypesRegistry {
-  private _map: Map<string, ExportTypeDefinition> = new Map();
+  private _map: Map<string, PdfExportType> = new Map();
 
   constructor() {}
 
-  register(item: ExportTypeDefinition): void {
+  register(item: PdfExportType): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
     }
@@ -42,21 +43,21 @@ export class ExportTypesRegistry {
     return this._map.size;
   }
 
-  getById(id: string): ExportTypeDefinition {
+  getById(id: string): PdfExportType {
     if (!this._map.has(id)) {
       throw new Error(`Unknown id ${id}`);
     }
 
-    return this._map.get(id) as ExportTypeDefinition;
+    return this._map.get(id) as PdfExportType;
   }
 
-  get(findType: GetCallbackFn): ExportTypeDefinition {
+  get(findType: GetCallbackFn): PdfExportType {
     let result;
     for (const value of this._map.values()) {
       if (!findType(value)) {
         continue; // try next value
       }
-      const foundResult: ExportTypeDefinition = value;
+      const foundResult: PdfExportType = value;
 
       if (result) {
         throw new Error('Found multiple items matching predicate.');
@@ -94,7 +95,7 @@ export function getExportTypesRegistry(): ExportTypesRegistry {
     getTypePrintablePdf,
   ];
   getTypeFns.forEach((getType) => {
-    registry.register(getType());
+    // registry.register(getType());
   });
   return registry;
 }

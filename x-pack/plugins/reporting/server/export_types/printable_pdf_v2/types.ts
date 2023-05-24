@@ -38,7 +38,7 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
-  PDF_JOB_TYPE_V2 as jobType,
+  PDF_JOB_TYPE_V2,
 } from '../../../common/constants';
 import { JobParamsPDFV2 } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
@@ -46,7 +46,6 @@ import { ReportingConfigType } from '../../config';
 import { decryptJobHeaders, getCustomLogo } from '../common';
 import { ReportingServerInfo } from '../../core';
 import { generatePdfObservable, GetScreenshotsFn } from './lib/generate_pdf';
-import { ExportTypeDefinition, RunTaskFnFactory } from '../../types';
 import { metadata } from './metadata';
 export type {
   JobParamsPDFV2,
@@ -70,6 +69,17 @@ export class PdfExportType {
   private pluginSetupDeps?: PdfExportTypeSetupDeps;
   private pluginStartDeps?: PdfExportTypeStartupDeps;
   private readonly pluginStart$ = new Rx.ReplaySubject<PdfExportTypeStartupDeps>(); // observe async background startDeps
+  id: string = metadata.id;
+  validLicenses = [
+    LICENSE_TYPE_TRIAL,
+    LICENSE_TYPE_CLOUD_STANDARD,
+    LICENSE_TYPE_GOLD,
+    LICENSE_TYPE_PLATINUM,
+    LICENSE_TYPE_ENTERPRISE,
+  ];
+  jobType = PDF_JOB_TYPE_V2;
+  jobContentEncoding = 'base64';
+  jobContentExtension = 'pdf';
 
   constructor(
     private core: CoreSetup,
@@ -195,6 +205,17 @@ export class PdfExportType {
     );
   }
 
+  /**
+   * @param JobParamsPDFV2
+   * @returns jobParams
+   */
+  public createJob(jobParams: JobParamsPDFV2) {
+    return {
+      ...jobParams,
+      forceNow: new Date().toISOString(),
+    };
+  }
+
   async runTask(
     jobId: string,
     job: TaskPayloadPDFV2,
@@ -203,7 +224,6 @@ export class PdfExportType {
   ) {
     // use the dependencies to execute the job and return the content through the stream
     const { encryptionKey } = this.config;
-
     return async () => {
       const jobLogger = this.logger.get(`execute-job:${jobId}`);
       const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
@@ -272,45 +292,6 @@ export class PdfExportType {
 
       apmTrans?.end();
       return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
-    };
-  }
-
-  /**
-   * @TODO Remove this method once all export types have been refactored to classes
-   */
-
-  public createJob(jobParams: JobParamsPDFV2) {
-    return {
-      ...jobParams,
-      forceNow: new Date().toISOString(),
-    };
-  }
-
-  public getExportType(
-    jobId: string,
-    job: TaskPayloadPDFV2,
-    cancellationToken: CancellationToken,
-    stream: Writable
-  ): ExportTypeDefinition {
-    return {
-      ...metadata,
-      jobType,
-      jobContentEncoding: 'base64',
-      jobContentExtension: 'pdf',
-      createJobFnFactory: () => async () => this.createJob(job),
-      runTaskFnFactory: this.runTask(
-        jobId,
-        job,
-        cancellationToken,
-        stream
-      ) as unknown as RunTaskFnFactory<any>,
-      validLicenses: [
-        LICENSE_TYPE_TRIAL,
-        LICENSE_TYPE_CLOUD_STANDARD,
-        LICENSE_TYPE_GOLD,
-        LICENSE_TYPE_PLATINUM,
-        LICENSE_TYPE_ENTERPRISE,
-      ],
     };
   }
 }
