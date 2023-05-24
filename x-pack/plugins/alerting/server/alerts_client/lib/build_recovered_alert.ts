@@ -21,6 +21,7 @@ interface BuildRecoveredAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  recoveryActionGroup: string;
   timestamp: string;
 }
 
@@ -42,6 +43,7 @@ export const buildRecoveredAlert = <
   legacyAlert,
   rule,
   timestamp,
+  recoveryActionGroup,
 }: BuildRecoveredAlertOpts<
   AlertData,
   LegacyState,
@@ -61,6 +63,8 @@ export const buildRecoveredAlert = <
       ...alert.kibana,
       alert: {
         ...alert.kibana.alert,
+        // Set the recovery action group
+        action_group: recoveryActionGroup,
         // Set latest flapping state
         flapping: legacyAlert.getFlapping(),
         // Set latest rule configuration

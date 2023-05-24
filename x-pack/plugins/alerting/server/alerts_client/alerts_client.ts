@@ -242,6 +242,7 @@ export class AlertsClient<
             legacyAlert: recoveredAlerts[id],
             rule: this.rule,
             timestamp: currentTime,
+            recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
           })
         );
       } else {

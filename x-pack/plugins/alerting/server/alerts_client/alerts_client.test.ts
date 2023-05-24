@@ -347,6 +347,7 @@ describe('Alerts Client', () => {
                 instance: {
                   id: '1',
                 },
+                maintenance_window_ids: [],
                 rule: {
                   category: 'My test rule',
                   consumer: 'bar',
@@ -385,6 +386,7 @@ describe('Alerts Client', () => {
                 instance: {
                   id: '2',
                 },
+                maintenance_window_ids: [],
                 rule: {
                   category: 'My test rule',
                   consumer: 'bar',
@@ -537,6 +539,7 @@ describe('Alerts Client', () => {
                 instance: {
                   id: '1',
                 },
+                maintenance_window_ids: [],
                 rule: {
                   category: 'My test rule',
                   consumer: 'bar',
@@ -575,6 +578,7 @@ describe('Alerts Client', () => {
                 instance: {
                   id: '2',
                 },
+                maintenance_window_ids: [],
                 rule: {
                   category: 'My test rule',
                   consumer: 'bar',
@@ -777,6 +781,7 @@ describe('Alerts Client', () => {
                 instance: {
                   id: '2',
                 },
+                maintenance_window_ids: [],
                 rule: {
                   category: 'My test rule',
                   consumer: 'bar',
@@ -815,6 +820,7 @@ describe('Alerts Client', () => {
                 instance: {
                   id: '3',
                 },
+                maintenance_window_ids: [],
                 rule: {
                   category: 'My test rule',
                   consumer: 'bar',
@@ -850,7 +856,7 @@ describe('Alerts Client', () => {
             '@timestamp': date,
             kibana: {
               alert: {
-                action_group: 'default',
+                action_group: 'recovered',
                 duration: {
                   us: '36000000000000',
                 },
@@ -860,6 +866,7 @@ describe('Alerts Client', () => {
                 instance: {
                   id: '1',
                 },
+                maintenance_window_ids: [],
                 rule: {
                   category: 'My test rule',
                   consumer: 'bar',

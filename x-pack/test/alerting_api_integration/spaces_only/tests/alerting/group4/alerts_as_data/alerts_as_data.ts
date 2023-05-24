@@ -79,7 +79,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       let executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
       expect(executionUuid).not.to.be(undefined);
 
-      // Query for alerts by execution UUID
+      // Query for alerts
       const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
 
       // After the first run, we should have 3 alert docs for the 3 active alerts
@@ -137,7 +137,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
       expect(executionUuid).not.to.be(undefined);
 
-      // Query for alerts by execution UUID
+      // Query for alerts
       const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
 
       // After the second run, we should have 3 alert docs
@@ -161,7 +161,6 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const alertADocRun2 = alertDoc!._source!;
       // uuid is the same
       expect(alertADocRun2.kibana.alert.uuid).to.equal(alertADocRun1.kibana.alert.uuid);
-      // patternIndex should be 1 for the second run
       expect(alertADocRun2.kibana.alert.action_group).to.equal('default');
       // start time should be defined and the same as prior run
       expect(alertADocRun2.kibana.alert.start).to.match(timestampPattern);
@@ -182,8 +181,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // status is updated to recovered, duration is updated, end time is set
       alertDoc = alertDocsRun2.find((doc) => doc._source!.kibana.alert.instance.id === 'alertB');
       const alertBDocRun2 = alertDoc!._source!;
-      // recovered alerts don't change the action group
-      expect(alertBDocRun2.kibana.alert.action_group).to.be('default');
+      // action group should be set to recovered
+      expect(alertBDocRun2.kibana.alert.action_group).to.be('recovered');
       // uuid is the same
       expect(alertBDocRun2.kibana.alert.uuid).to.equal(alertBDocRun1.kibana.alert.uuid);
       // start time should be defined and the same as before
@@ -207,8 +206,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       // status is updated to recovered, duration is updated, end time is set
       alertDoc = alertDocsRun2.find((doc) => doc._source!.kibana.alert.instance.id === 'alertC');
       const alertCDocRun2 = alertDoc!._source!;
-      // recovered alerts don't change the action group
-      expect(alertCDocRun2.kibana.alert.action_group).to.be('default');
+      // action group should be set to recovered
+      expect(alertCDocRun2.kibana.alert.action_group).to.be('recovered');
       // uuid is the same
       expect(alertCDocRun2.kibana.alert.uuid).to.equal(alertCDocRun1.kibana.alert.uuid);
       // start time should be defined and the same as before
@@ -242,7 +241,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
       expect(executionUuid).not.to.be(undefined);
 
-      // Query for alerts by execution UUID
+      // Query for alerts
       const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
 
       // After the third run, we should have 4 alert docs

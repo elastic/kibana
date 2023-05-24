@@ -90,13 +90,14 @@ describe('buildRecoveredAlert', () => {
         alert: existingActiveAlert,
         legacyAlert,
         rule: alertRule,
+        recoveryActionGroup: 'recovered',
         timestamp: '2023-03-29T12:27:28.159Z',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
       kibana: {
         alert: {
-          action_group: 'default',
+          action_group: 'recovered',
           duration: {
             us: '36000000',
           },
@@ -127,6 +128,7 @@ describe('buildRecoveredAlert', () => {
       buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
         alert: existingActiveAlert,
         legacyAlert,
+        recoveryActionGroup: 'NoLongerActive',
         rule: {
           kibana: {
             alert: {
@@ -147,7 +149,7 @@ describe('buildRecoveredAlert', () => {
       '@timestamp': '2023-03-29T12:27:28.159Z',
       kibana: {
         alert: {
-          action_group: 'default',
+          action_group: 'NoLongerActive',
           duration: {
             us: '36000000',
           },
@@ -184,13 +186,14 @@ describe('buildRecoveredAlert', () => {
         alert: existingRecoveredAlert,
         legacyAlert,
         rule: alertRule,
+        recoveryActionGroup: 'recovered',
         timestamp: '2023-03-29T12:27:28.159Z',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
       kibana: {
         alert: {
-          action_group: 'default',
+          action_group: 'recovered',
           duration: {
             us: '0',
           },
