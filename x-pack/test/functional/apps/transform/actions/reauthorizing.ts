@@ -14,7 +14,7 @@ import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/ap
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
 import { USER } from '../../../services/transform/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../services/ml/common_api';
+import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
 interface TestDataPivot {
   suiteTitle: string;
@@ -48,7 +48,7 @@ type TestData = TestDataPivot | TestDataLatest;
 
 function generateHeaders(apiKey: SecurityCreateApiKeyResponse) {
   return {
-    ...COMMON_REQUEST_HEADERS,
+    ...getCommonRequestHeader(),
     'es-secondary-authorization': `ApiKey ${apiKey.encoded}`,
   };
 }

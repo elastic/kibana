@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -34,9 +34,9 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/saved_objects/remove_item_from_current_space`)
+      .post(`/s/${space}/internal/ml/saved_objects/remove_item_from_current_space`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
