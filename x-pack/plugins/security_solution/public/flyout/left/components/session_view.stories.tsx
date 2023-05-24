@@ -8,8 +8,7 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { SessionView } from './session_view';
-import type { LeftPanelContext } from '../context';
-import { LeftFlyoutContext } from '../context';
+import { LeftPanelContext } from '../context';
 
 export default {
   component: SessionView,
@@ -25,9 +24,9 @@ export default {
 //   } as unknown as LeftPanelContext;
 //
 //   return (
-//     <LeftFlyoutContext.Provider value={contextValue}>
+//     <LeftPanelContext.Provider value={contextValue}>
 //       <SessionView />
-//     </LeftFlyoutContext.Provider>
+//     </LeftPanelContext.Provider>
 //   );
 // };
 
@@ -37,8 +36,8 @@ export const Error: Story<void> = () => {
   } as unknown as LeftPanelContext;
 
   return (
-    <LeftFlyoutContext.Provider value={contextValue}>
+    <LeftPanelContext.Provider value={contextValue}>
       <SessionView />
-    </LeftFlyoutContext.Provider>
+    </LeftPanelContext.Provider>
   );
 };

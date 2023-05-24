@@ -14,8 +14,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { sourcererReducer } from '../../../common/store/sourcerer';
 import { inputsReducer } from '../../../common/store/inputs';
-import type { LeftPanelContext } from '../context';
-import { LeftFlyoutContext } from '../context';
+import { LeftPanelContext } from '../context';
 import { AnalyzeGraph } from './analyze_graph';
 
 export default {
@@ -32,9 +31,9 @@ export default {
 //   } as unknown as LeftPanelContext;
 //
 //   return (
-//     <LeftFlyoutContext.Provider value={contextValue}>
+//     <LeftPanelContext.Provider value={contextValue}>
 //       <AnalyzeGraph />
-//     </LeftFlyoutContext.Provider>
+//     </LeftPanelContext.Provider>
 //   );
 // };
 
@@ -66,9 +65,9 @@ export const Error: Story<void> = () => {
     <MemoryRouter>
       <ReduxStoreProvider store={store}>
         <KibanaReactContext.Provider>
-          <LeftFlyoutContext.Provider value={contextValue}>
+          <LeftPanelContext.Provider value={contextValue}>
             <AnalyzeGraph />
-          </LeftFlyoutContext.Provider>
+          </LeftPanelContext.Provider>
         </KibanaReactContext.Provider>
       </ReduxStoreProvider>
     </MemoryRouter>

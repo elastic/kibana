@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { createContext, useContext, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import type { SearchHit } from '../../../common/search_strategy';
@@ -31,20 +31,28 @@ export interface LeftPanelContext {
    */
   indexName: string;
   /**
-   * Retrieves searchHit values for the provided field
+   * Maintain backwards compatibility // TODO remove when possible
    */
-  getFieldsData: (field: string) => unknown | unknown[];
+  scopeId: string;
+  /**
+   * An object containing fields by type
+   */
+  browserFields: BrowserFields | null;
   /**
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
+   * Retrieves searchHit values for the provided field
+   */
+  getFieldsData: (field: string) => unknown | unknown[];
 
   data: SearchHit | undefined;
 
   dataAsNestedObject: Ecs | null;
 }
 
-export const LeftFlyoutContext = createContext<LeftPanelContext | undefined>(undefined);
+export const LeftPanelContext = createContext<LeftPanelContext | undefined>(undefined);
 
 export type LeftPanelProviderProps = {
   /**
@@ -53,7 +61,7 @@ export type LeftPanelProviderProps = {
   children: React.ReactNode;
 } & Partial<LeftPanelProps['params']>;
 
-export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProviderProps) => {
+export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPanelProviderProps) => {
   const currentSpaceId = useSpaceId();
   const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
   const [{ pageName }] = useRouteSpy();
@@ -73,17 +81,28 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
 
   const contextValue = useMemo(
     () =>
-      id && indexName
+      id && indexName && scopeId
         ? {
             eventId: id,
             indexName,
+            scopeId,
             getFieldsData,
-            data: searchHit,
+            browserFields: sourcererDataView.browserFields,
             dataFormattedForFieldBrowser,
             dataAsNestedObject,
+            data: searchHit,
           }
         : undefined,
-    [id, indexName, getFieldsData, searchHit, dataFormattedForFieldBrowser, dataAsNestedObject]
+    [
+      id,
+      indexName,
+      scopeId,
+      sourcererDataView.browserFields,
+      dataFormattedForFieldBrowser,
+      getFieldsData,
+      dataAsNestedObject,
+      searchHit,
+    ]
   );
 
   if (loading) {
@@ -99,11 +118,11 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
     );
   }
 
-  return <LeftFlyoutContext.Provider value={contextValue}>{children}</LeftFlyoutContext.Provider>;
+  return <LeftPanelContext.Provider value={contextValue}>{children}</LeftPanelContext.Provider>;
 };
 
 export const useLeftPanelContext = () => {
-  const contextValue = useContext(LeftFlyoutContext);
+  const contextValue = useContext(LeftPanelContext);
 
   if (!contextValue) {
     throw new Error('LeftPanelContext can only be used within LeftPanelContext provider');

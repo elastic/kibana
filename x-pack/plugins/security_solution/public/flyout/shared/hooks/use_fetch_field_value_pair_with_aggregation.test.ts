@@ -10,10 +10,10 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
-  UseFetchUniqueHostWithFieldPairParams,
-  UseFetchUniqueHostWithFieldPairResult,
-} from './use_fetch_unique_hosts_with_field_value_pair';
-import { useFetchUniqueHostsWithFieldPair } from './use_fetch_unique_hosts_with_field_value_pair';
+  UseFetchFieldValuePairWithAggregationParams,
+  UseFetchFieldValuePairWithAggregationResult,
+} from './use_fetch_field_value_pair_with_aggregation';
+import { useFetchFieldValuePairWithAggregation } from './use_fetch_field_value_pair_with_aggregation';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 
@@ -22,16 +22,16 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/hooks/use_selector');
 jest.mock('../../../common/containers/use_global_time');
 
-const field = 'field';
+const field = 'host.name';
 const values = ['values'];
 const isActiveTimelines = true;
+const aggregationField = 'aggregationField';
 
-describe('useFetchUniqueHostsWithFieldPair', () => {
+describe('useFetchFieldValuePairWithAggregation', () => {
   let hookResult: RenderHookResult<
-    UseFetchUniqueHostWithFieldPairParams,
-    UseFetchUniqueHostWithFieldPairResult
+    UseFetchFieldValuePairWithAggregationParams,
+    UseFetchFieldValuePairWithAggregationResult
   >;
-
   (useKibana as jest.Mock).mockReturnValue({
     services: {
       data: { search: jest.fn() },
@@ -40,7 +40,7 @@ describe('useFetchUniqueHostsWithFieldPair', () => {
   (useDeepEqualSelector as jest.Mock).mockReturnValue({ to: '', from: '' });
   (useGlobalTime as jest.Mock).mockReturnValue({ to: '', from: '' });
 
-  it('should return loading true while data is being fetched', async () => {
+  it('should return loading true while data is being fetched', () => {
     (useQuery as jest.Mock).mockReturnValue({
       isLoading: true,
       isError: false,
@@ -48,7 +48,7 @@ describe('useFetchUniqueHostsWithFieldPair', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchUniqueHostsWithFieldPair({ field, values, isActiveTimelines })
+      useFetchFieldValuePairWithAggregation({ field, values, isActiveTimelines, aggregationField })
     );
 
     expect(hookResult.result.current.loading).toBeTruthy();
@@ -56,7 +56,7 @@ describe('useFetchUniqueHostsWithFieldPair', () => {
     expect(hookResult.result.current.count).toBe(0);
   });
 
-  it('should return error true when data fetching has errored out', async () => {
+  it('should return error true when data fetching has errored out', () => {
     (useQuery as jest.Mock).mockReturnValue({
       isLoading: false,
       isError: true,
@@ -64,7 +64,7 @@ describe('useFetchUniqueHostsWithFieldPair', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchUniqueHostsWithFieldPair({ field, values, isActiveTimelines })
+      useFetchFieldValuePairWithAggregation({ field, values, isActiveTimelines, aggregationField })
     );
 
     expect(hookResult.result.current.loading).toBeFalsy();
@@ -72,7 +72,7 @@ describe('useFetchUniqueHostsWithFieldPair', () => {
     expect(hookResult.result.current.count).toBe(0);
   });
 
-  it('should return count on success', async () => {
+  it('should return count on success', () => {
     (useQuery as jest.Mock).mockReturnValue({
       isLoading: false,
       isError: false,
@@ -80,7 +80,7 @@ describe('useFetchUniqueHostsWithFieldPair', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchUniqueHostsWithFieldPair({ field, values, isActiveTimelines })
+      useFetchFieldValuePairWithAggregation({ field, values, isActiveTimelines, aggregationField })
     );
 
     expect(hookResult.result.current.loading).toBeFalsy();

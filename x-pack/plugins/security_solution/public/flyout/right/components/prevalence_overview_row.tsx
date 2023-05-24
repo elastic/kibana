@@ -8,11 +8,12 @@
 import type { VFC } from 'react';
 import React from 'react';
 import { PREVALENCE_ROW_UNCOMMON } from './translations';
-import { useFetchUniqueHostsWithFieldPair } from '../hooks/use_fetch_unique_hosts_with_field_value_pair';
-import { useFetchUniqueHosts } from '../hooks/use_fetch_unique_hosts';
+import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fetch_field_value_pair_with_aggregation';
+import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { TimelineId } from '../../../../common/types';
 
+const HOST_FIELD = 'host.name';
 const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is below 10%
 
 export interface PrevalenceOverviewRowProps {
@@ -56,17 +57,18 @@ export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
     loading: hostsLoading,
     error: hostsError,
     count: hostsCount,
-  } = useFetchUniqueHostsWithFieldPair({
+  } = useFetchFieldValuePairWithAggregation({
     field,
     values,
     isActiveTimelines,
+    aggregationField: HOST_FIELD,
   });
 
   const {
     loading: uniqueHostsLoading,
     error: uniqueHostsError,
     count: uniqueHostsCount,
-  } = useFetchUniqueHosts();
+  } = useFetchUniqueByField({ field: HOST_FIELD });
 
   // prevalence is number of host(s) where the field/value pair was found divided by the total number of hosts in the environment
   const prevalence = hostsCount / uniqueHostsCount;

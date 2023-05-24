@@ -8,16 +8,20 @@
 import { useQuery } from '@tanstack/react-query';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import type { UseUniqueValuesValue } from './use_fetch_unique_hosts';
-import { useFetchUniqueHosts } from './use_fetch_unique_hosts';
 import { useKibana } from '../../../common/lib/kibana';
+import type {
+  UseFetchUniqueByFieldParams,
+  UseFetchUniqueByFieldValue,
+} from './use_fetch_unique_by_field';
+import { useFetchUniqueByField } from './use_fetch_unique_by_field';
 
 jest.mock('@tanstack/react-query');
 jest.mock('../../../common/lib/kibana');
 
-describe('useFetchUniqueHosts', () => {
-  let hookResult: RenderHookResult<unknown, UseUniqueValuesValue>;
+const field = 'host.name';
 
+describe('useFetchUniqueByField', () => {
+  let hookResult: RenderHookResult<UseFetchUniqueByFieldParams, UseFetchUniqueByFieldValue>;
   (useKibana as jest.Mock).mockReturnValue({
     services: {
       data: { search: jest.fn() },
@@ -31,7 +35,7 @@ describe('useFetchUniqueHosts', () => {
       data: 0,
     });
 
-    hookResult = renderHook(() => useFetchUniqueHosts());
+    hookResult = renderHook(() => useFetchUniqueByField({ field }));
 
     expect(hookResult.result.current.loading).toBeTruthy();
     expect(hookResult.result.current.error).toBeFalsy();
@@ -45,7 +49,7 @@ describe('useFetchUniqueHosts', () => {
       data: 0,
     });
 
-    hookResult = renderHook(() => useFetchUniqueHosts());
+    hookResult = renderHook(() => useFetchUniqueByField({ field }));
 
     expect(hookResult.result.current.loading).toBeFalsy();
     expect(hookResult.result.current.error).toBeTruthy();
@@ -59,7 +63,7 @@ describe('useFetchUniqueHosts', () => {
       data: 1,
     });
 
-    hookResult = renderHook(() => useFetchUniqueHosts());
+    hookResult = renderHook(() => useFetchUniqueByField({ field }));
 
     expect(hookResult.result.current.loading).toBeFalsy();
     expect(hookResult.result.current.error).toBeFalsy();

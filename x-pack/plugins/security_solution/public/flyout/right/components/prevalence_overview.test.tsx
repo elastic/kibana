@@ -15,11 +15,11 @@ import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import { usePrevalence } from '../hooks/use_prevalence';
 import { PrevalenceOverviewRow } from './prevalence_overview_row';
-import { useFetchUniqueHostsWithFieldPair } from '../hooks/use_fetch_unique_hosts_with_field_value_pair';
-import { useFetchUniqueHosts } from '../hooks/use_fetch_unique_hosts';
+import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fetch_field_value_pair_with_aggregation';
+import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
 
-jest.mock('../hooks/use_fetch_unique_hosts_with_field_value_pair');
-jest.mock('../hooks/use_fetch_unique_hosts');
+jest.mock('../../shared/hooks/use_fetch_field_value_pair_with_aggregation');
+jest.mock('../../shared/hooks/use_fetch_unique_by_field');
 jest.mock('../hooks/use_prevalence');
 
 const field = 'field';
@@ -44,12 +44,12 @@ const renderPrevalenceOverview = (contextValue: RightPanelContext) => (
 
 describe('<PrevalenceOverview />', () => {
   it('should render PrevalenceOverviewRows', () => {
-    (useFetchUniqueHostsWithFieldPair as jest.Mock).mockReturnValue({
+    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 1,
     });
-    (useFetchUniqueHosts as jest.Mock).mockReturnValue({
+    (useFetchUniqueByField as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 10,
@@ -90,12 +90,12 @@ describe('<PrevalenceOverview />', () => {
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
-    (useFetchUniqueHostsWithFieldPair as jest.Mock).mockReturnValue({
+    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 1,
     });
-    (useFetchUniqueHosts as jest.Mock).mockReturnValue({
+    (useFetchUniqueByField as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 10,
