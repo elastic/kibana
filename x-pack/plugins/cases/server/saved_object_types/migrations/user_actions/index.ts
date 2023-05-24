@@ -11,15 +11,9 @@ import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationMap,
-  SavedObjectMigrationFn,
 } from '@kbn/core/server';
-import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 
-import type { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import { mapValues } from 'lodash';
-import type { PersistableStateAttachmentState } from '../../../attachment_framework/types';
-import type { CaseUserActionAttributesWithoutConnectorId } from '../../../../common/api';
-import { ActionTypes, CommentType, ConnectorTypes } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { SanitizedCaseOwner } from '..';
 import { addOwnerToSO } from '..';
@@ -28,7 +22,6 @@ import { userActionsConnectorIdMigration } from './connector_id';
 import { payloadMigration } from './payload';
 import { addSeverityToCreateUserAction } from './severity';
 import type { UserActions } from './types';
-import { getAllPersistableAttachmentMigrations } from '../get_all_persistable_attachment_migrations';
 import { addAssigneesToCreateUserAction } from './assignees';
 
 export interface UserActionsMigrationsDeps {
@@ -91,6 +84,5 @@ export const createUserActionsMigrations = (
     '8.5.0': addAssigneesToCreateUserAction,
   };
 
-  return  userActionsMigrations;
+  return userActionsMigrations;
 };
-

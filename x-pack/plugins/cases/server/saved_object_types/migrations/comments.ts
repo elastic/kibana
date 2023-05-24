@@ -29,9 +29,6 @@ import { addOwnerToSO } from '.';
 import { logError } from './utils';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { getAllPersistableAttachmentMigrations } from './get_all_persistable_attachment_migrations';
-import type { PersistableStateAttachmentState } from '../../attachment_framework/types';
-import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface UnsanitizedComment {
   comment: string;
@@ -119,9 +116,7 @@ export const createCommentsMigrations = (
     '8.1.0': removeAssociationType,
   };
 
-  return (
-    mergeSavedObjectMigrationMaps(commentsMigrations, embeddableMigrations)
-  );
+  return mergeSavedObjectMigrationMaps(commentsMigrations, embeddableMigrations);
 };
 
 export const migrateByValueLensVisualizations =
