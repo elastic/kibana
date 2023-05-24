@@ -327,8 +327,9 @@ Specifies the name of the connector that is used to send email notifications.
 In {ecloud}, the default value is `elastic-cloud-email`.
 
 [[path-data]] `path.data`::
-The path where {kib} stores persistent data
-not saved in {es}. *Default: `data`*
+The path where {kib} stores persistent data not saved in {es}.
+Can be a relative or absolute path.
+Relative paths are resolved starting from the installation directory. *Default: `data`*
 
 `pid.file`::
 Specifies the path where {kib} creates the process ID file.
