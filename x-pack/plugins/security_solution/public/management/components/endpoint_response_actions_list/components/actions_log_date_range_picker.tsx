@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -69,6 +69,20 @@ export const ActionLogDateRangePicker = memo(
       );
     });
 
+    const endDate = useMemo(
+      () =>
+        isFlyout ? dateRangePickerState.endDate : endDateFromUrl ?? dateRangePickerState.endDate,
+      [dateRangePickerState.endDate, endDateFromUrl, isFlyout]
+    );
+
+    const startDate = useMemo(
+      () =>
+        isFlyout
+          ? dateRangePickerState.startDate
+          : startDateFromUrl ?? dateRangePickerState.startDate,
+      [dateRangePickerState.startDate, isFlyout, startDateFromUrl]
+    );
+
     return (
       <DatePickerWrapper data-test-subj={getTestId('super-date-picker')}>
         <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="s">
@@ -77,22 +91,14 @@ export const ActionLogDateRangePicker = memo(
               isLoading={isDataLoading}
               dateFormat={uiSettings.get('dateFormat')}
               commonlyUsedRanges={commonlyUsedRanges}
-              end={
-                isFlyout
-                  ? dateRangePickerState.endDate
-                  : endDateFromUrl ?? dateRangePickerState.endDate
-              }
+              end={endDate}
               isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
               onTimeChange={onTimeChange}
               onRefreshChange={onRefreshChange}
               refreshInterval={dateRangePickerState.autoRefreshOptions.duration}
               onRefresh={onRefresh}
               recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
-              start={
-                isFlyout
-                  ? dateRangePickerState.startDate
-                  : startDateFromUrl ?? dateRangePickerState.startDate
-              }
+              start={startDate}
               showUpdateButton={false}
               updateButtonProps={{ iconOnly: true, fill: false }}
               width="auto"
