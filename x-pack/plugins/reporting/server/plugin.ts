@@ -21,7 +21,6 @@ import { ReportingStore, getExportTypesRegistry } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
-  ExportTypeDefinition,
   ReportingRequestHandlerContext,
   ReportingSetup,
   ReportingSetupDeps,
@@ -56,7 +55,7 @@ export class ReportingPlugin
       this.logger,
       this.initContext
     );
-    this.exportTypeRegistry.register(this.pdfExport as unknown as ExportTypeDefinition);
+    this.exportTypeRegistry.register(this.pdfExport.getExportType());
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
     http.registerRouteHandlerContext(PLUGIN_ID, () => {
