@@ -126,14 +126,22 @@ export const PersistableStateAttachmentRt = rt.type({
 });
 
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
-const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
+export const AttributesTypeAlertsRt = rt.intersection([
+  AlertCommentRequestRt,
+  CommentAttributesBasicRt,
+]);
 const AttributesTypeActionsRt = rt.intersection([
   ActionsCommentRequestRt,
   CommentAttributesBasicRt,
 ]);
 
-const AttributesTypeExternalReferenceRt = rt.intersection([
+export const AttributesTypeExternalReferenceRt = rt.intersection([
   ExternalReferenceRt,
+  CommentAttributesBasicRt,
+]);
+
+const AttributesTypeExternalReferenceWithoutRefsRt = rt.intersection([
+  ExternalReferenceWithoutRefsRt,
   CommentAttributesBasicRt,
 ]);
 
@@ -152,7 +160,7 @@ const AttributesTypePersistableStateRt = rt.intersection([
   CommentAttributesBasicRt,
 ]);
 
-const CommentAttributesRt = rt.union([
+export const CommentAttributesRt = rt.union([
   AttributesTypeUserRt,
   AttributesTypeAlertsRt,
   AttributesTypeActionsRt,
@@ -172,7 +180,7 @@ const CommentAttributesWithoutRefsRt = rt.union([
   AttributesTypeUserRt,
   AttributesTypeAlertsRt,
   AttributesTypeActionsRt,
-  ExternalReferenceWithoutRefsRt,
+  AttributesTypeExternalReferenceWithoutRefsRt,
   AttributesTypePersistableStateRt,
 ]);
 
@@ -324,6 +332,7 @@ export type AttributesTypeExternalReferenceSO = rt.TypeOf<
 export type AttributesTypeExternalReferenceNoSO = rt.TypeOf<
   typeof AttributesTypeExternalReferenceNoSORt
 >;
+export type ExternalReferenceWithoutRefs = rt.TypeOf<typeof ExternalReferenceWithoutRefsRt>;
 export type AttributesTypePersistableState = rt.TypeOf<typeof AttributesTypePersistableStateRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentAttributesNoSO = rt.TypeOf<typeof CommentAttributesNoSORt>;
