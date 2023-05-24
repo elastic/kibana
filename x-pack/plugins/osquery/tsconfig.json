@@ -57,7 +57,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/telemetry-plugin",
     "@kbn/actions-plugin",
-    "@kbn/usage-collection-plugin",
     "@kbn/features-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/data-views-plugin",
@@ -72,6 +71,7 @@
     "@kbn/shared-ux-router",
     "@kbn/securitysolution-ecs",
     "@kbn/licensing-plugin",
+    "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-server"
   ]
 }

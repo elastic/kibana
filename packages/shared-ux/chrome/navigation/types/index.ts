@@ -8,6 +8,8 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+
+import type { ChromeNavLink, ChromeProjectNavigation } from '@kbn/core-chrome-browser';
 import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 
 /**
@@ -19,8 +21,10 @@ export interface NavigationServices {
   basePath: BasePathService;
   loadingCount$: Observable<number>;
   recentlyAccessed$: Observable<RecentItem[]>;
+  navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
+  onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
 }
 
 /**
@@ -33,11 +37,17 @@ export interface NavigationKibanaDependencies {
     application: { navigateToUrl: NavigateToUrlFn };
     chrome: {
       recentlyAccessed: { get$: () => Observable<RecentItem[]> };
+      navLinks: {
+        getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
+      };
     };
     http: {
       basePath: BasePathService;
       getLoadingCount$(): Observable<number>;
     };
+  };
+  serverless: {
+    setNavigation: (projectNavigation: ChromeProjectNavigation) => void;
   };
 }
 
