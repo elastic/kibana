@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { modelVersionVirtualMajor } from './constants';
+export { modelVersionVirtualMajor, globalSwitchToModelVersionAt } from './constants';
 export {
   assertValidModelVersion,
   isVirtualModelVersion,
