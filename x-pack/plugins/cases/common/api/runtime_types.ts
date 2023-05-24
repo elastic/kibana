@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import Boom from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -21,17 +22,21 @@ export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) =>
   throw createError(formatErrors(errors).join());
 };
 
+export const throwBadRequestError = (errors: rt.Errors) => {
+  throw Boom.badRequest(formatErrors(errors).join());
+};
+
 /**
  * This function will throw if a required field is missing or an excess field is present.
  * NOTE: This will only throw for an excess field if the type passed in leverages exact from io-ts.
  */
 export const decodeWithExcessOrThrow =
-  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
+  <A, O, I>(runtimeType: rt.Type<A, O, I>) =>
   (inputValue: I): A =>
     pipe(
       runtimeType.decode(inputValue),
       (decoded) => exactCheck(inputValue, decoded),
-      fold(throwErrors(createError), identity)
+      fold(throwBadRequestError, identity)
     );
 
 /**
