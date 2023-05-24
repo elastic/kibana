@@ -19,7 +19,6 @@ import { SavedObject } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import { getTestBrowserSyntheticsPolicy } from './sample_data/test_browser_policy';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -42,12 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     const params: Record<string, string> = {};
 
     before(async () => {
-      await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.12.0')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await testPrivateLocations.installSyntheticsPackage();
 
       _browserMonitorJson = getFixtureJson('browser_monitor');
       _httpMonitorJson = getFixtureJson('http_monitor');
@@ -137,7 +131,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       comparePolicies(
         packagePolicy,
-        getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId })
+        getTestSyntheticsPolicy({
+          name: browserMonitorJson.name,
+          id: newMonitorId,
+          isBrowser: true,
+          location: { id: testFleetPolicyID },
+        })
       );
     });
 
@@ -145,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ key: 'test', value: 'test' });
+        .send({ key: 'test', value: 'http://proxy.com' });
 
       expect(apiResponse.status).eql(200);
     });
@@ -154,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI
         .get(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ key: 'test', value: 'test' });
+        .send({ key: 'test', value: 'http://proxy.com' });
 
       expect(apiResponse.status).eql(200);
 
@@ -186,7 +185,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       comparePolicies(
         packagePolicy,
-        getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId, params })
+        getTestSyntheticsPolicy({
+          name: browserMonitorJson.name,
+          id: newMonitorId,
+          params,
+          isBrowser: true,
+          location: { id: testFleetPolicyID },
+        })
       );
     });
 
@@ -231,26 +236,49 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      const pPolicy = getTestSyntheticsPolicy(
-        httpMonitorJson.name,
-        newHttpMonitorId,
-        undefined,
-        undefined,
-        false,
-        'test'
-      );
+      const pPolicy = getTestSyntheticsPolicy({
+        name: httpMonitorJson.name,
+        id: newHttpMonitorId,
+        isTLSEnabled: false,
+        namespace: 'testnamespace',
+        location: { id: testFleetPolicyID },
+      });
 
       comparePolicies(packagePolicy, pPolicy);
     });
 
     it('delete all params and sync again', async () => {
-      await kServer.savedObjects.clean({ types: [syntheticsParamType] });
-      const apiResponseK = await supertestAPI
+      await supertestAPI
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'get', value: 'test' });
+      const getResponse = await supertestAPI
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(getResponse.body.data.length).eql(2);
+
+      const paramsResponse = getResponse.body.data || [];
+      const ids = paramsResponse.map((param: any) => param.id);
+
+      await supertestAPI
+        .delete(SYNTHETICS_API_URLS.PARAMS)
+        .query({ ids: JSON.stringify(ids) })
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      const getResponseAfterDelete = await supertestAPI
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(getResponseAfterDelete.body.data.length).eql(0);
+
+      await supertestAPI
         .get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ key: 'test', value: 'test' });
-
-      expect(apiResponseK.status).eql(200);
+        .expect(200);
 
       const apiResponse = await supertestAPI.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
@@ -265,7 +293,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       comparePolicies(
         packagePolicy,
-        getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId })
+        getTestSyntheticsPolicy({
+          name: browserMonitorJson.name,
+          id: newMonitorId,
+          isBrowser: true,
+          location: { id: testFleetPolicyID },
+        })
       );
     });
   });

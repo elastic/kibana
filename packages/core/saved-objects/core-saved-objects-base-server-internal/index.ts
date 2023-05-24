@@ -39,6 +39,7 @@ export type {
   KibanaMigratorStatus,
   MigrationResult,
   MigrationStatus,
+  MigrateDocumentOptions,
 } from './src/migration';
 export { parseObjectKey, getObjectKey, getIndexForType } from './src/utils';
 export {
@@ -64,4 +65,5 @@ export {
   getModelVersionDelta,
   buildModelVersionTransformFn,
   aggregateMappingAdditions,
+  convertModelVersionBackwardConversionSchema,
 } from './src/model_version';
