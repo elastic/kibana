@@ -24,13 +24,13 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
   const { rule, agent } = action;
   const { action_id: actionId, expiration } = action.EndpointActions;
   const {
-    endpointPrivileges: { canReadActionsLogManagement },
+    endpointPrivileges: { canAccessEndpointActionsLogManagement },
   } = useUserPrivileges();
 
   const [isLive, setIsLive] = useState(true);
   const { data: expandedAction } = useGetAutomatedActionResponseList(
     { actionId, expiration, agent },
-    { enabled: canReadActionsLogManagement, action, isLive }
+    { enabled: canAccessEndpointActionsLogManagement, action, isLive }
   );
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
         event={eventText}
         data-test-subj={'endpoint-results-comment'}
       >
-        {canReadActionsLogManagement ? (
+        {canAccessEndpointActionsLogManagement ? (
           expandedAction ? (
             <ActionsLogExpandedTray
               action={expandedAction}
