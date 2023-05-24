@@ -165,12 +165,10 @@ export const CaseViewActivity = ({
     useGetSupportedActionConnectors();
 
   const onSubmitConnector = useCallback(
-    (connector, onError, onSuccess) => {
+    (connector) => {
       onUpdateField({
         key: 'connector',
         value: connector,
-        onSuccess,
-        onError,
       });
     },
     [onUpdateField]

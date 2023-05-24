@@ -11,10 +11,12 @@ import { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
 interface HeaderActionMenuProps {
-  actionMenu$: Observable<MountPoint | undefined>;
+  mounter: { mount: MountPoint | undefined };
 }
 
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => {
+export const useHeaderActionMenuMounter = (
+  actionMenu$: Observable<MountPoint<HTMLElement> | undefined>
+) => {
   // useObservable relies on useState under the hood. The signature is type SetStateAction<S> = S | ((prevState: S) => S);
   // As we got a Observable<Function> here, React's setState setter assume he's getting a `(prevState: S) => S` signature,
   // therefore executing the mount method, causing everything to crash.
@@ -29,6 +31,10 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => 
     return () => s.unsubscribe();
   }, [actionMenu$]);
 
+  return mounter;
+};
+
+export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 

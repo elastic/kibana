@@ -85,6 +85,13 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loading: false,
     loaded: false,
+    monitorFilterOptions: {
+      monitorTypes: [],
+      tags: [],
+      locations: [],
+      projects: [],
+      schedules: [],
+    },
   },
   overview: {
     pageState: {
