@@ -1957,10 +1957,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_location_monitors.ts"
               },
               {
@@ -1974,14 +1970,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
               },
               {
                 "plugin": "savedObjects",
