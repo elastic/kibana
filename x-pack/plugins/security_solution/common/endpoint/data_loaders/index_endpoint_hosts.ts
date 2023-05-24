@@ -26,6 +26,7 @@ import type {
 import {
   deleteIndexedEndpointAndFleetActions,
   indexEndpointAndFleetActionsForHost,
+  type IndexEndpointAndFleetActionsForHostOptions,
 } from './index_endpoint_fleet_actions';
 
 import type {
@@ -88,6 +89,7 @@ export async function indexEndpointHostDocs({
   enrollFleet,
   generator,
   withResponseActions = true,
+  numResponseActions,
 }: {
   numDocs: number;
   client: Client;
@@ -99,6 +101,7 @@ export async function indexEndpointHostDocs({
   enrollFleet: boolean;
   generator: EndpointDocGenerator;
   withResponseActions?: boolean;
+  numResponseActions?: IndexEndpointAndFleetActionsForHostOptions['numResponseActions'];
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
@@ -198,7 +201,10 @@ export async function indexEndpointHostDocs({
         const actionsResponse = await indexEndpointAndFleetActionsForHost(
           client,
           hostMetadata,
-          undefined
+          undefined,
+          {
+            numResponseActions,
+          }
         );
         mergeAndAppendArrays(response, actionsResponse);
       }

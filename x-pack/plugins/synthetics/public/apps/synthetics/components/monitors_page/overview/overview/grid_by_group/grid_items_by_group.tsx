@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
@@ -38,6 +38,10 @@ export const GridItemsByGroup = ({
   const { locations: allLocations } = useSelector(selectServiceLocationsState);
 
   const data = useFilters();
+
+  if (!data) {
+    return <EuiLoadingSpinner />;
+  }
 
   const { monitorTypes, locations, projects, tags } = data;
   let selectedGroup = {

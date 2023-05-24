@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { generateTransformConfig } from './common';
@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader())
         .send({
           ...generateTransformConfig(transformId),
           latest: {
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader())
         .send(config);
       transform.api.assertResponseStatusCode(400, status, body);
 

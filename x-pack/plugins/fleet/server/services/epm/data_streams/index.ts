@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './recorder';
+export { getDataStreams } from './get';

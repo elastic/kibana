@@ -10,7 +10,7 @@ import type { SavedObjectsFindResponse, SavedObjectsRawDoc } from '@kbn/core/ser
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/api';
-import { ActionTypes } from '../../../common/api';
+import { decodeOrThrow, ActionTypes } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -39,6 +39,7 @@ import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
+import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
@@ -208,10 +209,16 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const fieldsDoc = transformToExternalModel(
+        const res = transformToExternalModel(
           doc,
           this.context.persistableStateAttachmentTypeRegistry
         );
+
+        const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+
+        const fieldsDoc = Object.assign(res, {
+          attributes: decodeRes,
+        });
 
         connectorFields.set(connectorId, fieldsDoc);
       }
@@ -258,10 +265,17 @@ export class CaseUserActionService {
         return;
       }
 
-      return transformToExternalModel(
+      const res = transformToExternalModel(
         userActions.saved_objects[0],
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+
+      return {
+        ...res,
+        attributes: decodeRes,
+      };
     } catch (error) {
       this.context.log.error(
         `Error while retrieving the most recent user action for case id: ${caseId}: ${error}`
@@ -334,10 +348,14 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        fieldsDoc = transformToExternalModel(
+        const res = transformToExternalModel(
           doc,
           this.context.persistableStateAttachmentTypeRegistry
         );
+
+        const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+
+        fieldsDoc = { ...res, attributes: decodeRes };
       }
 
       const pushDocs = this.getPushDocs(connectorInfo.reverse.connectorActivity.buckets.pushInfo);
@@ -377,7 +395,13 @@ export class CaseUserActionService {
           rawPushDoc
         );
 
-      return transformToExternalModel(doc, this.context.persistableStateAttachmentTypeRegistry);
+      const res = transformToExternalModel(
+        doc,
+        this.context.persistableStateAttachmentTypeRegistry
+      );
+
+      const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+      return { ...res, attributes: decodeRes };
     }
   }
 

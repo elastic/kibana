@@ -1863,7 +1863,7 @@ describe('CasesService', () => {
     });
   });
 
-  describe('Encoding responses', () => {
+  describe('Decoding responses', () => {
     const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
       (acc, type) => ({ ...acc, ...type.props }),
       {}
@@ -1883,7 +1883,7 @@ describe('CasesService', () => {
     );
 
     describe('getCase', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(createCaseSavedObjectResponse());
 
         await expect(service.getCase({ id: 'a' })).resolves.not.toThrow();
@@ -1913,7 +1913,7 @@ describe('CasesService', () => {
     });
 
     describe('getResolveCase', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.resolve.mockResolvedValue({
           saved_object: createCaseSavedObjectResponse(),
           outcome: 'exactMatch',
@@ -1952,7 +1952,7 @@ describe('CasesService', () => {
     });
 
     describe('getCases', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({ caseId: '1' }),
@@ -1963,7 +1963,7 @@ describe('CasesService', () => {
         await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.not.toThrow();
       });
 
-      it('do not encodes errors', async () => {
+      it('do not decodes errors', async () => {
         const errorSO = {
           ...omit(createCaseSavedObjectResponse({ caseId: '2' }), 'attributes'),
           error: {
@@ -2078,7 +2078,7 @@ describe('CasesService', () => {
     });
 
     describe('findCases', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         const findMockReturn = createSOFindResponse([
           createFindSO({ caseId: '1' }),
           createFindSO({ caseId: '2' }),
@@ -2123,7 +2123,7 @@ describe('CasesService', () => {
     });
 
     describe('post', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await expect(
@@ -2166,7 +2166,7 @@ describe('CasesService', () => {
     });
 
     describe('patchCase', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(createUpdateSOResponse());
 
         await expect(
@@ -2199,7 +2199,7 @@ describe('CasesService', () => {
     });
 
     describe('patchCases', () => {
-      it('encodes correctly', async () => {
+      it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({ caseId: '1' }),
@@ -2222,7 +2222,7 @@ describe('CasesService', () => {
         ).resolves.not.toThrow();
       });
 
-      it('do not encodes errors', async () => {
+      it('do not decodes errors', async () => {
         const errorSO = {
           ...omit(createCaseSavedObjectResponse({ caseId: '2' }), 'attributes'),
           error: {
