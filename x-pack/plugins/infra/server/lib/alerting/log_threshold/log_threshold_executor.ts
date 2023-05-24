@@ -24,8 +24,7 @@ import {
   RuleExecutorServices,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { LocatorPublic, addSpaceIdToPath } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
 
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
