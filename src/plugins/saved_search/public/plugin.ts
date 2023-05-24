@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
+import { i18n } from '@kbn/i18n';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+import type { SOWithMetadata } from '@kbn/content-management-utils';
 import {
   getSavedSearch,
   saveSavedSearch,
@@ -18,6 +23,8 @@ import {
   getNewSavedSearch,
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
+import { SavedSearchType, LATEST_VERSION } from '../common';
+import type { SavedSearchCrudTypes } from '../common/content_management';
 
 /**
  * Data plugin public Setup contract
@@ -31,7 +38,7 @@ export interface SavedSearchPublicPluginSetup {}
 export interface SavedSearchPublicPluginStart {
   get: (savedSearchId: string) => ReturnType<typeof getSavedSearch>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
-  getAll: () => Promise<Array<SimpleSavedObject<SavedSearchAttributes>>>;
+  getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
@@ -41,8 +48,9 @@ export interface SavedSearchPublicPluginStart {
 /**
  * Data plugin public Setup contract
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedSearchPublicSetupDependencies {}
+export interface SavedSearchPublicSetupDependencies {
+  contentManagement: ContentManagementPublicSetup;
+}
 
 /**
  * Data plugin public Setup contract
@@ -51,6 +59,7 @@ export interface SavedSearchPublicStartDependencies {
   data: DataPublicPluginStart;
   spaces?: SpacesApi;
   savedObjectsTagging?: SavedObjectTaggingOssPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export class SavedSearchPublicPlugin
@@ -62,44 +71,57 @@ export class SavedSearchPublicPlugin
       SavedSearchPublicStartDependencies
     >
 {
-  public setup() {
+  public setup(core: CoreSetup, { contentManagement }: SavedSearchPublicSetupDependencies) {
+    contentManagement.registry.register({
+      id: SavedSearchType,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: i18n.translate('savedSearch.contentManagementType', {
+        defaultMessage: 'Saved search',
+      }),
+    });
+
     return {};
   }
 
   public start(
     core: CoreStart,
-    { data, spaces, savedObjectsTagging }: SavedSearchPublicStartDependencies
+    {
+      data: { search },
+      spaces,
+      savedObjectsTagging,
+      contentManagement: { client: contentManagement },
+    }: SavedSearchPublicStartDependencies
   ): SavedSearchPublicPluginStart {
     return {
       get: (savedSearchId: string) => {
         return getSavedSearch(savedSearchId, {
-          search: data.search,
-          savedObjectsClient: core.savedObjects.client,
+          search,
+          contentManagement,
           spaces,
           savedObjectsTagging: savedObjectsTagging?.getTaggingApi(),
         });
       },
       getAll: async () => {
         // todo this is loading a list
-        const result = await core.savedObjects.client.find<SavedSearchAttributes>({
-          type: 'search',
-          perPage: 10000,
+        const result = await contentManagement.search<
+          SavedSearchCrudTypes['SearchIn'],
+          SavedSearchCrudTypes['SearchOut']
+        >({
+          contentTypeId: SavedSearchType,
+          // perPage: 10000,
+          // todo
+          query: {},
         });
-        return result.savedObjects;
-        // todo
-        /*
-          .then((response) => {
-            savedSearchesCache = response.savedObjects;
-            return savedSearchesCache;
-          });
-          */
+        return result.hits;
       },
-      getNew: () => getNewSavedSearch({ search: data.search }),
+      getNew: () => getNewSavedSearch({ search }),
       save: (savedSearch, options = {}) => {
         return saveSavedSearch(
           savedSearch,
           options,
-          core.savedObjects.client,
+          contentManagement,
           savedObjectsTagging?.getTaggingApi()
         );
       },

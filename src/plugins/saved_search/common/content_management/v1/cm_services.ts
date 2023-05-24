@@ -1,0 +1,146 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { schema } from '@kbn/config-schema';
+import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import {
+  savedObjectSchema,
+  objectTypeToGetResultSchema,
+  createOptionsSchemas,
+  // updateOptionsSchema,
+  createResultSchema,
+  // searchOptionsSchemas,
+} from '@kbn/content-management-utils';
+
+const savedSearchAttributesSchema = schema.object(
+  {
+    title: schema.string(),
+    sort: schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 })),
+    columns: schema.arrayOf(schema.string()),
+    description: schema.string(),
+    grid: schema.object({
+      columns: schema.maybe(
+        schema.recordOf(
+          schema.string(),
+          schema.object({
+            width: schema.maybe(schema.number()),
+          })
+        )
+      ),
+    }),
+    hideChart: schema.boolean(),
+    isTextBasedQuery: schema.boolean(),
+    usesAdHocDataView: schema.maybe(schema.boolean()),
+    kibanaSavedObjectMeta: schema.object({
+      searchSourceJSON: schema.string(),
+    }),
+    viewMode: schema.maybe(
+      schema.oneOf([schema.literal('documents'), schema.literal('aggregated')])
+    ),
+    hideAggregatedPreview: schema.maybe(schema.boolean()),
+    rowHeight: schema.maybe(schema.number()),
+
+    timeRestore: schema.maybe(schema.boolean()),
+    timeRange: schema.maybe(
+      schema.object({
+        from: schema.string(),
+        to: schema.string(),
+      })
+    ),
+    refreshInterval: schema.maybe(
+      schema.object({
+        pause: schema.boolean(),
+        value: schema.number(),
+      })
+    ),
+    rowsPerPage: schema.maybe(schema.number()),
+    breakdownField: schema.maybe(schema.string()),
+  },
+  { unknowns: 'forbid' }
+);
+
+const savedSearchSavedObjectSchema = savedObjectSchema(savedSearchAttributesSchema);
+
+const savedSearchCreateOptionsSchema = schema.maybe(
+  schema.object({
+    id: createOptionsSchemas.id,
+    references: createOptionsSchemas.references,
+    overwrite: createOptionsSchemas.overwrite,
+  })
+);
+
+const savedSearchUpdateOptionsSchema = schema.maybe(schema.object({}));
+const savedSearchSearchOptionsSchema = schema.maybe(
+  schema.object({
+    searchFields: schema.maybe(schema.arrayOf(schema.string())),
+    fields: schema.maybe(schema.arrayOf(schema.string())),
+  })
+);
+/**
+const dataViewSearchOptionsSchema = schema.object({
+  searchFields: searchOptionsSchemas.searchFields,
+  fields: searchOptionsSchemas.fields,
+});
+
+const dataViewUpdateOptionsSchema = schema.object({
+  version: updateOptionsSchema.version,
+  refresh: updateOptionsSchema.refresh,
+  retryOnConflict: updateOptionsSchema.retryOnConflict,
+});
+*/
+
+// Content management service definition.
+// We need it for BWC support between different versions of the content
+export const serviceDefinition: ServicesDefinition = {
+  get: {
+    out: {
+      result: {
+        schema: objectTypeToGetResultSchema(savedSearchSavedObjectSchema),
+      },
+    },
+  },
+  create: {
+    in: {
+      options: {
+        schema: savedSearchCreateOptionsSchema,
+      },
+      data: {
+        schema: savedSearchAttributesSchema,
+      },
+    },
+    out: {
+      result: {
+        schema: createResultSchema(savedSearchSavedObjectSchema),
+      },
+    },
+  },
+  update: {
+    in: {
+      options: {
+        schema: savedSearchUpdateOptionsSchema,
+      },
+      data: {
+        schema: savedSearchAttributesSchema,
+      },
+    },
+  },
+  search: {
+    in: {
+      options: {
+        schema: savedSearchSearchOptionsSchema,
+      },
+    },
+  },
+  mSearch: {
+    out: {
+      result: {
+        schema: savedSearchSavedObjectSchema,
+      },
+    },
+  },
+};

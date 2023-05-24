@@ -6,21 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SavedSearchAttributes } from '../../../common';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
+import type { SavedSearchCrudTypes } from '../../../common/content_management';
 
 interface GetSavedSearchDependencies {
   search: DataPublicPluginStart['search'];
-  savedObjectsClient: SavedObjectsClientContract;
+  contentManagement: ContentManagementPublicStart['client'];
   spaces?: SpacesApi;
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
@@ -35,18 +34,18 @@ const getSavedSearchUrlConflictMessage = async (savedSearch: SavedSearch) =>
 
 export const getSavedSearch = async (
   savedSearchId: string,
-  { search, savedObjectsClient, spaces, savedObjectsTagging }: GetSavedSearchDependencies
+  { search, spaces, savedObjectsTagging, contentManagement }: GetSavedSearchDependencies
 ) => {
-  const so = await savedObjectsClient.resolve<SavedSearchAttributes>(
-    SAVED_SEARCH_TYPE,
-    savedSearchId
-  );
+  const so = await contentManagement.get<
+    SavedSearchCrudTypes['GetIn'],
+    SavedSearchCrudTypes['GetOut']
+  >({
+    contentTypeId: SAVED_SEARCH_TYPE,
+    id: savedSearchId,
+  });
 
-  if (!so.saved_object || so.saved_object.error) {
-    throw new SavedObjectNotFound(SAVED_SEARCH_TYPE, savedSearchId);
-  }
-
-  const savedSearch = so.saved_object;
+  // todo check for conflict
+  const savedSearch = so.item;
 
   const parsedSearchSourceJSON = parseSearchSourceJSON(
     savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
@@ -65,14 +64,12 @@ export const getSavedSearch = async (
     savedSearchId,
     savedSearch.attributes,
     tags,
-    so.saved_object.references,
+    savedSearch.references,
     await search.searchSource.create(searchSourceValues),
     {
-      outcome: so.outcome,
-      aliasTargetId: so.alias_target_id,
-      aliasPurpose: so.alias_purpose,
+      ...so.meta,
       errorJSON:
-        so.outcome === 'conflict' && spaces
+        so.meta.outcome === 'conflict' && spaces
           ? JSON.stringify({
               targetType: SAVED_SEARCH_TYPE,
               sourceId: savedSearchId,
