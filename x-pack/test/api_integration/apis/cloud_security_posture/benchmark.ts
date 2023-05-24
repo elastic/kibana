@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import type { BenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types';
 import type { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { createPackagePolicy } from './helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

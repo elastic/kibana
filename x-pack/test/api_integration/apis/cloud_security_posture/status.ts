@@ -17,12 +17,15 @@ const VULN_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-de
 const VULN_INDEX = 'logs-cloud_security_posture.vulnerabilities-default';
 const INDEX_ARRAY = [FINDINGS_INDEX, FINDINGS_LATEST_INDEX, VULN_LATEST_INDEX, VULN_INDEX];
 
+const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const chance = new Chance();
 
   const findingsMockData = [
@@ -171,16 +174,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.vuln_mgmt.healthyAgents).to.be(0);
         expect(res.vuln_mgmt.installedPackagePolicies).to.be(1);
       });
-      // it(`TEST TEST TEST`, async () => {
-      //   const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
-      //     .get(`/internal/cloud_security_posture/status`)
-      //     .set('kbn-xsrf', 'xxxx')
-      //     .auth('test_user_unprivileged', 'changeme')
-      //     .expect(200);
-
-      //   expect(res.cspm.status).to.be('not-installed');
-      //   expect(res.kspm.status).to.be('not-installed');
-      // });
     });
 
     describe('status = indexed test', () => {
@@ -269,6 +262,66 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(res.vuln_mgmt.status).to.be('indexed');
+      });
+    });
+
+    describe('status = unprivileged test', () => {
+      const createUnprivilegedUser = async () => {
+        await security.user.create(UNPRIVILEGED_USERNAME, {
+          password: 'changeme',
+          roles: [],
+          full_name: 'a reporting user',
+        });
+      };
+
+      const deleteUnprivilegedUser = async () => {
+        await security.user.delete(UNPRIVILEGED_USERNAME);
+      };
+
+      before(async () => {
+        await createUnprivilegedUser();
+      });
+
+      after(async () => {
+        await deleteUnprivilegedUser();
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          });
+
+        agentPolicyId = agentPolicyResponse.item.id;
+      });
+
+      afterEach(async () => {
+        await deleteIndex(es, INDEX_ARRAY);
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+      //   NOT FINISHED, NEED TO FIGURE OUT ROLES AND PERMISSIONS
+      it(`status should return unprivileged when users don't have enough permission`, async () => {
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'kspm',
+          'cloudbeat/cis_k8s',
+          'vanilla',
+          'kspm'
+        );
+
+        const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme')
+          .expect(403);
       });
     });
 
