@@ -22,6 +22,8 @@ import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { useServiceName } from '../../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
@@ -35,6 +37,9 @@ export function ApmHeaderActionMenu() {
   const { isAlertingAvailable, canReadAlerts, canSaveAlerts } =
     getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
+  const isStorageExplorerAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.StorageExplorerAvailable
+  );
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
@@ -52,19 +57,22 @@ export function ApmHeaderActionMenu() {
   return (
     <EuiHeaderLinks gutterSize="xs">
       {isLabsButtonEnabled && <Labs />}
-      <EuiHeaderLink
-        color="text"
-        href={apmHref('/storage-explorer')}
-        data-test-subj="apmStorageExplorerHeaderLink"
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
-              defaultMessage: 'Storage Explorer',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiHeaderLink>
+      {isStorageExplorerAvailable && (
+        <EuiHeaderLink
+          color="text"
+          href={apmHref('/storage-explorer')}
+          data-test-subj="apmStorageExplorerHeaderLink"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
+                defaultMessage: 'Storage Explorer',
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiHeaderLink>
+      )}
+
       {canCreateMlJobs && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
