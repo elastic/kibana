@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
+import { map } from 'lodash';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
@@ -98,7 +99,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
 
     const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
 
-    if (errors) {
+    if (errors?.length) {
       return (
         // TODO: temporary solution, waiting for UI
         <>
@@ -182,7 +183,7 @@ export const ActionsLogExpandedTray = memo<{
 }>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const { startedAt, completedAt, command: _command, comment, parameters } = action;
+  const { hosts, startedAt, completedAt, command: _command, comment, parameters } = action;
 
   const parametersList = useMemo(
     () =>
@@ -223,13 +224,17 @@ export const ActionsLogExpandedTray = memo<{
           title: OUTPUT_MESSAGES.expandSection.comment,
           description: comment ? comment : emptyValue,
         },
+        {
+          title: OUTPUT_MESSAGES.expandSection.hostname,
+          description: map(hosts, (host) => host.name).join(', ') || emptyValue,
+        },
       ].map(({ title, description }) => {
         return {
           title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
           description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
         };
       }),
-    [command, comment, completedAt, parametersList, startedAt]
+    [command, comment, completedAt, hosts, parametersList, startedAt]
   );
 
   const outputList = useMemo(

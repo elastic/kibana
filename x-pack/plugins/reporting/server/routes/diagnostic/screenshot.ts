@@ -26,14 +26,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
       const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
-      const config = reporting.getConfig();
-      const [basePath, protocol, hostname, port] = [
-        config.kbnConfig.get('server', 'basePath'),
-        config.get('kibanaServer', 'protocol'),
-        config.get('kibanaServer', 'hostname'),
-        config.get('kibanaServer', 'port'),
-      ] as string[];
-
+      const { basePath, protocol, hostname, port } = reporting.getServerInfo();
       const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
       const hashUrl = getAbsoluteUrl({ path: '/', hash: '', search: '' });
 
@@ -50,9 +43,15 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           timefilterDurationAttribute: 'data-test-subj="kibanaChrome"',
         },
       };
-
+      const screenshotFn = () =>
+        reporting.getScreenshots({
+          layout,
+          request: req,
+          browserTimezone: 'America/Los_Angeles',
+          urls: [hashUrl],
+        });
       return lastValueFrom(
-        generatePngObservable(reporting, logger, {
+        generatePngObservable(screenshotFn, logger, {
           layout,
           request: req,
           browserTimezone: 'America/Los_Angeles',
