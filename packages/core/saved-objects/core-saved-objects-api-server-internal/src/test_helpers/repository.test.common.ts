@@ -582,6 +582,9 @@ export const expectBulkGetResult = (
   attributes: doc._source![type],
   references: doc._source!.references || [],
   migrationVersion: doc._source!.migrationVersion,
+  managed: expect.any(Boolean),
+  coreMigrationVersion: expect.any(String),
+  typeMigrationVersion: expect.any(String),
 });
 
 export const getMockBulkCreateResponse = (

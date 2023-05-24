@@ -290,7 +290,7 @@ const getMatchPhrasePrefixFields = ({
     fields = types.reduce((typeFields, type) => {
       const defaultSearchField = registry.getType(type)?.management?.defaultSearchField;
       if (defaultSearchField) {
-        return [...typeFields, `${type}.${defaultSearchField}`];
+        typeFields.push(`${type}.${defaultSearchField}`);
       }
       return typeFields;
     }, [] as string[]);

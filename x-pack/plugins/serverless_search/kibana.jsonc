@@ -14,7 +14,9 @@
     ],
     "requiredPlugins": [
       "serverless",
-      "management"
+      "cloud",
+      "management",
+      "security",
     ],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"]

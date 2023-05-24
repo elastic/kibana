@@ -5,179 +5,131 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
+import {
+  getFieldValidityAndErrorMessage,
+  UseField,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
-import type { ResilientFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
-import { ConnectorCard } from '../card';
 
-const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<ResilientFieldsType>> =
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
-  ({ isEdit = true, fields, connector, onChange }) => {
-    const init = useRef(true);
-    const { incidentTypes = null, severityCode = null } = fields ?? {};
+const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
+  const { http } = useKibana().services;
 
-    const { http, notifications } = useKibana().services;
+  const {
+    isLoading: isLoadingIncidentTypesData,
+    isFetching: isFetchingIncidentTypesData,
+    data: allIncidentTypesData,
+  } = useGetIncidentTypes({
+    http,
+    connector,
+  });
 
-    const { isLoading: isLoadingIncidentTypes, incidentTypes: allIncidentTypes } =
-      useGetIncidentTypes({
-        http,
-        toastNotifications: notifications.toasts,
-        connector,
-      });
+  const {
+    isLoading: isLoadingSeverityData,
+    isFetching: isFetchingSeverityData,
+    data: severityData,
+  } = useGetSeverity({
+    http,
+    connector,
+  });
 
-    const { isLoading: isLoadingSeverity, severity } = useGetSeverity({
-      http,
-      toastNotifications: notifications.toasts,
-      connector,
-    });
+  const allIncidentTypes = allIncidentTypesData?.data;
+  const severity = severityData?.data;
+  const isLoadingIncidentTypes = isLoadingIncidentTypesData || isFetchingIncidentTypesData;
+  const isLoadingSeverity = isLoadingSeverityData || isFetchingSeverityData;
 
-    const severitySelectOptions: EuiSelectOption[] = useMemo(
-      () =>
-        severity.map((s) => ({
-          value: s.id.toString(),
-          text: s.name,
-        })),
-      [severity]
-    );
+  const severitySelectOptions: EuiSelectOption[] = useMemo(
+    () =>
+      (severity ?? []).map((s) => ({
+        value: s.id.toString(),
+        text: s.name,
+      })),
+    [severity]
+  );
 
-    const incidentTypesComboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
-      () =>
-        allIncidentTypes
-          ? allIncidentTypes.map((type: { id: number; name: string }) => ({
-              label: type.name,
-              value: type.id.toString(),
-            }))
-          : [],
-      [allIncidentTypes]
-    );
-    const listItems = useMemo(
-      () => [
-        ...(incidentTypes != null && incidentTypes.length > 0
-          ? [
-              {
-                title: i18n.INCIDENT_TYPES_LABEL,
-                description: allIncidentTypes
-                  .filter((type) => incidentTypes.includes(type.id.toString()))
-                  .map((type) => type.name)
-                  .join(', '),
-              },
-            ]
-          : []),
-        ...(severityCode != null && severityCode.length > 0
-          ? [
-              {
-                title: i18n.SEVERITY_LABEL,
-                description:
-                  severity.find((severityObj) => severityObj.id.toString() === severityCode)
-                    ?.name ?? '',
-              },
-            ]
-          : []),
-      ],
-      [incidentTypes, severityCode, allIncidentTypes, severity]
-    );
+  const incidentTypesComboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () =>
+      allIncidentTypes
+        ? allIncidentTypes.map((type: { id: number; name: string }) => ({
+            label: type.name,
+            value: type.id.toString(),
+          }))
+        : [],
+    [allIncidentTypes]
+  );
 
-    const onFieldChange = useCallback(
-      (key, value) => {
-        onChange({
-          ...fields,
-          incidentTypes,
-          severityCode,
-          [key]: value,
-        });
-      },
-      [incidentTypes, severityCode, onChange, fields]
-    );
+  return (
+    <span data-test-subj={'connector-fields-resilient'}>
+      <UseField<string[]> path="fields.incidentTypes" config={{ defaultValue: [] }}>
+        {(field) => {
+          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-    const selectedIncidentTypesComboBoxOptionsMemo = useMemo(() => {
-      const allIncidentTypesAsObject = allIncidentTypes.reduce(
-        (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
-        {} as Record<string, string>
-      );
-      return incidentTypes
-        ? incidentTypes
-            .map((type) => ({
-              label: allIncidentTypesAsObject[type.toString()],
-              value: type.toString(),
-            }))
-            .filter((type) => type.label != null)
-        : [];
-    }, [allIncidentTypes, incidentTypes]);
+          const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+            field.setValue(changedOptions.map((option) => option.value as string));
+          };
 
-    const onIncidentChange = useCallback(
-      (selectedOptions: Array<{ label: string; value?: string }>) => {
-        onFieldChange(
-          'incidentTypes',
-          selectedOptions.map((selectedOption) => selectedOption.value ?? selectedOption.label)
-        );
-      },
-      [onFieldChange]
-    );
+          const selectedOptions = (field.value ?? []).map((incidentType) => ({
+            value: incidentType,
+            label:
+              (allIncidentTypes ?? []).find((type) => incidentType === type.id.toString())?.name ??
+              '',
+          }));
 
-    const onIncidentBlur = useCallback(() => {
-      if (!incidentTypes) {
-        onFieldChange('incidentTypes', []);
-      }
-    }, [incidentTypes, onFieldChange]);
-
-    // Set field at initialization
-    useEffect(() => {
-      if (init.current) {
-        init.current = false;
-        onChange({ incidentTypes, severityCode });
-      }
-    }, [incidentTypes, onChange, severityCode]);
-
-    return isEdit ? (
-      <span data-test-subj={'connector-fields-resilient'}>
-        <EuiFormRow fullWidth label={i18n.INCIDENT_TYPES_LABEL}>
-          <EuiComboBox
-            data-test-subj="incidentTypeComboBox"
-            fullWidth
-            isClearable={true}
-            isDisabled={isLoadingIncidentTypes}
-            isLoading={isLoadingIncidentTypes}
-            onBlur={onIncidentBlur}
-            onChange={onIncidentChange}
-            options={incidentTypesComboBoxOptions}
-            placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
-            selectedOptions={selectedIncidentTypesComboBoxOptionsMemo}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-        <EuiFormRow fullWidth label={i18n.SEVERITY_LABEL}>
-          <EuiSelect
-            data-test-subj="severitySelect"
-            disabled={isLoadingSeverity}
-            fullWidth
-            hasNoInitialSelection
-            isLoading={isLoadingSeverity}
-            onChange={(e) => onFieldChange('severityCode', e.target.value)}
-            options={severitySelectOptions}
-            value={severityCode ?? undefined}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-      </span>
-    ) : (
-      <ConnectorCard
-        connectorType={ConnectorTypes.resilient}
-        isLoading={isLoadingIncidentTypes || isLoadingSeverity}
-        listItems={listItems}
-        title={connector.name}
+          return (
+            <EuiFormRow
+              id="indexConnectorSelectSearchBox"
+              fullWidth
+              label={i18n.INCIDENT_TYPES_LABEL}
+              isInvalid={isInvalid}
+              error={errorMessage}
+            >
+              <EuiComboBox
+                data-test-subj="incidentTypeComboBox"
+                fullWidth
+                isClearable={true}
+                isDisabled={isLoadingIncidentTypes}
+                isLoading={isLoadingIncidentTypes}
+                onChange={onChangeComboBox}
+                options={incidentTypesComboBoxOptions}
+                placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
+                selectedOptions={selectedOptions}
+              />
+            </EuiFormRow>
+          );
+        }}
+      </UseField>
+      <EuiSpacer size="m" />
+      <UseField
+        path="fields.severityCode"
+        component={SelectField}
+        config={{
+          label: i18n.SEVERITY_LABEL,
+        }}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'severitySelect',
+            options: severitySelectOptions,
+            hasNoInitialSelection: true,
+            fullWidth: true,
+            disabled: isLoadingSeverity,
+            isLoading: isLoadingSeverity,
+          },
+        }}
       />
-    );
-  };
+      <EuiSpacer size="m" />
+    </span>
+  );
+};
 
+ResilientFieldsComponent.displayName = 'ResilientFields';
 // eslint-disable-next-line import/no-default-export
 export { ResilientFieldsComponent as default };

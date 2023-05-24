@@ -18,6 +18,8 @@ import {
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createInitialState, type CreateInitialStateParams } from './initial_state';
+import * as getOutdatedDocumentsQueryModule from './get_outdated_documents_query';
+import { getOutdatedDocumentsQuery } from './get_outdated_documents_query';
 
 const mockLogger = loggingSystemMock.create();
 
@@ -40,6 +42,7 @@ const createInitialStateCommonParams = {
     dynamic: 'strict',
     properties: { my_type: { properties: { title: { type: 'text' } } } },
   } as IndexMapping,
+  coreMigrationVersionPerType: {},
   migrationVersionPerType: {},
   indexPrefix: '.kibana_task_manager',
   migrationsConfig,
@@ -347,10 +350,13 @@ describe('createInitialState', () => {
     ).toEqual(true);
   });
   it('returns state with an outdatedDocumentsQuery', () => {
+    jest.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
+
     expect(
       createInitialState({
         ...createInitialStateParams,
         preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
+        coreMigrationVersionPerType: {},
         migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
       }).outdatedDocumentsQuery
     ).toMatchInlineSnapshot(`
@@ -370,6 +376,22 @@ describe('createInitialState', () => {
                       "should": Array [
                         Object {
                           "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "typeMigrationVersion",
+                                },
+                              },
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion.my_dashboard",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
                             "must": Object {
                               "exists": Object {
                                 "field": "migrationVersion",
@@ -383,19 +405,10 @@ describe('createInitialState', () => {
                           },
                         },
                         Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion",
-                                },
-                              },
-                              Object {
-                                "term": Object {
-                                  "typeMigrationVersion": "7.10.1",
-                                },
-                              },
-                            ],
+                          "range": Object {
+                            "typeMigrationVersion": Object {
+                              "lt": "7.10.1",
+                            },
                           },
                         },
                       ],
@@ -417,6 +430,22 @@ describe('createInitialState', () => {
                       "should": Array [
                         Object {
                           "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "typeMigrationVersion",
+                                },
+                              },
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion.my_viz",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
                             "must": Object {
                               "exists": Object {
                                 "field": "migrationVersion",
@@ -430,19 +459,10 @@ describe('createInitialState', () => {
                           },
                         },
                         Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion",
-                                },
-                              },
-                              Object {
-                                "term": Object {
-                                  "typeMigrationVersion": "8.0.0",
-                                },
-                              },
-                            ],
+                          "range": Object {
+                            "typeMigrationVersion": Object {
+                              "lt": "8.0.0",
+                            },
                           },
                         },
                       ],
@@ -455,6 +475,10 @@ describe('createInitialState', () => {
         },
       }
     `);
+    expect(getOutdatedDocumentsQuery).toHaveBeenCalledWith({
+      coreMigrationVersionPerType: {},
+      migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
+    });
   });
 
   it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
