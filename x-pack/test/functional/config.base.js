@@ -178,6 +178,9 @@ export default async function ({ readConfigFile }) {
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+      },
     },
 
     // choose where screenshots should be saved
