@@ -8,7 +8,7 @@
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 
-export const NvdLOGO = () => (
+export const NvdLogo = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="42px"
