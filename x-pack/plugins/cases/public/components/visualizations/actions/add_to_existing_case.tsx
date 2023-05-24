@@ -110,33 +110,31 @@ export const createAddToExistingCaseLensAction = ({
         cleanupDom(true);
       };
       const mount = toMountPoint(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              storage,
-            }}
-          >
-            <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
-              <Router history={history}>
-                <CasesProvider
-                  value={{
-                    ...caseContextProps,
-                    owner,
-                    permissions: casePermissions,
-                  }}
-                >
-                  <AddExistingCaseModalWrapper
-                    embeddable={embeddable}
-                    onClose={onClose}
-                    onSuccess={onSuccess}
-                  />
-                </CasesProvider>
-              </Router>
-            </EuiThemeProvider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+            storage,
+          }}
+        >
+          <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
+            <Router history={history}>
+              <CasesProvider
+                value={{
+                  ...caseContextProps,
+                  owner,
+                  permissions: casePermissions,
+                }}
+              >
+                <AddExistingCaseModalWrapper
+                  embeddable={embeddable}
+                  onClose={onClose}
+                  onSuccess={onSuccess}
+                />
+              </CasesProvider>
+            </Router>
+          </EuiThemeProvider>
+        </KibanaContextProvider>
       );
 
       mount(targetDomElement);
