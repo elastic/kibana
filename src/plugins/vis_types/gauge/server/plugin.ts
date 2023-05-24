@@ -40,7 +40,7 @@ interface GaugePluginSetupDependencies {
   visualizations: VisualizationsServerSetup;
 }
 
-export class VisTypeGaugeServerPlugin implements Plugin<GaugePluginSetupDependencies> {
+export class VisTypeGaugeServerPlugin implements Plugin<object, object> {
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }

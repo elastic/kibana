@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, GaugeConfig } from '../config';
 import { VisTypeGaugeServerPlugin } from './plugin';
 

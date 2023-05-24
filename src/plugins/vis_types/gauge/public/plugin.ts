@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -28,6 +28,8 @@ export interface VisTypeGaugePluginStartDependencies {
 }
 
 export class VisTypeGaugePlugin {
+  private readonly initializerContext: PluginInitializerContext<GaugePublicConfig>;
+
   constructor(initializerContext: PluginInitializerContext<GaugePublicConfig>) {
     this.initializerContext = initializerContext;
   }
