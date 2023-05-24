@@ -104,7 +104,7 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
       } catch (error) {
         if (isVersionConflictEngineException(error)) {
           return createError({
-            errorCode: (error as Error).message as ErrorCode,
+            errorCode: ErrorCode.SEARCH_APPLICATION_ALREADY_EXISTS,
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.createSearchApplication.searchApplciationExistsError',
               {

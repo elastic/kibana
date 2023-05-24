@@ -20,6 +20,7 @@ export enum ErrorCode {
   PIPELINE_IS_IN_USE = 'pipeline_is_in_use',
   PIPELINE_NOT_FOUND = 'pipeline_not_found',
   RESOURCE_NOT_FOUND = 'resource_not_found',
+  SEARCH_APPLICATION_ALREADY_EXISTS = 'search_application_already_exists',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
 }
