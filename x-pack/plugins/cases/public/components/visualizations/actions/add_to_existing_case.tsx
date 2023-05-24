@@ -93,7 +93,6 @@ export const createAddToExistingCaseLensAction = ({
       hasInput(embeddable),
     execute: async ({ embeddable }) => {
       const targetDomElement = document.createElement('div');
-      document.body.appendChild(targetDomElement);
 
       const cleanupDom = (shouldCleanup?: boolean) => {
         if (targetDomElement != null && shouldCleanup) {
