@@ -12,7 +12,7 @@ import { dateType } from './common';
 import { budgetingMethodSchema, sloIdSchema, tagsSchema, targetSchema } from './slo';
 import { rollingTimeWindowSchema } from './time_window';
 
-const combinedSlo = t.type({
+const combinedSloSchema = t.type({
   id: sloIdSchema,
   revision: t.number,
   weight: t.number,
@@ -26,10 +26,10 @@ const compositeSloSchema = t.type({
   timeWindow: rollingTimeWindowSchema,
   budgetingMethod: budgetingMethodSchema,
   objective: targetSchema,
-  combinedSlos: t.array(combinedSlo),
+  combinedSlos: t.array(combinedSloSchema),
   tags: tagsSchema,
   createdAt: dateType,
   updatedAt: dateType,
 });
 
-export { combinedSlo, compositeSloIdSchema, compositeSloSchema };
+export { combinedSloSchema, compositeSloIdSchema, compositeSloSchema };
