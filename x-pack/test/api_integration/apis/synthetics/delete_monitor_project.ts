@@ -39,7 +39,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await testPrivateLocations.installSyntheticsPackage();
-
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
