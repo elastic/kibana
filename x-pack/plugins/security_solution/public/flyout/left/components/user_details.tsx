@@ -114,67 +114,72 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
     skip: selectedPatterns.length === 0,
   });
 
-  const relatedHostsColumns: Array<EuiBasicTableColumn<RelatedHost>> = [
-    {
-      field: 'host',
-      name: i18n.RELATED_ENTITIES_NAME_COLUMN_TITLE,
-      render: (host: string) => (
-        <EuiText grow={false} size="xs">
-          <SecurityCellActions
-            mode={CellActionsMode.HOVER_RIGHT}
-            visibleCellActions={5}
-            showActionTooltips
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
-            field={{
-              name: 'host.name',
-              value: host,
-              type: 'keyword',
-            }}
-          >
-            {host}
-          </SecurityCellActions>
-        </EuiText>
-      ),
-    },
-    {
-      field: 'ip',
-      name: i18n.RELATED_ENTITIES_IP_COLUMN_TITLE,
-      render: (ips: string[]) => {
-        return (
-          <DefaultFieldRenderer
-            rowItems={ips}
-            attrName={'host.ip'}
-            idPrefix={''}
-            isDraggable={false}
-            render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
-          />
-        );
+  const relatedHostsColumns: Array<EuiBasicTableColumn<RelatedHost>> = useMemo(
+    () => [
+      {
+        field: 'host',
+        name: i18n.RELATED_ENTITIES_NAME_COLUMN_TITLE,
+        render: (host: string) => (
+          <EuiText grow={false} size="xs">
+            <SecurityCellActions
+              mode={CellActionsMode.HOVER_RIGHT}
+              visibleCellActions={5}
+              showActionTooltips
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              field={{
+                name: 'host.name',
+                value: host,
+                type: 'keyword',
+              }}
+            >
+              {host}
+            </SecurityCellActions>
+          </EuiText>
+        ),
       },
-    },
-  ];
+      {
+        field: 'ip',
+        name: i18n.RELATED_ENTITIES_IP_COLUMN_TITLE,
+        render: (ips: string[]) => {
+          return (
+            <DefaultFieldRenderer
+              rowItems={ips}
+              attrName={'host.ip'}
+              idPrefix={''}
+              isDraggable={false}
+              render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
+            />
+          );
+        },
+      },
+      ...(isPlatinumOrTrialLicense
+        ? [
+            {
+              field: 'risk',
+              name: (
+                <EuiToolTip content={HOST_RISK_TOOLTIP}>
+                  <>
+                    {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
+                    <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+                  </>
+                </EuiToolTip>
+              ),
+              truncateText: false,
+              mobileOptions: { show: true },
+              sortable: false,
+              render: (riskScore: RiskSeverity) => {
+                if (riskScore != null) {
+                  return <RiskScore severity={riskScore} />;
+                }
+                return getEmptyTagValue();
+              },
+            },
+          ]
+        : []),
+    ],
+    [isPlatinumOrTrialLicense]
+  );
 
-  if (isPlatinumOrTrialLicense) {
-    relatedHostsColumns.push({
-      field: 'risk',
-      name: (
-        <EuiToolTip content={HOST_RISK_TOOLTIP}>
-          <>
-            {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
-            <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
-      ),
-      truncateText: false,
-      mobileOptions: { show: true },
-      sortable: false,
-      render: (riskScore: RiskSeverity) => {
-        if (riskScore != null) {
-          return <RiskScore severity={riskScore} />;
-        }
-        return getEmptyTagValue();
-      },
-    });
-  }
   const relatedHostsCount = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="m">

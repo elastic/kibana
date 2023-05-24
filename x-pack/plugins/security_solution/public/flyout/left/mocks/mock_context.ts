@@ -37,4 +37,5 @@ export const mockContextValue: LeftPanelContext = {
   eventId: 'eventId',
   indexName: 'index',
   getFieldsData: mockGetFieldsData,
+  dataFormattedForFieldBrowser: null,
 };
