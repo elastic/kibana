@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { ScheduleNowTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/schedule_now_transforms';
 
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader())
           .send([{ id: reqBody[0].id }, { id: invalidTransformId }, { id: reqBody[1].id }]);
         transform.api.assertResponseStatusCode(200, status, body);
 

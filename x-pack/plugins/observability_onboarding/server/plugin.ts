@@ -23,7 +23,6 @@ import {
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
 import { ObservabilityOnboardingConfig } from '.';
-import { observabilityOnboardingState } from './saved_objects/observability_onboarding_status';
 
 export class ObservabilityOnboardingPlugin
   implements
@@ -47,8 +46,6 @@ export class ObservabilityOnboardingPlugin
     plugins: ObservabilityOnboardingPluginSetupDependencies
   ) {
     this.logger.debug('observability_onboarding: Setup');
-
-    core.savedObjects.registerType(observabilityOnboardingState);
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
