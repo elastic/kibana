@@ -299,10 +299,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   useEffect(() => {
     const queryStr: string = query[language] ?? '';
-    if (code !== queryStr) {
+    if (code !== queryStr && (!isCompactFocused || !isCodeEditorExpandedFocused)) {
       setCode(queryStr);
     }
-  }, [code, language, query]);
+  }, [code, isCompactFocused, language, query, isCodeEditorExpandedFocused]);
 
   const calculateVisibleCode = useCallback(
     (width: number, force?: boolean) => {
