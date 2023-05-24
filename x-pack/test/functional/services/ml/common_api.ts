@@ -6,9 +6,9 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { ProvidedType } from '@kbn/test';
+import type { ProvidedType } from '@kbn/test';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
