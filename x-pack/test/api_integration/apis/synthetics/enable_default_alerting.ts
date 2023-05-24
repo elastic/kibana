@@ -12,7 +12,7 @@ import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/con
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 import { Spaces } from '../../../alerting_api_integration/spaces_only/scenarios';
 import { ObjectRemover } from '../../../alerting_api_integration/common/lib';
 
