@@ -10,6 +10,20 @@ import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
 
+type Payload = Array<{
+  id: string;
+  count: number;
+}>;
+
+interface ExpectedResponse {
+  locations: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
 const aggs = {
   locations: {
     terms: {
@@ -27,14 +41,22 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory = () => ({
   handler: async ({
     savedObjectsClient: _s,
     uptimeEsClient: es,
-  }): Promise<IKibanaResponse<any>> => {
+  }): Promise<IKibanaResponse<Payload>> => {
+    const locationMonitors = await _s?.find<unknown, ExpectedResponse>({
+      type: syntheticsMonitorType,
+      perPage: 0,
+      aggs,
+    });
+
+    const payload =
+      locationMonitors.aggregations?.locations.buckets.map(({ key: id, doc_count: count }) => ({
+        id,
+        count,
+      })) ?? [];
+
     return {
       options: {},
-      payload: await _s?.find<unknown, typeof aggs>({
-        type: syntheticsMonitorType,
-        perPage: 0,
-        aggs,
-      }),
+      payload,
       status: 200,
     };
   },

@@ -38,18 +38,14 @@ export const setDynamicSettings = async ({
   return await apiService.post(apiPath, settings, DynamicSettingsSaveType);
 };
 
-export const getLocationMonitors = async (): Promise<LocationMonitor[]> => {
-  const response = await apiService.get<LocationMonitorsResponse>(
+export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {
+  const { payload } = await apiService.get<LocationMonitorsResponse>(
     SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
     undefined,
     LocationMonitorsType
   );
-  return (
-    response.payload?.aggregations.locations.buckets.map(({ key: id, doc_count: count }) => ({
-      id,
-      count,
-    })) ?? []
-  );
+
+  return payload;
 };
 
 export type ActionConnector = Omit<RawActionConnector, 'secrets'>;

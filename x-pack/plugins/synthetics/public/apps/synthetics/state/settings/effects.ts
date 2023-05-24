@@ -24,7 +24,7 @@ import {
   setDynamicSettings,
   syncGlobalParamsAPI,
   getDynamicSettings,
-  getLocationMonitors,
+  fetchLocationMonitors,
 } from './api';
 
 export function* syncGlobalParamsEffect() {
@@ -40,11 +40,11 @@ export function* syncGlobalParamsEffect() {
   );
 }
 
-export function* fetchLocationMonitors() {
+export function* fetchLocationMonitorsEffect() {
   yield takeLeading(
     String(getLocationMonitorsAction.get),
     fetchEffectFactory(
-      getLocationMonitors,
+      fetchLocationMonitors,
       getLocationMonitorsAction.success,
       getLocationMonitorsAction.fail
     )
