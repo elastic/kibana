@@ -51,9 +51,9 @@ export const Processes = ({
   searchFilter,
   setSearchFilter,
 }: ProcessesProps) => {
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState(searchFilter ?? '');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
-    searchFilter ? Query.parse(searchFilter) : Query.parse(searchText) ?? Query.MATCH_ALL
+    searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
 
   const [sortBy, setSortBy] = useState<SortBy>({
@@ -71,14 +71,15 @@ export const Processes = ({
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchFilter ?? searchText));
+  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchText));
 
   const debouncedSearchOnChange = useMemo(() => {
-    return debounce<(queryText: string) => void>(
-      (queryText) =>
-        setSearchFilter ? setSearchFilter({ searchFilter: queryText }) : setSearchText(queryText),
-      500
-    );
+    return debounce<(queryText: string) => void>((queryText) => {
+      if (setSearchFilter) {
+        setSearchFilter({ searchFilter: queryText });
+      }
+      setSearchText(queryText);
+    }, 500);
   }, [setSearchFilter]);
 
   const searchBarOnChange = useCallback(
