@@ -41,7 +41,7 @@ export interface FieldListItemProps extends RenderFieldItemParams<DataViewField>
   };
   isSelected: boolean;
   onAddFieldToWorkspace: FieldItemButtonProps<DataViewField>['onAddFieldToWorkspace'];
-  onRemoveFieldFromWorkplace: FieldItemButtonProps<DataViewField>['onRemoveFieldFromWorkspace'];
+  onRemoveFieldFromWorkspace: FieldItemButtonProps<DataViewField>['onRemoveFieldFromWorkspace'];
   onRefreshFields: () => void;
 }
 
@@ -57,7 +57,7 @@ export function FieldListItem({
   hideDetails,
   onRefreshFields,
   onAddFieldToWorkspace,
-  onRemoveFieldFromWorkplace,
+  onRemoveFieldFromWorkspace,
 }: FieldListItemProps) {
   const { dataViewFieldEditor, data } = services;
   const querySubscriberResult = useQuerySubscriber({ data });
@@ -183,7 +183,7 @@ export function FieldListItem({
               isSelected={isSelected}
               onClick={togglePopover}
               onAddFieldToWorkspace={onAddFieldToWorkspace}
-              onRemoveFieldFromWorkspace={onRemoveFieldFromWorkplace}
+              onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             />
           </DragDrop>
         }
@@ -192,7 +192,7 @@ export function FieldListItem({
             <FieldPopoverHeader
               field={field}
               closePopover={closePopover}
-              onAddFieldToWorkspace={onAddFieldToWorkspace}
+              onAddFieldToWorkspace={!isSelected ? onAddFieldToWorkspace : undefined}
               onAddFilter={addFilterAndClose}
               onEditField={editFieldAndClose}
               onDeleteField={removeFieldAndClose}

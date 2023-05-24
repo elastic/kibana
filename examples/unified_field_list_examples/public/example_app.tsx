@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -21,8 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
+import { ExampleDropZone } from './example_drop_zone';
 
 interface UnifiedFieldListExampleAppProps {
   services: FieldListSidebarProps['services'];
@@ -34,6 +36,28 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
   const { navigation, data, unifiedSearch } = services;
   const { IndexPatternSelect } = unifiedSearch.ui;
   const [dataView, setDataView] = useState<DataView | null>();
+  const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
+
+  const onAddFieldToWorkplace = useCallback(
+    (field: DataViewField) => {
+      setSelectedFieldNames((names) => [...names, field.name]);
+    },
+    [setSelectedFieldNames]
+  );
+
+  const onRemoveFieldFromWorkspace = useCallback(
+    (field: DataViewField) => {
+      setSelectedFieldNames((names) => names.filter((name) => name !== field.name));
+    },
+    [setSelectedFieldNames]
+  );
+
+  const onDropFieldToWorkplace = useCallback(
+    (fieldName: string) => {
+      setSelectedFieldNames((names) => [...names.filter((name) => name !== fieldName), fieldName]);
+    },
+    [setSelectedFieldNames]
+  );
 
   // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
   useEffect(() => {
@@ -103,14 +127,27 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <RootDragDropProvider>
-              <EuiPageSidebar
-                css={css`
-                  flex: 1;
-                  width: 320px;
-                `}
-              >
-                <FieldListSidebar services={services} dataView={dataView} />
-              </EuiPageSidebar>
+              <EuiFlexGroup direction="row" alignItems="stretch">
+                <EuiFlexItem grow={false}>
+                  <EuiPageSidebar
+                    css={css`
+                      flex: 1;
+                      width: 320px;
+                    `}
+                  >
+                    <FieldListSidebar
+                      services={services}
+                      dataView={dataView}
+                      selectedFieldNames={selectedFieldNames}
+                      onAddFieldToWorkplace={onAddFieldToWorkplace}
+                      onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+                    />
+                  </EuiPageSidebar>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <ExampleDropZone onDropField={onDropFieldToWorkplace} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </RootDragDropProvider>
           </EuiFlexItem>
         </EuiFlexGroup>

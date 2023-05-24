@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ChildDragDropProvider, DragContext } from '@kbn/dom-drag-drop';
 import {
@@ -31,13 +31,21 @@ import { FieldListItem, FieldListItemProps } from './field_list_item';
 
 export interface FieldListSidebarProps {
   dataView: DataView;
+  selectedFieldNames: string[];
   services: FieldListItemProps['services'];
+  onAddFieldToWorkplace: FieldListItemProps['onAddFieldToWorkspace'];
+  onRemoveFieldFromWorkspace: FieldListItemProps['onRemoveFieldFromWorkspace'];
 }
 
-export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({ dataView, services }) => {
+export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
+  dataView,
+  selectedFieldNames,
+  services,
+  onAddFieldToWorkplace,
+  onRemoveFieldFromWorkspace,
+}) => {
   const dragDropContext = useContext(DragContext);
   const allFields = dataView.fields;
-  const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
   const activeDataViews = useMemo(() => [dataView], [dataView]);
   const querySubscriberResult = useQuerySubscriber({ data: services.data });
 
@@ -46,20 +54,6 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({ dataView, se
       return selectedFieldNames.includes(field.name);
     },
     [selectedFieldNames]
-  );
-
-  const onAddFieldToWorkplace = useCallback(
-    (field: DataViewField) => {
-      setSelectedFieldNames((names) => [...names, field.name]);
-    },
-    [setSelectedFieldNames]
-  );
-
-  const onRemoveFieldFromWorkplace = useCallback(
-    (field: DataViewField) => {
-      setSelectedFieldNames((names) => names.filter((name) => name !== field.name));
-    },
-    [setSelectedFieldNames]
   );
 
   const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
@@ -95,7 +89,7 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({ dataView, se
         }
         onRefreshFields={onRefreshFields}
         onAddFieldToWorkspace={onAddFieldToWorkplace}
-        onRemoveFieldFromWorkplace={onRemoveFieldFromWorkplace}
+        onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
         {...params}
       />
     ),
@@ -105,7 +99,7 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({ dataView, se
       onRefreshFields,
       selectedFieldNames,
       onAddFieldToWorkplace,
-      onRemoveFieldFromWorkplace,
+      onRemoveFieldFromWorkspace,
     ]
   );
 
