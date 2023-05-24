@@ -19,6 +19,7 @@ const savedSearchStartMock = () => ({
     searchSource: searchSourceInstanceMock,
   })),
   save: jest.fn(),
+  find: jest.fn(),
 });
 
 export const savedSearchPluginMock = {

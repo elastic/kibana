@@ -6,23 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsStart } from '@kbn/core/public';
-
-import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { saveSavedSearch } from './save_saved_searches';
 import type { SavedSearch } from './types';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { savedSearchPluginMock } from '../../mocks';
 
 describe('saveSavedSearch', () => {
-  let savedObjectsClient: SavedObjectsStart['client'];
+  let savedSearches;
   let savedSearch: SavedSearch;
 
   beforeEach(() => {
-    savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
+    savedSearches = savedSearchPluginMock.createStartContract();
     const searchSource = dataPluginMock.createStartContract().search.searchSource.createEmpty();
-
     savedSearch = {
       id: 'id',
       title: 'title',
@@ -41,7 +38,7 @@ describe('saveSavedSearch', () => {
 
   describe('onTitleDuplicate', () => {
     test('should check for title duplicating', async () => {
-      savedObjectsClient.find = jest.fn().mockReturnValue({
+      savedSearches.find = jest.fn().mockReturnValue({
         savedObjects: [{ get: () => 'title' }],
       });
       const onTitleDuplicate = jest.fn();
