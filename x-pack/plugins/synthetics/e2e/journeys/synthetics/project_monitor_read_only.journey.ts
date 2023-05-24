@@ -55,6 +55,7 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
     await page.waitForSelector('text=read-only');
     monitorId = new URL(await page.url()).pathname.split('/').at(-1) || '';
     originalMonitorConfiguration = await services.getMonitor(monitorId);
+    expect(originalMonitorConfiguration).not.toBeNull();
   });
 
   step('Monitor configuration is unchanged when saved', async () => {

@@ -28,7 +28,7 @@ export class SyntheticsServices {
     try {
       const { data } = await this.requester.request<{ attributes: SyntheticsMonitor }>({
         description: 'get monitor by id',
-        path: uriencode`${API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId)}`,
+        path: API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
         query: {
           decrypted: true,
         },
