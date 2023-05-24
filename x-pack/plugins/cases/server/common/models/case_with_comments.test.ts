@@ -51,7 +51,7 @@ describe('CaseCommentModel', () => {
           Array [
             Object {
               "attributes": Object {
-                "comment": "Wow, good luck catching that bad meanie!",
+                "comment": "a comment",
                 "created_at": "2023-04-07T12:18:36.941Z",
                 "created_by": Object {
                   "email": "damaged_raccoon@elastic.co",
@@ -94,7 +94,7 @@ describe('CaseCommentModel', () => {
             Object {
               "attributes": Object {
                 "alertId": Array [
-                  "test-id-1",
+                  "alert-id-1",
                 ],
                 "created_at": "2023-04-07T12:18:36.941Z",
                 "created_by": Object {
@@ -104,7 +104,7 @@ describe('CaseCommentModel', () => {
                   "username": "damaged_raccoon",
                 },
                 "index": Array [
-                  "test-index-1",
+                  "alert-index-1",
                 ],
                 "owner": "securitySolution",
                 "pushed_at": null,
@@ -256,7 +256,7 @@ describe('CaseCommentModel', () => {
 
     it('does not create attachments if the alert is attached to the case', async () => {
       clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValueOnce(
-        new Set(['test-id-1'])
+        new Set(['alert-id-1'])
       );
 
       await model.createComment({
@@ -299,9 +299,10 @@ describe('CaseCommentModel', () => {
       expect(attachments[1].attributes.type).toBe('alert');
       expect(attachments[2].attributes.type).toBe('alert');
 
-      expect(singleAlertCall.attributes.alertId).toEqual(['test-id-1']);
-      expect(singleAlertCall.attributes.index).toEqual(['test-index-1']);
+      expect(singleAlertCall.attributes.alertId).toEqual(['alert-id-1']);
+      expect(singleAlertCall.attributes.index).toEqual(['alert-index-1']);
 
+      // test-id-4 is omitted because it is returned by getAllAlertIds, see the top of this file
       expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
     });
@@ -321,8 +322,8 @@ describe('CaseCommentModel', () => {
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe('alert');
-      expect(attachments[0].attributes.alertId).toEqual(['test-id-1']);
-      expect(attachments[0].attributes.index).toEqual(['test-index-1']);
+      expect(attachments[0].attributes.alertId).toEqual(['alert-id-1']);
+      expect(attachments[0].attributes.index).toEqual(['alert-index-1']);
     });
 
     it('remove alerts attached to the case', async () => {
@@ -435,8 +436,8 @@ describe('CaseCommentModel', () => {
       expect(attachments[1].attributes.type).toBe('alert');
       expect(attachments[2].attributes.type).toBe('alert');
 
-      expect(singleAlertCall.attributes.alertId).toEqual(['test-id-1']);
-      expect(singleAlertCall.attributes.index).toEqual(['test-index-1']);
+      expect(singleAlertCall.attributes.alertId).toEqual(['alert-id-1']);
+      expect(singleAlertCall.attributes.index).toEqual(['alert-index-1']);
 
       expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
@@ -456,8 +457,8 @@ describe('CaseCommentModel', () => {
           {
             id: 'comment-3',
             ...multipleAlert,
-            alertId: ['test-id-1', 'test-id-2'],
-            index: ['test-index-1', 'test-index-2'],
+            alertId: ['alert-id-1', 'test-id-2'],
+            index: ['alert-index-1', 'test-index-2'],
           },
           {
             id: 'comment-4',
@@ -481,19 +482,20 @@ describe('CaseCommentModel', () => {
       expect(attachments[2].attributes.type).toBe('alert');
       expect(attachments[3].attributes.type).toBe('alert');
 
-      expect(alertOne.attributes.alertId).toEqual(['test-id-1']);
-      expect(alertOne.attributes.index).toEqual(['test-index-1']);
+      expect(alertOne.attributes.alertId).toEqual(['alert-id-1']);
+      expect(alertOne.attributes.index).toEqual(['alert-index-1']);
 
       expect(alertTwo.attributes.alertId).toEqual(['test-id-2']);
       expect(alertTwo.attributes.index).toEqual(['test-index-2']);
 
+      // test-id-4 is omitted because it is returned by getAllAlertIds, see the top of this file
       expect(alertThree.attributes.alertId).toEqual(['test-id-5']);
       expect(alertThree.attributes.index).toEqual(['test-index-5']);
     });
 
     it('remove alerts from multiple attachments with multiple alerts attached to the case', async () => {
       clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValueOnce(
-        new Set(['test-id-1', 'test-id-4'])
+        new Set(['alert-id-1', 'test-id-4'])
       );
       await model.bulkCreate({
         attachments: [
