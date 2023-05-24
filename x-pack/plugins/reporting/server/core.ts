@@ -27,6 +27,7 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { CancellationToken } from '@kbn/reporting-common';
 import {
   PdfScreenshotResult,
   PngScreenshotResult,
@@ -46,7 +47,7 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { checkLicense, getExportTypesRegistry } from './lib';
+import { checkLicense, getExportTypesRegistry, PassThroughStream } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
@@ -161,8 +162,13 @@ export class ReportingCore {
 
     const { taskManager } = startDeps;
     const { executeTask, monitorTask } = this;
+    const cancellationToken = new CancellationToken();
+    const stream = new PassThroughStream();
     // enable this instance to generate reports and to monitor for pending reports
-    await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+    await Promise.all([
+      executeTask.init(taskManager, cancellationToken, stream),
+      monitorTask.init(taskManager),
+    ]);
   }
 
   public pluginStop() {

@@ -96,7 +96,11 @@ export class ExecuteReportTask implements ReportingTask {
   /*
    * To be called from plugin start
    */
-  public async init(taskManager: TaskManagerStartContract) {
+  public async init(
+    taskManager: TaskManagerStartContract,
+    cancellationToken: CancellationToken,
+    stream: Writable
+  ) {
     this.taskManagerStart = taskManager;
 
     const { reporting } = this;
@@ -104,8 +108,12 @@ export class ExecuteReportTask implements ReportingTask {
     const exportTypesRegistry = reporting.getExportTypesRegistry();
     const executors = new Map<string, TaskExecutor>();
     for (const exportType of exportTypesRegistry.getAll()) {
-      const exportTypeLogger = this.logger.get(exportType.jobType);
-      const jobExecutor = exportType.runTask(reporting, exportTypeLogger);
+      const jobExecutor = exportType.runTask(
+        exportType.jobContentEncoding,
+        reporting.getExportTypesRegistry().getAll()[0],
+        cancellationToken,
+        stream
+      );
       // The task will run the function with the job type as a param.
       // This allows us to retrieve the specific export type runFn when called to run an export
       executors.set(exportType.jobType, {
