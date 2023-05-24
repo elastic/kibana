@@ -10,7 +10,7 @@ import { ServerlessSecurityPLI } from '../config';
 import { PLI_APP_FEATURES } from './pli_config';
 
 /**
- * Returns the U (union) of all enabled skus features in a single object.
+ * Returns the U (union) of all enabled PLIs features in a single object.
  */
 export const getProjectPLIsFeatures = (projectPLIs: ServerlessSecurityPLI[]): AppFeatureKeys =>
   projectPLIs.reduce<AppFeatureKeys>((plisFeatures, projectPLI) => {
