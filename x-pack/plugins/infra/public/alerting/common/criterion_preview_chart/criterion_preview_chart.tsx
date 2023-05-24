@@ -19,8 +19,7 @@ import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../
 type Series = GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series'];
 
 export const tooltipProps: TooltipProps = {
-  headerFormatter: ({ value }) =>
-    moment(value).format('Y-MM-DD HH:mm:ss'),
+  headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss'),
 };
 
 export const NUM_BUCKETS = 20;

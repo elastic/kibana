@@ -60,8 +60,7 @@ export const ChartSection = ({
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const metrics = series.map((chartSeries) => chartSeries.metric);
   const tooltipProps: TooltipProps = {
-    headerFormatter: ({ value }) =>
-      moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
+    headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
   };
 
   return (

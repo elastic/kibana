@@ -124,8 +124,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const tooltipProps: TooltipProps = {
-    headerFormatter: ({ value }) =>
-      moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
+    headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
   };
 
   const dataDomain = timeseries ? calculateDomain(timeseries, [chartMetric], false) : null;

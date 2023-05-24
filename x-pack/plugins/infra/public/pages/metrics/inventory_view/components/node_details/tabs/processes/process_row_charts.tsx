@@ -96,8 +96,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
   const yAxisFormatter = createFormatter('percent');
 
   const tooltipProps: TooltipProps = {
-    headerFormatter: ({ value }) =>
-      moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
+    headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
   };
 
   const dataDomain = calculateDomain(timeseries, [chartMetric], false);
