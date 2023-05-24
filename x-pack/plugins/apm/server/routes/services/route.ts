@@ -382,7 +382,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
 });
 
 const serviceAnnotationsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
+  endpoint: 'GET /api/apm/services/{serviceName}/annotation/search 2023-05-22',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -433,7 +433,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
 });
 
 const serviceAnnotationsCreateRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/services/{serviceName}/annotation',
+  endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-05-22',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
