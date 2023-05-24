@@ -6,13 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
-import { FindCommentsQueryParamsRt, throwErrors, excess } from '../../../../common/api';
+import { FindCommentsQueryParamsRt, decodeWithExcessOrThrow } from '../../../../common/api';
 import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
@@ -27,10 +22,7 @@ export const findCommentsRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const query = pipe(
-        excess(FindCommentsQueryParamsRt).decode(request.query),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+      const query = decodeWithExcessOrThrow(FindCommentsQueryParamsRt)(request.query);
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
