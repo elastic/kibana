@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AssetDetailsProps } from './asset_details';
 
 const AssetDetails = React.lazy(() => import('./asset_details'));
 
 export const LazyAssetDetailsWrapper = (props: AssetDetailsProps) => (
-  <React.Suspense fallback={<div />}>
+  <React.Suspense fallback={<EuiLoadingSpinner />}>
     <AssetDetails {...props} />
   </React.Suspense>
 );

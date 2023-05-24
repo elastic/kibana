@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { MetadataProps } from './metadata';
 
 const Metadata = React.lazy(() => import('./metadata'));
 
 export const LazyMetadataWrapper = (props: MetadataProps) => (
-  <React.Suspense fallback={<div />}>
+  <React.Suspense fallback={<EuiLoadingSpinner />}>
     <Metadata {...props} />
   </React.Suspense>
 );
