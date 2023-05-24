@@ -191,8 +191,8 @@ export class TooltipSelector extends Component<Props, State> {
                 >
                   {(provided, state) => (
                     <div
-                      className={classNames('mapTooltipSelector__propertyRow', {
-                        'mapTooltipSelector__propertyRow-isDragging': state.isDragging,
+                      className={classNames({
+                        'mapToolbarOverlay__buttonIcon-filled': state.isDragging,
                         'mapTooltipSelector__propertyRow-isDraggingOver': snapshot.isDraggingOver,
                       })}
                     >
