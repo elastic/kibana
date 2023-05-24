@@ -25,7 +25,7 @@ import {
   getSyntheticsFilterKeyForLabel,
   SyntheticsMonitorFilterChangeHandler,
   SyntheticsMonitorFilterField,
-} from './filter_fields';
+} from '../../../../utils/filters/filter_fields';
 
 export const useFilters = (): MonitorFiltersResult | null => {
   const dispatch = useDispatch();
