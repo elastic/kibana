@@ -135,7 +135,12 @@ export interface LogsEndpointAction {
 }
 
 export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
-  hosts: Record<string, { name: string }>;
+  EndpointActions: EndpointActionFields &
+    ActionRequestFields & {
+      data: EndpointActionData & {
+        hosts: Record<string, { name: string }>;
+      };
+    };
 }
 
 /**
@@ -194,6 +199,7 @@ export interface EndpointActionData<
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
   alert_id?: string[];
+  hosts?: Record<string, { name: string }>;
 }
 
 export interface FleetActionResponseData {

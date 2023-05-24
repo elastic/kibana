@@ -8,7 +8,7 @@
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsEndpointActionResponse } from '../../../endpoint/types';
-import type { Direction, Inspect, Maybe, RequestBasicOptions } from './types';
+import type { SortOrder, Inspect, Maybe, RequestBasicOptions } from './types';
 
 export type ResultEdges<T = unknown> = estypes.SearchResponse<T>['hits']['hits'];
 
@@ -16,7 +16,7 @@ export interface ActionResponsesRequestOptions extends RequestBasicOptions {
   expiration: string;
   actionId: string;
   sort: {
-    direction: Direction;
+    order: SortOrder;
     field: string;
   };
   agents: number;

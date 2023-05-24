@@ -42,7 +42,7 @@ export const buildActionsQuery = ({
       sort: [
         {
           [sort.field]: {
-            order: sort.direction,
+            order: sort.order,
           },
         },
       ],

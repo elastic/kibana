@@ -41,13 +41,12 @@ export const useResponseActionsView = ({
 
   const shouldEarlyReturn = !ecsData || !responseActionsEnabled || !responseActions;
   const alertId = rawEventData?._id ?? '';
-  const executionIds = expandedEventFieldsObject?.kibana?.alert?.rule?.execution?.uuid;
+
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
       alertIds: [alertId],
-      executionIds,
     },
-    { skip: shouldEarlyReturn }
+    { enabled: !shouldEarlyReturn }
   );
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;

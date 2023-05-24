@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 
 const AutomatedActionListRequestSchema = {
   query: schema.object({
+    executionIds: schema.maybe(schema.arrayOf(schema.string())),
     alertIds: schema.arrayOf(schema.string({ minLength: 1 }), {
       minSize: 1,
       validate: (alertIds) => {

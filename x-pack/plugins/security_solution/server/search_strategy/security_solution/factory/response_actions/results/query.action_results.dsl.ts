@@ -55,7 +55,7 @@ export const buildActionResultsQuery = ({
       sort: [
         {
           [sort.field]: {
-            order: sort.direction,
+            order: sort.order,
           },
         },
       ],

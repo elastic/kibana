@@ -10,7 +10,7 @@ export enum ResponseActionsQueries {
   results = 'responseActionsResults',
 }
 
-export type { ActionRequestOptions, ActionRequestStrategyResponse } from './actions';
+export type { ActionRequestOptions, ActionRequestStrategyResponse } from './action';
 export type {
   ActionResponsesRequestOptions,
   ActionResponsesRequestStrategyResponse,

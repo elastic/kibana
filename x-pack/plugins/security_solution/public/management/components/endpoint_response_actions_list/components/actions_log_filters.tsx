@@ -84,6 +84,7 @@ export const ActionsLogFilters = memo(
             <AutomatedActionsFilter
               dataTestSubj={dataTestSubj}
               onChangeWithAutomatedActionsFilter={onChangeWithAutomatedActionsFilter}
+              isFlyout={isFlyout}
             />
           )}
         </>
