@@ -15,6 +15,10 @@ export const DATE_PICKER_APPLY_BUTTON_TIMELINE =
 
 export const DATE_PICKER_ABSOLUTE_TAB = '[data-test-subj="superDatePickerAbsoluteTab"]';
 
+export const DATE_PICKER_NOW_TAB = '[data-test-subj="superDatePickerNowTab"]';
+
+export const DATE_PICKER_NOW_BUTTON = '[data-test-subj="superDatePickerNowButton"]';
+
 export const DATE_PICKER_END_DATE_POPOVER_BUTTON =
   '[data-test-subj="globalDatePicker"] [data-test-subj="superDatePickerendDatePopoverButton"]';
 

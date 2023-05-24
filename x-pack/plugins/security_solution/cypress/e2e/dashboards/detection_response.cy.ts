@@ -13,6 +13,7 @@ import {
 } from '../../screens/common/filter_group';
 
 import {
+  ALERTS_DONUT_CHART,
   HOST_TABLE_HOST_NAME_BTN,
   HOST_TABLE_ROW_SEV,
   HOST_TABLE_ROW_TOTAL_ALERTS,
@@ -31,9 +32,12 @@ import { cleanKibana } from '../../tasks/common';
 import { investigateDashboardItemInTimeline } from '../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../tasks/kibana_navigation';
 import { login, visit } from '../../tasks/login';
-import { navigateFromHeaderTo } from '../../tasks/security_header';
+import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../../tasks/security_header';
 import { closeTimeline } from '../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
+
+const TEST_USER_NAME = 'test';
+const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
 describe('Detection response view', () => {
   before(() => {
@@ -42,6 +46,49 @@ describe('Detection response view', () => {
     createRule(getNewRule());
     visit(DETECTIONS_RESPONSE_URL);
   });
+
+  context('KQL search bar', { testIsolation: false }, () => {
+    it(`filters out hosts with KQL search bar query`, () => {
+      kqlSearch(`host.name : fakeHostName{enter}`);
+
+      cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
+      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
+      cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
+
+      clearSearchBar();
+    });
+
+    it(`finds the host when filtering with KQL search bar query`, () => {
+      kqlSearch(`host.name : ${SIEM_KIBANA_HOST_NAME}{enter}`);
+
+      cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
+      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
+
+      clearSearchBar();
+    });
+
+    it(`filters out the users with KQL search bar query`, () => {
+      kqlSearch(`user.name : fakeUserName{enter}`);
+
+      cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
+      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
+      cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
+
+      clearSearchBar();
+    });
+
+    it(`finds the user when filtering with KQL search bar query`, () => {
+      kqlSearch(`user.name : ${TEST_USER_NAME}{enter}`);
+
+      cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
+      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
+
+      clearSearchBar();
+    });
+  });
+
   context('Open in timeline', { testIsolation: false }, () => {
     afterEach(() => {
       closeTimeline();
@@ -67,6 +114,7 @@ describe('Detection response view', () => {
             });
         });
     });
+
     it(`opens timeline with correct query count for users by alert severity table`, () => {
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS)
         .first()

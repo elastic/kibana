@@ -65,6 +65,6 @@ export const getMetricsAggregations = (
         })
       );
     }
-    return { ...aggs, ...aggregation };
+    return Object.assign(aggs, aggregation);
   }, {});
 };
