@@ -139,7 +139,7 @@ export const nextActionMap = (
       Actions.createIndex({
         client,
         indexName: state.tempIndex,
-        aliases: state.tempIndexAlias,
+        aliases: [state.tempIndexAlias],
         mappings: state.tempIndexMappings,
       }),
     READY_TO_REINDEX_SYNC: () => Actions.synchronizeMigrators(readyToReindex),
