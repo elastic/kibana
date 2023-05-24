@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
@@ -24,10 +24,13 @@ const NODE_TYPE = 'host' as InventoryItemType;
 
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const currentTimeRange = {
-    ...getDateRangeAsTimestamp(),
-    interval: '1m',
-  };
+  const currentTimeRange = useMemo(
+    () => ({
+      ...getDateRangeAsTimestamp(),
+      interval: '1m',
+    }),
+    [getDateRangeAsTimestamp]
+  );
 
   const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
 
