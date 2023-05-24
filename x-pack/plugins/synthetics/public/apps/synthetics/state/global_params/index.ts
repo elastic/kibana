@@ -69,3 +69,4 @@ export const globalParamsReducer = createReducer(initialState, (builder) => {
 export * from './actions';
 export * from './effects';
 export * from './selectors';
+export * from './api';

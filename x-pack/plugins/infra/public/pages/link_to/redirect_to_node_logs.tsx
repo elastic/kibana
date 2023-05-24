@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
+=======
+import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
+>>>>>>> 360790290bf16155002dcb035b2ae19edadf5c18
 import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { InventoryItemType } from '../../../common/inventory_models/types';

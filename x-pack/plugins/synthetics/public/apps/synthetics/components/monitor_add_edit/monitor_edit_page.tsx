@@ -23,7 +23,7 @@ import { MonitorForm } from './form';
 import { LocationsLoadingError } from './locations_loading_error';
 import { MonitorDetailsLinkPortal } from './monitor_details_portal';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
-import { getMonitorAPI } from '../../state/monitor_management/api';
+import { getDecryptedMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 
@@ -42,7 +42,7 @@ export const MonitorEditPage: React.FC = () => {
   }, [locationsLoaded, dispatch]);
 
   const { data, loading, error } = useFetcher(() => {
-    return getMonitorAPI({ id: monitorId });
+    return getDecryptedMonitorAPI({ id: monitorId });
   }, []);
 
   const monitorNotFoundError = useMonitorNotFound(

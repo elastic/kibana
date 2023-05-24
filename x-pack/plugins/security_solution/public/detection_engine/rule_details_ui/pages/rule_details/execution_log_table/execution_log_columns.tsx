@@ -6,8 +6,15 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiText,
+  EuiButtonIcon,
+  EuiScreenReaderOnly,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -24,6 +31,37 @@ import { TableHeaderTooltipCell } from '../../../../rule_management_ui/component
 import { RuleDurationFormat } from './rule_duration_format';
 
 import * as i18n from './translations';
+
+type TableColumn = EuiBasicTableColumn<RuleExecutionResult>;
+
+interface UseColumnsArgs {
+  toggleRowExpanded: (item: RuleExecutionResult) => void;
+  isRowExpanded: (item: RuleExecutionResult) => boolean;
+}
+
+export const expanderColumn = ({
+  toggleRowExpanded,
+  isRowExpanded,
+}: UseColumnsArgs): TableColumn => {
+  return {
+    align: RIGHT_ALIGNMENT,
+    width: '40px',
+    isExpander: true,
+    name: (
+      <EuiScreenReaderOnly>
+        <span>{i18n.EXPAND_ROW}</span>
+      </EuiScreenReaderOnly>
+    ),
+    render: (item: RuleExecutionResult) =>
+      item.security_status === 'succeeded' ? null : (
+        <EuiButtonIcon
+          onClick={() => toggleRowExpanded(item)}
+          aria-label={isRowExpanded(item) ? i18n.COLLAPSE : i18n.EXPAND}
+          iconType={isRowExpanded(item) ? 'arrowUp' : 'arrowDown'}
+        />
+      ),
+  };
+};
 
 export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResult>> = [
   {
@@ -69,22 +107,39 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResul
     truncateText: false,
     width: '10%',
   },
-  {
-    field: 'security_message',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_MESSAGE}
-        tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
-      />
-    ),
-    render: (value: string) => <>{value}</>,
-    sortable: false,
-    truncateText: false,
-    width: '35%',
-  },
 ];
 
-export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
+export const getMessageColumn = (width: string) => ({
+  field: 'security_message',
+  name: (
+    <TableHeaderTooltipCell
+      title={i18n.COLUMN_MESSAGE}
+      tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
+    />
+  ),
+  render: (value: string, record: RuleExecutionResult) => {
+    if (record.security_status === 'succeeded') {
+      return value;
+    }
+
+    return (
+      <div
+        css={css`
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        `}
+      >
+        {value}
+      </div>
+    );
+  },
+  sortable: false,
+  width,
+});
+
+export const getExecutionLogMetricsColumns = (
   docLinks: DocLinksStart
 ): Array<EuiBasicTableColumn<RuleExecutionResult>> => [
   {
