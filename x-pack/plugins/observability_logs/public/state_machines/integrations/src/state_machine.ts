@@ -23,7 +23,7 @@ import {
 export const createPureIntegrationsStateMachine = (
   initialContext: DefaultIntegrationsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMADgDMZWdIBMAVnnyAnFtWctKgDQgAnojX6l0gOyyNAFjWyAbDukBfd8bSYc+YqRk9ES4EDRQrAAyAPIAggAiyAByAOIA+gDKAKoAwjkAovnxRVy8SCCCwqKo4lIIaupk0jYq9q52Wtac1sZmCJqKamr21lrOmlqcKuOe3hhYeNXkwaHhUXGJqWkAYrHIkSU84pUiAbXmjc3Wre1qnd295vKcZFr2KrIjTpzPP7MgPgW-hIyxCYVQUAAskRsGB1glkulsnlCsV4qVjkJTmJynVpN1rGRrHIFHJnJx3mpHgh1NIyOpOJwhnJ5NJnCppGp-oC-EsgmDwtDYfDNuldvtDmUBFjqucEJz7Ip7AZnm9Js4bM5qfYKU19BYKTr7IrZNZufNeQFQaE2DEEmlIdEAEr5NLJAAq+RSTti7uQ0SSGQx5ROstxiFNWjI8lkH0+nGcrhU8i1pkQOrp5Le7NjLmk8nNvkWVv5NogrAy+ViTpyAAlg9KqmdwwhI9Hc-HEyrU30VIyicqtApnjGEwnC0C+RAwAAjIhUADG4QyYFw2AXAAsK1Wa-WjiGZc3QHV1M57PTpl0VNYr-I2tqdU0DC5Psm1DYtFyvACLcWQWRpznRdl1XdctwkWB0HwMAyFwAAzTBsAACkras6zSYpIliABNABKVgeT-QJAPnVAlwhFc103BsKkPHFj0QDkb2jClnBcIYPgpalZH7aRHF0T4XHkaw7gnS1-xI4CKNAzdWAgqDMFghCwGQ1Ddww-IsLwgjf2BYjZ1I8ioEosD2GkKVaKbejJEYvso2sZw1Ec1o5GGaRuLpQch1aH5NEcM1v0IvTyFgGSN2XdBYVwABbWBtzQ2tMlyAoiklTErJqFsGjUJoWjaIc7i6Ho03qZQyGND4KvkO43gCuYi2CshQqo8KKMi1dYvi9TxQOdF90bbFMoY+pLjy257mKvpnGY2RPwMa9WU5AtAt0vkVnBKBtlwAh6FtDYHWdV0PS9H0-QDIN+sswa5QVJUVX0ZUE01alqsULMLGEz5rGVL96snEt1vCLadrYNS6xo0MjxsmkbEJZ42nYhoePsal31kMgk0+IdlVZWbPG-VAiGneByiCpZ0uulsAFoe0QKmcp0RmmaZ0YxKI8gqBoU4GGYSAKbDYb3lRzh0eUWw5HsaQ1WmNnGsBiF+ahk9bCUbGHO6VkfiMEr7DsaMbFNVQNQ5VxZbWgUISFMBFesvFnkJBb306YkFHvEqUxyqXOONWQ7FsZa-vEwJ1r5g8MrldXXhUToNCKtRvqpd3dHpO8LFUByGj+FaGqnAypOMsKbaG6H1GTIllDvVxOirxO+h+jHn0c7oDFUYSzZLZqwIiqLYqLuUPmcMh47F9RhK0eRWmpEScszt4Rm0XQ2Pb-95c27bdogPuWylsqYwHnQXem7VXAbj47gaFR1F0ex8fcIA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMADgDMZWZ3nyFAVgBsATnnaATNs0AaEAE9E6zrLIB2dfaPX5D7QBYAvh9NpMOfMSkZPREuBA0UKwAMgDyAIIAIsgAcgDiAPoAygCqAMK5AKIFCcVcvEgggsKiqOJSCOrS2mRunOpaerL6+tKqphYI3bZkKrbybg6yvZyctppePhhYeDXkIWER0fFJaekAYnHIUaU84lUigXWW+uojsuranJqcTa1usv3XzbK2Y5rSmi0Ux+CxAvmWARIa1C4VQUAAskRsGAtokUhkcvkiiUEmUzkILmIKvVpLNhpp5NJGvIKXM3J9Bo0yD1dLYnNppN1pKDwf5VsEYRFEcjUTsMgcjidygICTUrggqW5FDTbJy3LZZP8buoGa1FG0XrN-qr1IYeUs+YFoWE2LFEul4TEAEoFdIpAAqBVSTri7uQMWSmTxFXOcuJiB+zUpc1kbiaFKe+l1MzI7UNc2kJrN3jBFpWVoFNogrEyBTiTtyAAlgzLqpdwwhI2Ro5pY-H5ImGfoU7ZDFM3HHNIZVfJzX581CyBAwAAjIhUADGEUyYFw2AXAAsS2WK9XTiHZfXQPUbhSyNptJr9Jo3LoHH1zIglc1pAP9LZONo5ppVdyc7yJyCac50XZdV3XLcJFgdB8DAMhcAAM0wbAAApS3LKt0hKKI4gATQASlYADISA2d51QJc4RXNdNxrSpDyJY9EB6X4yE5FwvwpC9GgZNkbBHbRTSHdp320McIX5YDyMoqBqIg1goJgzB4KQsBUPQ3csIKHCCKIvMSPIKTQKo8DaOkaV6LrRjJGY7tmkmUldH0PQGSmFp7h-ON1HVd41HEy1J1gUyN2XdBkVwABbWBtwwyssjyQpiilfErNqBtTVuawHieF53E4d4GXUZRm00HRZE4-RgTE-99P5IKaJCqiwtXKKYs0iVjlxfda0JNKmIaG47my55Xnyj5HwQH9NBaVtGl6BQ3EqzwavHAzC1hKA9lwAh6FtbYHWdV0PS9H0-QDINuss3r5UVZUfzVDUtXaBkXH0VNnm8-RFqVd9ZH8wDrQ2radrYDSqzo0MjxswZM2GdiHjmPRBOkQrMzIIcLy-byHBxrwc1QIhp3gCpiNWFLrobABaEwJsp25Ma-TpbwHTz-rWqgaAuBhmEgcmw36xbCtmOwtF0TVOEMak2f5dYNr5qGTw1JRbFvH5TT0Ad1V1WNmWeKYWNjdQ9FHFaJILWWhSRMB5eskkOzhrRuwxp5AXkF6bzYt5emyrpOXUaXzZhXmD1S+U5k4ZWVUaB5nLGF7HjY34VaT9pxgBAPJyMiiwIam2+uhm5nNTRbZC6AdSVvXV3HR1RyseLp7pNxZVrq4LQvCqK8-lSrpvaXsDBUH8xjjib7DcEYjCmNkZjkfKM6CC24WB3aIC7hsmjc7sgUHZzSqTCa3FbGuNQljs9GvZavCAA */
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
       context: initialContext,
@@ -105,6 +105,7 @@ export const createPureIntegrationsStateMachine = (
               cond: 'hasMoreIntegrations',
               target: 'loadingMore',
             },
+            RELOAD_INTEGRATIONS: 'loading',
             SEARCH: 'debouncingSearch',
           },
         },
@@ -147,6 +148,8 @@ export const createPureIntegrationsStateMachine = (
 
           return {
             cache: context.cache.clear(),
+            integrationsSource: null,
+            integrations: null,
           };
         }),
         appendIntegrations: assign((context, event) =>
@@ -171,6 +174,7 @@ export const createPureIntegrationsStateMachine = (
         hasMoreIntegrations: (context) => Boolean(context.search.searchAfter),
         isStreamSearch: (context) =>
           context.search.strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS,
+        isRequestCached: (context) => context.cache.has(context.search),
       },
       delays: {
         SEARCH_DELAY: (_context, event) => {

@@ -81,6 +81,9 @@ export type IntegrationsEvent =
       type: 'LOAD_MORE_INTEGRATIONS';
     }
   | {
+      type: 'RELOAD_INTEGRATIONS';
+    }
+  | {
       type: 'SEARCH';
       search: IntegrationsSearchParams;
       delay?: number;

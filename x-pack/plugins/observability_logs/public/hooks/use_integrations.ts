@@ -71,6 +71,11 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
     [integrationsStateService, search.name]
   );
 
+  const reloadIntegrations = useCallback(
+    () => integrationsStateService.send({ type: 'RELOAD_INTEGRATIONS' }),
+    [integrationsStateService]
+  );
+
   const loadMore = useCallback(
     () => integrationsStateService.send({ type: 'LOAD_MORE_INTEGRATIONS' }),
     [integrationsStateService]
@@ -94,6 +99,7 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
 
     // Actions
     loadMore,
+    reloadIntegrations,
     searchIntegrations,
   };
 };

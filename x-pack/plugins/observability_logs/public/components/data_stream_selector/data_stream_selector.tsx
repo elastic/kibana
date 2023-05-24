@@ -33,14 +33,17 @@ import { buildIntegrationsTree, setIntegrationListSpy } from './utils';
 const DataStreamsList = dynamic(() => import('./sub_components/data_streams_list'), {
   fallback: <DataStreamSkeleton />,
 });
+const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'));
 
 export function DataStreamSelector({
   dataStreams,
   dataStreamsError,
   integrations,
+  integrationsError,
   isLoadingIntegrations,
   isLoadingStreams,
   onIntegrationsLoadMore,
+  onIntegrationsReload,
   onSearch,
   onStreamSelected,
   onStreamsEntryClick,
@@ -74,9 +77,20 @@ export function DataStreamSelector({
       panel: UNCATEGORIZED_STREAMS_PANEL_ID,
     };
 
+    const createIntegrationStatusItem = () => ({
+      disabled: true,
+      name: (
+        <IntegrationsListStatus
+          error={integrationsError}
+          integrations={integrations}
+          onRetry={onIntegrationsReload}
+        />
+      ),
+    });
+
     if (!integrations) {
       return {
-        items: [dataStreamsItem],
+        items: [dataStreamsItem, createIntegrationStatusItem()],
         panels: [],
       };
     }
@@ -88,11 +102,20 @@ export function DataStreamSelector({
 
     setIntegrationListSpy(items, setSpyRef);
 
+    if (items.length === 0) items.push(createIntegrationStatusItem());
+
     return {
       items: [dataStreamsItem, ...items],
       panels,
     };
-  }, [integrations, handleStreamSelection, onStreamsEntryClick, setSpyRef]);
+  }, [
+    integrations,
+    integrationsError,
+    handleStreamSelection,
+    onIntegrationsReload,
+    onStreamsEntryClick,
+    setSpyRef,
+  ]);
 
   const panels = [
     {

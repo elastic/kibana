@@ -25,9 +25,11 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   const dataView = useDataView();
 
   const {
+    error: integrationsError,
     integrations,
     isLoading: isLoadingIntegrations,
     loadMore,
+    reloadIntegrations,
     searchIntegrations,
   } = useIntegrationsContext();
 
@@ -65,9 +67,11 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
       dataStreams={dataStreams}
       dataStreamsError={dataStreamsError}
       integrations={integrations}
+      integrationsError={integrationsError}
       isLoadingIntegrations={isLoadingIntegrations}
       isLoadingStreams={isLoadingStreams}
       onIntegrationsLoadMore={loadMore}
+      onIntegrationsReload={reloadIntegrations}
       onSearch={handleSearch}
       onStreamSelected={handleStreamSelection}
       onStreamsEntryClick={loadDataStreams}
