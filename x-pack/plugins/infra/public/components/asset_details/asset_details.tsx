@@ -133,13 +133,12 @@ export const AssetDetails = ({
         <EuiSpacer size="l" />
         <EuiTabs
           css={css`
-            margin-right: ${euiTheme.size.l};
+            margin-bottom: ${euiTheme.size.l};
           `}
           size="l"
         >
           {tabEntries}
         </EuiTabs>
-        <EuiSpacer size="l" />
         <AssetDetailsTabContent
           node={node}
           nodeType={nodeType}
