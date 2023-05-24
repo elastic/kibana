@@ -27,5 +27,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/data-view-field-editor-plugin",
   ]
 }
