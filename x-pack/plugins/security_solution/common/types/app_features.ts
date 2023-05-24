@@ -5,29 +5,33 @@
  * 2.0.
  */
 
-export interface AppFeatureSecurityKeys {
+export enum AppFeatureSecurityKey {
   /**
    * Enables importing pre-packaged rules
    * */
-  rules_load_prepackaged: boolean;
+  rulesLoadPrepackaged = 'rules_load_prepackaged',
   /**
    * Enables the ability to add response actions to rules
    */
-  rules_response_actions: boolean;
+  rulesResponseActions = 'rules_response_actions',
   /**
    * Enables the ability to perform the isolate hosts operation
    */
-  isolate_host: boolean;
+  isolateHost = 'isolate_host',
 }
-export type AppFeatureSecurityKey = keyof AppFeatureSecurityKeys;
 
-export interface AppFeatureCasesKeys {
+export enum AppFeatureCasesKey {
   /**
    * Enables the basic Cases feature
    */
-  cases_base: boolean;
+  casesBase = 'cases_base',
 }
-export type AppFeatureCasesKey = keyof AppFeatureCasesKeys;
 
+// Merges the two enums.
+// We need to merge the value and the type and export both to replicate how enum works.
+export const AppFeatureKey = { ...AppFeatureSecurityKey, ...AppFeatureCasesKey };
+export type AppFeatureKey = AppFeatureSecurityKey | AppFeatureCasesKey;
+
+type AppFeatureSecurityKeys = { [key in AppFeatureSecurityKey]: boolean };
+type AppFeatureCasesKeys = { [key in AppFeatureCasesKey]: boolean };
 export type AppFeatureKeys = AppFeatureSecurityKeys & AppFeatureCasesKeys;
-export type AppFeatureKey = keyof AppFeatureKeys;
