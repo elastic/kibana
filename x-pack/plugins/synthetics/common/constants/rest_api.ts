@@ -24,11 +24,11 @@ export enum API_URLS {
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/uptime/journey/screenshot/block`,
   LOG_PAGE_VIEW = `/internal/uptime/log_page_view`,
 
-  ML_MODULE_JOBS = `/api/ml/modules/jobs_exist/`,
-  ML_SETUP_MODULE = '/api/ml/modules/setup/',
-  ML_DELETE_JOB = `/api/ml/jobs/delete_jobs`,
-  ML_CAPABILITIES = '/api/ml/ml_capabilities',
-  ML_ANOMALIES_RESULT = `/api/ml/results/anomalies_table_data`,
+  ML_MODULE_JOBS = `/internal/ml/modules/jobs_exist/`,
+  ML_SETUP_MODULE = '/internal/ml/modules/setup/',
+  ML_DELETE_JOB = `/internal/ml/jobs/delete_jobs`,
+  ML_CAPABILITIES = '/internal/ml/ml_capabilities',
+  ML_ANOMALIES_RESULT = `/internal/ml/results/anomalies_table_data`,
 
   RULE_CONNECTORS = '/api/actions/connectors',
   CREATE_RULE = '/api/alerting/rule',

@@ -465,6 +465,65 @@ describe('Response actions history', () => {
       expect(noTrays).toEqual([]);
     });
 
+    it('should show already expanded trays on page navigation', async () => {
+      // start with two pages worth of response actions
+      // 10 on page 1, 3 on page 2
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({ actionCount: 13 }),
+      });
+      render();
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      // on page 1
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 13 response actions'
+      );
+      const expandButtonsOnPage1 = getAllByTestId(`${testPrefix}-expand-button`);
+      // expand 2nd, 4th, 6th rows
+      expandButtonsOnPage1.forEach((button, i) => {
+        if ([1, 3, 5].includes(i)) {
+          userEvent.click(button);
+        }
+      });
+      // verify 3 rows are expanded
+      const traysOnPage1 = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(traysOnPage1).toBeTruthy();
+      expect(traysOnPage1.length).toEqual(3);
+
+      // go to 2nd page
+      const page2 = getByTestId('pagination-button-1');
+      userEvent.click(page2);
+
+      // verify on page 2
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 11-13 of 13 response actions'
+      );
+
+      // go back to 1st page
+      userEvent.click(getByTestId('pagination-button-0'));
+      // verify on page 1
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 13 response actions'
+      );
+
+      const traysOnPage1back = getAllByTestId(`${testPrefix}-details-tray`);
+      const expandButtonsOnPage1back = getAllByTestId(`${testPrefix}-expand-button`);
+      const expandedButtons = expandButtonsOnPage1back.reduce<number[]>((acc, button, i) => {
+        // find expanded rows
+        if (button.getAttribute('aria-label') === 'Collapse') {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+
+      // verify 3 rows are expanded
+      expect(traysOnPage1back).toBeTruthy();
+      expect(traysOnPage1back.length).toEqual(3);
+      // verify 3 rows that are expanded are the ones from before
+      expect(expandedButtons).toEqual([1, 3, 5]);
+    });
+
     it('should contain relevant details in each expanded row', async () => {
       render();
       const { getAllByTestId } = renderResult;
