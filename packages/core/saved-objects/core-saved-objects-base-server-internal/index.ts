@@ -44,6 +44,7 @@ export type {
 export { parseObjectKey, getObjectKey, getIndexForType } from './src/utils';
 export {
   modelVersionVirtualMajor,
+  globalSwitchToModelVersionAt,
   assertValidModelVersion,
   isVirtualModelVersion,
   virtualVersionToModelVersion,
