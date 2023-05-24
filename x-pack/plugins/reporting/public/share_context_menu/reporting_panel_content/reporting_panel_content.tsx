@@ -229,7 +229,9 @@ export class ReportingPanelContent extends Component<ReportingPanelProps, State>
         disabled={isDisabled || this.state.isCreatingReportJob}
         fullWidth
         fill
-        onClick={this.createReportingJob}
+        onClick={() => {
+          this.createReportingJob();
+        }}
         data-test-subj="generateReportButton"
         size="s"
         isLoading={this.state.isCreatingReportJob}
