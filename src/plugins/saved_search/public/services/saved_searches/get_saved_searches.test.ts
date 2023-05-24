@@ -26,6 +26,7 @@ describe('getSavedSearch', () => {
   test('should throw an error if so not found', async () => {
     let errorMessage = 'No error thrown.';
     cmClient.get = jest.fn().mockReturnValue({
+      // todo what will the error
       saved_object: {
         attributes: {},
         error: {

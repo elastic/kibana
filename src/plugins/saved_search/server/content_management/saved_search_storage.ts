@@ -18,21 +18,36 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
       savedObjectType: SavedSearchType,
       cmServicesDefinition,
       enableMSearch: true,
-      /* todo enable after data view pr is merged
       allowedSavedObjectAttributes: [
-        'fields',
         'title',
-        'type',
-        'typeMeta',
-        'timeFieldName',
-        'sourceFilters',
-        'fieldFormatMap',
-        'fieldAttrs',
-        'runtimeFieldMap',
-        'allowNoIndex',
-        'name',
+        'sort',
+        'columns',
+        'description',
+        'grid',
+        'hideChart',
+        'isTextBasedQuery',
+        'usesAdHocDataView',
+        'kibanaSavedObjectMeta',
+        'viewMode',
+        'hideAggregatedPreview',
+        'rowHeight',
+        'timeRestore',
+        'timeRange',
+        'refreshInterval',
+        'rowsPerPage',
+        'breakdownField',
       ],
-      */
     });
   }
 }
+// todo make sure these work
+/*
+: {
+  //grid.columns?: Record<string, DiscoverGridSettingsColumn>;
+};
+*/
+
+/* : {
+  'kibanaSavedObjectMeta'.searchSourceJSON: string;
+};
+*/
