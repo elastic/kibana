@@ -6,7 +6,6 @@
  */
 
 import {
-  PersistableStateAttachmentState,
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
 
