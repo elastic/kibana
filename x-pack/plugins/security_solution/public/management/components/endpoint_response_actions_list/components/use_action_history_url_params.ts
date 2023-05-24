@@ -107,8 +107,12 @@ export const actionsLogFiltersFromUrlParams = (
   actionsLogFilters.commands = urlCommands.length ? urlCommands : undefined;
   actionsLogFilters.hosts = urlHosts.length ? urlHosts : undefined;
   actionsLogFilters.statuses = urlStatuses.length ? urlStatuses : undefined;
-  actionsLogFilters.startDate = urlParams.startDate ? String(urlParams.startDate) : undefined;
-  actionsLogFilters.endDate = urlParams.endDate ? String(urlParams.endDate) : undefined;
+  actionsLogFilters.startDate = urlParams.startDate
+    ? String(urlParams.startDate)
+    : actionsLogFilters.startDate;
+  actionsLogFilters.endDate = urlParams.endDate
+    ? String(urlParams.endDate)
+    : actionsLogFilters.endDate;
   actionsLogFilters.users = urlUsers.length ? urlUsers : undefined;
   actionsLogFilters.withOutputs = urlWithOutputs.length ? urlWithOutputs : undefined;
   actionsLogFilters.withAutomatedActions = urlParams.withAutomatedActions ? true : undefined;

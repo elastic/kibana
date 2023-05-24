@@ -20,9 +20,9 @@ describe('#actionsLogFiltersFromUrlParams', () => {
   it('should not use invalid command values from URL params', () => {
     expect(actionsLogFiltersFromUrlParams({ commands: 'asa,was' })).toEqual({
       commands: undefined,
-      endDate: undefined,
+      endDate: 'now',
       hosts: undefined,
-      startDate: undefined,
+      startDate: 'now-24h/h',
       statuses: undefined,
       users: undefined,
     });
@@ -35,9 +35,9 @@ describe('#actionsLogFiltersFromUrlParams', () => {
       })
     ).toEqual({
       commands: getConsoleCommandsAsArray(),
-      endDate: undefined,
+      endDate: 'now',
       hosts: undefined,
-      startDate: undefined,
+      startDate: 'now-24h/h',
       statuses: undefined,
       users: undefined,
     });
@@ -46,9 +46,9 @@ describe('#actionsLogFiltersFromUrlParams', () => {
   it('should not use invalid status values from URL params', () => {
     expect(actionsLogFiltersFromUrlParams({ statuses: 'asa,was' })).toEqual({
       commands: undefined,
-      endDate: undefined,
+      endDate: 'now',
       hosts: undefined,
-      startDate: undefined,
+      startDate: 'now-24h/h',
       statuses: undefined,
       users: undefined,
     });
@@ -61,9 +61,9 @@ describe('#actionsLogFiltersFromUrlParams', () => {
       })
     ).toEqual({
       commands: undefined,
-      endDate: undefined,
+      endDate: 'now',
       hosts: undefined,
-      startDate: undefined,
+      startDate: 'now-24h/h',
       statuses: ['failed', 'pending', 'successful'],
       users: undefined,
     });
@@ -128,9 +128,9 @@ describe('#actionsLogFiltersFromUrlParams', () => {
       })
     ).toEqual({
       commands: undefined,
-      endDate: undefined,
+      endDate: 'now',
       hosts: ['agent-id-1', 'agent-id-2'],
-      startDate: undefined,
+      startDate: 'now-24h/h',
       statuses: undefined,
       users: undefined,
     });
@@ -143,9 +143,9 @@ describe('#actionsLogFiltersFromUrlParams', () => {
       })
     ).toEqual({
       commands: undefined,
-      endDate: undefined,
+      endDate: 'now',
       hosts: undefined,
-      startDate: undefined,
+      startDate: 'now-24h/h',
       statuses: undefined,
       users: ['usernameA', 'usernameB'],
     });
