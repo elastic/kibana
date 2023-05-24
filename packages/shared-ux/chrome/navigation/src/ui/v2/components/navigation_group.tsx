@@ -16,16 +16,16 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { BasePathService, NavigateToUrlFn } from '../../../../types/internal';
-import { useInitNavnode } from '../use_init_navnode';
+import { useInitNavNode } from '../use_init_navnode';
 import { navigationStyles as styles } from '../../../styles';
 import { useNavigation as useServices } from '../../../services';
 import { InternalNavigationNode, NodeProps, RegisterFunction } from '../types';
 
-export const NavigationGroupContext = createContext<Context | undefined>(undefined);
-
 interface Context {
   register: RegisterFunction;
 }
+
+export const NavigationGroupContext = createContext<Context | undefined>(undefined);
 
 export function useNavigationGroup<T extends boolean = true>(
   throwIfNotFound: T = true as T
@@ -102,7 +102,7 @@ interface Props extends NodeProps {
 
 function NavigationGroupComp(props: Props) {
   const { children, defaultIsCollapsed, unstyled = false, ...node } = props;
-  const { navNode, registerChildNode, path, childrenNodes } = useInitNavnode(node);
+  const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node);
 
   const renderContent = useCallback(() => {
     if (!path || !navNode) {

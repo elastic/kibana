@@ -59,7 +59,7 @@ function createInternalNavNode(
   };
 }
 
-export const useInitNavnode = (node: NodeProps) => {
+export const useInitNavNode = (node: NodeProps) => {
   /**
    * Map of children nodes
    */
@@ -78,7 +78,7 @@ export const useInitNavnode = (node: NodeProps) => {
    * This allows us to keep in sync the nav tree sent to the Chrome service
    * with the order of the DOM elements
    */
-  const orderChildrenRef = useRef<Record<string, number>>({});
+  const orderChildrenRef = useRef<Record<InternalNavigationNode['id'], number>>({});
   /**
    * Index to keep track of the order of the children when they mount.
    */
@@ -116,9 +116,13 @@ export const useInitNavnode = (node: NodeProps) => {
   );
 
   const register = useCallback(() => {
+    if (!internalNavNode) {
+      return;
+    }
+
     const childrenChanged = childrenIdsRef.current !== childrenNodeIds;
 
-    if (internalNavNode && (!isRegistered.current || childrenChanged)) {
+    if (!isRegistered.current || childrenChanged) {
       childrenIdsRef.current = childrenNodeIds;
 
       const children = Object.values(childrenNodes).sort((a, b) => {

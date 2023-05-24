@@ -11,12 +11,21 @@ import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { Navigation } from './components';
 
-interface Props {
+/**
+ * @public
+ */
+export interface DefaultNavigationProps {
+  /**
+   * The URL href for the home link
+   */
   homeRef: string;
+  /**
+   * A navigation tree structure with object items containing labels, links, and sub-items
+   */
   navTree: ChromeProjectNavigationNode[];
 }
 
-export const DefaultNavigation: FC<Props> = ({ homeRef, navTree }) => {
+export const DefaultNavigation: FC<DefaultNavigationProps> = ({ homeRef, navTree }) => {
   // Temp logic to demo removing items from the tree
   const [removedItems, setRemovedItems] = useState<Set<string>>(new Set());
 

@@ -9,7 +9,7 @@
 import React, { Fragment } from 'react';
 
 import { NodeProps } from '../types';
-import { useInitNavnode } from '../use_init_navnode';
+import { useInitNavNode } from '../use_init_navnode';
 
 interface Props extends NodeProps {
   element?: string;
@@ -19,7 +19,7 @@ interface Props extends NodeProps {
 
 function NavigationItemComp(props: Props) {
   const { element, unstyled = false, children, ...node } = props;
-  const { navNode } = useInitNavnode(node);
+  const { navNode } = useInitNavNode(node);
 
   if (!navNode || !unstyled) {
     return null;
