@@ -14,3 +14,14 @@ export const rawActionSchema = schema.object({
   config: schema.recordOf(schema.string(), schema.any()),
   secrets: schema.recordOf(schema.string(), schema.any()),
 });
+
+export const rawPreconfiguredActionSchema = schema.object({
+  id: schema.string(),
+  actionTypeId: schema.string(),
+  name: schema.string(),
+  isMissingSecrets: schema.maybe(schema.boolean()),
+  config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  secrets: schema.recordOf(schema.string(), schema.any()),
+  isPreconfigured: schema.boolean(),
+  isDeprecated: schema.boolean(),
+});

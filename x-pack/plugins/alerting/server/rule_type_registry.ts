@@ -283,7 +283,7 @@ export class RuleTypeRegistry {
         paramsSchema: schema.object({
           alertId: schema.string(),
           spaceId: schema.string(),
-          consumer: schema.string(),
+          consumer: schema.maybe(schema.string()),
         }),
       },
     });
