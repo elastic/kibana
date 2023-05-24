@@ -13,14 +13,16 @@ import { EuiFieldSearch } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { TabContent, TabProps } from './shared';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
 import { findInventoryFields } from '../../../../../../../common/inventory_models';
-import { getNodeLogsUrl } from '../../../../../link_to';
 
 const TabComponent = (props: TabProps) => {
+  const { services } = useKibanaContextForPlugin();
+  const { locators } = services;
   const [textQuery, setTextQuery] = useState('');
   const [textQueryDebounced, setTextQueryDebounced] = useState('');
   const endTimestamp = props.currentTime;
@@ -46,14 +48,6 @@ const TabComponent = (props: TabProps) => {
     setTextQuery(e.target.value);
   }, []);
 
-  const nodeLogsMenuItemLinkProps = useLinkProps(
-    getNodeLogsUrl({
-      nodeType,
-      nodeId: node.id,
-      time: startTimestamp,
-    })
-  );
-
   return (
     <TabContent>
       <EuiFlexGroup gutterSize={'m'} alignItems={'center'} responsive={false}>
@@ -70,18 +64,25 @@ const TabComponent = (props: TabProps) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="infraTabComponentOpenInLogsButton"
-            size={'xs'}
-            flush={'both'}
-            iconType={'popout'}
-            {...nodeLogsMenuItemLinkProps}
-          >
-            <FormattedMessage
-              id="xpack.infra.nodeDetails.logs.openLogsLink"
-              defaultMessage="Open in Logs"
-            />
-          </EuiButtonEmpty>
+          <RedirectAppLinks coreStart={services}>
+            <EuiButtonEmpty
+              data-test-subj="infraTabComponentOpenInLogsButton"
+              size={'xs'}
+              flush={'both'}
+              iconType={'popout'}
+              href={locators.nodeLogsLocator.getRedirectUrl({
+                nodeType,
+                nodeId: node.id,
+                time: startTimestamp,
+                filter: textQueryDebounced,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.infra.nodeDetails.logs.openLogsLink"
+                defaultMessage="Open in Logs"
+              />
+            </EuiButtonEmpty>
+          </RedirectAppLinks>
         </EuiFlexItem>
       </EuiFlexGroup>
       <LogStream
