@@ -732,7 +732,7 @@
     "fetch-mock": "^7.3.9",
     "file-loader": "^4.2.0",
     "form-data": "^4.0.0",
-    "geckodriver": "^3.2.0",
+    "geckodriver": "^4.0.0",
     "glob-watcher": "5.0.3",
     "gulp": "4.0.2",
     "gulp-babel": "^8.0.0",
