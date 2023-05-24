@@ -10,6 +10,7 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import { fieldList } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
@@ -172,6 +173,7 @@ export const useFetchIndex = (
               pattern: '',
               includeUnmapped: true,
             });
+            dv.fields = fieldList(fields);
           }
           const { browserFields } = getDataViewStateFromIndexFields(
             iNames,
