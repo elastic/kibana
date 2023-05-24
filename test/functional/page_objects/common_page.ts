@@ -26,7 +26,6 @@ export class CommonPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
-  private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
@@ -394,13 +393,11 @@ export class CommonPageObject extends FtrService {
   }
 
   async isChromeVisible() {
-    const globalNavShown = await this.globalNav.exists();
-    return globalNavShown;
+    return await this.testSubjects.exists('kbnAppWrapper visibleChrome');
   }
 
   async isChromeHidden() {
-    const globalNavShown = await this.globalNav.exists();
-    return !globalNavShown;
+    return await this.testSubjects.exists('kbnAppWrapper hiddenChrome');
   }
 
   async waitForTopNavToBeVisible() {

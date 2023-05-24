@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { deletePermissionError } from '../../synthetics_service/private_location/synthetics_private_location';
 import {
   ConfigKey,
@@ -17,7 +18,6 @@ import {
 } from '../../../common/runtime_types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   formatTelemetryDeleteEvent,

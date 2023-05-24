@@ -179,10 +179,10 @@ export const postprocessAnnotations = (
 
         let extraFields: Record<string, string | number | string[] | number[]> = {};
         if (annotationConfig?.extraFields?.length) {
-          extraFields = annotationConfig.extraFields.reduce(
-            (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
-            {}
-          );
+          extraFields = annotationConfig.extraFields.reduce((acc, field) => {
+            acc[`field:${field}`] = row[fieldsColIdMap[field]];
+            return acc;
+          }, {} as typeof extraFields);
         }
         if (annotationConfig?.textField) {
           extraFields[`field:${annotationConfig.textField}`] =

@@ -89,16 +89,12 @@ async function enhanceData(
   const response = await ruleDataReader?.search(query);
   const buckets: EnhancedDataBucket[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
 
-  const enhancedAlertsDataByEntityName: Record<
-    string,
-    { count: number; oldestAlertTimestamp: string }
-  > = buckets.reduce(
-    (acc, { key, doc_count: count, oldestAlertTimestamp }) => ({
-      ...acc,
-      [key]: { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string },
-    }),
-    {}
-  );
+  const enhancedAlertsDataByEntityName = buckets.reduce<
+    Record<string, { count: number; oldestAlertTimestamp: string }>
+  >((acc, { key, doc_count: count, oldestAlertTimestamp }) => {
+    acc[key] = { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string as string };
+    return acc;
+  }, {});
 
   return data.map((risk) => ({
     ...risk,
