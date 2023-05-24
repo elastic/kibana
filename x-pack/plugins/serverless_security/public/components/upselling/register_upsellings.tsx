@@ -8,8 +8,8 @@ import React from 'react';
 import type { UpsellingService } from '@kbn/security-solution-plugin/public';
 import { SecurityPageName, type AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
-  UpsellingPages,
-  UpsellingSections,
+  PageUpsellings,
+  SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
 import type { ServerlessSecurityPLIs } from '../../../common/config';
@@ -34,7 +34,7 @@ export const registerUpsellings = (
 ) => {
   const PLIsFeatures = getProjectPLIsFeatures(projectPLIs);
 
-  const upsellingPages = getUpsellingPages(projectPLIs).reduce<UpsellingPages>(
+  const upsellingPages = getUpsellingPages(projectPLIs).reduce<PageUpsellings>(
     (pageUpsellings, { pageName, feature, component }) => {
       if (!PLIsFeatures[feature]) {
         pageUpsellings[pageName] = component;
@@ -44,7 +44,7 @@ export const registerUpsellings = (
     {}
   );
 
-  const upsellingSections = getUpsellingSections(projectPLIs).reduce<UpsellingSections>(
+  const upsellingSections = getUpsellingSections(projectPLIs).reduce<SectionUpsellings>(
     (sectionUpsellings, { id, feature, component }) => {
       if (!PLIsFeatures[feature]) {
         sectionUpsellings[id] = component;

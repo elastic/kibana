@@ -11,8 +11,8 @@ import type { PluginSetup, PluginStart } from './types';
 export type { TimelineModel } from './timelines/store/timeline/model';
 export type {
   UpsellingService,
-  UpsellingPages,
-  UpsellingSections,
+  PageUpsellings,
+  SectionUpsellings,
   UpsellingSectionId,
 } from './common/lib/upsellings';
 

@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { SecurityPageName } from '../../../../common';
-import type { UpsellingSections, UpsellingPages, UpsellingSectionId } from './types';
+import type { SectionUpsellings, PageUpsellings, UpsellingSectionId } from './types';
 
 export class UpsellingService {
   private sections: Map<UpsellingSectionId, React.ComponentType>;
@@ -28,14 +28,14 @@ export class UpsellingService {
     this.pages$ = this.pagesSubject$.asObservable();
   }
 
-  registerSections(sections: UpsellingSections) {
+  registerSections(sections: SectionUpsellings) {
     Object.entries(sections).forEach(([sectionId, component]) => {
       this.sections.set(sectionId as UpsellingSectionId, component);
     });
     this.sectionsSubject$.next(this.sections);
   }
 
-  registerPages(pages: UpsellingPages) {
+  registerPages(pages: PageUpsellings) {
     Object.entries(pages).forEach(([pageId, component]) => {
       this.pages.set(pageId as SecurityPageName, component);
     });
