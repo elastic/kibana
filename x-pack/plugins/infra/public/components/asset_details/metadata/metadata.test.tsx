@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Metadata, MetadataProps } from './metadata';
+import { Metadata, type MetadataProps } from './metadata';
 
 import { useMetadata } from '../hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';

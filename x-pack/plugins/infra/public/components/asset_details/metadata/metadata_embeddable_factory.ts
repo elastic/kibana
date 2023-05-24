@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { InfraClientStartServicesAccessor } from '../../../types';
+import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import type { InfraClientStartServicesAccessor } from '../../../types';
 import {
   MetadataEmbeddable,
   MetadataEmbeddableInput,

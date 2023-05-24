@@ -32,11 +32,11 @@ export enum FlyoutTabIds {
   PROCESSES = 'processes',
 }
 
-export type TabIds = 'metadata' | 'processes';
+export type TabIds = `${FlyoutTabIds}`;
 
 export interface Tab {
   id: FlyoutTabIds;
-  name: any;
+  name: string;
   'data-test-subj': string;
 }
 
@@ -142,7 +142,7 @@ export const AssetDetails = ({
         <EuiSpacer size="l" />
         <EuiTabs
           css={css`
-            margin-bottom: 25px;
+            margin-right: ${euiTheme.size.l};
           `}
           size="l"
         >

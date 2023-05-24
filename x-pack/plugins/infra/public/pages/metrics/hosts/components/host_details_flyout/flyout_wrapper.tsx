@@ -10,19 +10,14 @@ import type { InventoryItemType } from '../../../../../../common/inventory_model
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import { FlyoutTabIds, useHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
+import type { Tab } from '../../../../../components/asset_details/asset_details';
+import { useHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
 import { metadataTab, processesTab } from './tabs';
 
 export interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
-}
-
-export interface Tab {
-  id: FlyoutTabIds.METADATA | FlyoutTabIds.PROCESSES;
-  name: any;
-  'data-test-subj': string;
 }
 
 const NODE_TYPE = 'host' as InventoryItemType;
