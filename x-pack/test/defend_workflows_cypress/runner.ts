@@ -74,7 +74,7 @@ function startDefendWorkflowsCypress(
 ) {
   const config = context.getService('config');
 
-  const env = {
+  return {
     FORCE_COLOR: '1',
     ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
@@ -89,6 +89,4 @@ function startDefendWorkflowsCypress(
     }),
     ENDPOINT_VM_NAME: runnerEnv?.agentVmName,
   };
-
-  return env;
 }

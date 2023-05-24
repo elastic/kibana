@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
@@ -241,7 +242,14 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible').click();
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
+  recurse(
+    () => {
+      cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).click();
+      return cy.root();
+    },
+    ($el) => $el.find(HOVER_ACTIONS.ADD_TO_TIMELINE).length === 0
+  );
 };
 
 export const addNewCase = () => {
