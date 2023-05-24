@@ -29,15 +29,6 @@ describe('applyTypeDefaults', () => {
       expect(result.switchToModelVersionAt).toEqual('8.4.0');
     });
 
-    it(`sets switchToModelVersionAt to the global version if type version is greater than the global version`, () => {
-      const type = createType({
-        switchToModelVersionAt: '9.2.0',
-      });
-
-      const result = applyTypeDefaults(type);
-      expect(result.switchToModelVersionAt).toEqual(globalSwitchToModelVersionAt);
-    });
-
     it(`sets switchToModelVersionAt to the global version if unspecified`, () => {
       const type = createType({
         switchToModelVersionAt: undefined,
@@ -47,13 +38,24 @@ describe('applyTypeDefaults', () => {
       expect(result.switchToModelVersionAt).toEqual(globalSwitchToModelVersionAt);
     });
 
-    it(`sets switchToModelVersionAt to the global version if invalid`, () => {
+    it(`throws if switchToModelVersionAt is invalid`, () => {
       const type = createType({
         switchToModelVersionAt: 'foobar',
       });
 
-      const result = applyTypeDefaults(type);
-      expect(result.switchToModelVersionAt).toEqual(globalSwitchToModelVersionAt);
+      expect(() => applyTypeDefaults(type)).toThrowErrorMatchingInlineSnapshot(
+        `"Type test: invalid switchToModelVersionAt provided: foobar"`
+      );
+    });
+
+    it(`throws if type version is greater than the global version`, () => {
+      const type = createType({
+        switchToModelVersionAt: '9.2.0',
+      });
+
+      expect(() => applyTypeDefaults(type)).toThrowErrorMatchingInlineSnapshot(
+        `"Type test: provided switchToModelVersionAt (9.2.0) is higher than maximum (8.10.0)"`
+      );
     });
   });
 });

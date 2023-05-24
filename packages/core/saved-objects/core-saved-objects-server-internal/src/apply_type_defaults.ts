@@ -15,11 +15,18 @@ import { globalSwitchToModelVersionAt } from '@kbn/core-saved-objects-base-serve
  */
 export const applyTypeDefaults = (type: SavedObjectsType): SavedObjectsType => {
   let switchToModelVersionAt = type.switchToModelVersionAt;
-  if (
-    !switchToModelVersionAt ||
-    !Semver.valid(switchToModelVersionAt) ||
-    Semver.gt(switchToModelVersionAt, globalSwitchToModelVersionAt)
-  ) {
+  if (switchToModelVersionAt) {
+    if (!Semver.valid(switchToModelVersionAt)) {
+      throw new Error(
+        `Type ${type.name}: invalid switchToModelVersionAt provided: ${switchToModelVersionAt}`
+      );
+    }
+    if (Semver.gt(switchToModelVersionAt, globalSwitchToModelVersionAt)) {
+      throw new Error(
+        `Type ${type.name}: provided switchToModelVersionAt (${switchToModelVersionAt}) is higher than maximum (${globalSwitchToModelVersionAt})`
+      );
+    }
+  } else {
     switchToModelVersionAt = globalSwitchToModelVersionAt;
   }
 
