@@ -177,7 +177,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
         await pageObjects.timeline.setDateRange('Last 1 year');
-        await pageObjects.timeline.waitForEvents(60_000);
+        await pageObjects.timeline.waitForEvents(MAX_WAIT_FOR_ALERTS_TIMEOUT);
 
         // Show event/alert details for the first one in the list
         await pageObjects.timeline.showEventDetails();
@@ -217,7 +217,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.detections.navigateToAlerts(
           `query=(language:kuery,query:'host.hostname: "${hostname}" ')`
         );
-        await pageObjects.detections.waitForListToHaveAlerts();
+        await pageObjects.detections.waitForListToHaveAlerts(MAX_WAIT_FOR_ALERTS_TIMEOUT);
         await pageObjects.detections.openFirstAlertDetailsForHostName(hostname);
         await pageObjects.detections.openResponseConsoleFromAlertDetails();
         await performResponderSanityChecks();
