@@ -39,7 +39,7 @@ describe('fleet authz', () => {
         writePolicyManagement: false,
         readPolicyManagement: true,
         writeHostIsolationExceptions: true,
-        writeHostIsolation: false,
+        writeIsolateHost: false,
       };
 
       const transformCapabilities = {
@@ -82,7 +82,7 @@ describe('fleet authz', () => {
         { privilege: `${SECURITY_SOLUTION_ID}-writePolicyManagement`, authorized: false },
         { privilege: `${SECURITY_SOLUTION_ID}-readPolicyManagement`, authorized: true },
         { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolationExceptions`, authorized: true },
-        { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolation`, authorized: false },
+        { privilege: `${SECURITY_SOLUTION_ID}-writeIsolateHost`, authorized: false },
         { privilege: `${SECURITY_SOLUTION_ID}-ignoreMe`, authorized: true },
         { privilege: `${TRANSFORM_PLUGIN_ID}-admin`, authorized: true },
         { privilege: `${TRANSFORM_PLUGIN_ID}-read`, authorized: true },
@@ -95,7 +95,7 @@ describe('fleet authz', () => {
             writePolicyManagement: false,
             readPolicyManagement: true,
             writeHostIsolationExceptions: true,
-            writeHostIsolation: false,
+            writeIsolateHost: false,
           }),
         },
         transform: {
