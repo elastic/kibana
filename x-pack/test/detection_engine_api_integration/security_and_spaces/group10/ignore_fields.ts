@@ -12,7 +12,7 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getEqlRuleForSignalTesting,
   getSignalsById,
   waitForRuleSuccess,
@@ -51,6 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const supertest = getService('supertest');
     const esArchiver = getService('esArchiver');
     const log = getService('log');
+    const es = getService('es');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ignore_fields');
@@ -65,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

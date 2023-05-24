@@ -28,7 +28,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = React.memo(
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [field.path] });
 
-    const selected = getSelected(form, field.path);
+    const { selected, utcOffset } = getSelected(form, field.path);
 
     const onChange = useCallback(
       (currentDate: Moment | null) => {
@@ -45,6 +45,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = React.memo(
           selected={selected}
           onChange={onChange}
           minDate={today}
+          utcOffset={utcOffset}
           fullWidth
         />
       </EuiFormRow>

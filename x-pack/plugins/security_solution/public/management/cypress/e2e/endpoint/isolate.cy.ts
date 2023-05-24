@@ -12,7 +12,6 @@ import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
   checkFlyoutEndpointIsolation,
-  createAgentPolicyTask,
   filterOutEndpoints,
   filterOutIsolatedHosts,
   isolateHostWithComment,
@@ -28,6 +27,7 @@ import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
+  createAgentPolicyTask,
   getAgentByHostName,
   getEndpointIntegrationVersion,
   reassignAgentPolicy,
