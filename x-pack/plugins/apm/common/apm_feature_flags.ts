@@ -54,7 +54,7 @@ const apmFeatureFlagMap = {
     type: t.boolean,
   },
   [ApmFeatureFlagName.StorageExplorerAvailable]: {
-    default: false,
+    default: true,
     type: t.boolean,
   },
 };

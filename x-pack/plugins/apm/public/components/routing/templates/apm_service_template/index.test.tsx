@@ -45,18 +45,19 @@ describe('APM service template', () => {
   describe('isInfraTabHidden', () => {
     describe('hides infra tab', () => {
       [
-        { agentName: undefined, isInfraTabAvailable: false },
-        { agentName: 'js-base', isInfraTabAvailable: false },
-        { agentName: 'rum-js', isInfraTabAvailable: false },
-        { agentName: 'opentelemetry/webjs', isInfraTabAvailable: false },
+        { agentName: undefined, isInfraTabAvailable: true },
+        { agentName: 'js-base', isInfraTabAvailable: true },
+        { agentName: 'rum-js', isInfraTabAvailable: true },
+        { agentName: 'opentelemetry/webjs', isInfraTabAvailable: true },
         {
           serverlessType: ServerlessType.AWS_LAMBDA,
-          isInfraTabAvailable: false,
+          isInfraTabAvailable: true,
         },
         {
           serverlessType: ServerlessType.AZURE_FUNCTIONS,
-          isInfraTabAvailable: false,
+          isInfraTabAvailable: true,
         },
+        { agentName: 'nodejs', isInfraTabAvailable: false },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isInfraTabHidden(input)).toBeTruthy();
