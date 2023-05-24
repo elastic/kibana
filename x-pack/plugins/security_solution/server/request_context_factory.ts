@@ -25,6 +25,7 @@ import type {
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
+import type { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -42,6 +43,7 @@ interface ConstructorOptions {
   ruleExecutionLogService: IRuleExecutionLogService;
   kibanaVersion: string;
   kibanaBranch: string;
+  riskEngineDataClient: RiskEngineDataClient;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -56,7 +58,14 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, core, plugins, endpointAppContextService, ruleExecutionLogService } = options;
+    const {
+      config,
+      core,
+      plugins,
+      endpointAppContextService,
+      ruleExecutionLogService,
+      riskEngineDataClient,
+    } = options;
     const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
@@ -115,6 +124,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       },
 
       getInternalFleetServices: memoize(() => endpointAppContextService.getInternalFleetServices()),
+
+      getRiskEngineDataClient: () => riskEngineDataClient,
     };
   }
 }

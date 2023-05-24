@@ -106,6 +106,7 @@ import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
+import { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -128,6 +129,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
+  private riskEngineDataClient: RiskEngineDataClient | undefined;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -169,6 +171,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
 
+    this.riskEngineDataClient = new RiskEngineDataClient({
+      logger: this.logger,
+      kibanaVersion: this.pluginContext.env.packageInfo.version,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+    });
+
+    this.riskEngineDataClient.initializeResources({});
+
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -178,6 +190,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleExecutionLogService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
+      riskEngineDataClient: this.riskEngineDataClient,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();

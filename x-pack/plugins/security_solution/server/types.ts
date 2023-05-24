@@ -26,6 +26,7 @@ import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_mon
 import type { FrameworkRequest } from './lib/framework';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import type { EndpointInternalFleetServicesInterface } from './endpoint/services/fleet';
+import type { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
 
 export { AppClient };
 
@@ -41,6 +42,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
+  getRiskEngineDataClient: () => RiskEngineDataClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
