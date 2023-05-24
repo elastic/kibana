@@ -14,8 +14,6 @@ import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/opera
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
-// @ts-ignore types not available
-import geckoDriver from 'geckodriver';
 import { Builder, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
@@ -252,7 +250,7 @@ async function attemptToCreateCommand(
           const session = await new Builder()
             .forBrowser(browserType)
             .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+            .setFirefoxService(new firefox.ServiceBuilder())
             .build();
           return {
             session,
@@ -266,9 +264,7 @@ async function attemptToCreateCommand(
         const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(
-            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
-          )
+          .setFirefoxService(new firefox.ServiceBuilder().setStdio(['ignore', input, 'ignore']))
           .build();
 
         const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
