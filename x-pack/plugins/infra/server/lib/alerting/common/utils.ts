@@ -149,16 +149,13 @@ export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
 export const getAlertUrl = async (
   alertUuid: string | null,
   spaceId: string,
-  startedAt: string | null,
+  startedAt: string,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>,
   publicBaseUrl?: string
 ) => {
   if (!publicBaseUrl || !alertsLocator || !alertUuid) return '';
 
-  const rangeFrom =
-    startedAt && moment(startedAt).isBefore(moment().subtract(15, 'minute').toISOString())
-      ? moment(startedAt).subtract('5', 'minute').toISOString()
-      : undefined;
+  const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
 
   return (
     await alertsLocator.getLocation({
