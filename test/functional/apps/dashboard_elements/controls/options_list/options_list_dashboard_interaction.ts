@@ -16,7 +16,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_DASHBOARD_NAME } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'header',
     ]);
 
-  describe.only('Interactions between options list and dashboard', () => {
+  describe('Interactions between options list and dashboard', () => {
     let controlId: string;
 
     const returnToDashboard = async () => {
