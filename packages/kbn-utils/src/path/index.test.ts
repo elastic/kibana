@@ -55,7 +55,7 @@ describe('Custom data path finder', () => {
     process.argv = originalArgv;
   });
 
-  it('overrides path.data when provided as command line argument', () => {
+  it('overrides absolute path.data when provided as command line argument', () => {
     process.argv = ['--foo', 'bar', '--path.data', '/some/data/path', '--baz', 'xyz'];
 
     /*
@@ -64,7 +64,23 @@ describe('Custom data path finder', () => {
      */
     expect(buildDataPaths()).toMatchInlineSnapshot(`
       Array [
-        <absolute path>/some/data/path,
+        "/some/data/path",
+        <absolute path>/data,
+        "/var/lib/kibana",
+      ]
+    `);
+  });
+
+  it('overrides relative path.data when provided as command line argument', () => {
+    process.argv = ['--foo', 'bar', '--path.data', 'data2', '--baz', 'xyz'];
+
+    /*
+     * Test buildDataPaths since getDataPath returns the first valid directory and
+     * custom paths do not exist in environment. Custom directories are built during env init.
+     */
+    expect(buildDataPaths()).toMatchInlineSnapshot(`
+      Array [
+        <absolute path>/data2,
         <absolute path>/data,
         "/var/lib/kibana",
       ]
@@ -82,12 +98,12 @@ describe('Custom data path finder', () => {
     `);
   });
 
-  it('overrides path.when when provided by kibana.yml', () => {
+  it('overrides absolute path.data when when provided by kibana.yml', () => {
     process.env.KBN_PATH_CONF = join(__dirname, '__fixtures__');
 
     expect(buildDataPaths()).toMatchInlineSnapshot(`
       Array [
-        <absolute path>/path/from/yml,
+        "/path/from/yml",
         <absolute path>/data,
         "/var/lib/kibana",
       ]

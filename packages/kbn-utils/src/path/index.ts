@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -54,8 +54,8 @@ export const buildDataPaths = (): string[] => {
   });
 
   return [
-    !!options.pathData && join(REPO_ROOT, options.pathData),
-    configDataPath && join(REPO_ROOT, configDataPath),
+    !!options.pathData && resolve(REPO_ROOT, options.pathData),
+    configDataPath && resolve(REPO_ROOT, configDataPath),
     join(REPO_ROOT, 'data'),
     '/var/lib/kibana',
   ].filter(isString);
