@@ -22,5 +22,10 @@
     "@kbn/unified-search-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
+    "@kbn/dom-drag-drop",
+    "@kbn/unified-field-list-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
   ]
 }
