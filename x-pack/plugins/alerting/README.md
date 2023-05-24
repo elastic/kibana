@@ -709,7 +709,7 @@ When a user is granted the `all` role in the Alerting Framework, they will be ab
 
 Finally, all users, whether they're granted any role or not, are privileged to call the following:
 
-- `listAlertTypes`, but the output is limited to displaying the rule types the user is privileged to `get`.
+- `listRuleTypes`, but the output is limited to displaying the rule types the user is privileged to `get`.
 
 Attempting to execute any operation the user isn't privileged to execute will result in an Authorization error thrown by the RulesClient.
 
