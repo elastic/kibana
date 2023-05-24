@@ -51,9 +51,9 @@ const tabs = [
     }),
   },
   {
-    id: 'resource',
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.resourceTabTitle', {
-      defaultMessage: 'Resource',
+    id: 'table',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.tableTabTitle', {
+      defaultMessage: 'Table',
     }),
   },
   {
@@ -109,7 +109,7 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
       return <OverviewTab data={findings} />;
     case 'rule':
       return <RuleTab data={findings} />;
-    case 'resource':
+    case 'table':
       return <TableTab data={findings} />;
     case 'json':
       return <JsonTab data={findings} />;

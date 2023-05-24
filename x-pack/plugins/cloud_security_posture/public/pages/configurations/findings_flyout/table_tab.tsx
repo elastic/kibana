@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 interface FlattenedItem {
-  key: string; // flattened dot notation object path for CspFinding['resource'];
+  key: string; // flattened dot notation object path for CspFinding;
   value: unknown;
 }
 
