@@ -10,12 +10,10 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
+import { map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
-// @ts-ignore types not available
-import geckoDriver from 'geckodriver';
 import { Builder, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
@@ -28,7 +26,6 @@ import { installDriver } from 'ms-chromium-edge-driver';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { pollForLogEntry$ } from './poll_for_log_entry';
-import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
@@ -230,9 +227,10 @@ async function attemptToCreateCommand(
       case 'firefox': {
         const firefoxOptions = new firefox.Options();
         // Firefox 65+ supports logging console output to stdout
-        firefoxOptions.set('moz:firefoxOptions', {
-          prefs: { 'devtools.console.stdout.content': true },
-        });
+        // firefoxOptions.set('moz:firefoxOptions', {
+        //   prefs: { 'devtools.console.stdout.content': true },
+        // });
+        firefoxOptions.setPreference('dom.always_stop_slow_scripts', true);
         firefoxOptions.setPreference('browser.download.folderList', 2);
         firefoxOptions.setPreference('browser.download.manager.showWhenStarting', false);
         firefoxOptions.setPreference('browser.download.dir', downloadDir);
@@ -240,60 +238,68 @@ async function attemptToCreateCommand(
           'browser.helperApps.neverAsk.saveToDisk',
           'application/comma-separated-values, text/csv, text/plain'
         );
+        firefoxOptions.setPreference('dom.ipc.processCount', 8);
         firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
-          // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
+          // See: https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/
           firefoxOptions.headless();
         }
-
-        // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
-        if (process.platform === 'win32') {
-          const session = await new Builder()
-            .forBrowser(browserType)
-            .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
-            .build();
-          return {
-            session,
-            consoleLog$: Rx.EMPTY,
-          };
-        }
-
-        const { input, chunk$, cleanup } = await createStdoutSocket();
-        lifecycle.cleanup.add(cleanup);
 
         const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
           .setFirefoxService(
-            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
+            new firefox.ServiceBuilder()
+            // .enableVerboseLogging().setStdio('inherit')
+            // .addArguments('--host', '::1')
           )
           .build();
-
-        const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
-
         return {
           session,
-          consoleLog$: chunk$.pipe(
-            map((chunk) => chunk.toString('utf8')),
-            mergeMap((msg) => {
-              const match = msg.match(CONSOLE_LINE_RE);
-              if (!match) {
-                log.debug('Firefox stdout: ' + msg);
-                return [];
-              }
-
-              const [, level, message] = match;
-              return [
-                {
-                  level,
-                  message: message.trim(),
-                },
-              ];
-            })
-          ),
+          consoleLog$: Rx.EMPTY,
         };
+        // }
+
+        // log.error(`not starting driver`);
+
+        // const { input, chunk$, cleanup } = await createStdoutSocket();
+        // lifecycle.cleanup.add(cleanup);
+
+        // const ffService = new firefox.ServiceBuilder(geckoDriver.path);
+
+        // const session = await new Builder()
+        //   .forBrowser(browserType)
+        //   .setFirefoxOptions(firefoxOptions)
+        //   .setFirefoxService(
+        //     new firefox.ServiceBuilder(geckoDriver.path).setHostname('127.0.0.1')
+        //     // .setStdio(['ignore', input, 'ignore'])
+        //   )
+        //   .build();
+
+        // const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
+
+        // return {
+        //   session,
+        //   consoleLog$: chunk$.pipe(
+        //     map((chunk) => chunk.toString('utf8')),
+        //     mergeMap((msg) => {
+        //       const match = msg.match(CONSOLE_LINE_RE);
+        //       if (!match) {
+        //         log.debug('Firefox stdout: ' + msg);
+        //         return [];
+        //       }
+
+        //       const [, level, message] = match;
+        //       return [
+        //         {
+        //           level,
+        //           message: message.trim(),
+        //         },
+        //       ];
+        //     })
+        //   ),
+        // };
       }
 
       default:

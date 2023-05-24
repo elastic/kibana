@@ -35,12 +35,16 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
   const caps = await driver.getCapabilities();
 
-  log.info(`Remote initialized: ${caps.get('browserName')} ${caps.get('browserVersion')}}`);
+  log.info(`Running testing in ${caps.get('browserName')} ${caps.get('browserVersion')}`);
 
   if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
     log.info(
       `${browserType}driver version: ${caps.get(browserType)[`${browserType}driverVersion`]}`
     );
+  }
+
+  if (Browsers.Firefox === browserType) {
+    log.info(`Geckodriver version: ${caps.get('moz:geckodriverVersion')}`);
   }
 
   consoleLog$.subscribe({
@@ -60,6 +64,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
+    await driver.manage().window().setRect({ width: 1600, height: 1000 });
     windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 
