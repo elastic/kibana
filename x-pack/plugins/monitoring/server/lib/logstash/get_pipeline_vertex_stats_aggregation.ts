@@ -59,7 +59,7 @@ function scalarCounterAggregation(
 }
 
 function createAggsObjectFromAggsList(aggsList: any) {
-  return aggsList.reduce((aggsSoFar: object, agg: object) => ({ ...aggsSoFar, ...agg }), {});
+  return aggsList.reduce((aggsSoFar: object, agg: object) => Object.assign(aggsSoFar, agg), {});
 }
 
 function createNestedVertexAgg(statsPath: string, vertexId: string, maxBucketSize: number) {

@@ -525,16 +525,17 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           isLoading={policiesIsLoading}
           isPlatinumPlus={isPlatinumPlus}
           onChange={handleOnPolicyChange}
-          data-test-subj={'effectedPolicies-select'}
+          data-test-subj={getTestId('effectedPolicies')}
         />
       ),
       [
-        policies,
         selectedPolicies,
+        policies,
         isGlobal,
+        policiesIsLoading,
         isPlatinumPlus,
         handleOnPolicyChange,
-        policiesIsLoading,
+        getTestId,
       ]
     );
 

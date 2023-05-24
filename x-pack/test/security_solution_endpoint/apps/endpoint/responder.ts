@@ -121,7 +121,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('from timeline', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/139260
+    describe.skip('from timeline', () => {
       let timeline: TimelineResponse;
       let indexedAlerts: IndexedEndpointRuleAlerts;
 

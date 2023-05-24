@@ -27,7 +27,6 @@ import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
-import { initUsageCollectors } from './usage';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
 import type { ConfigType } from '../common/config';
@@ -78,11 +77,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     };
 
     initSavedObjects(core.savedObjects);
-    initUsageCollectors({
-      core,
-      osqueryContext,
-      usageCollection: plugins.usageCollection,
-    });
 
     this.createActionService = createActionService(osqueryContext);
 

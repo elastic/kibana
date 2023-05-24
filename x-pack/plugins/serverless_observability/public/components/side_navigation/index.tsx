@@ -6,6 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   ChromeNavigationNodeViewModel,
   Navigation,
@@ -91,25 +92,27 @@ const navItems: ChromeNavigationNodeViewModel[] = [
   },
 ];
 
-export const getObservabilitySideNavComponent = (core: CoreStart) => () => {
-  const activeNavItemId = 'observability_project_nav.root';
+export const getObservabilitySideNavComponent =
+  (core: CoreStart, { serverless }: { serverless: ServerlessPluginStart }) =>
+  () => {
+    const activeNavItemId = 'observability_project_nav.root';
 
-  return (
-    <NavigationKibanaProvider core={core}>
-      <Navigation
-        navigationTree={[
-          {
-            id: 'observability_project_nav',
-            items: navItems,
-            title: 'Observability',
-            icon: 'logoObservability',
-          },
-        ]}
-        activeNavItemId={activeNavItemId}
-        homeHref="/app/enterprise_search/content/setup_guide"
-        linkToCloud="projects"
-        platformConfig={{ devTools: { enabled: false } }}
-      />
-    </NavigationKibanaProvider>
-  );
-};
+    return (
+      <NavigationKibanaProvider core={core} serverless={serverless}>
+        <Navigation
+          navigationTree={[
+            {
+              id: 'observability_project_nav',
+              items: navItems,
+              title: 'Observability',
+              icon: 'logoObservability',
+            },
+          ]}
+          activeNavItemId={activeNavItemId}
+          homeHref="/app/enterprise_search/content/setup_guide"
+          linkToCloud="projects"
+          platformConfig={{ devTools: { enabled: false } }}
+        />
+      </NavigationKibanaProvider>
+    );
+  };

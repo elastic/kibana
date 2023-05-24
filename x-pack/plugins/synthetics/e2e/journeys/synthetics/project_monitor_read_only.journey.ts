@@ -6,15 +6,17 @@
  */
 
 import { after, before, expect, journey, step } from '@elastic/synthetics';
+import { SyntheticsServices } from './services/synthetics_services';
 import { recordVideo } from '../../helpers/record_video';
 import { cleanTestMonitors, enableMonitorManagedViaApi } from './services/add_monitor';
-import { getMonitor } from './services/get_monitor';
 import { addTestMonitorProject } from './services/add_monitor_project';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { SyntheticsMonitor } from '../../../common/runtime_types';
 
-journey('Project Monitor Read-only', async ({ page, params }) => {
+journey('ProjectMonitorReadOnly', async ({ page, params }) => {
   recordVideo(page);
+
+  const services = new SyntheticsServices(params);
 
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   let originalMonitorConfiguration: SyntheticsMonitor | null;
@@ -52,12 +54,13 @@ journey('Project Monitor Read-only', async ({ page, params }) => {
   step('Confirm configuration is read-only', async () => {
     await page.waitForSelector('text=read-only');
     monitorId = new URL(await page.url()).pathname.split('/').at(-1) || '';
-    originalMonitorConfiguration = await getMonitor(params.kibanaUrl, monitorId);
+    originalMonitorConfiguration = await services.getMonitor(monitorId);
+    expect(originalMonitorConfiguration).not.toBeNull();
   });
 
   step('Monitor configuration is unchanged when saved', async () => {
     await syntheticsApp.confirmAndSave(true);
-    const newConfiguration = await getMonitor(params.kibanaUrl, monitorId);
+    const newConfiguration = await services.getMonitor(monitorId);
 
     // hash is always reset to empty string when monitor is edited
     // this ensures that when the monitor is pushed again, the monitor
@@ -74,7 +77,7 @@ journey('Project Monitor Read-only', async ({ page, params }) => {
     await page.click('[data-test-subj="syntheticsAlertStatusSwitch"]');
 
     await syntheticsApp.confirmAndSave(true);
-    const newConfiguration = await getMonitor(params.kibanaUrl, monitorId);
+    const newConfiguration = await services.getMonitor(monitorId);
 
     // hash is always reset to empty string when monitor is edited
     // this ensures that when the monitor is pushed again, the monitor
@@ -94,7 +97,7 @@ journey('Project Monitor Read-only', async ({ page, params }) => {
 
   step('Monitor can be repushed and overwrite any changes', async () => {
     await addTestMonitorProject(params.kibanaUrl, monitorName);
-    const repushedConfiguration = await getMonitor(params.kibanaUrl, monitorId);
+    const repushedConfiguration = await services.getMonitor(monitorId);
     expect(repushedConfiguration).toEqual({
       ...originalMonitorConfiguration,
       revision: 4,

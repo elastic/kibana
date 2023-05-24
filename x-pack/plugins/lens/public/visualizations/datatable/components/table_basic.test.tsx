@@ -15,13 +15,15 @@ import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/c
 import { VisualizationContainer } from '../../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DataContext, DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
+
+const { theme: setUpMockTheme } = coreMock.createSetup();
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -112,7 +114,7 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          theme={setUpMockTheme}
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
@@ -135,7 +137,7 @@ describe('DatatableComponent', () => {
           rowHasRowClickTriggerActions={[true, true, true]}
           renderMode="edit"
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          theme={setUpMockTheme}
           interactive
           renderComplete={renderComplete}
         />
@@ -155,7 +157,7 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          theme={setUpMockTheme}
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
@@ -178,7 +180,7 @@ describe('DatatableComponent', () => {
           rowHasRowClickTriggerActions={[false, false, false]}
           renderMode="view"
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          theme={setUpMockTheme}
           interactive
           renderComplete={renderComplete}
         />
@@ -198,7 +200,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
         columnFilterable={[true, true, true]}
@@ -239,7 +241,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
         columnFilterable={[true, true, true]}
@@ -315,7 +317,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
         columnFilterable={[true, true, true]}
@@ -356,7 +358,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive={false}
         renderComplete={renderComplete}
         columnFilterable={[true, true, true]}
@@ -388,7 +390,7 @@ describe('DatatableComponent', () => {
         )}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -413,7 +415,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -465,7 +467,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -497,7 +499,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -527,7 +529,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -574,7 +576,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -602,7 +604,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -641,7 +643,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -678,7 +680,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -715,7 +717,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -751,7 +753,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
       />
@@ -776,7 +778,7 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          theme={setUpMockTheme}
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
@@ -814,7 +816,7 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          theme={setUpMockTheme}
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
@@ -863,7 +865,7 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          theme={setUpMockTheme}
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
@@ -889,7 +891,7 @@ describe('DatatableComponent', () => {
         dispatchEvent: onDispatchEvent,
         getType: jest.fn(),
         paletteService: chartPluginMock.createPaletteRegistry(),
-        uiSettings: { get: jest.fn() } as unknown as IUiSettingsClient,
+        theme: setUpMockTheme,
         renderMode: 'edit' as RenderMode,
         interactive: true,
         renderComplete,
@@ -926,7 +928,7 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          theme={setUpMockTheme}
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
