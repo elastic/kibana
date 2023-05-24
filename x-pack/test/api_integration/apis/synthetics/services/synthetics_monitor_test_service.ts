@@ -6,7 +6,7 @@
  */
 
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
@@ -15,6 +15,16 @@ export class SyntheticsMonitorTestService {
 
   constructor(getService: FtrProviderContext['getService']) {
     this.supertest = getService('supertest');
+  }
+
+  async getMonitor(monitorId: string, decrypted: boolean = true, space?: string) {
+    let url =
+      API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
+      (decrypted ? '?decrypted=true' : '');
+    if (space) {
+      url = '/s/' + space + url;
+    }
+    return this.supertest.get(url).set('kbn-xsrf', 'true').expect(200);
   }
 
   async addProjectMonitors(project: string, monitors: any) {
