@@ -4,19 +4,10 @@ steps:
     timeout_in_minutes: 10
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
-      minCpuPlatform: 'Intel Cascade Lake'
-
-  - command: git clone https://github.com/elastic/kibana-buildkite.git; ls -alh .
-    label: Test Git Clone
-    agents:
-      provider: gcp
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
-      minCpuPlatform: 'Intel Cascade Lake'
 
   - wait
 
@@ -24,10 +15,10 @@ steps:
     label: Build Kibana Distribution and Plugins
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-16
-      minCpuPlatform: 'Intel Cascade Lake'
       buildDirectory: /dev/shm/bk
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
@@ -41,10 +32,10 @@ steps:
     label: 'Build API Docs'
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-4
-      minCpuPlatform: 'Intel Cascade Lake'
     key: build_api_docs
     timeout_in_minutes: 60
     retry:
@@ -56,10 +47,10 @@ steps:
     label: Mark CI Stats as ready
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
-      minCpuPlatform: 'Intel Cascade Lake'
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -73,10 +64,10 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
-      minCpuPlatform: 'Intel Cascade Lake'
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
@@ -90,10 +81,10 @@ steps:
     label: 'Linting'
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-8
-      minCpuPlatform: 'Intel Cascade Lake'
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -105,10 +96,10 @@ steps:
     label: 'Linting (with types)'
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-16
-      minCpuPlatform: 'Intel Cascade Lake'
       buildDirectory: /dev/shm/bk
     key: linting_with_types
     timeout_in_minutes: 90
@@ -121,10 +112,10 @@ steps:
     label: 'Checks'
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
-      minCpuPlatform: 'Intel Cascade Lake'
       buildDirectory: /dev/shm/bk
     timeout_in_minutes: 60
     retry:
@@ -136,10 +127,10 @@ steps:
     label: 'Check Types'
     agents:
       provider: gcp
+      preemptible: true
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-16
-      minCpuPlatform: 'Intel Cascade Lake'
       buildDirectory: /dev/shm/bk
     timeout_in_minutes: 60
     retry:
