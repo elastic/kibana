@@ -25,7 +25,7 @@ const assertLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandler
 };
 
 const createCompositeSLORoute = createObservabilityServerRoute({
-  endpoint: 'POST /api/observability/composite_slos',
+  endpoint: 'POST /api/observability/composite_slos 2023-05-24',
   options: {
     tags: ['access:slo_write'],
   },
@@ -38,7 +38,7 @@ const createCompositeSLORoute = createObservabilityServerRoute({
 });
 
 const updateCompositeSLORoute = createObservabilityServerRoute({
-  endpoint: 'PUT /api/observability/composite_slos/{id}',
+  endpoint: 'PUT /api/observability/composite_slos/{id} 2023-05-24',
   options: {
     tags: ['access:slo_write'],
   },
@@ -51,7 +51,7 @@ const updateCompositeSLORoute = createObservabilityServerRoute({
 });
 
 const deleteCompositeSLORoute = createObservabilityServerRoute({
-  endpoint: 'DELETE /api/observability/composite_slos/{id}',
+  endpoint: 'DELETE /api/observability/composite_slos/{id} 2023-05-24',
   options: {
     tags: ['access:slo_write'],
   },
@@ -64,7 +64,7 @@ const deleteCompositeSLORoute = createObservabilityServerRoute({
 });
 
 const getCompositeSLORoute = createObservabilityServerRoute({
-  endpoint: 'GET /api/observability/composite_slos/{id}',
+  endpoint: 'GET /api/observability/composite_slos/{id} 2023-05-24',
   options: {
     tags: ['access:slo_read'],
   },
@@ -77,7 +77,7 @@ const getCompositeSLORoute = createObservabilityServerRoute({
 });
 
 const findCompositeSLORoute = createObservabilityServerRoute({
-  endpoint: 'GET /api/observability/composite_slos',
+  endpoint: 'GET /api/observability/composite_slos 2023-05-24',
   options: {
     tags: ['access:slo_read'],
   },
