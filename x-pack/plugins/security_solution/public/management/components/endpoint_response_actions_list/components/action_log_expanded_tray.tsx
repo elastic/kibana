@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
+import { map } from 'lodash';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
@@ -182,7 +183,7 @@ export const ActionsLogExpandedTray = memo<{
 }>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const { hosts, agents, startedAt, completedAt, command: _command, comment, parameters } = action;
+  const { hosts, startedAt, completedAt, command: _command, comment, parameters } = action;
 
   const parametersList = useMemo(
     () =>
@@ -225,7 +226,7 @@ export const ActionsLogExpandedTray = memo<{
         },
         {
           title: OUTPUT_MESSAGES.expandSection.hostname,
-          description: hosts?.[agents?.[0]]?.name || emptyValue,
+          description: map(hosts, (host) => host.name).join(', ') || emptyValue,
         },
       ].map(({ title, description }) => {
         return {
@@ -233,7 +234,7 @@ export const ActionsLogExpandedTray = memo<{
           description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
         };
       }),
-    [agents, command, comment, completedAt, hosts, parametersList, startedAt]
+    [command, comment, completedAt, hosts, parametersList, startedAt]
   );
 
   const outputList = useMemo(

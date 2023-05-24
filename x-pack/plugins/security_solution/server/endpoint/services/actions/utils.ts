@@ -29,7 +29,6 @@ import type {
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 import type { EndpointMetadataService } from '../metadata';
-
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
  * @param item

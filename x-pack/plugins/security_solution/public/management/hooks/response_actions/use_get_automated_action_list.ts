@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 
@@ -31,7 +32,7 @@ interface GetAutomatedActionsListOptions {
 export const useGetAutomatedActionList = (
   query: EndpointAutomatedActionListRequestQuery,
   { enabled }: GetAutomatedActionsListOptions
-) => {
+): UseQueryResult<ActionRequestStrategyResponse & { items: LogsEndpointActionWithHosts[] }> => {
   const { data } = useKibana().services;
 
   const { alertIds } = query;
@@ -80,7 +81,7 @@ type GetAutomatedActionResponseListResponse = Pick<
 export const useGetAutomatedActionResponseList = (
   query: EndpointAutomatedActionResponseRequestQuery,
   { enabled, action: requestAction, isLive = false }: GetAutomatedActionResponseListOptions
-) => {
+): UseQueryResult<ActionDetails> => {
   const { data } = useKibana().services;
   const { expiration, actionId, agent } = query;
 
