@@ -303,7 +303,7 @@ describe('createBulkIndexOperationTuple', () => {
         Object {
           "index": Object {
             "_id": "",
-            "_index": ".kibana_cases_8.8.0_reindex_temp",
+            "_index": ".kibana_cases_8.8.0_reindex_temp_alias",
           },
         },
         Object {
