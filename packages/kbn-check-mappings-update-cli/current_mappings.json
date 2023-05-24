@@ -2097,6 +2097,33 @@
       }
     }
   },
+  "composite-slo": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "budgetingMethod": {
+        "type": "keyword"
+      },
+      "combinedSlos": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "revision": {
+            "type": "integer"
+          }
+        }
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
+  },
   "ml-job": {
     "properties": {
       "job_id": {
