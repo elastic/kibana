@@ -26,7 +26,7 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.selectMessage).toBe('Send a request to Generative AI');
+    expect(actionTypeModel.selectMessage).toBe('Send a request to generative AI systems.');
     expect(actionTypeModel.actionTypeTitle).toBe('Generative AI');
   });
 });

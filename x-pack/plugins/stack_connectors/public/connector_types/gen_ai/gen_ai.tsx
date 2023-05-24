@@ -21,7 +21,7 @@ export function getConnectorType(): GenerativeAiConnector {
     id: GEN_AI_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.genAi.selectMessageText', {
-      defaultMessage: 'Send a request to Generative AI',
+      defaultMessage: 'Send a request to generative AI systems.',
     }),
     actionTypeTitle: GEN_AI_TITLE,
     validateParams: async (

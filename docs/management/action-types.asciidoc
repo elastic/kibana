@@ -81,7 +81,7 @@ a| <<torq-action-type,Torq>>
 
 a| <<gen-ai-action-type,Generative AI>>
 
-| Send a request to OpenAI
+| Send a request to OpenAI.
 
 |===
 

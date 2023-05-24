@@ -10,7 +10,7 @@ The Generative AI connector uses https://github.com/axios/axios[axios] to send a
 [[define-gen-ai-ui]]
 === Create connectors in {kib}
 
-You can create connectors in *{stack-manage-app} > {connectors-ui}*  For example:
+You can create connectors in *{stack-manage-app} > {connectors-ui}*.  For example:
 
 [role="screenshot"]
 image::management/connectors/images/gen-ai-connector.png[Generative AI connector]
@@ -22,7 +22,7 @@ image::management/connectors/images/gen-ai-connector.png[Generative AI connector
 Generative AI connectors have the following configuration properties:
 
 Name::      The name of the connector.
-API Provider::   The OpenAI API Provider, either OpenAI or Azure OpenAI.
+API Provider::   The OpenAI API provider, either OpenAI or Azure OpenAI.
 API URL::   The OpenAI request URL.
 API Key::   The OpenAI or Azure OpenAI API key for authentication.
 
@@ -66,9 +66,7 @@ as you're creating or editing the connector in {kib}. For example:
 [role="screenshot"]
 image::management/connectors/images/gen-ai-params-test.png[Generative AI params test]
 
-The Generative AI connector supports one type of action: run (aka test)
-
-Generative AI run/test subaction has the following properties.
+The Generative AI actions have the following configuration properties.
 
 Body::      A JSON payload sent to the OpenAI API URL. For example: 
 +
