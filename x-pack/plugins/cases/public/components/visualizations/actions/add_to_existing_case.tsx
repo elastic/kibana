@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -40,22 +40,27 @@ interface Props {
 }
 
 const AddExistingCaseModalWrapper: React.FC<Props> = ({ embeddable, onClose, onSuccess }) => {
-  const { attributes, timeRange } = embeddable.getInput();
   const modal = useCasesAddToExistingCaseModal({
     onClose,
     onSuccess,
   });
 
-  const attachments = [
-    {
-      comment: `!{lens${JSON.stringify({
-        timeRange,
-        attributes,
-      })}}`,
-      type: CommentType.user as const,
-    },
-  ];
-  modal.open({ getAttachments: () => attachments });
+  const attachments = useMemo(() => {
+    const { attributes, timeRange } = embeddable.getInput();
+
+    return [
+      {
+        comment: `!{lens${JSON.stringify({
+          timeRange,
+          attributes,
+        })}}`,
+        type: CommentType.user as const,
+      },
+    ];
+  }, [embeddable]);
+  useEffect(() => {
+    modal.open({ getAttachments: () => attachments });
+  }, [attachments, modal]);
 
   return null;
 };
