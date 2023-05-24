@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 
@@ -12,12 +13,13 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
+import type { GetUninstallTokensRequestSchema } from '../../types/rest_spec/uninstall_token';
 
 import { getUninstallTokensHandler } from './handlers';
 
 describe('getUninstallTokensHandler', () => {
   let context: FleetRequestHandlerContext;
-  let request: KibanaRequest;
+  let request: KibanaRequest<unknown, TypeOf<typeof GetUninstallTokensRequestSchema.query>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let getAllTokensMock: jest.Mock;
 
