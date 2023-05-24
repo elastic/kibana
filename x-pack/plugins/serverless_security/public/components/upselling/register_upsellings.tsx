@@ -8,8 +8,8 @@ import React from 'react';
 import type { UpsellingService } from '@kbn/security-solution-plugin/public';
 import { SecurityPageName, type AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
-  PageUpsellings,
-  SectionUpsellings,
+  UpsellingPages,
+  UpsellingSections,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
 import type { ServerlessSecurityPLIs } from '../../../common/config';
@@ -30,13 +30,13 @@ type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 
 export const registerUpsellings = (
   upselling: UpsellingService,
-  projectSkus: ServerlessSecurityPLIs
+  projectPLIs: ServerlessSecurityPLIs
 ) => {
-  const skusFeatures = getProjectPLIsFeatures(projectSkus);
+  const PLIsFeatures = getProjectPLIsFeatures(projectPLIs);
 
-  const upsellingPages = getUpsellingPages(projectSkus).reduce<PageUpsellings>(
+  const upsellingPages = getUpsellingPages(projectPLIs).reduce<UpsellingPages>(
     (pageUpsellings, { pageName, feature, component }) => {
-      if (!skusFeatures[feature]) {
+      if (!PLIsFeatures[feature]) {
         pageUpsellings[pageName] = component;
       }
       return pageUpsellings;
@@ -44,9 +44,9 @@ export const registerUpsellings = (
     {}
   );
 
-  const upsellingSections = getUpsellingSections(projectSkus).reduce<SectionUpsellings>(
+  const upsellingSections = getUpsellingSections(projectPLIs).reduce<UpsellingSections>(
     (sectionUpsellings, { id, feature, component }) => {
-      if (!skusFeatures[feature]) {
+      if (!PLIsFeatures[feature]) {
         sectionUpsellings[id] = component;
       }
       return sectionUpsellings;
@@ -61,15 +61,15 @@ export const registerUpsellings = (
 // Upselling configuration for pages and sections components
 
 // TODO: lazy load these components
-const getUpsellingPages = (projectSkus: ServerlessSecurityPLIs): UpsellingPages => [
+const getUpsellingPages = (projectPLIs: ServerlessSecurityPLIs): UpsellingPages => [
   {
     pageName: SecurityPageName.case,
     feature: 'cases_base',
-    component: () => <CasesUpselling projectSkus={projectSkus} />,
+    component: () => <CasesUpselling projectPLIs={projectPLIs} />,
   },
 ];
 
-const getUpsellingSections = (projectSkus: ServerlessSecurityPLIs): UpsellingSections => [
+const getUpsellingSections = (projectPLIs: ServerlessSecurityPLIs): UpsellingSections => [
   {
     id: 'rules_load_prepackaged_tooltip',
     feature: 'rules_load_prepackaged',
@@ -78,6 +78,6 @@ const getUpsellingSections = (projectSkus: ServerlessSecurityPLIs): UpsellingSec
   {
     id: 'rules_response_actions',
     feature: 'rules_response_actions',
-    component: () => <RulesResponseActionsUpselling projectPLIs={projectSkus} />,
+    component: () => <RulesResponseActionsUpselling projectPLIs={projectPLIs} />,
   },
 ];
