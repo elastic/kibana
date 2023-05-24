@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * Attachment types are being registered in
    * x-pack/test/cases_api_integration/common/plugins/cases/server/plugin.ts
    */
-  describe.only('Persistable state attachments', () => {
+  describe('Persistable state attachments', () => {
     describe('references', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);
@@ -289,9 +289,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const types = await getRegisteredTypes();
 
         expect(types).to.eql({
-          '.test': 'dde5bd7492d266a0d54b77b5eddbeca95e19651c',
-          ml_anomaly_charts: 'f9bab0d17e31b89ae52a1b0d25fe117d9f23b38d',
-          ml_anomaly_swimlane: 'cf30664ea040f8e4190c816d093566ae22df54fe',
+          '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
+          ml_anomaly_charts: '23e92e824af9db6e8b8bb1d63c222e04f57d2147',
+          ml_anomaly_swimlane: 'a3517f3e53fb041e9cbb150477fb6ef0f731bd5f',
         });
       });
     });
