@@ -156,7 +156,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
         };
     }
-  }, [pagination, selectedTab]);
+  }, [pagination.page, pagination.perPage, pagination.total, rulesToUpgrade.length, selectedTab]);
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {

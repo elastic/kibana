@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiInMemoryTable, EuiLoadingContent, EuiProgress } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiInMemoryTable,
+  EuiLoadingContent,
+  EuiProgress,
+  Pagination,
+} from '@elastic/eui';
+import React, { useCallback, useMemo, useRef } from 'react';
+import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 import { Loader } from '../../../../../common/components/loader';
 import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
-import type { Rule } from '../../../../rule_management/logic';
+
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../../detections/pages/detection_engine/rules/types';
 import { RulesTableFilters } from '../rules_table_filters/rules_table_filters';
@@ -20,6 +27,7 @@ import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import type { FindRulesSortField } from '../../../../../../common/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useRulesTableNewContext } from './rules_table_new_context';
+import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -32,59 +40,51 @@ const NO_ITEMS_MESSAGE = (
 /**
  * Table Component for displaying new rules that are available to be installed
  */
-export const RulesTableNew = React.memo<RulesTableNewProps>(({}) => {
+export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
+  const tableRef = useRef<EuiInMemoryTable<RuleInstallationInfoForReview>>(null);
   const [{ canUserCRUD }] = useUserData();
   const hasPermissions = hasUserCRUDPermission(canUserCRUD);
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
-  const rulesTableContext = useRulesTableNewContext();
+  const addRulesTableContext = useRulesTableNewContext();
 
   const {
     state: {
       rules,
+      pagination,
+      selectionValue,
       filterOptions,
       isPreflightInProgress,
-      isAllSelected,
+      // isAllSelected,
       isFetched,
       isLoading,
       isRefetching,
-      loadingRuleIds,
-      loadingRulesAction,
-      pagination,
-      selectedRuleIds,
-      sortingOptions,
-      tags,
+      // loadingRuleIds,
+      // loadingRulesAction,
+      // tags,
     },
     actions: {
       setFilterOptions,
-      setIsAllSelected,
-      setPage,
-      setPerPage,
-      setSelectedRuleIds,
-      setSortingOptions,
+      // setIsAllSelected,
+      // setPage,
+      // setPerPage,
+      // setSelectedRuleIds,
+      // setSortingOptions,
+      onTableChange,
     },
-  } = rulesTableContext;
+  } = addRulesTableContext;
 
-  const paginationMemo = useMemo(() => {
-    return {
-      pageIndex: 0,
-      pageSize: 20,
-      totalItemCount: rules.length,
-      pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-    };
-  }, [pagination]);
-
-  const tableOnChangeCallback = useCallback(
-    ({ page, sort }: EuiBasicTableOnChange) => {
-      setSortingOptions({
-        field: (sort?.field as FindRulesSortField) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
-        order: sort?.direction ?? 'desc',
-      });
-      setPage(page.index + 1);
-      setPerPage(page.size);
-    },
-    [setPage, setPerPage, setSortingOptions]
-  );
+  // const tableOnChangeCallback = useCallback(
+  //   ({ page, sort }: EuiBasicTableOnChange) => {
+  //     setSortingOptions({
+  //       field: (sort?.field as FindRulesSortField) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
+  //       order: sort?.direction ?? 'desc',
+  //     });
+  //     setPage(page.index + 1);
+  //     setPerPage(page.size);
+  //   },
+  //   [setPage, setPerPage, setSortingOptions]
+  // );
 
   const rulesColumns = useRulesTableNewColumns({
     hasCRUDPermissions: hasPermissions,
@@ -101,9 +101,7 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(({}) => {
   const isTableEmpty = rules.length === 0;
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
-  let tableProps;
-
-  tableProps = {
+  const tableProps = {
     'data-test-subj': 'rules-updates-table',
     columns: rulesColumns,
   };
@@ -143,35 +141,16 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(({}) => {
           {/*  isBulkActionInProgress={false}*/}
           {/* />*/}
           <EuiInMemoryTable
+            ref={tableRef}
             items={rules}
-            isSelectable={false}
-            sorting={{
-              sort: {
-                // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
-                field: sortingOptions.field as keyof Rule,
-                direction: sortingOptions.order,
-              },
-            }}
-            pagination={paginationMemo}
+            sorting={true}
+            pagination={pagination}
+            isSelectable={true}
+            onTableChange={onTableChange}
+            selection={selectionValue}
+            itemId="rule_id"
             {...tableProps}
           />
-          {/* <EuiBasicTable*/}
-          {/*  itemId="id"*/}
-          {/*  items={rules}*/}
-          {/*  isSelectable={false}*/}
-          {/*  noItemsMessage={NO_ITEMS_MESSAGE}*/}
-          {/*  onChange={tableOnChangeCallback}*/}
-          {/*  pagination={paginationMemo}*/}
-          {/*  selection={undefined}*/}
-          {/*  sorting={{*/}
-          {/*    sort: {*/}
-          {/*      // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation*/}
-          {/*      field: sortingOptions.field as keyof Rule,*/}
-          {/*      direction: sortingOptions.order,*/}
-          {/*    },*/}
-          {/*  }}*/}
-          {/*  {...tableProps}*/}
-          {/* />*/}
         </>
       )}
     </>

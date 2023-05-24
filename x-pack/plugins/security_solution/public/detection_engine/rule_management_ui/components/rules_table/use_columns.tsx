@@ -46,14 +46,13 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
-import type { RuleInstallationInfoForReview } from '../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
-import type { DiffableRule } from '../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
+// import type { RuleInstallationInfoForReview } from '../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+// import type { DiffableRule } from '../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
 
-export type TableColumn =
-  | EuiBasicTableColumn<Rule>
-  | EuiTableActionsColumnType<Rule>
-  | EuiTableActionsColumnType<DiffableRule>
-  | EuiTableActionsColumnType<RuleInstallationInfoForReview>;
+export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+// TODO: Check if these types are necessary. Probably need to create a separate type for DiffableRule and RuleInstallationInfoForReview
+// | EuiTableActionsColumnType<DiffableRule>
+// | EuiTableActionsColumnType<RuleInstallationInfoForReview>;
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;

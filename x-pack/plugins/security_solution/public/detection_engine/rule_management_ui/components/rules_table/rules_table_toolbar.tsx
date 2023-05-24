@@ -16,7 +16,7 @@ export enum AllRulesTabs {
   updates = 'updates',
 }
 
-export const RulesTableToolbar = React.memo(({}) => {
+export const RulesTableToolbar = React.memo(() => {
   const {
     state: {
       pagination: { total: installedTotal },
@@ -33,7 +33,7 @@ export const RulesTableToolbar = React.memo(({}) => {
         name: i18n.INSTALLED_RULES_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.installed}`,
-        isBeta: !!(installedTotal ?? 0 > 0),
+        isBeta: !!((installedTotal ?? 0) > 0),
         betaOptions: {
           text: `${installedTotal}`,
         },
@@ -43,7 +43,7 @@ export const RulesTableToolbar = React.memo(({}) => {
         name: i18n.RULE_MONITORING_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.monitoring}`,
-        isBeta: !!(installedTotal ?? 0 > 0),
+        isBeta: !!((installedTotal ?? 0) > 0),
         betaOptions: {
           text: `${installedTotal}`,
         },
@@ -53,13 +53,13 @@ export const RulesTableToolbar = React.memo(({}) => {
         name: i18n.RULE_UPDATES_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.updates}`,
-        isBeta: !!(updateTotal ?? 0 > 0),
+        isBeta: !!((updateTotal ?? 0) > 0),
         betaOptions: {
           text: `${updateTotal}`,
         },
       },
     }),
-    [installedTotal, rulesToUpgrade]
+    [installedTotal, updateTotal]
   );
 
   return <TabNavigationWithBreadcrumbs navTabs={ruleTabs} />;
