@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
@@ -16,7 +17,6 @@ import {
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   getMonitorFilters,
@@ -29,26 +29,45 @@ import {
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: API_URLS.GET_SYNTHETICS_MONITOR,
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    }),
+    query: schema.object({
+      decrypted: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({
     request,
     response,
-    server: { encryptedSavedObjects },
+    server: { encryptedSavedObjects, coreStart },
     savedObjectsClient,
   }): Promise<any> => {
     const { monitorId } = request.params;
-    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     try {
-      return await libs.requests.getSyntheticsMonitor({
-        monitorId,
-        encryptedSavedObjectsClient,
-        savedObjectsClient,
-      });
+      const { decrypted } = request.query;
+
+      if (!decrypted) {
+        return await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
+          syntheticsMonitorType,
+          monitorId
+        );
+      } else {
+        // only user with write permissions can decrypt the monitor
+        const canSave =
+          (await coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;
+        if (!canSave) {
+          return response.forbidden();
+        }
+
+        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+        return await libs.requests.getSyntheticsMonitor({
+          monitorId,
+          encryptedSavedObjectsClient,
+          savedObjectsClient,
+        });
+      }
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
