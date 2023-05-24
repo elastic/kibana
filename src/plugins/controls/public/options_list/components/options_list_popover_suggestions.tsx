@@ -160,7 +160,11 @@ export const OptionsListPopoverSuggestions = ({
         <EuiSelectable
           options={selectableOptions}
           renderOption={(option) => {
-            return <EuiHighlight search={searchString.value}>{option.label}</EuiHighlight>;
+            return (
+              <EuiHighlight search={option.key === 'exists-option' ? '' : searchString.value}>
+                {option.label}
+              </EuiHighlight>
+            );
           }}
           listProps={{ onFocusBadge: false }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
