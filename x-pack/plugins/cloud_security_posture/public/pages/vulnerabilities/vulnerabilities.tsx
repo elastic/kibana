@@ -47,6 +47,7 @@ import {
   VULNERABILITY_SEVERITY_FIELD,
 } from './utils/custom_sort_script';
 import { usePageSlice } from '../../common/hooks/use_page_slice';
+import './vulnerabilities.scss';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -314,7 +315,14 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   );
 
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
+  const selectedVulnerabilityIndex = flyoutVulnerabilityIndex + pageIndex * pageSize;
   const error = queryError || null;
+
+  const rowClasses = !selectedVulnerability
+    ? {}
+    : {
+        [selectedVulnerabilityIndex]: 'vulnerabilitiesHighlightedRow',
+      };
 
   if (error) {
     return <ErrorCallout error={error as Error} />;
@@ -407,6 +415,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               cellPadding: 'l',
               stripes: false,
               rowHover: 'none',
+              rowClasses,
               header: 'underline',
             }}
             renderCellValue={renderCellValue}
@@ -423,7 +432,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
           {isLastLimitedPage && <LimitedResultsBar />}
           {showVulnerabilityFlyout && (
             <VulnerabilityFindingFlyout
-              flyoutIndex={flyoutVulnerabilityIndex + pageIndex * pageSize}
+              flyoutIndex={selectedVulnerabilityIndex}
               vulnerabilityRecord={selectedVulnerability}
               totalVulnerabilitiesCount={limitedTotalItemCount}
               onPaginate={onPaginateFlyout}
