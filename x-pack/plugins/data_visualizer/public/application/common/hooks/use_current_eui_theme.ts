@@ -7,13 +7,22 @@
 
 import { useMemo } from 'react';
 import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
+const themeDefault = { darkMode: false };
+
 export function useCurrentEuiTheme() {
-  const { services } = useDataVisualizerKibana();
-  const uiSettings = services.uiSettings;
-  return useMemo(
-    () => (uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight),
-    [uiSettings]
-  );
+  const {
+    services: { theme },
+  } = useDataVisualizerKibana();
+
+  const themeObservable$ = useMemo(() => {
+    return theme?.theme$ ?? of(themeDefault);
+  }, [theme]);
+
+  const { darkMode } = useObservable(themeObservable$, themeDefault);
+
+  return useMemo(() => (darkMode ? euiThemeDark : euiThemeLight), [darkMode]);
 }
