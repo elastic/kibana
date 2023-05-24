@@ -79,7 +79,7 @@ export class AssetDetailsEmbeddable extends Embeddable<AssetDetailsEmbeddableInp
               renderedTabsSet={this.input.renderedTabsSet}
               tabs={this.input.tabs}
               hostFlyoutOpen={this.input.hostFlyoutOpen}
-              setHostFlyoutOpen={this.input.setHostFlyoutOpen}
+              setHostFlyoutState={this.input.setHostFlyoutState}
               onTabClick={this.input.onTabClick}
               links={this.input.links}
               showInFlyout={this.input.showInFlyout}

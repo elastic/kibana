@@ -47,7 +47,7 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
       onTabClick={onTabClick}
       currentTimeRange={currentTimeRange}
       hostFlyoutOpen={hostFlyoutOpen}
-      setHostFlyoutOpen={setHostFlyoutOpen}
+      setHostFlyoutState={setHostFlyoutOpen}
       showActionsColumn
       showInFlyout
       renderedTabsSet={renderedTabsSet}

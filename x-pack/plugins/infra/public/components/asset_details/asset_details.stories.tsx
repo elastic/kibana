@@ -110,7 +110,7 @@ AssetDetailsWithMetadataTabSelectedWithPersistedSearch.args = {
     searchFilter: '',
     metadataSearch: 'ip',
   },
-  setHostFlyoutOpen: () => {},
+  setHostFlyoutState: () => {},
 };
 
 export const AssetDetailsWithMetadataWithoutActions = Template.bind({});

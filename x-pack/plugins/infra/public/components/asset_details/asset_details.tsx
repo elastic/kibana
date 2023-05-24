@@ -57,7 +57,7 @@ export interface AssetDetailsProps {
     searchFilter: string;
     metadataSearch: string;
   };
-  setHostFlyoutOpen?: SetNewHostFlyoutOpen;
+  setHostFlyoutState?: SetNewHostFlyoutOpen;
   onTabClick?: (tab: Tab) => void;
   links?: Array<'uptime' | 'apmServices'>;
   showInFlyout?: boolean;
@@ -74,7 +74,7 @@ export const AssetDetails = ({
   renderedTabsSet,
   currentTimeRange,
   hostFlyoutOpen,
-  setHostFlyoutOpen,
+  setHostFlyoutState,
   tabs,
   showInFlyout,
   links,
@@ -90,10 +90,10 @@ export const AssetDetails = ({
   };
 
   const persistMetadataSearchToUrlState =
-    setHostFlyoutOpen && hostFlyoutOpen
+    setHostFlyoutState && hostFlyoutOpen
       ? {
           metadataSearchUrlState: hostFlyoutOpen.metadataSearch,
-          setMetadataSearchUrlState: setHostFlyoutOpen,
+          setMetadataSearchUrlState: setHostFlyoutState,
         }
       : undefined;
 
@@ -166,7 +166,7 @@ export const AssetDetails = ({
               nodeType={nodeType}
               currentTime={currentTimeRange.to}
               hostFlyoutOpen={hostFlyoutOpen}
-              setHostFlyoutOpen={setHostFlyoutOpen}
+              setHostFlyoutState={setHostFlyoutState}
             />
           </div>
         )}
@@ -214,7 +214,7 @@ export const AssetDetails = ({
               nodeType={nodeType}
               currentTime={currentTimeRange.to}
               hostFlyoutOpen={hostFlyoutOpen}
-              setHostFlyoutOpen={setHostFlyoutOpen}
+              setHostFlyoutState={setHostFlyoutState}
             />
           </div>
         )}

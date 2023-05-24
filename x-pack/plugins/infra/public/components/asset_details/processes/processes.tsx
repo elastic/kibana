@@ -43,7 +43,7 @@ export interface ProcessesProps {
     searchFilter: string;
     metadataSearch: string;
   };
-  setHostFlyoutOpen?: SetNewHostFlyoutOpen;
+  setHostFlyoutState?: SetNewHostFlyoutOpen;
 }
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
@@ -56,7 +56,7 @@ export const Processes = ({
   node,
   nodeType,
   hostFlyoutOpen,
-  setHostFlyoutOpen,
+  setHostFlyoutState,
 }: ProcessesProps) => {
   const [searchText, setSearchText] = useState('');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
@@ -90,12 +90,12 @@ export const Processes = ({
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>(
       (queryText) =>
-        setHostFlyoutOpen
-          ? setHostFlyoutOpen({ searchFilter: queryText })
+        setHostFlyoutState
+          ? setHostFlyoutState({ searchFilter: queryText })
           : setSearchText(queryText),
       500
     );
-  }, [setHostFlyoutOpen]);
+  }, [setHostFlyoutState]);
 
   const searchBarOnChange = useCallback(
     ({ query, queryText }) => {
@@ -107,11 +107,11 @@ export const Processes = ({
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
-    if (setHostFlyoutOpen) {
-      setHostFlyoutOpen({ searchFilter: '' });
+    if (setHostFlyoutState) {
+      setHostFlyoutState({ searchFilter: '' });
     }
     setSearchText('');
-  }, [setHostFlyoutOpen]);
+  }, [setHostFlyoutState]);
 
   return (
     <TabContent>
