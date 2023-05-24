@@ -14,7 +14,7 @@ import { queryClient } from '../../query_client';
 import { useKibana } from '../../common/lib/kibana';
 import * as useLiveQueryDetails from '../../actions/use_live_query_details';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
-import { OsqueryResult } from './osquery_result';
+import { OsqueryActionResult } from './osquery_result_wrapper';
 import {
   defaultLiveQueryDetails,
   DETAILS_ID,
@@ -29,6 +29,7 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const defaultPermissions = {
   osquery: {
+    read: true,
     runSavedQueries: true,
     readSavedQueries: true,
   },
@@ -67,7 +68,7 @@ describe('Osquery Results', () => {
 
   it('return results table', async () => {
     const { getByText, queryByText, getByTestId } = renderWithContext(
-      <OsqueryResult {...defaultProps} />
+      <OsqueryActionResult {...defaultProps} />
     );
     expect(queryByText(PERMISSION_DENIED)).not.toBeInTheDocument();
     expect(getByTestId('osquery-results-comment'));
