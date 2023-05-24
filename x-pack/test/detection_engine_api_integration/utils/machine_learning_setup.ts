@@ -17,7 +17,7 @@ export const executeSetupModuleRequest = async ({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
 }) => {
   const { body } = await supertest
-    .post(`/api/ml/modules/setup/${module}`)
+    .post(`/internal/ml/modules/setup/${module}`)
     .set('kbn-xsrf', 'true')
     .send({
       prefix: '',
@@ -42,7 +42,7 @@ export const forceStartDatafeeds = async ({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
 }) => {
   const { body } = await supertest
-    .post(`/api/ml/jobs/force_start_datafeeds`)
+    .post(`/supertest/ml/jobs/force_start_datafeeds`)
     .set('kbn-xsrf', 'true')
     .send({
       datafeedIds: [`datafeed-${jobId}`],

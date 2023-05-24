@@ -62,9 +62,11 @@ export class ServerlessPlugin
     management.setIsSidebarEnabled(false);
 
     return {
+      // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
       setSideNavComponent: (sideNavigationComponent) =>
-        // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
         (core.chrome as InternalChromeStart).project.setSideNavComponent(sideNavigationComponent),
+      setNavigation: (projectNavigation) =>
+        (core.chrome as InternalChromeStart).project.setNavigation(projectNavigation),
     };
   }
 

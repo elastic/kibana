@@ -2289,7 +2289,15 @@
             "Theme",
             ">; readonly darkModeEnabled$: ",
             "Observable",
-            "<boolean>; useDarkMode: () => boolean; useChartsTheme: () => ",
+            "<",
+            {
+              "pluginId": "@kbn/core-theme-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreThemeBrowserPluginApi",
+              "section": "def-common.CoreTheme",
+              "text": "CoreTheme"
+            },
+            ">; useDarkMode: () => boolean; useChartsTheme: () => ",
             "RecursivePartial",
             "<",
             "Theme",

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IEsSearchRequest } from '@kbn/data-plugin/common';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { ActionResponsesRequestStrategyParseResponse } from './response_actions/response';
 import type { ESQuery } from '../../typed_json';
 import type {
   HostDetailsStrategyResponse,
@@ -100,6 +101,13 @@ import type {
   FirstLastSeenStrategyResponse,
 } from './first_last_seen';
 import type {
+  ActionRequestOptions,
+  ActionRequestStrategyResponse,
+  ActionResponsesRequestOptions,
+  ActionResponsesRequestStrategyResponse,
+  ResponseActionsQueries,
+} from './response_actions';
+import type {
   ManagedUserDetailsRequestOptions,
   ManagedUserDetailsStrategyResponse,
 } from './users/managed_details';
@@ -121,7 +129,8 @@ export type FactoryQueryTypes =
   | RiskQueries
   | CtiQueries
   | typeof MatrixHistogramQuery
-  | typeof FirstLastSeenQuery;
+  | typeof FirstLastSeenQuery
+  | ResponseActionsQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -136,6 +145,11 @@ export interface RequestOptionsPaginated<Field = string> extends RequestBasicOpt
   pagination: PaginationInputPaginated;
   sort: SortField<Field>;
 }
+
+export type StrategyParseResponseType<T extends FactoryQueryTypes> =
+  T extends ResponseActionsQueries.results
+    ? ActionResponsesRequestStrategyParseResponse
+    : IEsSearchResponse;
 
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsStrategyResponse
@@ -201,6 +215,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UsersRiskScoreStrategyResponse
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreStrategyResponse
+  : T extends ResponseActionsQueries.actions
+  ? ActionRequestStrategyResponse
+  : T extends ResponseActionsQueries.results
+  ? ActionResponsesRequestStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -267,6 +285,10 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? RiskScoreRequestOptions
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreRequestOptions
+  : T extends ResponseActionsQueries.actions
+  ? ActionRequestOptions
+  : T extends ResponseActionsQueries.results
+  ? ActionResponsesRequestOptions
   : never;
 
 export interface CommonFields {
