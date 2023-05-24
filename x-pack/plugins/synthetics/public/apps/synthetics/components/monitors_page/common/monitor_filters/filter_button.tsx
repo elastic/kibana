@@ -18,9 +18,11 @@ import { useMonitorFiltersState } from './use_filters';
 export const FilterButton = ({
   filter,
   handleFilterChange,
+  loading,
 }: {
   filter: SyntheticsMonitorFilterItem;
   handleFilterChange: ReturnType<typeof useMonitorFiltersState>['handleFilterChange'];
+  loading: boolean;
 }) => {
   const { label, values, field } = filter;
 
@@ -48,7 +50,7 @@ export const FilterButton = ({
       setQuery={setQuery}
       onChange={(selectedValues) => handleFilterChange(field, selectedValues)}
       allowExclusions={false}
-      loading={false}
+      loading={loading}
       asFilterButton={true}
     />
   );

@@ -54,7 +54,7 @@ beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
 });
 
-describe('listAlertTypes', () => {
+describe('listRuleTypes', () => {
   let rulesClient: RulesClient;
   const alertingAlertType: RegistryRuleType = {
     actionGroups: [],
@@ -100,7 +100,7 @@ describe('listAlertTypes', () => {
         { ...alertingAlertType, authorizedConsumers },
       ])
     );
-    expect(await rulesClient.listAlertTypes()).toEqual(
+    expect(await rulesClient.listRuleTypes()).toEqual(
       new Set([
         { ...myAppAlertType, authorizedConsumers },
         { ...alertingAlertType, authorizedConsumers },
@@ -157,7 +157,7 @@ describe('listAlertTypes', () => {
       ]);
       authorization.filterByRuleTypeAuthorization.mockResolvedValue(authorizedTypes);
 
-      expect(await rulesClient.listAlertTypes()).toEqual(authorizedTypes);
+      expect(await rulesClient.listRuleTypes()).toEqual(authorizedTypes);
     });
   });
 });
