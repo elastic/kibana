@@ -88,7 +88,7 @@ export function Navigation({ children, homeRef, onRootItemRemove }: Props) {
 
       return {
         unregister,
-        path: [],
+        path: [navNode.id],
       };
     },
     [unregister]

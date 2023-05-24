@@ -132,10 +132,7 @@ export const useInitNavNode = (node: NodeProps) => {
         children: children.length ? children : undefined,
       });
 
-      const updatedPath = [...path, internalNavNode.id];
-      internalNavNode.path = updatedPath;
-
-      setNodePath(updatedPath);
+      setNodePath(path);
       setChildrenNodesUpdated([]);
 
       unregisterRef.current = unregister;

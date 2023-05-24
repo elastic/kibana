@@ -6,20 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useCallback, useMemo, useContext, FC } from 'react';
+import React, { createContext, useCallback, useMemo, useContext } from 'react';
 
-import {
-  EuiCollapsibleNavGroup,
-  EuiIcon,
-  EuiSideNav,
-  EuiSideNavItemType,
-  EuiText,
-} from '@elastic/eui';
-import type { BasePathService, NavigateToUrlFn } from '../../../../types/internal';
 import { useInitNavNode } from '../use_init_navnode';
-import { navigationStyles as styles } from '../../../styles';
-import { useNavigation as useServices } from '../../../services';
-import { InternalNavigationNode, NodeProps, RegisterFunction } from '../types';
+import type { NodeProps, RegisterFunction } from '../types';
+import { NavigationSectionUI } from './navigation_section_ui';
 
 interface Context {
   register: RegisterFunction;
@@ -37,64 +28,6 @@ export function useNavigationGroup<T extends boolean = true>(
   return context as T extends true ? Context : Context | undefined;
 }
 
-const navigationNodeToEuiItem = (
-  item: InternalNavigationNode,
-  { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
-): EuiSideNavItemType<unknown> => {
-  const href = item.deepLink?.href;
-  const id = item.path ? item.path.join('.') : item.id;
-
-  return {
-    id,
-    name: item.title,
-    onClick:
-      href !== undefined
-        ? (event: React.MouseEvent) => {
-            event.preventDefault();
-            navigateToUrl(basePath.prepend(href!));
-          }
-        : undefined,
-    href,
-    renderItem: item.itemRender,
-    items: item.children?.map((_item) =>
-      navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
-    ),
-    ['data-test-subj']: `nav-item-${id}`,
-    ...(item.icon && {
-      icon: <EuiIcon type={item.icon} size="s" />,
-    }),
-  };
-};
-
-interface TopLevelProps {
-  navNode: InternalNavigationNode;
-  items?: InternalNavigationNode[];
-  defaultIsCollapsed?: boolean;
-}
-
-const TopLevel: FC<TopLevelProps> = ({ navNode, items = [], defaultIsCollapsed = true }) => {
-  const { id, title, icon } = navNode;
-  const { navigateToUrl, basePath } = useServices();
-
-  return (
-    <EuiCollapsibleNavGroup
-      id={id}
-      title={title}
-      iconType={icon}
-      isCollapsible={true}
-      initialIsOpen={!defaultIsCollapsed}
-      data-test-subj={`nav-bucket-${id}`}
-    >
-      <EuiText color="default">
-        <EuiSideNav
-          items={items?.map((item) => navigationNodeToEuiItem(item, { navigateToUrl, basePath }))}
-          css={styles.euiSideNavItems}
-        />
-      </EuiText>
-    </EuiCollapsibleNavGroup>
-  );
-};
-
 interface Props extends NodeProps {
   unstyled?: boolean;
   defaultIsCollapsed?: boolean;
@@ -108,12 +41,18 @@ function NavigationGroupComp(props: Props) {
     if (!path || !navNode) {
       return null;
     }
+
+    if (unstyled) {
+      // No UI for unstyled groups
+      return children;
+    }
+
     const isTopLevel = path && path.length === 1;
 
     return (
       <>
-        {isTopLevel && !unstyled && (
-          <TopLevel
+        {isTopLevel && (
+          <NavigationSectionUI
             navNode={navNode}
             items={Object.values(childrenNodes)}
             defaultIsCollapsed={defaultIsCollapsed}
