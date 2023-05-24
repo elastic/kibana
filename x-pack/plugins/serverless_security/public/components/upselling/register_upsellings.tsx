@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import type { UpsellingService } from '@kbn/security-solution-plugin/public';
-import { SecurityPageName, type AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
   PageUpsellings,
   SectionUpsellings,
@@ -64,7 +64,7 @@ export const registerUpsellings = (
 const getUpsellingPages = (projectPLIs: ServerlessSecurityPLIs): UpsellingPages => [
   {
     pageName: SecurityPageName.case,
-    feature: 'cases_base',
+    feature: AppFeatureKey.casesBase,
     component: () => <CasesUpselling projectPLIs={projectPLIs} />,
   },
 ];
@@ -72,12 +72,12 @@ const getUpsellingPages = (projectPLIs: ServerlessSecurityPLIs): UpsellingPages 
 const getUpsellingSections = (projectPLIs: ServerlessSecurityPLIs): UpsellingSections => [
   {
     id: 'rules_load_prepackaged_tooltip',
-    feature: 'rules_load_prepackaged',
+    feature: AppFeatureKey.rulesLoadPrepackaged,
     component: PrebuiltRulesTooltipUpselling,
   },
   {
     id: 'rules_response_actions',
-    feature: 'rules_response_actions',
+    feature: AppFeatureKey.rulesResponseActions,
     component: () => <RulesResponseActionsUpselling projectPLIs={projectPLIs} />,
   },
 ];
