@@ -262,7 +262,7 @@ const searchIntegrationStreams = (
       ...integration,
       // Filter and sort the dataStreams by the search criteria
       dataStreams: new EntityList<DataStream>(integration.dataStreams)
-        .filterBy((stream) => stream.name.includes(nameQuery ?? ''))
+        .filterBy((stream) => Boolean(stream.title?.includes(nameQuery ?? '')))
         .sortBy('name', sortOrder)
         .build(),
     };

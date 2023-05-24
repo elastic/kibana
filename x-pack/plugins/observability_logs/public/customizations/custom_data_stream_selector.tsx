@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { DataStream, SearchStrategy } from '../../common/data_streams';
 import { DataStreamSelector, SearchHandler } from '../components/data_stream_selector';
@@ -49,17 +49,19 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     });
   };
 
-  const handleSearch: SearchHandler = (params) => {
-    if (params.strategy === SearchStrategy.DATA_STREAMS) {
-      return searchDataStreams({ name: params.name, sortOrder: params.sortOrder });
-    } else {
-      searchIntegrations(params);
-    }
-  };
+  const handleSearch: SearchHandler = useCallback(
+    (params) => {
+      if (params.strategy === SearchStrategy.DATA_STREAMS) {
+        return searchDataStreams({ name: params.name, sortOrder: params.sortOrder });
+      } else {
+        searchIntegrations(params);
+      }
+    },
+    [searchDataStreams, searchIntegrations]
+  );
 
   return (
     <DataStreamSelector
-      key={dataView.id}
       dataStreams={dataStreams}
       dataStreamsError={dataStreamsError}
       integrations={integrations}

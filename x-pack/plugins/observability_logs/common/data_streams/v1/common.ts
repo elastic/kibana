@@ -26,23 +26,8 @@ export type IntegrationId = `integration-${string}-${string}`;
 /**
  * Getters
  */
-
 export const getIntegrationId = (integration: Integration): IntegrationId =>
   `integration-${integration.name}-${integration.version}`;
-
-export const getDataStreamsUrl = (search = {}) => {
-  const cleanSearch = omitBy(search, isEmpty);
-  const querySearch = new URLSearchParams(cleanSearch).toString();
-
-  return [DATA_STREAMS_URL, querySearch].filter(Boolean).join('?');
-};
-
-export const getIntegrationsUrl = (search = {}) => {
-  const cleanSearch = stringifyByProp(omitBy(search, isEmpty), ['searchAfter']);
-  const querySearch = new URLSearchParams(cleanSearch).toString();
-
-  return [INTEGRATIONS_URL, querySearch].filter(Boolean).join('?');
-};
 
 /**
  * Utils
@@ -53,3 +38,9 @@ function stringifyByProp(
 ) {
   return mapValues(obj, (val, key) => (props.includes(key) ? JSON.stringify(val) : val));
 }
+
+export const formatSearch = (
+  search: FindIntegrationsRequestQuery | FindDataStreamsRequestQuery
+) => {
+  return stringifyByProp(omitBy(search, isEmpty), ['searchAfter']);
+};

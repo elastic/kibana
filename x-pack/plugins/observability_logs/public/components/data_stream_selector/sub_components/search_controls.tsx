@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { SearchStrategy } from '../../../../common/data_streams';
 import { SortOrder } from '../../../../common';
@@ -50,19 +50,29 @@ export const useSearchStrategy = ({ id, onSearch }: UseSearchStrategyOptions) =>
   const [searchCache, insertSearch] = useReducer(searchCacheReducer, initialCache);
 
   const search = searchCache[id] ?? defaultSearch;
-  console.log({ id, searchCache, search });
 
-  const handleSearch = (params: SearchControlsParams) => {
-    const strategy = getSearchStrategy(id);
+  const handleSearch = useCallback(
+    (params: SearchControlsParams) => {
+      const strategy = getSearchStrategy(id);
 
-    insertSearch({ id, params });
+      insertSearch({ id, params });
 
-    return onSearch({
-      ...params,
-      strategy,
-      ...(strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS && { integrationId: id }),
-    });
-  };
+      return onSearch({
+        ...params,
+        strategy,
+        ...(strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS && { integrationId: id }),
+      });
+    },
+    [id, onSearch]
+  );
+
+  // Restore the search result when navigating into an existing search
+  // This should be cached so it'll be transparent to the user
+  useEffect(() => {
+    if (searchCache[id]) {
+      handleSearch(searchCache[id]);
+    }
+  }, [id]);
 
   return [search, handleSearch] as [SearchControlsParams, SearchControlsHandler];
 };
@@ -94,6 +104,7 @@ export const SearchControls = ({ search, onSearch, isLoading }: SearchControlsPr
           <EuiFieldSearch
             compressed
             incremental
+            value={search.name}
             onChange={handleQueryChange}
             isLoading={isLoading}
           />

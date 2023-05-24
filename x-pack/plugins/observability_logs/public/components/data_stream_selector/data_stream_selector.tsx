@@ -17,7 +17,7 @@ import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
   INTEGRATION_PANEL_ID,
-  selectViewLabel,
+  selectDatasetLabel,
   uncategorizedLabel,
   UNCATEGORIZED_STREAMS_PANEL_ID,
 } from './constants';
@@ -35,17 +35,17 @@ const DataStreamsList = dynamic(() => import('./sub_components/data_streams_list
 });
 
 export function DataStreamSelector({
-  title,
+  dataStreams,
+  dataStreamsError,
   integrations,
   isLoadingIntegrations,
-  onSearch,
-  onIntegrationsLoadMore,
-  onStreamSelected,
-  dataStreamsError,
   isLoadingStreams,
+  onIntegrationsLoadMore,
+  onSearch,
+  onStreamSelected,
   onStreamsEntryClick,
   onStreamsReload,
-  dataStreams,
+  title,
 }: DataStreamSelectorProps) {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
@@ -125,7 +125,7 @@ export function DataStreamSelector({
       closePopover={closePopover}
       onClick={togglePopover}
     >
-      <EuiContextMenuPanel title={selectViewLabel}>
+      <EuiContextMenuPanel title={selectDatasetLabel}>
         <SearchControls
           key={currentPanel}
           search={search}

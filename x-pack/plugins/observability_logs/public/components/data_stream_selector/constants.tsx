@@ -15,9 +15,9 @@ export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 300;
 
 export const contextMenuStyles = { maxHeight: 320 };
 
-export const selectViewLabel = i18n.translate(
-  'xpack.observabilityLogs.dataStreamSelector.selectView',
-  { defaultMessage: 'Select view' }
+export const selectDatasetLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.selectDataset',
+  { defaultMessage: 'Select dataset' }
 );
 
 export const integrationsLabel = i18n.translate(

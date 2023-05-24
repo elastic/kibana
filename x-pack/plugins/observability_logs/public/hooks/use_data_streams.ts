@@ -71,7 +71,7 @@ const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
           sortOrder: searchParams.sortOrder,
         },
       }),
-    [dataStreamsStateService, search]
+    [dataStreamsStateService, search.name]
   );
 
   return {
