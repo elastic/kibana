@@ -80,3 +80,10 @@ export const INVALID_ACTION = i18n.translate(
     defaultMessage: 'Invalid action name.',
   }
 );
+
+export const API_PROVIDER_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.genAi.error.requiredApiProviderText',
+  {
+    defaultMessage: 'API provider is required.',
+  }
+);

@@ -12,13 +12,19 @@ import {
   SecretsFieldSchema,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ButtonGroupField as SelectField } from '@kbn/triggers-actions-ui-plugin/public';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { OpenAiProviderType } from '../../../common/gen_ai/constants';
 import * as i18n from './translations';
 import { DEFAULT_URL, DEFAULT_URL_AZURE } from './constants';
+const { emptyField } = fieldValidators;
 
 const openAiConfig: ConfigFieldSchema[] = [
   {
@@ -152,14 +158,29 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
 
   return (
     <>
-      <SelectField
+      <UseField
         data-test-subj="config.apiProvider-select"
-        defaultValue={selectedProviderDefaultValue}
         path="config.apiProvider"
-        label={i18n.API_PROVIDER_LABEL}
-        options={providerOptions}
-        isButton={false}
-        fullWidth
+        component={SelectField}
+        config={{
+          label: i18n.API_PROVIDER_LABEL,
+          defaultValue: selectedProviderDefaultValue,
+          validations: [
+            {
+              validator: emptyField(i18n.API_PROVIDER_REQUIRED),
+            },
+          ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'emailServiceSelectInput',
+            options: providerOptions,
+            fullWidth: true,
+            hasNoInitialSelection: true,
+            disabled: readOnly,
+            readOnly,
+          },
+        }}
       />
       <EuiSpacer size="s" />
       {config != null && config.apiProvider === OpenAiProviderType.OpenAi && (

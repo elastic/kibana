@@ -6,7 +6,7 @@
  */
 
 import React, { memo, ReactNode } from 'react';
-import { EuiButtonGroup, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
   UseField,
@@ -34,7 +34,6 @@ const getFieldConfig = ({ label, defaultValue }: { label: string; defaultValue?:
 interface Props {
   path: string;
   label: string;
-  isButton?: boolean;
   defaultValue?: string;
   helpText?: string | ReactNode;
   [key: string]: any;
@@ -45,7 +44,6 @@ const ButtonGroupFieldComponent: React.FC<Props> = ({
   label,
   helpText,
   defaultValue,
-  isButton = true,
   ...rest
 }) => {
   return (
@@ -62,25 +60,16 @@ const ButtonGroupFieldComponent: React.FC<Props> = ({
             isInvalid={isInvalid}
             fullWidth
           >
-            {isButton ? (
-              <EuiButtonGroup
-                isFullWidth
-                buttonSize="m"
-                legend="Select"
-                color="primary"
-                options={[]}
-                idSelected={field.value}
-                onChange={field.setValue}
-                {...rest}
-              />
-            ) : (
-              <EuiSelect
-                value={field.value}
-                onChange={(e) => field.setValue(e.target.value)}
-                aria-label="Select"
-                {...rest}
-              />
-            )}
+            <EuiButtonGroup
+              isFullWidth
+              buttonSize="m"
+              legend="Select"
+              color="primary"
+              options={[]}
+              idSelected={field.value}
+              onChange={field.setValue}
+              {...rest}
+            />
           </EuiFormRow>
         );
       }}
