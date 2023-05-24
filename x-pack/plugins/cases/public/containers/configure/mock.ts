@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CasesConfigureResponse, CasesConfigureRequest } from '../../../common/api';
+import type { Configuration, ConfigurationRequest } from '../../../common/api';
 import { ConnectorTypes } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CaseConfigure, CaseConnectorMapping } from './types';
@@ -28,7 +28,7 @@ export const mappings: CaseConnectorMapping[] = [
   },
 ];
 
-export const caseConfigurationResposeMock: CasesConfigureResponse = {
+export const caseConfigurationResposeMock: Configuration = {
   id: '123',
   created_at: '2020-04-06T13:03:18.657Z',
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
@@ -47,7 +47,7 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
   version: 'WzHJ12',
 };
 
-export const caseConfigurationMock: CasesConfigureRequest = {
+export const caseConfigurationMock: ConfigurationRequest = {
   connector: {
     id: '123',
     name: 'My connector',

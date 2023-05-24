@@ -20,6 +20,7 @@ export interface GetBasicDataFromDetailsData {
   indexName?: string;
   isAlert: boolean;
   ruleDescription: string;
+  ruleId: string;
   ruleName: string;
   timestamp: string;
   userName: string;
@@ -29,6 +30,14 @@ export const useBasicDataFromDetailsData = (
   data: TimelineEventsDetailsItem[] | null
 ): GetBasicDataFromDetailsData => {
   const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data);
+
+  const ruleId = useMemo(
+    () =>
+      isAlert
+        ? getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data)
+        : getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data),
+    [isAlert, data]
+  );
 
   const ruleName = useMemo(
     () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, data),
@@ -82,6 +91,7 @@ export const useBasicDataFromDetailsData = (
       indexName,
       isAlert,
       ruleDescription,
+      ruleId,
       ruleName,
       timestamp,
       userName,
@@ -95,6 +105,7 @@ export const useBasicDataFromDetailsData = (
       indexName,
       isAlert,
       ruleDescription,
+      ruleId,
       ruleName,
       timestamp,
       userName,

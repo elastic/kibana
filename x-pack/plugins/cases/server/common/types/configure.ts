@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
+
+import type { SavedObject } from '@kbn/core/server';
+import type { ConfigurationAttributes } from '../../../common/api';
+import {
+  ConfigurationActivityFieldsRt,
+  ConfigurationBasicWithoutOwnerRt,
+  ConfigurationAttributesRt,
+} from '../../../common/api';
 import type { ConnectorPersisted } from './connectors';
 import type { User } from './user';
 
-export interface ConfigurePersistedAttributes {
+export interface ConfigurationPersistedAttributes {
   connector: ConnectorPersisted;
   closure_type: string;
   owner: string;
@@ -17,3 +26,18 @@ export interface ConfigurePersistedAttributes {
   updated_at: string | null;
   updated_by: User | null;
 }
+
+export type ConfigurationTransformedAttributes = ConfigurationAttributes;
+export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;
+
+export const ConfigurationPartialAttributesRt = rt.intersection([
+  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.props)),
+  rt.exact(rt.partial(ConfigurationActivityFieldsRt.props)),
+  rt.exact(
+    rt.partial({
+      owner: rt.string,
+    })
+  ),
+]);
+
+export const ConfigurationTransformedAttributesRt = ConfigurationAttributesRt;

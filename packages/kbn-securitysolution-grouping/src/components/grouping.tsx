@@ -101,7 +101,7 @@ const GroupingComponent = <T,>({
           : undefined;
 
         return (
-          <span key={groupKey}>
+          <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
             <GroupPanel
               isNullGroup={isNullGroup}
               nullGroupMessage={nullGroupMessage}

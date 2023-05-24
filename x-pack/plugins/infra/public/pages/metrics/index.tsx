@@ -13,8 +13,7 @@ import { Route } from '@kbn/shared-ux-router';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';

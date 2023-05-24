@@ -198,3 +198,10 @@ export const ANALYZER_PREVIEW_TEXT = i18n.translate(
 export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
   defaultMessage: 'Share Alert',
 });
+
+export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
+  {
+    defaultMessage: 'Investigation guide',
+  }
+);

@@ -54,6 +54,8 @@ export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
 export const HIGHLIGHTED_FIELDS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHighlightedFields';
 export const HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID = 'query-toggle-header';
 export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
+export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
 
 /* Insights section*/
 

@@ -17,9 +17,17 @@ xpack.license_management.enabled: false
 # Other disabled plugins
 #xpack.canvas.enabled: false #only disabable in dev-mode
 xpack.reporting.enabled: false
+xpack.cloud_integrations.data_migration.enabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 # server.restrictInternalApis: true
 # Telemetry enabled by default and not disableable via UI
 telemetry.optIn: true
 telemetry.allowChangingOptInStatus: false
+
+# Harden security response headers, see https://github.com/elastic/kibana/issues/150884
+# The browser should remember that a site, including subdomains, is only to be accessed using HTTPS for 1 year
+# Can override this setting in kibana.dev.yml, e.g. server.securityResponseHeaders.strictTransportSecurity: null
+server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includeSubDomains
+# Disable embedding for serverless MVP
+server.securityResponseHeaders.disableEmbedding: true

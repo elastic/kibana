@@ -489,6 +489,7 @@ export const arraysDifference = <T>(
 interface CaseWithIDVersion {
   id: string;
   version: string;
+
   [key: string]: unknown;
 }
 
@@ -496,31 +497,19 @@ export const getCaseToUpdate = (
   currentCase: unknown,
   queryCase: CaseWithIDVersion
 ): CaseWithIDVersion =>
-  Object.entries(queryCase).reduce(
+  Object.entries(queryCase).reduce<CaseWithIDVersion>(
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
       if (Array.isArray(currentValue) && Array.isArray(value)) {
         if (arraysDifference(value, currentValue)) {
-          return {
-            ...acc,
-            [key]: value,
-          };
+          acc[key] = value;
         }
-        return acc;
       } else if (isPlainObject(currentValue) && isPlainObject(value)) {
         if (!deepEqual(currentValue, value)) {
-          return {
-            ...acc,
-            [key]: value,
-          };
+          acc[key] = value;
         }
-
-        return acc;
       } else if (currentValue != null && value !== currentValue) {
-        return {
-          ...acc,
-          [key]: value,
-        };
+        acc[key] = value;
       }
       return acc;
     },
