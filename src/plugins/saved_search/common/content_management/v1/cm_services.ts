@@ -12,7 +12,7 @@ import {
   savedObjectSchema,
   objectTypeToGetResultSchema,
   createOptionsSchemas,
-  // updateOptionsSchema,
+  updateOptionsSchema,
   createResultSchema,
   // searchOptionsSchemas,
 } from '@kbn/content-management-utils';
@@ -74,7 +74,11 @@ const savedSearchCreateOptionsSchema = schema.maybe(
   })
 );
 
-const savedSearchUpdateOptionsSchema = schema.maybe(schema.object({}));
+const savedSearchUpdateOptionsSchema = schema.maybe(
+  schema.object({
+    references: updateOptionsSchema.references,
+  })
+);
 const savedSearchSearchOptionsSchema = schema.maybe(
   schema.object({
     searchFields: schema.maybe(schema.arrayOf(schema.string())),

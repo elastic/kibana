@@ -24,7 +24,7 @@ import {
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
 import { SavedSearchType, LATEST_VERSION } from '../common';
-import type { SavedSearchCrudTypes } from '../common/content_management';
+import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
 
 /**
  * Data plugin public Setup contract
@@ -58,7 +58,7 @@ export interface SavedSearchPublicSetupDependencies {
 export interface SavedSearchPublicStartDependencies {
   data: DataPublicPluginStart;
   spaces?: SpacesApi;
-  savedObjectsTagging?: SavedObjectTaggingOssPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   contentManagement: ContentManagementPublicStart;
 }
 
@@ -90,41 +90,10 @@ export class SavedSearchPublicPlugin
     {
       data: { search },
       spaces,
-      savedObjectsTagging,
+      savedObjectsTaggingOss,
       contentManagement: { client: contentManagement },
     }: SavedSearchPublicStartDependencies
   ): SavedSearchPublicPluginStart {
-    return {
-      get: (savedSearchId: string) => {
-        return getSavedSearch(savedSearchId, {
-          search,
-          contentManagement,
-          spaces,
-          savedObjectsTagging: savedObjectsTagging?.getTaggingApi(),
-        });
-      },
-      getAll: async () => {
-        // todo this is loading a list
-        const result = await contentManagement.search<
-          SavedSearchCrudTypes['SearchIn'],
-          SavedSearchCrudTypes['SearchOut']
-        >({
-          contentTypeId: SavedSearchType,
-          // perPage: 10000,
-          // todo
-          query: {},
-        });
-        return result.hits;
-      },
-      getNew: () => getNewSavedSearch({ search }),
-      save: (savedSearch, options = {}) => {
-        return saveSavedSearch(
-          savedSearch,
-          options,
-          contentManagement,
-          savedObjectsTagging?.getTaggingApi()
-        );
-      },
-    };
+    return new SavedSearchesService({ search, spaces, savedObjectsTaggingOss, contentManagement });
   }
 }
