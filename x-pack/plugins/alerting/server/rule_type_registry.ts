@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { schema, ObjectType, AnyType } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection, max } from 'lodash';
 import { Logger } from '@kbn/core/server';
@@ -267,7 +267,7 @@ export class RuleTypeRegistry {
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
 
-    let alertStateSchema: ObjectType | AnyType = schema.any();
+    let alertStateSchema = schema.maybe(schema.any());
     if (ruleType.alertStateSchemaByVersion) {
       const versions = Object.keys(ruleType.alertStateSchemaByVersion).map((key) =>
         parseInt(key, 10)
@@ -328,7 +328,7 @@ export class RuleTypeRegistry {
       )
     );
 
-    let ruleStateSchema: ObjectType | AnyType = schema.any();
+    let ruleStateSchema = schema.maybe(schema.any());
     if (ruleType.ruleStateSchemaByVersion) {
       const versions = Object.keys(ruleType.ruleStateSchemaByVersion).map((key) =>
         parseInt(key, 10)
