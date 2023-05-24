@@ -24,7 +24,7 @@ import { LinkToApmServices } from './links/link_to_apm_services';
 import type { HostNodeRow } from './types';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import type { SetNewHostFlyoutOpen } from '../../pages/metrics/hosts/hooks/use_host_flyout_open_url_state';
-import { AssetDetailsTabContent } from './tabsContent/tabs_content';
+import { AssetDetailsTabContent } from './tabs_content/tabs_content';
 
 export enum FlyoutTabIds {
   METADATA = 'metadata',
