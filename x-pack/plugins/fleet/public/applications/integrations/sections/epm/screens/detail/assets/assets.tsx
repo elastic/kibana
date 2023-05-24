@@ -8,7 +8,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 
 import type {
   EsAssetReference,
@@ -26,6 +26,7 @@ import {
   useLink,
   useStartServices,
   useUIExtension,
+  useAuthz,
 } from '../../../../../hooks';
 
 import { sendGetBulkAssets } from '../../../../../hooks';
@@ -44,6 +45,8 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const pkgkey = `${name}-${version}`;
   const { spaces } = useStartServices();
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
+
+  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
 
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -130,6 +133,23 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   let content: JSX.Element | Array<JSX.Element | null> | null;
   if (isLoading) {
     content = <Loading />;
+  } else if (!canReadPackageSettings) {
+    content = (
+      <EuiCallOut
+        color="warning"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.assets.assetsPermissionErrorTitle"
+            defaultMessage="Permission error"
+          />
+        }
+      >
+        <FormattedMessage
+          id="xpack.fleet.epm.packageDetails.assets.assetsPermissionError"
+          defaultMessage="You do not have permission to retrieve the Kibana saved object for that integration. Contact your administrator."
+        />
+      </EuiCallOut>
+    );
   } else if (fetchError) {
     content = (
       <Error
