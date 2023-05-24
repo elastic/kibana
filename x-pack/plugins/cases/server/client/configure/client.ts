@@ -7,9 +7,6 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -30,9 +27,8 @@ import {
   ConfigurationsRt,
   ConfigurationRt,
   ConfigurationPatchRequestRt,
-  excess,
   GetConfigurationFindRequestRt,
-  throwErrors,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -134,7 +130,7 @@ export const createConfigurationSubClient = (
   });
 };
 
-async function get(
+export async function get(
   params: GetConfigurationFindRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
@@ -146,10 +142,7 @@ async function get(
     authorization,
   } = clientArgs;
   try {
-    const queryParams = pipe(
-      excess(GetConfigurationFindRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(GetConfigurationFindRequestRt)(params);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findConfigurations);
@@ -240,7 +233,7 @@ function isConnectorSupported(
   );
 }
 
-async function update(
+export async function update(
   configurationId: string,
   req: ConfigurationPatchRequest,
   clientArgs: CasesClientArgs,
@@ -255,24 +248,9 @@ async function update(
   } = clientArgs;
 
   try {
-    const request = pipe(
-      ConfigurationPatchRequestRt.decode(req),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
     const { version, ...queryWithoutVersion } = request;
-
-    /**
-     * Excess function does not supports union or intersection types.
-     * For that reason we need to check manually for excess properties
-     * in the partial attributes.
-     *
-     * The owner attribute should not be allowed.
-     */
-    pipe(
-      excess(ConfigurationPatchRequestRt.types[0]).decode(queryWithoutVersion),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,

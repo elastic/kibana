@@ -52,6 +52,8 @@ export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
 export const HIGHLIGHTED_FIELDS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHighlightedFields';
 export const HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID = 'query-toggle-header';
 export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
+export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
 
 /* Insights section*/
 
@@ -59,14 +61,20 @@ export const INSIGHTS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsights';
 export const INSIGHTS_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsHeader';
 export const ENTITIES_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesHeader';
 export const ENTITIES_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesContent';
+export const ENTITIES_USER_CONTENT_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserContent';
+export const ENTITIES_HOST_CONTENT_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostContent';
 export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
-export const ENTITY_PANEL_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanel';
 export const ENTITY_PANEL_ICON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelTypeIcon';
 export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelToggleButton';
-export const ENTITY_PANEL_HEADER_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderTitle';
+export const ENTITY_PANEL_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelHeader';
+export const ENTITY_PANEL_HEADER_LEFT_SECTION_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderLeftSection';
+export const ENTITY_PANEL_HEADER_RIGHT_SECTION_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderRightSection';
 export const ENTITY_PANEL_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelContent';
 export const TECHNICAL_PREVIEW_ICON_TEST_ID =
