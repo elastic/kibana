@@ -267,11 +267,16 @@ describe('AlertsTable', () => {
       }),
     useBulkActions: () => [
       {
-        label: 'Fake Bulk Action',
-        key: 'fakeBulkAction',
-        'data-test-subj': 'fake-bulk-action',
-        disableOnQuery: false,
-        onClick: () => {},
+        id: 0,
+        items: [
+          {
+            label: 'Fake Bulk Action',
+            key: 'fakeBulkAction',
+            'data-test-subj': 'fake-bulk-action',
+            disableOnQuery: false,
+            onClick: () => {},
+          },
+        ],
       },
     ],
     useFieldBrowserOptions: () => {

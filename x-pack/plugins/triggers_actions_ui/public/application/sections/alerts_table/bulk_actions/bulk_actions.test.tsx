@@ -179,43 +179,47 @@ describe('AlertsTable.BulkActions', () => {
     alertsTableConfiguration: {
       ...alertsTableConfiguration,
 
-      useBulkActions: () =>
-        [
-          {
-            label: 'Fake Bulk Action',
-            key: 'fakeBulkAction',
-            'data-test-subj': 'fake-bulk-action',
-            disableOnQuery: false,
-            onClick: () => {},
-          },
-          {
-            label: 'Fake Bulk Action with clear selection',
-            key: 'fakeBulkActionClear',
-            'data-test-subj': 'fake-bulk-action-clear',
-            disableOnQuery: false,
-            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-              clearSelection();
+      useBulkActions: () => [
+        {
+          id: 0,
+          items: [
+            {
+              label: 'Fake Bulk Action',
+              key: 'fakeBulkAction',
+              'data-test-subj': 'fake-bulk-action',
+              disableOnQuery: false,
+              onClick: () => {},
             },
-          },
-          {
-            label: 'Fake Bulk Action with loading and clear selection',
-            key: 'fakeBulkActionLoadingClear',
-            'data-test-subj': 'fake-bulk-action-loading',
-            disableOnQuery: false,
-            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-              setIsBulkActionLoading(true);
+            {
+              label: 'Fake Bulk Action with clear selection',
+              key: 'fakeBulkActionClear',
+              'data-test-subj': 'fake-bulk-action-clear',
+              disableOnQuery: false,
+              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+                clearSelection();
+              },
             },
-          },
-          {
-            label: 'Fake Bulk Action with refresh Action',
-            key: 'fakeBulkActionRefresh',
-            'data-test-subj': 'fake-bulk-action-refresh',
-            disableOnQuery: false,
-            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-              refresh();
+            {
+              label: 'Fake Bulk Action with loading and clear selection',
+              key: 'fakeBulkActionLoadingClear',
+              'data-test-subj': 'fake-bulk-action-loading',
+              disableOnQuery: false,
+              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+                setIsBulkActionLoading(true);
+              },
             },
-          },
-        ] as BulkActionsConfig[],
+            {
+              label: 'Fake Bulk Action with refresh Action',
+              key: 'fakeBulkActionRefresh',
+              'data-test-subj': 'fake-bulk-action-refresh',
+              disableOnQuery: false,
+              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+                refresh();
+              },
+            },
+          ] as BulkActionsConfig[],
+        },
+      ],
     },
   };
 
@@ -334,11 +338,16 @@ describe('AlertsTable.BulkActions', () => {
           ...alertsTableConfiguration,
           useBulkActions: () => [
             {
-              label: 'Fake Bulk Action',
-              key: 'fakeBulkAction',
-              'data-test-subj': 'fake-bulk-action',
-              disableOnQuery: false,
-              onClick: mockedFn,
+              id: 0,
+              items: [
+                {
+                  label: 'Fake Bulk Action',
+                  key: 'fakeBulkAction',
+                  'data-test-subj': 'fake-bulk-action',
+                  disableOnQuery: false,
+                  onClick: mockedFn,
+                },
+              ],
             },
           ],
         },
@@ -573,11 +582,16 @@ describe('AlertsTable.BulkActions', () => {
               ...alertsTableConfiguration,
               useBulkActions: () => [
                 {
-                  label: 'Fake Bulk Action',
-                  key: 'fakeBulkAction',
-                  'data-test-subj': 'fake-bulk-action',
-                  disableOnQuery: false,
-                  onClick: mockedFn,
+                  id: 0,
+                  items: [
+                    {
+                      label: 'Fake Bulk Action',
+                      key: 'fakeBulkAction',
+                      'data-test-subj': 'fake-bulk-action',
+                      disableOnQuery: false,
+                      onClick: mockedFn,
+                    },
+                  ],
                 },
               ],
             },
@@ -629,11 +643,16 @@ describe('AlertsTable.BulkActions', () => {
                 ...alertsTableConfiguration,
                 useBulkActions: () => [
                   {
-                    label: 'Fake Bulk Action',
-                    key: 'fakeBulkAction',
-                    'data-test-subj': 'fake-bulk-action',
-                    disableOnQuery: false,
-                    onClick: mockedFn,
+                    id: 0,
+                    items: [
+                      {
+                        label: 'Fake Bulk Action',
+                        key: 'fakeBulkAction',
+                        'data-test-subj': 'fake-bulk-action',
+                        disableOnQuery: false,
+                        onClick: mockedFn,
+                      },
+                    ],
                   },
                 ],
               },
@@ -785,11 +804,16 @@ describe('AlertsTable.BulkActions', () => {
                 ...alertsTableConfiguration,
                 useBulkActions: () => [
                   {
-                    label: 'Fake Bulk Action',
-                    key: 'fakeBulkAction',
-                    'data-test-subj': 'fake-bulk-action',
-                    disableOnQuery: false,
-                    onClick: mockedFn,
+                    id: 0,
+                    items: [
+                      {
+                        label: 'Fake Bulk Action',
+                        key: 'fakeBulkAction',
+                        'data-test-subj': 'fake-bulk-action',
+                        disableOnQuery: false,
+                        onClick: mockedFn,
+                      },
+                    ],
                   },
                 ],
               },
