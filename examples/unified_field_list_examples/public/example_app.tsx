@@ -62,8 +62,12 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
   // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
   useEffect(() => {
     const setDefaultDataView = async () => {
-      const defaultDataView = await data.dataViews.getDefault();
-      setDataView(defaultDataView);
+      try {
+        const defaultDataView = await data.dataViews.getDefault();
+        setDataView(defaultDataView);
+      } catch (e) {
+        setDataView(null);
+      }
     };
 
     setDefaultDataView();

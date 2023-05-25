@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
@@ -13,573 +14,178 @@ const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'header', 'unifiedFieldList']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
   const dataViewTitle = 'logstash-2015.09.22';
 
   describe('Field stats', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
       );
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/pre_calculated_histogram');
       await PageObjects.common.navigateToApp('unifiedFieldListExamples');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('combobox is ready', async () => {
+        return await testSubjects.exists('dataViewSelector');
+      });
       await comboBox.setCustom('dataViewSelector', dataViewTitle);
       await retry.waitFor('page is ready', async () => {
         return await testSubjects.exists('globalQueryBar');
       });
+      await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/pre_calculated_histogram');
       await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
     });
 
     describe('field distribution', () => {
-      // before(async () => {
-      //   await kibanaServer.savedObjects.cleanStandardList();
-      //   await kibanaServer.importExport.load(
-      //     'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
-      //   );
-      // });
-      // after(async () => {
-      //   await kibanaServer.savedObjects.cleanStandardList();
-      // });
-
-      it('should return an auto histogram for numbers and top values', async () => {
-        await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        // const { body } = await supertest
-        //   .post(API_PATH)
-        //   .set(COMMON_HEADERS)
-        //   .send({
-        //     dataViewId: 'logstash-2015.09.22',
-        //     dslQuery: { match_all: {} },
-        //     fromDate: TEST_START_TIME,
-        //     toDate: TEST_END_TIME,
-        //     fieldName: 'bytes',
-        //   })
-        //   .expect(200);
-
-        // expect(body).to.eql({
-        //   totalDocuments: 4634,
-        //   sampledDocuments: 4634,
-        //   sampledValues: 4634,
-        //   histogram: {
-        //     buckets: [
-        //       {
-        //         count: 705,
-        //         key: 0,
-        //       },
-        //       {
-        //         count: 898,
-        //         key: 1999,
-        //       },
-        //       {
-        //         count: 886,
-        //         key: 3998,
-        //       },
-        //       {
-        //         count: 970,
-        //         key: 5997,
-        //       },
-        //       {
-        //         count: 939,
-        //         key: 7996,
-        //       },
-        //       {
-        //         count: 44,
-        //         key: 9995,
-        //       },
-        //       {
-        //         count: 43,
-        //         key: 11994,
-        //       },
-        //       {
-        //         count: 43,
-        //         key: 13993,
-        //       },
-        //       {
-        //         count: 57,
-        //         key: 15992,
-        //       },
-        //       {
-        //         count: 49,
-        //         key: 17991,
-        //       },
-        //     ],
-        //   },
-        //   topValues: {
-        //     buckets: [
-        //       {
-        //         count: 147,
-        //         key: 0,
-        //       },
-        //       {
-        //         count: 5,
-        //         key: 3954,
-        //       },
-        //       {
-        //         count: 5,
-        //         key: 5846,
-        //       },
-        //       {
-        //         count: 5,
-        //         key: 6497,
-        //       },
-        //       {
-        //         count: 4,
-        //         key: 1840,
-        //       },
-        //       {
-        //         count: 4,
-        //         key: 4206,
-        //       },
-        //       {
-        //         count: 4,
-        //         key: 4328,
-        //       },
-        //       {
-        //         count: 4,
-        //         key: 4669,
-        //       },
-        //       {
-        //         count: 4,
-        //         key: 5863,
-        //       },
-        //       {
-        //         count: 4,
-        //         key: 6631,
-        //       },
-        //     ],
-        //   },
-        // });
+      before(async () => {
+        await PageObjects.unifiedFieldList.toggleSidebarSection('empty'); // it will allow to render more fields in Available fields section
       });
 
-      //
-      // it('should return an auto histogram for dates', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: { match_all: {} },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: '@timestamp',
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body).to.eql({
-      //     totalDocuments: 4634,
-      //     histogram: {
-      //       buckets: [
-      //         {
-      //           count: 1162,
-      //           key: 1442875680000,
-      //         },
-      //         {
-      //           count: 3420,
-      //           key: 1442914560000,
-      //         },
-      //         {
-      //           count: 52,
-      //           key: 1442953440000,
-      //         },
-      //       ],
-      //     },
-      //   });
-      // });
-      //
-      // it('should return top values for strings', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: { match_all: {} },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: 'geo.src',
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body).to.eql({
-      //     totalDocuments: 4634,
-      //     sampledDocuments: 4634,
-      //     sampledValues: 4633,
-      //     topValues: {
-      //       buckets: [
-      //         {
-      //           count: 832,
-      //           key: 'CN',
-      //         },
-      //         {
-      //           count: 804,
-      //           key: 'IN',
-      //         },
-      //         {
-      //           count: 425,
-      //           key: 'US',
-      //         },
-      //         {
-      //           count: 158,
-      //           key: 'ID',
-      //         },
-      //         {
-      //           count: 143,
-      //           key: 'BR',
-      //         },
-      //         {
-      //           count: 116,
-      //           key: 'PK',
-      //         },
-      //         {
-      //           count: 106,
-      //           key: 'BD',
-      //         },
-      //         {
-      //           count: 94,
-      //           key: 'NG',
-      //         },
-      //         {
-      //           count: 84,
-      //           key: 'RU',
-      //         },
-      //         {
-      //           count: 73,
-      //           key: 'JP',
-      //         },
-      //       ],
-      //     },
-      //   });
-      // });
-      //
-      // it('should return top values for ip fields', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: { match_all: {} },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: 'ip',
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body).to.eql({
-      //     totalDocuments: 4634,
-      //     sampledDocuments: 4634,
-      //     sampledValues: 4633,
-      //     topValues: {
-      //       buckets: [
-      //         {
-      //           count: 13,
-      //           key: '177.194.175.66',
-      //         },
-      //         {
-      //           count: 12,
-      //           key: '18.55.141.62',
-      //         },
-      //         {
-      //           count: 12,
-      //           key: '53.55.251.105',
-      //         },
-      //         {
-      //           count: 11,
-      //           key: '21.111.249.239',
-      //         },
-      //         {
-      //           count: 11,
-      //           key: '97.63.84.25',
-      //         },
-      //         {
-      //           count: 11,
-      //           key: '100.99.207.174',
-      //         },
-      //         {
-      //           count: 11,
-      //           key: '112.34.138.226',
-      //         },
-      //         {
-      //           count: 11,
-      //           key: '194.68.89.92',
-      //         },
-      //         {
-      //           count: 11,
-      //           key: '235.186.79.201',
-      //         },
-      //         {
-      //           count: 10,
-      //           key: '57.79.108.136',
-      //         },
-      //       ],
-      //     },
-      //   });
-      // });
-      //
-      // it('should return histograms for scripted date fields', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: { match_all: {} },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: 'scripted_date',
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body).to.eql({
-      //     histogram: {
-      //       buckets: [
-      //         {
-      //           count: 4634,
-      //           key: 0,
-      //         },
-      //       ],
-      //     },
-      //     totalDocuments: 4634,
-      //   });
-      // });
-      //
-      // it('should return top values for scripted string fields', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: { match_all: {} },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: 'scripted_string',
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body).to.eql({
-      //     totalDocuments: 4634,
-      //     sampledDocuments: 4634,
-      //     sampledValues: 4634,
-      //     topValues: {
-      //       buckets: [
-      //         {
-      //           count: 4634,
-      //           key: 'hello',
-      //         },
-      //       ],
-      //     },
-      //   });
-      // });
-      //
-      // it('should return examples for non-aggregatable fields', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: { match_all: {} },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: 'extension', // `extension.keyword` is an aggregatable field but `extension` is not
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body.totalDocuments).to.eql(4634);
-      //   expect(body.sampledDocuments).to.eql(100);
-      //   expect(body.sampledValues).to.eql(100);
-      //   expect(body.topValues.buckets.length).to.be.greaterThan(0);
-      // });
-      //
-      // it('should return top values for index pattern runtime string fields', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: { match_all: {} },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: 'runtime_string_field',
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body).to.eql({
-      //     totalDocuments: 4634,
-      //     sampledDocuments: 4634,
-      //     sampledValues: 4634,
-      //     topValues: {
-      //       buckets: [
-      //         {
-      //           count: 4634,
-      //           key: 'hello world!',
-      //         },
-      //       ],
-      //     },
-      //   });
-      // });
-      //
-      // it('should apply filters and queries', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: {
-      //         bool: {
-      //           filter: [{ match: { 'geo.src': 'US' } }],
-      //         },
-      //       },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: 'bytes',
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body.totalDocuments).to.eql(425);
-      // });
-      //
-      // it('should allow filtering on a runtime field other than the field in use', async () => {
-      //   const { body } = await supertest
-      //     .post(API_PATH)
-      //     .set(COMMON_HEADERS)
-      //     .send({
-      //       dataViewId: 'logstash-2015.09.22',
-      //       dslQuery: {
-      //         bool: {
-      //           filter: [{ exists: { field: 'runtime_string_field' } }],
-      //         },
-      //       },
-      //       fromDate: TEST_START_TIME,
-      //       toDate: TEST_END_TIME,
-      //       fieldName: 'runtime_number_field',
-      //     })
-      //     .expect(200);
-      //
-      //   expect(body).to.eql({
-      //     totalDocuments: 4634,
-      //     sampledDocuments: 4634,
-      //     sampledValues: 4634,
-      //     topValues: {
-      //       buckets: [
-      //         {
-      //           count: 4634,
-      //           key: 5,
-      //         },
-      //       ],
-      //     },
-      //     histogram: { buckets: [] },
-      //   });
-      // });
+      it('should return an auto histogram for numbers and top values', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be(
+          'topValuesAndDistribution'
+        );
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
+          '0\n3.2%\n3,954\n0.1%\n5,846\n0.1%\n6,497\n0.1%\n1,840\n0.1%\n4,206\n0.1%\n4,328\n0.1%\n4,669\n0.1%\n5,863\n0.1%\n6,631\n0.1%\nOther\n96.0%'
+        );
+      });
+
+      it('should return an auto histogram for dates', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('@timestamp');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be(
+          'timeDistribution'
+        );
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+      });
+
+      it('should return top values for strings', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('geo.src');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
+          'CN\n18.0%\nIN\n17.4%\nUS\n9.2%\nID\n3.4%\nBR\n3.1%\nPK\n2.5%\nBD\n2.3%\nNG\n2.0%\nRU\n1.8%\nJP\n1.6%\nOther\n38.8%'
+        );
+      });
+
+      it('should return top values for ip fields', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('ip');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
+          '177.194.175.66\n0.3%\n18.55.141.62\n0.3%\n53.55.251.105\n0.3%\n21.111.249.239\n0.2%\n97.63.84.25\n0.2%\n100.99.207.174\n0.2%\n112.34.138.226\n0.2%\n194.68.89.92\n0.2%\n235.186.79.201\n0.2%\n57.79.108.136\n0.2%\nOther\n97.6%'
+        );
+      });
+
+      it('should return histograms for scripted date fields', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('scripted_date');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be(
+          'timeDistribution'
+        );
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+      });
+
+      it('should return top values for scripted string fields', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('scripted_string');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
+          'hello\n100%'
+        );
+      });
+
+      it('should return examples for non-aggregatable fields', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('extension');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('exampleValues');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(100);
+        // actual hits might vary
+        expect(
+          (await PageObjects.unifiedFieldList.getFieldStatsExampleBucketsVisibleText()).length
+        ).to.above(0);
+      });
+
+      it('should return top values for index pattern runtime string fields', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('runtime_string_field');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
+          'hello world!\n100%'
+        );
+      });
+
+      it('should apply filters and queries', async () => {
+        await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be(
+          'topValuesAndDistribution'
+        );
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(425);
+        await filterBar.removeFilter('geo.src');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should allow filtering on a runtime field other than the field in use', async () => {
+        await filterBar.addFilter({ field: 'runtime_string_field', operation: 'exists' });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.clickFieldListItem('runtime_number_field');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
+          '5\n100%'
+        );
+        await filterBar.removeFilter('runtime_string_field');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
     });
 
-    // describe('histogram', () => {
-    //   before(async () => {
-    //     await esArchiver.loadIfNeeded(
-    //       'x-pack/test/functional/es_archives/pre_calculated_histogram'
-    //     );
-    //   });
-    //   after(async () => {
-    //     await esArchiver.unload('x-pack/test/functional/es_archives/pre_calculated_histogram');
-    //   });
-    //
-    //   it('should return an auto histogram for precalculated histograms', async () => {
-    //     const { body } = await supertest
-    //       .post(API_PATH)
-    //       .set(COMMON_HEADERS)
-    //       .send({
-    //         dataViewId: 'histogram-test',
-    //         dslQuery: { match_all: {} },
-    //         fromDate: TEST_START_TIME,
-    //         toDate: TEST_END_TIME,
-    //         fieldName: 'histogram-content',
-    //       })
-    //       .expect(200);
-    //
-    //     expect(body).to.eql({
-    //       histogram: {
-    //         buckets: [
-    //           {
-    //             count: 237,
-    //             key: 0,
-    //           },
-    //           {
-    //             count: 323,
-    //             key: 0.47000000000000003,
-    //           },
-    //           {
-    //             count: 454,
-    //             key: 0.9400000000000001,
-    //           },
-    //           {
-    //             count: 166,
-    //             key: 1.4100000000000001,
-    //           },
-    //           {
-    //             count: 168,
-    //             key: 1.8800000000000001,
-    //           },
-    //           {
-    //             count: 425,
-    //             key: 2.35,
-    //           },
-    //           {
-    //             count: 311,
-    //             key: 2.8200000000000003,
-    //           },
-    //           {
-    //             count: 391,
-    //             key: 3.29,
-    //           },
-    //           {
-    //             count: 406,
-    //             key: 3.7600000000000002,
-    //           },
-    //           {
-    //             count: 324,
-    //             key: 4.23,
-    //           },
-    //           {
-    //             count: 628,
-    //             key: 4.7,
-    //           },
-    //         ],
-    //       },
-    //       sampledDocuments: 7,
-    //       sampledValues: 3833,
-    //       totalDocuments: 7,
-    //       topValues: { buckets: [] },
-    //     });
-    //   });
-    //
-    //   it('should return a single-value histogram when filtering a precalculated histogram', async () => {
-    //     const { body } = await supertest
-    //       .post(API_PATH)
-    //       .set(COMMON_HEADERS)
-    //       .send({
-    //         dataViewId: 'histogram-test',
-    //         dslQuery: { match: { 'histogram-title': 'single value' } },
-    //         fromDate: TEST_START_TIME,
-    //         toDate: TEST_END_TIME,
-    //         fieldName: 'histogram-content',
-    //       })
-    //       .expect(200);
-    //
-    //     expect(body).to.eql({
-    //       histogram: { buckets: [{ count: 1, key: 1 }] },
-    //       sampledDocuments: 1,
-    //       sampledValues: 1,
-    //       totalDocuments: 1,
-    //       topValues: { buckets: [] },
-    //     });
-    //   });
-    // });
+    describe('histogram', () => {
+      before(async () => {
+        await comboBox.setCustom('dataViewSelector', 'histogram-test');
+        await retry.waitFor('page is ready', async () => {
+          return await testSubjects.exists('globalQueryBar');
+        });
+        await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      });
+
+      it('should return an auto histogram for precalculated histograms', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('histogram-content');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('histogram');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(7);
+      });
+
+      it('should return a single-value histogram when filtering a precalculated histogram', async () => {
+        await filterBar.addFilter({
+          field: 'histogram-title',
+          operation: 'is',
+          value: 'single value',
+        });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.clickFieldListItem('histogram-content');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('histogram');
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(1);
+        await filterBar.removeFilter('histogram-title');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+    });
   });
 };

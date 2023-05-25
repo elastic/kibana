@@ -15,6 +15,7 @@ import FieldTopValuesBucket from './field_top_values_bucket';
 import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 
 export interface FieldTopValuesProps {
+  areExamples: boolean; // real top values or only examples
   buckets: BucketedAggregation<number | string>['buckets'];
   dataView: DataView;
   field: DataViewField;
@@ -26,6 +27,7 @@ export interface FieldTopValuesProps {
 }
 
 export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
+  areExamples,
   buckets,
   dataView,
   field,
@@ -46,55 +48,61 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   );
 
   return (
-    <div data-test-subj={`${dataTestSubject}-topValues`}>
-      {buckets.map((bucket, index) => {
-        const fieldValue = bucket.key;
-        const formatted = formatter.convert(fieldValue);
+    <section
+      data-test-subj={
+        areExamples ? 'unifiedFieldStats-exampleValueBuckets' : 'unifiedFieldStats-topValueBuckets'
+      }
+    >
+      <div data-test-subj={`${dataTestSubject}-topValues`}>
+        {buckets.map((bucket, index) => {
+          const fieldValue = bucket.key;
+          const formatted = formatter.convert(fieldValue);
 
-        return (
-          <Fragment key={fieldValue}>
-            {index > 0 && <EuiSpacer size="s" />}
+          return (
+            <Fragment key={fieldValue}>
+              {index > 0 && <EuiSpacer size="s" />}
+              <FieldTopValuesBucket
+                field={field}
+                fieldValue={fieldValue}
+                formattedFieldValue={formatted}
+                formattedPercentage={getFormattedPercentageValue(
+                  bucket.count,
+                  sampledValuesCount,
+                  digitsRequired
+                )}
+                progressValue={getProgressValue(bucket.count, sampledValuesCount)}
+                count={bucket.count}
+                color={color}
+                data-test-subj={dataTestSubject}
+                onAddFilter={onAddFilter}
+                overrideFieldTopValueBar={overrideFieldTopValueBar}
+              />
+            </Fragment>
+          );
+        })}
+        {otherCount > 0 && (
+          <>
+            <EuiSpacer size="s" />
             <FieldTopValuesBucket
+              type="other"
               field={field}
-              fieldValue={fieldValue}
-              formattedFieldValue={formatted}
+              fieldValue={undefined}
               formattedPercentage={getFormattedPercentageValue(
-                bucket.count,
+                otherCount,
                 sampledValuesCount,
                 digitsRequired
               )}
-              progressValue={getProgressValue(bucket.count, sampledValuesCount)}
-              count={bucket.count}
+              progressValue={getProgressValue(otherCount, sampledValuesCount)}
+              count={otherCount}
               color={color}
               data-test-subj={dataTestSubject}
               onAddFilter={onAddFilter}
               overrideFieldTopValueBar={overrideFieldTopValueBar}
             />
-          </Fragment>
-        );
-      })}
-      {otherCount > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <FieldTopValuesBucket
-            type="other"
-            field={field}
-            fieldValue={undefined}
-            formattedPercentage={getFormattedPercentageValue(
-              otherCount,
-              sampledValuesCount,
-              digitsRequired
-            )}
-            progressValue={getProgressValue(otherCount, sampledValuesCount)}
-            count={otherCount}
-            color={color}
-            data-test-subj={dataTestSubject}
-            onAddFilter={onAddFilter}
-            overrideFieldTopValueBar={overrideFieldTopValueBar}
-          />
-        </>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+    </section>
   );
 };
 

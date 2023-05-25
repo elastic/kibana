@@ -60,7 +60,7 @@ export function FieldListItem({
   onRemoveFieldFromWorkspace,
 }: FieldListItemProps) {
   const { dataViewFieldEditor, data } = services;
-  const querySubscriberResult = useQuerySubscriber({ data });
+  const querySubscriberResult = useQuerySubscriber({ data, listenToSearchSessionUpdates: false }); // this example app does not use search sessions
   const filterManager = data?.query?.filterManager;
   const [infoIsOpen, setOpen] = useState(false);
 

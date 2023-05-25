@@ -203,4 +203,52 @@ export class UnifiedFieldListPageObject extends FtrService {
       return !(await this.testSubjects.exists('fieldListFiltersFieldTypeFilterOptions'));
     });
   }
+
+  public async getFieldStatsViewType(): Promise<
+    | 'topValuesAndDistribution'
+    | 'histogram'
+    | 'topValues'
+    | 'timeDistribution'
+    | 'exampleValues'
+    | 'unknown'
+  > {
+    if (await this.testSubjects.exists('unifiedFieldStats-buttonGroup')) {
+      return 'topValuesAndDistribution';
+    }
+
+    if (await this.testSubjects.exists('unifiedFieldStats-timeDistribution')) {
+      return 'timeDistribution';
+    }
+
+    if (await this.testSubjects.exists('unifiedFieldStats-histogram')) {
+      return 'histogram';
+    }
+
+    if (await this.testSubjects.exists('unifiedFieldStats-topValueBuckets')) {
+      return 'topValues';
+    }
+
+    if (await this.testSubjects.exists('unifiedFieldStats-exampleValueBuckets')) {
+      return 'exampleValues';
+    }
+
+    return 'unknown';
+  }
+
+  public async getFieldStatsDocsCount() {
+    return parseInt(
+      (
+        await this.testSubjects.getVisibleText('unifiedFieldStats-statsFooter-docsCount')
+      ).replaceAll(',', ''),
+      10
+    );
+  }
+
+  public async getFieldStatsTopValueBucketsVisibleText() {
+    return await this.testSubjects.getVisibleText('unifiedFieldStats-topValueBuckets');
+  }
+
+  public async getFieldStatsExampleBucketsVisibleText() {
+    return await this.testSubjects.getVisibleText('unifiedFieldStats-exampleValueBuckets');
+  }
 }

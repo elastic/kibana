@@ -47,7 +47,10 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
   const dragDropContext = useContext(DragContext);
   const allFields = dataView.fields;
   const activeDataViews = useMemo(() => [dataView], [dataView]);
-  const querySubscriberResult = useQuerySubscriber({ data: services.data });
+  const querySubscriberResult = useQuerySubscriber({
+    data: services.data,
+    listenToSearchSessionUpdates: false, // this example app does not use search sessions
+  });
 
   const onSelectedFieldFilter = useCallback(
     (field: DataViewField) => {
