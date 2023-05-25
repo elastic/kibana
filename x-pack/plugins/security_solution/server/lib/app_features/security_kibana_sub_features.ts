@@ -396,7 +396,7 @@ export const hostIsolationSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: [`${APP_ID}-writeReleaseHost`],
+          api: [`${APP_ID}-writeHostIsolation`],
           id: 'host_isolation_all',
           includeIn: 'none',
           name: 'All',
@@ -404,12 +404,13 @@ export const hostIsolationSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ui: ['writeReleaseHost'],
+          ui: ['writeHostIsolation'],
         },
       ],
     },
   ],
 };
+
 export const processOperationsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
