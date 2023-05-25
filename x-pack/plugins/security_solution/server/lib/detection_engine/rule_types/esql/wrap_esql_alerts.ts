@@ -6,6 +6,7 @@
  */
 
 import objectHash from 'object-hash';
+import type { Moment } from 'moment';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -16,7 +17,6 @@ import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { SignalSource } from '../types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
-
 import type { EsqlTable, EsqlResultRow, EsqlResultColumn } from './esql_request';
 
 const rowToDocument = (
@@ -38,6 +38,7 @@ export const wrapEsqlAlerts = ({
   alertTimestampOverride,
   ruleExecutionLogger,
   publicBaseUrl,
+  tuple,
 }: {
   results: EsqlTable;
   spaceId: string | null | undefined;
@@ -46,12 +47,24 @@ export const wrapEsqlAlerts = ({
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
+  tuple: {
+    to: Moment;
+    from: Moment;
+    maxSignals: number;
+  };
   // TODO latest fields
 }): Array<WrappedFieldsLatest<any>> => {
+  console.log('>>>>>>> results', JSON.stringify(results, null, 2));
   console.log('>>>>>>> columns', JSON.stringify(results.columns, null, 2));
 
-  return results.values.map((row, i) => {
-    const id = objectHash([completeRule.ruleParams.query, `${spaceId}:${completeRule.alertId}`, i]);
+  return results.values.slice(0, completeRule.ruleParams.maxSignals).map((row, i) => {
+    const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
+    const id = objectHash([
+      ruleRunId,
+      completeRule.ruleParams.query,
+      `${spaceId}:${completeRule.alertId}`,
+      i,
+    ]);
 
     const document = rowToDocument(results.columns, row);
     console.log('>>>>>>> row', JSON.stringify(row, null, 2));

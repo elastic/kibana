@@ -93,6 +93,7 @@ export const esqlExecutor = async ({
       alertTimestampOverride,
       ruleExecutionLogger,
       publicBaseUrl,
+      tuple,
     });
 
     if (wrappedAlerts?.length) {
