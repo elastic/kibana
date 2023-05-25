@@ -48,6 +48,10 @@ export const ONLY_ES_QUERY_EXPRESSION_ERRORS = {
   timeField: new Array<string>(),
 };
 
+export const ONLY_ESQL_QUERY_EXPRESSION_ERRORS = {
+  esqlQuery: new Array<string>(),
+};
+
 const ALL_EXPRESSION_ERROR_ENTRIES = {
   ...COMMON_EXPRESSION_ERRORS,
   ...SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,

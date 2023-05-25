@@ -19,6 +19,10 @@ export type OnlySearchSourceRuleParams = Omit<EsQueryRuleParams, 'esQuery' | 'in
   searchType: 'searchSource';
 };
 
+export type OnlyEsqlQueryRuleParams = Omit<EsQueryRuleParams, 'esQuery' | 'index'> & {
+  searchType: 'esqlQuery';
+};
+
 export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   P,
   EsQueryRuleState,

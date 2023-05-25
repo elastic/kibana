@@ -17,6 +17,7 @@ import { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,
+  ONLY_ESQL_QUERY_EXPRESSION_ERRORS,
   ONLY_ES_QUERY_EXPRESSION_ERRORS,
   SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
 } from './constants';
@@ -222,52 +223,17 @@ const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>
 };
 
 const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQuery>) => {
-  const errors: typeof ONLY_ES_QUERY_EXPRESSION_ERRORS = defaultsDeep(
+  const errors: typeof ONLY_ESQL_QUERY_EXPRESSION_ERRORS = defaultsDeep(
     {},
-    ONLY_ES_QUERY_EXPRESSION_ERRORS
+    ONLY_ESQL_QUERY_EXPRESSION_ERRORS
   );
-
-  if (!ruleParams.index) {
-    errors.index.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
-        defaultMessage: 'Index is required.',
+  if (!ruleParams.esqlQuery) {
+    errors.esqlQuery.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredQueryText', {
+        defaultMessage: 'ESQL query is required.',
       })
     );
   }
-
-  if (!ruleParams.timeField) {
-    errors.timeField.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
-        defaultMessage: 'Time field is required.',
-      })
-    );
-  }
-
-  if (!ruleParams.esQuery) {
-    errors.esQuery.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
-        defaultMessage: 'Elasticsearch query is required.',
-      })
-    );
-  }
-  // } else {
-  //   try {
-  //     const parsedQuery = JSON.parse(ruleParams.esQuery);
-  //     if (!parsedQuery.query) {
-  //       errors.esQuery.push(
-  //         i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
-  //           defaultMessage: `Query field is required.`,
-  //         })
-  //       );
-  //     }
-  //   } catch (err) {
-  //     errors.esQuery.push(
-  //       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.jsonQueryText', {
-  //         defaultMessage: 'Query must be valid JSON.',
-  //       })
-  //     );
-  //   }
-  // }
   return errors;
 };
 
