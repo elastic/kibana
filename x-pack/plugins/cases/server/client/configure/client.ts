@@ -29,6 +29,7 @@ import {
   ConfigurationPatchRequestRt,
   GetConfigurationFindRequestRt,
   decodeWithExcessOrThrow,
+  ConfigurationRequestRt,
 } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -141,6 +142,7 @@ export async function get(
     logger,
     authorization,
   } = clientArgs;
+
   try {
     const queryParams = decodeWithExcessOrThrow(GetConfigurationFindRequestRt)(params);
 
@@ -334,7 +336,7 @@ export async function update(
 }
 
 async function create(
-  configuration: ConfigurationRequest,
+  configRequest: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<Configuration> {
@@ -345,7 +347,11 @@ async function create(
     user,
     authorization,
   } = clientArgs;
+
   try {
+    const validatedConfigurationRequest =
+      decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+
     let error = null;
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -359,7 +365,7 @@ async function create(
       );
 
     const filter = combineAuthorizedAndOwnerFilter(
-      configuration.owner,
+      validatedConfigurationRequest.owner,
       authorizationFilter,
       Operations.createConfiguration.savedObjectType
     );
@@ -394,7 +400,7 @@ async function create(
 
     await authorization.ensureAuthorized({
       operation: Operations.createConfiguration,
-      entities: [{ owner: configuration.owner, id: savedObjectID }],
+      entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
     });
 
     const creationDate = new Date().toISOString();
@@ -402,21 +408,21 @@ async function create(
 
     try {
       mappings = await casesClientInternal.configuration.createMappings({
-        connector: configuration.connector,
-        owner: configuration.owner,
+        connector: validatedConfigurationRequest.connector,
+        owner: validatedConfigurationRequest.owner,
         refresh: false,
       });
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
-        : `Error creating mapping for ${configuration.connector.name}`;
+        : `Error creating mapping for ${validatedConfigurationRequest.connector.name}`;
     }
 
     const post = await caseConfigureService.post({
       unsecuredSavedObjectsClient,
       attributes: {
-        ...configuration,
-        connector: configuration.connector,
+        ...validatedConfigurationRequest,
+        connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,
         updated_at: null,

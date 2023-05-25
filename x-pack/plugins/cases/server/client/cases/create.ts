@@ -39,19 +39,19 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     authorization: auth,
   } = clientArgs;
 
-  const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
-
-  if (query.title.length > MAX_TITLE_LENGTH) {
-    throw Boom.badRequest(
-      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
-    );
-  }
-
-  if (query.tags.some(isInvalidTag)) {
-    throw Boom.badRequest('A tag must contain at least one non-space character');
-  }
-
   try {
+    const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+
+    if (query.title.length > MAX_TITLE_LENGTH) {
+      throw Boom.badRequest(
+        `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+      );
+    }
+
+    if (query.tags.some(isInvalidTag)) {
+      throw Boom.badRequest('A tag must contain at least one non-space character');
+    }
+
     const savedObjectID = SavedObjectsUtils.generateId();
 
     await auth.ensureAuthorized({

@@ -25,9 +25,9 @@ export const getCasesMetrics = async (
 ): Promise<CasesMetricsResponse> => {
   const { logger } = clientArgs;
 
-  const queryParams = decodeWithExcessOrThrow(CasesMetricsRequestRt)(params);
-
   try {
+    const queryParams = decodeWithExcessOrThrow(CasesMetricsRequestRt)(params);
+
     const handlers = buildHandlers(queryParams, casesClient, clientArgs);
 
     const computedMetrics = await Promise.all(

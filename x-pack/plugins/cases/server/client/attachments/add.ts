@@ -36,8 +36,9 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     externalReferenceAttachmentTypeRegistry,
   } = clientArgs;
 
-  decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
   try {
+    decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
+
     const savedObjectID = SavedObjectsUtils.generateId();
 
     await authorization.ensureAuthorized({
