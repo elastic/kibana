@@ -83,6 +83,7 @@ export {
   PasswordField,
   SimpleConnectorForm,
   TextAreaWithMessageVariables,
+  TextAreaWithAutocomplete,
   TextFieldWithMessageVariables,
   SectionLoading,
 } from './application/components';

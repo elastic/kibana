@@ -11,7 +11,7 @@ import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  TextAreaWithMessageVariables,
+  TextAreaWithAutocomplete,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EmailActionParams } from '../types';
@@ -231,7 +231,7 @@ export const EmailParamsFields = ({
         </EuiFormRow>
       )}
       {showEmailSubjectAndMessage && (
-        <TextAreaWithMessageVariables
+        <TextAreaWithAutocomplete
           index={index}
           editAction={editAction}
           messageVariables={messageVariables}

@@ -10,6 +10,7 @@ export { HiddenField } from './hidden_field';
 export { PasswordField } from './password_field';
 export { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 export { TextAreaWithMessageVariables } from './text_area_with_message_variables';
+export { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
 export { SimpleConnectorForm } from './simple_connector_form';
 export type { ConfigFieldSchema, SecretsFieldSchema } from './simple_connector_form';
 export { ButtonGroupField } from './button_group_field';
