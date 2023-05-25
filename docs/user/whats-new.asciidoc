@@ -1,8 +1,6 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[8.8.0]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
@@ -176,6 +174,8 @@ You can click through to any URL with the values from that row.
 [role="screenshot"]
 image::images/highlights-ml-dfa-drilldown-2.png[Data frame analytics results table]
 
+
+
 [discrete]
 === Alerting
 
@@ -184,19 +184,10 @@ image::images/highlights-ml-dfa-drilldown-2.png[Data frame analytics results tab
 
 Schedule single or recurring maintenance windows to reduce alert noise and suppress notifications.
 For example, if you have a planned outage or event, a maintenance window prevents false alarms during this period.
-For more information, check <<maintenance-windows>>.
+// For more information, check <<maintenance-windows>>.
 
 [role="screenshot"]
 image::images/highlights-maintenance-windows.png[Viewing maintenance windows in {kib}]
-
-[discrete]
-==== Slack connector improvements
-
-The <<slack-action-type,Slack connector>> now enables you to pick your channel when you create rule actions. Thus, you no longer need a separate connector for each Slack channel.
-
-[role="screenshot"]
-image::images/highlights-slack-action.png[Creating a rule with Slack connector actions]
-
 
 [discrete]
 === Cases
@@ -218,18 +209,8 @@ image::images/highlights-case-activity.png[The Activity tab in a case in {stack-
 ==== Case attachments
 
 You can now attach files to cases for better investigation processes.
-With the new capability you can upload indicators of compromise (IOCs) and other files to support alert and case triage. For more information, check <<add-case-files>>.
-
-[discrete]
-==== Case details in alert tables
-
-In *{observability} > Alerts* and *Security > Alerts* there is a new *Cases* column.
-When you attach an alert to a case, a link appears in the new column.
-You can attach up to 10 cases to each alert.
-
-[role="screenshot"]
-image::images/highlights-alerts-table.png[The cases column in {observability}>Alerts]
-
+With the new capability, you can upload indicators of compromise (IOCs)
+and other files to support alert and case triage. For more information, check <<add-case-files>>.
 
 [discrete]
 === Per-user dark mode
@@ -259,4 +240,4 @@ https://www.elastic.co/subscriptions[subscription feature] and
 and applies to all spaces.
 
 [role="screenshot"]
-image::images/highlights-branding-settings.png[Settings in for customizing logo, organization name, page title, and browser icon]
+image::images/highlights-branding-settings.png[Settings in for customizing logo, organaization name, page title, and browser icon]
