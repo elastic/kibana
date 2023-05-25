@@ -778,6 +778,8 @@
       "@kbn/global-search-test-plugin/*": ["x-pack/test/plugin_functional/plugins/global_search_test/*"],
       "@kbn/graph-plugin": ["x-pack/plugins/graph"],
       "@kbn/graph-plugin/*": ["x-pack/plugins/graph/*"],
+      "@kbn/graph-renderer": ["packages/kbn-graph-renderer"],
+      "@kbn/graph-renderer/*": ["packages/kbn-graph-renderer/*"],
       "@kbn/grokdebugger-plugin": ["x-pack/plugins/grokdebugger"],
       "@kbn/grokdebugger-plugin/*": ["x-pack/plugins/grokdebugger/*"],
       "@kbn/guided-onboarding": ["packages/kbn-guided-onboarding"],

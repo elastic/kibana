@@ -8,15 +8,184 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import type { IconName } from '@fortawesome/fontawesome-common-types';
+import '@fortawesome/free-solid-svg-icons';
+import type { FontawesomeIcon4, NodeIconType } from '@kbn/graph-renderer';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
-export interface FontawesomeIcon {
-  class: string;
-  code: string;
-  patterns?: RegExp[];
-  label: string;
-}
+library.add(fas);
+library.add(faGoogle);
 
-export const iconChoices = [
+export const iconChoices: NodeIconType[] = [
+  // Patterns are used to help default icon choices for common field names
+  {
+    version: 'fa5',
+    name: 'folder-open',
+    patterns: [/category/i, /folder/i, /group/i],
+    label: i18n.translate('xpack.graph.icon.folderOpen', { defaultMessage: 'Folder open' }),
+  },
+  {
+    name: 'cube',
+    version: 'fa5',
+    patterns: [/prod/i, /sku/i],
+    label: i18n.translate('xpack.graph.icon.cube', { defaultMessage: 'Cube' }),
+  },
+  {
+    name: 'key',
+
+    version: 'fa5',
+    patterns: [/key/i],
+    label: i18n.translate('xpack.graph.icon.key', { defaultMessage: 'Key' }),
+  },
+  {
+    name: 'university',
+    version: 'fa5',
+    patterns: [/bank/i, /account/i],
+    label: i18n.translate('xpack.graph.icon.bank', { defaultMessage: 'Bank' }),
+  },
+  {
+    name: 'car',
+    version: 'fa5',
+    patterns: [/car/i, /veh/i],
+    label: i18n.translate('xpack.graph.icon.automobile', { defaultMessage: 'Automobile' }),
+  },
+  {
+    name: 'home',
+    version: 'fa5',
+    patterns: [/address/i, /home/i],
+    label: i18n.translate('xpack.graph.icon.home', { defaultMessage: 'Home' }),
+  },
+  {
+    name: 'question',
+
+    version: 'fa5',
+    patterns: [/query/i, /search/i],
+    label: i18n.translate('xpack.graph.icon.question', { defaultMessage: 'Question' }),
+  },
+  {
+    name: 'plane',
+
+    version: 'fa5',
+    patterns: [/flight/i, /plane/i],
+    label: i18n.translate('xpack.graph.icon.plane', { defaultMessage: 'Plane' }),
+  },
+  {
+    name: 'file',
+    version: 'fa5',
+    patterns: [/file/i, /doc/i],
+    label: i18n.translate('xpack.graph.icon.file', { defaultMessage: 'File open' }),
+  },
+  {
+    name: 'user',
+
+    version: 'eui',
+    patterns: [
+      /user/i,
+      /person/i,
+      /people/i,
+      /owner/i,
+      /cust/i,
+      /participant/i,
+      /party/i,
+      /member/i,
+    ],
+    label: i18n.translate('xpack.graph.icon.user', { defaultMessage: 'User' }),
+  },
+  {
+    name: 'users',
+
+    version: 'fa5',
+    patterns: [/group/i, /team/i, /meeting/i],
+    label: i18n.translate('xpack.graph.icon.users', { defaultMessage: 'Users' }),
+  },
+  {
+    name: 'music',
+
+    version: 'fa5',
+    patterns: [/artist/i, /sound/i, /music/i],
+    label: i18n.translate('xpack.graph.icon.music', { defaultMessage: 'Music' }),
+  },
+  {
+    name: 'flag',
+
+    version: 'fa5',
+    patterns: [/country/i, /warn/i, /flag/i],
+    label: i18n.translate('xpack.graph.icon.flag', { defaultMessage: 'Flag' }),
+  },
+  {
+    name: 'tag',
+
+    version: 'fa5',
+    patterns: [/tag/i, /label/i],
+    label: 'Tag',
+  },
+  {
+    name: 'phone',
+
+    version: 'fa5',
+    patterns: [/phone/i],
+    label: i18n.translate('xpack.graph.icon.phone', { defaultMessage: 'Phone' }),
+  },
+  {
+    name: 'desktop',
+
+    version: 'fa5',
+    patterns: [/host/i, /server/i],
+    label: i18n.translate('xpack.graph.icon.desktop', { defaultMessage: 'Desktop' }),
+  },
+  {
+    name: 'font',
+
+    version: 'fa5',
+    patterns: [/text/i, /title/i, /body/i, /desc/i],
+    label: i18n.translate('xpack.graph.icon.font', { defaultMessage: 'Font' }),
+  },
+  {
+    name: 'at',
+
+    version: 'fa5',
+    patterns: [/account/i, /email/i],
+    label: i18n.translate('xpack.graph.icon.at', { defaultMessage: 'At' }),
+  },
+  {
+    name: 'heart',
+
+    version: 'fa5',
+    patterns: [/like/i, /favourite/i, /favorite/i],
+    label: i18n.translate('xpack.graph.icon.heart', { defaultMessage: 'Heart' }),
+  },
+  {
+    name: 'bolt',
+
+    version: 'fa5',
+    patterns: [/action/i],
+    label: i18n.translate('xpack.graph.icon.bolt', { defaultMessage: 'Bolt' }),
+  },
+  {
+    name: 'map-marker',
+
+    version: 'fa5',
+    patterns: [/location/i, /geo/i, /position/i],
+    label: i18n.translate('xpack.graph.icon.mapMarker', { defaultMessage: 'Map marker' }),
+  },
+  {
+    name: 'exclamation',
+    version: 'fa5',
+    patterns: [/risk/i, /error/i, /warn/i],
+    label: i18n.translate('xpack.graph.icon.exclamation', { defaultMessage: 'Exclamation' }),
+  },
+  {
+    name: 'industry',
+    version: 'fa5',
+    patterns: [/business/i, /company/i, /industry/i, /organisation/i],
+    label: i18n.translate('xpack.graph.icon.industry', { defaultMessage: 'Industry' }),
+  },
+];
+
+export const iconChoicesOld = [
   // Patterns are used to help default icon choices for common field names
   {
     class: 'fa-folder-open-o',
@@ -168,92 +337,129 @@ export const iconChoices = [
 ];
 
 export const getSuitableIcon = (fieldName: string) =>
-  iconChoices.find((choice) => choice.patterns.some((pattern) => pattern.test(fieldName))) ||
+  iconChoices.find((choice) => choice.patterns?.some((pattern) => pattern.test(fieldName))) ||
   iconChoices[0];
 
-export const iconChoicesByClass: Partial<Record<string, FontawesomeIcon>> = {};
+export const iconChoicesByClass: Partial<Record<string, NodeIconType>> = {};
 
 iconChoices.forEach((icon) => {
-  iconChoicesByClass[icon.class] = icon;
+  iconChoicesByClass[icon.name] = icon;
 });
 
-export const urlTemplateIconChoices = [
+export const urlTemplateIconChoices: NodeIconType[] = [
   // Patterns are used to help default icon choices for common field names
   {
-    class: 'fa-line-chart',
-    code: '\uf201',
+    name: 'chart-line',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.lineChart', { defaultMessage: 'Line chart' }),
   },
   {
-    class: 'fa-pie-chart',
-    code: '\uf200',
+    name: 'chart-pie',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.pieChart', { defaultMessage: 'Pie chart' }),
   },
   {
-    class: 'fa-area-chart',
-    code: '\uf1fe',
+    name: 'chart-area',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.areaChart', { defaultMessage: 'Area chart' }),
   },
   {
-    class: 'fa-bar-chart',
-    code: '\uf080',
+    name: 'chart-bar',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.barChart', { defaultMessage: 'Bar chart' }),
   },
   {
-    class: 'fa-globe',
-    code: '\uf0ac',
+    name: 'globe',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.globe', { defaultMessage: 'Globe' }),
   },
   {
-    class: 'fa-file-text-o',
-    code: '\uf0f6',
+    name: 'file-alt',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.fileText', { defaultMessage: 'File' }),
   },
   {
-    class: 'fa-google',
-    code: '\uf1a0',
+    name: 'google',
+    prefix: 'fab',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.google', { defaultMessage: 'Google' }),
   },
   {
-    class: 'fa-eye',
-    code: '\uf06e',
+    name: 'eye',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.eye', { defaultMessage: 'Eye' }),
   },
   {
-    class: 'fa-tachometer',
-    code: '\uf0e4',
+    name: 'tachometer',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.tachometer', { defaultMessage: 'Tachometer' }),
   },
   {
-    class: 'fa-info',
-    code: '\uf129',
+    name: 'info',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.info', { defaultMessage: 'Info' }),
   },
   {
-    class: 'fa-external-link',
-    code: '\uf08e',
+    name: 'external-link',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.externalLink', { defaultMessage: 'External link' }),
   },
   {
-    class: 'fa-table',
-    code: '\uf0ce',
+    name: 'table',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.table', { defaultMessage: 'Table' }),
   },
   {
-    class: 'fa-list',
-    code: '\uf03a',
+    name: 'list',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.list', { defaultMessage: 'List' }),
   },
   {
-    class: 'fa-share-alt',
-    code: '\uf1e0',
+    name: 'share-alt',
+    version: 'fa5',
     label: i18n.translate('xpack.graph.icon.shareAlt', { defaultMessage: 'Share alt' }),
   },
 ];
-export const urlTemplateIconChoicesByClass: Partial<Record<string, FontawesomeIcon>> = {};
+export const urlTemplateIconChoicesByClass: Partial<Record<string, NodeIconType>> = {};
 
 urlTemplateIconChoices.forEach((icon) => {
-  urlTemplateIconChoicesByClass[icon.class] = icon;
+  urlTemplateIconChoicesByClass[icon.name] = icon;
 });
 
 export const colorChoices = euiPaletteColorBlind();
+
+export function isNewIcon(icon: FontawesomeIcon4 | NodeIconType | string): icon is NodeIconType {
+  return (
+    icon != null &&
+    (typeof icon !== 'string' ? 'version' in icon : iconChoices.some(({ name }) => name === icon))
+  );
+}
+
+function ensureNewNames(iconName: string): IconName {
+  if (iconName === 'file-text-o') {
+    return 'file-alt';
+  }
+  if (iconName === 'bank') {
+    return 'university';
+  }
+  if (iconName === 'automobile') {
+    return 'car';
+  }
+  // line-chart => chart-line
+  // pie-chart => chart-pie
+  // etc...
+  if (/chart$/.test(iconName)) {
+    return iconName.split('-').reverse().join('-') as IconName;
+  }
+  return iconName as IconName;
+}
+
+function getNewIcon(iconName: FontawesomeIcon4['class']): IconName {
+  const newIconName = ensureNewNames(iconName.replace('fa-', ''));
+  return newIconName;
+}
+
+export function convertToNewIcon(icon: FontawesomeIcon4 | string): NodeIconType {
+  const iconName = getNewIcon(typeof icon === 'string' ? icon : icon.class);
+  return (iconChoicesByClass[iconName] || urlTemplateIconChoicesByClass[iconName])!;
+}

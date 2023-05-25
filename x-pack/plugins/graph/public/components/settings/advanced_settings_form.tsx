@@ -222,6 +222,22 @@ export function AdvancedSettingsForm({
           }
         />
       </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        helpText={i18n.translate('xpack.graph.settings.advancedSettings.useCanvasRenderer', {
+          defaultMessage: 'Switch chart renderer to the Canvas one',
+        })}
+        label=""
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.graph.settings.advancedSettings.useCanvasRenderer', {
+            defaultMessage: 'Use Canvas renderer',
+          })}
+          id="canvasRenderer"
+          checked={Boolean(formState.useCanvas)}
+          onChange={({ target: { checked } }) => updateSetting('useCanvas', checked)}
+        />
+      </EuiFormRow>
     </form>
   );
 }

@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ControlType, Workspace, WorkspaceField } from '../../types';
 
 interface ControlPanelToolBarProps {
@@ -97,7 +98,9 @@ export const ControlPanelToolBar = ({
             onClick={onUndoClick}
             disabled={workspace.undoLog.length < 1}
           >
-            <span className="kuiIcon fa-history" />
+            <span className="kuiIcon">
+              <FontAwesomeIcon icon="history" />
+            </span>
           </button>
         </EuiToolTip>
       </EuiFlexItem>
@@ -111,7 +114,9 @@ export const ControlPanelToolBar = ({
             onClick={onRedoClick}
             disabled={workspace.redoLog.length === 0}
           >
-            <span className="kuiIcon fa-repeat" />
+            <span className="kuiIcon">
+              <FontAwesomeIcon icon="redo" />
+            </span>
           </button>
         </EuiToolTip>
       </EuiFlexItem>
@@ -124,7 +129,9 @@ export const ControlPanelToolBar = ({
             disabled={liveResponseFields.length === 0 || workspace.nodes.length === 0}
             onClick={onExpandButtonClick}
           >
-            <span className="kuiIcon fa-plus" />
+            <span className="kuiIcon">
+              <FontAwesomeIcon icon="plus" />
+            </span>
           </button>
         </EuiToolTip>
       </EuiFlexItem>
@@ -137,7 +144,9 @@ export const ControlPanelToolBar = ({
             disabled={haveNodes}
             onClick={onAddLinksClick}
           >
-            <span className="kuiIcon fa-link" />
+            <span className="kuiIcon">
+              <FontAwesomeIcon icon="link" />
+            </span>
           </button>
         </EuiToolTip>
       </EuiFlexItem>
@@ -151,7 +160,9 @@ export const ControlPanelToolBar = ({
             aria-label={removeVerticesButtonMsg}
             onClick={onRemoveVerticesClick}
           >
-            <span className="kuiIcon fa-trash" />
+            <span className="kuiIcon">
+              <FontAwesomeIcon icon="trash" />
+            </span>
           </button>
         </EuiToolTip>
       </EuiFlexItem>
@@ -164,7 +175,9 @@ export const ControlPanelToolBar = ({
             aria-label={blocklistButtonMsg}
             onClick={onBlockListClick}
           >
-            <span className="kuiIcon fa-ban" />
+            <span className="kuiIcon">
+              <FontAwesomeIcon icon="ban" />
+            </span>
           </button>
         </EuiToolTip>
       </EuiFlexItem>
@@ -177,7 +190,9 @@ export const ControlPanelToolBar = ({
             aria-label={customStyleButtonMsg}
             onClick={onCustomStyleClick}
           >
-            <span className="kuiIcon fa-paint-brush" />
+            <span className="kuiIcon">
+              <FontAwesomeIcon icon="paint-brush" />
+            </span>
           </button>
         </EuiToolTip>
       </EuiFlexItem>
@@ -190,7 +205,9 @@ export const ControlPanelToolBar = ({
             aria-label={drillDownButtonMsg}
             onClick={onDrillDownClick}
           >
-            <span className="kuiIcon fa-info" />
+            <span className="kuiIcon">
+              <FontAwesomeIcon icon="info" />
+            </span>
           </button>
         </EuiToolTip>
       </EuiFlexItem>
@@ -205,7 +222,9 @@ export const ControlPanelToolBar = ({
               aria-label={runLayoutButtonMsg}
               onClick={onRunLayoutClick}
             >
-              <span className="kuiIcon fa-play" />
+              <span className="kuiIcon">
+                <FontAwesomeIcon icon="play" />
+              </span>
             </button>
           </EuiToolTip>
         </EuiFlexItem>
@@ -220,7 +239,9 @@ export const ControlPanelToolBar = ({
               aria-label={pauseLayoutButtonMsg}
               onClick={onPauseLayoutClick}
             >
-              <span className="kuiIcon fa-pause" />
+              <span className="kuiIcon">
+                <FontAwesomeIcon icon="pause" />
+              </span>
             </button>
           </EuiToolTip>
         </EuiFlexItem>

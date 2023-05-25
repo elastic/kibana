@@ -7,11 +7,12 @@
 
 import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { WorkspaceNode } from '@kbn/graph-renderer';
+import { EuiSpacer } from '@elastic/eui';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -19,7 +20,7 @@ import {
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
+import type { ControlType, IndexPatternProvider, TermIntersect } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { GuidancePanel } from '../guidance_panel';
 import { GraphTitle } from '../graph_title';
@@ -63,6 +64,7 @@ type WorkspaceLayoutProps = Pick<
 interface WorkspaceLayoutStateProps {
   workspaceInitialized: boolean;
   hasFields: boolean;
+  useCanvas: boolean;
 }
 
 export const WorkspaceLayoutComponent = ({
@@ -84,6 +86,7 @@ export const WorkspaceLayoutComponent = ({
   spaces,
   inspect,
   requestAdapter,
+  useCanvas,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -228,6 +231,7 @@ export const WorkspaceLayoutComponent = ({
               selectSelected={selectSelected}
               onSetControl={onSetControl}
               onSetMergeCandidates={onSetMergeCandidates}
+              rendererType={useCanvas ? 'canvas' : 'svg'}
             />
           </div>
 
@@ -251,5 +255,6 @@ export const WorkspaceLayout = connect<WorkspaceLayoutStateProps, {}, {}, GraphS
   (state: GraphState) => ({
     workspaceInitialized: workspaceInitializedSelector(state),
     hasFields: hasFieldsSelector(state),
+    useCanvas: Boolean(state.advancedSettings.useCanvas),
   })
 )(WorkspaceLayoutComponent);

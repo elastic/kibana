@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { WorkspaceNode, WorkspaceEdge } from '@kbn/graph-renderer';
 import {
-  WorkspaceNode,
-  WorkspaceEdge,
   SerializedEdge,
   UrlTemplate,
   SerializedUrlTemplate,
@@ -58,7 +57,7 @@ function serializeUrlTemplate({ encoder, icon, url, description, isDefault }: Ur
     encoderID: encoder.id,
   };
   if (icon) {
-    serializedTemplate.iconClass = icon.class;
+    serializedTemplate.iconClass = icon.name;
   }
   return serializedTemplate;
 }
@@ -77,7 +76,7 @@ function serializeField({
     lastValidHopSize,
     color,
     selected,
-    iconClass: icon.class,
+    iconClass: icon.name,
   };
 }
 

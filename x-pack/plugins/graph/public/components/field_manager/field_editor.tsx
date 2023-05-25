@@ -26,10 +26,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
-import { LegacyIcon } from '../legacy_icon';
 import { UpdateableFieldProperties } from './field_manager';
 
 import { isEqual } from '../helpers';
@@ -145,7 +145,18 @@ export function FieldEditor({
             }
           }}
         >
-          <LegacyIcon className={'gphFieldEditor__badgeIcon'} icon={initialField.icon} />
+          {initialField.icon.version === 'fa5' ? (
+            <FontAwesomeIcon
+              icon={
+                initialField.icon.prefix
+                  ? [initialField.icon.prefix, initialField.icon.name]
+                  : initialField.icon.name
+              }
+              className="gphFieldEditor__badgeIcon"
+            />
+          ) : (
+            <EuiIcon type={initialField.icon.name} />
+          )}
           {initialField.name}
         </EuiBadge>
       }
@@ -284,9 +295,18 @@ export function FieldEditor({
                     isClearable={false}
                     renderOption={(option, searchValue, contentClassName) => {
                       const { label, value } = option;
+                      if (!value) {
+                        return;
+                      }
                       return (
                         <span className={contentClassName}>
-                          <LegacyIcon icon={value!} />{' '}
+                          {value!.version === 'fa5' ? (
+                            <FontAwesomeIcon
+                              icon={value!.prefix ? [value!.prefix, value!.name] : value!.name}
+                            />
+                          ) : (
+                            <EuiIcon type={value!.name} />
+                          )}{' '}
                           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
                         </span>
                       );
