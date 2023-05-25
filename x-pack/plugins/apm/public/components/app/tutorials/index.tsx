@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ApiKeyAndId, API_KEY_INSTRUCTION } from './api_keys';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -25,7 +26,8 @@ export function Tutorials() {
     apiKey: API_KEY_INSTRUCTION,
     error: false,
   });
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const [loading, setLoading] = useState(false);
+  const { services, notifications } = useKibana<ApmPluginStartDeps>();
   const { config } = useApmPluginContext();
   const { docLinks, observabilityShared } = services;
   const guideLink =
@@ -33,8 +35,10 @@ export function Tutorials() {
     'https://www.elastic.co/guide/en/kibana/current/index.html';
 
   const baseUrl = docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
-  const createAgentKey = async () => {
+
+  const createAgentKey = useCallback(async () => {
     try {
+      setLoading(true);
       const privileges: PrivilegeType[] = [PrivilegeType.EVENT];
 
       const { agentKey } = await callApmApi(
@@ -59,13 +63,27 @@ export function Tutorials() {
         error: false,
       });
     } catch (error) {
-      setApiKeyAndId({
-        apiKey: API_KEY_INSTRUCTION,
-        error: true,
-        errorMessage: error.body?.message || error.message,
+      notifications.toasts.danger({
+        title: i18n.translate('xpack.apm.tutorial.apiKey.error.title', {
+          defaultMessage: 'Error while creating API Key',
+        }),
+
+        body: (
+          <div>
+            <h5>
+              {i18n.translate('xpack.apm.tutorial.apiKey.error.status', {
+                defaultMessage: `Error`,
+              })}
+            </h5>
+
+            {error.body?.message || error.message}
+          </div>
+        ),
       });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [notifications.toasts]);
 
   const instructionsExists = instructions.length > 0;
 
@@ -78,11 +96,12 @@ export function Tutorials() {
           baseUrl,
           config,
         },
+        loading,
         apiKeyAndId,
         createAgentKey
       ),
     ]);
-  }, [apiKeyAndId, baseUrl, config]);
+  }, [apiKeyAndId, baseUrl, config, createAgentKey, loading]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (

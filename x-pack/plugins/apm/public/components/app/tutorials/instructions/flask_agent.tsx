@@ -29,6 +29,7 @@ export const createFlaskAgentInstructions = (
     createAgentKey,
     apiKeyAndId,
     displayCreateApiKeyAction,
+    loading,
   } = commonOptions;
   return [
     {
@@ -70,6 +71,7 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
                 data-test-subj="createApiKeyAndId"
                 fill
                 onClick={createAgentKey}
+                isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
                   defaultMessage: 'Create API Key',

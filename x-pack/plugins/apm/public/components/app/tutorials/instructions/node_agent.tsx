@@ -30,6 +30,7 @@ export const createNodeAgentInstructions = (
     createAgentKey = noop,
     apiKeyAndId,
     displayCreateApiKeyAction,
+    loading,
   } = commonOptions;
   return [
     {
@@ -73,6 +74,7 @@ export const createNodeAgentInstructions = (
                 data-test-subj="createApiKeyAndId"
                 fill
                 onClick={createAgentKey}
+                isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
                   defaultMessage: 'Create API Key',

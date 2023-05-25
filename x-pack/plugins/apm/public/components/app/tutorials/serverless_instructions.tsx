@@ -30,6 +30,7 @@ export function serverlessInstructions(
     baseUrl: string;
     config: ConfigSchema;
   },
+  loading: boolean,
   apiKeyAndId: ApiKeyAndId,
   createAgentKey: () => void
 ) {
@@ -40,6 +41,7 @@ export function serverlessInstructions(
     apiKeyAndId,
     createAgentKey,
     displayCreateApiKeyAction,
+    loading,
   };
 
   return {

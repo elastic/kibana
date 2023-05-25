@@ -29,6 +29,7 @@ export const createPhpAgentInstructions = (
     createAgentKey,
     apiKeyAndId,
     displayCreateApiKeyAction,
+    loading,
   } = commonOptions;
   return [
     {
@@ -98,6 +99,7 @@ export const createPhpAgentInstructions = (
                 data-test-subj="createApiKeyAndId"
                 fill
                 onClick={createAgentKey}
+                isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
                   defaultMessage: 'Create API Key',

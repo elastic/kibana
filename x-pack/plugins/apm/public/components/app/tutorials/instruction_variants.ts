@@ -55,4 +55,5 @@ export interface AgentInstructions {
   secretToken?: string;
   createAgentKey?: () => void;
   displayCreateApiKeyAction: boolean;
+  loading: boolean;
 }

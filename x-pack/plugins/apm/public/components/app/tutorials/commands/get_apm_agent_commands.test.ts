@@ -8,17 +8,12 @@
 import { getApmAgentCommands } from './get_apm_agent_commands';
 
 describe('getCommands', () => {
-  const defaultValues = {
-    apmServiceName: 'my-service-name',
-    apmEnvironment: 'my-environment',
-  };
   describe('Unknown agent', () => {
     it('renders empty command', () => {
       const commands = getApmAgentCommands({
         variantId: 'foo',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).toBe('');
     });
@@ -27,7 +22,6 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'java',
-        defaultValues,
       });
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
@@ -44,7 +38,6 @@ describe('getCommands', () => {
         variantId: 'java',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -63,7 +56,6 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -82,18 +74,22 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'node',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "// Add this to the very top of the first file loaded in your app
         var apm = require('elastic-apm-node').start({
+
+          // The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Overrides the service name in package.json.
           serviceName: 'my-service-name',
 
+          // Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
           secretToken: '',
 
+          // Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           serverUrl: '',
 
+          // The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           environment: 'my-environment'
         })"
       `);
@@ -103,18 +99,22 @@ describe('getCommands', () => {
         variantId: 'node',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "// Add this to the very top of the first file loaded in your app
         var apm = require('elastic-apm-node').start({
+
+          // The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Overrides the service name in package.json.
           serviceName: 'my-service-name',
 
+          // Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
           secretToken: 'foobar',
 
+          // Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           serverUrl: 'localhost:8220',
 
+          // The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           environment: 'my-environment'
         })"
       `);
@@ -125,18 +125,22 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "// Add this to the very top of the first file loaded in your app
         var apm = require('elastic-apm-node').start({
+
+          // The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Overrides the service name in package.json.
           serviceName: 'my-service-name',
 
+          // Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.
           apiKey: 'myApiKey',
 
+          // Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           serverUrl: 'localhost:8220',
 
+          // The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           environment: 'my-environment'
         })"
       `);
@@ -146,26 +150,31 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'django',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "INSTALLED_APPS = (
+          # Add the agent to installed apps
           'elasticapm.contrib.django',
           # ...
         )
 
         ELASTIC_APM = {
+          # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
           'SERVICE_NAME': 'my-service-name',
 
+          # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
           'SECRET_TOKEN': '',
 
+          # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': '',
 
+          # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
         MIDDLEWARE = (
+          # Add our tracing middleware to send performance metrics
           'elasticapm.contrib.django.middleware.TracingMiddleware',
           #...
         )"
@@ -176,26 +185,31 @@ describe('getCommands', () => {
         variantId: 'django',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "INSTALLED_APPS = (
+          # Add the agent to installed apps
           'elasticapm.contrib.django',
           # ...
         )
 
         ELASTIC_APM = {
+          # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
           'SERVICE_NAME': 'my-service-name',
 
+          # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
           'SECRET_TOKEN': 'foobar',
 
+          # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': 'localhost:8220',
 
+          # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
         MIDDLEWARE = (
+          # Add our tracing middleware to send performance metrics
           'elasticapm.contrib.django.middleware.TracingMiddleware',
           #...
         )"
@@ -207,26 +221,31 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "INSTALLED_APPS = (
+          # Add the agent to installed apps
           'elasticapm.contrib.django',
           # ...
         )
 
         ELASTIC_APM = {
+          # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
           'SERVICE_NAME': 'my-service-name',
 
+          # Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.
           'API_KEY': 'myApiKey',
 
+          # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': 'localhost:8220',
 
+          # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
         MIDDLEWARE = (
+          # Add our tracing middleware to send performance metrics
           'elasticapm.contrib.django.middleware.TracingMiddleware',
           #...
         )"
@@ -237,7 +256,6 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'flask',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -249,12 +267,16 @@ describe('getCommands', () => {
         # Or use ELASTIC_APM in your application's settings
         from elasticapm.contrib.flask import ElasticAPM
         app.config['ELASTIC_APM'] = {
+          # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
           'SERVICE_NAME': 'my-service-name',
 
+          # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
           'SECRET_TOKEN': '',
 
+          # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': '',
 
+          The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -266,7 +288,6 @@ describe('getCommands', () => {
         variantId: 'flask',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -278,12 +299,16 @@ describe('getCommands', () => {
         # Or use ELASTIC_APM in your application's settings
         from elasticapm.contrib.flask import ElasticAPM
         app.config['ELASTIC_APM'] = {
+          # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
           'SERVICE_NAME': 'my-service-name',
 
+          # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
           'SECRET_TOKEN': 'foobar',
 
+          # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': 'localhost:8220',
 
+          The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -296,7 +321,6 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -308,12 +332,16 @@ describe('getCommands', () => {
         # Or use ELASTIC_APM in your application's settings
         from elasticapm.contrib.flask import ElasticAPM
         app.config['ELASTIC_APM'] = {
+          # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
           'SERVICE_NAME': 'my-service-name',
 
+          # Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.
           'API_KEY': 'myApiKey',
 
+          # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': 'localhost:8220',
 
+          The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -325,18 +353,21 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'rails',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# config/elastic_apm.yml:
 
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Defaults to the name of your Rails app.
         service_name: 'my-service-name'
 
+        # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
         secret_token: ''
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: ''
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -345,18 +376,21 @@ describe('getCommands', () => {
         variantId: 'rails',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# config/elastic_apm.yml:
 
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Defaults to the name of your Rails app.
         service_name: 'my-service-name'
 
+        # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
         secret_token: 'foobar'
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: 'localhost:8220'
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -366,18 +400,21 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# config/elastic_apm.yml:
 
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Defaults to the name of your Rails app.
         service_name: 'my-service-name'
 
+        # Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.
         api_key: 'myApiKey'
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: 'localhost:8220'
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -386,18 +423,21 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'rack',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# config/elastic_apm.yml:
 
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Defaults to the name of your Rack app's class.
         service_name: 'my-service-name'
 
+        # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
         secret_token: ''
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: ''
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -406,18 +446,21 @@ describe('getCommands', () => {
         variantId: 'rack',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# config/elastic_apm.yml:
 
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Defaults to the name of your Rack app's class.
         service_name: 'my-service-name'
 
+        # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
         secret_token: 'foobar'
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: 'localhost:8220'
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -427,18 +470,21 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# config/elastic_apm.yml:
 
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Defaults to the name of your Rack app's class.
         service_name: 'my-service-name'
 
+        # Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.
         api_key: 'myApiKey'
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: 'localhost:8220'
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -447,17 +493,21 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'go',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# Initialize using environment variables:
+
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. If not specified, the executable name will be used.
         export ELASTIC_APM_SERVICE_NAME=my-service-name
 
+        # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
         export ELASTIC_APM_SECRET_TOKEN=
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         export ELASTIC_APM_SERVER_URL=
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         export ELASTIC_APM_ENVIRONMENT=my-environment
         "
       `);
@@ -467,17 +517,21 @@ describe('getCommands', () => {
         variantId: 'go',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# Initialize using environment variables:
+
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. If not specified, the executable name will be used.
         export ELASTIC_APM_SERVICE_NAME=my-service-name
 
+        # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
         export ELASTIC_APM_SECRET_TOKEN=foobar
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         export ELASTIC_APM_SERVER_URL=localhost:8220
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         export ELASTIC_APM_ENVIRONMENT=my-environment
         "
       `);
@@ -488,17 +542,21 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# Initialize using environment variables:
+
+        # The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. If not specified, the executable name will be used.
         export ELASTIC_APM_SERVICE_NAME=my-service-name
 
+        # Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.
         export ELASTIC_APM_API_KEY=myApiKey
 
+        # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         export ELASTIC_APM_SERVER_URL=localhost:8220
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         export ELASTIC_APM_ENVIRONMENT=my-environment
         "
       `);
@@ -508,15 +566,18 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'dotnet',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "{
           \\"ElasticApm\\": {
+            /// The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application.
             \\"ServiceName\\": \\"my-service-name\\",
+            /// Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
             \\"SecretToken\\": \\"\\",
+            /// Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
             \\"ServerUrl\\": \\"\\",
+            /// The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
             \\"Environment\\": \\"my-environment\\",
           }
         }"
@@ -527,15 +588,18 @@ describe('getCommands', () => {
         variantId: 'dotnet',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "{
           \\"ElasticApm\\": {
+            /// The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application.
             \\"ServiceName\\": \\"my-service-name\\",
+            /// Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
             \\"SecretToken\\": \\"foobar\\",
+            /// Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
             \\"ServerUrl\\": \\"localhost:8220\\",
+            /// The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
             \\"Environment\\": \\"my-environment\\",
           }
         }"
@@ -547,15 +611,18 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "{
           \\"ElasticApm\\": {
+            /// The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application.
             \\"ServiceName\\": \\"my-service-name\\",
+            /// Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.
             \\"ApiKey\\": \\"myApiKey\\",
+            /// Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
             \\"ServerUrl\\": \\"localhost:8220\\",
+            /// The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
             \\"Environment\\": \\"my-environment\\",
           }
         }"
@@ -566,16 +633,19 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getApmAgentCommands({
         variantId: 'php',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
-        "elastic_apm.service_name=\\"my-service-name\\"
+        "# The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
+        elastic_apm.service_name=\\"my-service-name\\"
 
+        # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
         elastic_apm.secret_token=\\"\\"
 
+        # Set the custom APM Server URL (default: http:&#x2F;&#x2F;localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         elastic_apm.server_url=\\"\\"
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         elastic_apm.environment=\\"my-environment\\""
       `);
     });
@@ -584,16 +654,19 @@ describe('getCommands', () => {
         variantId: 'php',
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
-        "elastic_apm.service_name=\\"my-service-name\\"
+        "# The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
+        elastic_apm.service_name=\\"my-service-name\\"
 
+        # Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.
         elastic_apm.secret_token=\\"foobar\\"
 
+        # Set the custom APM Server URL (default: http:&#x2F;&#x2F;localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         elastic_apm.server_url=\\"localhost:8220\\"
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         elastic_apm.environment=\\"my-environment\\""
       `);
     });
@@ -603,16 +676,19 @@ describe('getCommands', () => {
         apmServerUrl: 'localhost:8220',
         secretToken: 'foobar',
         apiKey: 'myApiKey',
-        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
-        "elastic_apm.service_name=\\"my-service-name\\"
+        "# The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.
+        elastic_apm.service_name=\\"my-service-name\\"
 
+        # Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.
         elastic_apm.api_key=\\"myApiKey\\"
 
+        # Set the custom APM Server URL (default: http:&#x2F;&#x2F;localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         elastic_apm.server_url=\\"localhost:8220\\"
 
+        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
         elastic_apm.environment=\\"my-environment\\""
       `);
     });

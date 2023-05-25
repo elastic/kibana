@@ -24,6 +24,11 @@ export function AgentConfigurationTable({
 }) {
   if (!variables) return null;
 
+  const defaultValues = {
+    apmServiceName: 'my-service-name',
+    apmEnvironment: 'my-environment',
+  };
+
   const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
     {
       field: 'setting',
@@ -46,7 +51,7 @@ export function AgentConfigurationTable({
 
   const items = Object.entries(variables).map(([key, value]) => ({
     setting: value,
-    value: get(data, key),
+    value: get({ ...data, ...defaultValues }, key),
   }));
   return <EuiBasicTable items={items} columns={columns} />;
 }

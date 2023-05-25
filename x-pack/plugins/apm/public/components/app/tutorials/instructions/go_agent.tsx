@@ -29,6 +29,7 @@ export const createGoAgentInstructions = (
     createAgentKey,
     apiKeyAndId,
     displayCreateApiKeyAction,
+    loading,
   } = commonOptions;
   const codeBlock = `\
 import (
@@ -84,6 +85,7 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
                 data-test-subj="createApiKeyAndId"
                 fill
                 onClick={createAgentKey}
+                isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
                   defaultMessage: 'Create API Key',
