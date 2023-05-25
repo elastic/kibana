@@ -12,20 +12,19 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import semver from 'semver';
 
 import { FtrProviderContext } from '../common/ftr_provider_context';
+
 export type { FtrProviderContext } from '../common/ftr_provider_context';
 
 export async function SecuritySolutionConfigurableCypressTestRunner(
   { getService }: FtrProviderContext,
-  command: string,
   envVars?: Record<string, string>
 ) {
-  // const log = getService('log');
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
   await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
 
-  const customEnv = {
+  return {
     FORCE_COLOR: '1',
     CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
     CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
@@ -38,8 +37,6 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
     ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
     ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
   };
-
-  return customEnv;
 
   // await withProcRunner(log, async (procs) => {
   //   // TODO: use Cypress module API wrapper to make it easier to run Cypress programmatically

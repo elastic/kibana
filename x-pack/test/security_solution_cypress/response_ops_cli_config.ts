@@ -16,6 +16,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...securitySolutionCypressConfig.getAll(),
 
     testRunner: (context: FtrProviderContext) =>
-      SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:respops'),
+      SecuritySolutionConfigurableCypressTestRunner(context),
   };
 }

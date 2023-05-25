@@ -48,6 +48,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
 
     testRunner: (context: FtrProviderContext) =>
-      SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:firefox'),
+      SecuritySolutionConfigurableCypressTestRunner(context),
   };
 }
