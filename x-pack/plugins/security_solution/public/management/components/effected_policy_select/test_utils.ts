@@ -93,5 +93,5 @@ export const isEffectedPolicySelected = async (
     throw new Error(`No policy found in EffectedPolicySelect at index position ${atIndex}`);
   }
 
-  return item.ariaChecked === 'true';
+  return item.getAttribute('aria-checked') === 'true';
 };
