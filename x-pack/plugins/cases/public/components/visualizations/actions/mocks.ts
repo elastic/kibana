@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreTheme } from '@kbn/core/public';
-import { of, Subject } from 'rxjs';
+import type { CoreTheme, PublicAppInfo } from '@kbn/core/public';
+import { BehaviorSubject, of } from 'rxjs';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { createBrowserHistory } from 'history';
 import type { CaseUIActionProps } from './types';
@@ -63,11 +63,17 @@ export const mockAttributes = {
   },
 } as unknown as TypedLensByValueInput['attributes'];
 
-export const getMockCaseUiActionProps = () => {
-  const currentAppId$ = new Subject<string | undefined>();
+export const mockTimeRange = { from: '', to: '', fromStr: '', toStr: '' };
 
+export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('testAppId');
+export const getMockApplications$ = () =>
+  new BehaviorSubject<Map<string, PublicAppInfo>>(
+    new Map([['testAppId', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
+  );
+
+export const getMockCaseUiActionProps = () => {
   const core = {
-    application: { currentAppId$: currentAppId$.asObservable(), capabilities: {} },
+    application: { currentAppId$: getMockCurrentAppId$(), capabilities: {} },
     theme: { theme$: createTheme$Mock() },
     uiSettings: {
       get: jest.fn().mockReturnValue(true),

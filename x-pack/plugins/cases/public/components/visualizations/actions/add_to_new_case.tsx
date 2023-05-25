@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import { i18n } from '@kbn/i18n';
 import { Router } from 'react-router-dom';
 
 import { createAction } from '@kbn/ui-actions-plugin/public';
@@ -26,7 +25,7 @@ import { KibanaContextProvider } from '../../../common/lib/kibana';
 
 import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import CasesProvider from '../../cases_context';
-import { ADD_TO_CASE_SUCCESS } from './translations';
+import { ADD_TO_CASE_SUCCESS, ADD_TO_NEW_CASE_DISPLAYNAME } from './translations';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
 export const ACTION_ID = 'embeddable_addToNewCase';
@@ -46,17 +45,22 @@ const AddToNewCaseFlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuc
     toastContent: ADD_TO_CASE_SUCCESS,
   });
 
-  const attachments = [
-    {
-      comment: `!{lens${JSON.stringify({
-        timeRange,
-        attributes,
-      })}}`,
-      type: CommentType.user as const,
-    },
-  ];
+  const attachments = useMemo(
+    () => [
+      {
+        comment: `!{lens${JSON.stringify({
+          timeRange,
+          attributes,
+        })}}`,
+        type: CommentType.user as const,
+      },
+    ],
+    [attributes, timeRange]
+  );
 
-  createNewCaseFlyout.open({ attachments });
+  useEffect(() => {
+    createNewCaseFlyout.open({ attachments });
+  }, [attachments, createNewCaseFlyout]);
 
   return null;
 };
@@ -83,10 +87,7 @@ export const createAddToNewCaseLensAction = ({
     id: ACTION_ID,
     type: 'actionButton',
     getIconType: () => 'casesApp',
-    getDisplayName: () =>
-      i18n.translate('xpack.cases.actions.visualizationActions.addToNewCase.displayName', {
-        defaultMessage: 'Add to new case',
-      }),
+    getDisplayName: () => ADD_TO_NEW_CASE_DISPLAYNAME,
     isCompatible: async ({ embeddable }) =>
       !isErrorEmbeddable(embeddable) &&
       isLensEmbeddable(embeddable) &&

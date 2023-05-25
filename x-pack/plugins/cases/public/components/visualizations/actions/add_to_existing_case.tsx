@@ -7,7 +7,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -29,6 +28,7 @@ import { KibanaContextProvider } from '../../../common/lib/kibana';
 import CasesProvider from '../../cases_context';
 import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
@@ -87,10 +87,7 @@ export const createAddToExistingCaseLensAction = ({
     id: ACTION_ID,
     type: 'actionButton',
     getIconType: () => 'casesApp',
-    getDisplayName: () =>
-      i18n.translate('xpack.cases.actions.visualizationActions.addToExistingCase.displayName', {
-        defaultMessage: 'Add to existing case',
-      }),
+    getDisplayName: () => ADD_TO_EXISTING_CASE_DISPLAYNAME,
     isCompatible: async ({ embeddable }) =>
       !isErrorEmbeddable(embeddable) &&
       isLensEmbeddable(embeddable) &&

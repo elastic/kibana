@@ -11,15 +11,24 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import { createAddToNewCaseLensAction } from './add_to_new_case';
 import type { ActionContext, DashboardVisualizationEmbeddable } from './types';
-import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import { getCasePermissions } from './utils';
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { getMockCaseUiActionProps, mockAttributes, MockEmbeddable } from './mocks';
+import {
+  getMockApplications$,
+  getMockCaseUiActionProps,
+  getMockCurrentAppId$,
+  mockAttributes,
+  MockEmbeddable,
+  mockTimeRange,
+} from './mocks';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import { useKibana } from '../../../common/lib/kibana';
+import { CommentType } from '../../../../common';
 
-jest.mock('../../all_cases/selector_modal/use_cases_add_to_existing_case_modal', () => ({
-  useCasesAddToExistingCaseModal: jest.fn(),
-}));
+const element = document.createElement('div');
+document.body.appendChild(element);
 
 jest.mock('./utils', () => {
   const actual = jest.requireActual('./utils');
@@ -31,14 +40,31 @@ jest.mock('./utils', () => {
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   toMountPoint: jest.fn(),
-  KibanaThemeProvider: jest.fn().mockImplementation(({ children }) => <>{children}</>),
 }));
+
+jest.mock('../../../common/lib/kibana', () => {
+  return {
+    useKibana: jest.fn(),
+    KibanaContextProvider: jest
+      .fn()
+      .mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>),
+  };
+});
+
+jest.mock('../../create/flyout/use_cases_add_to_new_case_flyout', () => ({
+  useCasesAddToNewCaseFlyout: jest.fn(),
+}));
+
+jest.mock('react-dom', () => {
+  const original = jest.requireActual('react-dom');
+  return { ...original, unmountComponentAtNode: jest.fn() };
+});
 
 describe('createAddToNewCaseLensAction', () => {
   const mockEmbeddable = new MockEmbeddable(LENS_EMBEDDABLE_TYPE, {
     id: 'mockId',
     attributes: mockAttributes,
-    timeRange: { from: '', to: '', fromStr: '', toStr: '' },
+    timeRange: mockTimeRange,
   }) as unknown as DashboardVisualizationEmbeddable;
 
   const context = {
@@ -47,21 +73,32 @@ describe('createAddToNewCaseLensAction', () => {
 
   const caseUiActionProps = getMockCaseUiActionProps();
 
-  const mockUseCasesAddToExistingCaseModal = useCasesAddToExistingCaseModal as jest.Mock;
-  const mockOpenModal = jest.fn();
+  const mockUseCasesAddToNewCaseFlyout = useCasesAddToNewCaseFlyout as jest.Mock;
+  const mockOpenFlyout = jest.fn();
   const mockMount = jest.fn();
   let action: Action<ActionContext>;
   beforeAll(() => {
-    mockUseCasesAddToExistingCaseModal.mockReturnValue({
-      open: mockOpenModal,
+    mockUseCasesAddToNewCaseFlyout.mockReturnValue({
+      open: mockOpenFlyout,
     });
   });
 
   beforeEach(() => {
-    (toMountPoint as jest.Mock).mockImplementation(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          currentAppId$: getMockCurrentAppId$(),
+          applications$: getMockApplications$(),
+        },
+      },
+    });
+
+    (getCasePermissions as jest.Mock).mockReturnValue({ update: true, read: true });
+
+    (toMountPoint as jest.Mock).mockImplementation((node) => {
+      ReactDOM.render(node, element);
       return mockMount;
     });
-    (getCasePermissions as jest.Mock).mockReturnValue({ update: true, read: true });
 
     jest.clearAllMocks();
     action = createAddToNewCaseLensAction(caseUiActionProps);
@@ -107,9 +144,43 @@ describe('createAddToNewCaseLensAction', () => {
   });
 
   describe('execute', () => {
-    it('should execute', async () => {
+    beforeEach(async () => {
       await action.execute(context);
+    });
+
+    it('should execute', () => {
+      expect(toMountPoint).toHaveBeenCalled();
       expect(mockMount).toHaveBeenCalled();
+    });
+
+    describe('Add to new case flyout', () => {
+      it('should open flyout', () => {
+        expect(mockOpenFlyout).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachments: [
+              {
+                comment: `!{lens${JSON.stringify({
+                  timeRange: mockTimeRange,
+                  attributes: mockAttributes,
+                })}}`,
+                type: CommentType.user as const,
+              },
+            ],
+          })
+        );
+      });
+
+      it('should have correct onClose handler', () => {
+        const onClose = mockUseCasesAddToNewCaseFlyout.mock.calls[0][0].onClose;
+        onClose();
+        expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+      });
+
+      it('should have correct onSuccess handler', () => {
+        const onSuccess = mockUseCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess;
+        onSuccess();
+        expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+      });
     });
   });
 });
