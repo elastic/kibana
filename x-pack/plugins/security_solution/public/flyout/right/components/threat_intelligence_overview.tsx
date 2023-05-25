@@ -51,7 +51,7 @@ export const ThreatIntelligenceOverview: React.FC = () => {
 
   const data: InsightsSummaryPanelData[] = [
     {
-      icon: 'image',
+      icon: 'warning',
       value: threatMatchesCount,
       text: threatMatchesCount <= 1 ? THREAT_MATCH_DETECTED : THREAT_MATCHES_DETECTED,
     },
