@@ -91,6 +91,10 @@ describe('Detection response view', () => {
   });
 
   context('Open in timeline', () => {
+    afterEach(() => {
+      closeTimeline();
+    });
+
     it(`opens timeline with correct query count for hosts by alert severity table`, () => {
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS)
         .first()
