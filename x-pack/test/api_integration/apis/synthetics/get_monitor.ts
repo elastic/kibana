@@ -10,10 +10,11 @@ import { ConfigKey, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('getSyntheticsMonitors', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/158394
+  describe.skip('getSyntheticsMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
