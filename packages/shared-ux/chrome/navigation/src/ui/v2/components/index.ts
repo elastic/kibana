@@ -7,3 +7,7 @@
  */
 
 export { Navigation } from './navigation';
+
+export type { Props as CloudLinkProps } from './cloud_link';
+
+export type { Props as RecentlyAccessedProps } from './recently_accessed';

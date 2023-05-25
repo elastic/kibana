@@ -10,7 +10,7 @@ import React, { FC, useCallback, useState } from 'react';
 import { of } from 'rxjs';
 import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import {
   EuiButton,
@@ -30,6 +30,8 @@ import { NavigationProvider } from '../../services';
 import { DefaultNavigation } from './default_navigation';
 import type { ChromeNavigationViewModel, NavigationServices } from '../../../types';
 import { Navigation } from './components';
+import { ProjectNavigationDefinition } from './types';
+import { getPresets } from './nav_tree_presets';
 
 const storybookMock = new NavigationStorybookMock();
 
@@ -84,92 +86,6 @@ const NavigationWrapper: FC = ({ children }) => {
   );
 };
 
-const navTree: ChromeProjectNavigationNode[] = [
-  {
-    id: 'group1',
-    title: 'Group 1',
-    children: [
-      {
-        id: 'item1',
-        title: 'Group 1: Item 1',
-        link: 'group1:item1',
-      },
-      {
-        id: 'groupA',
-        link: 'group1:groupA',
-        children: [
-          {
-            id: 'item1',
-            title: 'Group 1 > Group A > Item 1',
-          },
-          {
-            id: 'groupI',
-            title: 'Group 1 : Group A : Group I',
-            children: [
-              {
-                id: 'item1',
-                title: 'Group 1 > Group A > Group 1 > Item 1',
-                link: 'group1:groupA:groupI:item1',
-              },
-              {
-                id: 'item2',
-                title: 'Group 1 > Group A > Group 1 > Item 2',
-              },
-            ],
-          },
-          {
-            id: 'item2',
-            title: 'Group 1 > Group A > Item 2',
-          },
-        ],
-      },
-      {
-        id: 'item3',
-        title: 'Group 1: Item 3',
-      },
-    ],
-  },
-  {
-    id: 'group2',
-    link: 'group2',
-    title: 'Group 2',
-    children: [
-      {
-        id: 'item1',
-        title: 'Group 2: Item 1',
-        link: 'group2:item1',
-      },
-      {
-        id: 'item2',
-        title: 'Group 2: Item 2',
-        link: 'group2:item2',
-      },
-      {
-        id: 'item3',
-        title: 'Group 2: Item 3',
-        link: 'group2:item3',
-      },
-    ],
-  },
-  {
-    id: 'item1',
-    link: 'item1',
-  },
-  {
-    id: 'item2',
-    title: 'Item 2',
-    link: 'bad',
-  },
-  {
-    id: 'item3',
-    title: "I don't have a 'link' prop",
-  },
-  {
-    id: 'item4',
-    title: 'Item 4',
-  },
-];
-
 const baseDeeplink: ChromeNavLink = {
   id: 'foo',
   title: 'Title from deep link',
@@ -197,48 +113,173 @@ const deepLinks: ChromeNavLink[] = [
   createDeepLink('group2:item3'),
 ];
 
-export const FromObjectConfig = (args: ChromeNavigationViewModel & NavigationServices) => {
+const simpleNavigationDefinition: ProjectNavigationDefinition = {
+  homeRef: 'https://elastic.co',
+  projectNavigationTree: [
+    {
+      type: 'group',
+      id: 'example_projet',
+      title: 'Example project',
+      icon: 'logoObservability',
+      defaultIsCollapsed: false,
+      children: [
+        {
+          id: 'root',
+          children: [
+            {
+              id: 'item1',
+              title: 'Get started',
+            },
+            {
+              id: 'item2',
+              title: 'Alerts',
+            },
+            {
+              id: 'item3',
+              title: 'Some other node',
+            },
+          ],
+        },
+        {
+          id: 'group:settings',
+          title: 'Settings',
+          children: [
+            {
+              id: 'logs',
+              title: 'Logs',
+            },
+            {
+              id: 'signals',
+              title: 'Signals',
+            },
+            {
+              id: 'tracing',
+              title: 'Tracing',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+export const SimpleObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of(deepLinks),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
   });
 
   return (
-    <NavigationProvider {...services}>
-      <DefaultNavigation homeRef="/" navTree={navTree} />
-    </NavigationProvider>
+    <NavigationWrapper>
+      <NavigationProvider {...services}>
+        <DefaultNavigation {...simpleNavigationDefinition} />
+      </NavigationProvider>
+    </NavigationWrapper>
   );
 };
 
-export const FromReactNodes = (args: ChromeNavigationViewModel & NavigationServices) => {
+const navigationDefinition: ProjectNavigationDefinition = {
+  homeRef: 'https://elastic.co',
+  navigationTree: {
+    body: [
+      {
+        type: 'cloudLink',
+        preset: 'deployments',
+      },
+      // My custom project
+      {
+        type: 'group',
+        id: 'example_projet',
+        title: 'Example project',
+        icon: 'logoObservability',
+        defaultIsCollapsed: false,
+        children: [
+          {
+            id: 'root',
+            children: [
+              {
+                id: 'item1',
+                title: 'Get started',
+              },
+              {
+                id: 'item2',
+                title: 'Alerts',
+              },
+              {
+                id: 'item3',
+                title: 'Some other node',
+              },
+            ],
+          },
+          {
+            id: 'group:settings',
+            title: 'Settings',
+            children: [
+              {
+                id: 'logs',
+                title: 'Logs',
+              },
+              {
+                id: 'signals',
+                title: 'Signals',
+              },
+              {
+                id: 'tracing',
+                title: 'Tracing',
+              },
+            ],
+          },
+        ],
+      },
+      // Add ml
+      {
+        type: 'group',
+        ...getPresets('ml'),
+      },
+    ],
+    footer: [
+      {
+        type: 'recentlyAccessed',
+        defaultIsCollapsed: true,
+      },
+      {
+        type: 'group',
+        ...getPresets('devtools'),
+      },
+    ],
+  },
+};
+
+export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of(deepLinks),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
   });
 
   return (
-    <NavigationProvider {...services}>
-      <Navigation homeRef="/">
-        <Navigation.Item link="item1" />
-        <Navigation.Item link="unknown" title="This should not appear" />
-        <Navigation.Group id="group1" title="My group">
-          <Navigation.Item id="item1" title="Item 1" />
-          <Navigation.Item link="item2" title="Item 2 - override deeplink title" />
-          <Navigation.Item id="item3" title="Item 3" />
-        </Navigation.Group>
-        <Navigation.Item id="itemLast">Title from react node</Navigation.Item>
-      </Navigation>
-    </NavigationProvider>
+    <NavigationWrapper>
+      <NavigationProvider {...services}>
+        <DefaultNavigation {...navigationDefinition} />
+      </NavigationProvider>
+    </NavigationWrapper>
   );
 };
 
-export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of(deepLinks),
@@ -295,7 +336,9 @@ export const DefaultUI = (args: ChromeNavigationViewModel & NavigationServices) 
   );
 };
 
-export const MinimalUICustomCloudLink = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const MinimalUIAndCustomCloudLink = (
+  args: ChromeNavigationViewModel & NavigationServices
+) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of(deepLinks),
@@ -351,6 +394,17 @@ export const MinimalUICustomCloudLink = (args: ChromeNavigationViewModel & Navig
     </NavigationWrapper>
   );
 };
+
+export default {
+  title: 'Chrome/Navigation/v2',
+  description: 'Navigation container to render items for cross-app linking',
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
+  component: WithUIComponents,
+} as ComponentMeta<typeof WithUIComponents>;
 
 export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices({
@@ -452,20 +506,10 @@ export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices)
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
+
           <Navigation.CloudLink preset="deployments" />
         </Navigation>
       </NavigationProvider>
     </NavigationWrapper>
   );
 };
-
-export default {
-  title: 'Chrome/Navigation/v2',
-  description: 'Navigation container to render items for cross-app linking',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
-  component: FromObjectConfig,
-} as ComponentMeta<typeof FromObjectConfig>;

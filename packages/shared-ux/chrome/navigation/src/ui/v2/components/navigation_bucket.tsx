@@ -10,10 +10,9 @@ import React, { FC, useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { Navigation } from './navigation';
 import { analytics, devtools, ml, management } from '../nav_tree_presets';
+import type { NavigationBucketPreset, NodeDefinition } from '../types';
 
-type Preset = 'analytics' | 'devtools' | 'ml' | 'management';
-
-const navTreePresets: { [preset in Preset]: ChromeProjectNavigationNode } = {
+const navTreePresets: { [preset in NavigationBucketPreset]: ChromeProjectNavigationNode } = {
   analytics,
   ml,
   devtools,
@@ -21,14 +20,24 @@ const navTreePresets: { [preset in Preset]: ChromeProjectNavigationNode } = {
 };
 
 interface Props {
-  preset?: Preset;
-  navNode?: ChromeProjectNavigationNode;
+  preset?: NavigationBucketPreset;
+  nodeDefinition?: NodeDefinition;
   defaultIsCollapsed?: boolean;
 }
 
-export const NavigationBucket: FC<Props> = ({ navNode: _navNode, defaultIsCollapsed, preset }) => {
+export const NavigationBucket: FC<Props> = ({
+  nodeDefinition: _nodeDefinition,
+  defaultIsCollapsed,
+  preset,
+}) => {
+  const nodeDefinition = preset ? navTreePresets[preset] : _nodeDefinition;
+
+  if (!nodeDefinition) {
+    throw new Error('Either preset or nodeDefinition must be defined');
+  }
+
   const renderItems = useCallback(
-    (items: ChromeProjectNavigationNode[], isRoot = false) => {
+    (items: NodeDefinition[], isRoot = false) => {
       return items.map((item) => {
         const id = item.id ?? item.link;
 
@@ -62,11 +71,5 @@ export const NavigationBucket: FC<Props> = ({ navNode: _navNode, defaultIsCollap
     [defaultIsCollapsed]
   );
 
-  const navNode = preset ? navTreePresets[preset] : _navNode;
-
-  if (!navNode) {
-    throw new Error('Either preset or navNode must be defined');
-  }
-
-  return <>{renderItems([navNode], true)}</>;
+  return <>{renderItems([nodeDefinition], true)}</>;
 };

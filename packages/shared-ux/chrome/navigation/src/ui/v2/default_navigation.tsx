@@ -6,46 +6,86 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState } from 'react';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import React, { FC, useCallback } from 'react';
 
 import { Navigation } from './components';
+import {
+  GroupDefinition,
+  NodeDefinition,
+  ProjectNavigationDefinition,
+  RootNavigationItemDefinition,
+} from './types';
+import { CloudLink } from './components/cloud_link';
+import { RecentlyAccessed } from './components/recently_accessed';
+import { NavigationFooter } from './components/navigation_footer';
+import { getPresets } from './nav_tree_presets';
 
-/**
- * @public
- */
-export interface DefaultNavigationProps {
-  /**
-   * The URL href for the home link
-   */
-  homeRef: string;
-  /**
-   * A navigation tree structure with object items containing labels, links, and sub-items
-   */
-  navTree: ChromeProjectNavigationNode[];
-}
+const isChromeProjectNavigationNode = (
+  item: RootNavigationItemDefinition | NodeDefinition
+): item is NodeDefinition => {
+  // Only RootNavigationItemDefinition has a "type" property
+  return (item as RootNavigationItemDefinition).type === undefined;
+};
 
-export const DefaultNavigation: FC<DefaultNavigationProps> = ({ homeRef, navTree }) => {
-  // Temp logic to demo removing items from the tree
-  const [removedItems, setRemovedItems] = useState<Set<string>>(new Set());
+const getDefaultNavigationTree = (
+  projectDefinition: GroupDefinition[]
+): Required<ProjectNavigationDefinition>['navigationTree'] => {
+  return {
+    body: [
+      {
+        type: 'cloudLink',
+        preset: 'deployments',
+      },
+      ...projectDefinition,
+      {
+        type: 'group',
+        ...getPresets('analytics'),
+      },
+      {
+        type: 'group',
+        ...getPresets('ml'),
+      },
+    ],
+    footer: [
+      {
+        type: 'group',
+        ...getPresets('devtools'),
+      },
+      {
+        type: 'group',
+        ...getPresets('management'),
+      },
+    ],
+  };
+};
 
-  const onRemove = useCallback((path: string[]) => {
-    setRemovedItems((prevItems) => {
-      const newItems = new Set(prevItems);
-      newItems.add(path.join('.'));
-      return newItems;
-    });
-  }, []);
+export const DefaultNavigation: FC<ProjectNavigationDefinition> = ({
+  homeRef,
+  projectNavigationTree,
+  navigationTree,
+}) => {
+  if (!navigationTree && !projectNavigationTree) {
+    throw new Error('One of navigationTree or projectNavigationTree must be defined');
+  }
+
+  const navigationDefinition = !navigationTree
+    ? getDefaultNavigationTree(projectNavigationTree!)
+    : navigationTree!;
 
   const renderItems = useCallback(
-    (items: ChromeProjectNavigationNode[], path: string[] = []) => {
-      const filtered = items.filter(({ id: _id, link = '' }) => {
-        const id = _id ?? link;
-        const itemPath = (id ? [...path, id] : path).join('.');
-        return !removedItems.has(itemPath);
-      });
+    (items: Array<RootNavigationItemDefinition | NodeDefinition> = [], path: string[] = []) => {
+      return items.map((item) => {
+        const isNavigationNode = isChromeProjectNavigationNode(item);
+        if (!isNavigationNode) {
+          if (item.type === 'cloudLink') {
+            return <CloudLink {...item} />;
+          }
 
-      return filtered.map((item) => {
+          if (item.type === 'recentlyAccessed') {
+            return <RecentlyAccessed {...item} />;
+          }
+        }
+
         const id = item.id ?? item.link;
 
         if (!id) {
@@ -57,32 +97,27 @@ export const DefaultNavigation: FC<DefaultNavigationProps> = ({ homeRef, navTree
         return (
           <React.Fragment key={id}>
             {item.children ? (
-              <Navigation.Group id={item.id} link={item.link} title={item.title}>
+              <Navigation.Group {...item}>
                 {renderItems(item.children, [...path, id])}
               </Navigation.Group>
             ) : (
-              <Navigation.Item id={item.id} link={item.link} title={item.title} />
+              <Navigation.Item {...item} />
             )}
           </React.Fragment>
         );
       });
     },
-    [removedItems]
+    []
   );
 
-  const filteredNavTree = navTree.filter(({ id: _id, link }) => {
-    const id = _id ?? link;
-    return !removedItems.has(id ?? '');
-  });
-
   return (
-    <Navigation
-      homeRef={homeRef}
-      onRootItemRemove={(id) => {
-        onRemove([id]);
-      }}
-    >
-      {renderItems(filteredNavTree)}
+    <Navigation homeRef={homeRef}>
+      <>
+        {renderItems(navigationDefinition.body)}
+        {navigationDefinition.footer && (
+          <NavigationFooter>{renderItems(navigationDefinition.footer)}</NavigationFooter>
+        )}
+      </>
     </Navigation>
   );
 };

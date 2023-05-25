@@ -17,10 +17,10 @@ import {
 import type { BasePathService, NavigateToUrlFn } from '../../../../types/internal';
 import { navigationStyles as styles } from '../../../styles';
 import { useNavigation as useServices } from '../../../services';
-import { InternalNavigationNode } from '../types';
+import { ChromeProjectNavigationNode } from '../types';
 
 const navigationNodeToEuiItem = (
-  item: InternalNavigationNode,
+  item: ChromeProjectNavigationNode,
   { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
 ): EuiSideNavItemType<unknown> => {
   const href = item.deepLink?.href;
@@ -49,8 +49,8 @@ const navigationNodeToEuiItem = (
 };
 
 interface TopLevelProps {
-  navNode: InternalNavigationNode;
-  items?: InternalNavigationNode[];
+  navNode: ChromeProjectNavigationNode;
+  items?: ChromeProjectNavigationNode[];
   defaultIsCollapsed?: boolean;
 }
 

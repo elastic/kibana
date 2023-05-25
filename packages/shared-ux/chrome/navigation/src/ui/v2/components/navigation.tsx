@@ -16,9 +16,10 @@ import React, {
   useContext,
   useRef,
 } from 'react';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../../services';
-import { InternalNavigationNode, RegisterFunction, UnRegisterFunction } from '../types';
+import { RegisterFunction, UnRegisterFunction } from '../types';
 import { CloudLink } from './cloud_link';
 import { NavigationBucket } from './navigation_bucket';
 import { NavigationFooter } from './navigation_footer';
@@ -58,9 +59,9 @@ export function Navigation({ children, homeRef, onRootItemRemove, unstyled = fal
   const orderChildrenRef = useRef<Record<string, number>>({});
   const idx = useRef(0);
 
-  const [navigationItems, setNavigationItems] = useState<Record<string, InternalNavigationNode>>(
-    {}
-  );
+  const [navigationItems, setNavigationItems] = useState<
+    Record<string, ChromeProjectNavigationNode>
+  >({});
   const [footerChildren, setFooterChildren] = useState<ReactNode>(null);
 
   const unregister: UnRegisterFunction = useCallback(
@@ -79,7 +80,7 @@ export function Navigation({ children, homeRef, onRootItemRemove, unstyled = fal
   );
 
   const register = useCallback(
-    (navNode: InternalNavigationNode) => {
+    (navNode: ChromeProjectNavigationNode) => {
       orderChildrenRef.current[navNode.id] = idx.current++;
 
       setNavigationItems((prevItems) => {
@@ -107,15 +108,16 @@ export function Navigation({ children, homeRef, onRootItemRemove, unstyled = fal
   );
 
   useEffect(() => {
-    // Send the navigation tree to the Chrome service
+    // This will update the navigation tree in the Chrome service (calling the serverless.setNavigation())
     onProjectNavigationChange({
+      homeRef,
       navigationTree: Object.values(navigationItems).sort((a, b) => {
         const aOrder = orderChildrenRef.current[a.id];
         const bOrder = orderChildrenRef.current[b.id];
         return aOrder - bOrder;
       }),
     });
-  }, [navigationItems, onProjectNavigationChange]);
+  }, [navigationItems, onProjectNavigationChange, homeRef]);
 
   return (
     <NavigationContext.Provider value={contextValue}>

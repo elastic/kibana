@@ -17,7 +17,7 @@ import { navigationStyles as styles } from '../../../styles';
 
 import { getI18nStrings } from '../../i18n_strings';
 
-interface Props {
+export interface Props {
   recentlyAccessed$?: Observable<RecentItem[]>;
   /**
    * If true, the recently accessed list will be collapsed by default.

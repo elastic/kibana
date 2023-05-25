@@ -26,7 +26,7 @@ const presets = {
   },
 };
 
-interface Props {
+export interface Props {
   /** Use one of the cloud link presets */
   preset?: 'projects' | 'deployments' | null;
   /** Optional. If "preset" is not provided it is required */
