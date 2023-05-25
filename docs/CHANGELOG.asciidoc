@@ -272,7 +272,14 @@ Observability::
 * Adds Exploratory View to a separate app {kibana-pull}153852[#153852]
 
 Platform::
-Adds text {kibana-pull}151631[#151631]
+* Adds text {kibana-pull}151631[#151631]
+* For performance purposes, Kibana is now using more system indices to store its internal data. {kibana-pull}154888[#154888]
+
+The following system indices will be created when upgrading to 8.8.0
+* .kibana_alerting_cases
+* .kibana_analytics
+* .kibana_security_solution
+* .kibana_ingest
 
 Security::
 * Adds CloudFormation agent install method {kibana-pull}155045[#155045]
