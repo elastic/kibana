@@ -71,7 +71,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       throw getErr;
     }
   },
-  setUptimeDynamicSettings: async (client, settings: DynamicSettingsAttributes) => {
+  setUptimeDynamicSettings: async (client, settings: DynamicSettingsAttributes | undefined) => {
     await client.create(umDynamicSettings.name, settings, {
       id: settingsObjectId,
       overwrite: true,
