@@ -14,10 +14,8 @@ import { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 import { getSaveLayerAction } from './save_action';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
-import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
 import { getRevertChangesAction } from './revert_changes_action';
 
-// TODO add unit test to verify that the correct actions are shown
 export const createAnnotationActions = ({
   state,
   layer,
@@ -66,9 +64,7 @@ export const createAnnotationActions = ({
         toasts: core.notifications.toasts,
       })
     );
-  }
 
-  if (isByReferenceAnnotationsLayer(layer) && annotationLayerHasUnsavedChanges(layer)) {
     actions.push(getRevertChangesAction({ state, layer, setState, core }));
   }
 

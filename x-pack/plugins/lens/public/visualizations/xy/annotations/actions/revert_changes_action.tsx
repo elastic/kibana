@@ -24,6 +24,7 @@ import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import type { LayerAction, StateSetter } from '../../../../types';
 import type { XYState, XYByReferenceAnnotationLayerConfig } from '../../types';
+import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
 
 export const getRevertChangesAction = ({
   state,
@@ -68,6 +69,7 @@ export const getRevertChangesAction = ({
     },
     icon: 'editorUndo',
     isCompatible: true,
+    disabled: !annotationLayerHasUnsavedChanges(layer),
     'data-test-subj': 'lnsXY_annotationLayer_revertChanges',
   };
 };

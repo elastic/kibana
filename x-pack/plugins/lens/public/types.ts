@@ -613,6 +613,7 @@ export interface LayerAction {
   icon: IconType;
   color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
+  disabled?: boolean;
   'data-test-subj'?: string;
 }
 

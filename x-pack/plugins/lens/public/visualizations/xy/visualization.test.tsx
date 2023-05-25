@@ -3578,27 +3578,130 @@ describe('xy_visualization', () => {
       ).toHaveLength(0);
     });
 
-    it('should return no action for an annotation layer', () => {
-      const baseState = exampleState();
-      expect(
-        xyVisualization.getSupportedActionsForLayer?.(
-          'annotation',
-          {
-            ...baseState,
-            layers: [
-              ...baseState.layers,
-              {
-                layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
-                annotations: [exampleAnnotation2],
-                ignoreGlobalFilters: true,
-                indexPatternId: 'myIndexPattern',
-              },
-            ],
+    describe('annotations layer', () => {
+      it('should return no action for by-value annotation layer', () => {
+        const annotationLayer: XYByValueAnnotationLayerConfig = {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2],
+          ignoreGlobalFilters: true,
+          indexPatternId: 'myIndexPattern',
+        };
+
+        const baseState = exampleState();
+        expect(
+          xyVisualization.getSupportedActionsForLayer?.(
+            'annotation',
+            {
+              ...baseState,
+              layers: [annotationLayer],
+            },
+            jest.fn()
+          )
+        ).toEqual([]);
+      });
+
+      describe('by-ref layer', () => {
+        const annotationLayer: XYByReferenceAnnotationLayerConfig = {
+          annotationGroupId: 'some-group',
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2],
+          ignoreGlobalFilters: true,
+          indexPatternId: 'myIndexPattern',
+          __lastSaved: {
+            title: '',
+            description: '',
+            tags: [],
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+            indexPatternId: 'myIndexPattern',
           },
-          jest.fn()
-        )
-      ).toEqual([]);
+        };
+
+        it('should show actions', () => {
+          const baseState = exampleState();
+          expect(
+            xyVisualization.getSupportedActionsForLayer?.(
+              'annotation',
+              {
+                ...baseState,
+                layers: [annotationLayer],
+              },
+              jest.fn(),
+              true
+            )
+          ).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "data-test-subj": "lnsXY_annotationLayer_saveToLibrary",
+                "description": "Saves annotation group as separate saved object",
+                "displayName": "Save to library",
+                "execute": [Function],
+                "icon": "save",
+                "isCompatible": true,
+              },
+              Object {
+                "data-test-subj": "lnsXY_annotationLayer_unlinkFromLibrary",
+                "description": "Saves the annotation group as a part of the Lens Saved Object",
+                "displayName": "Unlink from library",
+                "execute": [Function],
+                "icon": "unlink",
+                "isCompatible": true,
+              },
+              Object {
+                "data-test-subj": "lnsXY_annotationLayer_revertChanges",
+                "description": "Restores annotation group to the last saved state.",
+                "disabled": true,
+                "displayName": "Revert changes",
+                "execute": [Function],
+                "icon": "editorUndo",
+                "isCompatible": true,
+              },
+            ]
+          `);
+        });
+
+        it('should hide save action if not saveable', () => {
+          const baseState = exampleState();
+          expect(
+            xyVisualization
+              .getSupportedActionsForLayer?.(
+                'annotation',
+                {
+                  ...baseState,
+                  layers: [annotationLayer],
+                },
+                jest.fn(),
+                false
+              )
+              .some((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary')
+          ).toBeFalsy();
+        });
+
+        it('should enable revert action if there are changes', () => {
+          const baseState = exampleState();
+          expect(
+            xyVisualization
+              .getSupportedActionsForLayer?.(
+                'annotation',
+                {
+                  ...baseState,
+                  layers: [
+                    {
+                      ...annotationLayer,
+                      ignoreGlobalFilters: !annotationLayer.ignoreGlobalFilters,
+                    },
+                  ],
+                },
+                jest.fn(),
+                false
+              )
+              .find((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_revertChanges')
+              ?.disabled
+          ).toEqual(false);
+        });
+      });
     });
   });
 

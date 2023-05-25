@@ -130,6 +130,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
               data-test-subj={i['data-test-subj']}
               aria-label={i.displayName}
               title={i.displayName}
+              disabled={i.disabled}
               onClick={() => {
                 closePopover();
                 i.execute(props.mountingPoint);
@@ -162,7 +163,8 @@ export const LayerActions = (props: LayerActionsProps) => {
   if (props.actions.length > 1) {
     return <InContextMenuActions {...props} />;
   }
-  const [{ displayName, execute, icon, color, 'data-test-subj': dataTestSubj }] = props.actions;
+  const [{ displayName, execute, icon, color, 'data-test-subj': dataTestSubj, disabled }] =
+    props.actions;
 
   return (
     <EuiButtonIcon
@@ -172,6 +174,7 @@ export const LayerActions = (props: LayerActionsProps) => {
       data-test-subj={dataTestSubj}
       aria-label={displayName}
       title={displayName}
+      disabled={disabled}
       onClick={() => execute?.(props.mountingPoint)}
     />
   );
