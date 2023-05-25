@@ -34,6 +34,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
+import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -46,7 +47,6 @@ import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 import { useCurrentThemeVars, useMlKibana } from '../contexts/kibana';
-import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 
 declare global {
   interface Window {
