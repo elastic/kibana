@@ -44,6 +44,11 @@ export const getSavedSearch = async (
     id: savedSearchId,
   });
 
+  // @ts-expect-error
+  if (so.error) {
+    throw new Error(`Could not locate that search (id: ${savedSearchId})`);
+  }
+
   // todo check for conflict
   const savedSearch = so.item;
 
