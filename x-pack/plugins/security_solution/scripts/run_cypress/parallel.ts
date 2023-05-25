@@ -37,6 +37,7 @@ import type {
 } from '@babel/types';
 
 import { createFailError } from '@kbn/dev-cli-errors';
+import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
@@ -304,13 +305,17 @@ export const cli = () => {
               installDir: process.env.KIBANA_INSTALL_DIR,
             };
 
-            const shutdownEs = await runElasticsearch({
-              config,
-              log,
-              name: `ftr-${esPort}`,
-              esFrom: 'snapshot',
-              onEarlyExit,
-            });
+            const shutdownEs = await pRetry(
+              async () =>
+                runElasticsearch({
+                  config,
+                  log,
+                  name: `ftr-${esPort}`,
+                  esFrom: 'snapshot',
+                  onEarlyExit,
+                }),
+              { retries: 2, forever: false }
+            );
 
             await runKibanaServer({
               procs,

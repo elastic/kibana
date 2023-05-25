@@ -40,11 +40,11 @@ const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 describe('Detection response view', () => {
   before(() => {
     cleanKibana();
+    createRule(getNewRule());
   });
 
   beforeEach(() => {
     login();
-    createRule(getNewRule());
     visit(DETECTIONS_RESPONSE_URL);
   });
 
