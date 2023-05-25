@@ -17,13 +17,7 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../tasks/create_new_case';
-import {
-  login,
-  loginWithUser,
-  logout,
-  visitHostDetailsPage,
-  visitWithUser,
-} from '../../tasks/login';
+import { login, loginWithUser, visitWithUser } from '../../tasks/login';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
@@ -38,7 +32,6 @@ import {
 } from '../../tasks/privileges';
 
 import { CASES_URL } from '../../urls/navigation';
-import { openSourcerer } from '../../tasks/sourcerer';
 const usersToCreate = [
   secAllUser,
   secReadCasesAllUser,
@@ -46,12 +39,6 @@ const usersToCreate = [
   secAllCasesOnlyReadDeleteUser,
 ];
 const rolesToCreate = [secAll, secReadCasesAll, secAllCasesNoDelete, secAllCasesOnlyReadDelete];
-// needed to generate index pattern
-const visitSecuritySolution = () => {
-  visitHostDetailsPage();
-  openSourcerer();
-  logout();
-};
 
 const testCase: TestCaseWithoutTimeline = {
   name: 'This is the title of the case',
@@ -73,7 +60,6 @@ describe('Cases privileges', () => {
 
   beforeEach(() => {
     login();
-    visitSecuritySolution();
     deleteCases();
   });
 
