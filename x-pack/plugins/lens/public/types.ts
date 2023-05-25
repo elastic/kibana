@@ -616,6 +616,7 @@ export interface LayerAction {
   disabled?: boolean;
   'data-test-subj'?: string;
   order: number;
+  showOutsideList?: boolean;
 }
 
 interface SharedDimensionProps {

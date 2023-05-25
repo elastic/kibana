@@ -226,10 +226,15 @@ export const getSaveLayerAction = ({
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
+  const displayName = i18n.translate(
+    'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary',
+    {
+      defaultMessage: 'Save annotation group',
+    }
+  );
+
   return {
-    displayName: i18n.translate('xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary', {
-      defaultMessage: 'Save to library',
-    }),
+    displayName,
     description: i18n.translate(
       'xpack.lens.xyChart.annotations.addAnnotationGroupToLibraryDescription',
       { defaultMessage: 'Saves annotation group as separate saved object' }
@@ -264,5 +269,6 @@ export const getSaveLayerAction = ({
     isCompatible: true,
     'data-test-subj': 'lnsXY_annotationLayer_saveToLibrary',
     order: 100,
+    showOutsideList: true,
   };
 };
