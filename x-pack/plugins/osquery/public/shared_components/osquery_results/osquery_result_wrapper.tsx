@@ -6,12 +6,13 @@
  */
 
 import { EuiComment, EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { css } from '@emotion/react';
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { useKibana } from '../../common/lib/kibana';
 import type { StartPlugins } from '../../types';
@@ -23,7 +24,7 @@ import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
 
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
-  ({ actionId, ruleName, startDate, ecsData }) => {
+  ({ actionId, ruleName, startDate, ecsData, isNewFlyout }) => {
     const { read } = useKibana().services.application.capabilities.osquery;
 
     const [isLive, setIsLive] = useState(false);
@@ -37,10 +38,20 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
       setIsLive(() => !(data?.status === 'completed'));
     }, [data?.status]);
 
+    const commentCss = useMemo(
+      () => css`
+        figure {
+          background-color: ${isNewFlyout} ? 'white' : 'transparent'
+        }
+      `,
+      [isNewFlyout]
+    );
+
     return (
       <AlertAttachmentContext.Provider value={ecsData}>
         <EuiSpacer size="s" />
         <EuiComment
+          css={commentCss}
           username={ruleName && ruleName[0]}
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}

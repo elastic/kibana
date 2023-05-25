@@ -19,10 +19,11 @@ interface ResponseActionsResultsProps {
   actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
   ruleName?: string[];
   ecsData?: Ecs | null;
+  isNewFlyout?: boolean;
 }
 
 export const ResponseActionsResults = React.memo(
-  ({ actions, ruleName, ecsData }: ResponseActionsResultsProps) => {
+  ({ actions, ruleName, ecsData, isNewFlyout }: ResponseActionsResultsProps) => {
     const {
       services: { osquery },
     } = useKibana();
@@ -44,12 +45,14 @@ export const ResponseActionsResults = React.memo(
                 startDate={startDate}
                 ruleName={ruleName}
                 ecsData={ecsData}
+                isNewFlyout={isNewFlyout}
               />
             );
           }
           if (isEndpoint(action)) {
             return (
               <EndpointResponseActionResults
+                isNewFlyout={isNewFlyout}
                 action={action}
                 key={action.EndpointActions.action_id}
               />

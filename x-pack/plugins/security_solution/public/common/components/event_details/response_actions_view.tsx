@@ -30,11 +30,11 @@ const TabContentWrapper = styled.div`
 export const useResponseActionsView = ({
   rawEventData,
   ecsData,
-  isTab,
+  isNewFlyout,
 }: {
   ecsData?: Ecs | null;
   rawEventData: SearchHit | undefined;
-  isTab?: boolean;
+  isNewFlyout?: boolean;
 }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
@@ -72,13 +72,14 @@ export const useResponseActionsView = ({
             actions={automatedList.items}
             ruleName={ruleName}
             ecsData={ecsData}
+            isNewFlyout={isNewFlyout}
           />
         ) : null}
       </TabContentWrapper>
     </>
   );
 
-  if (isTab) {
+  if (!isNewFlyout) {
     return {
       id: EventsViewType.responseActionsView,
       'data-test-subj': 'responseActionsViewTab',

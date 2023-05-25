@@ -42,12 +42,12 @@ export const ResponseDetails: React.FC = () => {
   const responseActionsView = useResponseActionsView({
     rawEventData: data,
     ecsData: ecs,
-    isTab: false,
+    isNewFlyout: true,
   });
   const osqueryView = useOsqueryTab({
     rawEventData: data,
     ecsData: ecs,
-    isTab: false,
+    isNewFlyout: true,
   });
 
   return (

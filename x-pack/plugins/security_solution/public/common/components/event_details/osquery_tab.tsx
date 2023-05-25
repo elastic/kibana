@@ -29,11 +29,11 @@ const TabContentWrapper = styled.div`
 export const useOsqueryTab = ({
   rawEventData,
   ecsData,
-  isTab,
+  isNewFlyout,
 }: {
   rawEventData?: SearchHit | undefined;
   ecsData?: Ecs | null;
-  isTab: boolean;
+  isNewFlyout: boolean;
 }) => {
   const {
     services: { osquery },
@@ -90,7 +90,7 @@ export const useOsqueryTab = ({
     </TabContentWrapper>
   );
 
-  if (isTab) {
+  if (!isNewFlyout) {
     return {
       id: EventsViewType.osqueryView,
       'data-test-subj': 'osqueryViewTab',
