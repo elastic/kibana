@@ -32,8 +32,6 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "discover"
     ]
   }
 }

@@ -5,8 +5,7 @@
   },
   "include": [
     "common/**/*",
-    "public/**/*",
-    "public/**/*.json",
+    "server/**/*",
     "../../../typings/**/*"
   ],
   "kbn_references": [
