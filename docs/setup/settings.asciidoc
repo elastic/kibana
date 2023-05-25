@@ -806,16 +806,18 @@ setting this to `true` enables unauthenticated users to access the {kib}
 server status API and status page. *Default: `false`*
 
 [[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`::
-When `true`, users are able to change the telemetry setting at a later time in
-<<advanced-options, Advanced Settings>>.  When `false`,
-{kib} looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send
-telemetry data or not. <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> and <<settings-telemetry-optIn, `telemetry.optIn`>>
+When `false`, users cannot change the opt-in status through <<advanced-options, Advanced Settings>>, and
+{kib} only looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send telemetry data or not. <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> and <<settings-telemetry-optIn, `telemetry.optIn`>>
 cannot be `false` at the same time. *Default: `true`*.
 
 [[settings-telemetry-optIn]] `telemetry.optIn`::
-When `true`, telemetry data is sent to Elastic.
-When `false`, collection of telemetry data is disabled.
-To enable telemetry and prevent users from disabling it,
+Set to `false` to stop sending any telemetry data to Elastic.
+Reporting your cluster statistics helps
+us improve your user experience.
+When `false`, the telemetry data is never sent to Elastic. +
++
+This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
+To prevent users from disabling it,
 set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false` and <<settings-telemetry-optIn, `telemetry.optIn`>> to `true`.
 *Default: `true`*
 

@@ -4,14 +4,12 @@
 <titleabbrev>Telemetry settings</titleabbrev>
 ++++
 
-By default, Usage Collection (also known as Telemetry) is enabled. This
-helps us learn about the {kib} features that our users are most interested in, so we
-can focus our efforts on making them even better.
+Usage Collection (also known as Telemetry) is enabled by default. This allows us to learn what our users are most interested in, so we can improve our products and services.
+
+Refer to our https://www.elastic.co/legal/product-privacy-statement[Privacy Statement] to learn more.
 
 You can control whether this data is sent from the {kib} servers, or if it should be sent
 from the user's browser, in case a firewall is blocking the connections from the server. Additionally, you can decide to completely disable this feature either in the config file or in {kib} via *Management > Kibana > Advanced Settings > Usage Data*.
-
-Refer to our https://www.elastic.co/legal/product-privacy-statement[Privacy Statement] to learn more.
 
 [float]
 [[telemetry-general-settings]]
@@ -30,11 +28,15 @@ Refer to our https://www.elastic.co/legal/product-privacy-statement[Privacy Stat
   when they are navigating through {kib}. Defaults to `'server'`.
 
 [[telemetry-optIn]] `telemetry.optIn`::
-  Set to `true` to automatically opt into reporting cluster statistics. You can also opt out through
-  *Advanced Settings* in {kib}. Defaults to `true`.
+  Set to `false` to stop sending any telemetry data to Elastic. Reporting your
+cluster statistics helps us improve your user experience. *Default: `true`.* +
++
+This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
+To prevent users from disabling it,
+set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false` and <<settings-telemetry-optIn, `telemetry.optIn`>> to `true`.
 
 `telemetry.allowChangingOptInStatus`::
-  Set to `true` to allow overwriting the <<telemetry-optIn, `telemetry.optIn`>> setting via the {kib} UI. Defaults to `true`. +
+  Set to `false` to disallow overwriting the <<telemetry-optIn, `telemetry.optIn`>> setting via the <<advanced-options, Advanced Settings>> in {kib}. *Default: `true`.* +
 +
 [NOTE]
 ============
