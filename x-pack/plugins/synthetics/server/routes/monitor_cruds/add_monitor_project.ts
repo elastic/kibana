@@ -31,14 +31,8 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       maxBytes: MAX_PAYLOAD_SIZE,
     },
   },
-  handler: async ({
-    context,
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response, server } = routeContext;
     const { projectName } = request.params;
     const decodedProjectName = decodeURI(projectName);
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
@@ -59,14 +53,11 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatter({
+        routeContext,
         projectId: decodedProjectName,
         spaceId,
         encryptedSavedObjectsClient,
-        savedObjectsClient,
         monitors,
-        server,
-        syntheticsMonitorClient,
-        request,
       });
 
       await pushMonitorFormatter.configureAllProjectMonitors();

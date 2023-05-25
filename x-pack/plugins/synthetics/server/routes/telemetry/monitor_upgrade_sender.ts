@@ -25,11 +25,6 @@ import {
 } from '../../legacy_uptime/lib/telemetry/constants';
 import { MonitorErrorEvent } from '../../legacy_uptime/lib/telemetry/types';
 
-export interface UpgradeError {
-  key?: string;
-  message: string | string[];
-}
-
 export function sendTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender | undefined,

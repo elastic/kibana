@@ -7,17 +7,17 @@
 
 import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { CasesFindResponse, CasesFindRequest } from '../../../common/api';
-import { CasesFindRequestRt, throwErrors, CasesFindResponseRt, excess } from '../../../common/api';
+import {
+  CasesFindRequestRt,
+  decodeWithExcessOrThrow,
+  CasesFindResponseRt,
+} from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions, constructSearch } from '../utils';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -41,12 +41,7 @@ export const find = async (
   } = clientArgs;
 
   try {
-    const fields = asArray(params.fields);
-
-    const queryParams = pipe(
-      excess(CasesFindRequestRt).decode({ ...params, fields }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
@@ -96,7 +91,6 @@ export const find = async (
           ...caseQueryOptions,
           ...caseSearch,
           searchFields: asArray(queryParams.searchFields),
-          fields: includeFieldsRequiredForAuthentication(fields),
         },
       }),
       caseService.getCaseStatusStats({

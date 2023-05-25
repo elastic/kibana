@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMappingProperties } from '../mapping_definition';
-import type { SavedObjectModelBidirectionalTransformation } from './transformations';
+import type { SavedObjectsModelVersionSchemaDefinitions } from './schemas';
+import type { SavedObjectsModelChange } from './model_change';
 
 /**
- * Represents a model version of a given savedObjects type.
+ * Represents a model version of a given saved object type.
  *
  * Model versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs
  * by exposing an unified way of describing the changes of shape or data of a type.
@@ -19,52 +19,16 @@ import type { SavedObjectModelBidirectionalTransformation } from './transformati
  */
 export interface SavedObjectsModelVersion {
   /**
-   * The {@link SavedObjectsModelChange | changes} associated with this version.
+   * The list of {@link SavedObjectsModelChange | changes} associated with this version.
    */
-  modelChange: SavedObjectsModelChange;
+  changes: SavedObjectsModelChange[];
+  /**
+   * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
+   *
+   * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
+   */
+  schemas?: SavedObjectsModelVersionSchemaDefinitions;
 }
-
-/**
- * {@link SavedObjectsModelChange | model change} representing an expansion.
- *
- * A model expansion can do either, or both, or those:
- * - add new mappings
- * - migrate data in a backward-compatible way
- *
- * @remark when adding mappings, {@link SavedObjectsType.mappings | the type mappings} must also be updated accordingly.
- *         Overall, the type's mapping represents the latests version of the mappings, where the model changes
- *         represent the changes of mappings between two versions.
- *
- * @public
- */
-export interface SavedObjectsModelExpansionChange<PreviousAttributes = any, NewAttributes = any> {
-  /**
-   * The type of {@link SavedObjectsModelChange | change}, used to identify them internally.
-   */
-  type: 'expansion';
-  /**
-   * (optional) A bidirectional transformation to migrate the document from and/or to the previous model version.
-   */
-  transformation?: SavedObjectModelBidirectionalTransformation<PreviousAttributes, NewAttributes>;
-  /**
-   * (optional) The new mappings introduced in this version.
-   */
-  addedMappings?: SavedObjectsMappingProperties;
-  /**
-   * (optional) A list of paths to mappings to flag as deprecated. Deprecated mappings should no longer be used and will
-   * eventually be deleted later.
-   */
-  deprecatedMappings?: string[];
-}
-
-/**
- * Identify the model change associated with a given {@link SavedObjectsModelVersion}.
- *
- * At the moment, Only one type of change is supported: {@link SavedObjectsModelExpansionChange | expansions}.
- *
- * @public
- */
-export type SavedObjectsModelChange = SavedObjectsModelExpansionChange;
 
 /**
  * A record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.

@@ -151,10 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('applying field formats from Advanced Settings for values', () => {
         before(async () => {
-          await visualize.navigateToNewVisualization();
-          await visualize.clickVisualBuilder();
-          await visualBuilder.checkVisualBuilderIsPresent();
-          await visualBuilder.setTime();
+          await visualBuilder.resetPage();
           await visualBuilder.clickMarkdown();
           await visualBuilder.markdownSwitchSubTab('markdown');
           await visualBuilder.enterMarkdown('{{ average_of_bytes.last.formatted }}');

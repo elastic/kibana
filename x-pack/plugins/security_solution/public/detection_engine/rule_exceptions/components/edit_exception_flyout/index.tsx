@@ -19,7 +19,7 @@ import {
   EuiTitle,
   EuiFlyout,
   EuiFlyoutFooter,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 
 import type {
@@ -350,7 +350,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="m" />
       </FlyoutHeader>
-      {isLoading && <EuiLoadingContent data-test-subj="loadingEditExceptionFlyout" lines={4} />}
+      {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
       <FlyoutBodySection className="builder-section">
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}

@@ -36,8 +36,11 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import { showExamplesForField } from '../../../common/utils/field_examples_calculator';
 import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
-import type { BucketedAggregation } from '../../../common/types';
-import { canProvideStatsForField } from '../../../common/utils/field_stats_utils';
+import type { BucketedAggregation, NumberSummary } from '../../../common/types';
+import {
+  canProvideStatsForField,
+  canProvideNumberSummaryForField,
+} from '../../../common/utils/field_stats_utils';
 import { loadFieldStats } from '../../services/field_stats';
 import type { AddFieldFilterHandler } from '../../types';
 import {
@@ -47,6 +50,7 @@ import {
   getDefaultColor,
 } from './field_top_values';
 import { FieldSummaryMessage } from './field_summary_message';
+import { FieldNumberSummary, isNumberSummaryValid } from './field_number_summary';
 import { ErrorBoundary } from '../error_boundary';
 
 export interface FieldStatsState {
@@ -56,6 +60,7 @@ export interface FieldStatsState {
   sampledValues?: number;
   histogram?: BucketedAggregation<number | string>;
   topValues?: BucketedAggregation<number | string>;
+  numberSummary?: NumberSummary;
 }
 
 export interface FieldStatsServices {
@@ -202,6 +207,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         sampledValues: results.sampledValues,
         histogram: results.histogram,
         topValues: results.topValues,
+        numberSummary: results.numberSummary,
       }));
     } catch (e) {
       setState((s) => ({ ...s, isLoading: false }));
@@ -236,8 +242,15 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       : chartTheme;
   }, [chartTheme, color]);
 
-  const { isLoading, histogram, topValues, sampledValues, sampledDocuments, totalDocuments } =
-    state;
+  const {
+    isLoading,
+    histogram,
+    topValues,
+    numberSummary,
+    sampledValues,
+    sampledDocuments,
+    totalDocuments,
+  } = state;
 
   let histogramDefault = !!state.histogram;
   const fromDateParsed = DateMath.parse(fromDate);
@@ -344,6 +357,27 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
           element: messageNoAnalysis,
         })
       : messageNoAnalysis;
+  }
+
+  if (canProvideNumberSummaryForField(field) && isNumberSummaryValid(numberSummary)) {
+    title = (
+      <EuiTitle size="xxxs">
+        <h6>
+          {i18n.translate('unifiedFieldList.fieldStats.numberSummary.summaryTableTitle', {
+            defaultMessage: 'Summary',
+          })}
+        </h6>
+      </EuiTitle>
+    );
+
+    return combineWithTitleAndFooter(
+      <FieldNumberSummary
+        dataView={dataView}
+        field={field}
+        numberSummary={numberSummary}
+        data-test-subj={dataTestSubject}
+      />
+    );
   }
 
   if (

@@ -17,6 +17,7 @@ import type {
   VersionedRoute,
   VersionedRouteConfig,
   IKibanaResponse,
+  RouteConfigOptions,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
@@ -28,7 +29,7 @@ import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
 
-type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
+type Options = AddVersionOpts<unknown, unknown, unknown>;
 
 // This validation is a pass-through so that we can apply our version-specific validation later
 export const passThroughValidation = {
@@ -72,10 +73,17 @@ export class CoreVersionedRoute implements VersionedRoute {
       {
         path: this.path,
         validate: passThroughValidation,
-        options: this.options,
+        options: this.getRouteConfigOptions(),
       },
       this.requestHandler
     );
+  }
+
+  private getRouteConfigOptions(): RouteConfigOptions<Method> {
+    return {
+      access: this.options.access,
+      ...this.options.options,
+    };
   }
 
   /** This method assumes that one or more versions handlers are registered  */

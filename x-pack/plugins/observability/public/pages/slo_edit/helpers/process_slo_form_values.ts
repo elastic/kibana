@@ -19,12 +19,14 @@ export function transformSloResponseToCreateSloInput(
     ...omit(values, ['id', 'revision', 'createdAt', 'updatedAt', 'summary', 'enabled']),
     objective: {
       target: values.objective.target * 100,
-      ...(values.objective.timesliceTarget && {
-        timesliceTarget: values.objective.timesliceTarget * 100,
-      }),
-      ...(values.objective.timesliceWindow && {
-        timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
-      }),
+      ...(values.budgetingMethod === 'timeslices' &&
+        values.objective.timesliceTarget && {
+          timesliceTarget: values.objective.timesliceTarget * 100,
+        }),
+      ...(values.budgetingMethod === 'timeslices' &&
+        values.objective.timesliceWindow && {
+          timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
+        }),
     },
   };
 }
@@ -34,12 +36,14 @@ export function transformValuesToCreateSLOInput(values: CreateSLOInput): CreateS
     ...values,
     objective: {
       target: values.objective.target / 100,
-      ...(values.objective.timesliceTarget && {
-        timesliceTarget: values.objective.timesliceTarget / 100,
-      }),
-      ...(values.objective.timesliceWindow && {
-        timesliceWindow: `${values.objective.timesliceWindow}m`,
-      }),
+      ...(values.budgetingMethod === 'timeslices' &&
+        values.objective.timesliceTarget && {
+          timesliceTarget: values.objective.timesliceTarget / 100,
+        }),
+      ...(values.budgetingMethod === 'timeslices' &&
+        values.objective.timesliceWindow && {
+          timesliceWindow: `${values.objective.timesliceWindow}m`,
+        }),
     },
   };
 }
@@ -49,12 +53,14 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOInput): UpdateS
     ...values,
     objective: {
       target: values.objective.target / 100,
-      ...(values.objective.timesliceTarget && {
-        timesliceTarget: values.objective.timesliceTarget / 100,
-      }),
-      ...(values.objective.timesliceWindow && {
-        timesliceWindow: `${values.objective.timesliceWindow}m`,
-      }),
+      ...(values.budgetingMethod === 'timeslices' &&
+        values.objective.timesliceTarget && {
+          timesliceTarget: values.objective.timesliceTarget / 100,
+        }),
+      ...(values.budgetingMethod === 'timeslices' &&
+        values.objective.timesliceWindow && {
+          timesliceWindow: `${values.objective.timesliceWindow}m`,
+        }),
     },
   };
 }

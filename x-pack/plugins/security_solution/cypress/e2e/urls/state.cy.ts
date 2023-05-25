@@ -286,7 +286,7 @@ describe('url state', () => {
     populateTimeline();
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
-
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.wait('@timeline').then(({ response }) => {
       addNameToTimeline(getTimeline().title);
       closeTimeline();

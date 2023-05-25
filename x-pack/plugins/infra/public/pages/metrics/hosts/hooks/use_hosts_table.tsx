@@ -21,7 +21,7 @@ import {
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
 import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
-import { Sorting, useHostsTableProperties } from './use_hosts_table_url_state';
+import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
 
@@ -166,7 +166,7 @@ const toggleDialogActionLabel = i18n.translate(
 export const useHostsTable = () => {
   const { hostNodes } = useHostsViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
-  const [{ pagination, sorting }, setProperties] = useHostsTableProperties();
+  const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();

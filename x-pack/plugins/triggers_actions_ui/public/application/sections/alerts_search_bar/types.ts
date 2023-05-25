@@ -12,6 +12,7 @@ export type QueryLanguageType = 'lucene' | 'kuery';
 
 export interface AlertsSearchBarProps {
   appName: string;
+  disableQueryLanguageSwitcher?: boolean;
   featureIds: ValidFeatureId[];
   rangeFrom?: string;
   rangeTo?: string;

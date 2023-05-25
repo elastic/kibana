@@ -52,7 +52,7 @@ export interface RiskScoreOverTimeProps {
 
 const RISKY_THRESHOLD = 70;
 const DEFAULT_CHART_HEIGHT = 250;
-
+const CHART_HEIGHT = 180;
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
@@ -135,7 +135,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                   getLensAttributes={getRiskScoreOverTimeAreaAttributes}
                   stackByField={riskEntity}
                   id={`${queryId}-embeddable`}
-                  height="180px"
+                  height={CHART_HEIGHT}
                   extraOptions={{ spaceId }}
                 />
               ) : (

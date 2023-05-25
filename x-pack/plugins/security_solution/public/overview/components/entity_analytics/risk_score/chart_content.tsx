@@ -17,6 +17,7 @@ import { generateSeverityFilter } from '../../../../explore/hosts/store/helpers'
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { TOTAL_LABEL } from '../common/translations';
 
+const CHART_HEIGHT = 180;
 const ChartContentComponent = ({
   dataExists,
   kpiQueryId,
@@ -52,7 +53,7 @@ const ChartContentComponent = ({
           donutTextWrapperClassName="risk-score"
           extraOptions={extraOptions}
           getLensAttributes={getRiskScoreDonutAttributes}
-          height="180px"
+          height={CHART_HEIGHT}
           id={`${kpiQueryId}-donut`}
           isDonut={true}
           label={TOTAL_LABEL}

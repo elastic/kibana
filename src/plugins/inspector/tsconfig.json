@@ -12,6 +12,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/monaco",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",

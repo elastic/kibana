@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
-
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
+import { ServerlessConfig } from './config';
 import {
   ServerlessPluginSetup,
-  ServerlessPluginStart,
   ServerlessPluginSetupDependencies,
+  ServerlessPluginStart,
   ServerlessPluginStartDependencies,
 } from './types';
-import { ServerlessConfig } from './config';
-import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 
 export class ServerlessPlugin
   implements
@@ -62,7 +61,13 @@ export class ServerlessPlugin
     core.chrome.setChromeStyle('project');
     management.setIsSidebarEnabled(false);
 
-    return {};
+    return {
+      // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
+      setSideNavComponent: (sideNavigationComponent) =>
+        (core.chrome as InternalChromeStart).project.setSideNavComponent(sideNavigationComponent),
+      setNavigation: (projectNavigation) =>
+        (core.chrome as InternalChromeStart).project.setNavigation(projectNavigation),
+    };
   }
 
   public stop() {}

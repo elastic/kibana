@@ -36,7 +36,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
     modalWidth: 675,
     iconClass: 'logoSlack',
     selectMessage: i18n.translate('xpack.stackConnectors.components.slack.selectMessageText', {
-      defaultMessage: 'Send a message to a Slack channel or user.',
+      defaultMessage: 'Send messages to Slack channels.',
     }),
     actionTypeTitle: i18n.translate('xpack.stackConnectors.components.slack.connectorTypeTitle', {
       defaultMessage: 'Send to Slack',

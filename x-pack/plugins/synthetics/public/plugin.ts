@@ -309,6 +309,7 @@ function registerUptimeRoutesWithNavigation(
                   path: OVERVIEW_ROUTE,
                   matchFullPath: false,
                   ignoreTrailingSlash: true,
+                  isNewFeature: true,
                 },
               ],
             },

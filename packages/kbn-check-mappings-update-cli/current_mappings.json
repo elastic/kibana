@@ -937,14 +937,14 @@
       "description": {
         "type": "text"
       },
-      "kibanaSavedObjectMeta": {
-        "properties": {}
-      },
       "title": {
         "type": "text"
       },
       "version": {
         "type": "integer"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {}
       }
     }
   },
@@ -1555,6 +1555,9 @@
             "type": "boolean"
           }
         }
+      },
+      "is_protected": {
+        "type": "boolean"
       }
     }
   },
@@ -1606,6 +1609,9 @@
       "shipper": {
         "dynamic": false,
         "properties": {}
+      },
+      "allow_edit": {
+        "enabled": false
       }
     }
   },
@@ -1652,6 +1658,13 @@
       "inputs": {
         "dynamic": false,
         "properties": {}
+      },
+      "secret_references": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
       },
       "revision": {
         "type": "integer"
@@ -1864,6 +1877,20 @@
     "dynamic": false,
     "properties": {}
   },
+  "fleet-uninstall-tokens": {
+    "dynamic": false,
+    "properties": {
+      "created_at": {
+        "type": "date"
+      },
+      "policy_id": {
+        "type": "keyword"
+      },
+      "token_plain": {
+        "type": "keyword"
+      }
+    }
+  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
@@ -2067,6 +2094,18 @@
       },
       "tags": {
         "type": "keyword"
+      }
+    }
+  },
+  "observability-onboarding-state": {
+    "properties": {
+      "state": {
+        "type": "object",
+        "dynamic": false
+      },
+      "progress": {
+        "type": "object",
+        "dynamic": false
       }
     }
   },

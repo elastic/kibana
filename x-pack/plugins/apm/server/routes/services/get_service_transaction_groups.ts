@@ -30,13 +30,6 @@ import {
 
 const txGroupsDroppedBucketName = '_other';
 
-export type ServiceOverviewTransactionGroupSortField =
-  | 'name'
-  | 'latency'
-  | 'throughput'
-  | 'errorRate'
-  | 'impact';
-
 export interface ServiceTransactionGroupsResponse {
   transactionGroups: Array<{
     transactionType: string;
@@ -61,6 +54,7 @@ export async function getServiceTransactionGroups({
   end,
   documentType,
   rollupInterval,
+  useDurationSummary,
 }: {
   environment: string;
   kuery: string;
@@ -72,8 +66,12 @@ export async function getServiceTransactionGroups({
   end: number;
   documentType: ApmTransactionDocumentType;
   rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
 }): Promise<ServiceTransactionGroupsResponse> {
-  const field = getDurationFieldForTransactions(documentType);
+  const field = getDurationFieldForTransactions(
+    documentType,
+    useDurationSummary
+  );
 
   const response = await apmEventClient.search(
     'get_service_transaction_groups',

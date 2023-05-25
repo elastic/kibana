@@ -131,6 +131,7 @@ const LogsRatioChart: React.FC<ChartProps> = ({
   const barSeries = useMemo(() => {
     return series.flatMap(({ points, id }) => points.map((point) => ({ ...point, groupBy: id })));
   }, [series]);
+
   if (isLoading) {
     return <LoadingState />;
   } else if (hasError) {

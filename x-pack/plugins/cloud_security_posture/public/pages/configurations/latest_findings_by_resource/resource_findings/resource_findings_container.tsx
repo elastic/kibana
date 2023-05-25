@@ -98,6 +98,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const {
     pageIndex,
     sort,
+    query,
     queryError,
     pageSize,
     setTableOptions,
@@ -117,6 +118,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
     sort,
     resourceId: decodedResourceId,
     enabled: !queryError,
+    query,
   });
 
   const error = resourceFindings.error || queryError;

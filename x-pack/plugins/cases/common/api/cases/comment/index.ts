@@ -7,13 +7,13 @@
 
 import * as rt from 'io-ts';
 import { jsonValueRt } from '../../runtime_types';
-import { SavedObjectFindOptionsRt } from '../../saved_object';
+import { NumberFromString } from '../../saved_object';
 
 import { UserRt } from '../../user';
 
 export * from './files';
 
-export const CommentAttributesBasicRt = rt.type({
+export const CommentAttributesBasicRt = rt.strict({
   created_at: rt.string,
   created_by: UserRt,
   owner: rt.string,
@@ -36,7 +36,7 @@ export enum IsolateHostActionType {
   unisolate = 'unisolate',
 }
 
-export const ContextTypeUserRt = rt.type({
+export const ContextTypeUserRt = rt.strict({
   comment: rt.string,
   type: rt.literal(CommentType.user),
   owner: rt.string,
@@ -47,23 +47,23 @@ export const ContextTypeUserRt = rt.type({
  * represents of an alert after it has been transformed. A generated alert will be transformed by the connector so that
  * it matches this structure. User attached alerts do not need to be transformed.
  */
-export const AlertCommentRequestRt = rt.type({
+export const AlertCommentRequestRt = rt.strict({
   type: rt.literal(CommentType.alert),
   alertId: rt.union([rt.array(rt.string), rt.string]),
   index: rt.union([rt.array(rt.string), rt.string]),
-  rule: rt.type({
+  rule: rt.strict({
     id: rt.union([rt.string, rt.null]),
     name: rt.union([rt.string, rt.null]),
   }),
   owner: rt.string,
 });
 
-export const ActionsCommentRequestRt = rt.type({
+export const ActionsCommentRequestRt = rt.strict({
   type: rt.literal(CommentType.actions),
   comment: rt.string,
-  actions: rt.type({
+  actions: rt.strict({
     targets: rt.array(
-      rt.type({
+      rt.strict({
         hostname: rt.string,
         endpointId: rt.string,
       })
@@ -78,37 +78,37 @@ export enum ExternalReferenceStorageType {
   elasticSearchDoc = 'elasticSearchDoc',
 }
 
-const ExternalReferenceStorageNoSORt = rt.type({
+const ExternalReferenceStorageNoSORt = rt.strict({
   type: rt.literal(ExternalReferenceStorageType.elasticSearchDoc),
 });
 
-const ExternalReferenceStorageSORt = rt.type({
+const ExternalReferenceStorageSORt = rt.strict({
   type: rt.literal(ExternalReferenceStorageType.savedObject),
   soType: rt.string,
 });
 
-export const ExternalReferenceBaseRt = rt.type({
+export const ExternalReferenceBaseRt = rt.strict({
   externalReferenceAttachmentTypeId: rt.string,
   externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
   type: rt.literal(CommentType.externalReference),
   owner: rt.string,
 });
 
-export const ExternalReferenceNoSORt = rt.type({
-  ...ExternalReferenceBaseRt.props,
+export const ExternalReferenceNoSORt = rt.strict({
+  ...ExternalReferenceBaseRt.type.props,
   externalReferenceId: rt.string,
   externalReferenceStorage: ExternalReferenceStorageNoSORt,
 });
 
-export const ExternalReferenceSORt = rt.type({
-  ...ExternalReferenceBaseRt.props,
+export const ExternalReferenceSORt = rt.strict({
+  ...ExternalReferenceBaseRt.type.props,
   externalReferenceId: rt.string,
   externalReferenceStorage: ExternalReferenceStorageSORt,
 });
 
 // externalReferenceId is missing.
-export const ExternalReferenceSOWithoutRefsRt = rt.type({
-  ...ExternalReferenceBaseRt.props,
+export const ExternalReferenceSOWithoutRefsRt = rt.strict({
+  ...ExternalReferenceBaseRt.type.props,
   externalReferenceStorage: ExternalReferenceStorageSORt,
 });
 
@@ -118,7 +118,7 @@ export const ExternalReferenceWithoutRefsRt = rt.union([
   ExternalReferenceSOWithoutRefsRt,
 ]);
 
-export const PersistableStateAttachmentRt = rt.type({
+export const PersistableStateAttachmentRt = rt.strict({
   type: rt.literal(CommentType.persistableState),
   owner: rt.string,
   persistableStateAttachmentTypeId: rt.string,
@@ -187,7 +187,7 @@ export const CommentRequestRt = rt.union([
 
 export const CommentRt = rt.intersection([
   CommentAttributesRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
@@ -195,7 +195,7 @@ export const CommentRt = rt.intersection([
 
 export const CommentResponseTypeUserRt = rt.intersection([
   AttributesTypeUserRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
@@ -203,7 +203,7 @@ export const CommentResponseTypeUserRt = rt.intersection([
 
 export const CommentResponseTypeAlertsRt = rt.intersection([
   AttributesTypeAlertsRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
@@ -211,7 +211,7 @@ export const CommentResponseTypeAlertsRt = rt.intersection([
 
 export const CommentResponseTypeActionsRt = rt.intersection([
   AttributesTypeActionsRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
@@ -219,7 +219,7 @@ export const CommentResponseTypeActionsRt = rt.intersection([
 
 export const CommentResponseTypeExternalReferenceRt = rt.intersection([
   AttributesTypeExternalReferenceRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
@@ -227,7 +227,7 @@ export const CommentResponseTypeExternalReferenceRt = rt.intersection([
 
 export const CommentResponseTypePersistableStateRt = rt.intersection([
   AttributesTypePersistableStateRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
@@ -243,7 +243,7 @@ export const CommentPatchRequestRt = rt.intersection([
    * persistableStateAttachmentState on a patch.
    */
   CommentRequestRt,
-  rt.type({ id: rt.string, version: rt.string }),
+  rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
 /**
@@ -254,17 +254,17 @@ export const CommentPatchRequestRt = rt.intersection([
  */
 export const CommentPatchAttributesRt = rt.intersection([
   rt.union([
-    rt.partial(ContextTypeUserRt.props),
-    rt.partial(AlertCommentRequestRt.props),
-    rt.partial(ActionsCommentRequestRt.props),
-    rt.partial(ExternalReferenceNoSORt.props),
-    rt.partial(ExternalReferenceSORt.props),
-    rt.partial(PersistableStateAttachmentRt.props),
+    rt.exact(rt.partial(ContextTypeUserRt.type.props)),
+    rt.exact(rt.partial(AlertCommentRequestRt.type.props)),
+    rt.exact(rt.partial(ActionsCommentRequestRt.type.props)),
+    rt.exact(rt.partial(ExternalReferenceNoSORt.type.props)),
+    rt.exact(rt.partial(ExternalReferenceSORt.type.props)),
+    rt.exact(rt.partial(PersistableStateAttachmentRt.type.props)),
   ]),
-  rt.partial(CommentAttributesBasicRt.props),
+  rt.exact(rt.partial(CommentAttributesBasicRt.type.props)),
 ]);
 
-export const CommentsFindResponseRt = rt.type({
+export const CommentsFindResponseRt = rt.strict({
   comments: rt.array(CommentRt),
   page: rt.number,
   per_page: rt.number,
@@ -273,20 +273,40 @@ export const CommentsFindResponseRt = rt.type({
 
 export const CommentsRt = rt.array(CommentRt);
 
-export const FindQueryParamsRt = rt.partial({
-  ...SavedObjectFindOptionsRt.props,
-});
+export const FindCommentsQueryParamsRt = rt.exact(
+  rt.partial({
+    /**
+     * The page of objects to return
+     */
+    page: rt.union([rt.number, NumberFromString]),
+    /**
+     * The number of objects to return for a page
+     */
+    perPage: rt.union([rt.number, NumberFromString]),
+    /**
+     * Order to sort the response
+     */
+    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+  })
+);
+
+export const FindCommentsArgsRt = rt.intersection([
+  rt.strict({
+    caseID: rt.string,
+  }),
+  rt.strict({ queryParams: rt.union([FindCommentsQueryParamsRt, rt.undefined]) }),
+]);
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
-export const BulkGetAttachmentsRequestRt = rt.type({
+export const BulkGetAttachmentsRequestRt = rt.strict({
   ids: rt.array(rt.string),
 });
 
-export const BulkGetAttachmentsResponseRt = rt.type({
+export const BulkGetAttachmentsResponseRt = rt.strict({
   attachments: CommentsRt,
   errors: rt.array(
-    rt.type({
+    rt.strict({
       error: rt.string,
       message: rt.string,
       status: rt.union([rt.undefined, rt.number]),
@@ -295,7 +315,7 @@ export const BulkGetAttachmentsResponseRt = rt.type({
   ),
 });
 
-export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
+export type FindCommentsQueryParams = rt.TypeOf<typeof FindCommentsQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;

@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { configArray } from '../../constants';
+import { configArray, dataViewConfig } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -288,6 +288,60 @@ export default function ({ getService }: FtrProviderContext) {
             );
           });
         });
+      });
+    });
+
+    describe('spaces', () => {
+      const kibanaServer = getService('kibanaServer');
+      const fooNamespace = 'foo-namespace';
+
+      before(async () => {
+        await kibanaServer.spaces.create({
+          id: fooNamespace,
+          name: fooNamespace,
+        });
+      });
+
+      after(async () => {
+        await kibanaServer.spaces.delete(fooNamespace);
+      });
+
+      it('can specify optional namespaces array when creating a data view', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const namespaces = ['default', fooNamespace];
+        const createResponse = await supertest.post(dataViewConfig.path).send({
+          [dataViewConfig.serviceKey]: {
+            title,
+            namespaces,
+          },
+        });
+
+        expect(createResponse.status).to.be(200);
+        expect(createResponse.body[dataViewConfig.serviceKey].namespaces).to.eql(namespaces);
+
+        const getResponse = await supertest.get(dataViewConfig.basePath);
+        const dataView = getResponse.body.data_view.find((dv: any) => dv.title === title);
+
+        expect(dataView.namespaces).to.eql(namespaces);
+      });
+
+      it('sets namespaces to the current space if namespaces array is not specified', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await supertest
+          .post(`/s/${fooNamespace}${dataViewConfig.path}`)
+          .send({
+            [dataViewConfig.serviceKey]: {
+              title,
+            },
+          });
+
+        expect(createResponse.status).to.be(200);
+        expect(createResponse.body[dataViewConfig.serviceKey].namespaces).to.eql([fooNamespace]);
+
+        const getResponse = await supertest.get(`/s/${fooNamespace}${dataViewConfig.basePath}`);
+        const dataView = getResponse.body.data_view.find((dv: any) => dv.title === title);
+
+        expect(dataView.namespaces).to.eql([fooNamespace]);
       });
     });
   });

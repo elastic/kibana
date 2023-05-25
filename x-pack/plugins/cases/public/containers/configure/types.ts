@@ -12,9 +12,9 @@ import type {
   ActionType,
   CaseConnector,
   CaseField,
-  CasesConfigure,
   ClosureType,
   ThirdPartyField,
+  ConfigurationAttributes,
 } from '../../../common/api';
 
 export type {
@@ -36,7 +36,7 @@ export interface CaseConnectorMapping {
 export interface CaseConfigure {
   id: string;
   closureType: ClosureType;
-  connector: CasesConfigure['connector'];
+  connector: ConfigurationAttributes['connector'];
   createdAt: string;
   createdBy: CaseUser;
   error: string | null;

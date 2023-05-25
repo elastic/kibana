@@ -8,6 +8,8 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+
+import type { ChromeNavLink, ChromeProjectNavigation } from '@kbn/core-chrome-browser';
 import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 
 /**
@@ -17,9 +19,12 @@ import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 export interface NavigationServices {
   activeNavItemId?: string;
   basePath: BasePathService;
-  loadingCount: number;
+  loadingCount$: Observable<number>;
+  recentlyAccessed$: Observable<RecentItem[]>;
+  navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
+  onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
 }
 
 /**
@@ -32,11 +37,17 @@ export interface NavigationKibanaDependencies {
     application: { navigateToUrl: NavigateToUrlFn };
     chrome: {
       recentlyAccessed: { get$: () => Observable<RecentItem[]> };
+      navLinks: {
+        getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
+      };
     };
     http: {
       basePath: BasePathService;
       getLoadingCount$(): Observable<number>;
     };
+  };
+  serverless: {
+    setNavigation: (projectNavigation: ChromeProjectNavigation) => void;
   };
 }
 
@@ -111,6 +122,10 @@ export interface ChromeNavigation {
    * above.
    */
   platformConfig?: Partial<PlatformConfigSet>;
+  /**
+   * Filter function to allow consumer to remove items from the recently accessed section
+   */
+  recentlyAccessedFilter?: (items: RecentItem[]) => RecentItem[];
 }
 
 /**
@@ -119,7 +134,7 @@ export interface ChromeNavigation {
  * @internal
  */
 export interface ChromeNavigationViewModel
-  extends Pick<ChromeNavigation, 'linkToCloud' | 'platformConfig'> {
+  extends Pick<ChromeNavigation, 'linkToCloud' | 'platformConfig' | 'recentlyAccessedFilter'> {
   /**
    * Target for the logo icon
    */

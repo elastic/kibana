@@ -34,7 +34,7 @@ export {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableCriticalPath,
-  profilingElasticsearchPlugin,
+  syntheticsThrottlingEnabled,
 } from './ui_settings_keys';
 
 export {
@@ -65,6 +65,7 @@ export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
+export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 
 export {
   NETWORK_TIMINGS_FIELDS,

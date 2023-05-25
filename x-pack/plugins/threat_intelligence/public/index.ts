@@ -7,15 +7,15 @@
 
 import { ThreatIntelligencePlugin } from './plugin';
 
-export { THREAT_INTELLIGENCE_BASE_PATH } from './common/navigation/constants';
+export { THREAT_INTELLIGENCE_BASE_PATH } from './constants/navigation';
 
-export type { TIPageId } from './common/navigation/types';
+export type { TIPageId } from './types';
 
 export {
   getSecuritySolutionDeepLink,
   getSecuritySolutionLink,
   getSecuritySolutionNavTab,
-} from './common/navigation/security_solution_links';
+} from './utils/security_solution_links';
 
 export function plugin() {
   return new ThreatIntelligencePlugin();

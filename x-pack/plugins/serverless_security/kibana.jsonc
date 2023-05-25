@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/serverless-security",
-  "owner": "@elastic/appex-sharedux",
+  "owner": "@elastic/security-solution",
   "description": "Serverless customizations for security.",
   "plugin": {
     "id": "serverlessSecurity",

@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
     });
 
-    afterEach(async () => {
+    after(async () => {
       await PageObjects.lens.clickField('runtimefield');
       await PageObjects.lens.removeField('runtimefield');
       await fieldEditor.confirmDelete();
@@ -60,10 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display static lookup formatter correctly', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.clickAddField();
-        await fieldEditor.setName('runtimefield');
-        await fieldEditor.enableValue();
-        await fieldEditor.typeScript("emit(doc['geo.dest'].value)");
+        await PageObjects.lens.clickField('runtimefield');
+        await PageObjects.lens.editField('runtimefield');
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.STATIC_LOOKUP);
         await fieldEditor.setStaticLookupFormat('CN', 'China');
         await fieldEditor.save();
@@ -76,10 +74,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display color formatter correctly', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.clickAddField();
-        await fieldEditor.setName('runtimefield');
-        await fieldEditor.enableValue();
-        await fieldEditor.typeScript("emit(doc['geo.dest'].value)");
+        await PageObjects.lens.clickField('runtimefield');
+        await PageObjects.lens.editField('runtimefield');
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.COLOR);
         await fieldEditor.setColorFormat('CN', '#ffffff', '#ff0000');
         await fieldEditor.save();
@@ -94,10 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display string formatter correctly', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.clickAddField();
-        await fieldEditor.setName('runtimefield');
-        await fieldEditor.enableValue();
-        await fieldEditor.typeScript("emit(doc['geo.dest'].value)");
+        await PageObjects.lens.clickField('runtimefield');
+        await PageObjects.lens.editField('runtimefield');
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.STRING);
         await fieldEditor.setStringFormat('lower');
         await fieldEditor.save();
@@ -110,9 +104,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display truncate string formatter correctly', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.clickAddField();
-        await fieldEditor.setName('runtimefield');
-        await fieldEditor.enableValue();
+        await PageObjects.lens.clickField('runtimefield');
+        await PageObjects.lens.editField('runtimefield');
+        await fieldEditor.clearScript();
         await fieldEditor.typeScript("emit(doc['links.raw'].value)");
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.TRUNCATE);
         await fieldEditor.setTruncateFormatLength('3');

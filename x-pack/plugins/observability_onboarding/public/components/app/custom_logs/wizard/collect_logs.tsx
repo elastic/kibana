@@ -42,7 +42,21 @@ export function CollectLogs() {
   }
 
   return (
-    <StepPanel title="">
+    <StepPanel
+      title=""
+      panelFooter={
+        <StepPanelFooter
+          items={[
+            <EuiButton color="ghost" fill onClick={onBack}>
+              Back
+            </EuiButton>,
+            <EuiButton color="primary" fill onClick={onContinue}>
+              Continue
+            </EuiButton>,
+          ]}
+        />
+      }
+    >
       <StepPanelContent>
         <EuiText color="subdued">
           <p>
@@ -90,16 +104,6 @@ export function CollectLogs() {
           </EuiFlexItem>
         </EuiFlexGroup>
       </StepPanelContent>
-      <StepPanelFooter
-        items={[
-          <EuiButton color="ghost" fill onClick={onBack}>
-            Back
-          </EuiButton>,
-          <EuiButton color="primary" fill onClick={onContinue}>
-            Continue
-          </EuiButton>,
-        ]}
-      />
     </StepPanel>
   );
 }

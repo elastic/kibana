@@ -52,7 +52,8 @@ const ruleType: NormalizedRuleType<
   AlertInstanceState,
   AlertInstanceContext,
   'default' | 'other-group',
-  'recovered'
+  'recovered',
+  {}
 > = {
   id: 'test',
   name: 'Test',
@@ -140,6 +141,7 @@ const generateAlert = ({
   scheduleActions = true,
   throttledActions = {},
   lastScheduledActionsGroup = 'default',
+  maintenanceWindowIds,
 }: {
   id: number;
   group?: ActiveActionGroup | 'recovered';
@@ -148,12 +150,14 @@ const generateAlert = ({
   scheduleActions?: boolean;
   throttledActions?: ThrottledActions;
   lastScheduledActionsGroup?: string;
+  maintenanceWindowIds?: string[];
 }) => {
   const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
     String(id),
     {
       state: state || { test: true },
       meta: {
+        maintenanceWindowIds,
         lastScheduledActions: {
           date: new Date(),
           group: lastScheduledActionsGroup,
@@ -1496,6 +1500,91 @@ describe('Execution Handler', () => {
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
       '(2) alerts have been filtered out for: testActionTypeId:111'
+    );
+  });
+
+  test('does not schedule summary actions when there is an active maintenance window', async () => {
+    getSummarizedAlertsMock.mockResolvedValue({
+      new: {
+        count: 2,
+        data: [
+          { ...mockAAD, kibana: { alert: { uuid: '1' } } },
+          { ...mockAAD, kibana: { alert: { uuid: '2' } } },
+        ],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
+          actions: [
+            {
+              uuid: '1',
+              id: '1',
+              group: null,
+              actionTypeId: 'testActionTypeId',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert',
+                throttle: null,
+              },
+              params: {
+                message:
+                  'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
+              },
+            },
+          ],
+        },
+        maintenanceWindowIds: ['test-id-active'],
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(2);
+
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      1,
+      '(1) alert has been filtered out for: testActionTypeId:1'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      2,
+      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-active.'
+    );
+  });
+
+  test('does not schedule actions for alerts with maintenance window IDs', async () => {
+    const executionHandler = new ExecutionHandler(generateExecutionParams());
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
+
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-1.'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      2,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-2.'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      3,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-3.'
     );
   });
 
