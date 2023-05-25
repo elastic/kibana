@@ -137,7 +137,7 @@ describe('ZDT upgrades - switching from v2 algorithm', () => {
       });
 
       await expect(runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to complete saved object migrations for the [.kibana] index: Index .kibana_8.7.0_001 is using an incompatible version of the v2 algorithm."`
+        `"Unable to complete saved object migrations for the [.kibana] index: Index .kibana_8.7.0_001 is using an incompatible version of the v2 algorithm"`
       );
 
       const records = await parseLogFile(logFilePath);

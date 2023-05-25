@@ -94,7 +94,7 @@ export const init: ModelStage<
       ...state,
       logs,
       controlState: 'FATAL',
-      reason: `Index ${currentIndex} is using an incompatible version of the v2 algorithm.`,
+      reason: `Index ${currentIndex} is using an incompatible version of the v2 algorithm`,
     };
   }
   if (currentAlgo === 'unknown') {
@@ -102,7 +102,7 @@ export const init: ModelStage<
       ...state,
       logs,
       controlState: 'FATAL',
-      reason: `Cannot identify algorithm used for index ${currentIndex}.`,
+      reason: `Cannot identify algorithm used for index ${currentIndex}`,
     };
   }
 
