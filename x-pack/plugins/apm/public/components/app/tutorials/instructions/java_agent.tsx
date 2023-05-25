@@ -6,17 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
-import { INSTRUCTION_VARIANT } from '../instruction_variants';
-import { AgentInstructionProps } from '../tutorial_typings';
+import {
+  INSTRUCTION_VARIANT,
+  AgentInstructions,
+} from '../instruction_variants';
 
 export const createJavaAgentInstructions = (
-  commonOptions: AgentInstructionProps
+  commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, managedServiceUrl } = commonOptions;
+  const {
+    baseUrl,
+    apmServerUrl,
+    createAgentKey,
+    apiKeyAndId,
+    displayCreateApiKeyAction,
+  } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.java.download.title', {
@@ -58,11 +66,25 @@ export const createJavaAgentInstructions = (
             )}
           </EuiMarkdownFormat>
           <EuiSpacer />
+
+          {displayCreateApiKeyAction && (
+            <>
+              <EuiButton
+                data-test-subj="createApiKeyAndId"
+                fill
+                onClick={createAgentKey}
+              >
+                {i18n.translate('xpack.apm.tutorial.apiKey.create', {
+                  defaultMessage: 'Create API Key',
+                })}
+              </EuiButton>
+              <EuiSpacer />
+            </>
+          )}
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.JAVA}
-            apmServerUrl={managedServiceUrl}
-            secretToken="tug"
-            apiKey="tugKey"
+            apmServerUrl={apmServerUrl}
+            apiKey={apiKeyAndId?.apiKey}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

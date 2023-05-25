@@ -22,7 +22,7 @@ export function AgentConfigInstructions({
   apiKey,
 }: {
   variantId: string;
-  apmServerUrl?: string;
+  apmServerUrl: string;
   secretToken?: string;
   apiKey?: string;
 }) {

@@ -5,17 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
+import { ApiKeyAndId, API_KEY_INSTRUCTION } from './api_keys';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { Introduction } from './introduction';
 import { InstructionsSet } from './instructions_set';
 import { serverlessInstructions } from './serverless_instructions';
 import { Footer } from './footer';
+import { PrivilegeType } from '../../../../common/privilege_type';
+import { InstructionSet } from './instruction_variants';
 
 export function Tutorials() {
+  const [instructions, setInstructions] = useState<InstructionSet>();
+  const [apiKeyAndId, setApiKeyAndId] = useState<ApiKeyAndId>({
+    apiKey: API_KEY_INSTRUCTION,
+    error: false,
+  });
   const { services } = useKibana<ApmPluginStartDeps>();
   const { config } = useApmPluginContext();
   const { docLinks, observabilityShared } = services;
@@ -24,20 +33,56 @@ export function Tutorials() {
     'https://www.elastic.co/guide/en/kibana/current/index.html';
 
   const baseUrl = docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
+  const createAgentKey = async () => {
+    try {
+      const privileges: PrivilegeType[] = [PrivilegeType.EVENT];
 
-  const commonOptions = {
-    baseUrl,
-    config,
+      const { agentKey } = await callApmApi('POST /api/apm/agent_keys', {
+        signal: null,
+        params: {
+          body: {
+            name: `onboarding-${(Math.random() + 1).toString(36).substring(7)}`,
+            privileges,
+          },
+        },
+      });
+
+      setApiKeyAndId({
+        apiKey: agentKey.api_key,
+        encodedKey: agentKey.encoded,
+        id: agentKey.id,
+        error: false,
+      });
+    } catch (error) {
+      setApiKeyAndId({
+        apiKey: API_KEY_INSTRUCTION,
+        error: true,
+        errorMessage: error.body?.message || error.message,
+      });
+    }
   };
 
-  const serverless = serverlessInstructions(commonOptions);
+  useEffect(() => {
+    // Here setInstructions will be called based on the condition for serverless, cloud or onPrem
+    // right now we will only call the ServerlessInstruction directly
+    setInstructions(
+      serverlessInstructions(
+        {
+          baseUrl,
+          config,
+        },
+        apiKeyAndId,
+        createAgentKey
+      )
+    );
+  }, [apiKeyAndId, baseUrl, config]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (
     <ObservabilityPageTemplate>
       <Introduction isBeta={false} guideLink={guideLink} />
       <EuiSpacer />
-      <InstructionsSet instructions={serverless} />
+      {instructions && <InstructionsSet instructions={instructions} />}
       <Footer />
     </ObservabilityPageTemplate>
   );

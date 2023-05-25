@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { ApiKeyAndId } from './api_keys';
+
 export enum INSTRUCTION_VARIANT {
   NODE = 'node',
   DJANGO = 'django',
@@ -16,6 +19,16 @@ export enum INSTRUCTION_VARIANT {
   DOTNET = 'dotnet',
   PHP = 'php',
   OPEN_TELEMETRY = 'openTelemetry',
+}
+
+export interface InstructionVariant {
+  id: INSTRUCTION_VARIANT;
+  instructions: EuiStepProps[];
+}
+
+export interface InstructionSet {
+  title: string;
+  instructionVariants: InstructionVariant[];
 }
 
 const DISPLAY_MAP = {
@@ -33,4 +46,13 @@ const DISPLAY_MAP = {
 
 export function getDisplayText(id: INSTRUCTION_VARIANT) {
   return id in DISPLAY_MAP ? DISPLAY_MAP[id] : id;
+}
+
+export interface AgentInstructions {
+  baseUrl: string;
+  apmServerUrl: string;
+  apiKeyAndId?: ApiKeyAndId;
+  secretToken?: string;
+  createAgentKey?: () => void;
+  displayCreateApiKeyAction: boolean;
 }

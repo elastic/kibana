@@ -6,17 +6,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiCodeBlock, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCodeBlock,
+  EuiMarkdownFormat,
+  EuiSpacer,
+} from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
-import { AgentInstructionProps } from '../tutorial_typings';
+
 import { AgentConfigInstructions } from '../agent_config_instructions';
-import { INSTRUCTION_VARIANT } from '../instruction_variants';
+import {
+  INSTRUCTION_VARIANT,
+  AgentInstructions,
+} from '../instruction_variants';
 
 export const createDotNetAgentInstructions = (
-  commonOptions: AgentInstructionProps
+  commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, managedServiceUrl } = commonOptions;
+  const {
+    baseUrl,
+    apmServerUrl,
+    createAgentKey,
+    apiKeyAndId,
+    displayCreateApiKeyAction,
+  } = commonOptions;
   const codeBlock = `public class Startup
 {
   public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -103,11 +117,24 @@ export const createDotNetAgentInstructions = (
       }),
       children: (
         <>
+          {displayCreateApiKeyAction && (
+            <>
+              <EuiButton
+                data-test-subj="createApiKeyAndId"
+                fill
+                onClick={createAgentKey}
+              >
+                {i18n.translate('xpack.apm.tutorial.apiKey.create', {
+                  defaultMessage: 'Create API Key',
+                })}
+              </EuiButton>
+              <EuiSpacer />
+            </>
+          )}
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.DOTNET}
-            apmServerUrl={managedServiceUrl}
-            secretToken="tug"
-            apiKey="tugKey"
+            apmServerUrl={apmServerUrl}
+            apiKey={apiKeyAndId?.apiKey}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButton,
   EuiLink,
   EuiMarkdownFormat,
   EuiSpacer,
@@ -18,12 +19,19 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AgentInstructionProps } from '../tutorial_typings';
+import { ApiKeyAndId } from '../api_keys';
+import { AgentInstructions } from '../instruction_variants';
 
 export const createOpenTelemetryAgentInstructions = (
-  commonOptions: AgentInstructionProps
+  commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, managedServiceUrl } = commonOptions;
+  const {
+    baseUrl,
+    apmServerUrl,
+    createAgentKey,
+    apiKeyAndId,
+    displayCreateApiKeyAction,
+  } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.otel.download.title', {
@@ -60,11 +68,24 @@ export const createOpenTelemetryAgentInstructions = (
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
+          {displayCreateApiKeyAction && (
+            <>
+              <EuiButton
+                data-test-subj="createApiKeyAndId"
+                fill
+                onClick={createAgentKey}
+              >
+                {i18n.translate('xpack.apm.tutorial.apiKey.create', {
+                  defaultMessage: 'Create API Key',
+                })}
+              </EuiButton>
+              <EuiSpacer />
+            </>
+          )}
           <OpenTelemetryInstructions
-            apmServerUrl={managedServiceUrl}
-            secretToken="hello"
-            apiKey="tugAPIKey"
-            apiId="myId"
+            apmServerUrl={apmServerUrl}
+            apiKeyAndId={apiKeyAndId}
+            displayCreateApiKeyAction={displayCreateApiKeyAction}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
@@ -85,14 +106,25 @@ export const createOpenTelemetryAgentInstructions = (
 export function OpenTelemetryInstructions({
   apmServerUrl,
   secretToken,
-  apiKey,
-  apiId,
+  apiKeyAndId,
+  displayCreateApiKeyAction,
 }: {
-  apmServerUrl?: string;
+  apmServerUrl: string;
   secretToken?: string;
-  apiKey?: string;
-  apiId?: string;
+  apiKeyAndId?: ApiKeyAndId;
+  displayCreateApiKeyAction: boolean;
 }) {
+  let authHeaderValue;
+
+  if (secretToken) {
+    authHeaderValue = `Authorization=Bearer ${secretToken}`;
+  } else {
+    authHeaderValue = `${
+      !displayCreateApiKeyAction
+        ? `Authorization=ApiKey ${apiKeyAndId?.encodedKey}`
+        : apiKeyAndId?.apiKey
+    }`;
+  }
   const items = [
     {
       setting: 'OTEL_EXPORTER_OTLP_ENDPOINT',
@@ -100,9 +132,7 @@ export function OpenTelemetryInstructions({
     },
     {
       setting: 'OTEL_EXPORTER_OTLP_HEADERS',
-      value: `"Authorization=${apiKey ? 'ApiKey' : 'Bearer'} ${
-        apiKey ? btoa(apiId + ':' + apiKey) : secretToken
-      }`,
+      value: authHeaderValue,
     },
     {
       setting: 'OTEL_METRICS_EXPORTER',

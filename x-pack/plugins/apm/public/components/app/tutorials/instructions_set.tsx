@@ -14,20 +14,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import { INSTRUCTION_VARIANT, getDisplayText } from './instruction_variants';
-
-interface InstructionVariant {
-  id: INSTRUCTION_VARIANT;
-  instructions: EuiStepProps[];
-}
-
-interface InstructionSetProps {
-  instructions: {
-    title: string;
-    instructionVariants: InstructionVariant[];
-  };
-}
+import {
+  INSTRUCTION_VARIANT,
+  getDisplayText,
+  InstructionVariant,
+  InstructionSet,
+} from './instruction_variants';
 
 interface AgentTab {
   id: INSTRUCTION_VARIANT;
@@ -41,7 +33,11 @@ function getTabs(variants: InstructionVariant[]): AgentTab[] {
   }));
 }
 
-export function InstructionsSet({ instructions }: InstructionSetProps) {
+export function InstructionsSet({
+  instructions,
+}: {
+  instructions: InstructionSet;
+}) {
   const tabs = getTabs(instructions.instructionVariants);
 
   const [selectedTab, setSelectedTab] = useState<string>(tabs[0].id);

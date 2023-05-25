@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ConfigSchema } from '../../..';
-import { INSTRUCTION_VARIANT } from './instruction_variants';
+import { INSTRUCTION_VARIANT, AgentInstructions } from './instruction_variants';
 import {
   createJavaAgentInstructions,
   createNodeAgentInstructions,
@@ -20,18 +20,26 @@ import {
   createPhpAgentInstructions,
   createOpenTelemetryAgentInstructions,
 } from './instructions';
-import { AgentInstructionProps } from './tutorial_typings';
+import { isApiKeyGenerated, ApiKeyAndId } from './api_keys';
 
-export function serverlessInstructions({
-  baseUrl,
-  config,
-}: {
-  baseUrl: string;
-  config: ConfigSchema;
-}) {
-  const commonOptions: AgentInstructionProps = {
+export function serverlessInstructions(
+  {
     baseUrl,
-    managedServiceUrl: config?.managedServiceUrl,
+    config,
+  }: {
+    baseUrl: string;
+    config: ConfigSchema;
+  },
+  apiKeyAndId: ApiKeyAndId,
+  createAgentKey: () => void
+) {
+  const displayCreateApiKeyAction = !isApiKeyGenerated(apiKeyAndId.apiKey);
+  const commonOptions: AgentInstructions = {
+    baseUrl,
+    apmServerUrl: config.managedServiceUrl,
+    apiKeyAndId,
+    createAgentKey,
+    displayCreateApiKeyAction,
   };
 
   return {

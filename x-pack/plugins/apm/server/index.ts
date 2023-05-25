@@ -58,7 +58,7 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   serverlessOnboarding: schema.boolean({ defaultValue: false }),
-  managedServiceUrl: schema.string(),
+  managedServiceUrl: schema.string({ defaultValue: '' }),
 });
 
 // plugin config
