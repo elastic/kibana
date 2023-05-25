@@ -56,7 +56,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     );
     const apiEndpoint = getKibanaUrl(
       coreStart,
-      '/api/observability_onboarding/custom_logs'
+      '/api/observability_onboarding'
     );
     const {
       elasticsearch: { client },

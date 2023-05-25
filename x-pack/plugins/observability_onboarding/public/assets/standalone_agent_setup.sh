@@ -7,7 +7,7 @@ updateStepProgress() {
   local STEPNAME="$1"
   local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
   curl --request GET \
-    --url "${API_ENDPOINT}/step/${STEPNAME}?status=${STATUS}" \
+    --url "${API_ENDPOINT}/custom_logs/step/${STEPNAME}?status=${STATUS}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
@@ -86,3 +86,31 @@ else
   updateStepProgress "ea-status" "warning"
   exit 1
 fi
+
+downloadElasticAgentConfig() {
+  curl --request GET \
+    --url "${API_ENDPOINT}/elastic_agent/config" \
+    --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
+    --header "Content-Type: application/json" \
+    --header "kbn-xsrf: true" \
+    --no-progress-meter \
+    --output /opt/Elastic/Agent/elastic-agent.yml
+
+  echo "Downloading elastic-agent.yml"
+  updateStepProgress "ea-config" "loading"
+  if [ "$?" -eq 0 ]; then
+    echo "Downloaded elastic-agent.yml"
+    updateStepProgress "ea-config" "complete"
+  else
+    updateStepProgress "ea-config" "warning"
+    echo "Failed to download elastic-agent.yml"
+    exit 1
+  fi
+
+  echo "Done with standalone Elastic Agent setup for custom logs. Look for streaming logs to arrive in Kibana."
+}
+
+downloadElasticAgentConfig
+
+echo "Exit"
+exit 0

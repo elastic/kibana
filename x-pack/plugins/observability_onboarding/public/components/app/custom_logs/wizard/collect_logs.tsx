@@ -101,6 +101,13 @@ export function CollectLogs() {
         completedTitle: 'Connected to the Elastic Agent',
       },
       {
+        id: 'ea-config',
+        incompleteTitle: 'Download Elastic Agent config',
+        loadingTitle: 'Downloading Elastic Agent config',
+        completedTitle:
+          'Downloaded Elastic Agent config to /opt/Elastic/Agent/elastic-agent.yml',
+      },
+      {
         id: 'logs-ingest',
         incompleteTitle: 'Check for shipped logs',
         loadingTitle: 'Waiting for logs to be shipped',
