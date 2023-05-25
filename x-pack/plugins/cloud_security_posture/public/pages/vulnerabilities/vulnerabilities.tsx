@@ -204,10 +204,25 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 
         if (!value) return null;
         return (
-          <EuiToolTip position="top" content={FILTER_IN}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButtonTooltip',
+              {
+                defaultMessage: 'Add {columnId} filter',
+                values: { columnId },
+              }
+            )}
+          >
             <Component
               iconType="plusInCircle"
-              aria-label={FILTER_IN}
+              aria-label={i18n.translate(
+                'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButton',
+                {
+                  defaultMessage: 'Add {columnId} negated filter',
+                  values: { columnId },
+                }
+              )}
               onClick={() => {
                 setUrlQuery({
                   pageIndex: 0,
@@ -231,10 +246,25 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 
         if (!value) return null;
         return (
-          <EuiToolTip position="top" content={FILTER_OUT}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegatedFilterButtonTooltip',
+              {
+                defaultMessage: 'Add {columnId} negated filter',
+                values: { columnId },
+              }
+            )}
+          >
             <Component
               iconType="minusInCircle"
-              aria-label={FILTER_OUT}
+              aria-label={i18n.translate(
+                'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegateFilterButton',
+                {
+                  defaultMessage: 'Add {columnId} negated filter',
+                  values: { columnId },
+                }
+              )}
               onClick={() => {
                 setUrlQuery({
                   pageIndex: 0,

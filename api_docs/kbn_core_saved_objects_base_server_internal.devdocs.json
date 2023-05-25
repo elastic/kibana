@@ -1498,6 +1498,23 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.globalSwitchToModelVersionAt",
+        "type": "string",
+        "tags": [],
+        "label": "globalSwitchToModelVersionAt",
+        "description": [
+          "\nThe stack version where all types will be forced to switch to using the model version system."
+        ],
+        "signature": [
+          "\"8.10.0\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.ModelVersionMap",
         "type": "Type",
         "tags": [],
