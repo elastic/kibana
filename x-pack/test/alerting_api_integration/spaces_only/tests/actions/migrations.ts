@@ -128,6 +128,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         status: 'error',
         message: `error validating action type connector: secrets must be defined`,
         retry: true,
+        reason: 'validation',
       });
     });
   });

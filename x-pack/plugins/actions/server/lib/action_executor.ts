@@ -165,7 +165,7 @@ export class ActionExecutor {
           validatedConfig = validationResult.validatedConfig;
           validatedSecrets = validationResult.validatedSecrets;
         } catch (err) {
-          return { ...err.result, reason: ActionExecutionErrorReason.Validation };
+          return err.result;
         }
 
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
@@ -492,6 +492,7 @@ function validateAction(
       status: 'error',
       message: err.message,
       retry: true,
+      reason: ActionExecutionErrorReason.Validation,
     });
   }
 }
