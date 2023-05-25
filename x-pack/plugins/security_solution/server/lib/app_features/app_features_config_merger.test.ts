@@ -261,7 +261,7 @@ describe('AppFeaturesConfigMerger', () => {
               groupType: 'mutually_exclusive',
               privileges: [
                 {
-                  api: ['APP_ID-writeReleaseHost'],
+                  api: [`APP_ID-writeHostIsolation`],
                   id: 'host_isolation_all',
                   includeIn: 'none',
                   name: 'All',
@@ -269,7 +269,7 @@ describe('AppFeaturesConfigMerger', () => {
                     all: [],
                     read: [],
                   },
-                  ui: ['writeReleaseHost'],
+                  ui: ['writeHostIsolation'],
                 },
               ],
             },
@@ -280,13 +280,12 @@ describe('AppFeaturesConfigMerger', () => {
 
     const enabledCasesAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
       {
-        subFeaturesPrivileges: [
-          {
-            id: 'host_isolation_all',
-            api: ['APP_ID-writeIsolateHost'],
-            ui: ['writeIsolateHost'],
+        privileges: {
+          all: {
+            api: ['rules_load_prepackaged'],
+            ui: ['rules_load_prepackaged'],
           },
-        ],
+        },
       },
     ];
 
@@ -310,7 +309,7 @@ describe('AppFeaturesConfigMerger', () => {
         all: {
           app: ['APP_ID', 'CLOUD_POSTURE_APP_ID', 'kibana'],
           catalogue: ['APP_ID'],
-          api: ['APP_ID', 'cloud-security-posture-read'],
+          api: ['APP_ID', 'cloud-security-posture-read', 'rules_load_prepackaged'],
           savedObject: {
             all: ['alert', 'CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE'],
             read: [],
@@ -326,7 +325,7 @@ describe('AppFeaturesConfigMerger', () => {
           management: {
             insightsAndAlerting: ['triggersActions'],
           },
-          ui: ['show', 'crud'],
+          ui: ['show', 'crud', 'rules_load_prepackaged'],
         },
         read: {
           app: ['APP_ID', 'CLOUD_POSTURE_APP_ID', 'kibana'],
@@ -361,7 +360,7 @@ describe('AppFeaturesConfigMerger', () => {
               groupType: 'mutually_exclusive',
               privileges: [
                 {
-                  api: ['APP_ID-writeReleaseHost', 'APP_ID-writeIsolateHost'],
+                  api: [`APP_ID-writeHostIsolation`],
                   id: 'host_isolation_all',
                   includeIn: 'none',
                   name: 'All',
@@ -369,7 +368,7 @@ describe('AppFeaturesConfigMerger', () => {
                     all: [],
                     read: [],
                   },
-                  ui: ['writeReleaseHost', 'writeIsolateHost'],
+                  ui: ['writeHostIsolation'],
                 },
               ],
             },
