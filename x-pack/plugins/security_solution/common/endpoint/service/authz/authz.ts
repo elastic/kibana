@@ -123,7 +123,7 @@ export const calculateEndpointAuthz = (
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
-    'writeIsolateHost'
+    'writeHostIsolation'
   );
   const canWriteProcessOperations = hasKibanaPrivilege(
     fleetAuthz,

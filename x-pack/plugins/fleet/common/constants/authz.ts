@@ -120,11 +120,11 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'readActionsLogManagement',
   },
-  writeIsolateHost: {
+  writeHostIsolation: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
     privilegeSplit: '-',
     privilegeType: 'api',
-    privilegeName: 'writeIsolateHost',
+    privilegeName: 'writeHostIsolation',
   },
   writeProcessOperations: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
