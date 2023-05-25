@@ -76,7 +76,7 @@ describe('When using calculateRouteAuthz()', () => {
           readActionsLogManagement: {
             executePackageAction: false,
           },
-          writeIsolateHost: {
+          writeHostIsolation: {
             executePackageAction: false,
           },
           writeProcessOperations: {
