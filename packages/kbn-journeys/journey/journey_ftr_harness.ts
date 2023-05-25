@@ -72,7 +72,7 @@ export class JourneyFtrHarness {
       kbnTestServerEnv.ELASTIC_APM_GLOBAL_LABELS.split(',').map((kv: string) => kv.split('='))
     );
 
-    // update labels before FTR service
+    // Update labels before start for consistency b/w APM services
     await this.updateTelemetryAndAPMLabels(journeyLabels);
 
     this.apm = apmNode.start({
@@ -138,14 +138,6 @@ export class JourneyFtrHarness {
   }
 
   private async onSetup() {
-    // const kbnTestServerEnv = this.config.get(`kbnTestServer.env`);
-    // const journeyLabels: { [k: string]: string } = Object.fromEntries(
-    //   kbnTestServerEnv.ELASTIC_APM_GLOBAL_LABELS.split(',').map((kv: string) => kv.split('='))
-    // );
-
-    // await this.updateTelemetryAndAPMLabels(journeyLabels);
-    // // wait for labels to be applied
-    // await setTimeout(10000);
     // We start browser and init page in the first place
     await this.setupBrowserAndPage();
     // We allow opt-in beforeSteps hook to manage Kibana/ES state

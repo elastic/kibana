@@ -83,7 +83,6 @@ export function makeFtrConfigProvider(
         serverArgs: [
           ...baseConfig.kbnTestServer.serverArgs,
           `--telemetry.optIn=${enableTelemetry && process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
-          // If we decide there is no need to restart Kibana, we can send server start metrics as its own "journey"
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
@@ -99,7 +98,6 @@ export function makeFtrConfigProvider(
           ELASTIC_APM_CAPTURE_BODY: JOURNEY_APM_CONFIG.captureBody,
           ELASTIC_APM_CAPTURE_HEADERS: JOURNEY_APM_CONFIG.captureRequestHeaders,
           ELASTIC_APM_LONG_FIELD_MAX_LENGTH: JOURNEY_APM_CONFIG.longFieldMaxLength,
-          // we probably can skip setting labels on Kibana start
           ELASTIC_APM_GLOBAL_LABELS: Object.entries({
             ...config.getExtraApmLabels(),
             testJobId,

@@ -74,7 +74,6 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const kibanaVersion = source.service.version;
 
   const kibanaRequests = getKibanaRequests(hits, withoutStaticResources);
-
   const esRequests = await getESRequests(esClient, kibanaRequests);
   log.info(
     `Found ${kibanaRequests.length} Kibana server and ${esRequests.length} Elasticsearch requests`
