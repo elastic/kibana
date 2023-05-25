@@ -135,13 +135,42 @@ export class ActionExecutor {
 
         const { actionTypeId, name, config, secrets, rawAction, isPreconfigured } = actionInfo;
 
-        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
-        let { logger } = this.actionExecutorContext!;
-        logger = logger.get(loggerId);
-
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
         }
+
+        if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
+          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+        }
+        const actionType = actionTypeRegistry.get(actionTypeId);
+        const configurationUtilities = actionTypeRegistry.getUtils();
+
+        let validatedParams;
+        let validatedConfig;
+        let validatedSecrets;
+        try {
+          const validationResult = validateAction(
+            {
+              actionId,
+              actionType,
+              params,
+              config,
+              secrets,
+              rawAction,
+              isPreconfigured,
+            },
+            { configurationUtilities }
+          );
+          validatedParams = validationResult.validatedParams;
+          validatedConfig = validationResult.validatedConfig;
+          validatedSecrets = validationResult.validatedSecrets;
+        } catch (err) {
+          return { ...err.result, reason: ActionExecutionErrorReason.Validation };
+        }
+
+        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+        let { logger } = this.actionExecutorContext!;
+        logger = logger.get(loggerId);
 
         if (span) {
           span.name = `execute_action ${actionTypeId}`;
@@ -149,11 +178,6 @@ export class ActionExecutor {
             actions_connector_type_id: actionTypeId,
           });
         }
-
-        if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
-          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-        }
-        const actionType = actionTypeRegistry.get(actionTypeId);
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
@@ -205,20 +229,6 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
-          const configurationUtilities = actionTypeRegistry.getUtils();
-          const { validatedParams, validatedConfig, validatedSecrets } = validateAction(
-            {
-              actionId,
-              actionType,
-              params,
-              config,
-              secrets,
-              rawAction,
-              isPreconfigured,
-            },
-            { configurationUtilities }
-          );
-
           rawResult = await actionType.executor({
             actionId,
             services,
@@ -231,18 +241,14 @@ export class ActionExecutor {
             logger,
           });
         } catch (err) {
-          if (err.reason === ActionExecutionErrorReason.Validation) {
-            rawResult = err.result;
-          } else {
-            rawResult = {
-              actionId,
-              status: 'error',
-              message: 'an error occurred while running the action',
-              serviceMessage: err.message,
-              error: err,
-              retry: true,
-            };
-          }
+          rawResult = {
+            actionId,
+            status: 'error',
+            message: 'an error occurred while running the action',
+            serviceMessage: err.message,
+            error: err,
+            retry: true,
+          };
         }
 
         eventLogger.stopTiming(event);

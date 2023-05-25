@@ -630,9 +630,9 @@ describe('action executor', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
+        config: { schema: schema.object({ bar: schema.boolean() }) },
+        secrets: { schema: schema.object({ baz: schema.boolean() }) },
+        params: { schema: schema.object({ foo: schema.boolean() }) },
       },
       executor: jest.fn(),
     };
@@ -642,6 +642,7 @@ describe('action executor', () => {
       attributes: {
         name: '1',
         actionTypeId: 'test',
+        isMissingSecrets: false,
         config: {
           bar: true,
         },
@@ -741,6 +742,7 @@ describe('action executor', () => {
       status: 'error',
       retry: true,
       message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+      reason: 'validation',
     });
   });
 
@@ -780,6 +782,7 @@ describe('action executor', () => {
       status: 'error',
       retry: true,
       message: `error validating action type connector: config must be defined`,
+      reason: 'validation',
     });
   });
 
@@ -818,6 +821,7 @@ describe('action executor', () => {
       status: 'error',
       retry: true,
       message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
+      reason: 'validation',
     });
   });
 
@@ -852,6 +856,7 @@ describe('action executor', () => {
       status: 'error',
       retry: true,
       message: '[isMissingSecrets]: expected value of type [boolean] but got [undefined]',
+      reason: 'validation',
     });
   });
 
