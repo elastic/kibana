@@ -27,5 +27,6 @@ export const getCloneLayerAction = (props: CloneLayerAction): LayerAction => {
     isCompatible: Boolean(props.activeVisualization.cloneLayer && !props.isTextBasedLanguage),
     icon: 'copy',
     'data-test-subj': `lnsLayerClone--${props.layerIndex}`,
+    order: -Infinity + 1,
   };
 };

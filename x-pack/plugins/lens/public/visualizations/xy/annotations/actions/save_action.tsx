@@ -263,5 +263,6 @@ export const getSaveLayerAction = ({
     icon: 'save',
     isCompatible: true,
     'data-test-subj': 'lnsXY_annotationLayer_saveToLibrary',
+    order: 100,
   };
 };

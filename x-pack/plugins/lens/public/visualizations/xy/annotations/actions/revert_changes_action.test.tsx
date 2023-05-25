@@ -77,7 +77,12 @@ describe('revert changes routine', () => {
     });
 
     expect(setState).toHaveBeenCalled();
-    expect(toasts.addSuccess).toHaveBeenCalledWith(`Reverted "${byRefLayer.__lastSaved.title}"`);
+    expect((toasts.addSuccess as jest.Mock).mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "text": "The most recently saved version of this annotation group has been restored.",
+        "title": "Reverted \\"My library group\\"",
+      }
+    `);
     expect(modal.close).toHaveBeenCalled();
 
     const newState = setState.mock.calls[0][0] as XYState;

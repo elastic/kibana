@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`revert changes routine reverts changes 1`] = `
+exports[`revert changes routine reverts changes 2`] = `
 Object {
   "layers": Array [
     Object {

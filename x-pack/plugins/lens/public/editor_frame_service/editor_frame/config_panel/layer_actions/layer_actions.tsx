@@ -96,6 +96,10 @@ const InContextMenuActions = (props: LayerActionsProps) => {
     }
   }, [isPopoverOpen]);
 
+  const sortedActions = [...props.actions].sort(
+    ({ order: order1 }, { order: order2 }) => order1 - order2
+  );
+
   return (
     <EuiOutsideClickDetector onOutsideClick={closePopover}>
       <EuiPopover
@@ -124,7 +128,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
       >
         <EuiContextMenuPanel
           size="s"
-          items={props.actions.map((i) => (
+          items={sortedActions.map((i) => (
             <EuiContextMenuItem
               icon={<EuiIcon type={i.icon} title={i.displayName} color={i.color} />}
               data-test-subj={i['data-test-subj']}

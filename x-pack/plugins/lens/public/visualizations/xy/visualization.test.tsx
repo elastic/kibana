@@ -3640,6 +3640,7 @@ describe('xy_visualization', () => {
                 "execute": [Function],
                 "icon": "save",
                 "isCompatible": true,
+                "order": 100,
               },
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_unlinkFromLibrary",
@@ -3648,6 +3649,7 @@ describe('xy_visualization', () => {
                 "execute": [Function],
                 "icon": "unlink",
                 "isCompatible": true,
+                "order": 300,
               },
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_revertChanges",
@@ -3657,6 +3659,7 @@ describe('xy_visualization', () => {
                 "execute": [Function],
                 "icon": "editorUndo",
                 "isCompatible": true,
+                "order": 200,
               },
             ]
           `);

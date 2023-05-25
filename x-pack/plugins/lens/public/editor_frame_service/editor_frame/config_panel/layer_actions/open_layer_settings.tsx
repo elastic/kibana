@@ -22,5 +22,6 @@ export const getOpenLayerSettingsAction = (props: {
     icon: 'gear',
     isCompatible: props.hasLayerSettings,
     'data-test-subj': 'lnsLayerSettings',
+    order: -Infinity,
   };
 };

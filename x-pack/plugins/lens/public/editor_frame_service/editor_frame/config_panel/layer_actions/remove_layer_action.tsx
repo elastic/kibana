@@ -236,5 +236,6 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
     icon: props.isOnlyLayer ? 'eraser' : 'trash',
     color: 'danger',
     'data-test-subj': `lnsLayerRemove--${props.layerIndex}`,
+    order: Infinity,
   };
 };

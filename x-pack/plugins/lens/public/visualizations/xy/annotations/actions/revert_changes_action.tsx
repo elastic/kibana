@@ -72,6 +72,7 @@ export const getRevertChangesAction = ({
     isCompatible: true,
     disabled: !annotationLayerHasUnsavedChanges(layer),
     'data-test-subj': 'lnsXY_annotationLayer_revertChanges',
+    order: 200,
   };
 };
 
