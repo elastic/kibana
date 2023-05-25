@@ -30,61 +30,41 @@ export const getCasesBaseKibanaFeature = (): KibanaFeatureConfig => ({
   category: DEFAULT_APP_CATEGORIES.security,
   app: [CASES_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
+  cases: [APP_ID],
   privileges: {
     all: {
-      api: [],
+      api: casesApiTags.all,
       app: [CASES_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
-      savedObject: {
-        all: [],
-        read: [],
+      cases: {
+        create: [APP_ID],
+        read: [APP_ID],
+        update: [APP_ID],
+        push: [APP_ID],
       },
-      ui: [],
+      savedObject: {
+        all: [...filesSavedObjectTypes],
+        read: [...filesSavedObjectTypes],
+      },
+      ui: casesCapabilities.all,
     },
     read: {
-      api: [],
+      api: casesApiTags.read,
       app: [CASES_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
+      cases: {
+        read: [APP_ID],
+      },
       savedObject: {
         all: [],
-        read: [],
+        read: [...filesSavedObjectTypes],
       },
-      ui: [],
+      ui: casesCapabilities.read,
     },
   },
+  subFeatures: [casesSubFeatureDelete],
 });
 
-// maps the AppFeatures keys to Kibana privileges
-export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
-  cases_base: {
-    cases: [APP_ID],
-    privileges: {
-      all: {
-        api: casesApiTags.all,
-        ui: casesCapabilities.all,
-        cases: {
-          create: [APP_ID],
-          read: [APP_ID],
-          update: [APP_ID],
-          push: [APP_ID],
-        },
-        savedObject: {
-          all: [...filesSavedObjectTypes],
-          read: [...filesSavedObjectTypes],
-        },
-      },
-      read: {
-        api: casesApiTags.read,
-        ui: casesCapabilities.read,
-        cases: {
-          read: [APP_ID],
-        },
-        savedObject: {
-          all: [],
-          read: [...filesSavedObjectTypes],
-        },
-      },
-    },
-    subFeatures: [casesSubFeatureDelete],
-  },
-});
+// TODO Add cases connector configuration
+// It maps the AppFeatures keys to Kibana privileges
+export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({});

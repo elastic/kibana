@@ -12,13 +12,10 @@ import type {
   SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
+
 import type { ServerlessSecurityPLIs } from '../../../common/config';
-import { CasesUpselling } from './pages/cases_upselling';
-import {
-  PrebuiltRulesTooltipUpselling,
-  RulesResponseActionsUpselling,
-} from './pages/rules_upselling';
 import { getProjectPLIsFeatures } from '../../../common/pli/pli_features';
+import { GenericUpsellingSection } from './pages/generic_upselling_section';
 
 interface UpsellingsConfig {
   feature: AppFeatureKey;
@@ -62,22 +59,17 @@ export const registerUpsellings = (
 
 // TODO: lazy load these components
 const getUpsellingPages = (projectPLIs: ServerlessSecurityPLIs): UpsellingPages => [
-  {
-    pageName: SecurityPageName.case,
-    feature: AppFeatureKey.casesBase,
-    component: () => <CasesUpselling projectPLIs={projectPLIs} />,
-  },
+  // {
+  //   pageName: SecurityPageName.entityAnalytics,
+  //   feature: AppFeatureKey.exampleCasesFeature,
+  //   component: () => <GenericUpsellingPage projectPLIs={projectPLIs} />,
+  // },
 ];
 
 const getUpsellingSections = (projectPLIs: ServerlessSecurityPLIs): UpsellingSections => [
   {
-    id: 'rules_load_prepackaged_tooltip',
-    feature: AppFeatureKey.rulesLoadPrepackaged,
-    component: PrebuiltRulesTooltipUpselling,
-  },
-  {
-    id: 'rules_response_actions',
-    feature: AppFeatureKey.rulesResponseActions,
-    component: () => <RulesResponseActionsUpselling projectPLIs={projectPLIs} />,
+    id: 'example_upselling_feature',
+    feature: AppFeatureKey.exampleAppFeature,
+    component: () => <GenericUpsellingSection projectPLIs={projectPLIs} />,
   },
 ];

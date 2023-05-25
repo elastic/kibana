@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { ServerlessSecurityPLIs } from '../../../../common/config';
 
-export const CasesUpselling: React.FC<{ projectPLIs: ServerlessSecurityPLIs }> = React.memo(
-  ({ projectPLIs: projectPLIs }) => {
+export const GenericUpsellingSection: React.FC<{ projectPLIs: ServerlessSecurityPLIs }> =
+  React.memo(({ projectPLIs }) => {
     const upsellingPLI = projectPLIs.includes('cloudEssentials')
       ? 'Cloud Complete'
       : 'Endpoint Complete';
@@ -21,7 +21,7 @@ export const CasesUpselling: React.FC<{ projectPLIs: ServerlessSecurityPLIs }> =
         title={<>This is a testing component for a Serverless upselling prompt.</>}
         body={
           <>
-            Get <EuiLink href="#">{upsellingPLI}</EuiLink> to use Cases
+            Get <EuiLink href="#">{upsellingPLI}</EuiLink> to enable this feature
             <br />
             <br />
             <iframe
@@ -37,5 +37,4 @@ export const CasesUpselling: React.FC<{ projectPLIs: ServerlessSecurityPLIs }> =
         }
       />
     );
-  }
-);
+  });
