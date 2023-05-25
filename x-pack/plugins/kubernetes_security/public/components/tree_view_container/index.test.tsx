@@ -31,13 +31,13 @@ describe('TreeNav component', () => {
     spy.mockRestore();
   });
 
-  it('shows empty message when there is no results', async () => {
+  it('shows empty message when there is no results', () => {
     spy.mockImplementation(() => ({
       ...jest.requireActual('./contexts').useTreeViewContext,
       noResults: true,
     }));
 
     renderResult = mockedContext.render(<TreeViewContainer {...defaultProps} />);
-    expect(await renderResult.getByText(/no results/i)).toBeInTheDocument();
+    expect(renderResult.getByText(/no results/i)).toBeInTheDocument();
   });
 });
