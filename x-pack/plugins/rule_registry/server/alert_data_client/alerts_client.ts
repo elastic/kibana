@@ -40,6 +40,7 @@ import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
+import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -79,6 +80,7 @@ export interface ConstructorOptions {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
   ruleDataService: IRuleDataService;
+  getRuleType: RuleTypeRegistry['get'];
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -149,6 +151,7 @@ export class AlertsClient {
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
+  private readonly getRuleType: RuleTypeRegistry['get'];
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -159,6 +162,7 @@ export class AlertsClient {
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
+    this.getRuleType = options.getRuleType;
   }
 
   private getOutcome(
@@ -1092,5 +1096,10 @@ export class AlertsClient {
     });
 
     return fieldDescriptorToBrowserFieldMapper(fields);
+  }
+
+  public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
+    const ruleType = this.getRuleType(ruleTypeId);
+    return ruleType.fieldsForAAD ?? [];
   }
 }

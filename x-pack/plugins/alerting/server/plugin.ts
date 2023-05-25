@@ -141,6 +141,7 @@ export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
   getAllTypes: RuleTypeRegistry['getAllTypes'];
+  getType: RuleTypeRegistry['get'];
 
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
@@ -546,6 +547,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
+      getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
       getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
