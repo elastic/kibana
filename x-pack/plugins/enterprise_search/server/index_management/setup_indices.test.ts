@@ -150,6 +150,7 @@ describe('Setup Indices', () => {
       },
       service_type: { type: 'keyword' },
       status: { type: 'keyword' },
+      sync_cursor: { type: 'object' },
       sync_now: { type: 'boolean' },
     },
   };
