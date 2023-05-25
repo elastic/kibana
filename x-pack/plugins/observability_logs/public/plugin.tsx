@@ -18,7 +18,7 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
     this.dataStreamsService = new DataStreamsService();
   }
 
-  public setup() { }
+  public setup() {}
 
   public start(core: CoreStart, plugins: ObservabilityLogsStartDeps) {
     const { discover } = plugins;
