@@ -1080,6 +1080,7 @@ export const LensTopNavMenu = ({
       dataViewPickerComponentProps={dataViewPickerProps}
       showDatePicker={
         indexPatterns.some((ip) => ip.isTimeBased()) ||
+        isOnTextBasedMode ||
         Boolean(
           allLoaded &&
             activeDatasourceId &&

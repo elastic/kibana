@@ -27,6 +27,7 @@ import {
   OnRefreshProps,
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
@@ -62,6 +63,25 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
       defaultMessage: 'Run query',
     }),
+};
+
+const getWrapperWithTooltip = (children: JSX.Element, enableTooltip: boolean, language: string) => {
+  if (enableTooltip) {
+    return (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
+          defaultMessage:
+            'Date range selection for {language} queries requires the presence of an @timestamp field in the dataset.',
+          values: { language },
+        })}
+      >
+        {children}
+      </EuiToolTip>
+    );
+  } else {
+    return children;
+  }
 };
 
 const SuperDatePicker = React.memo(
@@ -395,41 +415,45 @@ export const QueryBarTopRow = React.memo(
         return null;
       }
       let isDisabled = props.isDisabled;
+      let enableTooltip = false;
       // On text based mode the datepicker is always on when the user has unsaved changes.
       // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field
       if (Boolean(isQueryLangSelected) && !props.isDirty) {
         const adHocDataview = props.indexPatterns?.[0];
         if (adHocDataview && typeof adHocDataview !== 'string') {
           isDisabled = !Boolean(adHocDataview.timeFieldName);
+          enableTooltip = !Boolean(adHocDataview.timeFieldName);
         }
       }
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
-
-      return (
-        <EuiFlexItem className={wrapperClasses}>
-          <SuperDatePicker
-            isDisabled={isDisabled}
-            start={props.dateRangeFrom}
-            end={props.dateRangeTo}
-            isPaused={props.isRefreshPaused}
-            refreshInterval={props.refreshInterval}
-            onTimeChange={onTimeChange}
-            onRefresh={onRefresh}
-            onRefreshChange={props.onRefreshChange}
-            showUpdateButton={false}
-            recentlyUsedRanges={recentlyUsedRanges}
-            locale={i18n.getLocale()}
-            commonlyUsedRanges={commonlyUsedRanges}
-            dateFormat={uiSettings.get('dateFormat')}
-            isAutoRefreshOnly={showAutoRefreshOnly}
-            className="kbnQueryBar__datePicker"
-            isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
-            width={isMobile ? 'full' : 'auto'}
-            compressed={shouldShowDatePickerAsBadge()}
-          />
-        </EuiFlexItem>
+      const query = props.query as AggregateQuery;
+      const textBasedLanguage = getAggregateQueryMode(query);
+      const datePicker = (
+        <SuperDatePicker
+          isDisabled={isDisabled}
+          start={props.dateRangeFrom}
+          end={props.dateRangeTo}
+          isPaused={props.isRefreshPaused}
+          refreshInterval={props.refreshInterval}
+          onTimeChange={onTimeChange}
+          onRefresh={onRefresh}
+          onRefreshChange={props.onRefreshChange}
+          showUpdateButton={false}
+          recentlyUsedRanges={recentlyUsedRanges}
+          locale={i18n.getLocale()}
+          commonlyUsedRanges={commonlyUsedRanges}
+          dateFormat={uiSettings.get('dateFormat')}
+          isAutoRefreshOnly={showAutoRefreshOnly}
+          className="kbnQueryBar__datePicker"
+          isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
+          width={isMobile ? 'full' : 'auto'}
+          compressed={shouldShowDatePickerAsBadge()}
+        />
       );
+      const component = getWrapperWithTooltip(datePicker, enableTooltip, textBasedLanguage);
+
+      return <EuiFlexItem className={wrapperClasses}>{component}</EuiFlexItem>;
     }
 
     function renderUpdateButton() {
