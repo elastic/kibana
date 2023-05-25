@@ -17,7 +17,7 @@ from the user's browser, in case a firewall is blocking the connections from the
 
 [[telemetry-optIn]] `telemetry.optIn`::
   Set to `false` to stop sending any telemetry data to Elastic. Reporting your
-cluster statistics helps us improve your user experience. *Default: `true`.*+
+cluster statistics helps us improve your user experience. *Default: `true`.* +
 +
 This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
 To prevent users from changing it,
