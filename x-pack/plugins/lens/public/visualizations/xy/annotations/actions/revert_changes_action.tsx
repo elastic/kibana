@@ -63,6 +63,7 @@ export const getRevertChangesAction = ({
         ),
         {
           'data-test-subj': 'lnsAnnotationLayerRevertModal',
+          maxWidth: 600,
         }
       );
       await modal.onClose;

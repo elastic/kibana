@@ -223,6 +223,7 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
           ),
           {
             'data-test-subj': 'lnsLayerRemoveModal',
+            maxWidth: 600,
           }
         );
         await modal.onClose;
