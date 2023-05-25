@@ -100,7 +100,6 @@ export class UnifiedFieldListPageObject extends FtrService {
     await this.waitUntilFieldPopoverIsOpen();
   }
 
-  // next
   public async clickFieldListItemToggle(field: string) {
     await this.testSubjects.moveMouseTo(`field-${field}`);
     await this.testSubjects.click(`fieldToggle-${field}`);

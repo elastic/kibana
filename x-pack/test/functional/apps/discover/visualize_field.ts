@@ -60,12 +60,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('shows "visualize" field button', async () => {
       await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
-      await PageObjects.discover.expectFieldListItemVisualize('bytes');
+      await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
       await PageObjects.unifiedFieldList.findFieldByName('bytes');
-      await PageObjects.discover.clickFieldListItemVisualize('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemVisualize('bytes');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         value: { from: '3500', to: '4000' },
       });
       await PageObjects.unifiedFieldList.findFieldByName('geo.src');
-      await PageObjects.discover.clickFieldListItemVisualize('geo.src');
+      await PageObjects.unifiedFieldList.clickFieldListItemVisualize('geo.src');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await filterBar.hasFilter('bytes', '3,500 to 4,000')).to.be(true);
@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
       await PageObjects.unifiedFieldList.findFieldByName('geo.dest');
-      await PageObjects.discover.clickFieldListItemVisualize('geo.dest');
+      await PageObjects.unifiedFieldList.clickFieldListItemVisualize('geo.dest');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');

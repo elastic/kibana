@@ -474,108 +474,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.dataGrid.clickDocSortAsc(field, text);
   }
 
-  public async clickFieldListItemToggle(field: string) {
-    await this.testSubjects.moveMouseTo(`field-${field}`);
-    await this.testSubjects.click(`fieldToggle-${field}`);
-  }
-
-  public async clickFieldListItemAdd(field: string) {
-    await this.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-    // a filter check may make sense here, but it should be properly handled to make
-    // it work with the _score and _source fields as well
-    if (await this.isFieldSelected(field)) {
-      return;
-    }
-    if (['_score', '_id', '_index'].includes(field)) {
-      await this.unifiedFieldList.toggleSidebarSection('meta'); // expand Meta section
-    }
-    await this.clickFieldListItemToggle(field);
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      await this.retry.waitFor(`field ${field} to be added to classic table`, async () => {
-        return await this.testSubjects.exists(`docTableHeader-${field}`);
-      });
-    } else {
-      await this.retry.waitFor(`field ${field} to be added to new table`, async () => {
-        return await this.testSubjects.exists(`dataGridHeaderCell-${field}`);
-      });
-    }
-  }
-
   public async isAdHocDataViewSelected() {
     const dataView = await this.getCurrentlySelectedDataView();
     await this.testSubjects.click('discover-dataView-switch-link');
     return this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
-  }
-
-  public async isFieldSelected(field: string) {
-    if (!(await this.testSubjects.exists('fieldListGroupedSelectedFields'))) {
-      return false;
-    }
-    const selectedList = await this.testSubjects.find('fieldListGroupedSelectedFields');
-    return await this.testSubjects.descendantExists(`field-${field}`, selectedList);
-  }
-
-  public async clickFieldListItemRemove(field: string) {
-    await this.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-    if (
-      !(await this.testSubjects.exists('fieldListGroupedSelectedFields')) ||
-      !(await this.isFieldSelected(field))
-    ) {
-      return;
-    }
-
-    await this.clickFieldListItemToggle(field);
-  }
-
-  public async clickFieldListItemVisualize(fieldName: string) {
-    await this.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-    const field = await this.testSubjects.find(`field-${fieldName}-showDetails`);
-    const isActive = await field.elementHasClass('kbnFieldButton-isActive');
-
-    if (!isActive) {
-      // expand the field to show the "Visualize" button
-      await field.click();
-    }
-
-    await this.unifiedFieldList.waitUntilFieldPopoverIsOpen();
-    const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
-    // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
-    await this.retry.try(async () => {
-      await this.testSubjects.click(visualizeButtonTestSubject);
-      await this.testSubjects.waitForDeleted(visualizeButtonTestSubject);
-      await this.testSubjects.missingOrFail(visualizeButtonTestSubject);
-    });
-    await this.header.waitUntilLoadingHasFinished();
-  }
-
-  public async expectFieldListItemVisualize(field: string) {
-    await this.testSubjects.existOrFail(`fieldVisualize-${field}`);
-  }
-
-  public async expectMissingFieldListItemVisualize(field: string) {
-    await this.testSubjects.missingOrFail(`fieldVisualize-${field}`);
-  }
-
-  public async clickFieldListPlusFilter(field: string, value: string) {
-    const plusFilterTestSubj = `plus-${field}-${value}`;
-    if (!(await this.testSubjects.exists(plusFilterTestSubj))) {
-      // field has to be open
-      await this.unifiedFieldList.clickFieldListItem(field);
-    }
-    // this.testSubjects.find doesn't handle spaces in the data-test-subj value
-    await this.testSubjects.click(plusFilterTestSubj);
-    await this.header.waitUntilLoadingHasFinished();
-  }
-
-  public async clickFieldListMinusFilter(field: string, value: string) {
-    // this method requires the field details to be open from clickFieldListItem()
-    // this.testSubjects.find doesn't handle spaces in the data-test-subj value
-    await this.testSubjects.click(`minus-${field}-${value}`);
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async selectIndexPattern(indexPattern: string) {
@@ -612,19 +514,6 @@ export class DiscoverPageObject extends FtrService {
     } else {
       await this.dataGrid.clickRemoveColumn(name);
     }
-  }
-
-  public async openSidebarFieldFilter() {
-    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
-    await this.testSubjects.existOrFail('fieldListFiltersFieldTypeFilterOptions');
-  }
-
-  public async closeSidebarFieldFilter() {
-    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
-
-    await this.retry.waitFor('sidebar filter closed', async () => {
-      return !(await this.testSubjects.exists('fieldListFiltersFieldTypeFilterOptions'));
-    });
   }
 
   public async waitForChartLoadingComplete(renderCount: number) {

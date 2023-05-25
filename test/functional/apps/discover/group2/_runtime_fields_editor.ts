@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await PageObjects.unifiedFieldList.getAllFieldNames()).includes(customLabel)).to.be(
         true
       );
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
     });
 
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows creation of a new field and use it in a saved search', async function () {
       const fieldName = '_runtimefield-saved-search';
       await createRuntimeField(fieldName);
-      await PageObjects.discover.clickFieldListItemAdd(fieldName);
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd(fieldName);
       expect(await PageObjects.discover.getDocHeader()).to.have.string(fieldName);
       expect(await PageObjects.discover.saveSearch('Saved Search with runtimefield'));
       await PageObjects.header.waitUntilLoadingHasFinished();

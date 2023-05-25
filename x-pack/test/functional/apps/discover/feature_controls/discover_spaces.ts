@@ -86,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await setDiscoverTimeRange();
         await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
-        await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
       });
     });
 
@@ -156,7 +156,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await setDiscoverTimeRange();
         await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
     });
 

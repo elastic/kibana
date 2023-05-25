@@ -16,7 +16,7 @@
 // 1. Create scripted field
 // 2. See the expected value of the scripted field in Discover doc view
 // 3. Filter in Discover by the scripted field
-// 4. Visualize with aggregation on the scripted field by clicking discover.clickFieldListItemVisualize
+// 4. Visualize with aggregation on the scripted field by clicking unifiedFieldList.clickFieldListItemVisualize
 
 // NOTE: Scripted field input is managed by Ace editor, which automatically
 //   appends closing braces, for exmaple, if you type opening square brace [
@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName);
         await retry.try(async function () {
-          await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
+          await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -179,7 +179,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName);
         await log.debug('filter by the first value (14) in the expanded scripted field list');
-        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter(
+          scriptedPainlessFieldName,
+          '14'
+        );
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
@@ -189,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should visualize scripted field in vertical bar chart', async function () {
         await filterBar.removeAllFilters();
-        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
+        await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // verify Lens opens a visualization
         expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
@@ -232,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
-          await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
+          await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -266,7 +269,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "bad" in the expanded scripted field list');
-        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter(
+          scriptedPainlessFieldName2,
+          'bad'
+        );
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
@@ -276,7 +282,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // verify Lens opens a visualization
         expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
@@ -318,7 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
-          await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
+          await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -331,7 +337,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "true" in the expanded scripted field list');
-        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter(
+          scriptedPainlessFieldName2,
+          'true'
+        );
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
@@ -363,7 +372,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // verify Lens opens a visualization
         expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
@@ -405,7 +414,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
-          await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
+          await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -451,7 +460,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // verify Lens opens a visualization
         expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain('painDate');

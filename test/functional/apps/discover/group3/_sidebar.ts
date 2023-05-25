@@ -54,14 +54,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('field filtering', function () {
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
-        await PageObjects.discover.openSidebarFieldFilter();
-        await PageObjects.discover.closeSidebarFieldFilter();
+        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
+        await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
       });
 
       it('should filter by field type', async function () {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        await PageObjects.discover.openSidebarFieldFilter();
+        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
@@ -100,15 +100,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        await PageObjects.discover.openSidebarFieldFilter();
+        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         let options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
         expect(options).to.have.length(6);
-        await PageObjects.discover.closeSidebarFieldFilter();
+        await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
 
         await PageObjects.discover.selectTextBaseLang('SQL');
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        await PageObjects.discover.openSidebarFieldFilter();
+        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
         expect(options).to.have.length(3);
 
@@ -327,7 +327,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show selected and popular fields', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.clickFieldListItemAdd('@message');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         expect(
@@ -344,12 +344,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '2 selected fields. 2 popular fields. 53 available fields. 0 empty fields. 3 meta fields.'
         );
 
-        await PageObjects.discover.clickFieldListItemRemove('@message');
+        await PageObjects.unifiedFieldList.clickFieldListItemRemove('@message');
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await PageObjects.discover.clickFieldListItemAdd('_id');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('_id');
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.clickFieldListItemAdd('@message');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         expect(
@@ -381,7 +381,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '50 selected fields. 51 available fields.'
         );
 
-        await PageObjects.discover.clickFieldListItemRemove('extension');
+        await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
@@ -747,7 +747,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(selectedFields.includes(newField)).to.be(false);
         expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
 
-        await PageObjects.discover.clickFieldListItemAdd(newField);
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd(newField);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
