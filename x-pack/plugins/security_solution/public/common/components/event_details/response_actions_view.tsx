@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
   RawEventData,
@@ -29,9 +30,11 @@ const TabContentWrapper = styled.div`
 export const useResponseActionsView = ({
   rawEventData,
   ecsData,
+  isTab,
 }: {
-  ecsData?: Ecs;
-  rawEventData: RawEventData;
+  ecsData?: Ecs | null;
+  rawEventData: SearchHit | undefined;
+  isTab?: boolean;
 }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
@@ -50,42 +53,47 @@ export const useResponseActionsView = ({
   }
 
   const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
+    (rawEventData as RawEventData).fields
   ) as ExpandedEventFieldsObject;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
+  if (!responseActions?.length) {
+    return;
+  }
+
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
   const totalItemCount = automatedList?.items?.length ?? 0;
 
-  if (shouldEarlyReturn || !responseActions?.length) {
-    return;
-  }
+  const content = (
+    <>
+      <EuiSpacer size="s" />
+      <TabContentWrapper data-test-subj="responseActionsViewWrapper">
+        {isFetched && totalItemCount && automatedList?.items.length ? (
+          <ResponseActionsResults
+            actions={automatedList.items}
+            ruleName={ruleName}
+            ecsData={ecsData}
+          />
+        ) : null}
+      </TabContentWrapper>
+    </>
+  );
 
-  return {
-    id: EventsViewType.responseActionsView,
-    'data-test-subj': 'responseActionsViewTab',
-    name: i18n.RESPONSE_ACTIONS_VIEW,
-    append: (
-      <EuiNotificationBadge data-test-subj="response-actions-notification">
-        {totalItemCount}
-      </EuiNotificationBadge>
-    ),
-    content: (
-      <>
-        <EuiSpacer size="s" />
-        <TabContentWrapper data-test-subj="responseActionsViewWrapper">
-          {isFetched && totalItemCount && automatedList?.items.length ? (
-            <ResponseActionsResults
-              actions={automatedList.items}
-              ruleName={ruleName}
-              ecsData={ecsData}
-            />
-          ) : null}
-        </TabContentWrapper>
-      </>
-    ),
-  };
+  if (isTab) {
+    return {
+      id: EventsViewType.responseActionsView,
+      'data-test-subj': 'responseActionsViewTab',
+      name: i18n.RESPONSE_ACTIONS_VIEW,
+      append: (
+        <EuiNotificationBadge data-test-subj="response-actions-notification">
+          {totalItemCount}
+        </EuiNotificationBadge>
+      ),
+      content,
+    };
+  }
+  return content;
 };

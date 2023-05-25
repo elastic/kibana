@@ -6,26 +6,28 @@
  */
 
 import React from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useLeftPanelContext } from '../context';
-import { useOsqueryTab } from './use_osquery_tab';
-import { useResponseActionsTab } from './use_response_actions_tab';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useOsqueryTab } from '../../../common/components/event_details/osquery_tab';
+import { useResponseActionsView } from '../../../common/components/event_details/response_actions_view';
 
 export const RESPONSES_TAB_ID = 'responses-details';
 
-/**
- * Threat intelligence displayed in the document details expandable flyout left section under the Insights tab
- */
 export const ResponsesDetails: React.FC = () => {
   const { data, ecs } = useLeftPanelContext();
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
 
-  const responseActionsTab = useResponseActionsTab({ rawEventData: data, ecsData: ecs });
+  const responseActionsTab = useResponseActionsView({
+    rawEventData: data,
+    ecsData: ecs,
+    isTab: false,
+  });
   const osqueryTab = useOsqueryTab({
     rawEventData: data,
     ecsData: ecs,
+    isTab: false,
   });
   return <div>{endpointResponseActionsEnabled ? responseActionsTab : osqueryTab}</div>;
 };

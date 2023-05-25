@@ -9,6 +9,7 @@ import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
   RawEventData,
@@ -28,9 +29,11 @@ const TabContentWrapper = styled.div`
 export const useOsqueryTab = ({
   rawEventData,
   ecsData,
+  isTab,
 }: {
-  rawEventData?: RawEventData;
-  ecsData?: Ecs;
+  rawEventData?: SearchHit | undefined;
+  ecsData?: Ecs | null;
+  isTab: boolean;
 }) => {
   const {
     services: { osquery },
@@ -57,7 +60,7 @@ export const useOsqueryTab = ({
   }
 
   const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
+    (rawEventData as RawEventData).fields
   ) as ExpandedEventFieldsObject;
 
   const responseActions =
@@ -75,22 +78,25 @@ export const useOsqueryTab = ({
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
-  return {
-    id: EventsViewType.osqueryView,
-    'data-test-subj': 'osqueryViewTab',
-    name: i18n.OSQUERY_VIEW,
-    append: (
-      <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-        {actionItems.length}
-      </EuiNotificationBadge>
-    ),
-    content: (
-      <>
-        <TabContentWrapper data-test-subj="osqueryViewWrapper">
-          <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
-          <EuiSpacer size="s" />
-        </TabContentWrapper>
-      </>
-    ),
-  };
+  const content = (
+    <TabContentWrapper data-test-subj="osqueryViewWrapper">
+      <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
+      <EuiSpacer size="s" />
+    </TabContentWrapper>
+  );
+
+  if (isTab) {
+    return {
+      id: EventsViewType.osqueryView,
+      'data-test-subj': 'osqueryViewTab',
+      name: i18n.OSQUERY_VIEW,
+      append: (
+        <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+          {actionItems.length}
+        </EuiNotificationBadge>
+      ),
+      content,
+    };
+  }
+  return content;
 };

@@ -10,7 +10,7 @@ import type { ActionEdges } from '../../../common/search_strategy';
 
 export interface OsqueryActionResultsProps {
   ruleName?: string[];
-  ecsData: Ecs | null;
+  ecsData?: Ecs | null;
   actionItems?: ActionEdges;
 }
 
