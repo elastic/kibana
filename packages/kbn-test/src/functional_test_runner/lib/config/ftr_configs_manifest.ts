@@ -32,7 +32,7 @@ const load = (x: string): FtrConfigsManifest => JsYaml.safeLoad(Fs.readFileSync(
 try {
   const ftrManifestPath = Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL);
   // eslint-disable-next-line no-console
-  console.log('### Loading ftr manifest...', {
+  console.trace('### Loading ftr manifest...', {
     ftrManifestPath,
     REPO_ROOT,
     FTR_CONFIGS_MANIFEST_REL,
@@ -47,6 +47,9 @@ Error: \n  ${_},
 Now we'll try to load it from ${abnormalPath}`);
   try {
     ftrConfigsManifest = load(abnormalPath);
+
+    // eslint-disable-next-line no-console
+    console.trace('Successfully loaded ', abnormalPath);
   } catch (e) {
     throw new Error(`\n### Could not load ${abnormalPath} either, Error: \n  ${e}`);
   }
@@ -70,12 +73,13 @@ function listAffectedDirectories(repoRoot: string) {
       : Fs.readdirSync(buildkiteDir).join('; ');
 
     const alternativeKibanaPath = Path.resolve(repoRoot, '../kibana', '.buildkite');
-    const alternativeKibanaBuildkiteDirContents = !Fs.existsSync(buildkiteDir)
+    const alternativeKibanaBuildkiteDirContents = !Fs.existsSync(alternativeKibanaPath)
       ? '<doesnt-exist>'
       : Fs.readdirSync(alternativeKibanaPath).join('; ');
 
     // eslint-disable-next-line no-console
-    console.log('### Dir contents to discover structure', {
+    console.trace('### Dir contents to discover structure', {
+      pwd: process.cwd(),
       [buildkiteDir]: buildkiteDirContents,
       [alternativeKibanaPath]: alternativeKibanaBuildkiteDirContents,
     });
