@@ -248,6 +248,23 @@ exports.EcsCustomPropertyMappings = {
               },
             },
           },
+          meta: {
+            properties: {
+              usage: {
+                properties: {
+                  prompt_tokens: {
+                    type: 'long',
+                  },
+                  completion_tokens: {
+                    type: 'long',
+                  },
+                  total_tokens: {
+                    type: 'long',
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },

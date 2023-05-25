@@ -12,6 +12,8 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { GenAiRunActionResponse } from '@kbn/stack-connectors-plugin/common/gen_ai/types';
 import {
   validateParams,
   validateConfig,
@@ -239,6 +241,20 @@ export class ActionExecutor {
               retry: true,
             };
           }
+        }
+
+        if (rawResult.status === 'ok' && actionTypeId === GEN_AI_CONNECTOR_ID) {
+          const data = rawResult.data as unknown as GenAiRunActionResponse;
+          event.kibana = event.kibana || {};
+          event.kibana = {
+            ...event.kibana,
+            action: {
+              ...event.kibana.action,
+              meta: {
+                usage: data.usage,
+              },
+            },
+          };
         }
 
         eventLogger.stopTiming(event);

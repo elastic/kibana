@@ -208,6 +208,15 @@ export const EventSchema = schema.maybe(
                 uuid: ecsString(),
               })
             ),
+            meta: schema.maybe(
+              schema.object({
+                usage: schema.object({
+                  prompt_tokens: ecsNumber(),
+                  completion_tokens: ecsNumber(),
+                  total_tokens: ecsNumber(),
+                }),
+              })
+            ),
           })
         ),
       })
