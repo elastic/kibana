@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeoJsonProperties } from 'geojson';
+import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Query } from '@kbn/data-plugin/common/query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -23,7 +23,8 @@ export interface IJoinSource extends ISource {
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,
-    inspectorAdapters: Adapters
+    inspectorAdapters: Adapters,
+    featureCollection?: FeatureCollection
   ): Promise<PropertiesMap>;
 
   /*

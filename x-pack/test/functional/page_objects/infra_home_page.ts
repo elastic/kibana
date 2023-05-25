@@ -263,6 +263,18 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return await testSubjects.find('noMetricsDataPrompt');
     },
 
+    async getNoRemoteClusterPrompt() {
+      return await testSubjects.find('infraHostsNoRemoteCluster');
+    },
+
+    async getInfraMissingMetricsIndicesCallout() {
+      return await testSubjects.find('infraIndicesPanelSettingsWarningCallout');
+    },
+
+    async getInfraMissingRemoteClusterIndicesCallout() {
+      return await testSubjects.find('infraIndicesPanelSettingsDangerCallout');
+    },
+
     async openSourceConfigurationFlyout() {
       await testSubjects.click('configureSourceButton');
       await testSubjects.exists('sourceConfigurationFlyout');

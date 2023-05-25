@@ -18,7 +18,7 @@ import { importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { ImportRulesResponse } from '../../../../../../../common/detection_engine/rule_management';
 
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -35,7 +35,6 @@ import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/imp
 import { importRules as importRulesHelper } from '../../../logic/import/import_rules_utils';
 import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
-import type { HapiReadableStream } from '../../../logic/import/hapi_readable_stream';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;

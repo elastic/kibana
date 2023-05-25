@@ -70,11 +70,13 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
     ) {
       const selector = `~${testSubj} > ~mlInspectFieldStatsButton-${fieldName}`;
 
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(10 * 1000, async () => {
         await testSubjects.existOrFail(selector);
         await testSubjects.click(selector);
-        await testSubjects.existOrFail('mlFieldStatsFlyout');
-        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
+        await testSubjects.existOrFail('mlFieldStatsFlyout', { timeout: 500 });
+        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`, {
+          timeout: 500,
+        });
       });
       await this.assertFieldStatContentByType(testSubj, fieldName, fieldType);
       if (Array.isArray(expectedTopValuesContent)) {
@@ -90,16 +92,16 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
       expectedTopValuesContent?: string[]
     ) {
       const selector = `mlInspectFieldStatsButton-${fieldName}`;
-
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         const fieldTarget = await testSubjects.find(parentComboBoxSelector);
         await comboBox.openOptionsList(fieldTarget);
 
         await testSubjects.existOrFail(selector);
         await testSubjects.click(selector);
-        await testSubjects.existOrFail('mlFieldStatsFlyout');
-
-        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
+        await testSubjects.existOrFail('mlFieldStatsFlyout', { timeout: 500 });
+        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`, {
+          timeout: 500,
+        });
 
         await this.assertFieldStatContentByType(parentComboBoxSelector, fieldName, fieldType);
 

@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
-        expect(await testSubjects.exists('unifiedTextLangEditor')).to.be(true);
+        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
-        expect(await testSubjects.exists('shareTopNavButton')).to.be(false);
+        expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(false);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);

@@ -8,14 +8,7 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export type PLATFORM_TYPE =
-  | 'linux'
-  | 'mac'
-  | 'windows'
-  | 'rpm'
-  | 'deb'
-  | 'kubernetes'
-  | 'cloudFormation';
+export type PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb' | 'kubernetes';
 
 export const REDUCED_PLATFORM_OPTIONS: Array<{
   label: string;
@@ -58,14 +51,6 @@ export const REDUCED_PLATFORM_OPTIONS: Array<{
     'data-test-subj': 'platformTypeLinuxDeb',
   },
 ];
-
-export const CLOUD_FORMATION_PLATFORM_OPTION = {
-  id: 'cloudFormation',
-  label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.cloudFormation', {
-    defaultMessage: 'CloudFormation',
-  }),
-  'data-test-subj': 'platformTypeCloudFormation',
-};
 
 export const PLATFORM_OPTIONS = [
   ...REDUCED_PLATFORM_OPTIONS,

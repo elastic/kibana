@@ -50,6 +50,7 @@ export function useFetchHistoricalSummary({
     },
     refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
     refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 
   return {

@@ -6,11 +6,8 @@
  */
 
 import { createAction } from 'redux-actions';
-import {
-  MlCapabilitiesResponse,
-  AnomaliesTableRecord,
-  JobExistResult,
-} from '@kbn/ml-plugin/public';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import type { MlCapabilitiesResponse, JobExistResult } from '@kbn/ml-plugin/public';
 import { createAsyncAction } from './utils';
 import {
   CreateMLJobSuccess,
@@ -46,7 +43,7 @@ export interface AnomalyRecordsParams {
 }
 
 export interface AnomalyRecords {
-  anomalies: AnomaliesTableRecord[];
+  anomalies: MlAnomaliesTableRecord[];
   interval: string;
 }
 

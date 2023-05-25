@@ -90,5 +90,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
     "@kbn/ml-error-utils",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-kibana-theme",
   ],
 }

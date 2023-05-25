@@ -208,6 +208,7 @@ export interface LensEmbeddableDeps {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: {
     canSaveVisualizations: boolean;
+    canOpenVisualizations: boolean;
     canSaveDashboards: boolean;
     navLinks: Capabilities['navLinks'];
     discover: Capabilities['discover'];
@@ -1353,7 +1354,9 @@ export class Embeddable
   private getIsEditable() {
     return (
       this.deps.capabilities.canSaveVisualizations ||
-      (!this.inputIsRefType(this.getInput()) && this.deps.capabilities.canSaveDashboards)
+      (!this.inputIsRefType(this.getInput()) &&
+        this.deps.capabilities.canSaveDashboards &&
+        this.deps.capabilities.canOpenVisualizations)
     );
   }
 

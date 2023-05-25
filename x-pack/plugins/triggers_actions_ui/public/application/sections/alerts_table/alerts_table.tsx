@@ -15,7 +15,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -38,6 +38,12 @@ const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
   fontSize: 's',
+};
+
+const getCellActionsStub = {
+  getCellActions: () => null,
+  visibleCellActions: undefined,
+  disabledCellActions: [],
 };
 
 const basicRenderCellValue = ({
@@ -353,7 +359,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           ecsData: ecsAlert,
         });
       } else if (isLoading) {
-        return <EuiLoadingContent lines={1} />;
+        return <EuiSkeletonText lines={1} />;
       }
       return null;
     },
@@ -379,7 +385,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         dataGridRef,
         pageSize: pagination.pageSize,
       })
-    : { getCellActions: () => null, visibleCellActions: undefined, disabledCellActions: [] };
+    : getCellActionsStub;
 
   const columnsWithCellActions = useMemo(() => {
     if (getCellActions) {

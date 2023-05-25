@@ -27,13 +27,14 @@ import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries'
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
 import * as commonI18n from '../common/translations';
-
+import * as i18n from './translations';
 import { useEntityInfo } from './use_entity';
 import { RiskScoreHeaderContent } from './header_content';
 import { ChartContent } from './chart_content';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { getRiskEntityTranslation } from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -69,9 +70,12 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity, riskEntity);
-
-    return filter ? JSON.stringify(filter.query) : undefined;
+    return filter ? filter : undefined;
   }, [riskEntity, selectedSeverity]);
+
+  const { filterQuery } = useGlobalFilterQuery({
+    extraFilter: severityFilter,
+  });
 
   const timerange = useMemo(
     () => ({
@@ -87,7 +91,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     refetch: refetchKpi,
     inspect: inspectKpi,
   } = useRiskScoreKpi({
-    filterQuery: severityFilter,
+    filterQuery,
     skip: !toggleStatus,
     timerange,
     riskEntity,
@@ -110,7 +114,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     isLicenseValid,
     isModuleEnabled,
   } = useRiskScore({
-    filterQuery: severityFilter,
+    filterQuery,
     skip: !toggleStatus,
     pagination: {
       cursorStart: 0,
@@ -172,7 +176,12 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           id={entity.tableQueryId}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
-          tooltip={commonI18n.HOST_RISK_TABLE_TOOLTIP}
+          tooltip={
+            riskEntity === RiskScoreEntity.host
+              ? i18n.HOST_RISK_TABLE_TOOLTIP
+              : i18n.USER_RISK_TABLE_TOOLTIP
+          }
+          tooltipTitle={commonI18n.RISK_TABLE_TOOLTIP_TITLE}
         >
           <RiskScoreHeaderContent
             entityDocLink={entity.docLink}

@@ -1106,7 +1106,7 @@
             "label": "fields",
             "description": [],
             "signature": [
-              "BulkField[]"
+              "BulkField[] | undefined"
             ],
             "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,

@@ -53,7 +53,7 @@ describe('Slack action params validation', () => {
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         text: [],
-        channels: ['Selected channel is required.'],
+        channels: ['Channel is required.'],
       },
     });
   });

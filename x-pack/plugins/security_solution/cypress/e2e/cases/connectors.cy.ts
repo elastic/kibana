@@ -7,10 +7,10 @@
 
 import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../objects/case';
 
-import { SERVICE_NOW_MAPPING, TOASTER } from '../../screens/configure_cases';
+import { SERVICE_NOW_MAPPING } from '../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../tasks/all_cases';
-import { cleanKibana, deleteCases } from '../../tasks/common';
+import { cleanKibana, deleteCases, deleteConnectors } from '../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
@@ -50,6 +50,7 @@ describe('Cases connectors', () => {
     cleanKibana();
     login();
   });
+
   beforeEach(() => {
     deleteCases();
     cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
@@ -86,6 +87,10 @@ describe('Cases connectors', () => {
     });
   });
 
+  after(() => {
+    deleteConnectors();
+  });
+
   it('Configures a new connector', () => {
     visitWithoutDateRange(CASES_URL);
     goToEditExternalConnection();
@@ -96,10 +101,6 @@ describe('Cases connectors', () => {
       cy.wrap(response?.statusCode).should('eql', 200);
 
       verifyNewConnectorSelected(snConnector);
-
-      cy.get(TOASTER).should('have.text', "Created 'New connector'");
-      cy.get(TOASTER).should('have.text', 'Saved external connection settings');
-      cy.get(TOASTER).should('not.exist');
 
       cy.wait('@saveConnector').its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');

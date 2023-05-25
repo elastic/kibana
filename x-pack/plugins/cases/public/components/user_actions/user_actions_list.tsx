@@ -11,7 +11,7 @@ import { EuiCommentList } from '@elastic/eui';
 import React, { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import type { CaseUserActions } from '../../containers/types';
+import type { UserActionUI } from '../../containers/types';
 import type { UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { isUserActionTypeSupported } from './helpers';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -78,7 +78,7 @@ export type UserActionListProps = Omit<
   | 'statusActionButton'
 > &
   Pick<UserActionBuilderArgs, 'commentRefs' | 'handleManageQuote'> & {
-    caseUserActions: CaseUserActions[];
+    caseUserActions: UserActionUI[];
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
     bottomActions?: EuiCommentProps[];

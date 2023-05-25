@@ -8,6 +8,9 @@ xpack.securitySolution.enabled: false
 ## Enable the Serverless Obsersability plugin
 xpack.serverless.observability.enabled: true
 
+# Onboarding
+xpack.observability_onboarding.ui.enabled: true
+
 ## Configure plugins
 xpack.infra.logs.app_target: discover
 
@@ -16,3 +19,6 @@ uiSettings.overrides.defaultRoute: /app/observability/overview
 
 ## Set the dev project switch current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
+
+## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
+xpack.fleet.agentIdVerificationEnabled: false

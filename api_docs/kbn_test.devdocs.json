@@ -2844,7 +2844,7 @@
             "tags": [],
             "label": "dataArchive",
             "description": [
-              "\nPath to data archive snapshot to run Elasticsearch with.\nTo prepare the the snapshot:\n- run Elasticsearch server\n- index necessary data\n- stop Elasticsearch server\n- go to Elasticsearch folder: cd .es/${ELASTICSEARCH_VERSION}\n- archive data folder: zip -r my_archive.zip data"
+              "\nPath to data archive snapshot to run Elasticsearch with.\nTo prepare the snapshot:\n- run Elasticsearch server\n- index necessary data\n- stop Elasticsearch server\n- go to Elasticsearch folder: cd .es/${ELASTICSEARCH_VERSION}\n- archive data folder: zip -r my_archive.zip data"
             ],
             "signature": [
               "string | undefined"

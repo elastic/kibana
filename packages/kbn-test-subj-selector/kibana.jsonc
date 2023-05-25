@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/test-subj-selector",
-  "owner": "@elastic/kibana-operations",
+  "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],
   "devOnly": true
 }

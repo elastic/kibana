@@ -39,7 +39,7 @@ const CommonUserActionsRt = rt.union([
   AssigneesUserActionRt,
 ]);
 
-export const UserActionsRt = rt.union([
+const UserActionPayloadRt = rt.union([
   CommonUserActionsRt,
   CreateCaseUserActionRt,
   ConnectorUserActionRt,
@@ -55,7 +55,7 @@ const UserActionsWithoutConnectorIdRt = rt.union([
   DeleteCaseUserActionRt,
 ]);
 
-const CaseUserActionBasicRt = rt.intersection([UserActionsRt, UserActionCommonAttributesRt]);
+const CaseUserActionBasicRt = rt.intersection([UserActionPayloadRt, UserActionCommonAttributesRt]);
 const CaseUserActionBasicWithoutConnectorIdRt = rt.intersection([
   UserActionsWithoutConnectorIdRt,
   UserActionCommonAttributesRt,
@@ -69,38 +69,41 @@ const CaseUserActionDeprecatedResponseRt = rt.intersection([
 /**
  * This includes the comment_id but not the action_id or case_id
  */
-const CaseUserActionInjectedAttributesRt = rt.intersection([
+export const UserActionAttributesRt = rt.intersection([
   CaseUserActionBasicRt,
   CaseUserActionInjectedIdsRt,
 ]);
 
-const CaseUserActionResponseRt = rt.intersection([
-  CaseUserActionInjectedAttributesRt,
-  rt.type({
+const UserActionRt = rt.intersection([
+  UserActionAttributesRt,
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
 ]);
 
-const CaseUserActionAttributesRt = CaseUserActionBasicRt;
-export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRt);
+export const UserActionsRt = rt.array(UserActionRt);
 export const CaseUserActionsDeprecatedResponseRt = rt.array(CaseUserActionDeprecatedResponseRt);
 export const CaseUserActionStatsResponseRt = CaseUserActionStatsRt;
 
-export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
   typeof CaseUserActionBasicWithoutConnectorIdRt
 >;
 export type CaseUserActionStatsResponse = rt.TypeOf<typeof CaseUserActionStatsRt>;
-export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt>;
-export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRt>;
+export type UserActions = rt.TypeOf<typeof UserActionsRt>;
+export type UserAction = rt.TypeOf<typeof UserActionRt>;
 export type CaseUserActionsDeprecatedResponse = rt.TypeOf<
   typeof CaseUserActionsDeprecatedResponseRt
 >;
 export type CaseUserActionDeprecatedResponse = rt.TypeOf<typeof CaseUserActionDeprecatedResponseRt>;
-export type CaseUserActionInjectedAttributes = rt.TypeOf<typeof CaseUserActionInjectedAttributesRt>;
+export type UserActionAttributes = rt.TypeOf<typeof UserActionAttributesRt>;
 
-export type UserAction = rt.TypeOf<typeof ActionsRt>;
+/**
+ * This defines the high level category for the user action. Whether the user add, removed, updated something
+ */
+export type ActionCategory = rt.TypeOf<typeof ActionsRt>;
+/**
+ * This defines the type of the user action, meaning what individual action was taken, for example changing the status,
+ * adding an assignee etc.
+ */
 export type UserActionTypes = ActionTypeValues;
-
-export type CaseUserAction = rt.TypeOf<typeof CaseUserActionBasicRt>;

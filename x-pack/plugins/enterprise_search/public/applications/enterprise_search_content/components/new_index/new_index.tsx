@@ -52,7 +52,7 @@ export const NewIndex: React.FC = () => {
       pageHeader={{
         description: i18n.translate('xpack.enterpriseSearch.content.newIndex.pageDescription', {
           defaultMessage:
-            'Create a search optimized Elasticsearch index by selecting an ingestion method',
+            'Create a search optimized Elasticsearch index to store your content. Start by selecting an ingestion method.',
         }),
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.newIndex.pageTitle', {
           defaultMessage: 'Select an ingestion method',

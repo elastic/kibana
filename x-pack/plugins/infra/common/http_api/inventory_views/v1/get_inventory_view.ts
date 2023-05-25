@@ -10,5 +10,3 @@ import * as rt from 'io-ts';
 export const getInventoryViewRequestParamsRT = rt.type({
   inventoryViewId: rt.string,
 });
-
-export type GetInventoryViewRequestParams = rt.TypeOf<typeof getInventoryViewRequestParamsRT>;

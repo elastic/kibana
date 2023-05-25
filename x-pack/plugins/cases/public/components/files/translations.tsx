@@ -12,7 +12,7 @@ export const ACTIONS = i18n.translate('xpack.cases.caseView.files.actions', {
 });
 
 export const ADD_FILE = i18n.translate('xpack.cases.caseView.files.addFile', {
-  defaultMessage: 'Add File',
+  defaultMessage: 'Add file',
 });
 
 export const CLOSE_MODAL = i18n.translate('xpack.cases.caseView.files.closeModal', {
@@ -20,15 +20,15 @@ export const CLOSE_MODAL = i18n.translate('xpack.cases.caseView.files.closeModal
 });
 
 export const DATE_ADDED = i18n.translate('xpack.cases.caseView.files.dateAdded', {
-  defaultMessage: 'Date Added',
+  defaultMessage: 'Date added',
 });
 
 export const DELETE_FILE = i18n.translate('xpack.cases.caseView.files.deleteFile', {
-  defaultMessage: 'Delete File',
+  defaultMessage: 'Delete file',
 });
 
 export const DOWNLOAD_FILE = i18n.translate('xpack.cases.caseView.files.downloadFile', {
-  defaultMessage: 'Download File',
+  defaultMessage: 'Download file',
 });
 
 export const FILES_TABLE = i18n.translate('xpack.cases.caseView.files.filesTable', {

@@ -41,7 +41,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
-  [ConfigKey.PARAMS]: stringToObjectFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: stringToObjectFormatter,
   ...commonFormatters,
   ...tlsFormatters,

@@ -81,29 +81,27 @@ describe('Security Plugin', () => {
           "authz": Object {
             "actions": Actions {
               "alerting": AlertingActions {
-                "prefix": "alerting:version:",
+                "prefix": "alerting:",
               },
               "api": ApiActions {
-                "prefix": "api:version:",
+                "prefix": "api:",
               },
               "app": AppActions {
-                "prefix": "app:version:",
+                "prefix": "app:",
               },
               "cases": CasesActions {
-                "prefix": "cases:version:",
+                "prefix": "cases:",
               },
               "login": "login:",
               "savedObject": SavedObjectActions {
-                "prefix": "saved_object:version:",
+                "prefix": "saved_object:",
               },
               "space": SpaceActions {
-                "prefix": "space:version:",
+                "prefix": "space:",
               },
               "ui": UIActions {
-                "prefix": "ui:version:",
+                "prefix": "ui:",
               },
-              "version": "version:version",
-              "versionNumber": "version",
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
@@ -152,29 +150,27 @@ describe('Security Plugin', () => {
           "authz": Object {
             "actions": Actions {
               "alerting": AlertingActions {
-                "prefix": "alerting:version:",
+                "prefix": "alerting:",
               },
               "api": ApiActions {
-                "prefix": "api:version:",
+                "prefix": "api:",
               },
               "app": AppActions {
-                "prefix": "app:version:",
+                "prefix": "app:",
               },
               "cases": CasesActions {
-                "prefix": "cases:version:",
+                "prefix": "cases:",
               },
               "login": "login:",
               "savedObject": SavedObjectActions {
-                "prefix": "saved_object:version:",
+                "prefix": "saved_object:",
               },
               "space": SpaceActions {
-                "prefix": "space:version:",
+                "prefix": "space:",
               },
               "ui": UIActions {
-                "prefix": "ui:version:",
+                "prefix": "ui:",
               },
-              "version": "version:version",
-              "versionNumber": "version",
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],

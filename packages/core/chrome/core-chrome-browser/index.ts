@@ -29,4 +29,9 @@ export type {
   ChromeStart,
   ChromeStyle,
   ChromeUserBanner,
+  ChromeProjectNavigationLink,
+  ChromeProjectNavigation,
+  ChromeProjectNavigationNode,
+  SideNavCompProps,
+  SideNavComponent,
 } from './src';

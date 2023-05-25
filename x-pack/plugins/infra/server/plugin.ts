@@ -17,7 +17,12 @@ import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import {
+  DISCOVER_APP_TARGET,
+  LOGS_APP_TARGET,
+  LOGS_FEATURE_ID,
+  METRICS_FEATURE_ID,
+} from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
@@ -63,9 +68,12 @@ import { UsageCollector } from './usage/usage_collector';
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
     logs: schema.object({
-      app_target: schema.oneOf([schema.literal('logs-ui'), schema.literal('discover')], {
-        defaultValue: 'logs-ui',
-      }),
+      app_target: schema.oneOf(
+        [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
+        {
+          defaultValue: LOGS_APP_TARGET,
+        }
+      ),
     }),
     alerting: schema.object({
       inventory_threshold: schema.object({

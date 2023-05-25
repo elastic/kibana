@@ -29,7 +29,7 @@
           "\nComposes grouping query and aggregations"
         ],
         "signature": [
-          "({ additionalFilters, from, groupByField, pageNumber, rootAggregations, runtimeMappings, selectedGroupEsTypes, size, sort, statsAggregations, to, }: ",
+          "({ additionalFilters, from, groupByField, pageNumber, rootAggregations, runtimeMappings, size, sort, statsAggregations, to, uniqueValue, }: ",
           "GroupingQueryArgs",
           ") => ",
           "GroupingQuery"
@@ -43,7 +43,7 @@
             "id": "def-common.getGroupingQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  additionalFilters = [],\n  from,\n  groupByField,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  selectedGroupEsTypes,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  to,\n}",
+            "label": "{\n  additionalFilters = [],\n  from,\n  groupByField,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  to,\n  uniqueValue,\n}",
             "description": [],
             "signature": [
               "GroupingQueryArgs"
@@ -241,13 +241,7 @@
         ],
         "signature": [
           "{ isLoading: boolean; data?: ",
-          {
-            "pluginId": "@kbn/securitysolution-grouping",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionGroupingPluginApi",
-            "section": "def-common.GroupingAggregation",
-            "text": "GroupingAggregation"
-          },
+          "ParsedGroupingAggregation",
           "<T> | undefined; activePage: number; itemsPerPage: number; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; renderChildComponent: (groupFilter: ",
           {
             "pluginId": "@kbn/es-query",

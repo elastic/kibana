@@ -16,5 +16,6 @@
   "kbn_references": [
     "@kbn/ecs",
     "@kbn/rule-data-utils",
+    "@kbn/safer-lodash-set",
   ]
 }

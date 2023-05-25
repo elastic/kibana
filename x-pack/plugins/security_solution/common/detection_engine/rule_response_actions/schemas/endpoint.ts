@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../endpoint/service/response_actions/constants';
+import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../endpoint/service/response_actions/constants';
 
 // to enable using RESPONSE_ACTION_API_COMMANDS_NAMES as a type
 function keyObject<T extends readonly string[]>(arr: T): { [K in T[number]]: null } {
@@ -14,6 +14,8 @@ function keyObject<T extends readonly string[]>(arr: T): { [K in T[number]]: nul
 }
 
 export const EndpointParams = t.type({
-  command: t.keyof(keyObject(RESPONSE_ACTION_API_COMMANDS_NAMES)),
+  command: t.keyof(keyObject(ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)),
   comment: t.union([t.string, t.undefined]),
 });
+
+export type EndpointParams = t.TypeOf<typeof EndpointParams>;

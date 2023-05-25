@@ -14,3 +14,25 @@ export const navigateFromKibanaCollapsibleTo = (page: string) => {
 export const openKibanaNavigation = () => {
   cy.get(KIBANA_NAVIGATION_TOGGLE).click();
 };
+
+/**
+ *
+ * @param pathname Path from which you are navigating away
+ *
+ * @description
+ * Function waits until given pathname  is no longer available
+ *
+ * */
+export const waitToNavigateAwayFrom = (pathName: string) => {
+  cy.waitUntil(
+    () =>
+      cy.url().then((urlString) => {
+        const url = new URL(urlString);
+        return url.pathname !== pathName;
+      }),
+    {
+      timeout: 2000,
+      interval: 300,
+    }
+  );
+};

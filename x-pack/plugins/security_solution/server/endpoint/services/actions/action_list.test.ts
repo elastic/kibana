@@ -163,7 +163,24 @@ describe('When using `getActionList()', () => {
           isExpired: false,
           startedAt: '2022-04-27T16:08:47.449Z',
           status: 'successful',
-          outputs: {},
+          outputs: {
+            'agent-a': {
+              content: {
+                code: 'ra_get-file_success_done',
+                contents: [
+                  {
+                    file_name: 'bad_file.txt',
+                    path: '/some/path/bad_file.txt',
+                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+                    size: 1234,
+                    type: 'file',
+                  },
+                ],
+                zip_size: 123,
+              },
+              type: 'json',
+            },
+          },
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,

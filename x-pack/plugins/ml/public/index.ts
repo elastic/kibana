@@ -27,9 +27,7 @@ export const plugin: PluginInitializer<
 
 export type { MlPluginSetup, MlPluginStart };
 export type {
-  AnomaliesTableRecord,
   DataRecognizerConfigResponse,
-  Influencer,
   JobExistResult,
   JobStat,
   MlCapabilitiesResponse,
@@ -44,16 +42,8 @@ export type { AnomalySwimlaneEmbeddableInput } from './embeddables';
 export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables/constants';
 export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';
 
-// Static exports
-export {
-  getSeverityColor,
-  getSeverityType,
-  getFormattedSeverityScore,
-  getSeverity,
-} from '../common/util/anomaly_utils';
 export { ES_CLIENT_TOTAL_HITS_RELATION } from '../common/types/es_client';
 
-export { ANOMALY_SEVERITY } from '../common';
 export type { MlLocator } from './locator';
 export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 

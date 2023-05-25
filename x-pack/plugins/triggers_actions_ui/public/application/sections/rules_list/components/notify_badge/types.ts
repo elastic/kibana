@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { RuleTableItem, SnoozeSchedule } from '../../../../../types';
+import { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
 
 export interface RulesListNotifyBadgeProps {
-  rule: Pick<
-    RuleTableItem,
-    'id' | 'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'isEditable' | 'snoozeSchedule'
-  >;
-  isOpen: boolean;
-  isLoading: boolean;
-  previousSnoozeInterval?: string | null;
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
-  onClose: () => void;
-  onLoading: (isLoading: boolean) => void;
-  onRuleChanged: () => void;
+  /**
+   *  Rule's snooze settings
+   */
+  snoozeSettings: RuleSnoozeSettings | undefined;
+  /**
+   * Displays the component in the loading state. If isLoading = false and snoozeSettings aren't set
+   * and the component is shown in disabled state.
+   */
+  loading?: boolean;
+  /**
+   * Whether the component is disabled or not, string give a disabled reason displayed as a tooltip
+   */
+  disabled?: boolean | string;
+  onRuleChanged: () => void | Promise<void>;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showTooltipInline?: boolean;
@@ -27,5 +30,10 @@ export interface RulesListNotifyBadgeProps {
 
 export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
-  'rule' | 'isLoading' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
->;
+  'snoozeSettings' | 'loading' | 'disabled' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
+> & {
+  /**
+   * Rule's SO id
+   */
+  ruleId: string;
+};

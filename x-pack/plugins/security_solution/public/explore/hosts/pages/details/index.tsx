@@ -190,8 +190,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 }
                 title={detailName}
                 rightSideItems={[
-                  hostOverview.endpoint?.fleetAgentId && (
-                    <ResponderActionButton endpointId={hostOverview.endpoint?.fleetAgentId} />
+                  hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
+                    <ResponderActionButton
+                      endpointId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                    />
                   ),
                 ]}
               />

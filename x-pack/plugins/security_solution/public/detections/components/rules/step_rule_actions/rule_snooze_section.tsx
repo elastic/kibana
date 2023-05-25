@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
 import { RuleSnoozeBadge } from '../../../../detection_engine/rule_management/components/rule_snooze_badge';
 import * as i18n from './translations';
@@ -17,26 +16,14 @@ interface RuleSnoozeSectionProps {
 }
 
 export function RuleSnoozeSection({ ruleId }: RuleSnoozeSectionProps): JSX.Element {
-  const { euiTheme } = useEuiTheme();
-
   return (
-    <section>
-      <EuiText size="s">{i18n.RULE_SNOOZE_DESCRIPTION}</EuiText>
-      <EuiFlexGroup
-        alignItems="center"
-        css={css`
-          margin-top: ${euiTheme.size.s};
-        `}
-      >
-        <EuiFlexItem grow={false}>
-          <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{i18n.SNOOZED_ACTIONS_WARNING}</strong>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </section>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiText size="s">{i18n.RULE_SNOOZE_DESCRIPTION}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

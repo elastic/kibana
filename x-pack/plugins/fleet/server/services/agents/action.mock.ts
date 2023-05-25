@@ -16,6 +16,7 @@ export function createClientMock() {
     _id: 'agent-in-hosted-policy',
     _index: 'index',
     _source: {
+      active: true,
       policy_id: 'hosted-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
     },
@@ -27,6 +28,7 @@ export function createClientMock() {
     _id: 'agent-in-hosted-policy2',
     _index: 'index',
     _source: {
+      active: true,
       policy_id: 'hosted-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
     },
@@ -38,6 +40,7 @@ export function createClientMock() {
     _id: 'agent-in-regular-policy',
     _index: 'index',
     _source: {
+      active: true,
       policy_id: 'regular-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
     },
@@ -49,6 +52,7 @@ export function createClientMock() {
     _id: 'agent-in-regular-policy2',
     _index: 'index',
     _source: {
+      active: true,
       policy_id: 'regular-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
     },
@@ -60,6 +64,7 @@ export function createClientMock() {
     _id: 'agent-in-regular-policy-newer',
     _index: 'index',
     _source: {
+      active: true,
       policy_id: 'regular-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.7.0', upgradeable: true } } },
     },
@@ -71,6 +76,7 @@ export function createClientMock() {
     _id: 'agent-in-regular-policy-newer2',
     _index: 'index',
     _source: {
+      active: true,
       policy_id: 'regular-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.7.0', upgradeable: true } } },
     },
