@@ -15,7 +15,7 @@ import {
   INTEGRATION_PANEL_ID,
   UNCATEGORIZED_STREAMS_PANEL_ID,
 } from './constants';
-import { CurrentPanelId, DataStreamSelectionHandler } from './types';
+import { PanelId, DataStreamSelectionHandler } from './types';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -37,7 +37,7 @@ export const buildIntegrationsTree = ({
 }: IntegrationsTreeParams) => {
   return integrations.reduce(
     (res: IntegrationsTree, integration) => {
-      const entryId: CurrentPanelId = getIntegrationId(integration);
+      const entryId: PanelId = getIntegrationId(integration);
       const { name, version, dataStreams } = integration;
 
       res.items.push({
@@ -73,7 +73,7 @@ export const setIntegrationListSpy = (
   }
 };
 
-export const getSearchStrategy = (panelId: CurrentPanelId) => {
+export const getSearchStrategy = (panelId: PanelId) => {
   if (panelId === UNCATEGORIZED_STREAMS_PANEL_ID) return SearchStrategy.DATA_STREAMS;
   if (panelId === INTEGRATION_PANEL_ID) return SearchStrategy.INTEGRATIONS;
   return SearchStrategy.INTEGRATIONS_DATA_STREAMS;

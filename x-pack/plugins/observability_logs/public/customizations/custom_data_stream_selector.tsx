@@ -7,18 +7,20 @@
 
 import React, { useCallback } from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { DataStream, SearchStrategy } from '../../common/data_streams';
-import { DataStreamSelector, SearchHandler } from '../components/data_stream_selector';
-import { InternalStateProvider, useDataView } from '../utils/internal_state_container_context';
-import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
+import { SearchStrategy } from '../../common/data_streams';
+import {
+  DataStreamSelectionHandler,
+  DataStreamSelector,
+  SearchHandler,
+} from '../components/data_stream_selector';
 import { DataStreamsProvider, useDataStreamsContext } from '../hooks/use_data_streams';
+import { InternalStateProvider, useDataView } from '../hooks/use_data_view';
+import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDataStreamsClient } from '../services/data_streams';
 
 interface CustomDataStreamSelectorProps {
   stateContainer: DiscoverStateContainer;
 }
-
-export type DataStreamSelectionHandler = (stream: DataStream) => void;
 
 export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.

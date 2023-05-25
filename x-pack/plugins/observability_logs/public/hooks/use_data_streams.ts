@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useInterpret, useSelector } from '@xstate/react';
-import createContainer from 'constate';
 import { useCallback } from 'react';
-import { createDataStreamsStateMachine } from '../state_machines/data_streams';
-import { IDataStreamsClient } from '../services/data_streams';
+import createContainer from 'constate';
+import { useInterpret, useSelector } from '@xstate/react';
 import { FindDataStreamsRequestQuery, SortOrder } from '../../common';
+import { IDataStreamsClient } from '../services/data_streams';
+import { createDataStreamsStateMachine } from '../state_machines/data_streams';
 
 interface DataStreamsContextDeps {
   dataStreamsClient: IDataStreamsClient;

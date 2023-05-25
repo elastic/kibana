@@ -10,7 +10,6 @@ import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/
 import React, { useCallback, useMemo, useState } from 'react';
 import { dynamic } from '../../../common/dynamic';
 import type { DataStreamSelectionHandler } from '../../customizations/custom_data_stream_selector';
-import { useBoolean } from '../../hooks/use_boolean';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import {
   contextMenuStyles,
@@ -21,10 +20,11 @@ import {
   uncategorizedLabel,
   UNCATEGORIZED_STREAMS_PANEL_ID,
 } from './constants';
+import { useDataStreamSelector } from './state_machine/use_data_stream_selector';
 import { DataStreamsPopover } from './sub_components/data_streams_popover';
 import { DataStreamSkeleton } from './sub_components/data_streams_skeleton';
 import { SearchControls, useSearchStrategy } from './sub_components/search_controls';
-import { CurrentPanelId, DataStreamSelectorProps } from './types';
+import { PanelId, DataStreamSelectorProps } from './types';
 import { buildIntegrationsTree, setIntegrationListSpy } from './utils';
 
 /**
@@ -34,6 +34,11 @@ const DataStreamsList = dynamic(() => import('./sub_components/data_streams_list
   fallback: <DataStreamSkeleton />,
 });
 const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'));
+
+/**
+ * TODO
+ * - Refactor internal state management to work as a SM
+ */
 
 export function DataStreamSelector({
   dataStreams,
@@ -50,24 +55,24 @@ export function DataStreamSelector({
   onStreamsReload,
   title,
 }: DataStreamSelectorProps) {
-  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+  const { isOpen, togglePopover } = useDataStreamSelector();
 
   const [setSpyRef] = useIntersectionRef({ onIntersecting: onIntegrationsLoadMore });
 
-  const [currentPanel, setCurrentPanel] = useState<CurrentPanelId>(INTEGRATION_PANEL_ID);
+  const [currentPanel, setCurrentPanel] = useState<PanelId>(INTEGRATION_PANEL_ID);
 
   const [search, handleSearch] = useSearchStrategy({ id: currentPanel, onSearch });
 
   const handlePanelChange = ({ panelId }: { panelId: EuiContextMenuPanelId }) => {
-    setCurrentPanel(panelId as CurrentPanelId);
+    setCurrentPanel(panelId as PanelId);
   };
 
   const handleStreamSelection = useCallback<DataStreamSelectionHandler>(
     (dataStream) => {
       onStreamSelected(dataStream);
-      closePopover();
+      togglePopover();
     },
-    [closePopover, onStreamSelected]
+    [togglePopover, onStreamSelected]
   );
 
   const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
@@ -144,8 +149,8 @@ export function DataStreamSelector({
   return (
     <DataStreamsPopover
       title={title}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
+      isOpen={isOpen}
+      closePopover={togglePopover}
       onClick={togglePopover}
     >
       <EuiContextMenuPanel title={selectDatasetLabel}>

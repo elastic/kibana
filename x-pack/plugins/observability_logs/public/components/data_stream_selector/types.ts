@@ -39,13 +39,13 @@ export interface DataStreamSelectorProps {
   onStreamSelected: DataStreamSelectionHandler;
 }
 
-export type CurrentPanelId =
+export type PanelId =
   | typeof INTEGRATION_PANEL_ID
   | typeof UNCATEGORIZED_STREAMS_PANEL_ID
   | IntegrationId;
 
 export interface SearchParams {
-  integrationId?: CurrentPanelId;
+  integrationId?: PanelId;
   name?: string;
   sortOrder?: SortOrder;
   strategy: SearchStrategy;

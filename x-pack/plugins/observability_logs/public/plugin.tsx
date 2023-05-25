@@ -6,6 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { OBSERVABILITY_LOGS_PROFILE_ID } from '../common';
 import { createLazyCustomDataStreamSelector } from './customizations';
 import { DataStreamsService } from './services/data_streams';
 import { ObservabilityLogsClientPluginClass, ObservabilityLogsStartDeps } from './types';
@@ -17,7 +18,7 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
     this.dataStreamsService = new DataStreamsService();
   }
 
-  public setup() {}
+  public setup() { }
 
   public start(core: CoreStart, plugins: ObservabilityLogsStartDeps) {
     const { discover } = plugins;
@@ -33,32 +34,30 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
     /**
      * Replace the DataViewPicker with a custom DataStreamSelector to access only integrations streams
      */
-    discover.customize('observability-logs', async ({ customizations, stateContainer }) => {
-      customizations.set({
-        id: 'search_bar',
-        CustomDataViewPicker: createLazyCustomDataStreamSelector({
-          dataStreamsClient: dataStreamsService.client,
-          stateContainer,
-        }),
-      });
+    discover.customize(
+      OBSERVABILITY_LOGS_PROFILE_ID,
+      async ({ customizations, stateContainer }) => {
+        customizations.set({
+          id: 'search_bar',
+          CustomDataViewPicker: createLazyCustomDataStreamSelector({
+            dataStreamsClient: dataStreamsService.client,
+            stateContainer,
+          }),
+        });
 
-      /**
-       * Hide New, Open and Save settings to prevent working with saved views.
-       */
-      customizations.set({
-        id: 'top_nav',
-        defaultMenu: {
-          new: { disabled: true },
-          open: { disabled: true },
-          save: { disabled: true },
-        },
-      });
-
-      return () => {
-        // eslint-disable-next-line no-console
-        console.log('Cleaning up Logs explorer customizations');
-      };
-    });
+        /**
+         * Hide New, Open and Save settings to prevent working with saved views.
+         */
+        customizations.set({
+          id: 'top_nav',
+          defaultMenu: {
+            new: { disabled: true },
+            open: { disabled: true },
+            save: { disabled: true },
+          },
+        });
+      }
+    );
 
     return pluginStart;
   }
