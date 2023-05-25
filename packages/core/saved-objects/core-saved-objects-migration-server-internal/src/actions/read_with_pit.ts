@@ -106,7 +106,7 @@ export const readWithPit =
       .catch((e) => {
         if (
           e instanceof EsErrors.RequestAbortedError &&
-          e.message.match(/The content length \(\d+\) is bigger than the maximum/) != null
+          /The content length \(\d+\) is bigger than the maximum/.test(e.message)
         ) {
           return Either.left({
             type: 'es_response_too_large' as const,
