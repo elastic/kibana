@@ -21214,8 +21214,6 @@
     "xpack.lens.xyChart.addAnnotationsLayerLabel": "标注",
     "xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp": "标注需要基于时间的图表才能运行。添加日期直方图。",
     "xpack.lens.xyChart.addDataLayerLabel": "可视化",
-    "xpack.lens.xyChart.addLayer": "添加图层",
-    "xpack.lens.xyChart.addLayerTooltip": "使用多个图层以组合可视化类型或可视化不同的数据视图。",
     "xpack.lens.xyChart.addReferenceLineLayerLabel": "参考线",
     "xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp": "添加一些数据以启用参考图层",
     "xpack.lens.xyChart.annotation.hide": "隐藏标注",
