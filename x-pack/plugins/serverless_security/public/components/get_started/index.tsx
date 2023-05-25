@@ -11,18 +11,15 @@ import { CoreStart } from '@kbn/core/public';
 import { ServerlessSecurityPluginStartDependencies } from '../../types';
 import { KibanaServicesProvider } from '../../services';
 import type { GetStartedESSComponentProps, GetStartedESSComponent } from './types';
+import { GetStarted } from './get_started';
 
-// export const getSecurityGetStartedESSComponent = (
-//   core: CoreStart,
-//   pluginsStart: ServerlessSecurityPluginStartDependencies
-// ): GetStartedESSComponent => {
-//   return (_props: GetStartedESSComponentProps) => (
-//     <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
-//       <div>I am a serveless get started page!</div>
-//     </KibanaServicesProvider>
-//   );
-// };
-
-export const getSecurityGetStartedESSComponent = (): GetStartedESSComponent => {
-  return (_props?: GetStartedESSComponentProps) => <div>I am a ess get started page!</div>;
+export const getSecurityGetStartedESSComponent = (
+  core: CoreStart,
+  pluginsStart: ServerlessSecurityPluginStartDependencies
+): GetStartedESSComponent => {
+  return (_props?: GetStartedESSComponentProps) => (
+    <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
+      <GetStarted />
+    </KibanaServicesProvider>
+  );
 };

@@ -13,15 +13,15 @@ import { useKibana } from '../../common/lib/kibana';
 
 export const LandingPage = memo(() => {
   const { getStartedESSComponent } = useKibana().services;
-  const GetStartedESSComponent = useMemo(() => getStartedESSComponent?.(), []);
+  const GetStartedESSComponent = useMemo(
+    () => getStartedESSComponent?.(),
+    [getStartedESSComponent]
+  );
   return (
-    GetStartedESSComponent ?? (
-      <>
-        <>{'Server!!! Kibana'}</>
-        <LandingPageComponent />
-        <SpyRoute pageName={SecurityPageName.landing} />
-      </>
-    )
+    <>
+      {GetStartedESSComponent ?? <LandingPageComponent />}
+      <SpyRoute pageName={SecurityPageName.landing} />
+    </>
   );
 });
 
