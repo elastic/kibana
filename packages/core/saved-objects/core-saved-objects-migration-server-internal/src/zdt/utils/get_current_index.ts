@@ -7,12 +7,23 @@
  */
 
 import { escapeRegExp } from 'lodash';
+import type { Aliases } from '../../model/helpers';
 import type { FetchIndexResponse } from '../../actions';
 
-export const getCurrentIndex = (
-  indices: FetchIndexResponse,
-  indexPrefix: string
-): string | undefined => {
+export const getCurrentIndex = ({
+  indices,
+  aliases,
+  indexPrefix,
+}: {
+  indices: FetchIndexResponse;
+  aliases: Aliases;
+  indexPrefix: string;
+}): string | undefined => {
+  // if there is already a current alias pointing to an index, we reuse the index.
+  if (aliases[indexPrefix]?.startsWith(indexPrefix)) {
+    return aliases[indexPrefix];
+  }
+
   const matcher = new RegExp(`^${escapeRegExp(indexPrefix)}[_](?<counter>\\d+)$`);
 
   let lastCount = -1;
