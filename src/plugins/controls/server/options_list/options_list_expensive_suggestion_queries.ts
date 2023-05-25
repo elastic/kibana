@@ -58,27 +58,16 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         },
       };
       if (searchString) {
-        const filter = wildcardSearch
-          ? {
-              wildcard: {
-                [fieldName]: {
-                  value: `*${searchString}*`,
-                  case_insensitive: true,
-                },
-              },
-            }
-          : {
-              prefix: {
-                [fieldName]: {
-                  value: searchString,
-                  case_insensitive: true,
-                },
-              },
-            };
-
         textOrKeywordQuery = {
           filteredSuggestions: {
-            filter,
+            filter: {
+              [wildcardSearch ? 'wildcard' : 'prefix']: {
+                [fieldName]: {
+                  value: wildcardSearch ? `*${searchString}*` : searchString,
+                  case_insensitive: true,
+                },
+              },
+            },
             aggs: { ...textOrKeywordQuery },
           },
         };

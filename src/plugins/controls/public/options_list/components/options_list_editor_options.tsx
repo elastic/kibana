@@ -31,7 +31,6 @@ const SwitchWithTooltip = ({
   tooltip,
   initialChecked,
   onSwitchChange,
-  ...rest
 }: {
   label: string;
   tooltip: string;
@@ -41,7 +40,7 @@ const SwitchWithTooltip = ({
   const [checked, setChecked] = useState(initialChecked);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" {...rest}>
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <EuiSwitch
           label={label}
@@ -50,7 +49,6 @@ const SwitchWithTooltip = ({
             setChecked(event.target.checked);
             onSwitchChange();
           }}
-          {...rest}
         />
       </EuiFlexItem>
       <EuiFlexItem
