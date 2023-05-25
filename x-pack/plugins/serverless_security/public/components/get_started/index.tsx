@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
 
-import { ServerlessSecurityPluginStartDependencies } from '../../types';
-import { KibanaServicesProvider } from '../../services';
 import type { GetStartedESSComponentProps, GetStartedESSComponent } from './types';
 import { GetStarted } from './get_started';
 
