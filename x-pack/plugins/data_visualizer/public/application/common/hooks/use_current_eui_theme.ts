@@ -13,5 +13,5 @@ export function useCurrentEuiTheme() {
     services: { theme },
   } = useDataVisualizerKibana();
 
-  return useCurrentEuiThemeVars(theme);
+  return useCurrentEuiThemeVars(theme).euiTheme;
 }
