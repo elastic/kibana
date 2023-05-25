@@ -18,6 +18,14 @@ export const getUninstallTokensHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof GetUninstallTokensRequestSchema.query>
 > = async (context, request, response) => {
+  const { agentTamperProtectionEnabled } = appContextService.getExperimentalFeatures();
+  if (!agentTamperProtectionEnabled) {
+    return response.customError({
+      statusCode: 404,
+      body: { message: 'Not Found' },
+    });
+  }
+
   const uninstallTokenService = appContextService.getUninstallTokenService();
   if (!uninstallTokenService) {
     return response.customError({

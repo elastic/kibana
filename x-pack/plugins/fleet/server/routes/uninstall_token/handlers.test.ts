@@ -11,6 +11,7 @@ import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 
 import type { FleetRequestHandlerContext } from '../..';
 
+import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
 import type { GetUninstallTokensRequestSchema } from '../../types/rest_spec/uninstall_token';
@@ -21,6 +22,7 @@ describe('getUninstallTokensHandler', () => {
   let context: FleetRequestHandlerContext;
   let request: KibanaRequest<unknown, TypeOf<typeof GetUninstallTokensRequestSchema.query>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let appContextStartContractMock: MockedFleetAppContext;
   let getAllTokensMock: jest.Mock;
 
   const uninstallTokensFixture = {
@@ -34,7 +36,16 @@ describe('getUninstallTokensHandler', () => {
     response = httpServerMock.createResponseFactory();
     request = httpServerMock.createKibanaRequest();
 
-    appContextService.start(createAppContextStartContractMock());
+    const contractMock = createAppContextStartContractMock();
+    appContextStartContractMock = {
+      ...contractMock,
+      experimentalFeatures: {
+        ...contractMock.experimentalFeatures,
+        agentTamperProtectionEnabled: true,
+      },
+    };
+
+    appContextService.start(appContextStartContractMock);
     getAllTokensMock = appContextService.getUninstallTokenService()?.getAllTokens as jest.Mock;
   });
 
@@ -57,8 +68,9 @@ describe('getUninstallTokensHandler', () => {
   });
 
   it('should return internal error when uninstallTokenService is unavailable', async () => {
+    appContextService.stop();
     appContextService.start({
-      ...createAppContextStartContractMock(),
+      ...appContextStartContractMock,
       // @ts-expect-error
       uninstallTokenService: undefined,
     });
@@ -79,6 +91,24 @@ describe('getUninstallTokensHandler', () => {
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: { message: 'Failed to get uninstall tokens.' },
+    });
+  });
+
+  it('should return 404 if Agent Tamper Protection feature flag is disabled', async () => {
+    appContextService.stop();
+    appContextService.start({
+      ...appContextStartContractMock,
+      experimentalFeatures: {
+        ...appContextStartContractMock.experimentalFeatures,
+        agentTamperProtectionEnabled: false,
+      },
+    });
+
+    await getUninstallTokensHandler(context, request, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 404,
+      body: { message: 'Not Found' },
     });
   });
 });
