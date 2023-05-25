@@ -86,7 +86,7 @@ import { DocumentationPage } from './documentation';
 
 import './index.scss';
 
-type DetailViewPanelName =
+export type DetailViewPanelName =
   | 'overview'
   | 'policies'
   | 'assets'

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { IntegrationCardReleaseLabel } from '../../common/types';
+import type { IntegrationCardReleaseLabel } from '../applications/integrations/sections/epm/screens/home';
 
 const RELEASE_BADGE_LABEL: { [key in Exclude<IntegrationCardReleaseLabel, 'ga'>]: string } = {
   beta: i18n.translate('xpack.fleet.epm.releaseBadge.betaLabel', {
