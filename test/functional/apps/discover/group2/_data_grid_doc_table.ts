@@ -18,7 +18,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'dashboard',
+    'unifiedFieldList',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -228,8 +235,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should add more columns to the table', async function () {
         for (const column of extraColumns) {
-          await PageObjects.discover.clearFieldSearchInput();
-          await PageObjects.discover.findFieldByName(column);
+          await PageObjects.unifiedFieldList.clearFieldSearchInput();
+          await PageObjects.unifiedFieldList.findFieldByName(column);
           await PageObjects.discover.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test the header now
@@ -240,8 +247,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should remove columns from the table', async function () {
         for (const column of extraColumns) {
-          await PageObjects.discover.clearFieldSearchInput();
-          await PageObjects.discover.findFieldByName(column);
+          await PageObjects.unifiedFieldList.clearFieldSearchInput();
+          await PageObjects.unifiedFieldList.findFieldByName(column);
           await PageObjects.discover.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
         }

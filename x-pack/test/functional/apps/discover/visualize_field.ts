@@ -26,6 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'security',
     'spaceSelector',
     'header',
+    'unifiedFieldList',
   ]);
   const monacoEditor = getService('monacoEditor');
 
@@ -58,12 +59,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('shows "visualize" field button', async () => {
-      await PageObjects.discover.clickFieldListItem('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
       await PageObjects.discover.expectFieldListItemVisualize('bytes');
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
-      await PageObjects.discover.findFieldByName('bytes');
+      await PageObjects.unifiedFieldList.findFieldByName('bytes');
       await PageObjects.discover.clickFieldListItemVisualize('bytes');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -79,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         operation: 'is between',
         value: { from: '3500', to: '4000' },
       });
-      await PageObjects.discover.findFieldByName('geo.src');
+      await PageObjects.unifiedFieldList.findFieldByName('geo.src');
       await PageObjects.discover.clickFieldListItemVisualize('geo.src');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -89,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should preserve query in lens', async () => {
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
-      await PageObjects.discover.findFieldByName('geo.dest');
+      await PageObjects.unifiedFieldList.findFieldByName('geo.dest');
       await PageObjects.discover.clickFieldListItemVisualize('geo.dest');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

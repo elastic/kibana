@@ -79,17 +79,6 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
     );
   }
 
-  if (!dataView) {
-    return (
-      <EuiEmptyPrompt
-        iconType="warning"
-        color="warning"
-        title={<h2>{PLUGIN_NAME}</h2>}
-        body={<p>Make sure to create some data views first or install sample data.</p>}
-      />
-    );
-  }
-
   return (
     <EuiPage grow={true}>
       <EuiPageBody paddingSize="s">
@@ -117,39 +106,50 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
               data-test-subj="dataViewSelector"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <navigation.ui.TopNavMenu
-              appName={PLUGIN_ID}
-              showSearchBar={true}
-              useDefaultBehaviors={true}
-              indexPatterns={dataView ? [dataView] : undefined}
+          {dataView ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <navigation.ui.TopNavMenu
+                  appName={PLUGIN_ID}
+                  showSearchBar={true}
+                  useDefaultBehaviors={true}
+                  indexPatterns={dataView ? [dataView] : undefined}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <RootDragDropProvider>
+                  <EuiFlexGroup direction="row" alignItems="stretch">
+                    <EuiFlexItem grow={false}>
+                      <EuiPageSidebar
+                        css={css`
+                          flex: 1;
+                          width: 320px;
+                        `}
+                      >
+                        <FieldListSidebar
+                          services={services}
+                          dataView={dataView}
+                          selectedFieldNames={selectedFieldNames}
+                          onAddFieldToWorkplace={onAddFieldToWorkplace}
+                          onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+                        />
+                      </EuiPageSidebar>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <ExampleDropZone onDropField={onDropFieldToWorkplace} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </RootDragDropProvider>
+              </EuiFlexItem>
+            </>
+          ) : (
+            <EuiEmptyPrompt
+              iconType="warning"
+              color="warning"
+              title={<h2>Select a data view</h2>}
+              body={<p>Make sure to have at least one data view or install sample data.</p>}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <RootDragDropProvider>
-              <EuiFlexGroup direction="row" alignItems="stretch">
-                <EuiFlexItem grow={false}>
-                  <EuiPageSidebar
-                    css={css`
-                      flex: 1;
-                      width: 320px;
-                    `}
-                  >
-                    <FieldListSidebar
-                      services={services}
-                      dataView={dataView}
-                      selectedFieldNames={selectedFieldNames}
-                      onAddFieldToWorkplace={onAddFieldToWorkplace}
-                      onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-                    />
-                  </EuiPageSidebar>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <ExampleDropZone onDropField={onDropFieldToWorkplace} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </RootDragDropProvider>
-          </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPageBody>
     </EuiPage>

@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'share',
     'spaceSelector',
     'header',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -234,7 +235,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
 
@@ -326,7 +327,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
 
@@ -404,7 +405,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         await PageObjects.discover.expectFieldListItemVisualize('bytes');
       });
     });

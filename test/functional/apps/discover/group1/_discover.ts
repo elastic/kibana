@@ -19,7 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -249,7 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldListItemAdd('referer');
         await PageObjects.discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
-        expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
+        expect(await PageObjects.unifiedFieldList.getAllFieldNames()).to.contain('Referer custom');
         const url = await browser.getCurrentUrl();
         expect(url).to.contain('referer');
       });

@@ -16,7 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const fieldEditor = getService('fieldEditor');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
@@ -55,7 +61,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect((await PageObjects.discover.getAllFieldNames()).includes(customLabel)).to.be(true);
+      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).includes(customLabel)).to.be(
+        true
+      );
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
     });
@@ -64,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const field = '_runtimefield';
       await createRuntimeField(field);
       await retry.waitForWithTimeout('fieldNames to include runtimefield', 5000, async () => {
-        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
         return fieldNames.includes(field);
       });
     });
@@ -81,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitForDocTableLoadingComplete();
 
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
-        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
         return fieldNames.includes(newFieldName);
       });
     });
@@ -108,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.removeField(fieldName);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
-        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
         return !fieldNames.includes(fieldName);
       });
     });

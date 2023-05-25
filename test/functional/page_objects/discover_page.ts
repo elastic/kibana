@@ -10,8 +10,6 @@ import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
-type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
-
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -19,6 +17,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly flyout = this.ctx.getService('flyout');
   private readonly header = this.ctx.getPageObject('header');
   private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
+  private readonly unifiedFieldList = this.ctx.getPageObject('unifiedFieldList');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
@@ -43,16 +42,6 @@ export class DiscoverPageObject extends FtrService {
     } else {
       return this.dataGrid;
     }
-  }
-
-  public async findFieldByName(name: string) {
-    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
-    await fieldSearch.type(name);
-  }
-
-  public async clearFieldSearchInput() {
-    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
-    await fieldSearch.clearValue();
   }
 
   public async saveSearch(
@@ -391,24 +380,16 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async getAllFieldNames() {
-    const sidebar = await this.testSubjects.find('discover-sidebar');
-    const $ = await sidebar.parseDomContent();
-    return $('.kbnFieldButton__name')
-      .toArray()
-      .map((field) => $(field).text());
-  }
-
   public async editField(field: string) {
     await this.retry.try(async () => {
-      await this.clickFieldListItem(field);
+      await this.unifiedFieldList.clickFieldListItem(field);
       await this.testSubjects.click(`discoverFieldListPanelEdit-${field}`);
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
   }
 
   public async removeField(field: string) {
-    await this.clickFieldListItem(field);
+    await this.unifiedFieldList.clickFieldListItem(field);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
     await this.retry.waitFor('modal to open', async () => {
       return await this.testSubjects.exists('runtimeFieldDeleteConfirmModal');
@@ -485,71 +466,6 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.click('discoverNoResultsViewAllMatches');
   }
 
-  public async getSidebarAriaDescription(): Promise<string> {
-    return await (
-      await this.testSubjects.find('fieldListGrouped__ariaDescription')
-    ).getAttribute('innerText');
-  }
-
-  public async cleanSidebarLocalStorage(): Promise<void> {
-    await this.browser.setLocalStorageItem('discover.unifiedFieldList.initiallyOpenSections', '{}');
-  }
-
-  public async waitUntilSidebarHasLoaded() {
-    await this.retry.waitFor('sidebar is loaded', async () => {
-      return (await this.getSidebarAriaDescription()).length > 0;
-    });
-  }
-
-  public async doesSidebarShowFields() {
-    return await this.testSubjects.exists('fieldListGroupedFieldGroups');
-  }
-
-  public getSidebarSectionSelector(
-    sectionName: SidebarSectionName,
-    asCSSSelector: boolean = false
-  ) {
-    const testSubj = `fieldListGrouped${sectionName[0].toUpperCase()}${sectionName.substring(
-      1
-    )}Fields`;
-    if (!asCSSSelector) {
-      return testSubj;
-    }
-    return `[data-test-subj="${testSubj}"]`;
-  }
-
-  public async getSidebarSectionFieldNames(sectionName: SidebarSectionName): Promise<string[]> {
-    const elements = await this.find.allByCssSelector(
-      `${this.getSidebarSectionSelector(sectionName, true)} li`
-    );
-
-    if (!elements?.length) {
-      return [];
-    }
-
-    return Promise.all(
-      elements.map(async (element) => await element.getAttribute('data-attr-field'))
-    );
-  }
-
-  public async toggleSidebarSection(sectionName: SidebarSectionName) {
-    return await this.find.clickByCssSelector(
-      `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__iconButton`
-    );
-  }
-
-  public async waitUntilFieldPopoverIsOpen() {
-    await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.find.byCssSelector('[data-popover-open="true"]'));
-    });
-  }
-
-  public async clickFieldListItem(field: string) {
-    await this.testSubjects.click(`field-${field}`);
-
-    await this.waitUntilFieldPopoverIsOpen();
-  }
-
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {
@@ -564,7 +480,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemAdd(field: string) {
-    await this.waitUntilSidebarHasLoaded();
+    await this.unifiedFieldList.waitUntilSidebarHasLoaded();
 
     // a filter check may make sense here, but it should be properly handled to make
     // it work with the _score and _source fields as well
@@ -572,7 +488,7 @@ export class DiscoverPageObject extends FtrService {
       return;
     }
     if (['_score', '_id', '_index'].includes(field)) {
-      await this.toggleSidebarSection('meta'); // expand Meta section
+      await this.unifiedFieldList.toggleSidebarSection('meta'); // expand Meta section
     }
     await this.clickFieldListItemToggle(field);
     const isLegacyDefault = await this.useLegacyTable();
@@ -602,7 +518,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemRemove(field: string) {
-    await this.waitUntilSidebarHasLoaded();
+    await this.unifiedFieldList.waitUntilSidebarHasLoaded();
 
     if (
       !(await this.testSubjects.exists('fieldListGroupedSelectedFields')) ||
@@ -615,7 +531,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemVisualize(fieldName: string) {
-    await this.waitUntilSidebarHasLoaded();
+    await this.unifiedFieldList.waitUntilSidebarHasLoaded();
 
     const field = await this.testSubjects.find(`field-${fieldName}-showDetails`);
     const isActive = await field.elementHasClass('kbnFieldButton-isActive');
@@ -625,7 +541,7 @@ export class DiscoverPageObject extends FtrService {
       await field.click();
     }
 
-    await this.waitUntilFieldPopoverIsOpen();
+    await this.unifiedFieldList.waitUntilFieldPopoverIsOpen();
     const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
     // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
     await this.retry.try(async () => {
@@ -648,7 +564,7 @@ export class DiscoverPageObject extends FtrService {
     const plusFilterTestSubj = `plus-${field}-${value}`;
     if (!(await this.testSubjects.exists(plusFilterTestSubj))) {
       // field has to be open
-      await this.clickFieldListItem(field);
+      await this.unifiedFieldList.clickFieldListItem(field);
     }
     // this.testSubjects.find doesn't handle spaces in the data-test-subj value
     await this.testSubjects.click(plusFilterTestSubj);
@@ -886,7 +802,7 @@ export class DiscoverPageObject extends FtrService {
    * @param fieldName
    * */
   public async dragFieldToTable(fieldName: string) {
-    await this.waitUntilSidebarHasLoaded();
+    await this.unifiedFieldList.waitUntilSidebarHasLoaded();
 
     const from = `dscFieldListPanelField-${fieldName}`;
     await this.find.existsByCssSelector(from);

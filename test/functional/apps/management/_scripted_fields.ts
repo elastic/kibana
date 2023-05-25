@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should see scripted field value in Discover', async function () {
           await PageObjects.common.navigateToApp('discover');
 
-          await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
+          await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName);
           await retry.try(async function () {
             await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
           });
@@ -196,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should filter by scripted field value in Discover', async function () {
-          await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
+          await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName);
           await log.debug('filter by the first value (14) in the expanded scripted field list');
           await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
           await PageObjects.header.waitUntilLoadingHasFinished();
@@ -257,7 +257,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
@@ -299,7 +299,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "bad" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -359,7 +359,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
@@ -372,7 +372,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "true" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -454,7 +454,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
