@@ -24,5 +24,5 @@ import type { GetStartedESSComponentProps, GetStartedESSComponent } from './type
 // };
 
 export const getSecurityGetStartedESSComponent = (): GetStartedESSComponent => {
-  return (_props?: GetStartedESSComponentProps) => <div>I am a serveless get started page!</div>;
+  return (_props?: GetStartedESSComponentProps) => <div>I am a ess get started page!</div>;
 };
