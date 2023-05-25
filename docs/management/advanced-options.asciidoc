@@ -545,10 +545,6 @@ The maximum number of buckets a datasource can return. High numbers can have a n
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
 Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
-[[visualize-enablelabs]]`visualize:enableLabs`::
-Enables users to create, view, and edit experimental visualizations. When disabled,
-only production-ready visualizations are available to users.
-
 [float]
 [[kibana-telemetry-settings]]
 ==== Usage Data

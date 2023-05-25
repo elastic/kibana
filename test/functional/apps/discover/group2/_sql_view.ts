@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
-        expect(await testSubjects.exists('unifiedTextLangEditor')).to.be(true);
+        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);

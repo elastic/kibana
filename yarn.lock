@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@79.0.1":
-  version "79.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-79.0.1.tgz#bb723c961f438df41f5b92292b59c204cd795558"
-  integrity sha512-xCB8a2DaiAIg1qsFgegmXT5niKhL6LKqhD0fCc1ut+BZDPq4XvqagwOdmYRvP9IpYDcS6sP+F89JVF0kaQsXXw==
+"@elastic/eui@80.0.0":
+  version "80.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-80.0.0.tgz#33e1df8a3f193fb6a7a4f7e52a3028983856ba3a"
+  integrity sha512-0xWizIQ/kH9N2n9zOficqXPdRbVxCpHez2ZErnvISAEOneJ6401usI7fILGKrrvR+uyiYnNybfaP3H8HcgDa+g==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -5403,6 +5403,14 @@
   uid ""
 
 "@kbn/testing-embedded-lens-plugin@link:x-pack/examples/testing_embedded_lens":
+  version "0.0.0"
+  uid ""
+
+"@kbn/text-based-editor@link:packages/kbn-text-based-editor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/text-based-languages@link:src/plugins/text_based_languages":
   version "0.0.0"
   uid ""
 

@@ -45,6 +45,7 @@ import {
 } from '../legacy_uptime/routes';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { addSyntheticsParamsRoute } from './settings/add_param';
+import { deleteSyntheticsParamsRoute } from './settings/delete_param';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 import { createNetworkEventsRoute } from './network_events';
@@ -78,6 +79,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsParamsRoute,
   editSyntheticsParamsRoute,
   addSyntheticsParamsRoute,
+  deleteSyntheticsParamsRoute,
   syncParamsSyntheticsParamsRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,

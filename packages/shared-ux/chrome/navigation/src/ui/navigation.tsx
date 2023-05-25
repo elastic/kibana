@@ -34,6 +34,7 @@ interface Props extends ChromeNavigationViewModel {
    * ID of sections to highlight
    */
   activeNavItemId?: string;
+  dataTestSubj?: string; // optional test subject for the navigation
 }
 
 export const Navigation = ({
@@ -163,7 +164,12 @@ export const Navigation = ({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" style={{ overflowY: 'auto' }}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      style={{ overflowY: 'auto' }}
+      data-test-subj={props.dataTestSubj}
+    >
       <EuiFlexItem grow={false}>
         <EuiCollapsibleNavGroup css={{ background: euiTheme.colors.darkestShade, height: '50px' }}>
           <NavHeader />

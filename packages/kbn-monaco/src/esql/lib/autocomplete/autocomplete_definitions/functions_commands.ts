@@ -133,6 +133,21 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'to_string',
+    insertText: 'to_string',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toStringDoc', {
+      defaultMessage: 'Converts to string.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL string = to_string(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'date_format',
     insertText: 'date_format',
     kind: 1,
@@ -156,6 +171,20 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     documentation: {
       value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
         'from index where field="value" | eval year_hired = DATE_TRUNC(hire_date, 1 year)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'auto_bucket',
+    insertText: 'auto_bucket',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.autoBucketDoc', {
+      defaultMessage: `Automatically bucket dates based on a given range and bucket target.`,
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
       ]),
     },
     sortText: 'C',

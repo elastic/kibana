@@ -22937,6 +22937,21 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_DEFEND_PACKAGE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_DEFEND_PACKAGE",
+        "description": [],
+        "signature": [
+          "\"cloud_defend\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
         "type": "string",
         "tags": [],
