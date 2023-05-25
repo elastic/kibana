@@ -37,7 +37,6 @@ export function useTextBasedQueryLanguage({
     columns: [],
     query: undefined,
   });
-  const indexTitle = useRef<string>('');
   const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
@@ -85,6 +84,8 @@ export function useTextBasedQueryLanguage({
         const dataViewObj = await dataViews.create({
           title: indexPatternFromQuery,
         });
+        const { adHocDataViews } = stateContainer.internalState.getState();
+        const prevIndexPattern = adHocDataViews[0]?.title;
         stateContainer.internalState.transitions.setAdHocDataViews([dataViewObj]);
 
         if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
@@ -97,14 +98,12 @@ export function useTextBasedQueryLanguage({
         );
         // no need to reset index to state if it hasn't changed
         const addDataViewToState = Boolean(dataViewObj.id !== index);
-        const queryChanged = indexPatternFromQuery !== indexTitle.current;
+        const queryChanged = indexPatternFromQuery !== prevIndexPattern;
+        console.log({ queryChanged, addDataViewToState });
         if (!addColumnsToState && !queryChanged) {
           return;
         }
-
-        if (queryChanged) {
-          indexTitle.current = indexPatternFromQuery;
-        }
+        console.log('setNextState');
 
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
@@ -113,7 +112,7 @@ export function useTextBasedQueryLanguage({
             viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
           }),
         };
-        stateContainer.appState.replaceUrlState(nextState);
+        await stateContainer.appState.replaceUrlState(nextState);
       } else {
         // cleanup for a "regular" query
         cleanup();

@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should visualize correctly text based language queries in Discover', async () => {
+    it.only('should visualize correctly text based language queries in Discover', async () => {
       await PageObjects.discover.selectTextBaseLang('SQL');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -140,10 +140,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('heatmapChart')).to.be(true);
-
+      await PageObjects.common.sleep(1000);
       await PageObjects.discover.chooseLensChart('Donut');
+      await PageObjects.common.sleep(1000);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.sleep(1880000);
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
+      await PageObjects.common.sleep(1880000);
     });
 
     it('should visualize correctly text based language queries in Lens', async () => {

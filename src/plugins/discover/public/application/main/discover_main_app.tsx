@@ -17,7 +17,6 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
 import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
-import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -48,13 +47,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useAdHocDataViews({ stateContainer, services });
 
-  /**
-   * State changes (data view, columns), when a text base query result is returned
-   */
-  useTextBasedQueryLanguage({
-    dataViews: services.dataViews,
-    stateContainer,
-  });
   /**
    * Start state syncing and fetch data if necessary
    */

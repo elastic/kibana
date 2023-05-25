@@ -48,6 +48,7 @@ export const SuggestionSelector = ({
 
   const onSelectionChange = useCallback(
     (newOptions) => {
+      console.log('onSelectionChange', newOptions);
       const suggestion = newOptions.length
         ? suggestions.find((current) => current.title === newOptions[0].value)
         : activeSuggestion;

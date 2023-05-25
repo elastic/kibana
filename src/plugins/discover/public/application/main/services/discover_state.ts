@@ -15,6 +15,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import {
   DataPublicPluginStart,
+  DataViewsContract,
   noSearchSessionStorageCapabilityMessage,
   QueryState,
   SearchSessionInfoProvider,
@@ -23,7 +24,15 @@ import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/pub
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
-import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  getIndexPatternFromSQLQuery,
+  isOfAggregateQueryType,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
+import { isEqual } from 'lodash';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
@@ -51,6 +60,7 @@ import {
   DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
+import { getValidViewMode } from '../utils/get_valid_view_mode';
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -377,12 +387,19 @@ export function getDiscoverStateContainer({
               },
       }
     );
+    const textBasedUnsubscribe = subscribeTextBasedQueryLang({
+      appStateContainer,
+      dataStateContainer,
+      internalStateContainer,
+      dataViews: services.dataViews,
+    });
 
     return () => {
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
       filterUnsubscribe.unsubscribe();
+      textBasedUnsubscribe();
     };
   };
 
@@ -536,5 +553,100 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
+  };
+}
+const MAX_NUM_OF_COLUMNS = 50;
+
+export function subscribeTextBasedQueryLang({
+  dataViews,
+  dataStateContainer,
+  appStateContainer,
+  internalStateContainer,
+}: {
+  dataViews: DataViewsContract;
+  dataStateContainer: DiscoverDataStateContainer;
+  appStateContainer: DiscoverAppStateContainer;
+  internalStateContainer: DiscoverInternalStateContainer;
+}) {
+  let prev: { query: AggregateQuery | Query | undefined; columns: string[] } = {
+    columns: [],
+    query: undefined,
+  };
+
+  const cleanup = () => {
+    if (prev.query) {
+      // cleanup when it's not a text based query lang
+      prev = {
+        columns: [],
+        query: undefined,
+      };
+    }
+  };
+
+  const subscription = dataStateContainer.data$.documents$.subscribe(async (next) => {
+    const { query, recordRawType } = next;
+    if (!query || next.fetchStatus === FetchStatus.ERROR) {
+      return;
+    }
+    const { columns: stateColumns, viewMode } = appStateContainer.getState();
+    let nextColumns: string[] = [];
+    const isTextBasedQueryLang =
+      recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
+    const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
+    const initialFetch = !prev.columns.length;
+
+    if (isTextBasedQueryLang) {
+      if (hasResults) {
+        // check if state needs to contain column transformation due to a different columns in the resultset
+        const firstRow = next.result![0];
+        const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+        if (!isEqual(firstRowColumns, prev.columns) && !isEqual(query, prev.query)) {
+          prev = { columns: firstRowColumns, query };
+          nextColumns = firstRowColumns;
+        }
+
+        if (firstRowColumns && initialFetch) {
+          prev = { columns: firstRowColumns, query };
+        }
+      }
+      const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
+
+      const dataViewObj = await dataViews.create({
+        title: indexPatternFromQuery,
+      });
+      const { adHocDataViews } = internalStateContainer.getState();
+      const prevIndexPattern = adHocDataViews[0]?.title;
+      internalStateContainer.transitions.setAdHocDataViews([dataViewObj]);
+
+      if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
+        dataViewObj.timeFieldName = '@timestamp';
+      }
+
+      // don't set the columns on initial fetch, to prevent overwriting existing state
+      const addColumnsToState = Boolean(
+        nextColumns.length && (!initialFetch || !stateColumns?.length)
+      );
+      // no need to reset index to state if it hasn't changed
+      const queryChanged = indexPatternFromQuery !== prevIndexPattern;
+      if (!addColumnsToState && !queryChanged) {
+        return;
+      }
+
+      const nextState = {
+        ...(addColumnsToState && { columns: nextColumns }),
+        ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
+          viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
+        }),
+      };
+      await appStateContainer.replaceUrlState(nextState);
+    } else {
+      // cleanup for a "regular" query
+      cleanup();
+    }
+  });
+  return () => {
+    // cleanup for e.g. when savedSearch is switched
+    cleanup();
+    subscription.unsubscribe();
   };
 }
