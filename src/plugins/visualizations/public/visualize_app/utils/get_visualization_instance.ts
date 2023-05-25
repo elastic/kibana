@@ -40,18 +40,12 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   if (vis.data.savedSearchId) {
     try {
       savedSearch = vis.data.savedSearchId
-        ? await savedSearchApi.get(vis.data.savedSearchId)
+        ? // todo this can now throw on saved object conflict - is this okay?
+          await savedSearchApi.get(vis.data.savedSearchId)
         : await savedSearchApi.getNew();
     } catch (e) {
       // skip this catch block
     }
-
-    /*
-    todo why is this outside try/catch?
-    if (savedSearch) {
-      await throwErrorOnSavedSearchUrlConflict(savedSearch);
-    }
-    */
   }
 
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {

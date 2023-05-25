@@ -32,10 +32,8 @@ describe('createSearchItems', () => {
       {
         title: 'not test',
         description: '',
-        // hits: 0,
         columns: ['_source'],
         sort: [],
-        // version: 1,
         kibanaSavedObjectMeta: {
           searchSourceJSON: '',
         },

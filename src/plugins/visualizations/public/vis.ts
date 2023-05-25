@@ -43,14 +43,11 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
     let savedSearch: SavedSearch;
 
     try {
+      // todo note that this will now throw on saved object conflict - is that okay?
       savedSearch = await getSavedSearch().get(savedSearchId);
     } catch (e) {
       return inputSearchSource;
     }
-
-    // todo
-    // why is this error outside of try/catch?
-    // await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
     if (savedSearch?.searchSource) {
       inputSearchSource.setParent(savedSearch.searchSource);

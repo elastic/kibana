@@ -27,13 +27,13 @@ import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
 
 /**
- * Data plugin public Setup contract
+ * Saved search plugin public Setup contract
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedSearchPublicPluginSetup {}
 
 /**
- * Data plugin public Setup contract
+ * Saved search plugin public Setup contract
  */
 export interface SavedSearchPublicPluginStart {
   get: (savedSearchId: string) => ReturnType<typeof getSavedSearch>;
@@ -46,14 +46,14 @@ export interface SavedSearchPublicPluginStart {
 }
 
 /**
- * Data plugin public Setup contract
+ * Saved search plugin public Setup contract
  */
 export interface SavedSearchPublicSetupDependencies {
   contentManagement: ContentManagementPublicSetup;
 }
 
 /**
- * Data plugin public Setup contract
+ * Saved search plugin public Setup contract
  */
 export interface SavedSearchPublicStartDependencies {
   data: DataPublicPluginStart;

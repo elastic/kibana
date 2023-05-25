@@ -24,12 +24,10 @@ interface GetSavedSearchDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
-const getSavedSearchUrlConflictMessage = async (savedSearch: SavedSearch) =>
+const getSavedSearchUrlConflictMessage = async (json: string) =>
   i18n.translate('savedSearch.legacyURLConflict.errorMessage', {
     defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
-    values: {
-      json: savedSearch.sharingSavedObjectProps?.errorJSON,
-    },
+    values: { json },
   });
 
 export const getSavedSearch = async (
@@ -49,7 +47,18 @@ export const getSavedSearch = async (
     throw new Error(`Could not locate that search (id: ${savedSearchId})`);
   }
 
-  // todo check for conflict
+  if (so.meta.outcome === 'conflict') {
+    throw new Error(
+      await getSavedSearchUrlConflictMessage(
+        JSON.stringify({
+          targetType: SAVED_SEARCH_TYPE,
+          sourceId: savedSearchId,
+          targetSpace: (await spaces?.getActiveSpace())?.id,
+        })
+      )
+    );
+  }
+
   const savedSearch = so.item;
 
   const parsedSearchSourceJSON = parseSearchSourceJSON(
@@ -71,22 +80,8 @@ export const getSavedSearch = async (
     tags,
     savedSearch.references,
     await search.searchSource.create(searchSourceValues),
-    {
-      ...so.meta,
-      errorJSON:
-        so.meta.outcome === 'conflict' && spaces
-          ? JSON.stringify({
-              targetType: SAVED_SEARCH_TYPE,
-              sourceId: savedSearchId,
-              targetSpace: (await spaces.getActiveSpace()).id,
-            })
-          : undefined,
-    }
+    so.meta
   );
-
-  if (returnVal.sharingSavedObjectProps?.errorJSON) {
-    throw new Error(await getSavedSearchUrlConflictMessage(returnVal));
-  }
 
   return returnVal;
 };

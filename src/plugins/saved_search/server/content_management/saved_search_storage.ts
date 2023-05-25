@@ -40,14 +40,3 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
     });
   }
 }
-// todo make sure these work
-/*
-: {
-  //grid.columns?: Record<string, DiscoverGridSettingsColumn>;
-};
-*/
-
-/* : {
-  'kibanaSavedObjectMeta'.searchSourceJSON: string;
-};
-*/

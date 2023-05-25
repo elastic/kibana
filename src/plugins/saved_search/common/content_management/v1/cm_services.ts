@@ -22,9 +22,7 @@ const sortSchema = schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 });
 const savedSearchAttributesSchema = schema.object(
   {
     title: schema.string(),
-    // todo might need to take a closer look at this
     sort: schema.oneOf([sortSchema, schema.arrayOf(sortSchema)]),
-    // sort: schema.string(),
     columns: schema.arrayOf(schema.string()),
     description: schema.string(),
     grid: schema.object({
@@ -50,9 +48,7 @@ const savedSearchAttributesSchema = schema.object(
     ),
     hideAggregatedPreview: schema.maybe(schema.boolean()),
     rowHeight: schema.maybe(schema.number()),
-    // check
-    hits: schema.maybe(schema.any()),
-
+    hits: schema.maybe(schema.number()),
     timeRestore: schema.maybe(schema.boolean()),
     timeRange: schema.maybe(
       schema.object({
@@ -68,7 +64,6 @@ const savedSearchAttributesSchema = schema.object(
     ),
     rowsPerPage: schema.maybe(schema.number()),
     breakdownField: schema.maybe(schema.string()),
-    // todo
     version: schema.maybe(schema.number()),
   },
   { unknowns: 'forbid' }

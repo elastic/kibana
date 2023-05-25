@@ -89,30 +89,6 @@ describe('saved_searches_utils', () => {
     });
   });
 
-  /** todo
-  describe('throwErrorOnSavedSearchUrlConflict', () => {
-    test('should throw an error on url conflict', async () => {
-      let error = 'no error';
-
-      try {
-        await throwErrorOnSavedSearchUrlConflict({
-          id: 'id',
-          sharingSavedObjectProps: {
-            outcome: 'conflict',
-            errorJSON: '{}',
-          },
-        } as SavedSearch);
-      } catch (e) {
-        error = e.message;
-      }
-
-      expect(error).toBe(
-        'This search has the same URL as a legacy alias. Disable the alias to resolve this error : {}'
-      );
-    });
-  });
-  */
-
   describe('toSavedSearchAttributes', () => {
     test('should serialize SavedSearch attributes', () => {
       const savedSearch: SavedSearch = {

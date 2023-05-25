@@ -11,7 +11,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { Query, Filter } from '@kbn/es-query';
 import { getToastNotifications, getSavedSearch } from './dependency_cache';
 
-const savedSearchesCache: SavedSearch[] = [];
 let dataViewsContract: DataViewsContract | null = null;
 
 export async function cacheDataViewsContract(dvc: DataViewsContract) {
@@ -25,11 +24,6 @@ export function loadSavedSearches() {
 
 export async function loadSavedSearchById(id: string) {
   return getSavedSearch().get(id);
-  /*
-  const savedObjectsClient = getSavedObjectsClient();
-  const ss = await savedObjectsClient.get('search', id);
-  return ss.error === undefined ? ss : null;
-  */
 }
 
 export async function getDataViewNames() {
@@ -88,16 +82,13 @@ export async function getDataViewAndSavedSearch(savedSearchId: string) {
   return resp;
 }
 
-// todo remove
 export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
   return {
-    // todo this is hacky and miiight break something
     query: savedSearch.searchSource.getField('query')! as Query,
     filter: savedSearch.searchSource.getField('filter') as Filter[],
   };
 }
 
-// todo
 export function getSavedSearchById(id: string): Promise<SavedSearch> {
   return getSavedSearch().get(id);
 }
