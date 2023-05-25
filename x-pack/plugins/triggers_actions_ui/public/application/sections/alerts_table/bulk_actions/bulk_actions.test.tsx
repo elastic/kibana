@@ -219,6 +219,10 @@ describe('AlertsTable.BulkActions', () => {
             },
           ] as BulkActionsConfig[],
         },
+        {
+          id: 1,
+          renderContent: () => <></>,
+        },
       ],
     },
   };
@@ -376,6 +380,10 @@ describe('AlertsTable.BulkActions', () => {
             {
               field: 'kibana.alert.case_ids',
               value: ['test-case'],
+            },
+            {
+              field: 'tags',
+              value: [],
             },
           ],
           ecs: {
@@ -620,6 +628,10 @@ describe('AlertsTable.BulkActions', () => {
                   field: 'kibana.alert.case_ids',
                   value: [],
                 },
+                {
+                  field: 'tags',
+                  value: [],
+                },
               ],
               ecs: {
                 _id: 'alert1',
@@ -844,6 +856,10 @@ describe('AlertsTable.BulkActions', () => {
                     field: 'kibana.alert.case_ids',
                     value: [],
                   },
+                  {
+                    field: 'tags',
+                    value: [],
+                  },
                 ],
                 ecs: {
                   _id: 'alert0',
@@ -864,6 +880,10 @@ describe('AlertsTable.BulkActions', () => {
                   },
                   {
                     field: 'kibana.alert.case_ids',
+                    value: [],
+                  },
+                  {
+                    field: 'tags',
                     value: [],
                   },
                 ],

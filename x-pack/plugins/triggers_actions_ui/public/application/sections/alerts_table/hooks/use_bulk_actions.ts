@@ -182,10 +182,13 @@ export function useBulkActions({
   };
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
 
-  const bulkActions = addItemsToInitalPanel({
-    panels: configBulkActionPanels,
-    items: caseBulkActions,
-  });
+  const bulkActions =
+    caseBulkActions.length !== 0
+      ? addItemsToInitalPanel({
+          panels: configBulkActionPanels,
+          items: caseBulkActions,
+        })
+      : configBulkActionPanels;
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
