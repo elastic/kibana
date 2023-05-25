@@ -15,6 +15,7 @@ import { ctiFactoryTypes } from './cti';
 import { riskScoreFactory } from './risk_score';
 import { usersFactory } from './users';
 import { firstLastSeenFactory } from './last_first_seen';
+import { relatedEntitiesFactory } from './related_entities';
 import { responseActionsFactory } from './response_actions';
 
 export const securitySolutionFactory: Record<
@@ -28,5 +29,6 @@ export const securitySolutionFactory: Record<
   ...ctiFactoryTypes,
   ...riskScoreFactory,
   ...firstLastSeenFactory,
+  ...relatedEntitiesFactory,
   ...responseActionsFactory,
 };

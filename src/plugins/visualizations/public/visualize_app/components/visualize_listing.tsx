@@ -42,6 +42,7 @@ interface VisualizeUserContent extends VisualizationListItem, UserContentCommonS
     description?: string;
     editApp: string;
     editUrl: string;
+    readOnly: boolean;
     error?: string;
   };
 }
@@ -65,6 +66,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
       description: savedObject.description as string,
       editApp: savedObject.editApp as string,
       editUrl: savedObject.editUrl as string,
+      readOnly: savedObject.readOnly as boolean,
       error: savedObject.error as string,
     },
   };
@@ -291,6 +293,9 @@ export const VisualizeListing = () => {
       findItems={fetchItems}
       deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
       editItem={visualizeCapabilities.save ? editItem : undefined}
+      showEditActionForItem={({ attributes: { readOnly } }) =>
+        visualizeCapabilities.save && !readOnly
+      }
       customTableColumn={getCustomColumn()}
       listingLimit={listingLimit}
       initialPageSize={initialPageSize}
@@ -310,8 +315,10 @@ export const VisualizeListing = () => {
       tableListTitle={i18n.translate('visualizations.listing.table.listTitle', {
         defaultMessage: 'Visualize Library',
       })}
-      getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-        getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
+      getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) =>
+        readOnly
+          ? undefined
+          : getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
       }
     >
       {dashboardCapabilities.createNew && (
