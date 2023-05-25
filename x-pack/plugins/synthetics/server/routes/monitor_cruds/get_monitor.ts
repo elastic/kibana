@@ -6,7 +6,6 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
