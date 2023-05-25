@@ -190,6 +190,7 @@ describe('split .kibana index into multiple system indices', () => {
             "cases-connector-mappings",
             "cases-telemetry",
             "cases-user-actions",
+            "composite-slo",
             "config",
             "config-global",
             "connector_token",
