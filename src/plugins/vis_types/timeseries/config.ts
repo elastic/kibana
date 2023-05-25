@@ -11,6 +11,13 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const config = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 
+  readOnly: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.maybe(schema.boolean({ defaultValue: false })),
+    schema.never()
+  ),
+
   /** @deprecated **/
   chartResolution: schema.number({ defaultValue: 150 }),
   /** @deprecated **/
@@ -18,3 +25,7 @@ export const config = schema.object({
 });
 
 export type VisTypeTimeseriesConfig = TypeOf<typeof config>;
+
+export interface VisTypeTimeseriesPublicConfig {
+  readOnly?: boolean;
+}
