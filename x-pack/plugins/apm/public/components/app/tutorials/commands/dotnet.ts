@@ -6,52 +6,42 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  serviceNameHint,
-  secretTokenHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-  apiKeyHint,
-} from './shared_hints';
 
-export const dotnetVariables = {
+export const dotnetVariables = (apiKey?: string) => ({
   apmServiceName: 'ServiceName',
-  secretToken: 'SecretToken',
-  apiKey: 'ApiKey',
+  ...(!apiKey && { secretToken: 'SecretToken' }),
+  ...(apiKey && { apiKey: 'ApiKey' }),
   apmServerUrl: 'ServerUrl',
   apmEnvironment: 'Environment',
-};
+});
 
 export const dotnetHighlightLang = 'dotnet';
 
-const dotnetServiceNameHint = i18n.translate(
-  'xpack.apm.tutorial.dotnetClient.createConfig.commands.defaultServiceName',
-  {
-    defaultMessage: 'Default is the entry assembly of the application.',
-  }
-);
-
 export const dotnetLineNumbers = (apiKey?: string) => ({
   start: 1,
-  highlight: '3, 4, 5, 6',
-  annotations: {
-    3: `${serviceNameHint} ${dotnetServiceNameHint}`,
-    4: apiKey ? apiKeyHint : secretTokenHint,
-    5: serverUrlHint,
-    6: serviceEnvironmentHint,
-  },
+  highlight: '1-2, 4, 6, 8, 10-12',
 });
 
 export const dotnet = `{
   "ElasticApm": {
-    "${dotnetVariables.apmServiceName}": "{{{apmServiceName}}}",
+    /// {{serviceNameHint}} ${i18n.translate(
+      'xpack.apm.tutorial.dotnetClient.createConfig.commands.defaultServiceName',
+      {
+        defaultMessage: 'Default is the entry assembly of the application.',
+      }
+    )}
+    "ServiceName": "{{{apmServiceName}}}",
     {{#apiKey}}
-    "${dotnetVariables.apiKey}": "{{{apiKey}}}",
+    /// {{apiKeyHint}}
+    "ApiKey": "{{{apiKey}}}",
     {{/apiKey}}
     {{^apiKey}}
-    "${dotnetVariables.secretToken}": "{{{secretToken}}}",
+    /// {{secretTokenHint}}
+    "SecretToken": "{{{secretToken}}}",
     {{/apiKey}}
-    "${dotnetVariables.apmServerUrl}": "{{{apmServerUrl}}}",
-    "${dotnetVariables.apmEnvironment}": "{{{apmEnvironment}}}",
+    /// {{{serverUrlHint}}}
+    "ServerUrl": "{{{apmServerUrl}}}",
+    /// {{serviceEnvironmentHint}}
+    "Environment": "{{{apmEnvironment}}}",
   }
 }`;

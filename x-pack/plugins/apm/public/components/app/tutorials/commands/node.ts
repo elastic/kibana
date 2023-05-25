@@ -5,40 +5,20 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  serviceNameHint,
-  secretTokenHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-  apiKeyHint,
-} from './shared_hints';
 
-export const nodeVariables = {
+export const nodeVariables = (apiKey?: string) => ({
   apmServiceName: 'serviceName',
-  secretToken: 'secretToken',
-  apiKey: 'apiKey',
+  ...(!apiKey && { secretToken: 'secretToken' }),
+  ...(apiKey && { apiKey: 'apiKey' }),
   apmServerUrl: 'serverUrl',
   apmEnvironment: 'environment',
-};
+});
 
 export const nodeHighlightLang = 'js';
 
-const nodeServiceNameHint = i18n.translate(
-  'xpack.apm.tutorial.nodeClient.createConfig.commands.serviceName',
-  {
-    defaultMessage: 'Overrides the service name in package.json.',
-  }
-);
-
 export const nodeLineNumbers = (apiKey?: string) => ({
   start: 1,
-  highlight: '3, 5, 7, 9',
-  annotations: {
-    3: `${serviceNameHint} ${nodeServiceNameHint}`,
-    5: apiKey ? apiKeyHint : secretTokenHint,
-    7: serverUrlHint,
-    9: serviceEnvironmentHint,
-  },
+  highlight: '2, 5, 8, 11, 14-15',
 });
 
 export const node = `// ${i18n.translate(
@@ -49,16 +29,27 @@ export const node = `// ${i18n.translate(
   }
 )}
 var apm = require('elastic-apm-node').start({
-  ${nodeVariables.apmServiceName}: '{{{apmServiceName}}}',
+
+  // {{serviceNameHint}} ${i18n.translate(
+    'xpack.apm.tutorial.nodeClient.createConfig.commands.serviceName',
+    {
+      defaultMessage: 'Overrides the service name in package.json.',
+    }
+  )}
+  serviceName: '{{{apmServiceName}}}',
 
   {{#apiKey}}
-  ${nodeVariables.apiKey}: '{{{apiKey}}}',
+  // {{apiKeyHint}}
+  apiKey: '{{{apiKey}}}',
   {{/apiKey}}
   {{^apiKey}}
-  ${nodeVariables.secretToken}: '{{{secretToken}}}',
+  // {{secretTokenHint}}
+  secretToken: '{{{secretToken}}}',
   {{/apiKey}}
 
-  ${nodeVariables.apmServerUrl}: '{{{apmServerUrl}}}',
+  // {{{serverUrlHint}}}
+  serverUrl: '{{{apmServerUrl}}}',
 
-  ${nodeVariables.apmEnvironment}: '{{{apmEnvironment}}}'
+  // {{serviceEnvironmentHint}}
+  environment: '{{{apmEnvironment}}}'
 })`;

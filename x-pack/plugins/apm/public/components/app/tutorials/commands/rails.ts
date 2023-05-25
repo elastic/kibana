@@ -6,53 +6,43 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  serviceNameHint,
-  secretTokenHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-  apiKeyHint,
-} from './shared_hints';
 
-export const railsVariables = {
+export const railsVariables = (apiKey?: string) => ({
   apmServiceName: 'service_name',
-  secretToken: 'secret_token',
-  apiKey: 'api_key',
+  ...(!apiKey && { secretToken: 'secret_token' }),
+  ...(apiKey && { apiKey: 'api_key' }),
   apmServerUrl: 'server_url',
   apmEnvironment: 'environment',
-};
+});
 
 export const railsHighlightLang = 'rb';
 
-const railsServiceNameHint = i18n.translate(
-  'xpack.apm.tutorial.railsClient.createConfig.commands.defaultServiceName',
-  {
-    defaultMessage: 'Defaults to the name of your Rails app.',
-  }
-);
-
 export const railsLineNumbers = (apiKey?: string) => ({
   start: 1,
-  highlight: '3, 5, 7, 9',
-  annotations: {
-    3: `${serviceNameHint} ${railsServiceNameHint}`,
-    5: apiKey ? apiKeyHint : secretTokenHint,
-    7: serverUrlHint,
-    9: serviceEnvironmentHint,
-  },
+  highlight: '4, 7, 10, 13',
 });
 
 export const rails = `# config/elastic_apm.yml:
 
-${railsVariables.apmServiceName}: '{{{apmServiceName}}}'
+# {{serviceNameHint}} ${i18n.translate(
+  'xpack.apm.tutorial.railsClient.createConfig.commands.defaultServiceName',
+  {
+    defaultMessage: 'Defaults to the name of your Rails app.',
+  }
+)}
+service_name: '{{{apmServiceName}}}'
 
 {{#apiKey}}
-${railsVariables.apiKey}: '{{{apiKey}}}'
+# {{apiKeyHint}}
+api_key: '{{{apiKey}}}'
 {{/apiKey}}
 {{^apiKey}}
-${railsVariables.secretToken}: '{{{secretToken}}}'
+# {{secretTokenHint}}
+secret_token: '{{{secretToken}}}'
 {{/apiKey}}
 
-${railsVariables.apmServerUrl}: '{{{apmServerUrl}}}'
+# {{{serverUrlHint}}}
+server_url: '{{{apmServerUrl}}}'
 
-${railsVariables.apmEnvironment}: '{{{apmEnvironment}}}'`;
+# {{serviceEnvironmentHint}}
+environment: '{{{apmEnvironment}}}'`;

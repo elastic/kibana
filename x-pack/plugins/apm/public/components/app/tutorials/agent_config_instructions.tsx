@@ -39,15 +39,9 @@ export function AgentConfigInstructions({
     defaultValues,
   });
 
-  const variables = getApmAgentVariables(variantId);
+  const variables = getApmAgentVariables(variantId, apiKey);
   const lineNumbers = getApmAgentLineNumbers(variantId, apiKey);
   const highlightLang = getApmAgentHighlightLang(variantId);
-
-  if (apiKey) {
-    delete variables.secretToken;
-  } else {
-    delete variables.apiKey;
-  }
 
   return (
     <>
@@ -63,6 +57,7 @@ export function AgentConfigInstructions({
         language={highlightLang || 'bash'}
         data-test-subj="commands"
         lineNumbers={lineNumbers}
+        whiteSpace="pre"
       >
         {commands}
       </EuiCodeBlock>

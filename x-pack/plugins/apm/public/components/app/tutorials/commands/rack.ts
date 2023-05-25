@@ -6,53 +6,43 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  serviceNameHint,
-  secretTokenHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-  apiKeyHint,
-} from './shared_hints';
 
-export const rackVariables = {
+export const rackVariables = (apiKey?: string) => ({
   apmServiceName: 'service_name',
-  secretToken: 'secret_token',
-  apiKey: 'api_key',
+  ...(!apiKey && { secretToken: 'secret_token' }),
+  ...(apiKey && { apiKey: 'api_key' }),
   apmServerUrl: 'server_url',
   apmEnvironment: 'environment',
-};
+});
 
 export const rackHighlightLang = 'rb';
 
-const rackServiceNameHint = i18n.translate(
-  'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
-  {
-    defaultMessage: "Defaults to the name of your Rack app's class.",
-  }
-);
-
 export const rackLineNumbers = (apiKey?: string) => ({
   start: 1,
-  highlight: '3, 5, 7, 9',
-  annotations: {
-    3: `${serviceNameHint} ${rackServiceNameHint}`,
-    5: apiKey ? apiKeyHint : secretTokenHint,
-    7: serverUrlHint,
-    9: serviceEnvironmentHint,
-  },
+  highlight: '4, 7, 10, 13',
 });
 
 export const rack = `# config/elastic_apm.yml:
 
-${rackVariables.apmServiceName}: '{{{apmServiceName}}}'
+# {{serviceNameHint}} ${i18n.translate(
+  'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
+  {
+    defaultMessage: "Defaults to the name of your Rack app's class.",
+  }
+)}
+service_name: '{{{apmServiceName}}}'
 
 {{#apiKey}}
-${rackVariables.apiKey}: '{{{apiKey}}}'
+# {{apiKeyHint}}
+api_key: '{{{apiKey}}}'
 {{/apiKey}}
 {{^apiKey}}
-${rackVariables.secretToken}: '{{{secretToken}}}'
+# {{secretTokenHint}}
+secret_token: '{{{secretToken}}}'
 {{/apiKey}}
 
-${rackVariables.apmServerUrl}: '{{{apmServerUrl}}}'
+# {{{serverUrlHint}}}
+server_url: '{{{apmServerUrl}}}'
 
-${rackVariables.apmEnvironment}: '{{{apmEnvironment}}}'`;
+# {{serviceEnvironmentHint}}
+environment: '{{{apmEnvironment}}}'`;

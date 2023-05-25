@@ -6,40 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  serviceNameHint,
-  secretTokenHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-  apiKeyHint,
-} from './shared_hints';
 
-export const goVariables = {
+export const goVariables = (apiKey?: string) => ({
   apmServiceName: 'ELASTIC_APM_SERVICE_NAME',
-  secretToken: 'ELASTIC_APM_SECRET_TOKEN',
-  apiKey: 'ELASTIC_APM_API_KEY',
+  ...(!apiKey && { secretToken: 'ELASTIC_APM_SECRET_TOKEN' }),
+  ...(apiKey && { apiKey: 'ELASTIC_APM_API_KEY' }),
   apmServerUrl: 'ELASTIC_APM_SERVER_URL',
   apmEnvironment: 'ELASTIC_APM_ENVIRONMENT',
-};
+});
 
 export const goHighlightLang = 'go';
 
-const goServiceNameHint = i18n.translate(
-  'xpack.apm.tutorial.goClient.configure.commands.usedExecutableNameComment',
-  {
-    defaultMessage: 'If not specified, the executable name will be used.',
-  }
-);
-
 export const goLineNumbers = (apiKey?: string) => ({
   start: 1,
-  highlight: '2, 4, 6, 8',
-  annotations: {
-    2: `${serviceNameHint} ${goServiceNameHint}`,
-    4: apiKey ? apiKeyHint : secretTokenHint,
-    6: serverUrlHint,
-    8: serviceEnvironmentHint,
-  },
+  highlight: '4, 7, 10, 13',
 });
 
 export const go = `# ${i18n.translate(
@@ -48,16 +28,27 @@ export const go = `# ${i18n.translate(
     defaultMessage: 'Initialize using environment variables:',
   }
 )}
-export ${goVariables.apmServiceName}={{{apmServiceName}}}
+
+# {{serviceNameHint}} ${i18n.translate(
+  'xpack.apm.tutorial.goClient.configure.commands.usedExecutableNameComment',
+  {
+    defaultMessage: 'If not specified, the executable name will be used.',
+  }
+)}
+export ELASTIC_APM_SERVICE_NAME={{{apmServiceName}}}
 
 {{#apiKey}}
-export ${goVariables.apiKey}={{{apiKey}}}
+# {{apiKeyHint}}
+export ELASTIC_APM_API_KEY={{{apiKey}}}
 {{/apiKey}}
 {{^apiKey}}
-export ${goVariables.secretToken}={{{secretToken}}}
+# {{secretTokenHint}}
+export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
 {{/apiKey}}
 
-export ${goVariables.apmServerUrl}={{{apmServerUrl}}}
+# {{{serverUrlHint}}}
+export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
 
-export ${goVariables.apmEnvironment}={{{apmEnvironment}}}
+# {{serviceEnvironmentHint}}
+export ELASTIC_APM_ENVIRONMENT={{{apmEnvironment}}}
 `;

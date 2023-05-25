@@ -49,6 +49,13 @@ import {
   dotnetHighlightLang,
 } from './dotnet';
 import { php, phpVariables, phpLineNumbers, phpHighlightLang } from './php';
+import {
+  serviceNameHint,
+  serviceEnvironmentHint,
+  serverUrlHint,
+  secretTokenHint,
+  apiKeyHint,
+} from './shared_hints';
 
 const apmAgentCommandsMap: Record<string, string> = {
   java,
@@ -66,17 +73,19 @@ interface Variables {
   [key: string]: string;
 }
 
-const apmAgentVariablesMap: Record<string, Variables> = {
-  java: javaVariables,
-  node: nodeVariables,
-  django: djangoVariables,
-  flask: flaskVariables,
-  rails: railsVariables,
-  rack: rackVariables,
-  go: goVariables,
-  dotnet: dotnetVariables,
-  php: phpVariables,
-};
+const apmAgentVariablesMap: (apiKey?: string) => Record<string, Variables> = (
+  apiKey?: string
+) => ({
+  java: javaVariables(apiKey),
+  node: nodeVariables(apiKey),
+  django: djangoVariables(apiKey),
+  flask: flaskVariables(apiKey),
+  rails: railsVariables(apiKey),
+  rack: rackVariables(apiKey),
+  go: goVariables(apiKey),
+  dotnet: dotnetVariables(apiKey),
+  php: phpVariables(apiKey),
+});
 
 interface LineNumbers {
   [key: string]: string | number | object;
@@ -133,12 +142,17 @@ export function getApmAgentCommands({
     apmServerUrl,
     secretToken,
     apiKey,
+    serviceNameHint,
+    serviceEnvironmentHint,
+    serverUrlHint,
+    secretTokenHint,
+    apiKeyHint,
     ...defaultValues,
   });
 }
 
-export function getApmAgentVariables(variantId: string) {
-  return apmAgentVariablesMap[variantId];
+export function getApmAgentVariables(variantId: string, apiKey?: string) {
+  return apmAgentVariablesMap(apiKey)[variantId];
 }
 
 export function getApmAgentLineNumbers(variantId: string, apiKey?: string) {

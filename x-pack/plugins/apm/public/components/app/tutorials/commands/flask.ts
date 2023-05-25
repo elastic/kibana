@@ -6,33 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  serviceNameHint,
-  secretTokenHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-  apiKeyHint,
-} from './shared_hints';
 
-export const flaskVariables = {
+export const flaskVariables = (apiKey?: string) => ({
   apmServiceName: 'SERVICE_NAME',
-  secretToken: 'SECRET_TOKEN',
-  apiKey: 'API_KEY',
+  ...(!apiKey && { secretToken: 'SECRET_TOKEN' }),
+  ...(apiKey && { apiKey: 'API_KEY' }),
   apmServerUrl: 'SERVER_URL',
   apmEnvironment: 'ENVIRONMENT',
-};
+});
 
 export const flaskHighlightLang = 'py';
 
 export const flaskLineNumbers = (apiKey?: string) => ({
   start: 1,
-  highlight: '2-4, 7-18',
-  annotations: {
-    9: serviceNameHint,
-    11: apiKey ? apiKeyHint : secretTokenHint,
-    13: serverUrlHint,
-    15: serviceEnvironmentHint,
-  },
+  highlight: '2-4, 7-8, 10, 13, 16, 19-22',
 });
 
 export const flask = `# ${i18n.translate(
@@ -53,18 +40,23 @@ apm = ElasticAPM(app)
 )}
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {
-  '${flaskVariables.apmServiceName}': '{{{apmServiceName}}}',
+  # {{serviceNameHint}}
+  'SERVICE_NAME': '{{{apmServiceName}}}',
 
   {{#apiKey}}
-  '${flaskVariables.apiKey}': '{{{apiKey}}}',
+  # {{apiKeyHint}}
+  'API_KEY': '{{{apiKey}}}',
   {{/apiKey}}
   {{^apiKey}}
-  '${flaskVariables.secretToken}': '{{{secretToken}}}',
+  # {{secretTokenHint}}
+  'SECRET_TOKEN': '{{{secretToken}}}',
   {{/apiKey}}
 
-  '${flaskVariables.apmServerUrl}': '{{{apmServerUrl}}}',
+  # {{{serverUrlHint}}}
+  'SERVER_URL': '{{{apmServerUrl}}}',
 
-  '${flaskVariables.apmEnvironment}': '{{{apmEnvironment}}}',
+  {{serviceEnvironmentHint}}
+  'ENVIRONMENT': '{{{apmEnvironment}}}',
 }
 
 apm = ElasticAPM(app)`;

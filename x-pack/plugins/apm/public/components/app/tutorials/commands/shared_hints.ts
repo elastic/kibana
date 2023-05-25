@@ -27,8 +27,7 @@ export const apiKeyHint = i18n.translate(
   'xpack.apm.tutorial.shared_clients.configure.commands.apiKeyHint',
   {
     defaultMessage:
-      'Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server.\n' +
-      'Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.',
+      'Use if APM Server requires an API Key. This is used to ensure that only your agents can send data to your APM server. Agents can use API keys as a replacement of secret token, APM server can have multiple API keys. When both secret token and API key are used, API key has priority and secret token is ignored.',
   }
 );
 export const serverUrlHint = i18n.translate(

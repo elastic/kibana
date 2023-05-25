@@ -6,72 +6,60 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  serviceNameHint,
-  secretTokenHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-  apiKeyHint,
-} from './shared_hints';
 
-export const djangoVariables = {
+export const djangoVariables = (apiKey?: string) => ({
   apmServiceName: 'SERVICE_NAME',
-  secretToken: 'SECRET_TOKEN',
-  apiKey: 'API_KEY',
+  ...(!apiKey && { secretToken: 'SECRET_TOKEN' }),
+  ...(apiKey && { apiKey: 'API_KEY' }),
   apmServerUrl: 'SERVER_URL',
   apmEnvironment: 'ENVIRONMENT',
-};
+});
 
 export const djangoHighlightLang = 'py';
 
-const djangoAddAgentComment = i18n.translate(
-  'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
-  {
-    defaultMessage: 'Add the agent to installed apps',
-  }
-);
-
-const djangoTracingMiddlewareComment = i18n.translate(
-  'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',
-  {
-    defaultMessage: 'Add our tracing middleware to send performance metrics',
-  }
-);
-
 export const djangoLineNumbers = (apiKey?: string) => ({
   start: 1,
-  highlight: '1-4, 7, 9, 11, 13, 16-19',
-  annotations: {
-    2: djangoAddAgentComment,
-    7: serviceNameHint,
-    9: apiKey ? apiKeyHint : secretTokenHint,
-    11: serverUrlHint,
-    13: serviceEnvironmentHint,
-    17: djangoTracingMiddlewareComment,
-  },
+  highlight: '1, 3, 5, 7, 9, 12, 15, 18-19,  21, 23, 25',
 });
 
 export const django = `INSTALLED_APPS = (
+  # ${i18n.translate(
+    'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
+    {
+      defaultMessage: 'Add the agent to installed apps',
+    }
+  )}
   'elasticapm.contrib.django',
   # ...
 )
 
 ELASTIC_APM = {
-  '${djangoVariables.apmServiceName}': '{{{apmServiceName}}}',
+  # {{serviceNameHint}}
+  'SERVICE_NAME': '{{{apmServiceName}}}',
 
   {{#apiKey}}
-  '${djangoVariables.apiKey}': '{{{apiKey}}}',
+  # {{apiKeyHint}}
+  'API_KEY': '{{{apiKey}}}',
   {{/apiKey}}
   {{^apiKey}}
-  '${djangoVariables.secretToken}': '{{{secretToken}}}',
+  # {{secretTokenHint}}
+  'SECRET_TOKEN': '{{{secretToken}}}',
   {{/apiKey}}
 
-  '${djangoVariables.apmServerUrl}': '{{{apmServerUrl}}}',
+  # {{{serverUrlHint}}}
+  'SERVER_URL': '{{{apmServerUrl}}}',
 
-  '${djangoVariables.apmEnvironment}': '{{{apmEnvironment}}}',
+  # {{serviceEnvironmentHint}}
+  'ENVIRONMENT': '{{{apmEnvironment}}}',
 }
 
 MIDDLEWARE = (
+  # ${i18n.translate(
+    'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',
+    {
+      defaultMessage: 'Add our tracing middleware to send performance metrics',
+    }
+  )}
   'elasticapm.contrib.django.middleware.TracingMiddleware',
   #...
 )`;

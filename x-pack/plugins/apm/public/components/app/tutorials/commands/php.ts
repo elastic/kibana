@@ -4,44 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  serviceNameHint,
-  secretTokenHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-  apiKeyHint,
-} from './shared_hints';
-
-export const phpVariables = {
+export const phpVariables = (apiKey?: string) => ({
   apmServiceName: 'elastic_apm.service_name',
-  secretToken: 'elastic_apm.secret_token',
-  apiKey: 'elastic_apm.api_key',
+  ...(!apiKey && { secretToken: 'elastic_apm.secret_token' }),
+  ...(apiKey && { apiKey: 'elastic_apm.api_key' }),
   apmServerUrl: 'elastic_apm.server_url',
   apmEnvironment: 'elastic_apm.environment',
-};
+});
 
 export const phpHighlightLang = 'php';
 
 export const phpLineNumbers = (apiKey?: string) => ({
   start: 1,
-  highlight: '1, 3, 5, 7',
-  annotations: {
-    1: serviceNameHint,
-    3: apiKey ? apiKeyHint : secretTokenHint,
-    5: serverUrlHint,
-    7: serviceEnvironmentHint,
-  },
+  highlight: '2, 5, 8, 11',
 });
 
-export const php = `${phpVariables.apmServiceName}="{{{apmServiceName}}}"
+export const php = `# {{serviceNameHint}}
+elastic_apm.service_name="{{{apmServiceName}}}"
 
 {{#apiKey}}
-${phpVariables.apiKey}="{{{apiKey}}}"
+# {{apiKeyHint}}
+elastic_apm.api_key="{{{apiKey}}}"
 {{/apiKey}}
 {{^apiKey}}
-${phpVariables.secretToken}="{{{secretToken}}}"
+# {{secretTokenHint}}
+elastic_apm.secret_token="{{{secretToken}}}"
 {{/apiKey}}
 
-${phpVariables.apmServerUrl}="{{{apmServerUrl}}}"
+# {{serverUrlHint}}
+elastic_apm.server_url="{{{apmServerUrl}}}"
 
-${phpVariables.apmEnvironment}="{{{apmEnvironment}}}"`;
+# {{serviceEnvironmentHint}}
+elastic_apm.environment="{{{apmEnvironment}}}"`;
