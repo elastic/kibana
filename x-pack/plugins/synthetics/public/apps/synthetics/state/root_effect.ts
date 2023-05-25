@@ -13,6 +13,7 @@ import { executeEsQueryEffect } from './elasticsearch';
 import {
   fetchAlertConnectorsEffect,
   fetchDynamicSettingsEffect,
+  fetchLocationMonitorsEffect,
   setDynamicSettingsEffect,
 } from './settings/effects';
 import { syncGlobalParamsEffect } from './settings';
@@ -47,6 +48,7 @@ export const rootEffect = function* root(): Generator {
     fork(fetchPingStatusesEffect),
     fork(fetchAgentPoliciesEffect),
     fork(fetchDynamicSettingsEffect),
+    fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),
     fork(fetchAlertConnectorsEffect),
     fork(syncGlobalParamsEffect),
