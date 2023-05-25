@@ -134,7 +134,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
         }
         return 0;
       })
-      .filter(({ hidden }: BaseVisType) => !hidden);
+      .filter(({ disableCreate }: BaseVisType) => !disableCreate);
 
   const visTypeAliases = visualizationsService
     .getAliases()

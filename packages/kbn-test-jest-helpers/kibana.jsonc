@@ -2,5 +2,5 @@
   "type": "shared-common",
   "id": "@kbn/test-jest-helpers",
   "devOnly": true,
-  "owner": "@elastic/kibana-operations"
+  "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],
 }
