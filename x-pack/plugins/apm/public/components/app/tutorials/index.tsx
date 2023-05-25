@@ -37,15 +37,20 @@ export function Tutorials() {
     try {
       const privileges: PrivilegeType[] = [PrivilegeType.EVENT];
 
-      const { agentKey } = await callApmApi('POST /api/apm/agent_keys', {
-        signal: null,
-        params: {
-          body: {
-            name: `onboarding-${(Math.random() + 1).toString(36).substring(7)}`,
-            privileges,
+      const { agentKey } = await callApmApi(
+        'POST /api/apm/agent_keys 2023-05-22',
+        {
+          signal: null,
+          params: {
+            body: {
+              name: `onboarding-${(Math.random() + 1)
+                .toString(36)
+                .substring(7)}`,
+              privileges,
+            },
           },
-        },
-      });
+        }
+      );
 
       setApiKeyAndId({
         apiKey: agentKey.api_key,
