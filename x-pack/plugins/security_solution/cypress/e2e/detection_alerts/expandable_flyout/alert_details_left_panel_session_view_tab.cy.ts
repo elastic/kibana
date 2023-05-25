@@ -40,6 +40,6 @@ describe.skip(
         .and('contain.text', 'No process events found for this query');
     });
 
-    it('should display session view component', () => {});
+    // it('should display session view component', () => {});
   }
 );

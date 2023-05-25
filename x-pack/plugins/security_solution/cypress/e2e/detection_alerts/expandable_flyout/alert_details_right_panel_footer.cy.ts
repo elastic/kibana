@@ -173,7 +173,7 @@ describe.skip(
 
     // TODO figure out why isolate host isn't showing up in the dropdown
     //  https://github.com/elastic/security-team/issues/6302
-    it.skip('should isolate host', () => {});
+    // it.skip('should isolate host', () => {});
 
     // TODO this will change when respond is improved
     //  https://github.com/elastic/security-team/issues/6303
