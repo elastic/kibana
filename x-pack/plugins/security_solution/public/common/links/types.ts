@@ -84,12 +84,6 @@ export interface LinkItem {
    */
   id: SecurityPageName;
   /**
-   * This prop is set automatically using the upsell service.
-   * The link will be rendered but shadowed in the navigation,
-   * it will be accessible but the page will display an upsell placeholder.
-   */
-  isUpsell?: boolean;
-  /**
    * Displays the "Beta" badge. Defaults to false.
    */
   isBeta?: boolean;
@@ -156,7 +150,6 @@ export interface NavigationLink {
   title: string;
   skipUrlState?: boolean;
   unauthorized?: boolean;
-  isUpsell?: boolean;
   isBeta?: boolean;
   betaOptions?: {
     text: string;
