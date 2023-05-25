@@ -174,7 +174,6 @@ export const createPureIntegrationsStateMachine = (
         hasMoreIntegrations: (context) => Boolean(context.search.searchAfter),
         isStreamSearch: (context) =>
           context.search.strategy === SearchStrategy.INTEGRATIONS_DATA_STREAMS,
-        isRequestCached: (context) => context.cache.has(context.search),
       },
       delays: {
         SEARCH_DELAY: (_context, event) => {
@@ -187,7 +186,7 @@ export const createPureIntegrationsStateMachine = (
   );
 
 export interface IntegrationsStateMachineDependencies {
-  initialContext?: IntegrationsContext;
+  initialContext?: DefaultIntegrationsContext;
   dataStreamsClient: IDataStreamsClient;
 }
 
