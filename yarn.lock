@@ -4574,6 +4574,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-kibana-theme@link:x-pack/packages/ml/kibana_theme":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-local-storage@link:x-pack/packages/ml/local_storage":
   version "0.0.0"
   uid ""

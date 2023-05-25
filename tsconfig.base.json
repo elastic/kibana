@@ -918,6 +918,8 @@
       "@kbn/ml-is-defined/*": ["x-pack/packages/ml/is_defined/*"],
       "@kbn/ml-is-populated-object": ["x-pack/packages/ml/is_populated_object"],
       "@kbn/ml-is-populated-object/*": ["x-pack/packages/ml/is_populated_object/*"],
+      "@kbn/ml-kibana-theme": ["x-pack/packages/ml/kibana_theme"],
+      "@kbn/ml-kibana-theme/*": ["x-pack/packages/ml/kibana_theme/*"],
       "@kbn/ml-local-storage": ["x-pack/packages/ml/local_storage"],
       "@kbn/ml-local-storage/*": ["x-pack/packages/ml/local_storage/*"],
       "@kbn/ml-nested-property": ["x-pack/packages/ml/nested_property"],
