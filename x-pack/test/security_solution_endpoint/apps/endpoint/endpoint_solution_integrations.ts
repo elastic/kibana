@@ -63,6 +63,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let timeline: TimelineResponse;
 
       before(async () => {
+        log.info(
+          `Creating timeline for events from host: ${indexedData.hosts[0].host.hostname} (agent id: ${indexedData.hosts[0].agent.id})`
+        );
         timeline = await timelineTestService.createTimelineForEndpointAlerts(
           'endpoint in timeline',
           {

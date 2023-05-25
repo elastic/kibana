@@ -107,11 +107,25 @@ export class TimelinePageObject extends FtrService {
   }
 
   /**
+   * Check to see if the timeline has events in the list
+   */
+  async hasEvents(): Promise<boolean> {
+    const eventRows = await this.testSubjects.findService.allByCssSelector(
+      `${testSubjSelector(TIMELINE_MODAL_PAGE_TEST_SUBJ)} ${testSubjSelector('event')}`
+    );
+
+    return eventRows.length > 0;
+  }
+
+  /**
    * Waits for events to be displayed in the timeline. It will click on the "Refresh" button to trigger a data fetch
    * @param timeoutMs
    */
   async waitForEvents(timeoutMs?: number): Promise<void> {
-    let count = 1;
+    if (await this.hasEvents()) {
+      this.logger.info(`Timeline already has events displayed`);
+      return;
+    }
 
     await this.retry.waitForWithTimeout(
       'waiting for events to show up on timeline',
@@ -119,13 +133,7 @@ export class TimelinePageObject extends FtrService {
       async (): Promise<boolean> => {
         await this.clickRefresh();
 
-        this.logger.info(`Checking if table has data (iteration: ${count++})...`);
-
-        const allEventRows = await this.testSubjects.findService.allByCssSelector(
-          `${testSubjSelector(TIMELINE_MODAL_PAGE_TEST_SUBJ)} ${testSubjSelector('event')}`
-        );
-
-        return Boolean(allEventRows.length);
+        return this.hasEvents();
       }
     );
   }
