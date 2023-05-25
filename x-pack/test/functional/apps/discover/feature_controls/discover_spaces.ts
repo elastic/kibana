@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'security',
     'spaceSelector',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');

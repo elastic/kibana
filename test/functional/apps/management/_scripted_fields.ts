@@ -41,6 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visualize',
     'discover',
     'timePicker',
+    'unifiedFieldList',
   ]);
 
   describe('scripted fields', function () {
