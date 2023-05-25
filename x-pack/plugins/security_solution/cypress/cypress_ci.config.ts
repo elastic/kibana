@@ -24,6 +24,5 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   e2e: {
     baseUrl: 'http://localhost:5601',
-    excludeSpecPattern: './cypress/e2e/investigations/**/*.cy.ts',
   },
 });

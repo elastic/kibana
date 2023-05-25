@@ -47,7 +47,7 @@ import {
   toggleOverviewTabInsightsSection,
   toggleOverviewTabVisualizationsSection,
 } from '../../../../tasks/document_expandable_flyout';
-import { cleanKibana } from '../../../../../tasks/common';
+import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
