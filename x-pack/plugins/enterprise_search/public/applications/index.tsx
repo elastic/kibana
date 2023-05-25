@@ -76,7 +76,9 @@ export const renderApp = (
     setChromeIsVisible: core.chrome.setIsVisible,
     setDocTitle: core.chrome.docTitle.change,
     renderHeaderActions: (HeaderActions) =>
-      params.setHeaderActionMenu((el) => renderHeaderActions(HeaderActions, store, el)),
+      params.setHeaderActionMenu(
+        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store) : undefined
+      ),
   });
   const unmountLicensingLogic = mountLicensingLogic({
     license$: plugins.licensing.license$,
