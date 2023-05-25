@@ -11,8 +11,8 @@ import '@testing-library/jest-dom';
 import type { LeftPanelContext } from '../context';
 import { LeftFlyoutContext } from '../context';
 import { rawEventData, TestProviders } from '../../../common/mock';
-import { RESPONSES_DETAILS_TEST_ID, RESPONSES_EMPTY_TEST_ID } from './test_ids';
-import { ResponsesDetails } from './responses_details';
+import { RESPONSE_DETAILS_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
+import { ResponseDetails } from './response_details';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../common/hooks/use_experimental_features');
@@ -81,12 +81,12 @@ const renderSUT = (contextValue: LeftPanelContext) =>
   render(
     <TestProviders>
       <LeftFlyoutContext.Provider value={contextValue}>
-        <ResponsesDetails />
+        <ResponseDetails />
       </LeftFlyoutContext.Provider>
     </TestProviders>
   );
 
-describe('<ResponsesDetails />', () => {
+describe('<ResponseDetails />', () => {
   let featureFlags: { endpointResponseActionsEnabled: boolean; responseActionsEnabled: boolean };
 
   beforeEach(() => {
@@ -102,11 +102,11 @@ describe('<ResponsesDetails />', () => {
   it('should render the view with response actions', () => {
     const wrapper = renderSUT(contextWithResponseActions);
 
-    expect(wrapper.getByTestId(RESPONSES_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
-    expect(wrapper.queryByTestId(RESPONSES_EMPTY_TEST_ID)).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId(RESPONSE_EMPTY_TEST_ID)).not.toBeInTheDocument();
   });
   it('should render the view with osquery only', () => {
     featureFlags.responseActionsEnabled = true;
@@ -114,17 +114,17 @@ describe('<ResponsesDetails />', () => {
 
     const wrapper = renderSUT(contextWithResponseActions);
 
-    expect(wrapper.getByTestId(RESPONSES_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('responseActionsViewWrapper')).not.toBeInTheDocument();
     expect(wrapper.getByTestId('osqueryViewWrapper')).toBeInTheDocument();
   });
   it('should render the empty information', () => {
     const wrapper = renderSUT(defaultContextValue);
 
-    expect(wrapper.getByTestId(RESPONSES_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('responseActionsViewWrapper')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
-    expect(wrapper.getByTestId(RESPONSES_EMPTY_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 });

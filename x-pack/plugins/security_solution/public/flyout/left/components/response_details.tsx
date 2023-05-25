@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { RESPONSES_DETAILS_TEST_ID, RESPONSES_EMPTY_TEST_ID } from './test_ids';
+import { RESPONSE_DETAILS_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type {
   ExpandedEventFieldsObject,
@@ -20,49 +20,49 @@ import { useOsqueryTab } from '../../../common/components/event_details/osquery_
 import { useResponseActionsView } from '../../../common/components/event_details/response_actions_view';
 import * as i18n from './translations';
 
-export const RESPONSES_TAB_ID = 'responses-details';
+export const RESPONSE_TAB_ID = 'response-details';
 
 const InlineBlock = styled.div`
   display: inline-block;
   line-height: 1.7em;
 `;
 
-export const ResponsesDetails: React.FC = () => {
+export const ResponseDetails: React.FC = () => {
   const { data, ecs } = useLeftPanelContext();
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
-  const expandedEventFieldsObject = expandDottedObject(
-    (data as RawEventData).fields
-  ) as ExpandedEventFieldsObject;
+  const expandedEventFieldsObject = data
+    ? (expandDottedObject((data as RawEventData).fields) as ExpandedEventFieldsObject)
+    : undefined;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
-  const responseActionsTab = useResponseActionsView({
+  const responseActionsView = useResponseActionsView({
     rawEventData: data,
     ecsData: ecs,
     isTab: false,
   });
-  const osqueryTab = useOsqueryTab({
+  const osqueryView = useOsqueryTab({
     rawEventData: data,
     ecsData: ecs,
     isTab: false,
   });
 
   return (
-    <div data-test-subj={RESPONSES_DETAILS_TEST_ID}>
+    <div data-test-subj={RESPONSE_DETAILS_TEST_ID}>
       <EuiTitle size="xxxs">
         <h5>{i18n.RESPONSE_TITLE}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       {!responseActions ? (
-        <InlineBlock data-test-subj={RESPONSES_EMPTY_TEST_ID}>{i18n.RESPONSE_EMPTY}</InlineBlock>
+        <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>{i18n.RESPONSE_EMPTY}</InlineBlock>
       ) : (
-        <>{endpointResponseActionsEnabled ? responseActionsTab : osqueryTab}</>
+        <>{endpointResponseActionsEnabled ? responseActionsView : osqueryView}</>
       )}
     </div>
   );
 };
 
-ResponsesDetails.displayName = 'ResponsesDetails';
+ResponseDetails.displayName = 'ResponseDetails';
