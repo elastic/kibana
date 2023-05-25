@@ -38,6 +38,7 @@ const previouslyRegisteredTypes = [
   'config',
   'config-global',
   'connector_token',
+  'composite-slo',
   'core-usage-stats',
   'csp-rule-template',
   'csp_rule',
