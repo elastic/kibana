@@ -22,7 +22,6 @@ export const getAADFieldsByRuleType = (router: IRouter<RacRequestHandlerContext>
           t.exact(
             t.type({
               ruleTypeId: t.string,
-              // featureIds: t.union([t.string, t.array(t.string)]),
             })
           )
         ),
